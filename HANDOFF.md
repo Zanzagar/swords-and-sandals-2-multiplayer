@@ -829,8 +829,9 @@ for the already-accumulated design record; and `bf12e53` merges main's mailmap
 fix without rebasing pushed history. Do not recreate fake historical commit
 granularity. Resume small per-choice commits from here.
 
-PR #3 exists, and the feature branch is pushed through design commit
-`fe33018`. **Owner correction, 2026-09-24:** the project-specific per-push
+PR #3 exists, and before the main integration the feature branch was pushed
+through design commit `3435d5d`. **Owner correction, 2026-09-24:** the
+project-specific per-push
 approval tightening is removed. Follow harness rule 7 as written: push feature
 branches freely and often without per-push owner approval. This does not
 authorize pushing `main`, a force-push forbidden by rule 9, or an agent merge.
@@ -840,14 +841,13 @@ Claude settings do not enforce Codex or a human shell; shared policy lives in
 
 **Git-divergence correction, 2026-09-25:** the earlier statement that this
 branch was current with `github/main` became false as main advanced. A fresh
-fetch at main `a89704c` and design commit `fe33018` found that neither tip was
-an ancestor of the other; PR #3 reports `DIRTY`/`CONFLICTING` and is not
-rule-13 merge-eligible. Do not hide this with an `ours`/`theirs` merge:
-`AGENTS.md`, `HANDOFF.md`, and `README.md` contain concurrent current-state
-edits, and choosing either whole side would erase a live lane. The feature
-branch may continue to be pushed under rule 7, but a deliberate integration
-must preserve both the engine and progression living heads, rerun the full
-suite, and leave the actual merge to a human.
+fetch at main `a89704c` and design commit `3435d5d` found that neither tip was
+an ancestor of the other; PR #3 reported `DIRTY`/`CONFLICTING`. That is the
+pre-integration measurement, not current guidance. It triggered a deliberate
+merge that preserved both the engine and progression living heads instead of
+choosing either whole side. The full integrated suite and GitHub mergeability
+must be measured after that merge is committed and pushed; only a human may
+merge the PR.
 
 ## 2026-09-24 master progression closure index
 
@@ -8357,6 +8357,4054 @@ EP-D03–EP-D06 and EP-A01–EP-A03 remain pending, and implementation remains b
 through the newest dated progression handoff and discuss one owner-guided
 frontier at a time.
 
+## 2026-09-25 integrated engine lane from github/main
+
+**This file is the accumulated STATE of the project. The brief for a single
+session lives in [`docs/handoffs/`](docs/handoffs/README.md), stamped
+`YYYY-MM-DD-HHMM--slug`.** Starting a session should cost one sentence — "read
+the latest handoff in `docs/handoffs/` and proceed" — with this file as the state
+it points at. A handoff must not restate what is here; if the two ever disagree,
+THIS file is right and the handoff was frozen at the end of its session.
+
+**THE PROJECT BOARD (owner's request, 2026-09-23):
+https://claude.ai/artifact/Mu7AjEwZXcJfZGPzgXKZxb** — a kanban of every
+system, from "needs design" to "done", seeded from a code-checked inventory
+(its 34 doc-vs-code disagreements are one card). Private; the owner shares it.
+**Keep it current:** when work lands, move the card in
+`docs/board/board.json` (and add a `changes` line), then
+`node tools/board/build.mjs <out.html>` and republish `<out.html>` to that URL.
+
+**THE PRODUCT'S NAME (owner, 2026-09-24): "Swords and Sandals II: Souls and
+Simulacra"** — the mod, built on this engine with the progression being
+designed with Codex in the `ss2-progression-design` worktree, wearing Swords
+and Sandals II's skin. It is **conditional on permission**: the brand and the
+art belong to their owners (Oliver Joyce / Whiskeybarrel; the brand rights,
+per the studio's own press kit, to eGames), and a holding reply from Oliver
+has arrived but grants nothing yet (`docs/outreach/2026-09-02-email-to-oliver-joyce.md`,
+"Replies"). **Use the name internally now; put it on anything public (README,
+a hosted build) only once permission covers the name.** Without it, the
+standalone name is **"Souls and Simulacra"** (the design branch's). Until then
+the "ship no SS2 asset" rule stands unchanged.
+
+**LATEST:
+[2026-09-25 04:02 UTC — universal authored-episode coarsening selected](docs/handoffs/2026-09-25-0402--relic-authored-episode-coarsening-selected.md)**
+(session `1b7efff1-0561-4822-a925-84a0382490b9`). Start there for the active
+progression frontier, then use this living head for the integrated engine
+state.
+
+**ENGINE-LANE LATEST:**
+[2026-09-24 14:50 — the team HUD is built, and the gate waits](docs/handoffs/2026-09-24-1450--the-team-hud-is-built-and-the-gate-waits.md)
+(the END of session `e75af16c`, which continued `b64d8f55`).
+*(The engine-lane pointer supersedes
+[2026-09-24 11:48 — the night merged, and the HUD is decided](docs/handoffs/2026-09-24-1148--the-night-merged-and-the-hud-is-decided.md),
+**whose in-flight items 1-2 are MERGED, item 3 (the gate) is BUILT BUT NOT
+ADOPTED, and item 4 (ring3) is not started.**)* *(That one supersedes
+[2026-09-24 04:53 — the stranded work is merged, and the night is running](docs/handoffs/2026-09-24-0453--the-stranded-work-is-merged-and-the-night-is-running.md),
+**whose overnight run is ALL MERGED.**)* *(That one supersedes
+[2026-09-23 21:19 — the arena draws what the engine does](docs/handoffs/2026-09-23-2119--the-arena-draws-what-the-engine-does.md),
+**whose session `c62c201f` ran on after it, then ran out of context with five
+implementers finished-unmerged and no handoff — all five are now merged
+(28d4b3b, b1ac294, ef48e17, 9ed4375, e89a7d7).**)* *(That one supersedes the same
+session's mid-session checkpoint
+[2026-09-23 01:19 — every quirk is decided, and the crowd is built](docs/handoffs/2026-09-23-0119--every-quirk-decided-and-the-crowd-is-built.md),
+**whose "In flight" items 1-3 are ALL MERGED (2efddc9, a62e67a, bf53d81) and
+whose "Open, not started" list is carried forward.**)* *(That one supersedes
+[2026-09-22 19:34 — every spell but rejuvenate is resolved or mapped, and the build plays favourites](docs/handoffs/2026-09-22-1934--every-spell-but-rejuvenate-and-the-build-plays-favourites.md),
+**whose ranked item 1 — the five owner decisions — is CLOSED (all decided, see
+the block below), whose items 3, 4 and 6 are CLOSED, and whose items 2 and 5
+are unchanged.**)* *(That one supersedes
+[2026-09-22 18:21 — nine verbs are built, and the build plays favourites](docs/handoffs/2026-09-22-1821--nine-verbs-built-and-the-build-plays-favourites.md),
+**the same session's mid-session checkpoint: the session carried on and built
+command, death from above, whirlwind and ghost strike, and fixed the psyche
+gate and the bonus-kill rule after it.**)*
+*(That one supersedes
+[2026-09-20 21:30 — the bolts are built, and a `null` was a scheduled divergence](docs/handoffs/2026-09-20-2130--the-bolts-are-built-and-a-null-was-a-scheduled-divergence.md),
+**whose ranked items 2, 3, 4 and 5 are ALL CLOSED — item 4's premise ("`cast_gale`
+is blocked on `fightdistance`") was wrong: the five-condition gate is the
+VILLAIN's decision and the hero's offer is possession — and whose items 1 and 6
+are unchanged. NOTHING FROM THE 2026-09-22 SESSION IS PUSHED: github.com was
+unreachable all session.**)*
+*(That one supersedes
+[2026-09-20 02:00 — the six slots are declared, and three of yesterday's sentences were wrong](docs/handoffs/2026-09-20-0200--the-slots-are-declared-and-three-sentences-were-wrong.md),
+**whose ranked item 2 is DONE, whose ranked item 4 is answered NO — and the
+answer was already written in `docs/ss2-adapter-contract.md` before that file
+asked the question — and whose ranked item 3 is WORSE-BLOCKED: a seventh
+unconditional ladder arm (id 45) sits immediately before gale and pre-empts it.
+That file's `inventory_maxslots` paragraph is also retracted in two of its three
+sentences.**)*
+*(That one supersedes
+[2026-09-19 21:30 — four defects, a campaign, and a blocker that moved](docs/handoffs/2026-09-19-2130--four-defects-a-campaign-and-a-blocker-that-moved.md),
+**whose ranked item 1 is DONE and whose ranked item 5 is now BETTER-BLOCKED than
+it was: `cast_gale`'s gate is five conditions, not the one that file names, and
+one of them is an arena field this engine has no home for. Two of that file's
+priced costs — `CANONICAL_RESOURCE_SOURCES` and the campaign record — turned out
+not to exist.**)*
+*(That one supersedes
+[2026-09-19 15:00 — four ranked items, and three premises that did not survive](docs/handoffs/2026-09-19-1500--four-ranked-items-and-three-broken-premises.md),
+**whose ranked items 2, 4 and 6 are CLOSED, whose item 5 is answered NO, and
+four of whose shipped commits carried defects a Codex review then found.**)*
+*(That one supersedes
+[2026-09-19 04:00 — the taunt was never ranked](docs/handoffs/2026-09-19-0400--the-taunt-was-never-ranked.md),
+**whose ranked items 1, 5 and 6 are CLOSED, whose item 4 is HALF-CLOSED, and
+whose ranked item 2 was posed on a claim that is FALSE** — the shell's 4,110
+lines are not untested; 13 of its 70 functions are executed by the suite.)*
+*(That one supersedes
+[2026-09-18 01:30 — the picture was lying, and the canvas was a postage stamp](docs/handoffs/2026-09-18-0130--the-picture-was-lying-and-the-canvas-was-a-postage-stamp.md),
+**whose ranked item 1 is DONE, whose ranked item 2 is CLOSED RATHER THAN
+ANSWERED because the premise it was posed on is refuted, and two of whose
+published numbers do not survive their own controls** — the "257 of 400, ~4σ"
+taunt head-to-head is one arm of two, and "nobody can gang up" is backwards.)*
+*(That one supersedes
+[2026-09-16 23:56 — the stance, the glow, and an AI that winds up](docs/handoffs/2026-09-16-2356--the-stance-the-glow-and-an-ai-that-winds-up.md),
+**whose ranked items 1, 2, 6 and 7 are all CLOSED and four of whose published
+numbers it retracts** — `aiCharges`'s measurement table, `rankStride`'s default,
+the crowd claim, and the "17 of 42 verbs" denominator.)* *(That one supersedes
+[2026-09-16 22:28 — the build plays seven runs](docs/handoffs/2026-09-16-2228--the-build-plays-seven-runs.md),
+**whose ranked item 1 is CLOSED and two of whose claims it corrects.**)* *(It supersedes
+[2026-09-16 05:00 — `psyche_up` is built](docs/handoffs/2026-09-16-0500--psyche-up-is-built.md),
+**whose ranked item 3 is CLOSED and whose framing of it was wrong** — the two
+`psyche_charging*` continuations were not stranded by a design decision, they
+were stranded by an unchecked premise about the BUILD.)* *(It supersedes
+[2026-09-16 01:30 — `psyche_up` was never the owner's](docs/handoffs/2026-09-16-0130--psyche-up-was-never-the-owners.md),
+whose ranked item 1 is CLOSED;
+[`docs/handoffs/PSYCHE-UP-BRIEF.md`](docs/handoffs/PSYCHE-UP-BRIEF.md) is now
+HISTORY and says so at its own head.)* *(It supersedes
+[2026-09-15 23:30 — two clip phenomena, one per rasteriser](docs/handoffs/2026-09-15-2330--two-clip-phenomena-one-per-rasteriser.md),
+whose findings are in this file above and whose ranked items are carried forward.)* *(It supersedes
+[2026-09-15 21:30 — the rasteriser moves a sixth of the arena](docs/handoffs/2026-09-15-2130--the-rasteriser-moves-a-sixth-of-the-arena.md),
+**whose ranked items 3 and 4 are CLOSED and one of whose claims it corrects** —
+"the probe gives every number identical under both rasterisers" was true only of
+a page with one canvas.)* *(It supersedes
+[2026-09-15 19:00 — the residual was the rectangle, and a warning was wrong](docs/handoffs/2026-09-15-1900--the-residual-was-the-rectangle-and-a-warning-was-wrong.md),
+**whose ranked items 3 and 4 are both CLOSED** — and whose numbers were measured
+over a canvas rectangle that turned out to be wrong, though not wrongly enough to
+move them.)* *(It supersedes
+[2026-09-15 15:35 — a synthetic SWF is an oracle, and two glows were doubled](docs/handoffs/2026-09-15-1535--a-synthetic-swf-is-an-oracle-and-two-glows-were-doubled.md),
+**whose ranked item 3 is CLOSED and whose "known, measured, unexplained" section
+and probe warning are both WITHDRAWN** — see the two entries below.)*
+
+► **THE OWNER DECIDED EVERY OPEN "REPRODUCE THE BUILD'S QUIRK?" QUESTION
+  (2026-09-22, session `c62c201f`, asked in chat with costed options; each
+  answer below is binding and is ALSO recorded at its code site).** The
+  2026-09-22-1934 handoff's ranked item 1 (five decisions, a-f) is CLOSED, and
+  three more that the session's derivations raised were decided the same night
+  (the arena wall, the villain's decision distance, and how the crowd works in
+  team play — folded into (f) below, so eight bullets carry nine decisions).
+  The rule that falls out of all nine: **reproduce the build where every
+  combatant is treated alike; where the build treats hero and villain
+  differently, the hero's rule is the player's rule and applies to everyone;
+  where the build's behaviour is an artefact of frame timing, don't reproduce
+  it.**
+  - **(a) The hero's per-round re-skin: NOT reproduced.** Removed armour stays
+    removed and stat buffs last their timer, for everyone.
+  - **(b) The villain's ladder overriding its status phases: NOT reproduced**
+    (status phases forced for everyone). The same holds for the zero-stamina
+    forced rest, which the build applies to the hero only.
+  - **(c) Timed buffs in team play: the BEARER'S-TURN rule, 1v1-exact** — a
+    bearer ticks on its own completed phase and on the first phase anyone else
+    completes after it; ten applications at any team size. Built `611094d`
+    (invented resource `timed_spell_tick_owed`).
+  - **(d) Rejuvenate restores the shoulderguard from its own backup** (the
+    build reads a free variable and gets `undefined`). Built `8ff985d`.
+  - **(e) The weaken-armour AI spends its item on an unarmoured foe, as the
+    build does: KEPT.**
+  - **(f) `crowd_interest` IS MODELLED, one crowd per battle across all sides**,
+    starting at the sum of every combatant's level (exactly the build in 1v1),
+    fed by every completed phase, clamped 1..100, scaling the purse of every
+    member of the winning side; wincrowd uses the ACTOR's own charisma (the
+    build always reads the hero's). **Built `cefaf83`** (with `cast_adulation`);
+    the team purse base is the owner's EQUAL SHARE of the losing side's
+    `character_xp` per winner (chosen over the whole pot each, and kill credit).
+  - **The arena-wall phase cuts: NOT reproduced** — knockback spillover past
+    ±2100, the nudge-into-wall stunlock, the command pull-through. Recorded at
+    `SS2_ARENA.clamp` (`77e3f7b`).
+  - **The villain's stale decision distance: NOT reproduced.** The build's
+    villain decides from positions before the hero's last move completed (and
+    its melee then lands at any range); this engine's AI reads current
+    positions.
+  - **THREE MORE, 2026-09-22/23, from the implementers' questions:**
+    **the adapter WRITES stat changes and the crowd back** to the vanilla
+    mirror (two new provenance-checked write sources; the fight-start stats
+    stay in `backup_*` and the record); **the team purse is an EQUAL SHARE** of
+    the losing side's `character_xp` per winner (recorded under (f));
+    **`BATTLE_STATE_VERSION` covers the top-level wire-state keys** as well as
+    the combatant fields — every pinned hash moved once, measured.
+  - **TWO MORE, 2026-09-23:** **the three tournament bosses whose DNA starts
+    them with the bow equipped but `using_bow` unset (The Evil Ninja, Dantus,
+    Sandalphon — `unleash_hell` which_boss 2/4/16) are NORMALISED** — they enter
+    as proper archers, the engine's single bow flag; the build's split state
+    (archer AI with melee numbers until their first swap DRAWS the bow) is a
+    named divergence, not reproduced. And **the AI VALUES THE PURSE**: it plays
+    to the crowd (wincrowd, adulation) when an authored valuation of the purse
+    gain beats the turn it spends — tunable, measured, no build roll invented.
+  - **ONE MORE, 2026-09-23: A TAUNT MAY NAME ONLY A FOE IN THE TAUNTER'S OWN
+    RANK, at any distance** (the build has one rank, so no byte decides it;
+    measured before the rule, 26 of 26 damaging 3v3 taunts crossed a rank).
+    `legalActions` offers it through `ss2SameLane` and `ss2TauntValue` prices a
+    cross-rank target at 0; exactly the build in 1v1 and with `rankStride` 0.
+    The rule exposed an AI chase to the arena wall (the walk arm stepped at the
+    nearest foe in ANY rank), fixed in the same commit: with a foe in its own
+    rank the AI walks at that one.
+  - **ONE MORE, 2026-09-24 (grill Q7): NO REST WHILE A FOE IS IN REACH, matching
+    the build** — neither close-range controller wires `rest`, so `legalActions`
+    withholds it on the close frame for everyone; the zero-stamina forced rest
+    still applies in reach, and a position-blind gladiator keeps it. **Still
+    open:** at or above half stamina on a long-range frame the engine offers
+    `rest` beside the taunt, where the build's shared slot shows the taunt alone.
+
+► **THE FIRST SPELL VERBS ARE BUILT, AND A `null` IN THE CANDIDATE TABLE WAS A
+  SCHEDULED FALSE DIVERGENCE (2026-09-20).** `cast_lightning_bolt` and
+  `cast_frightning_bolt` resolve: offered on possession of inventory id 34 or
+  35, ONE `randomBetween` for the damage, `round(magicka)` stamina with **no
+  affordability check anywhere**, the slot consumed by setting it to **1**.
+  ► **`damage_method` IS A PROPERTY OF THE ARM, NOT OF THE SPELL**, and
+    `SS2_DIRECT_DAMAGE_SPELLS` carried `damageMethod: null` for ids 31, 32 and
+    35 for three weeks because the map's table had one row per SPELL. There are
+    **three spell call sites for eleven spells**; the fifth and sixth arguments
+    are pushed once per arm. **The shape produced the error**, and the table is
+    grouped by arm now.
+  ► **THE MEASUREMENT WAS ALREADY IN THE TREE.**
+    `tools/runtime-capture/ss2-capture-wrapper.as` has named these literals at
+    these offsets since `7601888`, five hours after `8c3fc0a` wrote the nulls,
+    and it even says **group**. An internal contradiction, not an unread byte.
+  ► **ONLY THE BOLTS ARE A TURN.** The fireball family lands its damage from a
+    per-frame handler after a ballistic flight, and molten death spawns 10-20
+    boulders each with its own `onEnterFrame` (41-81 samples per cast).
+    **Sample count is NOT the discriminator** — a fireball takes one sample too.
+    Timing is.
+  ► **THREE CODEX PASSES: `needs-attention`, `needs-attention`, `approve`.** The
+    first found that the AI never cast; **the second found the defect my fix for
+    the first had introduced** — `boltOnOffer` invalidated the construction the
+    psyche range check had been retired against, and a charged caster at
+    separation 1960 burned 57 stamina a turn for ever. Both reproduced before
+    anything was touched.
+
+► **`use_item` IS DERIVED, AND `cast_gale`'S BLOCKER MOVED RATHER THAN CLEARED
+  (2026-09-19).** **1 is the EMPTY marker for an inventory slot**, confirmed by
+  three independent sites: `use_item` refuses `which_item == 1` (`+0x03cc`), it
+  writes 1 to the slot it consumed (`+0x0409`), and a character-init block
+  writes 1 to all six slots at once beside `shield = 0` (`+0x330a`). **The
+  empty marker DIFFERS BY COLUMN** — 0 for equipment, 1 for inventory, in the
+  same block — which is the trap that made this worth deferring over.
+  So consumption is: set the slot to 1, and `magic_damage_character` (`+0x148e`)
+  is unblocked by the same reading.
+  ► ~~**BUT `cast_gale` IS STILL NOT BUILDABLE, AND THE NEW BLOCKER IS BIGGER AND
+    BETTER MEASURED.** `inventory1`–`inventory6` **are not declared resources**
+    — absent from `SS2_RESOURCE_NAMES`, so they never reach the resolver and a
+    verb gated on carrying item 38 has nothing to read.~~ **CORRECTED 2026-09-24
+    — ALL THREE BULLETS OF THIS ENTRY ARE DONE, AND NONE WAS STRUCK UNTIL NOW.**
+    `inventory1`–`inventory6` **are declared** (`a506618`, 2026-09-20: in
+    `SS2_RESOURCE_NAMES` in `src/team/ss2-rules.js`, with NO
+    `SS2_RESOURCE_DEFAULTS` entry) and **`cast_gale` is built** (`ea6dd7a`,
+    2026-09-22). Adding them is a SCHEMA
+    change whose price that constant's own comment states: a name WITH a default
+    is filled into every combatant that does not state it, **including every
+    golden's, and that moves all 23 golden replay hashes** — measured, and done
+    once before at `86ccb68`. Six names without defaults is the `psyche_up`
+    shape and is safer, ~~but still touches `CANONICAL_RESOURCE_SOURCES`, the
+    adapter write-back and the campaign record.~~ **and it is the shape
+    `a506618` took: all 23 golden hashes held byte-identical, and two of the
+    three costs priced here did not exist** — `CANONICAL_RESOURCE_SOURCES` was
+    left untouched deliberately (nothing wrote a slot yet) and the campaign
+    record needed nothing (that commit's message says why).
+  ► ~~**NOT STARTED DELIBERATELY: this session was at 75% of its context.**~~
+    **DONE, in its own session (`a506618`), as this bullet asked.**
+    Beginning a multi-file schema change with the goldens downstream of it, with
+    no room to finish it or to run the Codex review it would need, is how the
+    defects two entries up got shipped. **It is its own session, with the
+    goldens in front of it.**
+  ► ~~**AND THE DEMO ROSTER DECLARES ITS SIX SLOTS AS 0, WHICH IS NOT EMPTY.**~~
+    **FIXED in the same commit (`a506618`): `tools/arena/roster.js` declares
+    all six slots as 1**, the build's empty marker (`inventory1: 1` …
+    `inventory6: 1` in the gladiator factory).
+    ~~Inert today because nothing reads the field — the exact hazard that roster's
+    header already records four times. Fix it in the session that declares the
+    resources, not before.~~ The comment beside those six lines in the roster
+    now records it as the FIFTH instance of that hazard.
+
+► **A CODEX REVIEW CAME BACK `needs-attention` ON 13 UNREVIEWED COMMITS, AND
+  ALL FOUR FINDINGS WERE REAL (2026-09-19).** I ran Codex once today, on the
+  taunt diff, and then shipped **13 more commits / 1,666 lines of code** — the
+  campaign host, the file backend, `shove`, the rank dial, three shell
+  extractions — without running it again. AGENTS.md names save/persistence as
+  exactly the case for it. **Every finding was re-derived here before anything
+  was touched; all four confirmed and fixed.**
+  ► **THE CLI FOUGHT GLADIATORS THAT WERE NOT THE DEMO ROSTER'S.** It passed
+    `demoSide().members` straight to `createTeamBattle` — the browser host's
+    shape, carrying no canonical `stats`, `loadout` or `maxHealth`. Reproduced:
+    **`red-1` entered as strength 5 / agility 5 / attack 5 with 140 max health**
+    against the roster's 9 / 7 / 8 and 46. **Every campaign bout run before this
+    fix persisted a record describing the wrong fighters.** This repository
+    already names that exact shape as a past mistake in
+    `tools/engagement-census.mjs`'s header and in the `aiCharges` docstring.
+    **Third time.**
+  ► **`shove` WAS OFFERED PER FRAME, NOT PER FOE — THE CROSS-LANE DEFECT,
+    REINTRODUCED.** `onCloseFrame` means "SOMEBODY is in reach", so one nearby
+    enemy unlocked a shove against every enemy on the field. Reproduced: an
+    actor at (0, 200) with a foe at (50, 200) and another at (500, 6) could
+    shove the far one to x 438, while `quick-attack` correctly offered only the
+    near one. **That is the defect the owner found by watching on 2026-09-18**
+    (4,440 of 7,845 melee swings cross-rank), in a new verb three weeks later.
+    It shares the melee verbs' own target set now, so the two cannot disagree.
+  ► **THE CAMPAIGN COULD SILENTLY ROLL BACK.** An unreadable record got
+    `recordedAt` of `""`, which sorts BEFORE every real timestamp — so it landed
+    at the front, `history.at(-1)` picked a valid but OLDER bout, and the guard
+    that should have refused read only the last entry. And `readRecord`
+    quarantines by default, so the next run would see an empty directory and
+    start over. **Any** unreadable record refuses the run now.
+  ► **TWO WRITERS SHARED ONE `.writing` FILE.** The fixed suffix was justified
+    "because this backend is single-process by contract" — and nothing enforced
+    that contract. **A contract nothing checks is a comment.** The name carries
+    the pid now; it is protection, not mutual exclusion, and says so.
+  ► **AND MY FIX FOR THE SHOVE BROKE THE ARCHER**, caught by the suite one run
+    later: `closerange_archer` wires a shove too (map `:229`-`:230`), and the
+    reachable set was only being filled on the melee branch.
+  ► **THE LESSON IS THE CADENCE, NOT THE FINDINGS.** Four defects, three of
+    them high, in code that was committed, pushed and reported as done — and
+    the review that found them costs one command. **Run it per diff that
+    matters, not per session.**
+
+► **RAISING THE ROSTER'S `herolevel` WOULD DO NOTHING, AND THE PUBLISHED CAUSE
+  FOR `aiCharges` BEING INERT IS ONE GATE OF TWO (2026-09-19).** The
+  2026-09-18 handoff and this file both said *"the cause is the `herolevel`
+  gate: the demo gladiator is level 4 against a melee gate of 7"*, and both my
+  own 04:00 and 15:00 handoffs repeated it as ranked work — *"a roster reaching
+  level 7 lights the first with no code change"*. **Measured: it does not.**
+
+```text
+    herolevel   psyche_up offered   charges taken (aiCharges ON)
+        4              600                 0
+        6              600                 0
+        7            4,753                 0     <- 2,654 of them to WARRIORS
+        9            5,145                 0
+       12            5,145                 0
+```
+
+  ► **THE LEVEL GATE IS REAL AND SITS AT EXACTLY 7** — at 4 and 6 the only
+    offers go to the two archers, and at 7 the warriors get 2,654 of them. So
+    that half of the claim holds. **(2026-09-23: those archer offers were the
+    bow-mode offer at `herolevel >= 3`, which the build never shows — both
+    archer frames hide the button at every level. Removed; they are 0 now.)**
+  ► **IT IS JUST NOT THE BINDING GATE.** That is `survivesTheWindUp` in
+    `chooseAiAction`: `actor.health > engaged.max_damage * presses`. The demo
+    roster is 46 max health against a foe whose `max_damage` is 17, so
+    **`46 > 51` is false on every turn, forever** — and the level gate opening
+    changes nothing behind it. **Two gates in series, and the published cause
+    named the one that is not binding.**
+  ► ~~**WHAT DOES LIGHT IT IS MAX HEALTH, AND IT IS A CLIFF WITH A PRICE**:~~
+    **SUPERSEDED 2026-09-23 — it takes max health AND `herolevel >= 7`**, now
+    that a drawn bow is no longer offered the verb. Those numbers were taken
+    while the bow-mode offer existed, at a level they do not record:
+    46 → 0 charges, 60 → 2,914 charges and bouts 79 → 153 turns, 120 → 4,251
+    and 270 turns. Re-measured before/after on one scratch instrument at
+    `951047e` (60 bouts, method at the `aiCharges` docstring): level 4 at max
+    health 60 / 120 goes 2,073 / 3,227 charges → **0 / 0**, every one of them
+    bow-mode; level 7 goes 3,307 / 5,129 → 1,586 / 2,003.
+    **Nearly double the bout length**, which is consistent
+    rather than surprising: this file's own table already says charging LOSES
+    on damage per turn, so a roster that charges is a roster that takes longer
+    to finish.
+  ► **SO THE RANKED ITEM IS ANSWERED "NO" RATHER THAN DONE**, and the
+    correction is AT the `aiCharges` docstring rather than only here. A roster
+    change that opens a gate nothing is waiting behind is not a fix.
+
+► **`cast_gale` IS FULLY DERIVED AND ~~DELIBERATELY NOT BUILT~~ (2026-09-19).**
+  **CORRECTED 2026-09-24: BUILT since `ea6dd7a` (2026-09-22)**, after
+  `a506618` settled the slot column and declared `inventory1`–`inventory6`;
+  the "blocker" bullet below is history, kept for its derivation.
+  The phase is written out in the battle map under "The `cast_gale` phase, in
+  full". **Zero `randomBetween`, zero `checkattackroll`, zero `hitpoints`** over
+  `+0x7aaa`…`+0x7be5`; cost is **`round(magicka)`, the STAT**; force is flat
+  ±1000 with no floor; the knockback animation is **unconditional**, the only
+  one of the four `knockback` sites that is.
+  ► **IT REUSES `attacker.shove` AS ITS LATCH**, so `shove` is not that verb's
+    own flag but the state machine's generic "a displacement phase has started"
+    bit — two displacement phases can never overlap.
+  ► **THE BLOCKER IS `use_item`, AND IT IS NAMED RATHER THAN GUESSED.** Spells
+    are INVENTORY ITEMS (gale is id 38, the same number as its icon call), so
+    the gate is carrying it in one of six slots. `use_item`'s body
+    (`DoAction@0x23e7cf`, `+0x0369`) writes **`inventory<i> = 1`** — **1, not
+    0** — and 1 is itself an id in the item columns. **Until that column's
+    meaning is established, a built gale either consumes nothing (an unlimited
+    ±1000 knockback, worse than not having the verb) or consumes it wrongly.**
+    Deferred the way `taunt` was, for a reason that was right to the end.
+  ► **THE DERIVATION IS THE DELIVERABLE HERE**, and it is worth more than a
+    guessed verb: `magic_damage_character` (`+0x148e`) sits behind the same
+    unread column, so settling `use_item` unblocks both.
+
+► **THE CAMPAIGN LAYER HAS A HOST, AND A CAMPAIGN SURVIVES THE PROCESS
+  (2026-09-19).** The September audit's *"nothing a person can run persists a
+  campaign anywhere"* is closed. Re-measured first: **3,174 lines, 69 exports,
+  70 passing tests, ONE non-test consumer, ZERO `writeFile` calls.**
+  ► **THE DESIGN WAS NEVER THE GAP.** `CampaignStore` has always taken an
+    INJECTED backend — `read`, `write`, `remove`, `keys`, optional `flush` — and
+    shipped two implementations: a `Map` and fields on a live vanilla save
+    object. **Neither survives a process.** `src/campaign/file-backend.js` is
+    the third, and `tools/arena-campaign.mjs` is the runnable host.
+  ► **THE STATE IS THE RECORDS, WITH NO SUMMARY TO DRIFT FROM THEM.** A
+    campaign IS its sequence of battle records; the roster for the next bout is
+    rebuilt by `rosterFromCampaignRecord`. **`file-backend.js` is deliberately
+    NOT re-exported from `src/campaign/index.js`** — ~~it imports `node:fs` and
+    the rest of the layer runs in a browser, so a barrel export would put a node
+    builtin on the page's import graph.~~ **CORRECTED 2026-09-24: it has NO
+    static `node:fs` import, and never had** (checked at `6c3a1bf`, its first
+    commit): `createFileBackend` fetches `node:fs` lazily through
+    `process.getBuiltinModule` only when called without an injected `{ fs }`, so
+    the module imports anywhere and only CONSTRUCTING the default backend needs
+    Node. The module's own header repeats the wrong reason.
+  ► **TWO DECISIONS THAT ARE NOT OBVIOUS**: a key is not a filename (`:` is
+    illegal on Windows, and `~` is the one separator the key grammar cannot
+    produce, so the mapping is INJECTIVE rather than merely readable); and a
+    write is atomic via temp-plus-rename, because the store distinguishes
+    CORRUPT from MISSING and a killed process would otherwise manufacture the
+    first.
+  ► **THREE DEFECTS IN MY OWN HOST, NONE REACHABLE BY UNIT TEST**, all found by
+    running it the way a person does:
+    1. **THE RESUME PRINTED ITS MESSAGE WITHOUT DOING ANYTHING.** It logged
+       "resuming after …" and then fought from the opening roster, so every
+       bout started with six fresh gladiators. **A log line is not a
+       behaviour.**
+    2. **CHALLENGERS REUSED THE DEAD GLADIATORS' IDS**, so a refilled `red-1`
+       was indistinguishable from the `red-1` that had just died. Ids are
+       `<side>-c<bout>-<n>` now and **rebuildable from the id alone**, which is
+       what makes "the state is the records" true ACROSS processes.
+    3. **BLUEPRINTS WERE READ OFF `teams[].combatants`, WHICH A RECORD DOES NOT
+       HAVE** — `teams` carry SLOTS and the ids live on `outcomes`. The store
+       caught it rather than absorbing it, refusing by name.
+  ► **AND A DRAWN BOUT CONCLUDES A CIRCUIT, which the first cut threw on.**
+    Both sides eliminated is a legitimate outcome and exiting 1 would make it
+    indistinguishable from a broken store. Reached on the second bout of the
+    first campaign this tool ever ran.
+  ► **Pinned by a SUBPROCESS test** — three runs of the real tool, asserting the
+    third starts from what the second left — plus 7 mutations of the backend,
+    each red.
+
+► **A THIRD SHELL DECISION IS OUT, AND PICKING IT TAUGHT THE SELECTION RULE
+  (2026-09-19).** `groupPaintReadout`. **The DOM-bound set is 22 functions, not
+  the ~28 I published earlier today** — counted properly this time — and 10 of
+  them carry no arithmetic at all.
+  ► **ARITHMETIC DENSITY IS NOT DEFECT RISK, and choosing by it sends you to
+    the wrong function.** The densest is `drawArenaBowl`: 57 arithmetic
+    expressions in 69 lines. **A wrong bowl is the most visible thing on the
+    screen**, so somebody notices immediately. `groupPaintReadout` has four
+    expressions and its failure mode is **a panel that confidently reports
+    nothing was approximated when something was** — the hazard this repository
+    is organised against, and one the provenance panel has already produced
+    once. **Pick by whether the failure is INVISIBLE, not by operator count.**
+  ► **THE SIX-TERM SUM IS THE THING PINNED.** Split, nested, blend-refused,
+    unmeasurable box, filter-at-stage-scale, not-composited. The panel prints
+    each term AND a warning keyed on their sum, so **a term dropped from the sum
+    makes the warning vanish while the number is still printed beside it** — a
+    readout that contradicts itself. Each of the six is pinned separately, and
+    a `Number(...) || 0` guard stops a missing counter turning the sum into NaN,
+    which compares false and would silently stop warning.
+  ► **AND `viewport`, `stepCamera` AND `arenaScreenAvailable` ALL NEEDED
+    NOTHING** — thin dispatchers and a memoiser over `src/render/`. Three
+    checked, three already done.
+
+► **A SECOND SHELL DECISION IS OUT OF THE DOM SET: `settlementReadiness`
+  (2026-09-19).** The gate was five terms of boolean inside `settleIfReady`,
+  which reads module-scope mutable state and calls the host — so a wrong term
+  produced a page that looks alive, keeps painting and **silently never
+  acknowledges**, which is the same shape as the four defects the owner found
+  by watching. It returns **what it is waiting on**, not just a boolean, because
+  this shell has already given up one defect of exactly that kind (autoplay
+  rejections caught and discarded, so a spectated bout ran silent with no
+  explanation anywhere). `alreadySettled` is asked FIRST because
+  `acknowledgeResultAnimations` is not idempotent, and the defaults lean toward
+  NOT settling — acknowledging a bout that has not finished writes an outcome
+  that never happened, which is worse than a page that sits there. 3 tests, 6
+  mutations each red.
+  ► **AND `viewport`/`stepCamera` NEEDED NOTHING, which is the other half of
+    the correction.** Both are already thin dispatchers over `src/render/` —
+    `cameraFor`, `cameraStep`, `stageProjectorFor`, `stageFitFor`, `viewportFor`
+    — and `viewport`'s own docstring says so. **The shell is in better shape
+    than "4,110 lines and not one is executed by a test" implied**, and the
+    remaining work is picking off the DOM-bound functions that still hold
+    numbers rather than a sweep.
+
+► **`shove` IS BUILT (2026-09-19), AND IT TAKES NO SAMPLE AT ALL.** Ranked
+  item 6, closed. A real SS2 player verb this engine had no representation of.
+  **The map carried two rows about it and not the phase**, so the phase was
+  derived from the oracle for this commit — block
+  `sprite:862[overlay]/frame:52`, `+0x5dcd`…`+0x6007`:
+
+```text
+    staminacost = round(strength * 1.5)                      +0x5dd3
+    attacker.gotoAndPlay("shove")                            +0x5e27
+    force = strength * 12                                    +0x5e53
+    force_bonus = get_percentage(100 + gauntlet * 2, 100)    +0x5e6b
+    force = add_percentage(force, force_bonus)               +0x5e99
+    if (|force| < 20) force = ±20                            +0x5eb3 / +0x5f74
+    if (|force| > 100) defender.gotoAndPlay("knockback")     +0x5ed3 / +0x5f94
+    knockback(defender, force)   — UNCONDITIONAL             +0x5fc9
+```
+
+  ► **ZERO `randomBetween`, ZERO `checkattackroll`, ZERO `hitpoints` over the
+    whole phase.** `taunt` stayed deferred for a MONTH because a partial
+    candidate would take the dispatcher's samples on every press where the build
+    takes them on one in four. **A shove has no tape hazard**, so it returns
+    before the band table rather than being unwound inside it, and it shipped in
+    an afternoon. It is a pure displacement that costs stamina.
+  ► **THE GAUNTLET BOOSTS IT, AND THE ARGUMENT ORDER IS WHAT DECIDED THAT.**
+    `get_percentage(a, b) = (a/b)*100`, `a` in register 2. Which of the two
+    pushed values is `a` was settled against the WALK's `walk_bonus` at
+    `+0x3ba3` — a byte-for-byte identical call shape this repository had already
+    derived and checked with six verifiers — giving
+    `force_bonus = 100 + 2 * gauntlet`. **Read the other way a gauntlet would
+    have WEAKENED the shove.** The floor is applied AFTER the boost.
+  ► **AND A PIN AIMED ELSEWHERE CAUGHT A REAL DESIGN ERROR, for the third time
+    this week.** `test/ss2-position.test.js` refused the first cut because a
+    position-blind rule set was being offered a shove. It was right: an attack
+    RESOLVES from any distance, but **a shove's entire outcome is the
+    displacement**, so offering one with no positions is a button that spends
+    stamina and does nothing — the exact finding an adversarial review made
+    against the taunt's first cut. Gated on `positioned` now.
+  ► **THE AI NEVER CHOOSES IT, STATED RATHER THAN DISCOVERED.** It has no
+    damage term, so it cannot join the expected-damage table; and
+    `ss2TauntValue` already scores the taunt's shove arm at ZERO for a melee
+    actor by an argument that applies here exactly — pushing a melee opponent
+    out of reach costs the pusher its own reach too. **It is a HUMAN verb.**
+    Pinned at 0 of 100+ AI actions, because `psyche_up` taught what happens when
+    a verb ships with a live population of zero and nobody says so.
+  ► **Six vocabulary pins moved and every one was explained before it was
+    updated**; the only difference in each was `'shove'` appearing where the
+    map's button table says it should.
+
+► **THE ARCHIVE MANIFEST ATTESTS THE WHOLE ARCHIVE NOW, AFTER ATTESTING 19% OF
+  IT FOR EIGHTEEN DAYS (2026-09-19).** Ranked item 5, closed. It was recorded on
+  2026-09-01 at 1,588 files; the archive is **8,325 files / 58,492,555 bytes**,
+  so **a copy could have dropped 81% of it and verified clean** — the one thing
+  the file exists to make impossible.
+  ► **THE OLD ATTESTATION WAS CHECKED BEFORE IT WAS REPLACED, AND PRESERVED.**
+    The committed manifest was verified against the archive first and passed
+    silently (1,588 of 1,588); the new one is a strict SUPERSET — every old line
+    appears in it verbatim, `comm -23` over both sorted returns **0**. The
+    regeneration added 6,737 files and altered nothing, and the new manifest
+    round-trips (`sha256sum -c --quiet`, 0 mismatches, exit 0). **That check is
+    now written into `captures/README.md`**, because the failure mode of a bad
+    regeneration is a manifest that looks larger and attests something else.
+  ► **THE `D:` MIRROR IS STILL AT 1,588 AND IS NOW 19% OF THE ARCHIVE.** The
+    living head said it held "all" of it, which was true when written; the
+    correction is AT that sentence rather than only here. Re-taking the mirror
+    is unclaimed. **Check `D:` from Windows, never from `/mnt/d`.**
+
+► **"THE SHELL IS 4,110 LINES AND NOT ONE IS EXECUTED BY A TEST" IS FALSE, AND
+  I PUBLISHED IT MYSELF THIS MORNING (2026-09-19).** It is ranked item 2 of the
+  2026-09-18 handoff and ranked item 2 of mine, which repeated it verbatim
+  without grepping the test file. **Measured: 13 of the shell's 70 top-level
+  functions ARE executed by the suite**, through `liftFromShell` in
+  `test/render-arena-shell.test.js` — it cuts a function out of the source and
+  `new Function`s it, with real calls and real assertions
+  (`groupRunsOf`, `pathBoxOf`, `composedMatrix`, `boxThrough`, `filterBleedOf`,
+  `runBoxOf`, `bufferRegionOf`, `opSpaceRunsOf`, `figureOriginMatrix`,
+  `figureRouteFor`, `figureEffectCensusOf`, `enchantmentCensusOf`,
+  `enchantDemoFrom`). **And `src/render/arena-shell.js` has existed since
+  2026-09-12 to hold exactly these decisions**, carrying eight of them.
+  ► **THE REAL PROBLEM IS NARROWER AND THE FIX IS DIFFERENT.** What the suite
+    cannot reach is the **~28 functions that touch `document`, `window`, a
+    canvas context or `Audio`**, because `liftFromShell` evaluates a body with
+    no DOM around it. So "make the file importable" was never the fix; **taking
+    the DECISION out of the DOM access** is, which is what
+    `src/render/arena-shell.js` was built for and what it now gets more of.
+  ► **`canvasBackingFor` IS THE FIRST ONE MOVED, and it is the right one to
+    start with**: `sizeCanvasToStage` is the function whose ~~ABSENCE cost this
+    project every pixel number it published before 2026-09-18~~ absence was
+    blamed for that (**refuted 2026-09-24, see "AND THE CANVAS HAD NEVER BEEN
+    SIZED" below**), and whose
+    arithmetic has run since with nothing behind it. Four values in, a size and
+    a `changed` flag out; the shell keeps two reads and two writes. **`changed`
+    is the contract, because assigning either dimension CLEARS the canvas and
+    resets the whole 2d state** — a caller that assigned every frame would wipe
+    the arena every frame. 7 tests by real import, 7 mutations each red.
+    ► **CORRECTED 2026-09-24: THE ARENA DOES NOT KEEP THAT CONTRACT.**
+      `render()` in `tools/arena/main.js` calls `sizeCanvasToStage()` and then
+      assigns `canvas.width` / `canvas.height` itself, UNCONDITIONALLY, every
+      frame once the asset gate is open (`Math.floor(parent rect ×
+      devicePixelRatio)`) — lines it has
+      carried since the arena's first commit, `473ef59`. So the arena is that
+      caller, and the wipe is harmless only because `render()` then clears and
+      redraws the whole frame. The two sites also measure different boxes (the
+      canvas's own rect, ROUNDED, against its parent's, FLOORED), so at a
+      fractional device-pixel size they disagree by a pixel. Read off the code,
+      not watched in a browser; the fix is `main.js`'s, not this file's.
+  ► **AND THE UNCAPPED AREA IS STATED RATHER THAN FIXED.** Browsers refuse a
+    canvas past a maximum area and the failure is a BLANK canvas, not an
+    exception — but this arena's stage at ratio 1-2 reaches at most about 3.7M
+    device pixels, nowhere near any published limit. **Inventing work for an
+    unmeasured hazard is the same error as deferring work for an unmeasured
+    cost, facing the other way.**
+
+► **THE NONCE RECOVERY IS RUN, REPRODUCES, AND THE APPLY IS STILL THE OWNER'S
+  (2026-09-19).** `tools/recover-launch-nonces.mjs --archive /mnt/c/ss2-capture/captures`
+  — verified read-only first (no `writeFile`, no `mkdir`, no `rm` anywhere in
+  it, and `--archive` is required so it has no "no arguments means do the full
+  job" hazard). Archive reachable, 8,325 files. **Run twice, byte-identical**,
+  which is the only assurance the tool itself says is on offer:
+
+```text
+    distinct tokens across recovered + already-committed .... 51
+    no shared token — every recovery is distinct
+    waiver today ........................................... 58
+    waiver if every recovery landed ........................ 18
+    goldens needing re-promotion ........................... 20 of 23
+```
+
+  **It is NOT applied and must not be applied casually.** The tool has no
+  `--apply` by design, `campaign.mjs ingest-round` refuses to overwrite
+  committed evidence, and that guard is correct: this rewrites 40 observation
+  digests and re-promotes 20 of 23 goldens. **Ranked item 4 is therefore
+  HALF-CLOSED** — the measurement is done and reproducible; the corpus
+  operation is a decision, not a fix.
+
+► **THE AI JOINS ITS ALLY'S FIGHT BY DEFAULT NOW — OWNER'S DECISION,
+  2026-09-19, TAKEN ON THE SWEEP BELOW.** `SS2_RANK_JOIN_SURPLUS` is 0.
+  **The id is unchanged** (`ss2-map-derived-tournament`), because a suffix names
+  what differs from the SHIPPED DEFAULT and the default moved with it — so an
+  ordinary battle keeps the id every literal `combatStateHash` pin was taken
+  against, and `-join-none` is how the pre-decision engine is asked for.
+  **Suite 2059 / fail 0 / skipped 1, exit 0, with nothing but the new tests
+  moving**, which is the evidence that the AI policy is not hashed or pinned
+  anywhere in this repository.
+  ► **WHAT IT BOUGHT, on the same 24 seeds as the measurement that motivated
+    it**, through `tools/engagement-census.mjs`:
+
+```text
+                                  before        after
+      crossings                   20.0%         25.9%
+      turns with 2+ fights           30           196
+      most fights at once             2             2
+      actions a bout                 83            93
+      settled                     24/24         24/24
+```
+
+  ► **AND THE 2-ON-1 RATE NEEDS 300 BOUTS, NOT 24 — measured, after two of my
+    own harnesses appeared to disagree.** They did not: at matched sample size
+    both give **1,465** ganged turns exactly. The RATE is what moves with the
+    sample — 3.1% at 24 bouts, 3.9% at 100, **5.3% at 300** — so **every
+    2-on-1 figure in this file taken at 24 bouts is a low-sample estimate**,
+    including the 3.0% that closed the layout question. That conclusion
+    survives regardless, because its other arm is 0 of 2,851 and structurally
+    impossible; the NUMBER is soft and the COMPARISON is not.
+  ► **A MUTATION THAT SURVIVED FOUND AN ID THAT LIED.** The guard read
+    `!Number.isFinite(rankJoinSurplus)`, sending `-Infinity` down the OFF path
+    while `joinSuffix` spelled it `-join-always`. **A rule-set id that says the
+    opposite of the behaviour is worse than no id** — it is the one string two
+    peers compare before they trust each other. `< Infinity` settles all three
+    cases in one comparison. **A second mutation survived on an EMPTY view**,
+    which returns `null` whatever the surplus is and so cannot tell a working
+    guard from a deleted one; the `NaN` pin runs on the live view now.
+
+► **THE RANK-JOINING DIAL IS SWEPT, AND THE SETTING THAT HELPS IS NOT THE ONE
+  THAT WINS (2026-09-19).** `rankJoinSurplus` is the question ranked item 2
+  should have asked, now that the layout half of it is closed. **OFF BY DEFAULT
+  AND THAT IS PROVABLE, NOT ARGUED**: `ss2RankToJoin` returns `null` for
+  `Infinity` before reading the view, and the arena census reproduces 2,234
+  decisions exactly. 300 seeded 3v3 bouts an arm:
+
+```text
+    HEAD-TO-HEAD vs shipped       as team 0        as team 1        alternating
+      surplus  0                  155-145 51.7%    136-164 45.3%    130-170 43.3%  -2.3σ
+      surplus -1                  166-133 55.5%    148-150 49.7%    150-149 50.2%  +0.1σ
+      surplus -99                 166-133 55.5%    148-150 49.7%    150-149 50.2%  +0.1σ
+
+    WHAT A BOUT LOOKS LIKE        turns   settled    2-on-1 turns   rank changes
+      off (shipped)                  97   300/300     804 (2.7%)             500
+      surplus  0                     92   300/300    1465 (5.3%)             847
+      surplus -1                    137   297/300     754 (1.8%)            1113
+      surplus -99                   137   297/300     754 (1.8%)            1113
+```
+
+  ► **`0` IS THE SETTING THAT BUYS THE THING THE OWNER ASKED FOR**: it
+    DOUBLES the 2-on-1 rate (2.7% → 5.3%), makes bouts SHORTER (97 → 92), and
+    all 300 still settle — for about 2.3σ of win rate. **Same shape of trade as
+    `aiCharges`**: an opponent more interesting to fight and slightly worse at
+    fighting. And the win rate is the wrong number for PvP anyway, where both
+    sides have it and it is symmetric.
+  ► **`-1` IS WORSE THAN DOING NOTHING AT THE VERY THING IT IS FOR.** It
+    HALVES the 2-on-1 rate against off (1.8% against 2.7%) while tripling rank
+    changes, runs bouts 41% longer and stops 3 of 300 settling. **Everybody
+    breaks off constantly and nobody stands still long enough for a second
+    attacker to arrive — churn, not focus.** Counter-intuitive, measured, and
+    the reason a dial needed a sweep rather than a guess.
+  ► **`-1`, `-2` AND `-99` ARE ONE POLICY ON THIS ROSTER**, byte-identical in
+    both tables: with one gladiator a side in a rank the surplus only reaches
+    -1, so nothing below it can bind. **Three settings, not a curve** — off, 0,
+    and "any negative" — and the sweep is reported that way rather than as a
+    smooth trend it is not.
+  ► **AND THE FIRST CUT DEFAULTED TO 0 AND CLAIMED IN ITS OWN DOCSTRING THAT
+    NOTHING MOVED.** Measured: 2,234 decisions → 2,307, rank changes 43 → 79,
+    because at 0 the arm still fires from a rank holding an ally and one foe and
+    it aims at the rank where an ALLY is fighting where the old arm aimed at the
+    NEAREST FOE's rank. **A default that has to be argued to be a no-op is not
+    one.**
+  ► **THE ANTI-PILE-UP GUARD IS THE PROPERTY THAT SURVIVES EVERY VALUE**: the
+    join requires an ally ALREADY ENGAGED in the target rank, which is false for
+    everybody on turn one, so the 2026-09-12 opening collapse cannot return
+    however permissive the dial is. Pinned at `-99`, the most permissive setting
+    there is.
+  ► **`ss2FlankingWalk` RUNS FIRST AND IS A PRELUDE, NOT A COMPETITOR** — it
+    walks you past the target so the rank change arrives BEHIND. The first
+    version of the test file staged the actor on the near side and every
+    behavioural assertion returned `walk-right`: **a test that stages past the
+    arm it means to exercise reports the wrong function green.**
+
+  **STILL AT `Infinity` (off), because the numbers do not settle it.** This is
+  how the arena LOOKS, and this file's own hard rule is that the owner watching
+  a bout is the instrument for that. `0` is the recommendation.
+
+► **THE AI TAUNTS AT RANGE NOW, AND THE TWO CLAIMS THAT RANKED THE WORK BOTH
+  BROKE UNDER THEIR OWN CONTROLS (2026-09-19).** Ranked items 1 and 2 of the
+  2026-09-18 handoff are both addressed and both were posed on a premise that
+  does not survive being measured. **Read this before either of them.**
+
+  ► **"TAUNT WHENEVER LEGAL BEATS THE SHIPPED AI, 257 OF 400, ~4σ" IS ONE ARM
+    OF A TWO-ARM EXPERIMENT, AND IT IS THE BLUE ARM.** Re-derived over the same
+    400 seeds through `createVanillaBattleHost` + `demoSide`:
+
+```text
+      taunting policy on   wins    share     against a 200-200 control
+        blue                257    64.3%       <- the published number, exactly
+        red                 189    47.6%          the same policy, LOSING
+        alternating         226    56.6%  (2.65σ, not 4)
+```
+
+    **The AI-vs-AI control the claim never had is 200-200 over those seeds.**
+    The gap between the two arms (47.6% against 64.3%) is four times the effect
+    the claim reports. The effect is real and is worth about 2.6σ alternating;
+    it is not worth 4σ and it is not side-independent. **An A/B with one arm is
+    an A.**
+
+  ► **AND "NOBODY CAN GANG UP" IS BACKWARDS — THE LANES ARE WHAT MAKE A 2-ON-1
+    POSSIBLE AT ALL.** Ranked item 2 called the team layout blocking on the
+    ground that with lanes enforced "a 3v3 is three parallel duels; nobody can
+    gang up", and offered one lane as the remedy. Measured over 24 seeded 3v3
+    bouts, counting turns on which a gladiator is inside 2+ enemies' MELEE reach
+    **with `ss2SameLane` applied exactly as the offer applies it**:
+
+```text
+      rankStride 97 (shipped)    59 of 1,983 turns   3.0%   in 14 of 24 bouts
+      rankStride 0  (one lane)    0 of 2,851 turns   0.0%   in  0 of 24 bouts
+```
+
+    **One lane is the arrangement in which ganging up is impossible**, and for a
+    reason the census already recorded: a walk may never cross a foe, so two
+    allies approaching one target queue on the same side of it. 0 crossings and
+    1 simultaneous fight, every bout. The shipped lanes give 20.0% crossings and
+    2 simultaneous fights. **The remedy the item proposed is the disease it
+    describes**, so the fork is closed rather than answered: keep the lanes.
+    What is genuinely open is how willing a gladiator should be to change rank
+    to join a fight — it does so on ~1% of its offers — and that is a dial, not
+    a layout.
+
+    ► **AND THE FIRST VERSION OF THIS MEASUREMENT SAID 69.4%**, because it used
+      Euclidean reach without the lane gate — measuring the layer below the one
+      the question is about, which is the error the same handoff's own hard
+      rules name twice.
+
+  ► **`taunt` WAS NOT RANKED LAST, IT WAS NEVER RANKED.** The published
+    diagnosis — *"absent from the preference table ENTIRELY"* — is true and is
+    about a quarter of it. 25 seeded 3v3 bouts, the arena's own path: taunt
+    legal on 914 of 2,064 decisions, and **on 664 of them (72.6%) no attack was
+    legal at all**, so `chooseAiAction`'s `!attackOnOffer` branch returned a
+    walk before any table was built. **The taunt is a LONG-RANGE verb** — the
+    build wires it on `longrange_warrior` and `longrange_archer` and on neither
+    close-range warrior frame — and the only other answer this AI had at range
+    was "take a step". Adding the table row alone would have reached 250 of 914
+    opportunities and reported the verb fixed.
+
+  ► **THE DESIGN DECISION, TAKEN: price every action as a HITPOINT SWING rather
+    than as damage dealt.** `ss2TauntValue` is the recovery (certain, capped at
+    missing health, the largest term), plus the direction-20 strike, plus one
+    turn of the target's `max_damage` when the taunt can force a FLEE. The
+    attack rows are untouched, because for a swing the other two terms are zero
+    — so the 560-combination band sweep still holds and a wounded warrior in
+    melee reach still swings. **`aiTaunts` ships ON and names itself in the id
+    when OFF** (`-no-taunt`), the opposite spelling from `aiCharges` and for a
+    stated reason: charging LOSES on the arithmetic and has to be asked for,
+    while taunting at range replaces a walk that is worth nothing.
+    **New policy against old, sides alternating: 288-112, 72.0%, 8.8σ — and it
+    wins on BOTH arms** (73.5% as red, 68.5% as blue), which is exactly the
+    property the published claim lacked.
+
+  ► **TWO THINGS I GOT WRONG AND THE MEASUREMENT CAUGHT, both recorded at the
+    code:**
+    ► **I AMORTISED THE APPROACH OVER THE WALKS IT TAKES** — `best / (walks +
+      1)` — and built a taunt-bot: 81.6% of offers taken, bouts 84% longer.
+      The discount assumed the arrival it was preventing. The rule is the plain
+      one now: walk unless the taunt beats the swing you are walking toward.
+    ► **I FORGOT THAT EFFECT 1 ROLLS THE CHANCE A SECOND TIME.** It sets
+      `direction = 20` and calls `checkattackroll()`, which `directionProfile`
+      hands `chance: chances.taunt` again — so the strike arm is quadratic in
+      the chance, and a single discount overstated it 2.5x at 40%. Caught by
+      checking the model against a bout: 3,069 taunts gave 599 effect-1 events
+      whose mean damage no single 40% roll explains.
+    ► **AND A THIRD, CAUGHT BY A PIN AIMED SOMEWHERE ELSE.** I priced a SHOVE
+      like a FLEE, and `test/ss2-ranged.test.js`'s snipe/bombard crossover went
+      red: the archer was taunting a foe it could shoot. A shove denies a turn
+      of WALKING; a flee denies a turn of FIGHTING.
+
+  ► **AND THE DEMO ROSTER GAINS A DUELLIST, because a correct policy with nobody
+    to express it is the `aiCharges` failure again.** Before the roster changed:
+    taunt offered 926 times over 25 bouts, **taken 5**. Slot 3 carries
+    `charisma: 16` now — chosen against a sweep printed at the line, and
+    charisma is grepped to drive the taunt and nothing else — which gives about
+    five taunts a bout, 61 of 69 of them that slot's, for 7% longer bouts and
+    25/25 still settling. **Three gladiators who fight differently**, which is
+    the shape the melee monoculture finding asked for and did not get.
+
+► **A GLADIATOR WHO HAD NOT MOVED WAS FACING NOBODY, AND 40 OF 40 OPENING
+  RANGED ATTACKS WERE SCORED AS BACK ATTACKS (`bba6fd0`..HEAD).** This is the
+  largest live defect found this month and nothing was looking for it.
+  `ss2FacingEffects` was correct and was reached from ONE place — the movement
+  branches — so a gladiator who had not yet walked carried no `facing-left`
+  token at all, and `ss2IsBackAttack` reads a MISSING token as "faces right".
+  The villain starts at +250 with the hero at -250, so he was modelled as
+  looking away from the fight for as long as he stood still, and every opening
+  shot took the 50% back-attack bonus. **Melee hid it**: at the vanilla
+  separation of 500 nothing melee is in reach until somebody walks, and a walk
+  fixed the facing on the way past.
+  ► **THE BUILD DERIVES IT AT CONSTRUCTION TOO, which is what makes this a fix
+    and not an addition.** `changeCombatants` sets BOTH facings from `hero._x`
+    vs `villain._x` (`+0x28f3`-`+0x2ae3`) and runs once before the first turn.
+    The new `openingEffects` hook on the rule set is asked once, after the
+    roster exists — `startingPosition` is asked one combatant at a time and
+    cannot see the other side. **STATUS effects only**, refused by name
+    otherwise, so it can never fight `startingPosition` for the same field.
+  ► **THREE OF THE FOUR SEEDED PINS MOVED AND THE FOURTH IS THE EVIDENCE.**
+    `f2e862f9`→`f11e6bc9`, `f45930aa`→`a6cbd6a8`, `e54cebb5`→`2ef865ca`, and
+    the canonical projection pin `3698d1e3`→`29fc00d7` — which applies NO
+    action, so construction is the only thing that can have moved it.
+    `3e770611` is unchanged because its driver closes the distance first, so
+    its facing was already the derived one. **No golden moved and none can**: a
+    fixture has no `x` to derive a facing from.
+
+► **AND `damagecharacter`'s KNOCKBACK DISPLACES SOMEBODY NOW — THE LAST GAP OF
+  ITS KIND ON A MODELLED VERB — AFTER BEING DEFERRED TWICE FOR A COST THAT DOES
+  NOT EXIST.** Three places in this repository said closing it "re-datums every
+  pinned hash and every golden that carries one", and a handoff's `next:` field
+  dropped the hedge and called it "a DECISION and not an afternoon".
+  **Measured: no golden carries a position or a hash and none structurally can**
+  (`startingPosition` returns `null` under `fixtureReplay`), **and the
+  displacement moves ZERO pinned hashes** — verified by removing the facing hook
+  and re-running, which reproduced all four old values. Every seeded pin's
+  driver swings directions 1-4 and the build's gate needs 5-12 or 30, so the
+  branch is unreachable from them. **That is luck, not coverage**, and the pin
+  block says so.
+  ► **IT IS NOT EVERY BLOW, and this file said it was.** Two gates, not one:
+    the band (`+0x1a72`-`+0x1aa5`) and `randosmash > 3 || direction == 30`
+    (`+0x1ac8`-`+0x1ae4`). About one eligible blow in four. "Unconditional" was
+    only ever true with respect to the ANIMATION gate.
+  ► **AND THE SIGN IS THE DEFENDER's FACING (`+0x1ae9`), the opposite of the
+    taunt's shove** — which is exactly why the facing defect above had to be
+    fixed first, and how it was found.
+
+► **THE ARENA CLAMP THIS ENGINE APPLIES EVERYWHERE IS CITED TO A BLOCK OF DEAD
+  CODE, AND I WROTE THAT CITATION YESTERDAY.** `bba6fd0` retracted a correct
+  caveat and replaced it with "BYTE-VERIFIED 2026-09-17 ... it runs in
+  `nextphase`, so it bounds EVERY gait — and it is the only thing that bounds
+  the taunted flee." The eight ±2100 pushes are real. **What they act on is
+  `game_attacker._x` / `game_defender._x` — `_root.game.hero` / `.villain`,
+  plain `new Object()`s** — while the gladiators that move are the CLIPS. Across
+  the whole SWF those four comparisons are the only reads of `game_*._x`, against
+  50 reads of `attacker._x`.
+  ► **THE VALUE SURVIVES IN A DIFFERENT FUNCTION.** `attacker.onEnterFrame`
+    carries a near-identical clamp on the clips (`+0x38fd`, `+0x3988`,
+    `+0x3a13`, `+0x3a3f`), and hitting it also nulls `destination` and calls
+    `nextphase()` — **touching the wall ENDS the phase**, which the dead copy
+    could never have done. Every use of `SS2_ARENA.clamp` here is still right.
+  ► **THE LESSON, and it is not "check harder".** The retraction was made for a
+    good reason — the old decoder printed opcodes without operands, so the
+    literals genuinely looked absent. **Finding the literals proved the
+    literals. It did not prove the effect, and nobody checked the receiver.**
+    A retraction is a new claim and needs its own evidence.
+
+► **AND `knockback(whichcharacter, force)` IS DECODED AT LAST**, having been
+  cited for a month as a black box: `new mx.transitions.Tween(clip, "_x",
+  Regular.easeOut, _x, _x + force, 1, true)` — exactly `_x + force`, over one
+  real second, with **no clamp, no arena edge and no body check** in its 155
+  bytes. **Four call sites, and they are not four variations on one shape**:
+  `damagecharacter` (`+0x1bd6`, sign from the DEFENDER, animation at 80),
+  `shove` (`+0x5fc9`, `strength * 12` boosted by gauntlet — **an unmodelled
+  player verb**), `taunt` (`+0x6ab1`), and `cast_gale` (`+0x7b98`, **flat ±1000,
+  no floor, animation unconditional**). So the displacement gaps were never one:
+  the other two are verbs this engine does not have at all.
+
+► **AN AUDIT OF TWELVE AGENTS BROKE FOUR NUMBERS THIS FILE PUBLISHES, AND ONE
+  OF THEM IS THE FEATURE MEASUREMENT FOR `aiCharges` (2026-09-18).**
+  ► **`aiCharges` IS INERT ON THE ARENA PATH.** The line below saying "40
+    seeded 3v3 bouts: 0 charges off, 2,433 on (30.6%)" does not reproduce at
+    HEAD or at `1775a4c`, the commit that shipped it. Re-measured through
+    `createVanillaBattleHost` as the shell builds it: **1,653 actions, psyche-up
+    chosen ZERO times with the flag on, byte-identical to off.** The published
+    table came from feeding `demoSide(...).members` straight to
+    `createTeamBattle` — the harness `tools/engagement-census.mjs` names as a
+    past mistake. **A measurement taken off the path nobody plays is not a
+    measurement of the feature.** The cause is the `herolevel` gate: the demo
+    gladiator is level 4 against a melee gate of 7.
+  ► **`rankStride` DEFAULTS TO 97 AND THE SECOND AXIS IS ON.** Two docstrings
+    in the rule set said 0 was the default; this file said both things 59 lines
+    apart. Corrected at all three.
+  ► **"BOUTS SETTLE ON COMBAT, NOT THE CROWD" WAS MEASURED ON THE ONE ROSTER
+    BUILT TO AVOID THE CROWD.** `tools/arena/roster.js` says in its own header
+    that it is tuned so a demo bout "lasts a few interesting turns and no
+    further". The repo's committed sweep: **279 of 648 build pairings (43%) do
+    not end without the crowd.**
+  ► **AND "17 OF 42 VERBS" IS THE WRONG DENOMINATOR.** 42 counts `staminacost`
+    ASSIGNMENT SITES; those rows carry **48 distinct phase labels**, because
+    four sites cover several verbs each. Against labels it is 20 of 48. Three
+    auditors flagged it independently.
+
+► **THE OWNER'S RANGED REPORT WAS REAL AND THE AI WAS INNOCENT.** *"Is AI
+  attacking its own teammate with ranged?"* — no: 2,064 AI actions over 25
+  seeded 3v3 bouts, 250 of them shots, **0 ally-targeted**, because ranged
+  options are built from `view.foes`. **But 85 of 120 arrows ENDED inside a
+  living teammate's body**, at the same depth, painted over them.
+  ► **TWO CORRECT RULES LANDING ON ONE NUMBER.** `ss2WalkDestination` parks a
+    gladiator against a body at `target.x ∓ physical_size`; the arrow's
+    stop-short ends the flight at `target.x ∓ physical_size`. The same point by
+    construction, and the walk clamp is what puts the front-liner there.
+  ► **THE ARC WAS NOT THE CAUSE, and the claim about it is wrong anyway.**
+    `ss2-rules.js` says a bombard flies `>= 1.055` figure heights "everywhere a
+    body could stand". The true global minimum is **0.789** on the claim's own
+    terms and **0.636** with the adapter's real `targetSize`, both at the LAUNCH
+    end. Over an interposed body the lob really does clear (1.04-1.34). It
+    STOPS there, at 0.64-0.99 — chest to head height.
+  ► **SO THE FIX IS THE ENDPOINT.** `stopShortFor` in the adapter drops the
+    stop-short to 0 — the build's own literal `bullet._x > defender._x` — when
+    it would land inside somebody else. 85 of 120 became 0 of 120, and the
+    September clipping fix is kept everywhere it helps.
+
+► **THE PSYCH-UP DISCHARGE HAD BEEN DRAWING A STICK FIGURE FOR TWO DAYS.**
+  `familyOf` split `psyche_up3` into `psyche:discharge` on 2026-09-16 and
+  `FAMILY_LABELS` was never told, so the only press that swings asked for a
+  family with an EMPTY clip vocabulary: no extracted art, no face, no sound —
+  **and `recognised: true`, so nothing logged a notice.** `stance.js` already
+  had this exact guard for its own families; it is symmetric now
+  (`test/render-clip-labels-cover.test.js`).
+
+► **AND THE CANVAS HAD NEVER BEEN SIZED.** `<canvas id="arena">` with no width
+  or height is **300x150**, ~~and this shell only ever READ those fields. No
+  resize handler, no `devicePixelRatio`, in 4,000 lines. Every pixel number this
+  project has published was taken through an unrecorded bilinear upscale.~~ It is
+  sized to its stage in device pixels now.
+  ► **CORRECTED 2026-09-24: WRONG THE DAY IT WAS WRITTEN — THE SHELL HAD SIZED
+    ITS CANVAS SINCE ITS FIRST COMMIT.** `git show 473ef59:tools/arena/main.js`
+    (2026-09-10, the arena's first commit), `render()`: `const ratio =
+    window.devicePixelRatio || 1; canvas.width = Math.max(1,
+    Math.floor(rect.width * ratio));` and the same for the height, from the
+    parent's rect, on every frame (`frame()` → `render(now)` →
+    `requestAnimationFrame`), plus `window.addEventListener("resize", () =>
+    render())`. `git log -S` on that assignment finds only `473ef59`, and it was
+    still there in `553084d`, the commit that wrote this entry and added
+    `sizeCanvasToStage` (today it is in `render()` still). So there WAS a resize
+    handler and a `devicePixelRatio`, and the "unrecorded bilinear upscale"
+    conclusion has no support in the code. Read off the code, not re-measured
+    in a browser: whatever the 2026-09-18 audit saw as 300x150 was not a shell
+    that never assigned the fields. The same claim sits in `main.js`'s comment
+    above `sizeCanvasToStage`, in `src/render/arena-shell.js` above
+    `canvasBackingFor`, and in the frozen 2026-09-18-0130 handoff's title.
+
+► **THE TAUNTED FLEE IS BUILT (`cbaf406`), AND THE RUN IS NOT A BIG WALK.**
+  Row 3 of frame 1's forced chain is the only forced phase that is not a
+  condition, and it was the last vanilla action left unresolved. `runleft` sets
+  `destination = _x - movement_speed * 40` with **no boot bonus** and a stop gap
+  of **10** where a walk takes 16, the bonus and 20 — and the movement table's
+  closed form `40 * ms - 10` is **+1 low at 23 of the 57 reachable speeds**,
+  because the easing tween is a do/while and not an expression.
+  `ss2RunDisplacement` runs the loop.
+  ► **A FLEEING GLADIATOR RUNS THROUGH THE MAN WHO TAUNTED HIM, and that is
+    DERIVED.** Both run arms carry a body test (`+0x3fbd`, `+0x4146`) and it is
+    not the walk's clip: it reads the LIVE `_x` every frame, it ENDS the phase
+    rather than shortening it, and it measures the ATTACKER's `physical_size`
+    where the walk measures the DEFENDER's. **It is guarded on the facing, and
+    the flee inverts the facing** — row 3 sends `gladiator_dir == "right"` to
+    `runleft`, whose guard wants `"left"` — so the arm that runs is always the
+    arm whose guard is false. Only `nextphase` step 1's `[-2100, 2100]` bounds
+    a flee. A Codex review called the engine's missing clamp a collision bug;
+    two tests now pin the crossing AND the walk that stops short in the same
+    geometry, so adding the clamp fails loudly.
+  ► **AND `[-2100, 2100]` IS BYTE-VERIFIED NOW.** `ss2-rules.js` carried a
+    caveat saying the bound lived in the map's PROSE only and no offset carried
+    a literal. Both literals are pushed eight times over, at `+0x31c2`,
+    `+0x31d7`, `+0x31ee`, `+0x3203`, `+0x321a`, `+0x322f`, `+0x3246`, `+0x325b`.
+    **The absence was the DECODER's** — the tool that produced those four `If`
+    offsets printed opcodes without their operands — and the caveat is
+    retracted at the constant.
+
+► **A SECOND CODEX REVIEW RETURNED FOUR ON THE FLEE. THREE WERE REAL AND THE
+  FOURTH WOULD HAVE MADE THE ENGINE WRONG.** Fixed:
+  ► **THE FLEE LEFT THE FACING STALE.** `changeCombatants` recomputes BOTH
+    facings from `hero._x` vs `villain._x` at every phase advance
+    (`+0x28bf`-`+0x2ae3`), and a flee is a phase advance. The comment above
+    `facingAfter` said *"exactly two verbs move anybody: a walk and a rank
+    change"* — **a census in a comment, true when written and false the day the
+    flee shipped, which read as a licence to leave the new branch out.** It
+    names the RULE now (every branch that writes an `x` recomputes the facing
+    from the `x` it wrote) and the grep that checks it.
+  ► **ONE FLEE SPENT ONE `taunted1` TOKEN.** Tokens are source-qualified, the
+    build's flag is one boolean, so two taunters left a survivor that forced a
+    SECOND flee. `statusConsumptionEffects` already carried this exact lesson
+    for the burning flags; the flee's own clear did not call it.
+  ► **AND A FORCED SWAP CONSUMED NOTHING AT ALL, a forced rest four of five.**
+    Rows 1-7 are STATEMENTS: row 3 writes `taunted1 = false` inside the facing
+    arm and BEFORE its `getphase`, so a row-1 swap or a row-2 rest spends a
+    pending flee exactly as it spends a pending burn. `SS2_CHAIN_CLEAR_FLAGS` is
+    that list, and `forcedStatusFlag` now ranks off the same one, because in the
+    build they are the same statements.
+  ► **THE FOURTH — "extract the body-clamping logic and use it on the flee" —
+    IS REJECTED ON THE BYTES**, above. A review finding is a claim to verify,
+    and this one's OBSERVATION was right while its RECOMMENDATION would have
+    diverged the engine from the oracle.
+
+► **THE LAST DEFERRED VANILLA ACTION RESOLVES (`8ede824`, `d5dabeb`), AND ITS
+  DEFERRAL REASON WAS RIGHT TO THE END.** `taunt` stayed unbuilt for a month
+  because the candidate implements direction 20's profile and NOTHING BEFORE
+  IT — so resolving it through the ordinary attack path would take the
+  dispatcher's samples on every press, where the build takes them on one outcome
+  in four. **Measured: 1 sample on a failed roll, 2 on effect 2, and the
+  dispatcher's only on effect 1.** Every vanilla action the controllers wire now
+  resolves, and `ss2-rules.js`'s deferral list is empty.
+  ► **FOUR THINGS THE MAP'S PROSE DID NOT SAY**, all derived this session: both
+    clips fire BEFORE the roll (so a FAILED taunt still animates); the
+    comparison is DIRECT and not `100 - chance`; **effect 2 splits on the
+    DEFENDER'S WEAPON MODE** (`+0x69a7` — the discriminator left open as "a
+    knockback OR sets `taunted1`"); and the displacement is unconditional while
+    the ANIMATION is gated at `|force| > 100`.
+  ► **A TAUNT IS PRICED LIKE A REST, WHICH IS WHY THEY SHARE A BUTTON.** Cost
+    `round(charisma * 2)`, gain `+= stamina`, heal `3 + ceil(stamina)` — the
+    same three writes `rest` makes. Routing it through the shared band path
+    would have repriced it on STRENGTH and dropped the recovery.
+
+► **AND A CODEX REVIEW SAID DO NOT SHIP IT, WITH THREE HIGH FINDINGS. TWO ARE
+  FIXED; THE THIRD IS ACCEPTED AND NAMED.**
+  ► **THE SHOVE REPORTED A FORCE AND MOVED NOBODY** — force 750 with the
+    defender still at x 250. **I had found this myself an hour earlier and filed
+    it as a pre-existing convention**, because `damagecharacter`'s knockback
+    displaces nobody either. That was true and was the wrong conclusion: **a
+    convention that makes a NEW outcome inert is not a defence.** It emits a
+    `POSITION` effect now.
+  ► **THE RECOVERY WAS APPLIED AT THE WRONG BOUNDARY.** `check_stats`
+    (`+0x68d3`) clamps BEFORE the roll (`+0x6921`), so the recovery survives a
+    lethal strike and the gain clamps before the cost is spent — 220/220,
+    charisma 30, stamina 12 ends at **165**, not 177. **`rest` cannot show this
+    and that is why it went unnoticed**: its cost is negative, so it never
+    spends and there is no second stage.
+  ► ~~**AND THE `taunted1` FLEE IS STILL UNBUILT**, which the review is right to
+    call incomplete rather than documented. Ranked, with the one derivation it
+    is blocked on.~~ **BUILT 2026-09-17 (`cbaf406`), and corrected again the
+    same day — see the flee entry at the head of this file.** The derivation it
+    was blocked on was the run's displacement, which is `movement_speed * 40`
+    less the stop gap of 10, run as a loop rather than a closed form.
+
+► **THE `psyche_up` COUNTER HAS EIGHT RESET SITES AND THIS PROJECT HAD THREE
+  (`34636ff`, `2a0e3da`).** Three sessions each added one without asking how
+  many there were. Every write in the battle overlay sets 1; the only increment
+  is `+0x6761`. The unrecorded three: **`+0x148e`** (`magic_damage_character`,
+  the defender — the write sits directly after `hitpoints -= damage`),
+  **`+0x6ac8`** (a landed `taunt` against a bow-mode defender) and **`+0x7a6a`**
+  (`cast_whirlwind`'s write-back, which has **NO matching increment**, so a
+  whirlwind caster is left at 1 where a psych-up discharger is left at 2).
+  **None is live** — this engine has no magic-damage, taunt or whirlwind verb —
+  and each goes live the day one is built. Named at `SS2_PSYCHE_UP.floor`, which
+  is where a reader stands when they need to know what writes the counter.
+
+► **`taunt` IS NO LONGER BLOCKED ON A DERIVATION — IT IS SPECIFIED, AND IT IS
+  THE NEXT THING TO BUILD.** Its deferral reason was exact and is still true
+  (the candidate implements only the post-`checkattackroll` arm, so it would
+  consume the wrong number of samples), but the missing half is now written out
+  in the battle map under "The taunt phase, in full". Four things in it were not
+  in the prose:
+  ► **BOTH CLIPS FIRE BEFORE THE ROLL** — `taunt` on the actor, `taunted` on the
+    target — so a FAILED taunt still animates both.
+  ► **THE COMPARISON IS DIRECT**, `diceroll < taunt_percentage` (`+0x694b`), and
+    not the dispatcher's `100 - chance` form. Backwards inverts the action.
+  ► **`taunt_effect == 2` SPLITS ON THE DEFENDER'S WEAPON MODE** (`+0x69a7`) —
+    the discriminator the map had left as "a knockback or sets `taunted1`".
+    Melee takes a `charisma * 25` shove; bow-mode is made to flee.
+  ► **THE DISPLACEMENT IS UNCONDITIONAL AND THE ANIMATION IS GATED** on
+    `|force| > 100`, the same shape `damagecharacter` has.
+  ► **AND WHAT IS ALREADY BUILT MUST NOT BE RE-DERIVED**: the candidate computes
+    `chances.taunt` as `bounded(roundedChance(charismaRatio, 0.4))` — the bytes
+    at `+0x052b` exactly — and direction 20's damage profile. What is LEFT is
+    the two pre-samples, the two effect arms, and a `taunted1` flee consumption
+    that `SS2_STATUS_PHASE_FOR_FLAG` does not yet carry.
+
+► **AND THE DEFERRAL HEADER WENT STALE A SECOND TIME, IN THE PARAGRAPH WHOSE
+  SUBJECT IS GOING STALE.** It was rewritten on 2026-09-15 to say two actions
+  were genuinely deferred; `psyche_up` shipped on 2026-09-16 and the line was
+  not touched. **A header that documents its own staleness and then repeats it
+  is worth less than one that says nothing**, because it teaches a reader to
+  trust it.
+
+► **A WINNER CELEBRATES NOW, AND HE DOES IT UNTIL SOMETHING MOVES HIM
+  (`d093bff`).** A won match drew the breathing `Standing`; the build does not.
+  Overlay frame 65 (inside `combatwon`, 62-73) runs
+  `hero.gotoAndPlay("celebrate1")` and frame 77 (inside `combatlost`, 74-84)
+  the same on `villain`; `celebrate1` has no `Stop`, runs on into `celebrate1a`,
+  and 1426 is `GoToLabel("celebrate1a"); Play`. `clip-sequences.js` already had
+  the run, so this needed only a dispatcher — a `celebrate` family, a looping
+  27-beat schedule, and an arm in `idleFrameFor`.
+  ► **THE CELEBRATION OUTRANKS THE CHARGED STANCE**, because a gladiator can win
+    while still holding a charge and a finished bout has nothing to spend it on.
+    The control is the same combatant on the LOSING side, who keeps the pose and
+    the glow. **The dead do not celebrate**, which a 3v3 makes reachable.
+  ► **ONE STATED APPROXIMATION**: the build cycles only `celebrate1a`'s 18
+    frames and this loops all 27, so the winner re-plays his opening flourish
+    once a cycle. A loop-start offset would need the renderer to hold when the
+    bout ended, and that statelessness is what makes the idle need nothing
+    invalidated.
+  ► **Census 79/22 -> 80/21.** `celebrate1a` stays declared undispatched — the
+    `continuations` bucket is down to it and `flame_repeat`, the only two of the
+    six run members nothing in the build names.
+
+► **A GLADIATOR HOLDING A CHARGE STANDS CHARGED, AND GLOWS WHILE HE WAITS
+  (`b1be7b2`).** `changeCombatants` resets both fighters to `Standing` and then
+  overrides whichever holds a charge — `gotoAndStop("psyche_charging")` at
+  counter 2, `psyche_charging2` at 3, four sites (`+0x281e`, `+0x284d`,
+  `+0x287c`, `+0x28ab`). `src/render/stance.js` owns the whole idle decision;
+  the shell had `timelineFor("Standing")` and a clock inline, so **"which pose
+  does a gladiator rest in" was a decision the suite could not reach and nobody
+  had asked.**
+  ► **IT IS DERIVED AT THE DRAW SITE, NOT PUSHED DOWN THE PRESENTATION
+    STREAM.** A `clip-goto` is consumed and finished; a stance must survive
+    every action in between. Per-frame derivation makes it automatically
+    persistent — the moment the counter resets, the next frame draws `Standing`.
+  ► **AND THE FIRST FIGURE EFFECT GROUP ANYTHING HERE DRAWS.** Both charging
+    clips carry the cyan glow, so a resting charged gladiator glows — which
+    closed a condition `figureRouteFor()` had set for itself and could not meet:
+    `filtersScaled` is `true` now, radii measured linear at 4.2742 / 8.5483 /
+    17.0967 px for scales 1 / 2 / 4. The two levels are two DIFFERENT glows
+    (4.2742 against 2.5208), so collapsing them would be visibly wrong.
+  ► **THE LABEL CENSUS MOVED 77/24 -> 79/22** and `continuations` is down to
+    `celebrate1a` and `flame_repeat`, the only two run members nothing names.
+
+► **THE AI WINDS UP NOW, BEHIND `aiCharges`, AND THE ARITHMETIC SAYS IT SHOULD
+  NOT (`1775a4c`).** Owner's call against a measurement: the verb was chosen **0
+  times in 6,000 AI actions**, so the action, its clips, the stance and the glow
+  had a live population of zero outside human play. **But the criterion the
+  decision was taken on is refuted by the numbers** — damage per actor turn over
+  40 seeded bouts: quick 17.82, normal 15.26, **charge 11.53**, power 11.44; and
+  over five stat-lines the charge won exactly one. **So the flag buys a
+  CHARACTER, not an optimisation, and says so.** An unwounded gladiator winds
+  up; a wounded one fights, because taking a blow resets the charge.
+  ► **OFF BY DEFAULT AND IN THE RULE-SET ID WHEN ON**, the same argument
+    `crowdPatience` and `rankStride` are in the id for: the hash carries only
+    the id, so two peers on different AI policies would agree on every hash and
+    then diverge at the first charge. No pinned hash, golden or census moves.
+  ► **40 seeded 3v3 bouts: 0 charges off, 2,433 on (30.6%, 974 discharges),
+    40/40 resolving either way, bouts 8% longer. Every charge came from the two
+    BOW slots** — ~~warriors gate `psyche_up` at `herolevel >= 7` and archers at
+    `>= 3`, and the demo gladiator is level 4, so on the shipped roster this is
+    an archer behaviour whether or not anyone intended it.~~ **the archer half
+    of that gate was the map's misreading (corrected 2026-09-23): both archer
+    frames hide the psyche button at EVERY level, so a drawn bow never charges
+    in the build, and no longer does here. Every charge in that (already
+    superseded) table was one the build forbids.**
+
+► **SIX VERIFIERS ON THE STANCE, TWO REFUTED ME (`ce38286`).**
+  ► **"THE CHARGED POSE IS THE ONLY HELD FIGHTER STANCE IN COMBAT" IS FALSE.**
+    86 of the fighter clip's frame scripts end in `Stop` and only 7 spans
+    self-loop, so the figure parks on the terminal frame of nearly every action
+    until the next `changeCombatants`. The true claim is **the only held stance
+    that SURVIVES A TURN BOUNDARY**.
+  ► **"REPRODUCES THE BUILD RATHER THAN APPROXIMATING IT" IS FALSE — BUT BY ONE
+    FRAME, NOT BY TWO SECONDS, AND I GOT THAT WRONG IN THE HANDOFF.** The
+    verifier said the build holds a figure's last frame until `changeCombatants`
+    and that `nextphase` gates that on `demand_move >= 60` enter-frames. I
+    relayed it into a ranked item without re-deriving it. **Re-derived
+    2026-09-17: the hold is ONE ENTER-FRAME, about 33 ms.** ~~A clip's last frame
+    runs `this.struck = true; stop()`~~ **A REPORTING clip's last frame does —
+    37 of the fighter clip's 86 `Stop` run-ends, not all of them** *(corrected
+    2026-09-22 by a write-nothing verifier over every `"struck"` reference in
+    sprite 1241: 38 frames write it, the 38th being 1963, the burn's exit, and
+    no `Hurt`, `Defend`, `Death`, `Yield`, `knockback`, `taunted`, `bombard` or
+    `snipe` run does)*; the fighter's `onEnterFrame` ~~polls
+    `attacker.struck != null` (`+0x5025`)~~ **tests `attacker.struck == true` —
+    in the wincrowd arm at `+0x510f`-`+0x511c`** *(corrected 2026-09-22 by the
+    same verifier: `+0x5025` is that arm's ENTRY guard, whose body runs when
+    `struck == null`)* and on the next frame clears it and calls `nextphase()`
+    (`+0x5121`-`+0x513d`). **`demand_move` is a STALL WATCHDOG** — `>= 60`
+    also requires `_y >= grounded` and no bullet in flight, `>= 200` is the
+    backstop — for animations that never report.
+    **So there is no meaningful action-end gap**; what survives is that the
+    build restarts the `Standing` loop at every `changeCombatants` while this
+    engine's idle phase free-runs. **Never relay a number you have not
+    re-derived — it displaced the genuine next item for a day.**
+  ► **`changeCombatants` RUNS ~4x A TURN, NOT ONCE** — `+0x317e` (top level,
+    every `heroactions` entry), `+0x3638` (every phase advance), `+0x365f` (turn
+    end). `battle_action` is a phase selector.
+  ► **TWO REAL DEFECTS**: `idleFrameFor` had no `alive` guard, and a negative
+    finite `now` leaked a negative phase while the docstring promised otherwise.
+  ► **AND A MAP SILENCE IS RETIRED BY THE BYTES.** Sprite 2249 frame 1 is
+    labelled `initbattle` and `+0x0bc9`-`+0x0bf1` runs
+    `_root.game.hero.psyche_up = _root.game.villain.psyche_up = 1`; `psyche_up`
+    appears in exactly six action blocks in the whole SWF, so there is no other
+    initialisation site. **At battle time the counter is never undefined.**
+    `psyche-up-initialisation` is narrowed to the between-battles save, and its
+    `settledBy` now says a battle capture CANNOT answer it.
+
+► **AND A CODEX REVIEW CAUGHT THE `knockback` CORRECTION MAKING KNOCKBACKS
+  SILENT (`8bc27c0`)** — re-deriving it found the same hole already open on
+  `hurt8` since 2026-09-14. **Neither clip is silent in the build**: the sound
+  fires on the continuation (`hurt9` at 1266, `knockback_mov` at 1440). Sound
+  follows the RUN now and still may not borrow from a family sibling.
+
+► **THE BUILD PLAYS SEVEN RUNS AND THIS ENGINE WAS CUTTING FIVE OF THEM IN
+  HALF (`67dfc01`).** The 05:00 handoff ranked "animation sequences" third, as
+  art completeness. **It was a correctness gap in five dispatched animations**,
+  and the premise underneath it — *"this engine dispatches one animation per
+  action and never a sequence"*, in three handoffs and four source files — was
+  true of the ENGINE and had never been checked against the BUILD. In AVM1 a
+  `gotoAndPlay("x")` runs FORWARD until an action stops it, and seven of export
+  1241's 101 labels carry no terminating action inside their own span:
+
+```text
+    initialize   1..1        -> 32    GotoLabel Standing      Standing
+    Hurt8        1250..1265  -> 1283  Stop                    Hurt9
+    celebrate1   1400..1408  -> 1426  GotoLabel celebrate1a   celebrate1a
+    knockback    1428..1433  -> 1446  Stop                    knockback_mov
+    psyche_up    1609..1617  -> 1626  Stop, struck = true     psyche_charging
+    psyche_up2   1627..1635  -> 1643  Stop, struck = true     psyche_charging2
+    burning      1947..1948  -> 1963  gotoAndPlay Standing    flame_repeat x2
+```
+
+  So direction 8 plays 34 frames where direction 9 plays 18, a knockback 19 and
+  not 13, a first charge 18 and a second 17 — and **`burning` plays 32 frames
+  where this engine played 2**, 6% of the build, invisible to every test
+  because the pack's `burning` entry really is two poses long.
+  ► **THE DISCRIMINATOR THIS FILE HAD BEEN USING WAS WRONG.** "No `StartSound`
+    binding" is true of 21 of the 101 labels and of only four continuations;
+    `hurt8`, `knockback` and `celebrate1` are silent ENTRY points whose sound
+    fires on the continuation (`hurt9` -> 1183.mp3 at 1266, `knockback_mov` ->
+    1104.mp3 at 1440). **That also answers a puzzle this file recorded twice:
+    `hurt8` is not "the one silent hurt", it is half a performance.**
+    Contiguity was no better — 1609-1656 is one unbroken run of five labels.
+  ► **`supersededBySibling: ["knockback"]` WAS BACKWARDS.** `damagecharacter`
+    dispatches `"knockback"` (`+0x1b4f`, `+0x1bc0`) and the 13-frame
+    `knockback_mov` is its continuation, so this engine had been drawing the
+    second half of a knockback and never the first.
+  ► **`src/render/clip-sequences.js` IS THE TABLE AND `tools/clip-sequences.mjs`
+    RE-DERIVES IT** from the oracle, read-only. Mutation-checked four ways:
+    drop the effect rebase -> 3 fail, never sequence -> 6, drop the beats -> 2,
+    count a child-clip `gotoAndPlay` as a terminator -> 1.
+
+► **AND `psyche_charging*` ARE A HELD STANCE THE ENGINE HAS NOT BUILT — the
+  highest-value thing this session found and did not do.** `changeCombatants`
+  poses BOTH fighters from the counter at the top of every turn:
+  `if (game_attacker.psyche_up == 2) attacker.gotoAndStop("psyche_charging")`
+  at `+0x281e`, the same at 3 for `psyche_charging2` (`+0x284d`), and both
+  again for the defender (`+0x287c`, `+0x28ab`). **A gladiator holding a charge
+  STANDS in the charged pose instead of `Standing`** — the visible form of the
+  resource, and the counter values line up exactly (2 after one press, 3 after
+  two). A stance is a persistent pose BETWEEN actions and a run is one
+  performance WITHIN one, so it is its own piece of work; it is ranked in the
+  handoff and deliberately not attempted in `67dfc01`.
+
+► **A SIX-VERIFIER WAVE BROKE TWO OF MY CLAIMS AND ONE OF THEM WAS THE SAFETY
+  ARGUMENT.** Write-nothing, one named claim each, against a scratchpad copy of
+  the oracle; 6 briefs, 6 returned, 0 dead.
+  ► **"Clip labels are strictly downstream of `toTeamWireState`" IS FALSE.**
+    The resolver puts `vanillaLabel` and `clip` ON events, `toTeamWireState`
+    clones `battle.events` wholesale, and **19 of 23 goldens and 61 of 69
+    observations state `combatwon`/`combat_won` as expected values**. Renaming
+    a resolver-side label moves committed hashes — measured by the verifier at
+    3 of 5 literal pins. The conclusion for `67dfc01` survives for a different
+    reason: the diff is `src/render/` and `src/golden/*` imports neither
+    `src/render` nor `src/adapter`. **Right answer, wrong reason, and the wrong
+    reason would have licensed a resolver-side rename.**
+  ► **MY BRIEF SAID EIGHT RUN-ONS AND THERE ARE SEVEN** — `flame_repeat`'s
+    frame 1963 is a TOTAL if/else and both arms jump. The committed tool
+    already said seven; only the brief was wrong, which is the wave working.
+  ► **"Nothing dispatches `knockback_mov`" was too strong** — one site,
+    `+0x7c5e`, behind ~~`cast_spell_icon(attacker, 39, 2)`~~
+    **`cast_spell_icon(attacker, 39)`** *(corrected 2026-09-22 by a
+    write-nothing verifier re-reading `+0x7c46`-`+0x7c5c`: the 2 is the
+    argument COUNT pushed for `CallFunction`)*, a spell path — the
+    `cast_command` arm — with no verb here. Said while correcting a claim that
+    was also too strong.
+  ► **`burning`'s `frames: 32` IS THE ONE NUMBER THE TOOL DOES NOT PROVE.** The
+    repeat count of 2 is read by hand from `burncycle = 1` against `>= 2`; it
+    carries `derivedBy: "hand"` at the field now and the tool prints
+    `[REPEATS]` on any run whose counter it cannot evaluate.
+
+► **THE CAPTURE WINDOW CAN CLOSE AT THE PHASE NOW, AND BOTH WINDOWS PASS THE
+  GATE.** `finishTrace` fires on `checkattackroll`'s RETURN, so the armed window
+  was exactly that call — and `psyche_up`'s counter is written at `+0x6738` and
+  `+0x6761`, **both after that return**. `-TraceWindow phase` defers the close
+  to `nextphase`. **It is OPT-IN and the default path is untouched**: the end
+  line carries `traceWindow` only in the wide mode, exactly as `staged` does, so
+  every archived trace stays byte-comparable; ingest refuses any value but
+  `"phase"`; the observation carries it as a fourth optional capture key under
+  the same omission rule, because a field on legacy records would rewrite every
+  digest and invalidate the provenance of every golden citing them.
+  ► **`validate-vehicle.ps1` PASSES IN BOTH MODES** — wrapper source
+    `19AF3F347355AA47`, round trip matching, every `.sol` hashed identical
+    before and after — **and it caught a defect in the change**: the first
+    `phase` run failed at ingest with "the end line carries an unexpected field
+    traceWindow". The guard was right; ingest had to be taught the field.
+  ► **THE GATE TAKES `-TraceWindow` ITSELF, because an opt-in mode nobody has
+    run is an approximation nobody counts.**
+  ► **AND THE GATE IS RUNNABLE FROM THIS TREE NOW.** It needs `.tools` —
+    portable Ruffle, ffdec and a JRE — which existed only in the Windows capture
+    vehicle at `C:\ss2-capture`, a second checkout carrying uncommitted work.
+    Copied here (202 MB, gitignored) rather than disturbing that checkout or
+    testing the wrapper against its older `src/golden`.
+  ► **`ss2-capture-staging.md` PRESCRIBED A CAPTURE THE WRAPPER COULD NOT
+    TAKE**, and said so in a sentence a reader would have acted on. Corrected at
+    the sentence. **A document that prescribes an impossible capture is worse
+    than one that says nothing: the next reader runs the session and reads the
+    silence as the build's answer.** The session also needs
+    `-WatchFields psyche_up`, which EXTENDS the defaults rather than replacing
+    them.
+
+► **`tools/shot.sh` IS RETIRED RATHER THAN FIXED.** Owner's steer: "only fix it
+  if we need the functionality." We needed the functionality and not that tool —
+  its last justification was pages `shot-live` could not shoot, and **a freeze of
+  0 now waits for QUIESCENCE** instead of a frame number. Measured on the same
+  static screen, the two tools' renders are **byte-identical, 76,983 bytes, 0
+  differing pixels**. Asking for frame 1 instead is not a workaround: it catches
+  the page before its packs land, 51.6% different with a 407,839-pixel spike at
+  delta 178. A test asserts the file stays gone.
+
+► **AN ADVERSARIAL REVIEW SAID "DO NOT SHIP `psyche_up` YET" AND WAS RIGHT
+  THREE TIMES (`8fe5c58`).** Codex `gpt-6-astra`, model pinned on the command
+  line, on the diff that had been committed an hour earlier. **Every finding was
+  re-derived here before anything was touched; all three confirmed, fixed and
+  mutation-checked.**
+  ► **TAKING DAMAGE DID NOT INTERRUPT A CHARGE.** `damagecharacter` resets the
+    DEFENDER's counter at `+0x1be4` and only the actor's half was built, so
+    **the shipped action was strictly stronger than the build's** — three
+    presses of `ceil(max_damage * 1.5)` are expensive only because three
+    UNINTERRUPTED turns are hard to get. **Found twice independently**, by
+    reading the map's own sentence and by the review reproducing it.
+  ► **A LETHAL DISCHARGE BANKED A CHARGE IT CANNOT HAVE.** The `+0x6738`
+    write-back is synchronous; the `+0x6761` increment fires a tick later on
+    `attacker.struck == true` — and `death()` deletes both `onEnterFrame`s
+    (`+0x2035`, `+0x2042`) and `nextphase` itself (`+0x2049`), **so after a kill
+    that tick never comes.** A lethal discharge leaves 1. **This file already
+    applied that rule to the stamina transition**, where nineteen goldens
+    measure it; I applied it to stamina and not to the counter.
+  ► **A STATED ZERO NEEDED FOUR PRESSES AND PLAYED ONE CLIP TWICE.**
+    `tools/arena/roster.js` has authored `psyche_up: 0` since 2026-09-10 and
+    every test started at 1, **so the arena got a different action from the one
+    the tests exercised** — `clips[Math.min(0,3)-1]` is `clips[-1]`, which fell
+    through to `clips[0]`. The counter reads clamped to the floor now:
+    **below-floor is fresh**, since both resets write 1 and nothing the build
+    does leaves anyone under it.
+  ► **AND ONE THE REVIEW DID NOT RAISE: THE AI NEVER PSYCHES UP.**
+    `suggestAction` is keyed on `ATTACK_BANDS` membership, which this action
+    deliberately lacks. **A side effect of a correct decision, not a defect** —
+    recorded at the band decision, because a sweep would otherwise report the
+    feature working over a population of zero, which is the failure this file
+    recorded about the twelve effect groups a day earlier. Teaching the AI to
+    charge is the OWNER'S call.
+  ► **AND "NO GOLDEN MOVED" WAS SAID AS THOUGH A HASH HAD BEEN COMPARED.**
+    **Golden replay hashes are not committed anywhere** — a golden pins
+    `expected` outcomes, not a digest. What is true: **0 of 23 goldens state
+    `psyche_up`**, the expected-outcome replay passes, and all **11** literal
+    `combatStateHash` pins are unchanged. Say which of those three is the
+    evidence.
+
+► **`psyche_up` IS BUILT (2026-09-16, `b201486`), AND THE TWELVE EFFECT GROUPS
+  REACH A GLADIATOR AT LAST.** Three presses: the counter is read at press time
+  and advanced on report-back, so 1 plays `psyche_up`, 2 plays `psyche_up2`, and
+  3 plays `psyche_up3` AND fires a range-gated grievous.
+  ► **THE DISCHARGE NEEDED NO ARITHMETIC.** `directionProfile`'s
+    `direction === 30` arm already resolved it — `ceil(max_damage * 1.5)`
+    falling back to `character_level * 10`, critical forced to 20 — **which also
+    closes the brief's first named hole: the map's unexpanded "level-based
+    fallback" IS expanded**, in the module the goldens replay against.
+  ► **IT IS NOT AN `ATTACK_BAND`, AND THAT IS THE LOAD-BEARING DECISION.**
+    Membership means "always attacks"; two of three presses draw NOTHING, so a
+    band entry would put samples on the ordered channel the build never takes
+    and desynchronise every peer replaying the same tape. Pinned by a test that
+    counts the journal across a charge, with an ordinary attack as the control.
+  ► **THE RESET LIVES IN `phaseTransitionEffects`, BECAUSE THAT IS THIS
+    ENGINE'S `nextphase`.** The build writes `psyche_up = 1` on any decision
+    that is not `psyche_up` (`+0x35c7`-`+0x35ea`), and every completed phase
+    pays and regenerates through that one function — so the rule has one copy
+    rather than eight, and the branch that forgot would have banked a charge.
+  ► **OUT OF RANGE IT DECIDES NOTHING — no roll, no damage, no death** — unlike
+    every melee attack, which resolves from any distance. The gate runs before
+    the first draw, the event says `outOfRange` and carries both numbers, and
+    the charge is KEPT so closing and pressing again spends it.
+  ► **THE COUNTER LANDS ON 2 AND THAT IS A STATIC CANDIDATE, MARKED.** The
+    map's own gloss on it is wrong by one press — at 2 the selector picks
+    `psyche_up2`, so the readings differ as a CADENCE (3 then 2 per discharge,
+    against 3 every time). Settling it needs two consecutive discharges under
+    `-TraceWindow phase`.
+  ► **SIX PINNED LISTS TURNED RED AND EVERY ONE WAS RIGHT TO**, including the
+    test written to go red when this was built: *"THE FOUR CLIPS THAT CARRY
+    EVERY EFFECT GROUP ARE UNREACHABLE — say it, do not discover it"*. Measured
+    from the pack, **10 of the 12 groups are reachable now**; the 2 on the
+    ~~`psyche_charging*` continuations are not, because this engine dispatches
+    one animation per action and never a sequence.~~ **ALL TWELVE REACH A
+    GLADIATOR SINCE `67dfc01`, and this clause is the premise that entry
+    broke** — the engine having no sequence was true, the BUILD having none was
+    never checked and is false. See the top of this file.
+  ► **AND NOTHING MOVED**: suite 1931, fail 0, every golden, fixture, replay and
+    observation test included. The counter is a resource with NO default, which
+    is what bought that.
+
+► ~~**`psyche_up` IS NOT THE OWNER'S AND IS NOT A SPELL TO INVENT — THREE
+  HANDOFFS SAID BOTH.**~~ **BUILT, see above.** They recorded that the figure pack's twelve effect
+  groups sit on four clips declared unplayed and concluded that *"making them
+  reachable means deciding what those spells ARE."* **It is a vanilla SS2
+  ACTION** with a `getphase` label, a button on all four controller frames, 31
+  mentions in the battle map and a fully decoded discharge chain; the twelve
+  groups are its ART. `AGENTS.md` says new systems are the agent's to build, and
+  this one does not even need designing.
+  ► **THE DERIVATION IS WRITTEN UP AND CHECKED: `docs/handoffs/PSYCHE-UP-BRIEF.md`**
+    — ten agents, 5 questions and 5 write-nothing verifiers, 10 started, 10
+    returned, 0 dead. **Six premises broke, four of them mine.** Read the brief
+    before writing a line, and treat every fact in it as a hypothesis anyway.
+  ► **AND IT IS A SESSION'S WORK, MEASURED.** The closest precedent is the
+    ranged trio (`7310583`): **2,252 insertions across 10 files**, plus a
+    correction commit the next day. Do not start it in the last hour.
+  ► **`round(strength)` AT `+0x653f` IS THE STAMINA COST, NOT THE DAMAGE, AND I
+    PUBLISHED IT AS DAMAGE.** It is a row of the map's `staminacost`-by-phase
+    table, beside `power_attack -> round(strength*3)` and `rest ->
+    0 - round(stamina * 15)` — **a table whose `rest` row is negative can only be
+    a cost table.** The damage is `ceil(max_damage * 1.5)`, in the attack-roll
+    dispatcher, a different section entirely. Three agents broke it independently.
+  ► **A NAME WITH AN `SS2_RESOURCE_DEFAULTS` ENTRY MOVES EVERY GOLDEN REPLAY
+    HASH — MEASURED 23/23 — AND THIS FILE'S REASSURANCE IS RIGHT FOR THE WRONG
+    REASON.** It says the vocabulary pin's warning is "broader than what
+    happens". The last three additions left goldens alone **because
+    `weapon_range`, `weapon` and `secondary_weapon` are deliberately ABSENT from
+    `SS2_RESOURCE_DEFAULTS`**, which is stated at the field itself. For a name
+    WITH a default the warning is literally accurate, `derive: false` does not
+    stop the default fill, and **the repository already caught this at `86ccb68`
+    — all 23 hashes moved, the armoured golden went `70e605e1` -> `4032d673`,
+    and the suite stayed green because nothing pinned the shape.**
+
+► **EVERY GRIEVOUS BLOW BOUND ITS ACTOR TO `attack30`, AND THERE IS NO SUCH
+  CLIP.** `attackLabel` branched 20/21/22/23 then fell through to
+  `` `attack${direction}` ``; the fighter carries `attack1`..`attack12`, and
+  `animationFor` answers a missing label by falling back rather than by
+  complaining. **It is the same defect the `direction === 23` branch above it was
+  written to fix, one number later, and it survived that fix because the suite
+  pinned 23 and not the CLASS** — so the guard is now the RANGE. And no clip
+  could have been named from the direction anyway: for `psyche_up` the animation
+  is chosen by the COUNTER (`+0x658a`/`+0x65b9`/`+0x65ef`), not the direction.
+  Found by an agent reading for something else entirely.
+
+► **`ss2-rules.js`'s DEFERRAL PARAGRAPH WAS WRONG ABOUT THREE OF ITS FOUR
+  ENTRIES FOR TWO DAYS.** It deferred `bash_attack`, `bombard`/`snipe`,
+  `psyche_up` and `taunt` "each for a stated reason" and ended "None of the four
+  has a single golden" — while `Ss2ActionType` exported the first three and
+  `legalActions` pushed them. **An implementer reading only that header would
+  re-derive work already in the file underneath it.** Corrected at the paragraph;
+  `taunt` is the one entry that has not moved.
+
+► **THE RASTERISER MOVES 15.9% OF THE ARENA AND NOTHING HAD EVER VARIED IT.**
+  `tools/shot-live.mjs` passed `--disable-gpu` as a constant, so **every pixel
+  count in this repository was measured under software rasterisation** and no
+  shot recorded which. It is the EIGHTH argument now — `cpu` (the default and
+  the old behaviour) or `gpu`, refused by name if it is neither — and
+  `chromeFlagsFor` is exported so the suite reaches it. Same URL, same frame,
+  same window, varying only the flag:
+
+```text
+    arena, whole page      152,530 px differ (15.9%)   max delta 105
+      inside the canvas    133,568 (20.3%), bbox = exactly the stage
+      the sidebar alone     16,607
+    each rasteriser against itself     0 px, byte-identical
+```
+
+  ► **SO TWO SHOTS TAKEN UNDER DIFFERENT RASTERISERS ARE NOT COMPARABLE.** Hold
+    it fixed in any differencing measurement, and say which one you used — both
+    tools print it now, because it cannot be recovered from the PNG.
+  ► **AND `tools/shot.sh` HAS THE SAME ARGUMENT, SIXTH RATHER THAN EIGHTH.** It
+    hardcoded the flag for a session after its sibling stopped, which meant two
+    shots taken with the two tools differed by 15.9% before anything under test
+    changed. **A test reads the shell script and asserts the two tools offer the
+    same two values and the same default** — it cannot import a `.sh`, so it
+    pins the contract and says so. Mutation-checked: change the default and the
+    suite names it.
+  ► **AND IT IS A DIFFERENT PHENOMENON FROM THE CLIP RESIDUAL, BY SIGNATURE.**
+    15.5% of the movers sit on a strong edge against **99.8%** for the clip, and
+    they cover a third of the stage: bitmap resampling and gradient dither, not
+    antialiasing.
+  ► ~~**THE FRACTIONAL-CLIP FINDING SURVIVES IT.** The probe shot under both
+    rasterisers gives **every number identical**.~~ **TRUE OF THE PAGE AS IT
+    THEN WAS, AND MISLEADING NOW — CORRECTED THE SAME EVENING.** That page had
+    exactly ONE canvas. **Allocate a second one and `gpu` answers differently**,
+    and the discriminator is already in hand: the run carrying the gradient
+    trials but no offscreen still read 2,548, so it is the ALLOCATION and not
+    the drawing. The finding the sentence was defending does survive — the snap
+    is right under both — but not for the reason it gave.
+
+► **THERE ARE TWO CLIP PHENOMENA AND EACH EXISTS UNDER EXACTLY ONE RASTERISER.**
+  With every control green — three null controls at 0, positive control 18,440 —
+  the probe's centre box (~200px clear of every rectangle) reads:
+
+```text
+    trial                                   cpu          gpu
+    every whole-pixel clip                    0            0
+    FRACTIONAL, cuts nothing              2,548 d6         0
+    FRACTIONAL, cuts the overhang         2,548 d6         0
+    the arena's own FRACTIONAL rect       2,548 d6         0
+    the arena's SNAPPED rect                  0            0
+    every fractional variant in the sweep 2,548 d6         0
+    GRADIENT + snapped clip                   0            3 d1
+    BITMAP + a WHOLE-pixel clip               0           50 d1
+    BITMAP + the arena's SNAPPED rect         0           49 d1
+```
+
+  ► **THE FRACTIONAL-RECTANGLE EFFECT PERTURBS PATH ANTIALIASING AND IS
+    CPU-ONLY.** It is what `stageClipRectFor`'s snap removes.
+  ► **A CLIP OVER A RESAMPLED BITMAP PERTURBS THE SAMPLER AT DELTA 1 AND IS
+    GPU-ONLY — and it does not care whether the rectangle is whole.** That is
+    the arena's 654-pixel band: rows 177..434 are the sky and the crowd, which
+    are raster. **No choice of rectangle fixes it**, so it is not a defect in
+    the clip and it is not open in the way it was written up as being.
+  ► **THE SNAP IS STILL RIGHT AND IS BETTER ARGUED NOW**: it removes 644
+    interior movers under `cpu` and costs nothing under `gpu`, where whole and
+    fractional both read 0.
+  ► **A LAZILY-CREATED RESOURCE IS A REGIME CHANGE WITH A TIMESTAMP.** Adding
+    the bitmap trials took the probe's NULL CONTROL from 0 to **8,196 at delta
+    45**, because the offscreen canvas was first allocated AFTER three baselines
+    had been captured, so every trial was compared against a baseline from the
+    other regime. **The page printed "THE CONTROLS FAILED, so every row above is
+    noise" rather than a number** — the third defect its own controls have
+    caught and the first about its own instrument. One discarded shot of every
+    draw path, before the first baseline, fixes it.
+
+► **THE ARENA REPORTS ITS OWN RECTANGLE NOW, AS A VALUE.** `stageFitReportFor`
+  in `src/render/arena-backdrop.js` returns the canvas, the CSS rect, the ratio,
+  the stage in DEVICE and PAGE pixels and all four letterbox bars — **calling
+  `stageFitFor` and `stageClipRectFor` rather than re-typing them**, which is
+  what its test asserts. `render` hangs it on `window.__stageFit` every frame and
+  `tools/shot-live.mjs` prints it beside every shot, so a screenshot now carries
+  the rectangle a reader needs to interpret it.
+  ► **IT CORRECTED ITS AUTHOR ON ITS FIRST RUN.** The canvas is **870x800**, not
+    the 870x688 derived from the letterbox bars, and it starts at page y 43 and
+    not 98. **Two errors that nearly cancelled** — the derived stage top came out
+    156.5 against a true 158 — which is the accident the function exists to
+    stop. Every "inside the stage" figure before this was computed over a
+    rectangle nobody had asked the page for.
+  ► **IT IS DELIBERATELY NOT A LOG LINE**, for the reason below: the panel is
+    below the fold at every window size this work has been shot at.
+
+► **THE 392-PIXEL CLIP RESIDUAL IS CLOSED, AND IT WAS THE RECTANGLE'S OWN
+  FRACTIONAL EDGES.** `stageFitFor` halves and multiplies by a float, so
+  `stageClipRectFor` landed on a whole pixel only by accident — at the arena's
+  870x688 canvas it was `0, 58.531, 870 x 570.938`. **A fractional clip makes
+  Chrome clip through an ANTIALIASED MASK instead of a whole-pixel scissor, and
+  that perturbs antialiased edges anywhere on the surface**, hundreds of pixels
+  from any boundary. It snaps to whole device pixels now, each edge moving by at
+  most half of one.
+  ► **`tools/clip-probe/index.html` IS THE INSTRUMENT AND IT IS THE REUSABLE
+    PART** — the canvas2d counterpart of `tools/swf-probe.mjs`. Same content,
+    same canvas, ONLY the rectangle varies; it reads its own pixels back and
+    prints the verdict, so no screenshot has to be differenced afterwards. Null
+    control 0, null-with-overhang 0, positive control 19,911. At 870x688, in a
+    160x160 box ~200px clear of every edge:
+
+```text
+    whole-pixel, cutting nothing                      0        centre 0
+    whole-pixel inset 20 / 39, CUTTING the overhang  46,393 / 81,393   centre 0
+    fractional inset 20.37, cutting nothing          3,359    centre 2,548  d<=6
+    the arena's own 0, 58.531, 870 x 570.938        53,720    centre 2,548  d<=6
+    the same rectangle SNAPPED (0, 59, 870 x 570)   50,361    centre 0
+```
+
+    **So it is the FRACTION and not the cutting** — a whole-pixel clip that
+    removes 81,393 pixels changes nothing in the middle. The sweep says which
+    edge and how much: **one fractional edge is as bad as four (centre 2,548 in
+    every case, identically), 0.25 does it and 0.001 does not** — a blitter
+    switching ONCE for the surface, not error accumulating with the fraction.
+  ► **AND IT HOLDS IN THE ARENA.** `seed=7`, frame 120, 1200x800, clipped
+    against `?clip=0`, movers 20px or more inside every clip edge: **644 BEFORE,
+    0 AFTER.** What is left inside the stage is 870 pixels — one full
+    canvas-width row AT the boundary, which is the clip's own edge. Null control
+    0 both times.
+  ► **CONTROL (a) IN THE HANDOFF THAT SHIPPED THE CLIP TESTED A CLIP THAT WAS
+    NOT THERE.** *"A clip inflated by 10,000px is pixel-identical to no clip, so
+    the cause is the rectangle actually cutting something."* The measurement
+    reproduces exactly; the inference does not. **An inflated rectangle
+    intersected with the device bounds is a solid rectangle, and Skia collapses
+    that case back to a black-and-white region clip** — so the control exercises
+    an ELIDED clip and can say nothing about one that is present. It is the
+    reason this question pointed at "what is being cut" for a session.
+  ► **AND "99.8% OF THE MOVERS SIT ON ANTIALIASED EDGES" IS CORROBORATING, NOT
+    DIAGNOSTIC — a verifier caught me on it.** The number is real (against 5.8%
+    of the unchanged pixels in the same region, and 0% in flat areas against
+    56%), and at a maximum delta of 8 a difference of ANY cause can only surface
+    on antialiased coverage. It separates the finding from uniform noise, which
+    was never a rival hypothesis. **The arm that actually decides it is the
+    integer/fractional pair, and that lives in the probe.**
+  ► **THE SCREENS PAGE HAD THE SAME RECTANGLE BY A DIFFERENT ROUTE** — it
+    clipped in STAGE space to `0,0,640,420` under the fit transform, which is
+    the same fractional device rect — and clips `stageClipRectFor`'s snapped
+    rectangle in DEVICE space now, before the transform. Correcting one and
+    leaving the other is the pointer-not-the-pointee failure this file keeps
+    recording.
+
+► **"THE CALL SITE EXECUTES AND THE LOGGING DOES NOT" WAS AN INVALID INFERENCE,
+  AND THE ARENA LOGS FROM INSIDE A FRAME PERFECTLY WELL.** The 15:35 handoff
+  warned the next reader off writing a `?probe=1` for the arena because
+  `reportStageFit`'s lines never reached the panel while "the clip two lines
+  below it demonstrably worked in the same frame". **The stage clip is COMMITTED
+  code (`3b851c3`), so a working clip cannot distinguish "my edited file was
+  loaded" from "a build without the probe was loaded"** — three agents aimed at
+  different questions broke that inference independently, and a 1200x2600 shot
+  settles it: the panel holds `figure groups: 0 group(s) over 0/488 op(s) in 4
+  figure(s) this frame` and `seam: painter ops=100 dressed=...`, both logged
+  from inside `renderStage`, i.e. inside `render()`. **`reportStageFit` was
+  never committed** — `git log --all -S reportStageFit` finds it only in that
+  handoff's own prose.
+  ► **THE PANEL IS ALSO OUT OF FRAME AT EVERY SIZE THE CLIP WAS SHOT AT.** At
+    1200x800 only the `SURFACE LOG` heading reaches the image. **Shoot 2600 tall
+    to read the log at all**, which is what the screens-page log shots already
+    did and nothing wrote down.
+  ► **THE BETTER PROBE IS NOT A LOG LINE.** Set `window.__stageFit` in `render`
+    and read it back with `Runtime.evaluate` — `tools/shot-live.mjs` already
+    polls `window.__frames` that way, so the plumbing exists, and the answer
+    comes back as a number rather than a picture of a number.
+
+► **THIS REPOSITORY CAN NOW ASK A FLASH PLAYER A QUESTION WITH A KNOWN ANSWER,
+  AND THAT IS THE DURABLE PART OF 2026-09-15.** `tools/swf-probe.mjs` writes a
+  minimal SWF — a few hundred bytes of this project's own shapes, carrying a
+  chosen filter — and `tools/ruffle-shot.ps1` renders it under Ruffle and reads
+  the client area back. **Two questions that had each been ranked open and each
+  been called "a session's work to set up" were both answered in one afternoon**
+  and neither needed the game: a synthetic movie isolates the variable, where
+  one frame of the real build offers one sample and no control.
+  ► **AND IT KEEPS THE ORACLE CLEAN.** The probes contain no SS2 bytes and run
+    under `--storage memory`, so the installed build and its save are untouched.
+
+► **THE GREEN BAND IS CLOSED, AND IT WAS NEVER A BAND.** Carried as "known,
+  measured, unexplained" across five handoffs. **The sky simply leaves the
+  stage, and how far depends on the frame** — top edge -12.0 at frame 1,
+  **-164.8 at frame 60**, -114.1 at 200, with 1, 17 and 57 operations above the
+  stage respectively. `crowd` leaves it on every frame of every arena, spanning
+  x -289.5..1073.3 against a 640-wide stage.
+  ► **THE EXTENTS TABLE IN THIS FILE IS WHAT MISDIRECTED IT, AND IT WAS
+    CORRECT.** It was computed AT FRAME 1 — the one frame where the sky barely
+    leaves the stage — on a surface with 200 of them. **A table computed at one
+    frame is not a table**, and the 17:12 handoff had already written that rule
+    about a different measurement.
+  ► **THE PLAYER'S ANSWER IS A MASK, MEASURED FOUR EDGES AT A TIME.** Varying
+    only Ruffle's `--letterbox` over a probe with one rectangle inside the stage
+    and four outside it: every outside edge reads `#000000` with the letterbox
+    on and its own colour with it off, while the inside control reads `#ffffff`
+    in both. **So a player rasterises out-of-stage content and MASKS it**, and
+    the ARENA page was computing a letterbox in `stageFitFor` and then painting
+    through the bars it had just made. `stageClipRectFor` is the other half;
+    `?clip=0` restores the old picture; the difference is **43,985 px, 6.98% of
+    the page**, against a null control of exactly 0.
+  ► **THE SCREENS PAGE ALREADY KNEW, AND I WROTE A BROADER CLAIM THAN I HAD
+    BEFORE READING IT.** `tools/screens/main.js` has clipped by default since
+    2026-09-14 under its own `?clip=0`, saying so in a docstring — *"THE STAGE
+    CLIP IS ON BY DEFAULT BECAUSE THE PLAYER CLIPS"* — with `magicshop`
+    reaching stage y 929 and `arena_intro` x -1383..1026 beside it. **So the gap
+    was one page, not "the renderer", and what is new here is the MEASUREMENT
+    rather than the conclusion.** I also added a second, unconditional clip to
+    that page, which made its own toggle inert; taken back out the same
+    session.
+  ► **NOT MEASURED, AND SAY SO:** whether the shipped Adobe AIR host (a 640x480
+    stage around this 640x420 one) masks its child. The case does not rest on
+    it — the build's own border art is 732x505 on a 640x420 stage, oversized on
+    every edge, which is a thing you draw only when the overhang is cut off.
+
+► **EVERY GLOW AND EVERY SHADOW IN THE BUILD WAS DRAWN AT TWICE ITS BLUR, BEHIND
+  A CORRECT CITATION OF THE CSS SPECIFICATION.** `canvasFilterFor` handed
+  `drop-shadow` twice the box blur's sigma because the spec defines that third
+  length as a box-shadow radius and a box-shadow radius as twice a standard
+  deviation. **Both clauses are true and Chrome does something else** — one
+  render, one source, three cells: `blur(S)` and `drop-shadow(0 0 S)` reach 5 px
+  and are pixel-identical, `drop-shadow(0 0 2S)` reaches 10. The oracle agrees
+  about which is right: at `blurX` 8 strength 1 it draws `63 39 26 2 0`, we drew
+  `63 52 41 31 23 16 11 7 4 2 1`, and at one sigma we draw `62 38 19 8 2 0`.
+  **The peak was never wrong — 63 against 63. Only the width was.**
+  ► **WHEN YOUR RENDERER AND A SPECIFICATION DISAGREE, RENDER BOTH.** A
+    specification says what a browser SHOULD do.
+  ► **AND `blur()` IS DELIBERATELY UNCHANGED, WHICH IS THE HALF THAT WAS NEARLY
+    GOT WRONG.** Applying the same halving to the sibling branch is the obvious
+    move and it is wrong: `blur(sigma)` is closer to the oracle than
+    `blur(sigma/2)` at all six measured widths. **A correction that fits one
+    branch is not a correction to its sibling** — and only rendering it said so.
+
+► **AND THE STRENGTH HALF IS DRAWN NOW TOO — RANKED FIRST IN THIS FILE AND
+  CLOSED IN THE SAME SESSION.** `glowAmplificationFor` in
+  `src/render/filters.js` returns a PLAN and `amplifyGlows` in
+  `tools/arena/main.js` executes it: silhouette the group buffer under a WHITE
+  drop-shadow, draw it `ceil(strength)` times with `lighter` (the last at
+  `globalAlpha = strength % 1`), colourise with `source-in`, draw under.
+  **Additive compositing sums premultiplied channels and clamps at 1, so the
+  alpha out is exactly `min(1, blurredAlpha * strength)` — an identity, not a
+  fit**, which is the only reason it is allowed. White is load-bearing: it is
+  the one colour whose premultiplied channels equal its alpha, so the additive
+  step cannot shift a hue. Verified against the oracle BEFORE the compositor was
+  touched (`tools/glow-compare/amplified.html`):
+
+```text
+    strength        oracle              ours
+       1        63  39  26   2      62  38  19   8     <- the null control
+       2       126  78  52   4     124  76  38  16
+       4       252 156 104   8     248 152  76  32
+      16       255 255 255  48     255 255 255 128
+```
+
+  In the arena, against its own kill switch `?amplify=0`: **0 differing pixels
+  with no enchantment, 3,015 with one** — bounded to the weapon, mean shift
+  B +28.6 — and the log reports `4 group(s) drew an AMPLIFIED glow (8 step(s))`.
+  ► **IT DECLINES A MIXED LIST AND THAT IS THE DESIGN.** A glow beside a blur or
+    a colour matrix composes in an order this does not model; 44 lists land
+    there and keep the counted `shadowStrengthSaturated` loss. 370 are a single
+    saturating glow and 24 are the enchantment's PAIR — **every one of its 12
+    art frames carries two saturating glows, so a single-glow shortcut would
+    have silently dropped the second colour.**
+  ► **DO NOT STACK `drop-shadow`s INSTEAD** — `source-over` gives
+    `1 - (1-a)^k`, not `k*a`. It looks closer and is a different curve.
+
+► **THE MUTATION AUDIT CAME BACK OPPOSITE TO ITS OWN PREMISE.** Deferred four
+  times; **54 mutations, 47 KILLED, 7 SURVIVED** across six `src/render/` files
+  (`filters.js` 9/9, `screen.js`/`extracted-figure.js`/`arena-backdrop.js` 8/9,
+  `props.js`/`screen-text.js` 7/9), against the 2026-09-07 engine audit's 37 of
+  48 SURVIVING. **The render code is among the best-pinned in the repository
+  and the engine was not; do not carry that document's ratio forward as the
+  expected shape here.**
+  ► **EXACTLY ONE SURVIVOR WAS A REAL COVERAGE GAP, AND IT IS CLOSED.**
+    `stageProjectorFor`'s `horizon` took `SS2_GROUND_LINE` for
+    `SS2_ARENA_ORIGIN.y` — 200 arena units down a 420-unit stage — with the
+    suite green, because the only assertion on it anywhere was
+    `Number.isFinite`. Now `projector.horizon === projector.toY(0, 0)`, derived
+    through `arenaToStage` rather than by re-typing the field's arithmetic, and
+    **verified to kill the exact mutation that survived.**
+  ► **THE OTHER SIX ARE "NO INPUT IN THE BUILD DISCRIMINATES THEM", NOT GAPS,
+    AND TWO OF THEM I HAD ALREADY MIS-BELIEVED.** An agent reported
+    `props.js:506` (`.every` to `.some`) as "the strongest form of
+    under-asserted" on 5,890 measured divergences a run. Re-derived: the only
+    reader is gated on `matrices.length > 0`, and the divergent case is the
+    EMPTY array — 745 real group instances, 397 with 0 matrices, 348 with 1,
+    none with 2+. A semantic no-op. `:384` drops blue from `touchesRgb` and the
+    pack holds 2,330 non-identity transforms, 340 touching RGB, **0 blue-only.**
+    **"Reachable" and "discriminating" are different questions and
+    instrumentation that measures an expression rather than an OUTCOME conflates
+    them.**
+
+*(The brief it supersedes, whose ranked items 2 and 4 are CLOSED:)*
+[2026-09-15 10:15 — the glow is drawn, and I measured the instrument twice](docs/handoffs/2026-09-15-1015--the-glow-is-drawn-and-i-measured-the-instrument-twice.md).
+*(It supersedes the 07:18 brief, **whose title and ranked item 1 are both
+wrong**; that file is kept only as the record of how.)*
+
+► **THE FILTERS ARE APPLIED. `screen.js` EMITS 248 GROUPS AND BOTH SHELLS
+  COMPOSITE EACH ONE THROUGH ONE OFFSCREEN WITH ONE `ctx.filter`** — never per
+  leaf, because a group's filter is a filter of the COMPOSITE and stamping it on
+  each of `townsquare`'s 1523 paths is a different picture, not an approximation
+  of the right one. Nested groups COMPOSE rather than innermost-winning: 40% of
+  operations sit under exactly two filtered ancestors, so the rule is reachable
+  and tested rather than assumed. ~~**Both shells carry a kill switch —
+  `?filters=0` and `?groups=0` — that reproduces exactly what the page drew
+  before, so the difference between two shots is the measurement.**~~
+  ► **HALF WRONG, CORRECTED 2026-09-15 BY GREPPING THE SHELL RATHER THAN
+    BELIEVING THIS LINE. `tools/arena/main.js` HAS NO `?filters=0`.** It reads
+    `seed`, `spectate`, `rank`, `arena`, `sky`, `rain`, `enchant`, `groups`,
+    `clip`, `amplify`, `seam` and `filterprobe` — and it MENTIONS `?filters=0`
+    in a comment beside the stage clip, which is how the claim survived. Only
+    `tools/screens/main.js` has one. **A shot taken with `?filters=0` on the
+    arena is BYTE-IDENTICAL to one taken without it**, which reads as "the
+    toggle changed nothing" and is really "there is no toggle".
+  ► **AND `?groups=0` IS NEARLY INERT ON THE ARENA TOO**: at `seed=7`, frame
+    120, 1200x800 it is byte-identical to the default by md5 while the page's
+    own log says 2 groups composited and 1 buffered; at the 2026-09-15
+    dressing it moved 13-28 pixels in the whole frame. It is a real kill
+    switch and it is a weak control — **ask what it could have varied over
+    before ruling anything out with it.**
+
+► **AND FOLDING THE SKY'S ENCLOSING ColorMatrix GAVE IT A DAY/NIGHT CYCLE IT HAS
+  NEVER HAD**: frame 1 `#440037`→`#79689f` dawn, frame 60 `#2d2dfd`→`#5fbefe`
+  midday, frame 200 `#000030`→`#3f5f75` night. **Before the fold every frame was
+  the midday blue** while `time_of_day` climbed 1..200 and re-seeked the sky
+  every 1500ms.
+
+► **A COLOUR-MATRIX-ONLY GROUP IS NOT COMPOSITED AT ALL — 31 groups, 8210 of
+  13638 operations, 60%.** Canvas has no arbitrary colour-matrix filter, so
+  those groups open no offscreen. **Five of the 31 have a DESCENDANT that does
+  composite**, producing exactly the innermost-wins picture `screen.js` argues
+  against. Counted as `groupsMatrixOnlyWithFilteredDescendant` rather than
+  guessed at; closing it needs `getImageData` or an inline SVG filter.
+
+► **THE RENDERER READS THEM NOW, AND THE WEAPON ENCHANTMENT IS ON SCREEN —
+  MEASURED, FOUR TYPES, FOUR COLOURS.** `paintExtractedFigure` interns one
+  frozen record per group per paint and hangs it on `op.group`, so the shell's
+  existing `groupRunsOf`/`paintGroupRuns` composite it. Differencing two shots
+  frozen at the same frame, canvas only, against `?groups=0`:
+
+```text
+  type 2  Flame   #ffcc00/#ff0000   R +64.6   G  +5.0   B -15.9    1586 movers
+  type 3  Frost   #00ccff/#000099   R -17.1   G  +5.6   B +45.4    1456
+  type 4  Poison  #00ff00/#006600   R -19.7   G +37.9   B -20.0    1188
+  type 5  Wraith  #cccccc/#000000   R +11.2   G  +7.7   B  +9.0    1042
+```
+
+  **Each dominant channel is that enchantment's own colour**, and the ladder
+  that picked the frame came from the AVM1 bytes while the colour came from the
+  render — two independent derivations agreeing. Wraith is the one that would
+  read as noise on hue alone; **the null control is exactly 0 pixels and two
+  byte-identical files**, so it is not noise.
+
+► ~~**IT HANGS A HEADLESS RENDER, CAUSE NOT FOUND.**~~ **WRONG, AND I PUBLISHED
+  IT. CORRECTED THE SAME SESSION — TWICE, BECAUSE THE FIRST CORRECTION WAS ALSO
+  MEASURED ON THE WRONG CONFIGURATION.** The page does not hang. A CPU profile
+  over CDP puts **95.8% of samples in `(program)`** — native rasterisation, not
+  script. What stalls is `--virtual-time-budget`, which is what `tools/shot.sh`
+  drives Chrome with and which does not advance while a filtered composite is
+  outstanding.
+  ► **AND THE COST IS NOT 3.9x, WHICH IS WHAT I SAID NEXT.** That number came
+    from a browser started with `--disable-gpu`, i.e. software rasterisation —
+    the worst case, and not what anyone plays in. Varying only that flag:
+
+```text
+                        no glow   with glow        2 fighters   6 fighters
+    --disable-gpu       16.6 ms     64.5 ms  3.9x
+    GPU rasterisation    6.1 ms      6.1 ms  free    6.1 -> 6.1  6.1 -> 11.8
+```
+
+    **About one millisecond a frame per enchanted fighter, free at two, 85 fps
+    at six.** So the "frame cost worth reducing" I ranked first is an artefact
+    of the measuring configuration and is RETIRED, not deferred.
+  ► **THE LESSON IS THE ONE THIS FILE KEEPS RECORDING, ARRIVING TWICE IN AN
+    HOUR: ASK WHAT YOUR EVIDENCE COULD VARY OVER.** First I measured the
+    screenshot MODE and reported it as a property of the page; then I measured
+    the RASTERISER and reported it as a property of the feature. Both times the
+    number was real and the subject was wrong.
+  ► **MY EVIDENCE FOR "HANG" WAS THAT THE WALL TIME DID NOT MOVE WITH THE
+    BUDGET. That was real and my inference from it was not** — it says virtual
+    time is not advancing, which is a fact about the SCREENSHOT MODE, not about
+    the page. **A `FAILED` from `tools/shot.sh` is evidence about the
+    instrument.**
+  ► **AND IT WAS MEASURED THROUGH A LEAKING ONE.** 73 Chrome processes were
+    alive from earlier `shot.sh` runs; past some point new ones cannot start, so
+    URLs that had worked minutes earlier failed too. That noise is what made the
+    wall times look identical and is half of why I got it wrong.
+
+► **`tools/shot-live.mjs` + `tools/shot-live.sh` ARE THE INSTRUMENT THAT SETTLED
+  IT, AND THEY ARE THE ONES TO REACH FOR NOW.** Real time over CDP, so a
+  filtered page shoots at all; the browser is killed in a `finally`, so it does
+  not leak; and **the page is frozen at a FRAME NUMBER with `performance.now`
+  and `Date.now` driven from that number**, which is what makes two shots
+  comparable. Without the clock pinned, the same pair differenced to 9,900
+  pixels at B +5.1 — the weapon had MOVED. With it: 2,822 pixels at **B +45.4**.
+  **A frame count alone is not determinism on a page that animates on elapsed
+  time.** It needs the WINDOWS node (Chrome binds its debug port to the Windows
+  loopback), which `shot-live.sh` resolves rather than pins.
+
+► **AND THE TWELVE GROUPS IN THE FIGURE PACK REACH NO GLADIATOR AT ALL.** Three
+  verifiers found this independently: every one of the 12 group entries and 30
+  grouped placements sits on `psyche_up`, `psyche_up2`, `psyche_charging` or
+  `psyche_charging2`, and all four are **declared unplayed** in
+  `src/render/clip-labels.js`. Swept 44,880 and 73,440 family x label x facing
+  combinations: reached 0 times. So the body half of the effect work is dead
+  until a family dispatches a psyche clip, and **the only figure group that
+  reaches the compositor today is the weapon enchantment.** Pinned by a test, so
+  building the psyche family turns the suite red rather than quietly outliving
+  the paragraph.
+  ► **CLOSED IN TWO STEPS AND THE PIN WORKED BOTH TIMES.** `b201486` built the
+    psyche family and took it to 10 of 12; `67dfc01` found that the build RUNS
+    `psyche_up` on into `psyche_charging` and took it to 12 of 12. **The second
+    step is the one this paragraph could not have predicted**: it assumed the
+    only route to a continuation was a family dispatching it, and the route
+    that existed was the playhead never stopping.
+
+► **THE GLOW COVERS THE WHOLE WEAPON LIMB, AND MY OWN BRIEF SAID OTHERWISE.** I
+  wrote that the filter "encloses the attached blade and not the `weapon` limb's
+  own rig art either", an agent implemented it faithfully, and a verifier broke
+  it from the bytes. Char 701 — the rig's own weapon art — sits at depth
+  `[39, 1, 1]` on all 2,216 such placements, i.e. INSIDE the `realweapon`
+  placement that wears the filter. The faithful scope is the union,
+  `op.limb === "weapon"`: **19 ops, not 8**, still contiguous, still one buffer.
+  **The test that should have caught the change could not**: its fixture's only
+  body placement was on `torso`, so both scopes passed it. Fixture and assertion
+  corrected, and the correction is mutation-checked.
+
+► **THE STRENGTH HALF OF EVERY GLOW IS CARRIED AND NOT DRAWN.** `rgbaOf` clamps
+  alpha to [0,1] and alpha is `colour.alpha/255 * strength`, so every strength at
+  or above the clamp emits `1` and two different strengths draw byte-identically.
+  A verifier proved it by flattening all nine of `psyche_up2`'s outer strengths
+  and watching the ten filter strings stay ten — **the blur alone was carrying
+  the distinctness**, and 17 of 18 strength values could be set to anything with
+  the suite green. `canvasFilterFor` now names `shadowStrengthSaturated` apart
+  from `shadowStrengthAsAlpha`, which turns an invisible loss into a counted one:
+  the figure pack reads **23 saturated / 1 scaled** (the 1 is the single value
+  below the clamp, 0.9765625) and **all 24 enchantment filters saturate.**
+
+► ~~**`tools/shot.sh` LEAKS A CHROME PROCESS PER INVOCATION — 73 were alive.**~~
+  **RETIRED 2026-09-16 RATHER THAN FIXED, on the owner's steer ("only fix it if
+  we need the functionality").** We needed the functionality and not that tool:
+  its last justification was pages `shot-live` could not shoot — ones that draw
+  once and stop, which never reach a frame number — and **a freeze of 0 now
+  waits for QUIESCENCE instead.** Measured on the same static screen: the two
+  tools' renders are **BYTE-IDENTICAL, 76,983 bytes, 0 differing pixels**. A
+  test asserts the file stays gone. The paragraph below is kept because the
+  SYMPTOM is worth recognising if it ever recurs:
+  They accumulate until new ones cannot start, and the symptom is screenshots
+  failing for URLs that worked minutes earlier, which reads as a page defect and
+  is not. **Kill them before trusting a FAILED shot**:
+  `powershell.exe -NoProfile -Command "Stop-Process -Name chrome -Force"`. This
+  masked the real hang above for half an hour by making working URLs fail too.
+
+► ~~**THE FIGURE AND ICON EXTRACTORS READ NO FILTER FIELDS AT ALL**~~ **— BOTH
+  CARRY THEM NOW (2026-09-15), AND A THIRD TOOL OWNS THE ENCHANTMENT.** The
+  figure pack carries 12 effect-group tables (10 distinct) over 30 placements;
+  the icons pack carries 174 own filters and 2 enclosing groups, including the
+  only two bevels it can reach. **The SELECTOR sentence below was stale when it
+  was written** — see the correction at the `ids 1..24` bullet.
+
+► **THE FRAME-1 FREEZE HID TWENTY-FOUR GLOWS BEHIND A CLEAN BILL OF HEALTH, AND
+  THAT IS THE FINDING, NOT THE GLOWS.** `--report` printed *"DROPPED 0 filters
+  and 0 inherited groups with 0 skipped drawables"* while sprite 703 `weapon0`
+  sat at depth 39 of clip 1241 carrying two glows on each of frames 2..13. Every
+  drop counter was telling the truth: `flattenFrame` pins a nested sprite to
+  frame 1, so those filters were never DROPPED, they were **never read**, and a
+  counter that counts drops cannot see what was never looked at.
+  **`frozenNestedSpriteCensus` now measures it: 3 frozen children, 30 frames
+  never resolved, 24 filters behind them, all 24 on `weapon0`** — and the report
+  NAMES the child rather than printing a bare number.
+  ► **AND FRAME 1 IS A LOADED SAMPLE, NOT A NEUTRAL ONE**: `itemglow` drives
+    that clip to frames 2..13, so frame 1 is precisely the UNENCHANTED weapon.
+    A freeze that always lands on the frame where the effect is off will always
+    report that there is no effect.
+  ► This closes, for two packs, the gap ranked 4th on 2026-09-15: *"nothing
+    counts filters discarded by that freeze."* `src/render/screen.js`'s
+    `nestedSpriteFrame1` still counts SPRITES only.
+
+► **THE ENCHANTMENT IS A TWELVE-CELL LADDER AND `tools/extract-enchantments.mjs`
+  DERIVES IT FROM THE BYTES** — 107 of 107 instructions accounted for, the art
+  clip derived from the call sites' member name rather than declared, and seven
+  cross-checks green. `frame = 3 * (type - 2) + potency + 1`;
+  type 2/3/4/5 = Flame/Frost/Poison/Wraith, potency 1/2/3 = Weak/Medium/Strong.
+  **`test/extract-figure.test.js` cross-checks its 24 against the figure
+  census's 24 by a completely different route**, so either tool drifting turns
+  the suite red.
+
+► **AND THE BATTLE MAP HAD THE ARGUMENTS THE WRONG WAY ROUND SINCE 2026-09-13,
+  WHICH IS THE MOST DANGEROUS PLACE IN THIS REPOSITORY FOR AN ERROR TO LIVE** —
+  AGENTS.md says candidates are derived from it. It read `itemglow`'s outer
+  register as POTENCY, concluded that potency 2..5 chose the element, found the
+  resulting contradiction with `damagecharacter`, and **wrote it down as an open
+  question that "only a capture of a gladiator with a known enchantment
+  settles"**. There is no tension and no capture is needed: the function's own
+  `DefineFunction2` binds `enchant_type` to `register:3`, which is the register
+  the outer test reads. **Seven witnesses**, the first being the build's own
+  `weaponenchantments = ["","","Flame","Frost","Poison","Wraith"]` at `0x3fe79c`.
+  **An inconsistency between two readings of one build is evidence that a
+  reading is wrong before it is evidence about the build.**
+
+► **`else frame 1` IS NOT WHAT `itemglow` DOES.** The only frame-1 arm is
+  `enchant_type < 2`; the body ends with no trailing default, so for a type ≥ 6,
+  for a potency outside 1..3 (**including the 0 `randomise_gladiator` zeroes
+  to**), and for a NaN type, `gotoAndStop` is never called and the clip keeps
+  its current frame. The NaN path is reachable from `characterDNA[33]`.
+
+► **OPPONENTS CAN BE ENCHANTED — and the primary's level-banded potency ladder
+  is ~~DEAD CODE~~ DEAD STORES** *(corrected 2026-09-22: arms 2 and 3 still run
+  and still draw; only their writes are dead)*. All three banded arms fall into
+  an unconditional `randomBetween(1, 3)` at `0x404999`, so opponent primary
+  potency is uniform at every level while the secondary's is genuinely banded.
+  ~~It costs a second RNG draw, which a replay reproducing the build's stream
+  must make.~~ **THE SECOND DRAW HAPPENS ONLY WHEN `herolevel > 10` — corrected
+  2026-09-22 by a write-nothing verifier re-deriving the arms from the bytes.**
+  Arm 1 (`herolevel <= 10`) writes the constant 1 at `0x404912` with no draw;
+  arms 2 and 3 call `randomBetween` before `0x404999` calls it again. A replay
+  that always draws twice drifts for every opponent at level 10 or below. See
+  the battle map's witness 6 and §"Three things the corrected reading exposes".
+
+► **THERE IS NO BUILD-LEVEL FILTER DENOMINATOR.** 1,894 filter records on 1,507
+  placements; a reader can reach 848 — 44.8% — and the two pack numbers are not
+  on the same unit, so they cannot be summed. Nothing in the suite re-derives
+  the build partition.
+
+► **WHEN THE CODE AND THIS FILE DISAGREE, THIS FILE WINS UNTIL SOMETHING
+  RE-MEASURES — AND I BROKE THAT RULE.** Yesterday's colour-transform commit
+  wrote *"the sky's colouring is the transform and not a ColorMatrix"* into
+  `src/render/props.js`, contradicting this file. **I then paraphrased the CODE
+  into an agent brief**, telling it not to assume a matrix; it measured and broke
+  the premise. Struck at both ends. **Quoting a source file into a brief is not
+  re-measuring.**
+
+*(The brief it supersedes, whose ranked item 1 is DONE for shapes and text:)*
+[2026-09-15 00:46 — the tint landed, and the trail vanished](docs/handoffs/2026-09-15-0046--the-tint-landed-and-the-trail-vanished.md).
+
+► **THE COLOUR TRANSFORM IS IN `src/render/props.js` AND THE SHELL'S COPY IS
+  GONE.** `propOpsFor` carries each placement's transform onto fill, stroke,
+  both opacities and every gradient stop, through `filters.js`. The arena's UI
+  bar plate measures `#30160c` where it measured `#ffffff`. `tools/arena/main.js`
+  lost `tintedPropOpsFor`, `probeColourTransform` and its own tally; the two
+  cases the fold cannot express are counted in a new `propInvoiceFor`, **with
+  denominators, because both are DEAD on the real pack** and a bare zero would
+  not say so.
+
+► **APPLYING IT CORRECTLY REVEALED THAT FOURTEEN OF THE TWENTY BOWS DREW NO
+  ARROW TRAIL.** `arrowTrailOpsFor` was indexing `bullet_trail`'s seven-frame
+  TIME fade with the WEAPON's art index; bows 67..80 clamped onto frame 7, whose
+  `alphaMultiplier` is 0. **Wrong before, and invisible, because the alpha was
+  being dropped anyway.** The build settles it —
+  `trail.bullet.gotoAndStop(secondary_weapon - 60)` puts the weapon index on a
+  CHILD inside the puff, and sprite 48's seven frames are one drawing at seven
+  alphas ending in `this.removeMovieClip()`: **the puff's whole life, not a
+  lookup with fourteen dark entries.** `tools/extract-props.mjs` had quoted those
+  exact bytes and written the wrong conclusion beside them. The parameter is
+  `ageFrames` now, 0-BASED on purpose where `arrowOpsFor`'s is 1-based.
+
+► ~~**THE FILTERS LEAVE THE EXTRACTORS NOW, AND NOTHING READS THEM.**~~
+  **CLOSED — AND `prefixesOf` NO LONGER EXISTS, WHICH THIS PARAGRAPH WENT ON
+  ASSERTING.** `props.json` carries ~~363 effect groups over 3209 placements~~
+  366 effect groups over 3,258 placements (**corrected 2026-09-24**: 363/3209
+  was the 12-prop pack's; the bolt and the boulder added 3 groups and 49
+  grouped placements, 46 of them in their clocks — re-derived from the
+  player's pack, and `tools/extract-props.mjs`'s header says so);
+  `screens.json` carries 276 typed filters. The diagnosis below was right and is
+  why the work went where it did: ~~`prefixesOf` in `screen.js` reads only
+  `entry.path`, so its output is invariant under those records being correct,
+  garbage or absent~~ — **it was REPLACED on 2026-09-15 by
+  `filterGroupDraftsOf`, and `src/render/screen.js` says so at its own
+  docstring.** The only `prefixesOf` left in that file is the struck sentence
+  recording the deletion. The evidence that CAN vary was measured —
+  `canvasFilterFor` over the real rosters, 0 applied before, **214 now**.
+  ► **CAUGHT 2026-09-15 BY A MUTATION-AUDIT AGENT THAT HAD BEEN BRIEFED THE
+    STALE NAME AND CHECKED IT.** Two more of that brief's premises were mine and
+    also wrong: `groupRunsOf` is in `tools/arena/main.js:2237`, NOT in
+    `src/render/screen.js` as I wrote, and `docs/mutation-audit-2026-09-07.md`'s
+    baseline of 816 describes a tree 2.3x smaller than today's 1889. **Three
+    wrong facts in one brief, all three broken by the agent reading them.**
+
+► **CORRECTING THE POINTER IS NOT CORRECTING THE POINTEE.** `text.js` struck its
+  own copy of the alignment claim and NAMED `tools/screens/main.js` as stale —
+  and did not change it, so a reader of that file still met a live bug report for
+  a fixed bug. **Ninth instance of the signature failure here, and the first
+  created by a previous fix's own note.** Related and cheap: seven in-tree
+  pointers cited `screen.js:647` and `props.js:366`, neither of which held that
+  code. **Cite SYMBOLS, not line numbers.**
+
+► **A TEST CAN MEASURE A COUNTERFACTUAL AND CALL IT A RE-DERIVATION.** One fed
+  the FIXED wrapper the OLD argument and reported 15 dark bows; the shipped
+  defect was 14, because bow 66 drew faint rather than invisible. A comment
+  claiming to "RE-DERIVE rather than quote" made it worse than a quotation.
+
+► **AND ONE VERIFIER FINDING IS RECORDED AS WRONG RATHER THAN OBEYED.** Two
+  `approximated` shapes do coexist in one merged array — 209 strings, 65 lists —
+  **and there is exactly one documented reader that takes both**, the op-level
+  consumer uses it, and the placement-level field is uniformly an array. A
+  tolerant reader at a named seam is a design, not a data loss. **Do not rewrite
+  four files to satisfy it.**
+
+► **TWO BUILD WAVES, 24 AGENTS, 0 DEAD, 0 OWNERSHIP VIOLATIONS, AND TWELVE
+  VERIFIER VERDICTS: 1 CONFIRMED, 10 PARTIALLY-BROKEN, 1 BROKEN — 22 of 23 on
+  this project.** Both waves used disjoint FILE OWNERSHIP with a monitor running
+  against the matrix, and the shell track was sequenced AFTER the module it
+  depends on so nothing could double-apply. **No agent regenerated `assets/`**:
+  extractors ran into scratch and the main session regenerated serially, which is
+  how the new pack shape met the renderer for the first time — no regression.
+
+*(The brief it supersedes, whose ranked items 1, 3, 4 and 6 are CLOSED and whose
+item 2 is HALF closed — the extractors carry the filters, nothing reads them:)*
+[2026-09-14 17:12 — the screens are drawn, and five are black on purpose](docs/handoffs/2026-09-14-1712--the-screens-are-drawn-and-five-are-black-on-purpose.md).
+
+► **ALL 26 SCREENS DRAW, AND THE ARENA'S BAR READS ITS OWN WORDS.**
+  `tools/screens/index.html` — `?screen=<name>`, arrows to walk. `help` renders
+  WHOLE: parchment, shield, mace, helm, the return button and **656 glyph
+  operations of readable English in the build's own Goudy Handtooled.** The
+  arena's UI bar reads `TOOLTIPS:OFF   SOUND:ON`. **`src/render/screen-text.js`
+  is the join** and takes `screen.js`'s `textNotDrawn: 187` down to 28.
+
+► **`?probe=1` MAKES A PAGE READ ITS OWN CANVAS BACK**, and it is the only
+  reason "1698 operations painted" and "the canvas is black" got settled instead
+  of argued. It reports distinct colours, opaque pixels, the fit and the
+  placement. **`tools/shot.sh` now takes a PAGE PATH as its fifth argument** —
+  it hardcoded the arena, so a second page could not be shot at all.
+
+► ~~**THE BAR WAS WHITE FOR THE SAME REASON IT WAS WORDLESS, AND THAT IS ONE
+  DEFECT.**~~ **FIXED 2026-09-15 — see the top of this file.** The diagnosis
+  below was correct and is kept as the record of how it was found; **its
+  instruction ("Ranked first: move it into `props.js`") is DONE**, and
+  `probeColourTransform` no longer exists to turn itself off.
+  ~~`propOpsFor` in `src/render/props.js` drops each placement's colour
+  transform; the plate is `rgb x0, alpha x0.5` and the fields are `#ffffff`.
+  **`tools/arena/main.js` composes it in the SHELL today and says so in its own
+  log panel** — a decision where no test reaches it, which is the arrangement
+  five live defects have come out of. **Ranked first: move it into `props.js`.**
+  It fixes the layers, the arrow trail and the scenery together, and unblocks
+  `bullet_trail`'s 7-frame alpha fade, whose seventh puff should be invisible
+  and currently draws solid.~~
+  ► **AND THE LAST SENTENCE OF IT WAS THE WRONG WAY ROUND, which only applying
+    the fix could show.** The seventh puff was never the problem: the fade is
+    indexed by the puff's AGE and the shipped caller was passing the WEAPON's
+    art index, so fourteen of the twenty bows drew NO trail at all. "The
+    scenery" was wrong too — `rockMC` carries 1 placement and 0 tinted, so the
+    fix could not reach it. **A prediction of what a fix will repair is not
+    evidence about what is broken.**
+
+► ~~**THE FILTERS ARE BLOCKED IN THE EXTRACTORS, NOT THE RENDERER.**~~
+  **THE EXTRACTOR HALF IS DONE 2026-09-15; THE BLOCK IS NOW THE RENDERER.** The
+  diagnosis was right and is why the work went where it did: ~~the data never
+  leaves `extract-props.mjs` (which discards the `filters`/`blendMode`
+  `flattenFrame` already returns) or `extract-screens.mjs` (which writes
+  `filters: true` where the LIST belongs)~~ — both carry them now, ~~363 effect
+  groups over 3209 placements~~ 366 effect groups over 3,258 placements (the
+  count since the spell props; corrected 2026-09-24, see the entry above) and
+  276 typed filters respectively, and the arena
+  page no longer reports `props: NO filter data in the pack`.
+  ► ~~**BUT NOTHING READS THEM AND THE PICTURE IS UNCHANGED.**~~ **CLOSED, and
+    the function named here is GONE.** ~~`prefixesOf` in `screen.js` reads only
+    `entry.path`, so its output is invariant under those records being correct,
+    garbage or absent~~ — a verifier proved the obvious "did the op count move?"
+    check could not have varied, and the fix **replaced `prefixesOf` with
+    `filterGroupDraftsOf` on 2026-09-15**. Kept for the diagnosis, corrected for
+    the name: citing a deleted function as current is how a reader goes looking
+    for a bug that was fixed. The evidence that CAN vary: **`canvasFilterFor`
+    over the real rosters, 0 applied before, 214 now.**
+
+► **ASK WHAT YOUR EVIDENCE COULD POSSIBLY VARY OVER.** The sharpest finding of
+  two waves. A fold was justified by the operation list for all 26 screens
+  digesting byte-identically before and after; a verifier then **deleted the
+  colour transform from gradient stops entirely and the digest did not move**,
+  because all 107 transformed stops sit under ALPHA-ONLY transforms. A digest
+  over data that cannot vary is not evidence. Siblings: an `assert.equal(X, X)`
+  on the only number reporting the bar's two dead readouts, and a headline
+  extractor fix that could be deleted green because **no test called
+  `extractFigure` at all.**
+
+► **`flattenFrame` FREEZES NESTED SPRITES AT FRAME 1, AND ON FIVE SCREENS THAT
+  IS A CLOSED BLACK CURTAIN** — `townsquare` 9, `daybreak`/`special_event`/
+  `magicshop`/`arena_intro` 8 each, against 0 on the six that draw clean. Same
+  root cause as the sky's 8 unreachable gradients, in a second place, now
+  counted per screen as `nestedSpriteFrame1`.
+
+► **TWO BUILD WAVES, 20 AGENTS, 20 RETURNED, 0 DEAD, 0 OWNERSHIP VIOLATIONS —
+  AND ALL TEN VERIFIER VERDICTS PARTIALLY-BROKEN, which is 16 of 16 here.**
+  Four wave-2 tracks existed only to close what wave 1's verifiers broke. One
+  changed NO source file: all eight of its defects were in the test.
+  **I briefed four wrong premises and agents broke all four**, because the
+  briefs numbered them and invited it.
+
+► **THE ARENA RENDERS THE BUILD'S OWN ART.** Six DISTINCT arenas — measured,
+  96-100% different over 2,728 sampled points, with the six sand colours in the
+  RENDER matching the six read off the BYTES — a 200-frame day/night sky, real
+  gradients, and a gladiator with a FACE keyed to the animation he is playing.
+  `?arena=1..6`, `?sky=1..200`, `?rain=10..17`, `?seam=1`.
+
+► **RANKED FIRST: DRAW WHAT ALREADY EXISTS.** `src/render/text.js` and
+  `src/render/screen.js` are finished, tested, exported — and **nothing calls
+  them.** 1027 glyphs round-trip to readable English and all 26 root screens are
+  extracted, while the arena's UI bar is still blank boxes and 25 screens have
+  never been on a screen. `src/render/filters.js` is the same story: it decodes
+  colour matrices, blend modes and blurs, and `main.js` sets neither
+  `globalCompositeOperation` nor `ctx.filter`. **The sky's day/night colouring
+  IS a ColorMatrix — ~~208 of them~~ 150 of them in that one clip, 148 of them
+  non-identity.**
+  ► **THE CLAIM IS RIGHT AND THE NUMBER WAS WRONG, and between them they cost a
+    day.** `208` is the sky's BLUR count. Measured 2026-09-15 from
+    `props.sky.effects.inherited.filtersByType`:
+    `{colourMatrix: 150, blur: 208, glow: 212}`.
+  ► **AND A FIX WROTE THE OPPOSITE CLAIM INTO THE CODE, WHERE IT WAS BELIEVED.**
+    The 2026-09-14 colour-transform work put *"its day/night colouring IS this
+    transform, swept across 200 frames, and not a ColorMatrix"* into
+    `src/render/props.js`'s header. **That is false, it contradicted this file,
+    and this file was right.** I then paraphrased the CODE rather than the
+    living head into an agent brief, and the agent broke it by measuring:
+    backdrop shape 1679 at frame 1 is `#2d2dfd`→`#5fbefe` after the colour
+    transform and `#440037`→`#79689f` after the group matrix. **The transform
+    moves the sky a few units; the MATRIX moves it blue → maroon → black.**
+    Both are real and the matrix is the day/night cycle.
+  ► **THE LESSON IS THE PRECEDENCE RULE AT THE TOP OF THIS FILE, WHICH I BROKE.**
+    When the code and the living head disagree, THIS FILE IS RIGHT until
+    something re-measures. Quoting a source file into a brief is not
+    re-measuring.
+
+► **TWO TOOLS, AND REACH FOR THEM FIRST.** `tools/shot.sh` drives the WINDOWS
+  Chrome headless against the server; `tools/sample-png.mjs` reads the pixels
+  back. Three defects this session were invisible to a green suite and obvious
+  in a render — and **two confident WRONG conclusions came from renders that
+  were too small.** A sword was called missing through four screenshots and was
+  there the whole time; an agent suspected missing hair from a crop that had cut
+  it off. **A render too small to show the defect is not evidence of its
+  absence, and it manufactures defects too.** The face was verified by
+  DIFFERENCING two identical renders — pale pixels in the head went 6 to 185 —
+  rather than by looking.
+
+► **THE COLOUR TRANSFORM MUST FLOOR, AND TWO OF THREE COPIES ROUNDED.**
+  `readColourTransform` gives signed 8.8 and the player computes
+  `(channel * multTerm) >> 8`, an arithmetic shift. **69 of 1023 tinted fills
+  were a unit out**, three copies of the arithmetic appeared in one evening, and
+  **no test caught the change** — the figure's tint has never been pinned by
+  value. One implementation now, in `src/render/filters.js`.
+
+► **DO NOT `git add -A` WHILE AGENTS ARE RUNNING**, which this file already said
+  and I did anyway: commit `0775463` carries five agents' mid-flight work under
+  a message about a pixel sampler, and four of the five caught it themselves.
+  `e3f3832` is the correction. **And do not use a TOTAL TEST COUNT as a gate
+  during a fan-out** — it moved 1397 to 1573 in one run and an agent briefly saw
+  the tree red. `fail == 0` and the exit code are the gate.
+
+► **PUT YOUR OWN CONCLUSIONS IN AN AGENT BRIEF AS NUMBERED HYPOTHESES.** Every
+  premise break this session came from having done that — including two wrong
+  byte-facts of mine: the only Blur(11,11) in the build is on `cloud_patterns`
+  (the MOON has an animated blur to 48 plus 175 glows), and "4,544 colour
+  transforms" is the fighter clip's number, not the build's 3,413 of 29,966.
+
+► **OPEN AND THE OWNER'S: the 9 embedded typefaces are COMMERCIALLY LICENSED**
+  (Bitstream, Monotype, named in the build's own `DefineFontName`). Glyph
+  outlines are extracted only to gitignored `assets/text/` — the same Doom/WAD
+  model as every other asset here — and **no font file is written**. If the
+  answer is no, three files and one directory come out and nothing else depends
+  on them.
+
+*(The brief it supersedes, whose ranked items 1 and 2 are closed:)*
+[2026-09-14 02:55 — the backgrounds were JPEGs and I drew none of them](docs/handoffs/2026-09-14-0255--the-backgrounds-were-jpegs-and-i-drew-none-of-them.md).**
+Start there.
+
+► **THE ARENA'S WALLS ARE RASTER AND THIS PIPELINE DREW NONE OF THEM.** The
+  owner asked *"where are the backgrounds that are actually in game? Did you
+  make these?"* — nothing was invented, and what was on screen was the vector
+  underlay: a neon-green placeholder, flat sand, a gradient collapsed to one
+  stop, and an INVISIBLE wall. `shapeToPaths` emitted `fill: "none"` with an
+  honest `approximated: "bitmap"`, the note died at the next seam, and the
+  extractor reported ZERO failures.
+  ► **THE RULE, and it is the most expensive lesson this project has:
+    AN APPROXIMATION THAT IS NOT COUNTED IS INDISTINGUISHABLE FROM A CORRECT
+    READ.** Once it had a name the same omission was found FOUR more times.
+    `test/extraction-honesty.test.js` recomputes every manifest's tally from
+    that pack's own data, so the next one fails by name.
+  **Now drawing: 14 bitmaps, 97 gradients, SIX arenas, a 200-frame sky, rain.**
+
+► **YOU CAN SCREENSHOT THE ARENA FROM WSL.** Chrome is on the WINDOWS side;
+  `tools/shot.sh <name> "<query>"` drives it headless against the server and
+  writes a PNG. **Three of this session's defects were invisible to the suite
+  and obvious in a screenshot**, and one of them I had already explained away in
+  writing. **Looking at the ASSET is not looking at the RENDER** — the alpha
+  masks were perfect and the render was black.
+
+► **THE ASSET CENSUS IS DONE: 6 read-only agents, 44 sized work items**, and it
+  broke four of my premises. Delivered since: 9 fonts / 1027 glyphs / 4061 glyph
+  entries round-tripping to readable English; all 26 root screens; faces, icons
+  and the combat panel; opt-in buttons and filters. **`weapon` and
+  `secondary_weapon` are now declared resources** — appearance selectors no rule
+  reads — because 89 of the 387 wardrobe pieces were indexed by nothing.
+  **No golden moved, measured: 138 golden/fixture/replay/observation tests pass
+  by exit code.** The vocabulary pin's warning that a change "re-hashes every
+  battle in existence, including all 23 golden replays" is BROADER THAN WHAT
+  HAPPENS, and has been for the last two additions.
+
+► **THE TYPEFACES ARE COMMERCIALLY LICENSED** — Bitstream and Monotype, named in
+  the build's own `DefineFontName`. The tools parse and REPORT and write no font
+  file. **Whether glyph outlines may ever leave a machine is the OWNER'S call
+  and is open.**
+
+*(The brief it supersedes, whose ranked items 1, 2 and 5 are closed:)*
+[2026-09-14 02:00 — I read the corpse, and the arena is drawn](docs/handoffs/2026-09-14-0200--i-read-the-corpse-and-the-arena-is-drawn.md).**
+Start there. **The arena screen draws — seven layers in the build's own nesting
+order, with the build's own pan-and-zoom camera moving the fight inside it — and
+getting there cost a full retraction of that session's own central conclusion.**
+
+► **`combatCamera` IS A `return;` AND `combatscale` IS THE CAMERA. THE ARENA
+  PANS AND ZOOMS.** A session concluded the opposite — that the shipped arena
+  was a FIXED camera and that this file's standing claim should be retired — and
+  began correcting the battle map to match. `combatCamera`'s body at file
+  `0x6e46c2` is `96 01 00 03 3e`: **`Push undefined; Return`**, with 470
+  unreachable bytes after it, and it is the ONLY function body in the build that
+  begins that way. `combatscale` is called every enterFrame from
+  `gladiators.onEnterFrame` (`+0x0e98`), guarded on
+  `_global.phasecomplete != false`, in the scope where it is defined.
+  **The committed record was right.**
+  ► **TWO CHEAP FAILURES PRODUCED IT, and both left artefacts.** The session's
+    own disassembly printed `Push undefined / Return` as its FIRST TWO LINES and
+    it wrote a reason for them not to count — the docstring it then produced
+    cites the body as starting one instruction AFTER the `Return`. And
+    `--references combatscale` reported five hits; it read two. **Explaining
+    away evidence is worse than missing it, because it leaves a written reason
+    behind that the next reader believes.** Eighth instance of the signature
+    failure here, and the first where the refuted claim was the author's own and
+    hours old.
+  ► **ONE CAPPED WAVE CAUGHT IT — 5 questions, 6 write-nothing verifiers, 0
+    dead, VERIFIED.** The brief stated the conclusion as a numbered hypothesis
+    and invited its destruction; two investigators aimed at DIFFERENT questions
+    broke it by different routes inside twenty minutes, one walking the call
+    graph and one enumerating every positional write in the build without
+    reading the camera functions at all. **Fan out on questions, not replicas**
+    has now paid twice.
+
+► **THE ARENA SIZE TABLE WAS OUT BY A FACTOR OF TWENTY IN THREE OF ITS FIVE
+  ROWS**, in `ss2-battle-map.md` and in the 01:30 handoff. Matrices from
+  `swf-display-list.mjs` carry `tx`/`ty` in TWIPS; `shapeToPaths` emits PIXELS.
+  Compose them and the OFFSET inflates twentyfold while the SIZE does not.
+  `1729` is 640x211 not 8417x1032; `2249` is 1363x422 not 24177x2489; `1531` is
+  641x27 not 1919x210. **The two rows that were right are exactly the two whose
+  contents sit at the origin — the two the bug could not reach.** A table that
+  is correct wherever it cannot be wrong reads as a table that was checked.
+
+► **CHARACTER 1729 IS `sky`, NOT THE CROWD.** The build names it three ways; the
+  real crowd is **2112**, inside the arena clip. The misnaming had reached
+  `extract-props.mjs`, where the sky shipped under the key `crowd` — and the
+  renderer looks layers up BY KEY, so it would have painted a 640x211 sky where
+  the stands belong and drawn no stands at all. **No error, no gap, just the
+  wrong picture.**
+
+► **SIX ARENAS AND TWENTY-THREE HOURS, where this repository had one of each.**
+  `sand` (673) and `crowd` (2112) share ONE `current_arena` index over six
+  frames; the sky is `time_of_day = 1 + random(23)` over 200 declared frames
+  holding SIX distinct drawings. **The count of SLOTS is not the count of
+  MEANINGS** — the lesson `bullet`'s fifty frames and five arrows already
+  taught, arriving in a second place. `?arena=`, `?sky=`, `?rain=`.
+
+► **THE BOUT OPENS AT A ZOOM OF FIVE AND RUSHES IN** (`_global.zoomscale = 5`,
+  `+0x0c7c`) — the build's establishing shot. **Seven declared zoom bands
+  resolve to FIVE**, because the fourth (`> 200 && !(> 400)`) swallows the 70
+  and 60 arms whole and bites into the 80 arm; all seven are kept and the dead
+  ones are pinned as dead. **The depth factor moved 1.7 -> 1 and the ART decided
+  it**: the build's sand spans arena-local y -56.75..256.2, and at 1.7 the back
+  rank sits at -129.8, standing in the crowd.
+
+► **NOBODY HAS LOOKED AT THE ARENA SCREEN.** That is ranked item 1 and it is the
+  owner's; a camera that frames the fight and one that frames the sand pass the
+  suite identically. **Serve it with
+  `node tools/arena-server.mjs --host 0.0.0.0` and open
+  `http://<the WSL IP>:8123/tools/arena/index.html` from Windows** — the IP,
+  not `127.0.0.1`, and `hostname -I` gives it. Verified reachable from Windows
+  2026-09-14 by `Invoke-WebRequest`, which is the check three sessions skipped
+  by curling from inside WSL.
+
+► **ITS RANKED ITEMS 2 AND 5 ARE DONE, in the same session that wrote it.**
+  ► **THE MASKS RESOLVE: 180 extraction failures -> 2.** `flattenFrame` gained
+    an OPT-IN `resolveMasks`, so a masked placement carries its cutter to the
+    canvas. The night sky had been dropping the mask AND what it covers — the
+    moon's glow on 89 of 200 frames. **And it was nearly written off as
+    unreachable**: every masked frame is 112..200, and I had read `time_of_day`
+    as `1 + random(23)`. **It is a CLOCK** — `day_night_cycle` increments it
+    toward 200 on a 1500ms interval while a battle is on and re-seeks the sky
+    every tick, so the sky MOVES WHILE YOU FIGHT and 112..200 is the night.
+    Second time in two sessions that a bound inferred from ONE assignment site
+    was wrong. **One assignment is not a range.**
+  ► **A MISS IS A PARRY, AND THIS ENGINE HAD BEEN PLAYING THE GUARD.**
+    `defender_blocked()` plays `"defend" + attack_direction` (`+0x2160`), one of
+    thirteen, with the same 21-23 rewrite as `hurt` and `defend12` at direction
+    30; `Block` is the STATIC guard held during a weapon swap. The thirteen
+    `defend` clips are a family now and the label census moves 60/41 to 73/28.
+    **`clip-labels.js` had recorded the mapping as underivable for two
+    sessions** — *"a capture, or the build's own selector, would settle it"* —
+    and the selector is twelve instructions in a function the map already names.
+    **Refusing to guess an index mapping is right; recording it as underived
+    without asking the bytes is the failure that refusal exists to prevent**,
+    and that is the fourth instance here. Two tests pinned the old behaviour and
+    both are corrected at the assertion.
+
+► **A HANDOFF STAMPED ITSELF TWO HOURS INTO THE FUTURE AND BROKE THE ONE
+  PROPERTY THE CONVENTION RESTS ON.** `docs/handoffs/README.md` promises that
+  `ls docs/handoffs/` puts the newest last, and AGENTS.md's first instruction
+  depends on it. The `0130` brief's own commit landed at 2026-09-13 23:23, so
+  the next session's honest stamp would have sorted BEFORE it. **Stamp from the
+  clock, check that it sorts after what it supersedes**, and see that handoff's
+  "THE STAMP" section for the two-line test that would make it mechanical.
+
+*(The brief it supersedes, whose ranked item 1 is DONE and whose size table is
+WRONG in three of five rows:)*
+[2026-09-14 01:30 — the arena is 1:1, and three readings were mine](docs/handoffs/2026-09-14-0130--the-arena-is-1to1-and-three-readings-were-mine.md).**
+**The arena is measured down to its ground line and nothing draws
+it yet**; ~~blood, sparks,~~ the arena's edges and the enchantment selector all
+landed tonight. **CORRECTED 2026-09-24: BLOOD AND SPARKS DID NOT DRAW until
+`787c6b2` (2026-09-23).** From `f0a3780` (2026-09-13) the spray was seeded
+with `step.actionBoundary` inside `render()` (moved into `renderStage` at
+`3b851c3`), where no `step` exists, so with
+an extracted pack the line threw a ReferenceError at the first effect pose of
+every hurt or death clip: no drop was ever spawned and the rest of that frame's
+draws were skipped (`frame()` logged it once and carried on). `787c6b2` seeds it
+from the timeline entry's `token` (`test/arena-render-stage-scope.test.js`);
+its own message says it was not yet watched in a browser. The frozen
+2026-09-14-0130 handoff's "Blood and sparks" section says otherwise and stays
+as written.
+
+*(The brief it supersedes, whose ranked items 4, 5 and 6 are closed:)*
+[2026-09-13 21:30 — ranged is built and the guard had a hole](docs/handoffs/2026-09-13-2130--ranged-is-built-and-the-guard-had-a-hole.md).**
+
+► **RANGED IS DONE.** The bow, `bombard`, `snipe`, `bash_attack` and the
+  `swap_weapons` turn that arms one. `7310583`. **`docs/handoffs/RANGED-BRIEF.md`
+  IS CLOSED AND IS NOW HISTORY** — read it to check how ranged got here, never
+  to learn what it is. That lives in the code and in
+  `test/ss2-ranged.test.js`, which executes every branch of it.
+
+  **The owner decided all four open questions on 2026-09-13 and took the
+  BUILD'S OWN answer to three**: the swap costs a turn, an archer closed on
+  inside `100 + physical_size` loses the bow and bashes, ammunition is finite
+  and tiered. The fourth is the only authored rule in the feature — a body
+  between you and your target BLOCKS the shot — **and it took TWO corrections
+  from the owner looking at the arena to get right.**
+
+► **A BOMBARD GOES OVER AND A SNIPE DOES NOT, AND THE BUILD SAYS WHICH.** The
+  two shots fly differently here because they fly differently in vanilla:
+  `_y -= Yvelocity` is inside a bombard-only test (`+0x72c7`). Measured off the
+  reproduced ballistic, where a gladiator is exactly 1.000 figure heights tall:
+  **a snipe flies flat at 0.674 — chest height — and a bombard is never below
+  1.055 anywhere a body could stand, at every range from 200 to 4,000 units.**
+  So the lob is offered against every foe in every lane and the flat shot needs
+  a clean one, blocked by ANY body including your own side. **The rule IS that
+  measurement**, and the test that pins it lives in
+  `test/render-projectile.test.js` — the game rule rests on a property of the
+  renderer's arithmetic, so that is where a changed launch height would be
+  caught.
+► **THE ARENA IS A TIMELINE BACKDROP *PLUS* A CONSTRUCTION SCRIPT, and my
+  "the display list is EMPTY" was a BUG IN MY READING.** `resolveTimeline`
+  returns one entry per frame OF THE TIMELINE, not per frame requested, so
+  `frames[0]` was frame 1 (null, unasked-for) and not frame 221. Root frame 221
+  places SIX objects — **char 643 is the backdrop and is 640x420, the stage size
+  to the pixel**; 1729 is the animated crowd; 2249 is `_root.arena` at
+  (320, 167), which the 488-instruction script then fills with two `rockMC`, a
+  `midway_focus` and the two fighters.
+► **AND THAT SETTLES THE SCALE QUESTION: IT IS 1:1.** Every transform on that
+  frame is 1.00, so **one arena unit is one stage pixel**; the arena origin is
+  (320, 167); **the ground line is stage y 367**; a fighter at `_x ±250` lands
+  at stage x 70 and 570; the rocks at ±2160 are far off stage, which is what
+  `midway_focus` and `maxscale` pan across.
+► **AN AVM1 INTERPRETER IS TRACTABLE — 58 distinct opcodes build-wide — AND IS
+  NOT NEEDED YET.** Every effect call and every arena `attachMovie` pushes
+  literals, so an interpreter would compute tables that can be read out. What
+  would change that is recorded at `tools/extract-clip-effects.mjs`.
+► **BLOOD VOLUME TRACKS THE ATTACK BAND**, derived from the 32 `bounceitem`
+  call sites: 3 drops on a quick hit, 6 on a normal, 9 on a power, 15 on every
+  death. `hurtN` IS the attack direction, so the renderer already knows which.
+  Extracted; nothing reads it yet.
+► **THE ARROW FLIES, and the build had already modelled all of it.** 125
+  `bullet` references in one block; `maxscale` appears nowhere else in the
+  corpus. **The build has TWO coordinates and this engine has THREE** — vanilla's
+  `bullet._y` carries the arc because both its gladiators stand at `_y = 200`,
+  while here arena `y` is DEPTH and height is the renderer's `lift`. That third
+  axis is where the owner's scaling question lands: the arrow rides
+  `figureScaleFor` on its interpolated depth, pinned by a test asserting its
+  size AGREES with a gladiator standing in that rank. **The scale table is NOT
+  ported** — it is camera-zoom compensation and this camera is fixed. **And the
+  phase waits for the arrow**, because `bullet_in_air` sits on vanilla's own
+  completion guard.
+
+► **A GUARD KEYED ON A CONSEQUENCE HAS AN EXCEPTION NOBODY COUNTED.** The
+  construction refusal that held ranged shut fired on `weapon_range > arena
+  width`, because a type-4 row's range multiplier is 100. **Ids 65 and 75 carry
+  4** (item tables `:472`/`:482`), so their reach is ~262 and they walked
+  straight past it — reproduced, all three melee verbs at 262 units with a bow
+  drawn. **And I then made the same mistake one revision later**, refusing
+  `equipped_weapon == 2` outright because root frame 221 starts ~~everyone~~
+  in melee mode — ~~true~~ **true of the HERO ONLY (corrected 2026-09-23 by a
+  derivation and a write-nothing refuter: `root/frame:221 DoAction@0x671acd`
+  `+0x056f`-`+0x05a5` writes the hero's `equipped_weapon`/`using_bow` and
+  nothing on the villain; three tournament bosses enter with the bow equipped
+  and `using_bow` unset, normalised by the owner's decision above)**, and
+  still keyed on the wrong thing, because a state the build reaches on turn
+  two is one a capture can observe.
+
+► **THE SOUND HAD BEEN PICKING ITS OWN CLIP SINCE SOUND LANDED — the SEVENTH
+  instance.** `animationFor` has always preferred the engine's own label over
+  the family's first, with a comment saying why; `chooseSound` spread across the
+  whole family by a counter. The figure played `attack3` while the speaker
+  played whichever of `1092`-`1095` the counter reached. **Two halves of one
+  join disagreeing, with the correct rule written out in full on the other side
+  of it.** Ranged made it undeniable — `bombard` and `snipe` share a family and
+  have different sounds — and it was caught before it shipped rather than after
+  the owner heard it.
+
+► **`whichweapon` IS NEVER ASSIGNED ANYWHERE IN THE BUILD**, and `battlevalues`
+  reads `attack_type` and `attack_speed` off it (`+0x3450`, `+0x346a`) — the
+  only four references in the SWF. So the build's own `attack_speed` is
+  `undefined` in BOTH weapon modes and this engine's derivation of it is
+  authored in both. Recorded, not acted on.
+
+*(The brief it supersedes, whose ONE ranked item is the work above:)*
+[2026-09-13 16:00 — everything but ranged is closed](docs/handoffs/2026-09-13-1600--everything-but-ranged-is-closed.md).**
+
+► **OWNER, 2026-09-13: "range will interact with the second axis."** And it was
+  cheaper than it sounded — `getfightdistance` is EUCLIDEAN over both axes and
+  `ss2FightDistance` already implemented it, **so a foe two ranks back was
+  already further away** and `fightdistance < N` was already a 2-D gate. What it
+  did not settle was whether a rank BETWEEN you and your target blocks the shot;
+  that is `ss2ShotBlocked` now, authored inside
+  `MAP_SILENCE.multi-slot-arena-geometry`.
+► **THE LAST OPEN DECISION IS CLOSED: `BATTLE_STATE_VERSION` IS DERIVED**, owner
+  2026-09-13 — derive rather than bump, because bumping fixes the instance and
+  deriving removes the failure mode. ~~`fnv1a` over the sorted
+  `COMBATANT_PROJECTION_FIELDS`~~, **1 -> 573176825**, an IDENTITY not an
+  ordering, with a test asserting the declared list is what the projection
+  actually returns. **CORRECTED 2026-09-23: it hashes the TOP-LEVEL keys too
+  now** (owner's decision), `TEAM_WIRE_STATE_KEYS` beside the combatant
+  fields, **573176825 -> 2858363730** — the combatant-only version could not
+  see `battleResources` (`cefaf83`) or the two tape fields. Every
+  `combatStateHash` pin and all 23 golden replay hashes moved once; no golden
+  value or file did. The why is at `BATTLE_STATE_VERSION` in
+  `src/team/resolver.js`. **Eleven pinned hashes moved, all accounted for by name; NO
+  GOLDEN MOVED.** Two stings: `src/engine.js` projected `battle.version` so the
+  number leaked into the frozen compatibility façade (it carries
+  `LEGACY_WIRE_VERSION = 1` now), and **90 tests failed on ONE schema line**
+  because `fnv1a` returns hex where a sealed record wants a positive integer.
+► **DONE AND NOT TO BE REOPENED:** the rig (101 animations, 290 baked morph
+  frames — the blood), the wardrobe (387 pieces attached by the build's own
+  table), sound bound by frame label, a 2v1 that PINCERS (0% -> 17.8%), and
+  eight decisions moved out of the browser shell.
+► **`ids 1..24` IS A MIN AND A MAX, NOT A RANGE.** Five absent `features` ids
+  became a ranked open question that way. The build only ever exported
+  nineteen. The report names gaps now — and the one real signal it uncovered is
+  that `shield` is missing exactly id 13.
+► ~~**THE WEAPON ENCHANTMENT SELECTOR HAS NOT BEEN FOUND**~~ **— FOUND
+  2026-09-13, AND THIS LINE WENT ON SAYING OTHERWISE FOR TWO DAYS.** It is
+  `itemglow(whichitem, enchant_type, enchant_potency)`, root frame 35,
+  `DefineFunction2` at `0x3fa786`, and `docs/integration/ss2-battle-map.md` has
+  recorded it since the day it was found. **The clause below is the reason the
+  search kept missing it and is exactly right** — `updatecharacter` contains no
+  `gotoAndStop`, because the selector is a SEPARATE root function that
+  `updatecharacter`'s neighbour `skincharacter` calls. Kept, corrected here:
+  `weapon0` is character 703 with `flame`/`frost`/`poison`/`wraith` at frames
+  2/5/8/11, the resources exist, and **`updatecharacter` contains no
+  `gotoAndStop` at all.**
+  ► **A LIVING-HEAD LINE THAT SAYS "NOT FOUND" ABOUT SOMETHING A COMMITTED
+    DOCUMENT FOUND IS WORSE THAN NO LINE**, because AGENTS.md sends every
+    session here first. The correction belongs AT the instruction, which is
+    what this is. **Whoever closes a gap: close it in the living head too, not
+    only where you were working.**
+
+*(The brief it supersedes, whose every ranked item is now done or handed off:)*
+[2026-09-13 11:45 — the gladiator is dressed, and the shell has a seam](docs/handoffs/2026-09-13-1145--the-gladiator-is-dressed-and-the-shell-has-a-seam.md).**
+Start there. **The arena draws the build's own gladiator wearing his own
+armour** — 387 wardrobe pieces attached by the build's own table, all 44 morph
+shapes rendering as the blood in the death animations, and a 2v1 that pincers.
+
+► **NEXT IS RANGED AND IT HAS ITS OWN BRIEF:
+  [`docs/handoffs/RANGED-BRIEF.md`](docs/handoffs/RANGED-BRIEF.md).** The owner
+  kept it for a session he is awake for. **Everything presentational is already
+  built** — `bombard` and `snipe` are extracted, bound to sound and mapped —
+  **so the work is the resolver's alone.** The one thing not to do is in there:
+  the module refuses a bow at construction and that refusal is CORRECT.
+► **A GREEN SUITE IS NOT COVERAGE, and twenty agents proved it.** A mutation
+  audit broke one line at a time: 15 of 17 applied mutations went red and **2
+  SURVIVED — both in the dressing path, and not because it was under-asserted
+  but because it had NEVER BEEN EXECUTED.** `paintExtractedFigure` was called
+  nine times suite-wide, every time with no wardrobe. **And the test that
+  looked like coverage asserted `helmet.depth === hair.depth` on the DATA
+  TABLE** — the fact the rule is derived from, never the rule — so it passed
+  with the rule deleted. Run the audit again after any substantial render
+  change.
+► **FLANKING: a 2v1 now pincers.** The owner watched one and said the survivors
+  stood behind each other rather than going round. Measured: **208 outnumbered
+  turns, 100% same-side, 0 crossings in 3,424 turns.** It was never geometry —
+  `ss2BodyBlocks` is `|dy| < physical_size`, so at stride 97 a foe one rank away
+  never blocked. **Pincered 0% -> 17.8%, simultaneous fights 273 -> 413 turns,
+  24/24 still settle, and the pile-up tell is absent** (97 and 150 return
+  clearly different censuses). No golden moved: with the axis off every `y` is
+  null and the arm is inert.
+► **`grep` IS NOT A GATE.** I piped the suite through `grep` and committed on
+  `fail 2` — grep succeeds when it MATCHES. **Use the exit code.** And do not
+  reach for `git add -A` while agents are running: it staged seventeen worktree
+  gitlinks and I pushed them.
+► **`--host 0.0.0.0`, NOT `127.0.0.1`.** WSL2 localhost forwarding here is
+  INTERMITTENT — it worked at 01:05 and timed out at 03:30 unchanged. Three
+  sessions called this server healthy from inside WSL, the one place it was
+  always going to work.
+
+*(The brief it supersedes, whose ranked items 1, 2 and 3 are all done:)*
+[2026-09-13 02:35 — the wardrobe was in the linkage table all along](docs/handoffs/2026-09-13-0235--the-wardrobe-was-in-the-linkage-table-all-along.md).**
+Start there. **The arena draws the build's own gladiator**, and a 12-agent wave
+found that **the fighter clip does not dress itself**: the mechanism is at the
+ROOT (`DoAction` at `0x40bf76`, body `0x40bf7c`, a 149-entry constant pool) and
+the whole wardrobe is exported by linkage name.
+
+```text
+  weapon  89  ids 0..220      shield    25  ids 0..25     387 pieces
+  helmet  40  ids 1..120      facehair  24  ids 1..24     12 slots
+  hair    40  ids 1..40       features  19  ids 1..24     401 shapes
+  boot / shinguard / breastplate / shoulderguard / greaves / gauntlet
+          25 each, ids 2..26                              0 failures
+```
+
+► **THE ITEM ROW'S ID *IS* THE ART COLUMN.** 89 weapon symbols against the item
+  tables' ~90 weapon rows. This repository carried `MAP_SILENCE`-shaped doubt
+  about appearance that the export table answers outright.
+► **AN EMPTY SLOT MAY MEAN YOU ARE LOOKING AT THE WRONG SLOT.** Sprite 704 at
+  depth 35 named `shield` holds nothing, and I read that as a placeholder
+  nobody had filled — ranking it as work and citing the head's invisible parts
+  as a second witness. **The shield attaches to the RIGHT FOREARM at depth 3.**
+  `attachMovie` onto a NAMED LIMB, `Color` onto that limb's `bareskin` child —
+  so the grey canvas is right for a better reason: there is a named tint target
+  under every limb. **`helmet` and `hair` share depth 5, so a helmet REPLACES
+  the hair** — a game rule falling out of the byte layout.
+► **`--host 0.0.0.0` IS NOT OPTIONAL HERE: Windows cannot reach WSL's
+  loopback.** `Invoke-WebRequest http://127.0.0.1:8123/` from Windows TIMES OUT
+  while `curl` inside WSL gets 200. **Three sessions called this server healthy
+  on the strength of `curl` from the one place it was always going to work**,
+  so the owner's browser could never open the arena. `preview.html` is
+  unaffected — it is self-contained.
+► **THE OWNER FOUND FOUR DEFECTS BY PLAYING IT.** Sounds cut off (one `Audio`
+  element per file, and the build SHARES files across labels — `706.mp3` serves
+  FIVE); sounds not starting (autoplay blocked, and spectate never interacts —
+  the rejection was caught and discarded); a blank preview; and **a 2v1 that
+  will not flank**. That last is NOT a bug: a walk may never cross a foe, and
+  `chooseAiAction` has no pincer concept. **0 crossings in 3,424 turns.** He is
+  right that it is the weaker play, and it is ranked.
+► **RANKED FIRST: DRESS THE GLADIATOR.** Everything is derived and extracted;
+  the one gap is the per-piece `_x`/`_y` offsets in the `attachMovie` init
+  objects.
+
+*(The brief it supersedes, whose ranked items 1 and 2 are done — and whose item
+2 was built on the shield misreading above:)*
+[2026-09-13 00:40 — the fighter is a rig, and Codex broke four things in it](docs/handoffs/2026-09-13-0040--the-fighter-is-a-rig-and-codex-broke-four-things.md).**
+Start there. **Ranked item 1 of the brief below is DONE: the fighter clip
+resolves.** 101 animations, 2,222 poses, 61 shapes, 0 parse failures, extracted
+from the player's own install into gitignored `assets/figure/`.
+
+```text
+  depth  name            resolves to            22,783 PlaceObject2 tags,
+   9/11  L/Rupperleg     677 -> 676 -> 675      of which 22,683 are MOVE-ONLY.
+  13/15  R/Llowerleg     680 -> 679 -> 678
+  17/19  L/Rfoot         682 -------> 681       The whole body is ELEVEN shapes
+  21/37  R/Lupperarm     685 -> 684 -> 683      and thirteen matrices a frame.
+     23  torso           688 -> 687 -> 686
+     25  head            697 -> 690/692/694/696 -> 689,691,693,695
+  33/41  R/Llowerarm     700 -> 699 -> 698
+     39  weapon          703 -> 702 -> 701   (13 frames: flame/frost/poison/wraith)
+     35  shield          704 ------->  EMPTY — attached at runtime, mechanism UNKNOWN
+```
+
+► **SCOPE BY DEPTH, NOT BY FRAME.** The brief below says to pick "the labelled
+  frames that matter" out of 2,222. Counted, that is the wrong axis: name the
+  rig's depths and all 2,222 frames come free.
+► **THE GIFT BELOW OMITS 34 MORPH SHAPES.** The closure from 1241 is **148
+  characters — 44 sprites, 70 shapes and 34 morphs** (`DefineMorphShape`/`2`),
+  which `swf-shapes.mjs` cannot read. All 34 are on EFFECT depths (1, 2, 43,
+  45, 47) and none on the rig, so the body is unaffected — but a flattener that
+  assumed shape would have lost them in silence.
+► **THE LESSON, SIXTH INSTANCE: two things that share an error confirm each
+  other, and this time both were mine.** I wrote `PlaceObject2`'s replace rule
+  backwards and then wrote a test asserting the backwards version. Green suite,
+  wrong code. **A test written by whoever wrote the code inherits the code's
+  model of the format and cannot check it.** `/adversarial-review` broke it:
+  **five findings, four real.** Ruffle settles the rule — `replace_with` then
+  `apply_place_object` — and the build has 144 matrix-less replaces. Correcting
+  it moves 55 placements across 7 sprites, **and clip 1241 is not one of them**,
+  measured by resolving every sprite both ways rather than inferred. I reasoned
+  about that twice and was wrong both times before diffing.
+► **OPEN `assets/figure/preview.html`. No server — it is self-contained.** It
+  is the only check this extraction has, because no suite can tell a correct rig
+  from a plausible one, **and it earned that on first use.** The first version
+  `fetch`ed its data, so a `file://` open gave the owner a BLANK PAGE; and once
+  it rendered, the gladiator had black-and-white WEDGES across his chest.
+  `shapeToPaths` emitted each edge run as its own OPEN subpath, and a renderer
+  closes a filled open subpath with a straight chord. **Torso: 127 open runs ->
+  10 closed regions.** Every number in the extraction called that correct — 824
+  of 824 shapes "survived", the `d` strings were well-formed — and the two tests
+  pinning path data asserted the OPEN strings, because I wrote them from the
+  same wrong model. **The stitch: reverse a `fillStyle0` edge, chain on EXACT
+  integer twips, one element per fill under `fill-rule: evenodd`, close with
+  `Z`. An edge with the same fill on both sides is INTERIOR and is not
+  boundary** — style state persists across records, so that is common.
+► **THE PREVIEW NOW SOUNDS, so it checks BOTH extractions at once.** The two
+  join on the build's own frame labels and nothing else. 80 of 101 animations
+  carry sound; the other 21 say so rather than looking broken. **Nobody has
+  listened yet — that is now one action: open it, pick `StepForward`.**
+► **COLOUR TRANSFORMS ARE THE CONDITION TINTS — 4,544 placements carry one**
+  (`death_poisoned` 735, `cast1` 732, `frozen` 560, `poisoned` 286, `lifesteal`
+  272, `lightning` 224). A frozen gladiator is blue and encased in ice.
+► **THE BASE BODY ART IS A GREY CANVAS BUILT TO BE TINTED** — `#cccccc`,
+  `#666666`, `#333333`, tan sandals, one skin-toned fill under the head. **So
+  team colours are the art's own mechanism, not a fight with it.** That answers
+  the open question the stage-3 item was blocked on. The head's three extra
+  parts are all `fillOpacity: 0` placeholder slots, exactly like the empty
+  `shield` — two independent pieces of evidence that face, hair and armour are
+  attached at runtime by a mechanism still unfound.
+► **RANKED FIRST: stage 3** — the renderer prefers extracted art with
+  `figure.js` as the fallback, exactly as sound already does. **What is still
+  open is the eight armour SLOTS, which the base clip does not dress.**
+
+*(The brief it supersedes, whose ranked item 1 is the work above:)*
+[2026-09-13 01:30 — the arena has two axes, and the build has its own voice](docs/handoffs/2026-09-12-2358--the-arena-has-two-axes-and-the-build-has-its-own-voice.md).**
+Start there. **The second axis is SHIPPED, not a flag** — `rankStride` defaults
+to 97 with three lanes, the owner's own choice after playing it. A gladiator
+turns to face whoever it is fighting (`changeCombatants` derives facing from
+position; turning was never an action in the build), a blow from behind costs
+extra, and **the build's own sound effects play in the arena** — extracted from
+the player's install, never from this repository.
+
+```text
+                       stride 0    SHIPPED (97)
+  settled                24/24        24/24
+  can hit EVERY foe      13.3%        20.2%
+  blows through body      0.0%        15.6%
+  most fights at once        1            2
+```
+
+► **THE LESSON, and it is the FIFTH instance: a SUMMARY in a transcription is
+  not a catalogue.** The owner heard a jump sound on a walk. The cause was
+  bucketing extracted sounds by the battle map's PROSE ranges — "movement and
+  charge (33-104)" is four different clips including a leaping attack, and
+  "Block (118/179)" swallowed both jumps. **`Block` carries no sound at all**,
+  which the prose hid by lending it one. The clip enumerates itself: **101
+  frame labels against 17 prose ranges.** Nothing in the suite could catch it,
+  because BOTH SIDES of the lookup bucketed the same coarse way and agreed —
+  **two coarse mappings agreeing is not the same as either being right.**
+► **ASSETS COME OUT OF YOUR OWN INSTALL AND NEVER INTO THE REPO.** `assets/` is
+  gitignored AND `test/asset-attestation.test.js` fails if anything under it is
+  tracked — two lines of defence, because the ignore rule alone has already
+  failed once here. Doom/WAD model, and `AGENTS.md` already said so.
+► **RANKED FIRST: stage 2 of asset extraction** — resolve the display list, so
+  the 70 shapes the fighter clip reaches become a gladiator standing. The
+  handoff carries the SWF structure already derived; do not re-derive it.
+► **THE ONLY OWNER DECISION STILL OPEN is the projection version bump**, now
+  the fourth format change under a constant `BATTLE_STATE_VERSION`. Nothing is
+  deployed, so it is free.
+
+*(The brief it supersedes, whose central claim is now WRONG — it says the second
+axis sits behind a flag that is off by default:)*
+[2026-09-12 20:30 — the build had a second axis all along](docs/handoffs/2026-09-12-2030--the-build-had-a-second-axis-all-along.md).**
+Start there. **`getfightdistance` computes `ydist` from `_y` and returns
+`round(sqrt(xdist^2 + ydist^2))` — the build's own distance is EUCLIDEAN, and
+this repository recorded it as "the rounded x-separation" in FOUR places.** The
+two offsets the docstring always cited are both real; `ydist` is computed
+between them, at `+0x0338` / `+0x03de`. **Fifth instance of the signature
+failure, and the first found by reading the oracle rather than a
+transcription.** So the second axis is half DERIVED rather than wholly invented:
+the metric is the build's, while where a gladiator STANDS stays authored under
+`MAP_SILENCE.multi-slot-arena-geometry`.
+**It is built, measured and playable at `?rank=N`.** Ranked item 1 of the 16:00
+brief is DONE, and so is item 2. Measured over 24 seeds a size:
+
+```text
+                       stride 0   stride 97   stride 150
+  settled                24/24      24/24       24/24
+  can hit EVERY foe      41.0%      22.0%        6.1%
+  blows through a body   44.7%      20.3%        3.7%
+  most fights at once      1          2            3
+```
+
+**Two or three simultaneous fights where one was geometrically impossible, and
+every bout still settles.** `rankStride: 0` is the default and is off
+STRUCTURALLY — every gladiator gets `y: null`, which `ss2FightDistance` reads as
+0 — so there is no second code path to keep in step.
+► **THE TRAP, and it cost a commit: "move toward the nearest foe's rank" is a
+  PILE-UP MACHINE.** It collapses all six into one rank at the opening and
+  rebuilds the single interface in two dimensions. The census reported it
+  unasked — **strides 97 and 150 returned IDENTICAL numbers**, because once
+  everybody shares a rank the stride cannot matter. The rule that works is
+  *fight who is in front of you*: change rank only when your own rank holds no
+  foe. Pinned, and verified to fail on the naive rule.
+► **RANKED FIRST AND IT IS THE OWNER'S: play it.** `?rank=97` vs `?rank=150` vs
+  `?rank=0`. How much should standing in the right place matter is game feel and
+  no measurement can settle it.
+► **`figure.js` said "vanilla has one gladiator a side, so there is no second
+  axis to be faithful to", and that sentence is why nobody checked for eleven
+  days. A confident negative stops the check that would refute it.**
+
+*(The brief it supersedes, whose ranked items 1 and 2 are the work above:)*
+[2026-09-12 16:00 — one interface, so the second axis is a prerequisite](docs/handoffs/2026-09-12-1600--one-interface-and-the-second-axis-is-a-prerequisite.md).**
+Start there. **The owner watched a 3v3 and called it "super limited"** — everyone
+jumbles into one melee, no breakoff fight, no choice between duelling and
+brawling, nowhere to stand off and shoot. Measured, he is not describing a tuning
+problem: **a walk may never cross a FOE, so the two teams meet at exactly ONE
+interface and every fight must happen there.** 0 turns in 1,682 where any red
+stood right of any blue; never more than 1 simultaneous fight. **A second
+engagement is geometrically impossible and no AI change can create one**, which
+retires "fix the AI first, it may be enough". `tools/engagement-census.mjs` is
+the committed instrument: **a 3v3 uses 2.4% of a 4,200-unit arena and 44.7% of
+its blows pass through a living gladiator.**
+
+*(The brief it supersedes, whose ranked item 1 — LOOK AT THE ARENA — is what
+produced all of the above:)*
+[2026-09-12 11:30 — Codex found in one pass what twelve agents missed](docs/handoffs/2026-09-12-1130--codex-found-what-twelve-agents-missed.md).**
+Start there. **`/codex:adversarial-review` was never unrunnable by a session** —
+that instruction was false and had been copied through five handoffs, parking the
+top-ranked item for four sessions. Run, it returned **two high defects a 12-agent
+wave had missed an hour earlier**, one of them a walk that carried a gladiator
+THROUGH a foe. All four actionable findings are fixed; the version bump is the
+owner's. **The lesson: a wave audits the RECORD, a review audits the CODE.**
+**RANKED FIRST AND IT IS THE OWNER'S: look at the arena** — three things changed
+under it today that no agent here can see.
+
+*(The brief it supersedes, written MID-session by the same session, whose ranked
+items 1, 3 and 4 are now done:)*
+[2026-09-12 09:30 — weapon_range is projected, and twelve verifiers broke six things](docs/handoffs/2026-09-12-0930--weapon-range-is-projected-and-the-wave-broke-six.md).**
+Start there. **Ranked item 1 is CLOSED**: `weapon_range` is a projected
+resource, the build's own overlap clamp is restored, the `foe.x` narrowing is
+gone. The reach it replaced was `physical_size` — **the reach of no gladiator
+the build can make**, because its docstring cited half of a wrapped line.
+**Then a 12-agent wave broke six things in it, and the worst was mine: I wrote
+the sub-100 nudge backwards in five places. It SEPARATES.** The bytes do not
+settle that — only the `gladiator_dir` turnaround does — so the tool now
+DERIVES the direction instead of checking a constant.
+
+*(The brief it supersedes, whose ranked item 1 is the work above:)*
+[2026-09-12 01:40 — the last authored number is derived](docs/handoffs/2026-09-12-0140--the-last-authored-number-is-derived.md).**
+Start there. **The walk displacement was in the build all along** —
+`movement_speed * 16` eased to a stop — so `MAP_SILENCE.movement-displacement` is
+removed and the authored 44 is exactly right AT THE CLAMP FLOOR and wrong by a
+factor of four above it. **The lesson outranks the number: a gap in that
+catalogue is a gap in a TRANSCRIPTION and says nothing about the build**, and
+three sessions in a row read one as if it did. A six-verifier wave then broke four
+things in the first version of the derivation — including the arithmetic — and
+**retracted `440dae9` in full: `phase_action` records the HERO only.**
+
+*(The brief it supersedes, whose ranked item 5 is DONE by a route it did not name
+and half of whose ranked item 3 was a wrong number rather than a decision:)*
+[2026-09-11 23:40 — two "owner's lane" items were a session away](docs/handoffs/2026-09-11-2340--two-owner-items-were-a-session-away.md).**
+Start there. **A session can read the installed SWF and the capture archive, and
+both were being treated as out of reach** — two ranked owner items closed on
+that basis. It also records that session putting a four-way design fork to the
+owner **on gladiators that cannot exist**, and the retraction.
+
+*(The brief it supersedes, written MID-session by the same session, whose
+ranked items 1 and 5 are now done:)*
+[2026-09-11 21:15 — both halves of position are built](docs/handoffs/2026-09-11-2115--both-halves-of-position-are-built.md).**
+Start there. **Gladiators now stand somewhere and must walk to reach each
+other.** Both halves landed today — presentation in `3a8638b`, the resolver in
+`567eb41` — and the thing that needs a decision is not a defect: **53% of a 3v3
+is now walking.** The preserved patch is SUPERSEDED; read it as history.
+
+*(The brief it supersedes, written MID-session by the same session, whose
+ranked item 3 and whose "the resolver half must add `vanillaLabel`" are both
+done:)*
+[2026-09-11 18:30 — a walking gladiator has a clip to play](docs/handoffs/2026-09-11-1830--a-walking-gladiator-has-a-clip-to-play.md).**
+Start there. **Ranked item 3 is closed**: the presentation stream has a movement
+command, the SS2 bindings have a movement case, and the renderer has four gait
+schedules — so the resolver half can now land without a walking gladiator
+playing the idle clip. Nothing emits a `move-clip` yet, and that is the point.
+The one thing the resolver half must ADD is `vanillaLabel` on the movement
+event; the preserved patch does not carry it. Details in the ► block below.
+
+*(The brief it supersedes, whose ranked item 3 is the work above and whose item
+1 is still the owner's and still the cheapest question on the board:)*
+[2026-09-10 22:44 — the economy was the cheese](docs/handoffs/2026-09-10-2244--the-economy-was-the-cheese.md).**
+Start there. **Asked to design 3v3 so it could not be cheesed, a 13-agent panel
+produced four designs and ALL FOUR WERE BROKEN** — by two properties of the
+shipped 1v1 engine that 3v3 only multiplies. **D1: a bout need not terminate**
+(4,000 mutual `rest` actions, `result` still null). **D2: strength was a trap
+and stamina the only stat** (strength 7 beat strength 30 losing nothing). Both
+closed by owner decision — an authored crowd-impatience toll, and a swing
+priced on the weapon with strength in the denominator — and **both gated behind
+`fixtureReplay`, so all 23 goldens still reproduce their MEASURED
+`staminaleft`.** The 3v3 positional layer is deliberately NOT built on top yet.
+
+► **D3 IS CLOSED (2026-09-11): SIDES ALTERNATE.** The agility alpha-strike —
+  a side that out-ran the enemy acting three times before the enemy acted at
+  all — is gone; agility now buys the first action of the bout and never a free
+  round. A fidelity GAIN, because SS2's `changeCombatants` alternates and the
+  flat sort was ours. **One consequence, measured before it was accepted:
+  conditions effectively stop crossing bout boundaries** (0 of 300 seeds leave
+  a living afflicted survivor). Not a correctness regression, but a design
+  change that arrived as a side effect — if it matters, that is what to
+  restore. `docs/combat-economy-findings-2026-09-10.md` carries both.
+  **A working position implementation is preserved as a reference patch** at
+  `docs/reference/position-in-the-resolver.patch.md` — written against
+  `2c047b9`, UNBUILT, and it deadlocks the animation gate until presentation
+  lands. Read it; do not apply it blind.
+
+► **THIS SESSION COMMITTED TWO AND MEASURED TWO UNPUSHED AFTER ITS HANDOFF
+  COMMIT `92e651e`, and the correction commit carrying this sentence makes
+  three.** Written as an EVENT with the self-reference in it, for the same
+  reason every block below it is: a count is false one commit later.
+  **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **THIS SESSION'S THIRD STRETCH COMMITTED FIVE AND MEASURED FIVE UNPUSHED
+  AFTER ITS HANDOFF COMMIT; the correction commit carrying this sentence makes
+  six.** An event, with the self-reference, for the reason every block below it
+  gives. **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **THIS SESSION COMMITTED THREE AND MEASURED THREE UNPUSHED AFTER ITS HANDOFF
+  COMMIT `208f4a2`; the commit carrying this sentence makes four.** An event with
+  the self-reference in it, for the reason every block below it gives: a bare
+  count is false one commit later. **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **THIS SESSION COMMITTED FOUR AND MEASURED **ZERO** UNPUSHED AFTER ITS
+  HANDOFF COMMIT `209f5fd`; the commit carrying this sentence makes one.** An
+  event with the self-reference in it, for the reason every block below it
+  gives. **And the ZERO is the point, not the four:** every block above this
+  one records a backlog because pushing needed the owner's yes each time. Rule 7
+  applies as written now, so a session pushes as it goes and the steady state is
+  0. **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **THERE IS EXACTLY ONE INTERFACE, AND THAT IS WHY THE ARENA FEELS SMALL
+  (2026-09-12, `58366d8`).** `ss2WalkDestination` refuses to carry a walk across
+  a FOE — the build's own clamp at `+0x3de6` — so no red ever reaches the far
+  side of a blue. **Measured over 24 bouts and 1,682 turns: 0 crossings, and
+  never more than ONE simultaneous fight.** The two teams therefore meet at a
+  single contact point and every blow in the bout is struck there. A breakoff
+  fight is not unlikely; it is impossible.
+  **This retires two plausible guesses of mine, both made before measuring:**
+  that the left-to-right order is frozen (it is not — a walk may cross an ALLY,
+  and the order reshuffles in 24 of 24 bouts), and that better TARGETING would
+  spread the fighters out (a no-op — the target picks a DIRECTION, the clamp
+  picks the STOP). **The order that costs nothing is measure, then guess.**
+  ► **`tools/engagement-census.mjs` IS THE INSTRUMENT, and it is committed
+    because every number in the design discussion before it was a scratch script
+    that died with its session.** Run it before and after any change to movement,
+    targeting, reach or the AI. Today: **a 3v3 uses 99 units of 4,200 (2.4%),
+    can-hit-every-foe is 41.0% of turns, and 44.7% of blows pass through a
+    living body.**
+  **RANKED FIRST: build the second axis.** It is a PREREQUISITE for everything
+  the owner asked for, not an improvement on it. Discrete nodes over a continuous
+  plane (the 9-agent panel's recommendation, and SS2's own movement is already
+  discrete phases). **The question that outranks the geometry is game feel and is
+  the owner's: how much should standing in the right place matter?** Build it
+  playable behind a flag and let him play it.
+
+► **`weapon_range` IS A PROJECTED RESOURCE AND THE BUILD'S OWN CLAMP IS BACK
+  (2026-09-12, `6926069` + `3666c62`). RANKED ITEM 1 IS CLOSED.** `ss2Reach`
+  returned `physical_size` and called it "the unarmed reach", citing
+  `ss2-item-tables.md:58` — **half of a wrapped line**; line 59 continues
+  `+ _root["weapon" + c.weapon][5] * 44`. There is no unarmed branch in
+  `battlevalues`, and the smallest `[5]` in ninety rows is 1, so the shipped
+  reach was 44 short of the shortest the build has. **Fourth instance here of a
+  quoted offset's neighbouring line holding the answer, and the first that was a
+  DOCSTRING rather than a `MAP_SILENCE` entry** — so the catalogue's new "say why
+  the bytes cannot answer it" rule would not have caught it. The clamp is the
+  DEFENDER's `physical_size`, the gate is the ATTACKER's `weapon_range`; one
+  function for both is what deadlocked the faithful clamp. Byte-identical walk
+  ratios to the narrowing it deletes, and 8/8 settling in all 24 sweep
+  configurations.
+
+  ► **THEN 12 AGENTS BROKE SIX THINGS IN IT — 6 questions + 6 write-nothing
+    verifiers, 0 dead, 5 HOLDS and 1 PARTIALLY-BROKEN, and the HOLDS verdicts
+    carried more damage than the broken one.** All six re-derived by the main
+    session before being written down.
+    - **THE SUB-100 NUDGE SEPARATES, and I wrote "drives the two together" into
+      two source docstrings, two test comments and a commit message.** The
+      nudge's own bytes DO NOT settle it — `hero._x += 1` is toward or away
+      depending on what `gladiator_dir` means, and the rival convention fits the
+      same opcodes. The TURNAROUND settles it: `if (hero._x < villain._x)
+      hero.gladiator_dir = "right"` (`+0x28f3` -> `+0x290e`), so the word is
+      FACING and both arms move the pair APART.
+      **And the claim it supported is broken a second time, independently**: the
+      guard is `fightdistance < 100` while the parked-with-gate-shut case needs a
+      separation of at least `80 + 44 = 124`. The nudge cannot fire there.
+      **The build has no escape from that case; it simply has the case.**
+    - **`physical_size` IS a live reach gate**, just not `weapon_range`: the
+      frame-4 selector's bow arm is `fightdistance < 100 + hero.physical_size`
+      and never reads `weapon_range` at all.
+    - **A THIRD reach gate exists and this repository did not hold it** —
+      `sprite:862/frame:52/DoAction@0x23f835` `+0x0356`: the VILLAIN's AI gate is
+      `(equipped_weapon == 1 && fightdistance < villain.weapon_range) ||
+      (equipped_weapon == 2 && ~~fightdistance < 200~~ !(fightdistance < 200))`
+      — **the bow arm is a MINIMUM, corrected 2026-09-23 here at the site: the
+      bytes are `Push 200; Less2; Not` (`+0x03ca`-`+0x03d3`), as
+      `src/team/ss2-rules.js` already has it.** **The two sides do not share a
+      gate in vanilla.**
+    - **`[5]` runs 1, 2, 3, 4 and 100** — 18 ranged rows at 100. The build's
+      reach scale is 44 to 4,400, and the sweeps covered 1/2/3 only.
+    - **The archive claim is mostly WITHDRAWN.** 3,004 resolve not 3,091; 432 are
+      ambiguous and every one spans the range column; and "not one implies a
+      `weapon_range` below `physical_size + 44`" is **unfalsifiable by
+      construction**, because min `[5]` is 1 over every row. What survives: the
+      archive's hero resolves uniquely to weapon 0, so its reach is 131 not 87 —
+      a fact about the DAMAGE columns, with the range following through the
+      table.
+    - **I made the exact reporting error my own docstring convicts somebody of.**
+      `tools/arena/roster.js` said the `weapon_range: 1` paste meant "no bout in
+      the arena ever settled". Every bout settled either way — 24/24 — and the
+      real diagnostic is **0 attacks and seven times the actions**. The crowd
+      kills them. That is the failure `ss2WalkDestination` already names, quoted
+      in the same commit that repeated it.
+  **WHAT HELD:** the formula, the absence of an unarmed branch, the clamp's
+  structure, the strict `<`, the bow override, **no golden moved** (confirmed
+  independently by hashing all 23 rebuilt projections on both trees) and
+  **exactly one seeded pin moved**.
+  ► **UNFIXED AND RANKED: the browser arena's SPECTATE mode never reaches a
+    swing.** `tools/arena/main.js:572` drives `options[turnNumber %
+    options.length]`; out of range that list is `[walk-left, walk-right, rest]`,
+    so the cycle is net-zero displacement forever. 24/24 bouts, 20,712 actions,
+    **0 attacks**, identical before and after this work. Not caused here.
+
+► **THE WALK DISPLACEMENT IS DERIVED AND `MAP_SILENCE.movement-displacement` IS
+  GONE (2026-09-12, `bdc157b` + `6bb790e`).** `movement_speed * 16`, scaled by
+  `100 + 2 * boot` percent, set as a DESTINATION and eased by `ceil(gap / 8)` a
+  frame until the gap is 20 or less — so the clamp floor of 4 realises `64 - 20 =
+  44` and **the uncited "one walk is 44 px" was right all along, as the FLOOR
+  case.** `SS2_ARENA.walkDistance` is renamed `walkDistanceAtSpeedFloor`; a walk
+  is per-actor; `movement_speed` 12 walks 172.
+  **The lesson outranks the number and is in the catalogue's own header: a gap in
+  `MAP_SILENCE` is a gap in a TRANSCRIPTION and says nothing about the build.**
+  An entry whose `settledBy` reaches for a capture must now say why the bytes
+  cannot answer it first.
+  ► **A SIX-VERIFIER WAVE THEN BROKE FOUR THINGS IN THE FIRST VERSION, one of
+    them behaviour** — the build's `get_percentage` round trip is lossy in doubles
+    and `add_percentage` divides before multiplying, so the collapsed formula is
+    +1 out at six reachable `(movement_speed, boot)` pairs; and the tween is a
+    DO/WHILE, so a `while` returned 0 where the build moves 2. Both classes are
+    now caught mechanically by `tools/walk-displacement-derivation.mjs`.
+  **RANKED FIRST FOR THE NEXT SESSION, measured not argued:** declare
+  `weapon_range` a projected resource and restore the build's own overlap clamp.
+  The build clamps on the DEFENDER's `physical_size` and gates on the ATTACKER's
+  `weapon_range`; this module uses `ss2Reach` for both, which parks a walker
+  exactly ON its own gate threshold — that is why the faithful clamp deadlocks and
+  why the shipped narrowing is a placeholder.
+
+► **THE `weaponweights` DIRECTION IS READ, AND THE REPOSITORY ALREADY HELD IT
+  (2026-09-11, `ac8c7f4`). RANKED ITEM 1 IS CLOSED.** Index 1 IS the heavy end,
+  so `ss2WeaponMass` is right and the swing cost is NOT backwards. Read
+  read-only off the installed build at `+0x3dd4`; the install is byte-identical
+  (`77cb545c…`).
+  **Two findings beside the answer:** `weaponweights` holds STRINGS, so
+  `attack_speed` is a weight-CLASS index and never a numeric speed; and
+  `SS2_SWING.weightIndexMax`'s comment said the index runs 1..6 when it runs
+  1..5 (measured across all ninety rows).
+  ► **AND THE PART THAT MATTERS MORE: `ss2-item-tables.md` has stated the
+    answer since 2026-08-30, TWO LINES under the offset that
+    `MAP_SILENCE.swing-cost` cites for the array's LOCATION while declaring its
+    values unheld.** That entry is what ranked this as the owner's work. **Third
+    instance in this repository of one failure — declaring the map silent
+    without reading the surrounding paragraph.** Corrected at the entry, the
+    document and the docstring; `tools/item-table-transcription.mjs` now checks
+    shape, direction and the push-order convention on every run.
+
+► **A SESSION CAN READ THE INSTALLED SWF AND THE CAPTURE ARCHIVE, AND BOTH WERE
+  BEING TREATED AS OUT OF REACH.** The build is at the path
+  `tools/item-table-transcription.mjs` already defaults to; the populated
+  archive is a SECOND CHECKOUT at `/mnt/c/ss2-capture/captures` (1,650
+  rufflelogs). Neither needs Ruffle, staging, or a capture window — they are
+  READS, and `AGENTS.md` reserves only launching Ruffle and touching the
+  install/save/snapshots to the supervised main session. Two ranked "owner's
+  lane" items were closed this way in one stretch. **Check reachability before
+  ranking something as the owner's.**
+
+► **THE APPROACH IS MEASURED (`0dd1811`).** `tools/approach-length-census.mjs`
+  reads the archive and counts movement phases before the controller flips to
+  `closerange_warrior` — which IS `fightdistance < hero.weapon_range` first
+  holding, so it observes the gate rather than inferring from when the autopilot
+  swung. **n = 1,512: median 5, mode 5 (36.3%), 82% between 4 and 7.**
+  **It is NOT a displacement** — both gladiators close and these are the HERO's
+  steps, so the interval has one end. `SS2_ARENA.walkDistance` stays AUTHORED.
+  What it does is put the five-walk figure on something measured.
+
+► ~~**THE DISPLACEMENT IS CLOSER THAN THE 23:40 HANDOFF SAYS, and its ranked
+  item 5 contains a FALSE clause**~~ **— AND THE CORRECTION WAS ITSELF FALSE.
+  RETRACTED IN FULL 2026-09-11 by a write-nothing verifier. `phase_action`
+  RECORDS THE HERO ONLY.** The block below is kept because the retraction is
+  worth more than the claim was.
+
+  The claim was: *"`phase_action` fires for BOTH sides: 206 records against 140
+  autopilot steps in `arena-champ-1/obs-champ-1-a1`, and all 66 unpaired ones
+  are `rest` — the villain's, provably, because the autopilot's entire
+  vocabulary is `normal_attack`/`walkright`/`walkleft` and it never rests."*
+  Both counts reproduce exactly. **The inference does not: it is a false
+  dichotomy that leaves out the game's own forced phase.** Overlay frame 1 calls
+  `getphase("rest")` under `if (!(_root.game.hero.staminaleft > 0))` (`+0x0d2e`),
+  so the build issues rests the autopilot never asked for — **and the wrapper's
+  own comment at `ss2-capture-wrapper.as:1582-1586` already said so.**
+
+  **Measured, in that very file:** all 39 resolvable `rest` records sit at hero
+  `staminaleft == 0`; all 67 resolvable non-rest records sit at `>= 9`. Label
+  shuffles reproduce that separation in 0 of 20,000 trials. The session fought
+  three bouts and ended `ABORT:battle-lost`, so the villain certainly acted and
+  killed the hero — and `phase_action` holds exactly the autopilot's own 82
+  `normal_attack` and not one more. **Zero villain actions are recorded.**
+  Archive-wide (1,650 logs): `phase_action` 13,777 against 13,646 autopilot
+  steps, and the per-label excesses are precisely frame 1's forced-phase
+  vocabulary — rest +1387, poisoned +33, frozen +21, burning +19, life_stolen +6
+  — while the autopilot's own labels run NEGATIVE (`normal_attack` -1116,
+  `walkright` -220). `getphase` is hero-only by construction: the string occurs
+  seven times in the whole build and not once in the constant pool of any
+  villain block, and the villain is dispatched through
+  `villaindecisionA`/`villaindecisionB` instead.
+
+  **AND THIS FILE ALREADY SAID SO, 2,600 lines below, since `d39fb8b` on
+  2026-09-01** — "`getphase` carries only the HERO's actions … Confirmed live:
+  `adc36` … four `phase_action` lines, all the hero's." So `440dae9` did not
+  fill a gap in the living head; it CONTRADICTED the living head, and the
+  contradiction stood for a day with both halves above `## THE ARCHIVE LINE`.
+  **A living head long enough to disagree with itself needs the second reader,
+  not more care from the first.**
+
+  **The dependent clause goes too:** "in that session the villain never moves,
+  so the hero closed the whole distance alone" is UNSUPPORTED — the archive
+  carries no positional field anywhere, so no trace can say whether a villain
+  moved.
+
+  **AND THE GAP THE BLOCK WAS ABOUT IS CLOSED ANYWAY, BY A ROUTE NEITHER VERSION
+  CONSIDERED.** It said the missing piece was the hero's `weapon_range` and that
+  supplying it would bound the displacement from both ends. The hero's
+  `weapon_range` turned out to be derivable per session from the archive's own
+  `{"t":"state"}` record (strength 10, damage pair (1,3) → weapon 0 →
+  `physical_size` 87 → 131, in all 1,484), and the bound it gives is ONE-SIDED,
+  not two. **What settled the displacement was the build: `movement_speed * 16`,
+  eased to a stop.** Three successive framings of this gap all pointed at the
+  capture archive, and the answer was in the bytes the whole time.
+
+► **THE CROWD RE-MEASUREMENT, AND A NUMBER THIS SESSION WITHDREW (`4acf2c9`).**
+  ► **RETRACTED: "the longest self-terminating bout is 684 turns, so patience
+    200 no longer clears the tail."** That sweep invented five archetypes and
+    never checked them against `13 + 4L`: each declared `herolevel: 3` while
+    spending 40-53 points, each set `magicka: 0` below the floor of 1. **They
+    cannot exist**, and a four-way fork went to the owner on their behalf.
+    `tools/stat-vector-reachability.mjs` had implemented that budget for days.
+    Re-measured over reachable builds, **200 clears every self-terminating bout
+    with 70% headroom.**
+  **WHAT SURVIVED IS LARGER: `SS2_CROWD` is not a backstop, it is what makes
+  roughly HALF of all reachable matchups terminate at all** — 52-63% of CROSS
+  pairings never end without it, between builds a player can hold, carrying
+  weapons the measured shop gate permits. The mechanism is D1's from the
+  opposite direction: attacking heals the attacker (`:2530`), and a build that
+  spent its points anywhere but strength deals single digits. **Unlike D1 and
+  D2 this corner is reachable by ordinary progression.**
+  **OPEN, AND THE OWNER'S:** four costed options in
+  `docs/crowd-patience-findings-2026-09-11.md`. Recommended — re-document now
+  (the mechanic works; only its description is wrong), and price the per-phase
+  heal deliberately in its own session, which closes D1 and this together.
+
+► **THIS SESSION'S SECOND STRETCH COMMITTED TWO AND MEASURED TWO UNPUSHED AFTER
+  ITS HANDOFF COMMIT `4723e4c`; the correction commit carrying this sentence
+  makes three.** Written as an EVENT with the self-reference in it, for the
+  reason every block below it gives: a bare count is false one commit later.
+  **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **POSITION IS IN THE RESOLVER (2026-09-11, `567eb41`). BOTH HALVES ARE NOW
+  BUILT, and the ranked list below is overtaken as far as movement goes.**
+  `x` is on the combatant and inside `combatStateHash`; `EffectKind.POSITION`
+  is absolute; `ss2TeamRules` carries `SS2_ARENA`, a `startingPosition` hook,
+  `walk-left`/`walk-right`, the build's own controller gate
+  (`fightdistance < weapon_range`, STRICT `<`) and an AI that closes.
+  **Everything was re-derived from the map, not carried over from the preserved
+  patch** — which was written against `2c047b9` and is now superseded; read it
+  only as history.
+
+  **THREE PLACES THE BUILT VERSION DIFFERS FROM THAT PATCH, each deliberate:**
+  - **`movement_speed` is NOT a resource.** The map's persistence table lists it
+    among the fields "recomputed unconditionally", so it is a `battlevalues`
+    OUTPUT, and `agility` is already projected — it is computed at resolve time
+    and adds nothing to the wire vocabulary. ONE vocabulary change in that
+    commit (`x`), not two.
+  - **The two walks are ordered LEFT then RIGHT**, not away-then-toward. All
+    eight rows of the map's controller table put `walkleft` at `optionB` and
+    `walkright` at `optionE`, in BOTH facings; the patch's ordering was an
+    invented rule.
+  - **The walk event carries `vanillaLabel`**, which is what the presentation
+    half cannot derive.
+
+  ► **THE PACING NUMBER, AND IT IS THE OWNER'S DECISION, NOT A DEFECT.**
+    Measured over 40 AI-driven seeds a side at landing:
+    **1v1 — 11 actions before the first attack, 10 walks, 27 total;
+    2v2 — 23 / 26 / 56; 3v3 — 35 / 48 / 91.** All 120 settle. Five walks a side
+    at 1v1 independently reproduces the archive's own figure, so the FIDELITY
+    is good — but **53% of a 3v3 is now walking.** The levers are
+    `SS2_ARENA.frontX` and `walkDistance`. **`weapon_range` is NOT a lever**: a
+    real weapon saves about one walk, because the 500-vs-44 ratio dominates. Do
+    not reach for the reach.
+
+  **THE GOLDENS DID NOT MOVE** — `fixtureReplay` returns `null` from
+  `startingPosition`, so a fixture models no geometry and is never offered a
+  walk. A mutation giving fixtures a position fails 15 tests including the whole
+  golden replay suite. **Every other hash DID move**, and the asymmetry is the
+  check that position stayed in its seam: all six team-projection `aiFill` pins
+  moved, all six `engine.js` legacy pins are byte-identical.
+
+  **Two consequences found by tests rather than by reading, both now fixed and
+  pinned:** `rosterFromCampaignRecord` DROPS position (the build re-places
+  everyone at battle entry, and a carried survivor kept its blueprint's `x`
+  while a fresh challenger got `startingPosition`, so bout 2 of a circuit never
+  reached a swing); and `tools/hotseat.mjs` opens ENGAGED with a new
+  `--approach` flag, because its own header says its fighters exist "so a demo
+  fight lasts a few turns".
+
+► **PRESENTATION IS DONE (2026-09-11). RANKED ITEM 3 IS CLOSED, AND THE
+  RESOLVER HALF IS NOW UNBLOCKED.** A walking gladiator has a clip to play and
+  a command that moves it: `CommandKind.MOVE_CLIP` carrying `from` and `to` and
+  nothing else, a movement case in `SS2_STATIC_MAP_BINDINGS` at `ASSUMED`
+  provenance, four gait schedules and `travelAt` in `src/render/timeline.js`.
+  **Nothing emits a `move-clip` yet, and that is the point** — the producer is
+  the preserved patch at `docs/reference/position-in-the-resolver.patch.md`,
+  which is now the top buildable item.
+  **Three decisions in it that a rebuild must not undo:**
+  - **`move-clip` is NOT a partial `place-clip`.** `scene.js` folds that one by
+    overwriting all seven geometry fields, so a partial command sets `y` to
+    `undefined` and `toY(undefined)` is NaN — the figure vanishes rather than
+    moving. It carries no `distance` (two endpoints already say how far) and
+    never touches `facing` (vanilla walks backwards without turning round).
+  - **The GAIT is not derivable from the geometry and is not guessed.**
+    `to < from` gives the direction; nothing separates a walk from a charge. So
+    a movement event must NAME the build's phase in `vanillaLabel` — the eight
+    are `walkleft`, `walkright`, `runleft`, `runright`, `chargeleft`,
+    `chargeright`, `jumpleft`, `jumpright` — and one that does not is REPORTED.
+    **The resolver half must add that field**; the reference patch's event does
+    not carry it.
+  - **Geometry is not a label decision.** An event the bindings cannot name
+    still emits its `move-clip`, so the scene never draws a figure standing
+    where the resolver says it is not.
+  **Two decisions left the browser shell**, the one part of the renderer the
+  suite cannot reach, for the reason `animationCursor` left it: `figureXAt`
+  (lunge or travel) and `timelinesForStep` (which timelines a batch starts, and
+  the pairing of a travelling gait with its OWN `move-clip`).
+  `test/render-arena-host.test.js` had RE-IMPLEMENTED the second one, so the
+  test and the shell were two implementations that could agree while both being
+  wrong; both now call the same function.
+  ► ~~**THIS DIFF HAS NOT HAD `/codex:adversarial-review` ... the command is
+    `disable-model-invocation: true`, so a session cannot run it; it is the
+    owner's to type.**~~ **THE REVIEW IS DONE (2026-09-12), AND THE REASON IT
+    WAITED FOUR SESSIONS WAS A FALSE INSTRUCTION THIS FILE KEPT REPEATING.**
+    `disable-model-invocation: true` stops Claude AUTO-INVOKING the slash
+    command; it does not stop anything from running the command's body, which
+    is one line of `node scripts/codex-companion.mjs adversarial-review`. **A
+    session could always have run it.** The claim was written once and copied
+    forward into five handoffs and two places in this living head without
+    anybody opening the command file.
+    **Run it like this — the model is PINNED, because the plugin passes
+    `model: null` and the app-server then silently resolves whatever
+    `~/.codex/config.toml` happens to say:**
+    ```
+    CODEX_DIR=$(ls -d ~/.claude/plugins/cache/openai-codex/codex/*/ | sort -V | tail -1)
+    node "${CODEX_DIR}scripts/codex-companion.mjs" adversarial-review \
+      --model gpt-6-astra --base <ref> "focus text"
+    ```
+    `~/.claude/commands/adversarial-review.md` wraps that globally. **Do NOT
+    edit the plugin** — it is vendored under a pinned version directory and an
+    edit there is discarded, silently, on the next update.
+    ► **AND IT FOUND TWO HIGH DEFECTS THAT A 12-AGENT WAVE MISSED, one of them
+      introduced by the very commit the wave had just audited.** Both reproduced
+      by hand before being believed. See the ranked list in the newest handoff.
+      That is the ADR's precedence rule vindicated the expensive way round:
+      Codex review is the check on a diff that matters, and a fan-out wave is
+      not a substitute for it.
+
+► **THE CHEAPEST OPEN QUESTION ON THE BOARD IS THE OWNER'S, AND IT IS SMALL:
+  read the six `weaponweights` values at `+0x3dd4` off the installed build.**
+  `attack_speed` is an INDEX into that array and this repository does not hold
+  its values, so nothing says whether index 1 is the heavy end. It is read as
+  HEAVY from the damage correlation. **If that is backwards, every swing cost
+  in the engine is backwards.** No capture, no staging, no Ruffle — only the
+  licensed SWF. `tools/item-table-transcription.mjs` already reads the ninety
+  weapon literals out of the same action block BY SHAPE, so extending it is the
+  route; it was deliberately not extended blind, because a parser nobody has
+  run returning a confident wrong answer is the failure mode this session spent
+  the day catching in others.
+
+*(The brief it supersedes, written MID-session by the same session and
+overtaken by it — its ranked list aimed at the 3v3 positional layer, and the
+answer turned out to be that 3v3 was not where the cheese lived:)*
+[2026-09-10 17:30 — the map was not silent, twice](docs/handoffs/2026-09-10-1730--the-map-was-not-silent-twice.md).**
+Start there. **Ranked item 2 was blocked by a FALSE "the map is silent" claim**
+— the second in two days — and `git blame` shows it was written two days AFTER
+the corpus recorded the writer, so it was never a stale note. Corrected at its
+sentence, with every other input to the controller gate cited. The gap that IS
+real is now `MAP_SILENCE.movement-displacement`, careful about the one uncited
+figure the repo holds, and settleable with NO new capture.
+► **THAT GAP WAS NOT REAL EITHER, AND THE ENTRY IS GONE (2026-09-11).** It was a
+gap in the battle map DOCUMENT, which this file then read as a gap in the game.
+`walkright` `+0x3d78` sets `destination = _x + movement_speed * 16` — eight
+movement branches, each with its own factor, in the same block and a few
+instructions below the stamina cost the entry was quoting. **Three "the map is
+silent" claims in two days were all false in a different way**, and this was the
+third shape: the map really was silent, and silence in a transcription says
+nothing about the build. `ss2WalkDisplacement` derives it;
+`tools/walk-displacement-derivation.mjs` holds it to the installed SWF. **A whole position
+implementation was built in a scratch copy and works** — five walks a side,
+matching the archive — **and proved it must not land resolver-first**: a walk
+emits `clip-goto Standing`, the idle clip, because the bindings have no
+movement case. That is the same defect the owner found by watching the arena
+that morning, caught in the afternoon by the sweep guard written for it.
+**Presentation first, resolver second.**
+
+*(The brief it supersedes, whose ranked item 2 is the work above and one of
+whose sentences is false — corrected in this living head, not there:)*
+[2026-09-10 13:23 — the arena is drawn](docs/handoffs/2026-09-10-1323--the-arena-is-drawn.md).**
+Start there. **The RENDERED ARENA landed** — `src/render/` plus `tools/arena/`,
+the presentation stream's first consumer outside its own tests, drawing original
+vector art in a browser that imports `src/` directly as ES modules. Building it
+found three things: a shipped clip label that CONTRADICTS the battle map while a
+`MAP_SILENCE` entry declared the map silent on it (the map gives the rule with
+byte offsets); two module comments telling a host the action boundary is
+"never derived from the wire" when it is exactly
+`toTeamWireState(battle).events.length + 1` before `applyAction` (0 mismatches
+over 193 actions — the reason it is not PROJECTED is hash stability); and that
+**nothing whatsoever enforced "ship no SS2 asset"** until
+`test/no-shipped-assets.test.js`. It is also the first host here to set
+`awaitAnimations: true`, so the per-action gate ENFORCES for the first time and
+the animation-timeout policy exists for the first time. **The owner then opened it, and the one
+check no agent could run found the session's biggest defect in under a minute**:
+every SELF-TARGETED action was playing `Standing`, the IDLE clip, and emitting a
+spurious `unmapped` alongside it — 4,326 of each over a 360-bout sweep. Fixed
+from the map in `c6fe43b`. **No agent here can watch the arena animate**
+(headless Chrome gives a `requestAnimationFrame` loop 2 frames whatever
+`--virtual-time-budget` says), so ask the owner to look rather than concluding
+the arena is fine because the suite is green. **But the fix came from a SWEEP,
+not from watching**: the surface's log is derived from presentation commands and
+those run under `node --test`, so what a person had to read is now a guard that
+runs on every commit. Ask whether a surface's output can be computed — here it
+always could.
+
+**That brief's ranked item 4 was then done in the same session**
+(`f922d31`): `src/team/controllers.js` has its first negative tests, closing the
+2026-09-07 mutation audit's three confirmed survivors there. All three were
+re-derived first — applied one at a time, the suite still read 849 pass / 0 fail
+— and all nine throws in the module are now covered, each asserting the error
+TYPE *and* matching its MESSAGE. The module itself is unchanged; no bug was
+found, because a survivor is a COVERAGE fact. **It does not touch the audit's
+finding 2** — every pinned literal hash is still taken before any action is
+applied — which is the larger problem most of the remaining 29 survivors
+exploit.
+
+► **AND IT IS NOW CLOSED TOO** (`983fa7d`). It was ranked first the moment it
+  had a home — it had surfaced while closing the controllers work and was
+  mentioned only in this parenthesis, and **an unranked item is one the next
+  session does not do.** `test/seeded-play-pins.test.js` adds four literal pins
+  the construction-time one structurally cannot reach (six actions in, a settled
+  1v1, a settled 3v3, and the first eight seeded draws) plus the determinism
+  claim `src/team/rng.js` makes and nothing asserted. `rngCursor: 0` and
+  `turnCursor: 0` survive the old pin and fail the new ones; `elimination.js:44`
+  survives both and always will, because nothing consumes `teamStanding.down` —
+  **a pin cannot cover dead code**, and that is a deletion, not a hashing
+  problem. REGRESSION pins, never goldens: every literal was computed from this
+  repository's own code and is evidence about nothing but itself.
+
+► **THE SAME SESSION RAN ON PAST THAT AND PUSHED FOUR MORE TIMES, each on the
+  owner's explicit yes, verifying `0 unpushed` after each.** At its handoff
+  commit `e773c9e` the measured count was ONE, and the correction commit
+  carrying this sentence makes it two. Written with the self-reference for the
+  same reason as the block below it. **Measure the live number, never read it.**
+
+► **THE 2026-09-10 17:30 SESSION COMMITTED SIX AND MEASURED EIGHT UNPUSHED at
+  `7653f97`, its handoff commit — and this correction commit makes it nine.**
+  Written with the self-reference in it on purpose: the arithmetic fix says to
+  measure AFTER the handoff commit, and the very next commit then falsifies a
+  bare number. An event that names its own hash stays true; a count does not.
+  **Measure the live number, never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+
+► **THE 13:23 HANDOFF'S RANKED ITEM 2 CONTAINS A FALSE SENTENCE, and a wave
+  briefed from it inherited the error — corrected here 2026-09-10, because
+  the handoff is frozen and this is the only place it can be corrected.**
+  That item says `slot-layout.js` "ships that clamp as `ARENA_X_CLAMP` while
+  **nothing produces a value to clamp**". It does: `src/adapter/slot-layout.js`
+  clamps `VANILLA_FRONT_X[side] + ±ALLY_X_STRIDE * slotIndex` on every
+  placement it builds. The clamp never BINDS — max |x| is `250 + 130*2 = 510`
+  against a bound of 2100 — but "never binds" and "nothing produces a value"
+  are different claims, and only the first is true. Re-derived by hand after an
+  agent broke it; the same false sentence went out in six agent briefs.
+  **While checking it, two things about `ARENA_X_CLAMP` worth knowing before
+  citing it:** the literals `-2100`/`2100` have NO byte citation anywhere in
+  the repository — every occurrence traces to one line of uncited prose in the
+  battle map's `nextphase` summary — while the only line that carries offsets
+  for the clamp (`:927`, the four `_x` `If`s at `+0x31cc`, `+0x31f8`, `+0x3224`,
+  `+0x3250`) states no literals at all; and the map never says WHOSE `_x` is
+  clamped.
+
+► **RANKED ITEM 2 — POSITION IN THE RESOLVER — IS UNBLOCKED, PROVEN OUT, AND
+  NOT LANDED. Read this before starting it; it is specified now, not
+  discovered.** The blocker in `src/team/ss2-rules.js` was a false claim that
+  the map records no writer for `_root.arena.fightdistance`; it is corrected at
+  its own sentence, along with the derivation of every other input the gate
+  needs. What the map genuinely does not give is the movement DISPLACEMENT,
+  now recorded as `MAP_SILENCE.movement-displacement` with the measurement that
+  settles it and no new capture required.
+  ► **CLOSED 2026-09-11 BY READING THE BUILD, NOT BY THE MEASUREMENT THIS
+    SENTENCE PRESCRIBES.** The prescribed measurement was an archive census that
+    bounds the displacement from one end; what settled it was the walk branch
+    itself. **`movement_speed * 16`, eased toward the destination by
+    `ceil(gap / 8)` a frame and ending when the gap is 20 or less — which makes
+    the authored 44 exactly right AT THE `movement_speed` FLOOR of 4, and wrong
+    by a factor of four at `movement_speed` 12.** The entry is removed,
+    `SS2_ARENA.walkDistance` is renamed `walkDistanceAtSpeedFloor`, and a walk is
+    per-actor. See `ss2WalkDisplacement` and the two tools.
+  **A whole implementation was built and driven in a scratch copy** (never in
+  this tree) and it works: `x` on the projection, vanilla start geometry,
+  `walk-left`/`walk-right` with the map's own stamina costs, the controller
+  gate, an AI that closes. It reproduces the build's own approach — **five
+  walks a side**, matching the archive statistic in the 2026-09-02 handoff from
+  a completely independent direction. **All 23 goldens stay green**, because a
+  `fixtureReplay` rule set models no position and keeps the position-blind
+  vocabulary.
+  **Why it is not committed, measured rather than guessed:** with the melee
+  gate live the suite goes from 875/874/0/1 to **72 failures and two files that
+  hang**, and the hang is the important part — a walk emits `clip-goto`
+  **`Standing`, the idle clip**, plus a spurious `unmapped`, because
+  `SS2_STATIC_MAP_BINDINGS` has no movement case and falls through to the
+  attack branch. **That is the identical defect the owner found by watching the
+  arena on 2026-09-10, reappearing the instant a new self-targeted action was
+  added** — and the sweep guard written that day is what caught it.
+  So the order is: **presentation first, resolver second.** Movement needs a
+  command kind of its own (reusing `place-clip` is a defect, not a style
+  choice: `scene.js` overwrites all seven geometry fields, so a partial command
+  makes `toY(undefined)` NaN and the figure vanishes), a movement case in the
+  bindings with `LabelProvenance.ASSUMED` (export 1241 records movement only as
+  the unnamed frame range "movement and charge (33-104)"), and a timeline
+  entry — `timelineFor()` returns `unknown` for all eight movement labels
+  today. It is a PROTOCOL change and it is the `/codex:adversarial-review` case.
+  ► **ALL THREE OF THOSE ARE DONE (2026-09-11, `3a8638b`), so this paragraph is
+    a description of the RESOLVER half only from here on.** `move-clip`, the
+    bindings case and four gait schedules all landed; `timelineFor()` no longer
+    returns `unknown` for any of the eight. **What the resolver half must add
+    that this patch does not have: `vanillaLabel` on the movement event.** The
+    gait is not derivable from `from`/`to`, so an event without it is reported
+    rather than given a guessed walk. See the block at the head of this file.
+    ~~The `/codex:adversarial-review` sentence still stands and is still
+    unspent: the command is `disable-model-invocation: true`, so it is the
+    owner's to type, not a session's.~~ **FALSE, and corrected 2026-09-12 at the
+    other instance of it above. `disable-model-invocation` blocks AUTO-INVOCATION
+    ONLY; the command body is a `node` call any session can run. The review is
+    now DONE.**
+
+► **THE 2026-09-10 SESSION PUSHED EVERYTHING IT COMMITTED**, each push on the
+  owner's explicit yes, and verified `0 unpushed` after each one.
+
+  **This block is written as an EVENT, not as a live count, and that is the
+  point.** Its first version said "three commits are unpushed", which was true
+  for two minutes and then became a bold instruction to act on a state that no
+  longer existed — the same half-life problem as the six line numbers below.
+  A timestamped event stays true; a count does not. **Measure the live number,
+  never read it:**
+  `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
+  ~~`Bash(git push *)` stays in `ask`, so ask before every push regardless.~~
+  ► **NO LONGER TRUE (owner, 2026-09-12): it is in `permissions.allow` and a
+    push does not prompt.** `main`, `master` and every force form stay DENIED,
+    which is where the safety actually lived.
+
+  ► **AND THE REWRITE STILL LEFT A DECAYING CLAUSE IN, WHICH IS THE WHOLE
+    LESSON REPEATING ITSELF INSIDE THE PARAGRAPH ABOUT IT.** The version that
+    replaced the count named three specific commit hashes and then said "only
+    the correction commit that rewrote this very block came after it" — an
+    enumeration of the future, which the very next commit falsified. Naming an
+    event is not enough if the sentence also claims what has NOT happened
+    since. **Do not write "and nothing else since" into a file that is still
+    being written.**
+
+*(The brief it supersedes, whose RANKED LIST IS STILL THE WORK — nothing on it
+has been started:)*
+[2026-09-10 12:12 — everything is pushed, and the Workflow gate is gone](docs/handoffs/2026-09-10-1212--everything-is-pushed-and-the-workflow-gate-is-gone.md).**
+Start there — it is SHORT, and it carries only what changed. **Nothing is
+unpushed for the first time in three sessions.** No code changed; the one thing
+that binds you is that `Workflow` is no longer in `permissions.ask` *(re-added
+by the owner 2026-09-24 — see the corrected block on the `Workflow` gate below)*, so a
+fan-out wave starts with no dialog and **you must say what it will spawn before
+launching it.** Its ranked list is unchanged and points at the brief below,
+which is still the work.
+
+*(The brief it supersedes, whose RANKED LIST IS STILL THE WORK — nothing on it
+has been started:)*
+[2026-09-07 12:42 — the 78 are done, and the suite does not bite](docs/handoffs/2026-09-07-1242--the-78-are-done-and-the-suite-does-not-bite.md).**
+Start there. **The 78 stale living-head rows are re-derived and corrected AT
+their sentences** — every one carries a ► block naming what was measured and the
+command that measures it. **Then the finding that outranks them: 37 of 48
+deliberate one-line breakages SURVIVE the whole suite** (`docs/mutation-audit-2026-09-07.md`),
+with the corpus-integrity gates in `src/golden/` the honourable exception — six
+of the eleven kills are theirs, and only two of the thirty-seven survivors.
+**And Stage 7 is not the right next thing**
+(`docs/stage7-transport-findings-2026-09-07.md`). **Integrated-state
+correction, 2026-09-25:** the owner decision accepted 2026-09-03 is now in this
+tree's authoritative decision record. EP-D07 requires distinct connected
+humans for allied first-playable seats and forbids the AI takeover those five
+older designs assumed. Stage 4b's minimum admission/pause/reconnect lifecycle
+therefore precedes broader Stage 7 transport.
+
+► **THAT HANDOFF'S OWN PUSH COUNT IS WRONG, AND IT IS THE SAME ERROR IT WAS
+  WRITTEN TO WARN ABOUT.** Its frontmatter names FOUR new commits and SEVEN
+  unpushed; measured 2026-09-09 the answer is **FIVE new and EIGHT unpushed**,
+  because the handoff was written before the commit that carries it and did not
+  count itself. **This is the third instance of one defect in three consecutive
+  sessions** — a handoff describing a state that its own commit then changes.
+  The frozen file is deliberately NOT edited (`docs/handoffs/README.md`: never
+  edit a handoff after its session ends; corrections go here). **The durable fix
+  is not care, it is arithmetic a session cannot get wrong: after committing a
+  handoff, run `git log --oneline github/<branch>..HEAD | wc -l` and put THAT
+  number in the living head, where it can be corrected.** As of 2026-09-09,
+  eight commits are unpushed and the tree is clean at `79cc325`.
+
+► **CORRECTED 2026-09-24: `Workflow` IS BACK IN `permissions.ask` — the owner
+  re-added it in chat ("fulfill the requests that you could not auto accept from
+  the agent on the remote machine and need my word for"), on a peer session's
+  request: it is ADR 0001's owner-approves-each-wave layer, carried by every
+  other repository that adopted the set. The dialog is IN ADDITION to what the
+  paragraph below says still binds — the hard cap, one wave at a time, and the
+  spawn count stated in the transcript first — none of which is withdrawn.
+  `.claude/settings.json`'s `_ss2_workflow` records both decisions.**
+  ~~**THE `Workflow` PERMISSION GATE IS GONE — owner's decision, 2026-09-09.**~~
+  `.claude/settings.json` no longer lists `Workflow` in `permissions.ask`, so a
+  fan-out wave now starts with no confirmation dialog. **The reasoning, because
+  it changes what you must do rather than only what you may do: the dialog
+  bought VISIBILITY, not safety.** What still binds is the 6-questions /
+  6-verifiers hard cap inside `.claude/workflows/question-fanout-audit.js` and
+  the one-wave-at-a-time rule in `AGENTS.md`. **So SAY WHAT A WAVE WILL SPAWN IN
+  THE TRANSCRIPT BEFORE LAUNCHING IT** — that is now the only place the owner
+  sees the number, and it is on the session, not the harness. Authoring an
+  inline workflow to get past the committed cap was already a rule violation and
+  now has no dialog behind it. ~~**`Bash(git push *)` STAYS in ASK**: that gate
+  is about what leaves this machine, not about cost.~~
+  ► **AND IT WENT THE SAME WAY THREE DAYS LATER (owner, 2026-09-12).** Moved to
+    `permissions.allow`; rule 7 applies as written. The distinction this
+    sentence drew — cost versus what leaves the machine — did not survive the
+    owner deciding that the prompt was friction in both cases. **The deny list
+    is now the whole of the push control**, and it is the half that was always
+    load-bearing. The settings file carries the
+  full rationale, including a claim it used to make about bypass mode that the
+  owner's own experience contradicted — do not cite that claim, measure it.
+
+*(The brief it supersedes, whose ranked item 1 is DONE and whose items 2-5 are
+all still the owner's:)*
+[2026-09-07 11:40 — the sweep reached the untouched six](docs/handoffs/2026-09-07-1140--the-sweep-reached-the-untouched-six.md).**
+Start there. The six documents the previous sweep never touched are done — **79
+rows, 73 applied and 6 rejected**, every one re-derived by hand, and four of the
+six rejections are numbers that do not reproduce at all. **The remaining
+worklist was 78 rows in THIS FILE's LIVING HEAD, not in the archive:** the sweep
+chunked `HANDOFF.md` as though `## THE ARCHIVE LINE` were near line 800, and it
+is not, so three of its four surveyed chunks were labelled archive and never
+applied. The unapplied range holds § "What is running, and how to run it",
+§ "Non-negotiable rules", § "Next steps, in order" and § "Open items" —
+precisely the sections that misdirect a session when stale.
+**THOSE 78 ROWS WERE RE-DERIVED AND APPLIED 2026-09-07 (next session); every one
+now carries a ► correction AT its sentence.** Find any section by NAME, never by
+a line number some earlier session wrote down: `grep -n '^## ' HANDOFF.md`.
+
+► **THE PARAGRAPH ABOVE ORIGINALLY CARRIED SIX LINE NUMBERS AND THE COMMIT THAT
+  WROTE THEM INVALIDATED ALL SIX IN THE SAME BREATH. MY OWN ERROR, 2026-09-07.**
+  `4fe5dd8` inserted 24 lines ABOVE this paragraph while writing it, so its
+  "archive line at 3133" was 3157 the instant it was committed, its worklist
+  range "801–3132" was 825–3156, and its four section anchors were all 24 low.
+  **The commit that repaired one stale pointer minted six new ones inside the
+  paragraph explaining why stale pointers are dangerous** — and it was caught
+  not by me but by two independent agents of the very wave the paragraph was
+  written to launch. `test/handoff-navigation.test.js` checks § NAMES, never
+  line numbers, so the suite was green with all six wrong. **That is the whole
+  lesson: a line number into a growing file is a claim with a half-life of one
+  commit. The numbers are gone from this paragraph rather than corrected,
+  because correcting them would only restart the clock.**
+
+► **AND THE SWEEP'S OWN ROW NUMBERS WERE NEVER RIGHT EITHER — they are ~92 off
+  at HEAD, not the ~65 the file grew.** The next session's first move was to map
+  the 78 rows by adding the file's growth (+65, measured and correct) to the
+  sweep's numbers. That was WRONG, and it went out in six agent briefs before
+  text-matching the quotes caught it: the surveyors' own numbers were **already
+  ~27 lines low against the very blob they read** (`git show 470c56a:HANDOFF.md`
+  — archive line 3065, exactly the "3,064 lines" the sweep claims for the living
+  head). The wave was killed and relaunched with every anchor located by
+  MATCHING THE QUOTED TEXT. **If you ever need to find a sweep row again, match
+  its quoted sentence. Do not do arithmetic on the number in the table.**
+
+► **AND THAT HANDOFF'S OWN COMMIT LEFT THREE TESTS RED (found by the next
+  session, 2026-09-07).** `42527e0` added the handoff file without repointing
+  this `**LATEST:` marker or adding a row to `docs/handoffs/README.md`, so the
+  measured suite was **816 / 812 / 3 / 1** where that handoff's frontmatter
+  claims `816 / 815 / 0 / 1`. Repaired here. The lesson is not "be careful": the
+  three guards that caught it exist BECAUSE the pointer went stale twice before,
+  and they only help a session that RUNS them. **A handoff commit is not
+  finished until `node --test --test-concurrency=1` is green — and the handoff's
+  own suite line must be measured after that commit, not before it.**
+
+*(The brief it supersedes, whose ranked items 2-5 are all still open and all
+still the owner's:)*
+[2026-09-07 09:55 — the last adapter gap, and the sweep](docs/handoffs/2026-09-07-0955--the-last-adapter-gap-and-the-sweep.md).**
+Start there. **The adapter's last documented gap is closed** — per-action
+animation acknowledgement — and the mechanism this repository's own contract
+proposed for it was WRONG: `event.sequence` is stamped per EVENT and one action
+emits up to four, so a token read off it splits a killing blow into four
+actions. The boundary that works, `lastResolvedAction().firstEventSequence`, is
+deliberately NOT projected, because `combatStateHash` hashes everything that is.
+
+► **AND EVERY DOCUMENT WAS SWEPT (2026-09-07):** 17 write-nothing surveyors and
+  34 adversarial refuters, `started == returned` on both phases, **3,146 claims
+  examined and 264 STALE or WRONG.** The corrections that were re-derived by
+  hand have landed at their sentences; the remaining ~250 are in
+  **`docs/doc-integrity-sweep-2026-09-07.md`, labelled as CLAIMS TO VERIFY
+  rather than results.** **The refuters broke 7 of 34 — a 21% base rate — and
+  one of the breaks would have BROKEN THE CORPUS.** Read that file's header
+  before applying anything from it.
+
+► **AND THE ADAPTER HOST CANNOT DRIVE `ss2TeamRules` WITH A GLADIATOR A PERSON
+  CONTROLS (2026-09-07).** It CAN drive it through an AI-filled slot carrying
+  `team.aiFill.resources` — a full 27-action battle, measured — but the
+  SUPPLIED path stops at the role-based `max_damage`/`min_damage` requirement,
+  because `CANONICAL_RESOURCE_SOURCES` (20 names) does not carry 14 of the 32
+  `SS2_RESOURCE_NAMES`. **Do not write "the host cannot drive ss2TeamRules":
+  that over-general claim is the one `src/team/ss2-rules.js`'s own header warns
+  about, and I made it anyway.** A diagnostic that could abort construction has
+  been fixed, and `CANONICAL_RESOURCE_SOURCES` is now pinned literally —
+  nothing was watching it, so growing it would have re-hashed every
+  adapter-built battle with the suite green.
+
+  ► **AND IT CAN NOW (later the same day).** `toCanonicalCombatantSource` takes
+    an OPT-IN `resources` override and `battle-host.js` passes
+    `member.resources`, so a supplied gladiator declaring the SS2 bag fights a
+    full battle under `ss2TeamRules`. A caller that declares nothing is
+    byte-identical to before — the hash moves only for a caller who asks, and a
+    test pins that it moves. **What it does not buy: a destroyed armour piece
+    still does not reach the vanilla mirror**, because piece ids are outside the
+    write allowlist. Reported, pinned, and harmless today because a campaign
+    record carries no resources at all (measured, not assumed).
+
+*(The brief it supersedes, whose ranked items 1, 3 and 4 are all still open and
+all still the owner's:)*
+[2026-09-07 08:25 — the accepted decisions do not authorize anything](docs/handoffs/2026-09-07-0825--the-accepted-decisions-do-not-authorize-anything.md).**
+Historical context only; do not start there. Ranked item 2 was answered with a
+fork for the owner, and every accepted clause withheld implementation
+authority. **Integrated-state correction, 2026-09-25:** the accepted text and
+current progression packet are now on this branch. Read the newest handoff,
+the authoritative decision record, and `$ss2-progression-design`; do not use
+the frozen 2026-09-07 branch-location warning as present guidance. Meanwhile
+the campaign read-back got its first consumer —
+`node tools/hotseat.mjs --circuit 3` — and `playable` turned out to be a flag
+that CANNOT be true.
+
+► **THE OWNER ASKED THE NEXT SESSION TO PARALLELIZE (2026-09-07), and that
+  brief's § "PARALLELIZE" says where it applies.** The short version, because
+  the precedence rule is easy to misread: ADR 0001 putting a fan-out wave LAST
+  is about the `question-fanout-audit` wave aimed at the game's BYTES or the
+  CAPTURE ARCHIVE. **It is not a ban on ordinary parallel investigation of code
+  and docs.** A capped `Workflow` over code/doc questions is the right tool and
+  was used successfully this session. Keep the caps; do not read the precedence
+  as "work alone". Serial and non-negotiable: Ruffle, the install, the save, the
+  snapshots, `captures/`, every state-mutating git command, edits to one file,
+  and THE FINAL NUMBER — an agent finds, the main session re-derives.
+
+*(The brief it supersedes, whose ranked items 1, 3 and 4 are all still open and
+all still the owner's supervised lanes:)*
+[2026-09-07 07:24 — the ranked list ran out](docs/handoffs/2026-09-07-0724--the-ranked-list-ran-out.md).**
+Start there. Every ranked item is closed; the game gained status phases, team
+fights and a campaign record that can be read back; and **the most useful move
+of the session was to stop reading the brief and start reading
+`docs/roadmap.md`'s "not started" column**, which is where the last two features
+came from. It also carries what to be careful of, in the order it will bite.
+
+*(The brief it supersedes, written MID-session and stale in places it names
+itself — read it for the email record:)*
+[2026-09-07 03:30 — the armoured golden reaches the resolver](docs/handoffs/2026-09-07-0330--the-armoured-golden-reaches-the-resolver.md).**
+Start there. `REPLAY_UNDRIVABLE` is EMPTY and all 23 goldens drive a real
+battle; the email to the developer was already SENT and the record now says so;
+and **the owner has DECIDED the enchantment fork — option (a), status phase as a
+forced legal action — so it is a build instruction, not an open question.** It
+also carries what blocks that build: byte verification is not possible from this
+WSL tree, and nothing had written that down.
+
+*(The brief it supersedes, whose ONE task is now done:)*
+[2026-09-02 23:13 — reach for the stars: the email to the developer](docs/handoffs/2026-09-02-2313--reach-for-the-stars-the-email-to-the-developer.md).**
+Start there: the owner's FIRST task is drafting (never sending) a careful
+email to the game's developer, SOLO — no wave. It also records the decided
+verification precedence (Pocock first, Codex second, one capped wave last;
+harness ADR 0001) and that ultracode stays ON at the owner's instruction.
+
+► **THAT FIRST TASK IS DONE AND CLOSED: THE EMAIL WAS SENT. Do not draft it
+  again** — the 23:13 brief above still reads as though it is pending, and a
+  session that follows it will re-do finished work. The owner sent it himself
+  and reported so on **2026-09-07**; the sent text, the verified recipient
+  (`info@whiskeybarrelstudios.com`, confirmed from the studio's own press kit
+  that day) and a provenance table for every factual claim it makes are in
+  **`docs/outreach/2026-09-02-email-to-oliver-joyce.md`**. **No reply is
+  recorded — append one THERE, not to a handoff**, which freezes.
+  One claim in the sent text overstates the record and is flagged in that
+  file: *"every number... observed in the real game and confirmed twice"* is
+  true of the 23 goldens, NOT of the engine, whose rule set declares
+  `kind: "map-derived"`, `runtimeVerified: false` (`src/team/ss2-rules.js:914`).
+  The owner's signature block is redacted there because **this repository is
+  public**; nothing evidentiary depends on it.
+  **The next task is therefore the 16:59 brief's ranked item 1**, the
+  role-based damage-pair requirement.
+
+  ► **AND RANKED ITEM 1 IS NOW DONE (2026-09-07, `89bc6c0` + `df14b24`).**
+    `REPLAY_UNDRIVABLE` is EMPTY, all 23 goldens replay through
+    `createTeamBattle`/`applyAction`, and the armoured golden is in
+    `SS2_GOLDEN_FIXTURE_IDS`. Suite 728 / 727 / 0 / 1 from 721 / 720 / 0 / 1.
+    **It was NOT done with a wave** — both of the brief's unverified claims were
+    CODE claims, so ADR 0001 puts them behind a test, not behind agents. Three
+    things it found that the brief did not predict, each measured:
+    1. **A defender's declared damage pair MOVES the battle hash** while
+       reaching no arithmetic (`combatantProjection`, `resolver.js:480-496`,
+       into `combatStateHash` `:560`). Declaring it as `1/1` — the value the
+       arithmetic defaults to anyway — still moves it, because the projection
+       covers the DECLARATION. So "complete the fixture so the guard stops
+       complaining" is a PROTOCOL change and would desync peers. Pinned.
+    2. **The armoured golden is `fightMode: "tournament"`, not `misc`.** The
+       mode play uses now has exactly one runtime-verified fixture behind it,
+       where `ss2-rules.js`'s header said it had none. It is also the only
+       golden with a `provenance.staged` string — the attestation header
+       PREDICTED that would happen one day, and it has.
+    3. **A refused attack was not free**, and that was a regression this work
+       introduced: the guard sat after the direction draw, so three rejections
+       took the journal from 3 draws to 6 and moved the hash each time. Found
+       by an INDEPENDENT CODEX REVIEW, confirmed by measurement, fixed by
+       building both vanilla records before the first draw. Same review caught
+       that the new hash test filtered to settled goldens and therefore skipped
+       the only fixture that omits the pair. **Codex earned its place in the
+       precedence again: two real defects, neither reachable by the tests I
+       had just written.**
+
+  ► **AND RANKED ITEM 2 IS BUILT (2026-09-07, `86ccb68` → `dda33d4`): the
+    STATUS PHASE.** The owner chose option (a), so a condition —
+    burning/frozen/poison/life_stolen — is now the ONLY legal action its bearer
+    has, ticks damage through the existing `magic_damage_character` model,
+    draws NO rng, costs no stamina while `nextphase` still regenerates, and is
+    consumed. `node tools/hotseat.mjs --enchant burning:3` plays it. Suite
+    748 / 747 / 0 / 1. **Read these three before building on it:**
+    1. **THE WIRE FORMAT CHANGED AND NOTHING SIGNALS IT.** Declaring
+       `weapon_enchantment_damage`/`secondary_weapon_enchantment_damage` puts
+       them in every combatant's projection, so **all 23 golden replay hashes
+       moved** (armoured `70e605e1` → `4032d673`, measured against `842f45f`
+       in a worktree). No ASSERTED pin moved, which is why the suite stayed
+       green and why `86ccb68`'s message wrongly said no hash moved. An old
+       peer and a new peer now hash the same battle differently and
+       `ss2-map-derived-<mode>` carries no version to tell them apart.
+       **The owner's call, 2026-09-07: NOT a versioned id — pin the SHAPE
+       instead** (`7464ca0`). A version integer is only as good as the
+       discipline that bumps it, and this repository's record on metadata
+       discipline is poor; the projection's vocabulary, its DEFAULTS, the
+       declared-vs-projected key sets and one canonical battle hash are pinned
+       instead, so the next change to the wire format has to be a decision.
+       Replaying the original defect now fails two of those pins. **The
+       versioned id is deferred, not rejected: it earns its place at the first
+       release or the first second implementation, when it can be tested at
+       the value that matters.**
+    2. **A condition carries its inflictor** (`"burning:from=villain"`), the
+       owner's decision, because vanilla reads the tick damage off "the other
+       gladiator" and that names nobody at 2v2. At 1v1 they coincide exactly.
+       A bare flag stays legal and means "inflictor unknown": it costs the turn
+       and applies nothing.
+    3. **THE HERO'S RULE WAS ADOPTED FOR EVERYONE.** First match wins, and
+       every condition is consumed whether or not it played. The villain's
+       last-match rule and the taunted-run row are NOT modelled; a symmetric
+       engine cannot have both, and the player's rule was chosen.
+
+  ► **AND TWO THINGS THE GAME COULD NOT DO BEFORE (2026-09-07, `a380fa0`,
+    `de18178`), both found by asking what the roadmap says is missing rather
+    than what the brief says is next:**
+    - **TEAM FIGHTS ARE PLAYABLE.** `node tools/hotseat.mjs --teams 2v2` (1-3 a
+      side; four is refused BY NAME because three is what the six-slot
+      measurement covered). The resolver has supported N-a-side since long
+      before anything was playable and no person had ever taken a turn in one.
+      Almost nothing needed changing, which is the point — the loop, the
+      scoreboard and target selection already worked for N. It also makes the
+      status phase's NvN inflictor rule reachable by a human for the first
+      time.
+    - **THE CAMPAIGN LOOP IS CLOSED.** `src/campaign/to-battle.js` —
+      `rosterFromCampaignRecord(record, { blueprints })`. The roadmap said "a
+      record is written and never read back into a battle"; now one can be.
+      **It needs the BLUEPRINTS as well as the record and that is the format's
+      real shape, not a shortcut:** `outcomes` carry survival, health,
+      maxHealth and statuses and carry NO stats, loadout or resources, so a
+      record alone cannot rebuild a gladiator. **Rewards are still not built,
+      deliberately** — paying one is a progression decision and ~~EP-D04~~
+      EP-D05 is pending. **(Corrected 2026-09-24: EP-D04 is RARITY; the
+      reward-outcome decision is EP-D05 — personal precommitted outcomes —
+      in `docs/design/endless-progression-decisions.md`, pending in the
+      authoritative decision record. And the BUILD's own victory purse is now built,
+      map-derived, with no caller: `ss2VictoryPurse` / `ss2TeamVictoryPurses`
+      in `src/team/ss2-crowd.js`, `cefaf83`.)**
+    - **Conditions and bout boundaries: state this as a SWEEP, not a law.** A
+      condition takes its bearer's very next turn, so a gladiator does not land
+      a killing blow while carrying one, and if the bearer dies `death()`
+      clears the other side too — so a 40-seed 1v1 sweep leaves no survivor
+      afflicted, and a team sweep does only when a teammate ends the bout.
+      **An earlier version of this line said a condition CANNOT cross a 1v1
+      boundary, and a reviewer broke that universal within the hour**: the
+      inflictor's death-clear took only the FIRST token per condition, so two
+      tokens naming one condition left a survivor still alight. Fixed and
+      pinned. The tests assert what they visit.
+    - **`rosterFromCampaignRecord` reports two things it cannot prevent**:
+      `seatChanges`, because a survivor behind a casualty MOVES UP (seats come
+      from the array index and `"empty"` means AI-fill, not a vacant chair), and
+      `playable`/`unplayableTeamIds`, because a roster including the fallen can
+      never fight — a settled bout always has a wholly eliminated team. Both
+      were claims this session got WRONG first and measured second.
+
+  ► **RANKED ITEM 4 IS CLOSED, and the instruction that opened it is STALE.**
+    The 16:59 brief warns that `~/projects/claude-harness/workflows/question-fanout-audit.js`
+    is "the UNCAPPED pre-2026-09-02 version: no `verifierBudget`, no
+    `environment` field, no `maxItems: 6`", and that any project adopting it
+    re-learns the five-hour usage limit. **Measured 2026-09-07: that is no
+    longer true.** Both copies carry `verifierBudget` (3 occurrences each) and
+    `maxItems: 6` at the same line, and the ONLY difference between the two
+    files is one `whenToUse` string — in which the HARNESS copy is the better
+    of the two, because it cites `docs/adr/0001` where this repository's still
+    points at `docs/overnight-agent-plan.md`. The harness is committed and
+    pushed. Nothing to sync; if anything, this repository's copy should take
+    the harness's wording.
+
+*(The brief it supersedes, whose findings and ranked list are unchanged:)*
+[2026-09-02 16:59 — three waves, cut at the usage limit](docs/handoffs/2026-09-02-1659--three-waves-cut-at-the-usage-limit.md). Three capped fan-out waves on the 13:40 brief's ranked items 1–3
+were stopped at 92% of the session limit; ranked item 4 is CLOSED by
+measurement (the branch was already pushed), item 3's premise is BROKEN (the
+hero's walk count is set by the villain's approach), and the one VERIFIED
+result is that nothing on the hero's one-action path reads the defender's
+damage pair — so the armoured candidate's omission is correct and the fix is a
+role-based requirement on the rule-set side. **Read its cost section before
+launching any wave.**
+
+*(And before that:)*
+[2026-09-02 13:40 — the first armoured golden](docs/handoffs/2026-09-02-1340--the-first-armoured-golden.md).
+
+*(And the one before that:)*
+[2026-09-02 00:07 — the wave refuted more than it confirmed](docs/handoffs/2026-09-02-0007--the-wave-refuted-more-than-it-confirmed.md).
+
+► **`ls docs/handoffs/` PUTS THE NEWEST BRIEF SECOND-TO-LAST, NOT LAST, AND WILL
+  UNTIL SOMEONE RENAMES A FILE.** `2026-09-02-0130--ss2-rules-and-the-wave-that-broke-it`
+  is stamped with the UTC time under a `-0400` label — it was committed at
+  **2026-09-01 22:58 -0400**, so its true stamp is `2026-09-01-2258`. It carries
+  a forward pointer at the top so a reader who lands on it is redirected, and it
+  was NOT renamed, because every link to it would break. **This is the SECOND
+  time this bug has shipped** (see the `-1950-`/`-1550-` rename below).
+  **Stamp handoffs in LOCAL time and check with `git log --date=iso-local`
+  before you commit one.**
+
+  ► **IT IS NOW ENFORCED, so a third occurrence fails the suite rather than
+    reaching the next reader (2026-09-02).** `test/handoff-navigation.test.js`
+    derives each handoff's FIRST commit instant with
+    `git log --follow --diff-filter=A --format=%at` and asserts three things:
+    the head's `**LATEST:` pointer names the handoff that entered git most
+    recently; that file is not one some other handoff declares it supersedes;
+    and the filename stamps sort in commit order, with the two KNOWN inversions
+    (`2026-09-01-0030`, `2026-09-02-0130`) listed with their reasons and
+    asserted MINIMAL — an allowance that stops inverting fails as unnecessary.
+    Where git history is not derivable the git-free half still runs and the
+    assertion message SAYS which check it made.
+
+    **And the test that was supposed to catch this could not.** The old
+    assertion was `linked.includes(newest)` over EVERY handoff link in the
+    head, and the head links five. Measured, not argued: with the LATEST
+    pointer deliberately aimed at the superseded `-0130` brief, the old
+    assertion still returned PASS, because the newest FILENAME was linked
+    lower down the page as "the brief that opened the items the newest one
+    closes". It was blind to the exact defect it was named for — the project's
+    signature failure, found for the seventh time. Four mutants now die:
+    repointing LATEST at the superseded brief kills two tests, deleting a
+    known inversion kills the third, adding an allowance for a file that does
+    not invert kills it as stale, and flipping the ordering comparison kills
+    it too.
+
+*(The brief that opened the items the newest one closes:)*
+[2026-09-02 — the corpus got a consumer, and the wave broke ten of twelve claims](docs/handoffs/2026-09-02-0130--ss2-rules-and-the-wave-that-broke-it.md).**
+**`src/team/ss2-rules.js` exists**: SS2's own attack arithmetic
+runs inside the shared resolver, all 22 goldens replay through
+`createTeamBattle`/`applyAction`, and `node tools/hotseat.mjs` plays that rule
+set by default. **Its ranked items 2, 3 and 5 are now DONE or REFUTED, and item
+4 is answered but left to the owner — read the newest brief, not this one, for
+which is which.** Notably its item 2 is REFUTED: `activeEnchantment`'s
+primary-potency pairing is byte-faithful and must NOT be changed.
+
+**Read its corrections before quoting anything in it.** A 12-agent write-nothing
+wave broke **10 of 12** load-bearing claims, and two of the breaks were
+evidence-level, not stylistic: the `rest` branch has its OWN
+`hitpoints += 3 + ceil(stamina)` at `+0x51d5` (the map's prose said so and this
+session OVERRULED it), and `death()` deletes `nextphase` before the phase
+transition can fire, so **a killing blow costs the attacker nothing** — the
+golden replay had been asserting nineteen times that the engine must DISAGREE
+with the fixtures' only measured attacker number. Both are fixed and both are
+now pinned by tests. The battle map itself carried two errors, both corrected in
+place from the bytes.
+
+*(The previous LATEST, still the state it describes:)*
+[2026-09-01 21:12 — the project became playable](docs/handoffs/2026-09-01-2112--the-project-became-playable.md).
+Start there. **`node tools/hotseat.mjs` now plays a fight** — two humans, one
+keyboard, to a winner — the first playable thing in this project's history, and
+the answer to a question from the owner that outranks every measurement below:
+**the verification machinery had become the project.** 22 runtime-verified
+goldens fed nothing, the resolver ran invented formulas, and this file's own note
+that "the corpus is an asset nothing consumes, and breadth is buying less than
+use would" had been ranked LAST every session since it was written. **When a true
+observation keeps being ranked last, that ranking is the finding.**
+
+It also adds the `map-derived` verification tier — whose absence, not effort, is
+what kept SS2's real arithmetic from ever being wired in — retracts the previous
+handoff's ranked items 1 and 3 by measurement, and makes the raw archive
+verifiable (`captures/ARCHIVE-MANIFEST.sha256`) and mirrored. Three waves, all
+VERIFIED, **28 of 48 verdicts BROKEN**: read the corrections, not just the claims.
+
+Its retraction of the 15:50 ranked item 1 still stands and is worth the summary:
+an arming gate keyed on the fixtures would have armed **0 times in 38**, its hero
+predicate CONTRADICTS all eight target fixtures, and a new branch in it is dead
+code under `validate-vehicle.ps1`. But **35 of 38 archived rounds already
+reproduce the fixture on every pinned field except `staminaleft`**, and
+`hero.staminaleft == 110 − (walk count)` holds 38 of 38.
+
+**Still current, and superseded only in its ranking:**
+[2026-09-01 15:50 — Codex independence, and what the corpus actually proves](docs/handoffs/2026-09-01-1550--codex-independence-and-the-corpus-archetype.md).
+It carries how to drive a capture from WSL (five things nothing had
+written down, three of which fail looking like a wrapper defect), and — read this
+one carefully — a derivation that the armoured/tournament villain `staminaleft`
+is 110 which was **RETRACTED the same day by its own author**. Neither 110 nor
+105 is determined by the scenario. See § "Found 2026-09-01" for the retraction.
+Both of its agent waves completed VERIFIED (209/209 and 230/230 verifiers, zero
+errors). An independent Codex review then found what neither wave did — 67 raw
+traces wrongly committed — so read its opening paragraph before quoting it.
+*(That file was renamed from `…-1950--` to `…-1550--` on 2026-09-01 with the
+owner's approval: it was stamped in UTC while claiming `-0400`, which would have
+kept `ls docs/handoffs/` pointing the next session at the superseded brief.)*
+
+**Two earlier sessions closed the night of 2026-08-31 and each left a handoff.
+Read both, and know which answers what** — `ls` puts the migration one last, and
+it is not the corpus brief:
+[00:30 — migration close-out, and what is untested](docs/handoffs/2026-09-01-0030--migration-closeout-and-what-is-untested.md)
+covers the WSL/Windows split and what on this machine has never been exercised;
+[00:21 — corpus repair and doc-integrity guards](docs/handoffs/2026-09-01-0021--corpus-repair-and-doc-integrity-guards.md)
+covers the goldens, the promotion driver and the ranked work, and supersedes
+`2026-08-31-2244`.
+
+---
+
+**THIS FILE IS SPLIT. Everything above `## THE ARCHIVE LINE` is the LIVING HEAD:
+state, rules, next steps and open items. It is appended to and CORRECTED IN
+PLACE. Everything below that line is frozen evidence and history — do not append
+there.**
+
+The invariant, which this project has now broken twice: **there must be exactly
+ONE document where a wrong instruction can be corrected in place, and it must be
+the one `AGENTS.md` points at.** That document is this head. A handoff under
+`docs/handoffs/` is frozen the moment its session ends, so a correction that
+lives only there never reaches the next reader — which is how a false top-ranked
+next step survived in this file while a correction 270 lines above it already
+said so. **Retract AT THE INSTRUCTION, not only above it.**
+
+If you find a live instruction BELOW the archive line that is not represented up
+here, HOIST IT UP rather than correcting it in place.
+
+---
+
+## What to read, and what you may skip
+
+**The living head is large; after the mandatory newest handoff and current
+top-state sections, use this map for scoped navigation.** This map is keyed on
+WHAT YOU ARE ABOUT TO DO, deliberately not on
+the numbered next-steps list — that list renumbers every session, and a map
+pinned to its numbers would rot within one. Added 2026-08-31 by the first WSL
+session, whose measured complaint was ~50 KB of reading before any work began.
+
+**Everyone reads:** § "READ THIS FIRST — corrections from the 2026-08-31 audit pass",
+and § "Non-negotiable rules (each learned the hard way)". Nothing else is
+universal.
+
+| If you are about to… | read | and you may skip |
+| --- | --- | --- |
+| promote, re-promote, or touch a golden's provenance | § "What the re-promotion did and did not establish", § "The pairwise gate: what the 2026-08-31 measurement settled" | the staging/wrapper sections |
+| author or re-derive a candidate fixture | § "Next steps, in order", § "The single most important correction" | everything about the promotion gate |
+| run a capture, or edit the wrapper | § "What is running, and how to run it", § "`validate-vehicle.ps1` proves less than its name suggests", § "AVM1 has ONE comparison opcode" | the whole of § "Open items" |
+| land a field exclusion (`staminaleft` or any other) | § "The pairwise gate: what the 2026-08-31 measurement settled" IN FULL, and § "Read this before you touch the staminaleft exclusion" in the 18:20 handoff | § "What changed at the level of what this project can do" |
+| change the campaign driver or the test suite | § "Open items" → "Found 2026-08-31, not yet closed" | the champion/DNA chronology |
+| work on the design track | the current owner packet and decision record on `design/endless-progression-owner-packet`, through `$ss2-progression-design`; also read the current progression sections at the top and § "The design track is deliberately quarantined" | historical engine chronology not named by those current sections |
+
+**Two things no section title advertises, and both have cost a session:**
+
+- **An observation record's FILE NAME is not its `observationId`.**
+  `obs-20260830-auto1.json` carries `obs-diag`, `auto2` carries `obs-nav6`,
+  `auto3` carries `obs-gold3`. Key on the id inside the file, always. Keying on
+  the name silently no-ops rather than failing.
+- **`captures/` absent is a CAPABILITY boundary, not a test-count difference.**
+  The raw traces are the only artifact that can distinguish two independent
+  captures from a copy — the normalized records cannot, measured. They are
+  Windows-side and gitignored, so ~~**a question that turns on record
+  independence cannot be settled from a WSL clone at all.**~~ The 1-skipped test
+  profile is the visible symptom of this, not the substance of it.
+
+  ► **CORRECTED 2026-09-01 (evening). THE ARCHIVE IS FULLY READABLE FROM WSL, AT
+    `/mnt/c/ss2-capture/captures`** — 240 entries, 1,603 files, 42 of them
+    `session-adc*`; `grep`, `find` and `node` all read it normally. The
+    distinction the old sentence missed is CLONE versus MACHINE: a fresh clone
+    has no `captures/`, but a WSL session ON THE CAPTURE BOX reaches the Windows
+    tree through `/mnt/c`. **This wording is what would have stopped this
+    session's central measurement**, and two independent agents flagged it before
+    taking any number. Two further copies of it live at line ~1492 ("the archive
+    is not reachable from Linux") and line ~1524 ("not adjudicable from a WSL
+    clone at all"); both are struck there too. Retract at every site.
+
+  ► **SUPERSEDED THE SAME EVENING, BY MY OWN OVER-READING — AND THE FIX IS
+    DONE. `D:` WAS UNPLUGGED, NOT GONE.** When the owner attached the drive,
+    `D:\ss2-backups` turned out to hold a real mirror from 2026-08-31:
+    **1,589 files / 19,904,374 bytes**, matching this file's recorded figure
+    exactly, plus mirrors of the snapshot store and the Ruffle profile. So the
+    bullet below is right that only ONE copy was REACHABLE, and it invites the
+    stronger reading that only one EXISTS. It did not. **State reachability and
+    existence separately; an unplugged drive is a latency, not a loss.**
+
+    ► **AND THE WORD "ALL" IN THE NEXT SENTENCE EXPIRED WITHOUT ANYBODY
+      TOUCHING IT — corrected 2026-09-19.** It was true of the archive on
+      2026-09-01. Sessions added traces and nobody regenerated the manifest or
+      the mirror, so by 2026-09-19 the archive held **8,325 files / 58,492,555
+      bytes** and that backup holds 1,588 of them — **19%.** The manifest is
+      regenerated and now attests the whole archive; **the `D:` MIRROR IS NOT,
+      and re-taking it is unclaimed work.** Check it from Windows, never from
+      `/mnt/d`. **A count is a claim with a date on it**, and "all" is the word
+      that hides the date.
+
+    **Current state, 2026-09-01 evening, verified rather than asserted:**
+    `D:\ss2-backups\captures-2026-09-01` now holds all **1,588 files /
+    18,194,754 bytes**, hashed file-by-file on `D:` and compared line-for-line
+    against `captures/ARCHIVE-MANIFEST.sha256` — **1,588 of 1,588 match**.
+    (It was 1,603 / 20,008,972 until 15 UI screenshots were moved out of the
+    evidence archive to `C:\ss2-capture\ui-shots\` the same evening, with the
+    manifest and the mirror both regenerated and re-verified afterwards. The
+    drop is a relocation, not a loss — see `captures/README.md`.)
+    `ss2-capture-snapshots-2026-09-01` (225 files) and
+    `ruffle-SharedObjects-2026-09-01` (6 files, the whole Ruffle profile
+    including `openh264-2.4.1-win64.dll`, which a WSL-driven capture needs
+    seeded) are alongside it, matching the 08-31 naming convention.
+    **The manifest is now committed at `captures/ARCHIVE-MANIFEST.sha256`** —
+    the one file under `captures/` that is not gitignored — so any future copy
+    is checkable with `sha256sum -c`. Read `captures/README.md` for what it does
+    and does not prove: it is an integrity check, NOT a provenance claim, and a
+    copy hashes exactly like its original.
+
+    ~~**What is genuinely gone is the OneDrive tree**, which now holds only
+    `ss2-team-arena-foundation.bundle` — a git bundle, which by construction
+    cannot carry gitignored traces. So it is two copies, not three, and the
+    second one is normally unplugged.~~
+
+    ► **WRONG, AND CORRECTED 2026-09-07 BY MEASUREMENT. THE ONEDRIVE TREE IS
+      NOT GONE, AND IT IS A THIRD COPY OF THE EVIDENCE ARCHIVE.**
+      `/mnt/c/Users/corey/OneDrive/Documents/ChatGPT/SS2 Multiplayer Mod/ss2-team-arena-foundation/captures`
+      holds **1,589 files / 19,904,374 bytes, including 292 raw `.rufflelog`
+      traces** — byte-for-byte the figure this same section records ~20 lines
+      above for the 2026-08-31 `D:` mirror, so it is a frozen replica of that
+      snapshot rather than a bundle. The directory alongside it carries
+      `_RETIRED-DO-NOT-WORK-HERE.txt`, which is presumably why a previous
+      session inferred it had been emptied and never looked. **So it is THREE
+      copies, not two**, and two of the three are reachable from a WSL session
+      on this box right now. *(How this got written: the retired tree was
+      checked for a git bundle, found to have one, and the presence of the
+      bundle was read as the absence of everything else. State what you
+      measured, not what you inferred from one file.)*
+
+  ► **`/mnt/d` FAILING DOES NOT MEAN `D:` IS UNPLUGGED, AND THIS FILE HAS NOW
+    DRAWN THAT WRONG INFERENCE TWICE. Measured 2026-09-02.** `ls /mnt/d` returns
+    `cannot access '/mnt/d': No such device` while the drive is **attached and
+    healthy**: `powershell.exe -NoProfile -Command "Get-PSDrive -PSProvider
+    FileSystem"` reports `D` with 4.79 TB free, and `D:\ss2-backups` holds all
+    seven expected directories (`captures-2026-08-31`, `captures-2026-09-01`,
+    both `ss2-capture-snapshots-*`, both `ruffle-SharedObjects-*`,
+    `ui-shots-2026-09-01`) plus `README.txt`. **The evidence mirror is intact.**
+
+    The failure is a STALE WSL 9p mount, not a missing disk — the mount entry
+    still exists (`mount | grep /mnt/d` shows `D:\ on /mnt/d type 9p`), it just
+    no longer resolves, which is what happens when the drive is attached after
+    the WSL instance starts. Repairing it needs `wsl --shutdown`, which kills
+    every running WSL session, so it is the owner's call and not something an
+    agent should do mid-session.
+
+    **So: check `D:` from Windows, never from `/mnt/d`.** A session that reads
+    `/mnt/d` and concludes the backup is gone will report a data-loss scare that
+    is not real — which is exactly what this file did, and the bullet below is
+    left standing only because its OTHER measurements hold.
+
+  ► **AND THE ARCHIVE HAS ONE REACHABLE COPY TODAY, NOT THREE.** The head says
+    below that three exist (live tree, retired OneDrive tree, `D:`). Measured:
+    `D:` is not attached (`/mnt/d` is an empty mount point), the OneDrive
+    Documents tree holds only `ss2-team-arena-foundation.bundle` — a git bundle,
+    which by construction cannot carry gitignored traces — and a bounded search
+    of `/mnt/c` to depth 5 finds every `.rufflelog` under
+    `/mnt/c/ss2-capture/captures` and nowhere else. **1,603 files, ~20 MB, the
+    primary measured evidence the whole corpus is ingested from, unreplicated.**
+    Note the exposure inverts what the head assumes: the archive sits OUTSIDE the
+    Claude MSIX container, so an app reset does not touch it — while the
+    save-state store INSIDE the container (75 snapshots, ~62 KB) is the smaller
+    store. **Protecting the container does not protect the evidence.**
+
+## The design track is deliberately quarantined
+
+The progression track began on `design/endless-progression` (historical PR #1)
+and now lives on `design/endless-progression-owner-packet` (PR #3), integrated
+with the current engine lane here. It carries the owner-guided Arena Circuit,
+loot, inventory, opponent, settlement, Charm, and Soul Relic design. The
+authoritative decision record and live closure index distinguish accepted
+rules from still-open design; integration does not authorize implementation.
+
+**Design must never flow into candidate authoring.** A candidate fitted to a
+design is a candidate fitted to a hypothesis, and the capture that "confirms" it
+confirms a fit rather than a prediction — which is the one failure this whole
+pipeline exists to prevent. The rule is not that the two tracks disagree; it is
+that the measuring instrument must not be shaped by what anyone hopes to
+measure. Read the design if you are working on the design. Do not read it while
+authoring a fixture.
+
+This omission is mine: the rule was in the previous handoff and I dropped it
+when rewriting this file, at exactly the moment the design track grew from a
+brief into a full proposal.
+
 ## 2026-08-31 Endless readiness update
 
 The docs-only branch `design/endless-progression-readiness` adds the
@@ -8379,27 +12427,251 @@ launch Ruffle, or touch parity evidence, candidates, classic rules, or the
 licensed installation. Its fresh-worktree verification profile is 584 tests:
 583 passed, one expected raw-trace archive check skipped, and zero failed.
 
-## THE ARCHIVE LINE
-
-Everything below this heading is frozen evidence and history. Read it to check
-a claim; keep current state and corrections above this line.
+*(Rescued 2026-09-01 when `main` was merged into this branch: this section
+reached `main` through PR #2 and had never been on `arena/champion-capture`, so
+the branch would have carried a HANDOFF.md that silently lacked it.)*
 
 ## State at the end of the 2026-08-30 session
 
-22 promoted goldens. 584 tests, all passing. 36 commits this session, across a
-day of parallel work and one overnight run of twelve agents.
+**Repository naming.** The GitHub repo was renamed to
+`Zanzagar/swords-and-sandals-2-multiplayer`; the `github` remote already points
+at the new URL. The local worktree directories and the `origin` bundle keep the
+old `ss2-team-arena-foundation` name **intentionally** — do not rename them or
+hand-edit worktree metadata. `package.json` still carries the old identity on
+`main`; the migration is part of PR #1 and lands when that merges.
 
-### Expected test profiles after PR #1
+## Working agreement for parallel agents
+
+Exclusive file ownership stated in every prompt; no agent runs a state-mutating
+git command; no agent launches Ruffle or touches the installation, the save or
+the snapshots; adversarial verifiers write nothing at all.
+
+**The limit is the file graph, not the budget.** Writers are capped at ten to
+twelve coherent slices. Auditors have no cap, because they write nothing and
+cannot conflict — and several independent auditors on the same target is a
+quality technique, not duplication. Give each one ONE named claim to break.
+
+## Keep the project lawful and reversible
+
+Use only a licensed local copy for inspection. Keep originals untouched, work in
+a separate mod folder, and distribute patches or independently authored files
+rather than the original game files or assets.
+
+---
+
+## READ THIS FIRST — corrections from the 2026-08-31 audit pass
+
+A 13-agent write-nothing audit checked EVERY hand-authored scalar in all 60
+candidates against a byte-level derivation. **Roughly 3,300 scalars derive
+cleanly with no free parameter; 60 do not.** The corpus is about 98% sound, and
+four claims below this line are now WRONG. They are corrected here rather than
+edited away, because each was load-bearing.
+
+~~**Baseline is 622 tests, 0 failed, 0 skipped**~~ ► **808 / 807 / 0 / 1
+(fresh-clone), measured 2026-09-07. Every number in the parenthesis below is a
+historical trail, not a baseline — read it as history and measure the current
+one.** (614 at the end of the audit pass,
+617 by the end of that session — a number this file was never updated with, so
+every "614" below it was stale on the day it was written; 620 after `2b123b9`.
+Was 603 before the audit pass; the "602" written below was already stale when
+written — `20197f2`'s own message says 603). `github/main` is **`362859a`** — corrected 2026-09-01; this
+line has now named a stale tip twice, first `e3f14aa`, then `4409ec7`. `4409ec7`
+was PR #2 (`design/endless-progression-readiness`) merging; `362859a` is the
+`.mailmap` landing directly on `main` — a normal commit with `4409ec7` as its
+only parent, authored by Corey, not a PR merge. **So `main` does take direct
+commits; "do not push to `main`" binds AGENTS, not the owner.** That `.mailmap`
+is the one the authorship decision left as available-if-ever-needed, so that
+part of the record has moved too. **Re-derive this rather than trusting it:
+`git fetch github && git log --oneline -1 github/main`.**
+No PR is open for `arena/champion-capture`, which is now 61 commits ahead of
+`main` — every promoted golden and the whole capture pipeline sit unmerged. **`gh` IS installed and authenticated
+in WSL** (2.98.0, `Zanzagar`) as of 2026-08-31; it is NOT installed on Windows.
+`git ls-remote github "refs/pull/*/head"` works in both and needs no `gh`.
+
+► **THE "IMPOSSIBLE" FIXTURES ARE REACHABLE. This is the correction that changes
+  the roadmap.** This file has said no tool path can change hero `attack` or
+  `defence` — "not `-StageHero`, not the shop, not levelling" — and on that basis
+  22 fixtures were written off. **The third clause is false.** Root frame 227
+  (`levelup`) places character 2265, carrying eight `+` buttons, one per base
+  stat, each with the identical body behind a `statpoints > 0` guard:
+  `1596` strength, `1600` speed, **`1602` attack**, **`2252` defence**,
+  `2253` vitality, `1608` charisma, `2254` stamina, `2264` magicka. No per-stat
+  cap, no exclusion. And the writes PERSIST: `constructDNA` reads `hero.attack` at
+  `+0x1e1b` and `hero.defence` at `+0x1e36` into `charDNA`; `initcharacter`
+  restores them from DNA indices 18 and 19; button 2283 calls `backup_char` and
+  `restore_char`, both ending in `constructDNA`. So a spent point survives the
+  per-turn re-skin that discards every `-StageHero` write. Entry is ordinary play
+  — `gotoAndPlay("levelup")` has exactly ONE site in the build, on button 775 of
+  the reward overlay. The wrapper spends all four points into `vitality` BY POLICY
+  (it replicates button 2253 verbatim), to keep sessions comparable. **That is a
+  choice, not a limit.** Verified independently by the main session with
+  `inspect-swf --references 'statpoints'`. Detail is in `ss2-battle-map.md`.
+
+  Still to do: the arithmetic of which exact stat vectors are hittable under "four
+  points per level, all four must be spent" (GATE C will not release the level-up
+  screen until `statpoints` reads 0). Note also that the impossible-hero set is
+  better identified by `attack 11 / defence 11` (15 fixtures) than by the
+  strength/damage signature this file uses, which catches only 14 and misses
+  `candidate-grievous-knockback`; and the `attack 3 / defence 2` duel pair was
+  never counted at all.
+
+► **THE TRANSCRIPTION IS FIVE FIXTURES, NOT THE WHOLE CORPUS.** A digest detector
+  flags 23 candidates; only FIVE are transcriptions. **Digest equality between a
+  candidate and an observation is the signature of a CORRECT PREDICTION, not of a
+  copy** — when a map-derived candidate is right, the confirming observation has an
+  identical scenario and tape by definition. The discriminator is lineage, not
+  identity. Relabelling the other eighteen would have installed eighteen false
+  provenance claims and made ten probe goldens permanently unpromotable. The five,
+  each with the commit that landed fixture and record together:
+  `candidate-prisoner-normal-kill` ← `obs-20260830-t1` (`135f211`),
+  `-dir8` ← `obs-20260830-u1` (`5f45627`), `-dir6` ← `obs-diag` (`19aead3`),
+  `-dir5` ← `obs-nav6` (`5317cec`), and
+  `candidate-duel-firstblood-normal-kill` ← `obs-20260830-e1` (`74a07a4`).
+
+  **Four goldens counted their candidate's own source record as one of their two
+  "independent" observations.** `135f211` says so in plain words and draws the
+  opposite conclusion. That is now REFUSED (`7856e2b`, `141e98a`). **DONE
+  2026-08-31: all four are RE-PROMOTED, pipeline only, from every other
+  committed record that matches them** — 3, 5, 9 and 4 records respectively,
+  each from that many distinct sessions. Their scenario, samples and expected
+  blocks are byte-identical to what they were; only `provenance` moved. Read
+  the block "What the re-promotion did and did not establish" below before
+  quoting it as an independence result.
+  What is NOT in question: the goldens' measurements. The game really does produce
+  those outcomes. What was broken is the provenance argument, and for four of them
+  the independence of the pair.
+
+► **THE PRESCRIBED `staminaleft` FIX IS DEAD. Do not write it.** Its premise —
+  that `staminaleft` is inert — is false: the map has it gating which attack
+  buttons exist, forcing the rest phase, and steering the villain AI. Separately,
+  an auditor promoted a golden from two records disagreeing by **99,992 stamina**
+  with the new pairwise gate installed and silent, because this repository's only
+  existing exclusion (`comparableSamples`) is PROJECTION-side, and a
+  projection-side exclusion silences the gate. The sound path is to **fix the
+  capture, not the comparison**: pin the approach-step count so the value is
+  deterministic, turning a silent non-match into a visible refusal. That needs a
+  wrapper edit and supervised rounds. And do NOT "restore" 105 to 110 — 105 is a
+  TRUE description of that route; the defect is that the fixture pins a quantity
+  the scenario does not determine.
+
+► **THE PAIRWISE GATE'S DORMANCY IS SETTLED — run
+  `node tools/pairwise-gate-dormancy.mjs`, do not read the next two paragraphs
+  as current.** The gate HAS TEETH (407 free leaves it alone refuses, all at
+  `/samples/*/callSite`) and on committed evidence it still refuses NOTHING,
+  because the nonce check refuses every forgery about forty lines earlier. Both
+  facts, and what they do and do not license, are in the block at
+  "The pairwise gate: what the 2026-08-31 measurement settled" below. **The
+  "162" retraction in this bullet is itself wrong: 162 reproduces exactly.**
+
+  *The original bullet is kept below because it was load-bearing.*
+
+► **THE PAIRWISE GATE'S DORMANCY NUMBERS ARE WRONG, and the gate is weaker than
+  recorded.** **Both numbers in this bullet are wrong — see the note below it.**
+  **And the correction is wrong too: see the settled block below.**
+  "162 leaves" is a full-record count, not the comparison projection's
+  (142); over the surface it names at least 10 leaves can differ, not 0, and 2 of
+  them MUST differ in every legitimate promotion. The gate is LOGICALLY unable to
+  fire on the promotion path. **The largest hole in the pipeline is now this: two
+  fabricated observations that are copies of EACH OTHER still promote a new
+  golden.** Before any field exclusion ever lands, make
+  `projectSs2ObservationForComparison` structurally incapable of sharing an
+  exclusion with the matcher.
+
+  **Both halves of that were done on 2026-08-31.** The projection split landed in
+  `f2a57c4`. The copy hole is closed in `2b123b9`, and closing it needed
+  something the paragraph above did not see: **no pairwise comparison could ever
+  have caught it**, because copies agree, and agreement is what that gate checks
+  for. It went through the nonce instead. `cc42503` had already made
+  `launchNonce` mandatory at INGEST, but the promotion gate bound only the
+  records that HAPPENED to carry one — so deleting the key from the copy walked
+  past it, which was demonstrated end to end against the committed corpus. Absence
+  is now enumerated: `src/golden/pre-nonce-observations.js` names by digest the 58
+  records that predate the field, the list may only ever shrink, and three tests
+  audit it. **What is still open, and is smaller than what was closed: a forger
+  who MINTS A FRESH NONCE for the copy is refused by none of this.** A nonce off
+  the wrapper is unverifiable text; no repository-side check distinguishes one the
+  player minted from one a person typed.
+
+Also corrected this pass: three circular warrants in the staging docs — including
+`capture-staging.md:318`, which attributed the villain's `100→95` to the HERO's
+five walks, when `+0x32a1..+0x3304` mutate `game_attacker.staminaleft` ONLY, so
+that derivation was impossible — and five wrong rows in the `staminacost` table,
+notably `rest`, which is `0 - round(stamina*15)`, a GAIN, not 0.
+
+Not yet done, in priority order (the projection/exclusion hazard and the copy
+hole that led this list are both closed — see the paragraph above; ~~re-promote
+the four goldens from eligible records~~ **DONE 2026-08-31**): correct the
+CONTRADICTED scalars in non-promoted fixtures (7 of 9 misc-a carry a
+strength/damage triple no weapon row in the build produces; two pin an enchantment
+potency of 5 against a cap of 3; spell `damageMethod: null` for ids 31/32/35 where
+the bytes pass `"burning"` and `"lightning"`; villain blocks omit `<piece>_defence`
+fields `battlevalues` rewrites every phase); the stub rewrite (**only 4 of 15**
+hook slots can change the vehicle gate's PASS/FAIL, and every `dbg` line —
+including every `wrapped:`, `capture-refused-*` and `attacker-resolved-*` — is
+stripped before the match); and the attacker identity, whose record field is
+written 16 lines before the game is loaded.
+
+## State at the end of the 2026-08-31 session
+
+22 promoted goldens and **no runtime evidence yet for the champion, armoured or
+tournament families**. **622 tests, all passing, 0 skipped** (this paragraph said 602, then 614; see the corrections block above) in a capture-bearing
+worktree.
+
+The 2026-08-30 session landed 38 commits (`1d829c7..2d70738`); the previous
+handoff said 36. PR #1 and PR #2 have since merged and `github/main` has moved past both — it is
+`362859a` as of 2026-09-01, and `4409ec7` and `ecf4510` are both still ancestors
+of it (checked with `git merge-base --is-ancestor`, not assumed) — and the
+2026-08-31 session added the commits on `arena/champion-capture`.
+
+### Expected test profiles
+
+► **DO NOT READ ANY NUMBER IN THIS SECTION. MEASURE. Re-measured 2026-09-07 on
+  this tree: `808 tests, 807 passed, 0 failed, 1 skipped`** — the fresh-clone
+  profile, since this tree's `captures/` holds only `ARCHIVE-MANIFEST.sha256`
+  and `README.md`. **The SHAPE of the section is what is durable and it still
+  holds**: two profiles, differing by exactly the raw-trace archive existence
+  check, and a partial archive fails rather than skipping.
+
+  *(This block previously said "STALE BY 8 … read every 622 below as 630 and
+  every 621 as 629". That correction was itself stale by 178 when it was found
+  on 2026-09-07, and its substitution instruction was wrong at both values — so
+  a reader following it would have replaced one wrong number with another. A
+  correction that carries a number goes stale exactly as fast as the number
+  did; the durable fix is to state the COMMAND, which is
+  `node --test --test-concurrency=1` from the repo root.)*
 
 - A capture-bearing operator worktree with the complete ignored raw-trace
-  archive runs all **584 tests: 584 passed, 0 skipped, 0 failed**.
-- A fresh clone or worktree with none of those ignored traces runs **584 tests:
-  583 passed, 1 skipped, 0 failed**. The skipped test is the raw-trace archive
-  existence check; the committed observation and divergence integrity checks
-  still run.
+  archive runs **every test, 0 skipped, 0 failed**. *(Last measured at a total
+  of 622 on 2026-08-31; the total is now 808 and this profile has NOT been
+  re-measured since — do not assume 808/0.)*
+- A fresh clone or worktree with none of those ignored traces runs **one test
+  fewer passing and 1 skipped**: measured 2026-09-07, `808 tests, 807 passed,
+  1 skipped, 0 failed`. The skipped test is the raw-trace archive existence
+  check; the committed observation and divergence integrity checks still run.
 - A partial raw-trace archive does **not** skip: it fails and names every
-  missing expected trace. This keeps the clean-clone accommodation from
-  weakening evidence retention on an operator machine.
+  missing expected trace.
+
+**Both profiles were MEASURED AGAIN at `ce5699f`, not derived by adding 2** —
+622 passed / 0 skipped in the capture-bearing tree, and 622 tests / 621 passed /
+1 skipped in a detached worktree holding only committed content, which is the
+fresh-clone condition. The two tests added that session run in both. They were
+first measured the same way at `2b123b9` (620/0/0 and 619/1/0).
+
+Doing this every time is worth the minute: the four sessions before `2b123b9`
+each carried the previous session's count forward untouched, which is how "614"
+survived in three places after the suite had reached 617.
+
+**The skip is now anchored, and this is the part that changed.** It used to skip
+whenever zero expected traces resolved, and a count of successful lookups cannot
+tell "fresh clone" from "the path derivation is broken" — three one-character
+edits each made it skip silently on a machine holding the complete archive, and
+the resulting run was byte-identical to the fresh-clone profile documented
+above. It now requires a POSITIVE anchor: `captures/README.md` is the one path
+`git ls-files captures` returns, so it exists in a fresh clone AND on an
+operator machine. If it does not resolve, the derivation is wrong and the test
+FAILS naming it, instead of skipping.
+
+So a skip no longer needs a human to check which kind of machine they are on.
 
 Read this section, then [`docs/overnight-agent-plan.md`](docs/overnight-agent-plan.md)
 for how the parallel work is organised.
@@ -8413,10 +12685,45 @@ for how the parallel work is organised.
    1 → 4 and fought the tournament ladder to rank 2 in five of six attempts.
 3. **The wrapper can stage a scenario and buy equipment**, both owner-approved,
    both declared in the evidence.
-4. **The champion was decoded from the map before it was ever seen.** Reading
-   `unleash_hell`'s hard-coded DNA through `initcharacter` and `battlevalues`
-   PREDICTED `hitpointsmax` 110 and `armourclass` 86; twelve independent live
-   draws recorded exactly those. Five `candidate-champion-*` fixtures exist.
+4. **The champion's numbers were derived with no free parameter, from formulas
+   committed a day before the champion was ever met.** `unleash_hell`'s
+   hard-coded DNA, read through `initcharacter` and `battlevalues`, gives
+   `hitpointsmax` 110 and `armourclass` 86, and thirteen live draws recorded
+   exactly those. Five `candidate-champion-*` fixtures exist.
+
+   **The previous version of this file said the champion was "decoded from the
+   map before it was ever seen" and that the reading "PREDICTED" those numbers.
+   That is not what the record shows, and the overstatement was mine.** It is
+   corrected here rather than quietly fixed because it was load-bearing: it was
+   the stated reason to trust the champion family, in the document a new session
+   reads first, on a project whose whole discipline is that a candidate fitted
+   to a known answer makes its own confirmation meaningless.
+
+   The chronology, established by an auditor and then checked independently:
+
+   - `6dc750e` (2026-08-29 23:57) already carried every term needed —
+     `hitpointsmax = herolevel * 10 + vitality * 20`, the per-piece armour
+     multipliers, and decisively the `helmet > 25` branch — at
+     `docs/integration/ss2-battle-map.md:131-134`, in a file that contains no
+     champion.
+   - The thirteen draws ran 2026-08-30 21:31 to 22:06.
+   - `ss2-champion-dna.md`'s only commit before today, `5d3d777`, is
+     2026-08-30 22:48 — **42 minutes after the last draw.**
+
+   So the FORMULAS were effectively pre-registered, some 21 hours before the
+   opponent existed in this project. The DNA INDEX MAP was written afterwards.
+   That map has no fitting freedom to exploit — 50 strictly sequential
+   `characterDNA[n]` assignments, re-derived mechanically from the opcode stream
+   and matching the published table offset for offset — but "written afterwards"
+   and "predicted" are different claims, and only the first one is true.
+
+   The pre-registration is the stronger argument anyway, and the old wording
+   omitted it entirely. Without the `helmet > 25` branch the same arithmetic
+   gives `armourclass` 1081 rather than 86, so that branch is exactly the
+   constant a back-fit would have had to invent — and it was in the repository a
+   day early. [`ss2-champion-dna.md`](docs/integration/ss2-champion-dna.md) now
+   states this as a postdiction in its own text, and says it must not be
+   restated as a forward prediction.
 
 ### The single most important correction
 
@@ -8449,9 +12756,29 @@ byte-for-byte; manifests, digests and cited observations all resolve.
 | --- | --- | --- |
 | `run-campaign.ps1 -Concurrency N` | capture families in parallel | refuses `N>1` for any navigator but `prisoner` |
 | `run-arena.ps1` | the save-mutating arena route | refuses to start without a fresh snapshot, takes it itself, hashes before/after |
-| `launch-capture.ps1` | one session; the ONLY script with both `-WatchFields` and `-Stage*` | **no snapshot guard** — see Open items |
+| `launch-capture.ps1` | one session; the only script with `-Autopilot` **and** `-ArenaPolicy ''` together | **no snapshot guard** — see Open items |
 | `validate-vehicle.ps1` | wrapper gate after any edit | prints the source hash it compiled, and what it does not prove |
 | `save-state.ps1` | snapshot/restore | refuses an empty tree, and refuses to restore a WIPED save |
+
+► **THE "ONLY SCRIPT WITH BOTH `-WatchFields` AND `-Stage*`" CLAIM WAS STALE AND
+  IS CORRECTED ABOVE (2026-09-02).** `run-arena.ps1` declares
+  `[string] $WatchFields = ''` at `:137` and forwards it to `launch-capture.ps1`
+  at `:295` (appended only when non-empty), alongside `-StageHero`/
+  `-StageVillain` at `:100-101`. So **`run-arena.ps1` carries staging, watch
+  fields AND its own snapshot guard together**, and the armoured removal pair
+  does NOT have to go through the unguarded vehicle.
+
+  **It is exercised, not merely declared:** five rufflelogs in the archive
+  (`arena-champ-2`, `session-champ-n1`) emit
+  `{"t":"dbg","at":"watch-extended","added":11}` — the eleven names in
+  `run-arena.ps1`'s own header at `:66`. Verify with
+  `grep -oh '{"t":"dbg","at":"watch-extended"[^}]*}' /mnt/c/ss2-capture/captures/*/*.rufflelog`.
+
+  What is still TRUE of `launch-capture.ps1`, and must not be swept up in this
+  correction: it remains the only script that can pass `-ArenaPolicy ''` with
+  `-Autopilot` (`run-arena.ps1:267-269` does not forward those). That is why
+  only the two DIRECTION-5 armoured members clear the guarded vehicle; a
+  non-normal-band member still needs the unguarded one.
 
 Snapshots: **`level4-vitality-tournament-gate`** (vitality 13, 5723 gold,
 `current_tournament` 1 — `hitpointsmax` reads 220 in the level-up log because
@@ -8462,6 +12789,440 @@ are the original level-1 gladiator.
 
 **`zainger-repaired` is a WIPED save under a reassuring name.** `save-state.ps1`
 now refuses to restore it without `-Force`.
+
+► **THE SNAPSHOT STORE IS 75 DIRECTORIES HOLDING ONLY 7 DISTINCT SAVES, AND THE
+  LIVE SAVE IS ALREADY ONE OF THEM. Measured 2026-09-01 (evening) by hashing
+  every `ss2_data.sol` under `/mnt/c/ss2la/ss2-capture-snapshots`; the head's
+  "74" at line ~608 is stale.** Distribution of the 75:
+  **58** share `2514b1cb…`, 12 share `6a06e9e8…`, and five are unique.
+  ► **THIS POINTER RESOLVES NOWHERE, AND THE SURVEYOR CHASED IT TO THE WRONG PLACE
+    TOO.** There is no "74" at the line named — that line is about `github/main`'s
+    tip. The referent BY CONTENT is the "74 snapshots" sentence in § "Driving the
+    capture pipeline FROM WSL", which IS in the living head, and **which still
+    says 74 today** — so the correction announced here was never applied at the
+    sentence it corrects, and 74 is now wrong twice over (the store holds 1,429
+    directories). Fixed by quoting the text instead of a line: search
+    `grep -n '74 snapshots' HANDOFF.md`.
+
+  ► **DENOMINATOR STALE BY TWENTY-FOLD; THE SHAPE IS EXACTLY INTACT.** Re-measured
+    2026-09-07: **1,429 snapshot directories, not 75** — and still exactly 7
+    distinct saves, still 12 sharing `6a06e9e8…`, still five unique; the big
+    cohort is 1,412 sharing `2514b1cb…`, not 58. Every snapshot dir holds exactly
+    three files. **This is a live growing store, so the durable form is the
+    command, not the number:**
+    `find <snapshot-root> -name ss2_data.sol -exec sha256sum {} + | awk '{print $1}' | sort | uniq -c | sort -rn`.
+    The "the live save is already one of them" half was NOT re-derived — reading
+    the live save is outside the read-only boundary.
+
+
+  **The operationally useful part: the LIVE save is `2514b1cb…` too** — byte
+  identical to those 58, which include `level4-vitality-tournament-gate`. So for
+  the armoured/tournament family **"restore `level4-vitality-tournament-gate`"
+  is a no-op today and destroys nothing**, and the starting state that family
+  needs is redundantly preserved 58 times over. That removes the restore risk the
+  runbook warns about — but NOT the run risk: `run-arena.ps1` mutates the live
+  save DURING a run, which is why it takes its own snapshot and why a fresh
+  snapshot name stays mandatory.
+
+### Codex: which machine owns which config, and what is actually installed
+
+**BOTH `.codex/config.toml` files that matter are on THIS box.** Corrected
+2026-09-01 by the peer session `Codex workflow operations`, which is on a
+DIFFERENT physical machine (Corey's primary WSL box). This machine is the
+migrated capture machine — WSL agents plus a Windows-native capture side — so
+"the Windows config" is ours, not theirs. I had assumed the opposite and relayed
+it to them; they sent it straight back.
+
+| Config | Model / effort | Owner |
+| --- | --- | --- |
+| `~/.codex/config.toml` (this box, WSL) | `gpt-5.6-sol` / **`xhigh`** | ours — briefly raised to `ultra` 2026-09-01 and REVERTED the same day, see below; backup of the ultra state at `~/.codex/config.toml.bak-20260901` |
+| `/mnt/c/Users/corey/.codex/config.toml` (this box, Windows) | `gpt-5.6-sol` / **`ultra`**, plus `service_tier = "priority"` | ours — ALREADY aligned, no change made |
+| the peer machine's | `gpt-5.6-sol` / `xhigh` | theirs; divergence is deliberate and in front of Corey |
+► **RE-MEASURED 2026-09-07: the WSL row is now `gpt-6-astra` / `medium` /
+  `service_tier = "fast"`; the Windows row still HOLDS exactly.** ► **And the
+  backup file this sentence names does NOT hold "the ultra state" — it holds the
+  PRE-ultra state.** This is a live-mutable store, so the durable form is the
+  command: `cat ~/.codex/config.toml` and
+  `cat /mnt/c/Users/corey/.codex/config.toml`.
+
+
+`codex` is NOT on the Windows PATH here, which fits the migration guide's
+position that agents run in WSL and the Windows side is capture-only. The
+Windows file is full of `\\?\C:` paths and bundled-plugin entries; **do not
+"align" it further without a reason** — it is a different install, not a copy.
+
+**`xhigh` IS THE CONFIGURATION WITH A TRACK RECORD; `ultra` IS A PREFERENCE.**
+Decided 2026-09-01 on evidence, after raising it to `ultra` and reverting within
+the hour. The Codex review that found the 67 wrongly committed traces — the
+defect 758 of this session's own verification agents walked past — ran at
+**`xhigh`**, 220,010 tokens, ~13 minutes. Every `ultra` run on this box was a
+trivial probe (17,044 tokens, "reply with EFFORT-OK"). **There is no measurement
+here in which `ultra` outperforms anything.** Swapping a proven setting for an
+unproven one because more effort ought to be better is the reasoning this
+project exists to refuse, and it was refused here against my own earlier
+position.
+► **FALSIFIED 117 TIMES OVER.** Of 124 rollouts under `~/.codex/sessions`, **118
+  ran at `ultra`**, 5 at `medium` and 1 at `xhigh`; exactly ONE ultra rollout is
+  the 17,044-token probe, and 101 of the 118 exceed 1 M total tokens (median
+  ~3.0 M, max ~112.8 M). The sentence was true when written and is now the
+  opposite of true. ► **The comparative claim it supports — that no measurement
+  here shows `ultra` outperforming anything — is NOT falsified by this**, because
+  no A/B exists in the rollout store; but its stated evidence is gone, so the
+  sentence must be REBUILT, not renumbered. ► **Two further facts.** `ultra` is
+  still in active use today even though the WSL config now reads `medium` — so
+  the config value is not what the runs actually used, which is exactly what this
+  section warns about elsewhere. And **the "220,010 tokens" figure for the xhigh
+  run is not reproducible**: the single xhigh rollout records 5,566,666 total
+  tokens (uncached input 230,075), and this same living head gives "5.57 M total
+  tokens" for what must be the same run ~100 lines later — **two irreconcilable
+  figures for one run.** The "~13 minutes" HOLDS (13 m 28 s).
+
+
+**If anyone wants `ultra` back, measure it: run the same review over the same
+diff at both efforts and compare findings.** Until that exists, this is settled.
+
+**PREFER THE PLUGIN, KEEP THE CLI AS THE ESCAPE HATCH.** Source of
+`openai/codex-plugin-cc` read at HEAD 2026-09-01 (32.6k stars, actively pushed):
+
+- **It CANNOT express `ultra`.** `scripts/codex-companion.mjs`'s
+  `normalizeReasoningEffort()` throws on anything outside
+  `none|minimal|low|medium|high|xhigh`. Insisting on `ultra` means permanently
+  staying off the maintained path.
+- **Its review path passes `model` but NOT `effort`** (`~line 409-414`), so a
+  plugin review INHERITS `config.toml`. That is why both machines' config must
+  stay honest and identical — through the plugin, effort is not per-run.
+- **Its read-only IS a real sandbox, not a prompt instruction** — `sandbox:
+  "read-only"` is hardcoded at `companion.mjs:411`, and `workspace-write` only
+  ever comes from an explicit `--write` (`:491`). I had doubted this; it holds.
+- **It does not use `codex exec`** — it drives Codex's app-server protocol
+  through a broker and returns STRUCTURED findings against a committed
+  `schemas/review-output.schema.json`.
+  ► **OFF BY THREE, AND THE FILENAME IS WRONG TOO.** The `read-only` literal is
+    three lines below the line named — that line is the opening of the same call.
+    The `workspace-write` citation is exact, and the substance (a real sandbox, not
+    a prompt instruction) holds in both the installed copy and the marketplace
+    checkout, which are byte-identical. **The file is `codex-companion.mjs`, not
+    `companion.mjs`** — a filesystem search for the latter returns nothing.
+
+
+**ANSWERED 2026-09-01, AND IT SETTLES WHICH PATH TO USE WHEN: THE PLUGIN
+PRESERVES NO PER-COMMAND TRANSCRIPT AND WRITES NO ROLLOUT RECORD AT ALL.**
+Established two independent ways. The peer session measured the OUTCOME on its
+box after a `/codex:review` smoke test: only truncated command previews in the
+live log, only the structured final message in the result, and the review threads
+left nothing in `~/.codex` — no `rollout-*.jsonl`, nothing in
+`archived_sessions`, no grep hit for the thread ids. This session measured the
+MECHANISM from the installed source here: `lib/job-control.mjs:137-144` reads
+`"running command:"` / `"command completed:"` lines **only to pick a progress
+label** (`verifying` / `reviewing` / `investigating`) and then discards the
+text; `writeJobFile` persists a job payload, not a transcript; and
+`lib/app-server.mjs` has no rollout or persistence path at all. Same answer from
+opposite directions.
+
+**Two consequences, and the second is a hole in this file's own instructions.**
+
+1. **The raw-CLI escape hatch is LOAD-BEARING, not habit.** The CLI emits every
+   shell command Codex ran and its output, which is exactly what let this session
+   AUDIT the review's seven findings rather than trust them — and two of the
+   seven were defects in my own work that I would otherwise have had to take on
+   faith. **For any review whose findings will be acted on, use the CLI.**
+2. **"Verify by the rollout record" is EXECUTABLE ON THE CLI PATH ONLY.** That
+   instruction appears below and is correct there; against a plugin review there
+   is no rollout record to read, so the model and effort a plugin review actually
+   used are **not verifiable after the fact by any means found so far**. That is
+   the real reason both machines' `config.toml` must stay honest and identical:
+   for plugin reviews, config is not merely the default — it is the ONLY record
+   of what ran.
+
+**THE PLUGIN IS NOW INSTALLED ON THIS BOX (2026-09-01): `codex@openai-codex`
+v1.0.6, user scope, enabled.** Installed non-interactively — `/plugin ...` is a
+built-in a session cannot invoke, but `claude plugin marketplace add
+openai/codex-plugin-cc` and `claude plugin install codex@openai-codex` are
+supported CLI subcommands and work fine. I first told the owner to run them
+himself; that was wrong, and the CLI surface is worth remembering.
+
+It registers `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`,
+`/codex:setup`, `/codex:status`, `/codex:result`, `/codex:cancel`,
+`/codex:transfer`, plus the `codex-rescue` subagent. **Commands load at session
+start**, so they are unavailable in the session that installs them.
+
+**THE PLUGIN SHIPS THE GATE THIS PROJECT DISABLED — AND IT REGISTERS THE HOOK,
+BUT DORMANT.** `plugins/codex/hooks/hooks.json` wires a `Stop` hook to
+`scripts/stop-review-gate-hook.mjs` with a **900-second timeout**, alongside
+`SessionStart`/`SessionEnd` lifecycle hooks. VERIFIED INERT rather than assumed:
+the hook's `main()` early-returns on `if (!config.stopReviewGate)`,
+`scripts/lib/state.mjs:23` defaults `stopReviewGate: false`, nothing on disk sets
+it, and `~/.claude/settings.json` has `hooks: none` and no gate keys. So the
+install did NOT arm it, and AGENTS.md's `reviewGateEnabled: false` remains the
+true state.
+
+**But the footgun is now reachable on this machine, where before it was not.**
+**Do NOT run `/codex:setup --enable-review-gate`** — AGENTS.md's reason stands:
+the only controlled study of Codex reviewing Claude found harm precisely when
+reviewer output was auto-adopted. Note `/codex:setup`'s own description offers to
+"optionally toggle the stop-time review gate", so the toggle is one command away
+and reads as routine setup. **If a future session finds `stopReviewGate` true,
+that is a regression to undo, not a preference someone expressed.**
+
+**FOR THE RAW-CLI PATH ONLY, pin the model and effort at the invocation.** Both
+machines now treat this as standard. I ran this session's review without pinning
+either and inherited `xhigh` without knowing; it was a good setting by luck, and
+I could not have said what ran until I read the rollout record afterwards. Use:
+
+```
+codex exec -m gpt-5.6-sol -c model_reasoning_effort=ultra -s read-only \
+  --skip-git-repo-check - < prompt.txt
+```
+
+**Verify by the ROLLOUT RECORD, never the exit code.** Acceptance is not
+application: `~/.codex/sessions/<date>/rollout-*.jsonl` carries the resolved
+`"effort"` and `"model"`. A flag the CLI tolerates but ignores exits 0.
+
+**Budget for `ultra`.** A trivial one-line prompt exceeded a 240 s timeout. A
+real review of this session's diff took ~13 minutes, 5.57 M total tokens (5.3 M
+cached input), 34.5 k output of which 20.4 k reasoning. And `codex exec` buffers
+ALL stdout until it finishes, so a run in progress is indistinguishable from a
+wedged one — check the process, not the output file.
+
+**WHAT IS INSTALLED, AND WHERE — I OVERSTATED THIS ONCE.** On this box there is
+NO Claude/Codex integration: `mcpServers` is empty, no codex plugin is
+installed, and `/codex:adversarial-review` is unavailable, so reviews here run
+as a plain npm CLI subprocess
+(`~/.nvm/.../@openai/codex/bin/codex.js`). I wrote that the documented slash
+command "is not registered anywhere". **That was true of this machine only.**
+The peer reports that on ITS box the `codex@openai-codex` plugin
+(`openai/codex-plugin-cc`) registers `/codex:review` and
+`/codex:adversarial-review`, smoke-tested 2026-08-31. Reported, not verified
+from here — this session cannot see that machine's plugin state. So the
+migration handoff's "never exercised" claim holds for THIS box and should not be
+generalised.
+► **TWO OF THREE CLAUSES ARE FALSE, AND THIS FILE CONTRADICTS ITSELF ~50 LINES
+  ABOVE.** `mcpServers` empty HOLDS. But **the codex plugin IS installed**
+  (`codex@openai-codex` v1.0.6, user scope, 2026-09-01) and
+  **`/codex:adversarial-review` IS registered** — the command file ships in the
+  install alongside `review`/`rescue`/`setup`/`status`/`result`/`cancel`/
+  `transfer`, and agent sessions in this repo load the `codex:*` skills. ► This
+  same living head says "THE PLUGIN IS NOW INSTALLED ON THIS BOX (2026-09-01)"
+  fifty lines earlier, and this block then denies it in the present tense.
+  **A search of the surrounding hundred lines for a retraction finds none — this
+  is a live self-contradiction, not a retained historical bullet.** The one
+  surviving true clause is the npm CLI escape hatch.
+
+
+### Driving the capture pipeline FROM WSL (measured 2026-09-01, first run since the relocation)
+
+**The vehicle gate PASSES from WSL** — `validate-vehicle.ps1` round-tripped
+wrapper → Ruffle → delog → ingest → verify, and the save tripwire read all three
+`.sol` files unchanged. The migration handoff called the next capture run "the
+real test"; this was it, and it needed five things nothing had written down.
+
+- **`powershell.exe -NoProfile -ExecutionPolicy Bypass`.** The Windows execution
+  policy blocks every `.ps1` here. Without `-ExecutionPolicy Bypass` the scripts
+  do not run at all.
+- **`$env:LOCALAPPDATA` must be set to `C:\ss2la`** (see the junction below).
+  Every earlier capture ran INSIDE the Claude Windows app, whose MSIX container
+  virtualises `%LOCALAPPDATA%`. So the licensed save universe, the 74 snapshots
+  and `ss2-capture-isolated` all live under
+  `C:\Users\corey\AppData\Local\packages\Claude_pzs8sxrjxfjjc\LocalCache\Local\`,
+  NOT under the `%LOCALAPPDATA%` an outside process sees. A WSL-driven session is
+  outside the container and silently addresses an EMPTY store otherwise.
+- **`C:\ss2la` is a directory junction to that LocalCache path**, created
+  2026-09-01. It exists because the literal path is 75 characters and
+  `save-state.ps1` blows MAX_PATH on the store's own nesting: a `snapshot` run
+  through the literal path FAILED HALF-WAY and left a partial snapshot that
+  `Remove-Item` could not delete either — and a partial snapshot is
+  indistinguishable from a real one in `save-state.ps1 list`. Inside the
+  container the same code is fine, because the app sees the short
+  `C:\Users\corey\AppData\Local` and the redirect happens below the filesystem
+  API. **Use the junction; do not pass the literal LocalCache path.**
+- **Ruffle IGNORES `%LOCALAPPDATA%`.** It resolves its own profile through the
+  Windows Known Folder API, which only the container virtualises, so an
+  unpackaged Ruffle starts from an EMPTY profile at
+  `C:\Users\corey\AppData\Local\ruffle`. It then stalls fetching OpenH264 and
+  never loads the movie: the run dies at `Opening file:…` with no `avm_trace`
+  lines and the gate reports "No capture-trace lines found", which reads like a
+  wrapper defect and is not one. Seed the profile by copying
+  `…\LocalCache\Local\ruffle\video\openh264-2.4.1-win64.dll` into
+  `C:\Users\corey\AppData\Local\ruffle\video\`. Done 2026-09-01.
+- **A cold profile needs `-RunSeconds 30`;** the 12-second default is not enough
+  and fails the same indistinguishable way.
+- **From WSL, a campaign needs `-Concurrency 2` or more.** At `-Concurrency 1`
+  `run-campaign.ps1` passes no `-SaveDirectory`, so Ruffle falls back to its own
+  profile store — which, unpackaged, is the empty one. `N>1` forces a
+  per-session store seeded from the real save, which is what makes it work.
+
+  ► **THIS RULE IS SCOPED TO `run-campaign.ps1` PRISONER CAMPAIGNS, AND READING
+    IT AS GENERAL IS DANGEROUS FOR THE ARMOURED FAMILY. Verified in the scripts
+    2026-09-01 (evening).** `run-campaign.ps1:123-124` **refuses**
+    `-Concurrency > 1` for any `-Navigate` other than `prisoner`, and passes
+    `-SaveDirectory` only when `Concurrency > 1` (`:166`, `:179`).
+    `run-arena.ps1` — the vehicle all five armoured fixtures use — has **no
+    `-Concurrency` parameter at all** (its only mention is a comment at `:121`)
+    and passes `-Navigate arena` (`:266`). **So the armoured family cannot get
+    per-session save isolation by any parameter, and necessarily runs against the
+    licensed save.** That is not a nicety: it is why `run-arena.ps1` snapshots
+    first, and why an armoured run is a supervised, serial, save-mutating
+    operation rather than something to fan out.
+
+- **`-RunSeconds` is NOT a capture parameter.** It exists only in
+  `validate-vehicle.ps1` (default 12), so the "cold profile needs `-RunSeconds
+  30`" rule above governs the VEHICLE-VALIDATION step that `AGENTS.md` requires
+  after a wrapper edit — not `launch-capture.ps1`, `run-arena.ps1`,
+  `run-campaign.ps1` or `run-capture.ps1`, none of which accept it.
+
+- ► **THE TWO THINGS THAT MADE A WSL-DRIVEN `run-arena.ps1` CAPTURE ACTUALLY
+  WORK, found 2026-09-02 on the first attempt to run one. Neither was written
+  down, because the 2026-09-01 session only ever ran `validate-vehicle.ps1`,
+  which uses `--save-directory` and therefore never touches the licensed
+  store.**
+
+  1. **RUFFLE READS A DIFFERENT SAVE STORE FROM THE ONE `save-state.ps1`
+     MANAGES, AND THE GUARDS WATCH THE WRONG ONE.** Setting
+     `$env:LOCALAPPDATA=C:\ss2la` makes `save-state.ps1` snapshot and restore
+     `C:\ss2la\ruffle\SharedObjects` — the licensed store. Ruffle resolves its
+     profile through the Windows Known Folder API and ignores the variable
+     entirely, so it read `C:\Users\corey\AppData\Local\ruffle\SharedObjects`,
+     found nothing, and **created a fresh 267-byte empty save**. The route
+     aborted at `new_or_continue` with `level: null` and
+     `ABORT:time-of-day-ceiling` after 188 s — a symptom that reads like a
+     navigator defect and is not one. **The gladiator was simply not in the
+     save Ruffle opened.**
+
+     Worse than the failure: `run-arena.ps1`'s snapshot guard AND its
+     before/after save tripwire both read the `C:\ss2la` store, so the run
+     printed `UNCHANGED (byte-identical)` — **truthfully, about a file it never
+     touched, while the file Ruffle did write was unguarded.** A save-mutating
+     run whose guard watches the wrong store is worse than no guard.
+
+     **Fix, applied 2026-09-02:** make the two stores one, with a directory
+     junction, so `save-state.ps1`, the tripwire and Ruffle all address the same
+     bytes:
+
+     ```
+     mklink /J "C:\Users\corey\AppData\Local\ruffle\SharedObjects" ^
+               "C:\ss2la\ruffle\SharedObjects"
+     ```
+
+     After it, the route loaded the hero (`level 4`, `gold 5723`,
+     `currentTournament 1`), reached `versus` and `battle-ready`, and returned
+     `Route outcome: CAPTURED`. The 267-byte stub Ruffle had minted is backed up
+     in this session's scratchpad; it was a fresh-new-game artefact, not
+     evidence.
+
+  2. **`campaign.mjs ingest-round` CANNOT RUN UNDER WSL NODE, AND IT FAILS WITH
+     A LICENCE-INTEGRITY SCARE.** `capture-session.mjs`'s `DEFAULT_INSTALL_DIR`
+     is the literal Windows path `C:\Program Files (x86)\Steam\...`, and
+     `ingestAgainst` calls `verifyInstallAgainstFingerprint()` with no
+     arguments. Under WSL node that path is `ENOENT`, `check.ok` is false, and
+     the thrown message is **"Post-session hash verification FAILED: the
+     installed build no longer matches the pinned fingerprint"**. Nothing is
+     wrong with the build — `verify-install` under Windows node reports both
+     SWFs OK against the current pin. **The message names the wrong cause and
+     the cause it names is the most alarming one available.** Run ingest under
+     Windows node:
+
+     ```
+     & 'C:\Users\corey\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' `
+        tools\runtime-capture\campaign.mjs ingest-round --family <f> --session <s> --observation <o>
+     ```
+
+     Note also that `--observation` takes the ATTEMPT-suffixed id (`obs-x-a1`),
+     not the id passed to `-ObservationId`; the un-suffixed form is an `ENOENT`
+     on the `.rufflelog`.
+
+  3. **A round costs 14 seconds end to end** (restore, route, capture, ingest),
+     measured over the first rounds of 2026-09-02. The armoured route is
+     therefore far cheaper than "a supervised window" implies, and a few hundred
+     rounds is an evening rather than a campaign.
+
+- ► **`powershell.exe` DRIVEN FROM WSL INHERITS A WORKING DIRECTORY INSIDE THE
+  REPO, so a malformed destination WRITES INTO THE REPO. Found the hard way
+  2026-09-01, by me, in this file's own session.** A stray
+  `Copy-Item 'C:\...\captures\README.md' -Destination $null` — left in a command
+  by mistake — resolved `$null` to the shell's CWD and **overwrote the
+  repository's root `README.md`** with `captures/README.md`. It was caught by
+  reading `git status` before committing, and restored with
+  `git checkout -- README.md`; nothing reached a commit. **Give every
+  `Copy-Item`/`Move-Item`/`Set-Content` an absolute `-Destination`, and read
+  `git status` before every commit rather than trusting the paths you passed to
+  `git add`.** This is the same lesson as the `git add -A` incident from a
+  different direction: in a tree where agents write, the working tree is the
+  thing to check, not your intent.
+
+- **The WSL repo cannot launch Ruffle at all.** `launch-capture.ps1:156`
+  resolves `ruffle.exe` under `$projectRoot/.tools`, which exists only in the
+  Windows tree at `C:\ss2-capture`. **A capture must be driven from that tree —
+  which is currently 28 commits behind this one**, so any wrapper edit made here
+  has to reach it before it can run. Its 38 "modified" files are pure CRLF churn
+  (verified by diffing content, not `git status`), so the tree is clean in
+  substance; it simply has not been fetched since `98482b6`.
+  ► **THE "38" IS RIGHT AND THE SWEEP'S "1366" WAS THE WRONG QUANTITY.** Measured
+    2026-09-07: the tree shows **40 modified tracked files and 1,326 untracked**,
+    totalling the 1,366 the sweep reported as modified. **So "clean in substance"
+    needs re-deriving against 40, not abandoning against 1,366** — and it now
+    fails narrowly: exactly **2 of the 40** differ in real content rather than only
+    line endings (`src/golden/observation.js` and `src/golden/run-1v1-fixture.js`).
+    There is no `core.autocrlf`, no `.gitattributes` and no skip-worktree bit.
+    Command: `git -C /mnt/c/ss2-capture --no-optional-locks status --porcelain | cut -c1-2 | sort | uniq -c`.
+
+  ► **"SINCE `98482b6`" HOLDS EXACTLY; "28 commits behind" is now 113**, with
+    nothing unique on that side (`git rev-list --count HEAD..98482b6` is 0). Live
+    moving target — write
+    `git -C /mnt/c/ss2-capture --no-optional-locks rev-list --count 98482b6..HEAD`
+    rather than a number.
+
+
+### The live save has moved past the prisoner, and 22 goldens depend on that bout
+
+The saved gladiator (John Ringler) has progressed beyond the dungeon prisoner
+fight. Two live rounds run 2026-09-01 with `-Navigate prisoner` each emitted a
+`meta` line and nothing else: Ruffle launched, the wrapper traced, and the
+navigator never reached a bout. **Every prisoner and probe family — all 22
+promoted goldens — is therefore uncapturable from the LIVE save**, and
+reproducing or extending any of them means restoring an early snapshot first
+(`verified-good-1701` or `pre-arena-path`).
+► **SUBSTANCE HOLDS; THE APPOSITION IS THE BIT THAT IS STALE, AND "23" WOULD MAKE
+  THIS SENTENCE FALSE.** The prisoner+probe subset is exactly 22 of the 23
+  goldens, so "uncapturable from the LIVE save" is true of it. What is stale is
+  the apposition equating that subset with the whole corpus. **Correct form:
+  "22 of the 23 promoted goldens".** A blanket 22→23 here breaks a true
+  sentence — the armoured golden is in neither family.
+
+
+That makes the snapshot store load-bearing evidence infrastructure rather than a
+safety net, and it is the one copy: it sits inside the MSIX container, and the
+`D:\ss2-backups` mirror is on an external drive that is usually unplugged.
+
+**`jr-live-0901` is the live John Ringler save, snapshotted 2026-09-01** (3 files
+verified identical) before any restore was attempted. Restore overwrites the live
+save, so take a snapshot BEFORE a restore, not only before a capture.
+
+### Throughput is memory-bound, and the per-round hash is 93% waste
+
+Measured 2026-09-01 on this machine (15.3 GB RAM, 8 physical cores, RTX 4060):
+
+| | measured |
+| --- | --- |
+| Available memory (free + standby) | **76 MB** |
+| One Ruffle instance | 373 MB working set / 449 MB commit |
+| `verify-install`, 1 run | 5.5 s |
+| `verify-install`, 4 concurrent | 6.1 s |
+| SS2-only hash, 4 concurrent | **0.43 s** |
+
+So concurrency is capped by RAM at about 2 today, not by CPU, which is mostly
+idle. Closing Firefox/Spotify/Dropbox/ChatGPT frees ~1.8 GB (≈4–5 instances);
+capping WSL2 in `%USERPROFILE%\.wslconfig` frees up to ~3 GB more (≈8, matching
+the physical cores) but needs `wsl --shutdown`.
+
+**The larger lever costs no memory.** `verify-install` hashes 102 MB per round
+and 95 MB of it is the AVM2 launcher SWF — which `98482b6` established the
+capture route never loads, and which that commit deliberately left as an open
+design decision ("SS2 mismatch should stop a session; launcher mismatch should
+warn"). Hashing only the 7.3 MB SS2 SWF turns ~6 s of every batch into ~0.4 s.
+Note what was NOT true: concurrent hashing does not contend badly on disk — 4
+concurrent full runs cost only +0.6 s over one, because the page cache absorbs
+them. The win is deleting redundant work, not relieving contention.
+
 
 ---
 
@@ -8481,12 +13242,54 @@ now refuses to restore it without `-Force`.
 
 ### AVM1 has ONE comparison opcode
 
-`>` is `<` with operands swapped; `>=` and `<=` are `<` negated. Every
+~~`>` is `<` with operands swapped;~~ `>=` and `<=` are `<` negated. Every
 comparison with NaN is false, so **both negated forms return TRUE for NaN**, and
 every field the wrapper reads is undefined until the frame that initialises it.
 This caused **three separate live defects in one day**, including one that
 rewrote the gladiator's gold. The only safe shape is un-negated `<`, twice:
 `(n < 1) || (0 < n)`. Use `isNum()`.
+
+► **THE HEADING AND THE FIRST CLAUSE ARE WRONG; THE RULE THEY JUSTIFY IS RIGHT.
+  Corrected 2026-09-01 (evening) — and this section is titled by the wrong half,
+  which is why it is corrected here rather than quietly rephrased.** This build's
+  AVM1 has **TWO** numeric comparison opcodes, `ActionLess2` (0x48) and
+  `ActionGreater` (0x67, SWF6+). Verified two ways: an opcode census over the
+  compiled wrapper artefact (Less2 70 = 51 `<` + 19 `>=`; Greater 39 = 28 `>` +
+  11 `<=`), and directly by the main session against the hash-verified licensed
+  SWF, whose own action stream contains both `Greater` and `Less2`. So `>` is a
+  real opcode here, not `<` with swapped operands.
+
+  **What survives untouched, because it is what the section exists for:** on this
+  toolchain `a >= b` compiles to `Less2; Not` and `a <= b` to `Greater; Not`, so
+  **both still return TRUE when an operand is NaN**, while bare `<` and `>`
+  return FALSE. Keep using `isNum()`.
+
+  **But do not read "un-negated `<`, twice" as a universal.** NaN-safety here is
+  branch POLARITY plus a guard, not an operator whitelist. The wrapper's own
+  dominant idiom — used inside `captureAllowedNow()` — is *reject NaN first, then
+  compare normally* (`if (!isNum(f)) return false;` then any ordinary
+  comparison), at lines 2029→2031, 755→756 and 735→737. A rule that forbade `>=`
+  outright would condemn all three. Where no `isNum` guard precedes the test:
+  if the true-branch ACCEPTS, the comparison must be un-negated so NaN fails it
+  (line 574); if the true-branch REFUSES or defaults, it must be negated so NaN
+  triggers the refusal (lines 588, 2137). Rewriting the second kind into the
+  first is what turns a gate fail-OPEN.
+► **THIS CITATION WAS NEVER RIGHT — not drift.** The wrapper line named is a
+  plain assignment with no comparison in it, and the wrapper blob is BYTE-
+  IDENTICAL at HEAD to what it was at the commit that wrote this sentence, so
+  the number cannot have moved. Re-derive the site before relying on the
+  argument; `git rev-parse HEAD:tools/runtime-capture/ss2-capture-wrapper.as`
+  matches the blob at that commit.
+
+
+  **And `isNum()` rejects only NaN.** `Number("")`, `Number(null)`,
+  `Number(false)` and `Number([])` are all 0, so `isNum(f) && Number(f) == want`
+  ACCEPTS all of them whenever `want` is 0 — and the armoured fixture family
+  carries 19 zero-valued fields, including `hero.armourclass` and eight zero hero
+  armour slots. **Before any gate compares a game field against a target of 0,
+  measure what Ruffle yields for a field that is `""` or `null`.** The wrapper
+  already treats `""` as a distinct hazard for FlashVars (lines 571, 580, 2118);
+  the same hazard for game-read fields is unsolved.
 
 ### `validate-vehicle.ps1` proves less than its name suggests
 
@@ -8497,21 +13300,388 @@ verbatim. Save corruption is outside its observable universe by construction —
 it compares a trace to a fixture, never a save. It now says so in its own PASS
 output and names the wrapper source hash it compiled.
 
+► **BUT ITS PASS TEXT NOW OVERSTATES ITS OWN BLINDNESS, AND THAT MATTERS FOR THE
+  ARMING-GATE WORK. Measured 2026-09-01 (evening).** The PASS output says the
+  gate "never enters the navigator, the arena state machine, the four gates,
+  staging, the shop, the fight policy or **the capture gate**". The last item is
+  false: **`captureAllowedNow()` runs on every gate run.** The path is
+  `ov.checkattackroll()` → the checkattackroll wrap (wrapper 2376-2389) →
+  `if (!actionCaptured) beginAction();` (2381) → `if (!captureAllowedNow())
+  return;` (2216). A gate run's own log shows `called:checkattackroll` followed
+  immediately by `attacker-resolved-hero`, and **two archived gate runs went RED
+  on a capture-gate refusal** — they produced a 387-byte `.jsonl` with no
+  observation, so ingest threw.
+
+  **So the gate is a working oracle for the FIRST HALF of that function** — the
+  `arenaStopped` check and the whole attacker-side guard (2006-2023) — and blind
+  only from line 2024 onward, because no `-Pnavigate` is passed and `arenaMode`
+  is false. **Anything added inside the `champion` block is DEAD CODE under the
+  gate and would pass green untested.**
+
+  **The remedy is proven on this codebase, not speculative:** when the
+  attacker-side guard was fixed, `stub-game.as` was extended with
+  `ov.game_attacker` / `ov.game_defender` (`stub-game.as:52-65`, whose comment
+  says exactly why), and the gate then demonstrated that guard firing in BOTH
+  directions and going red for each. **Extend the stub so the gate can see a new
+  branch** — that is the technique, and it has worked here once already.
+
+  *(Also corrected: `attack_chances` is NOT the arming point the gate exercises.
+  `called:attack_chances` appears **0 times** in vehicle-check rufflelogs and 209
+  times across the archive. The single vehicle-check "hit" for that string is
+  inside a decompiled wrapper SOURCE copy, not a trace — the exact false-positive
+  class the wrapper's own comment warns about, and it has now caught a reader
+  twice.)*
+► **BOTH LOAD-BEARING HALVES HOLD; THE "209" IS NOT A COUNT OF TIMES AND NEVER
+  WAS.** `dbg()` in `tools/runtime-capture/ss2-capture-wrapper.as` returns early
+  on a label it has already emitted, so `called:*`, `wrapped:*` and
+  `action-armed` appear AT MOST ONCE PER TRACE — measured across the archive,
+  every rufflelog carrying the label carries it exactly once, never twice. So
+  209 was a count of TRACES, and substituting a bigger number would fix the
+  denominator and leave the category error in place. Its provenance is nailed:
+  209 is exactly the file count in the frozen 2026-08-31 replica under
+  OneDrive, not a live measurement. Say it as a proportion of traces and give
+  the command:
+  `grep -rlc --include='*.rufflelog' -e 'called:attack_chances' <archive> | wc -l`
+  (1531 of 1650 rufflelogs on 2026-09-07). The vehicle-check half HOLDS exactly:
+  0 of its 49 rufflelogs carry it, and the single hit is a decompiled wrapper
+  SOURCE copy — precisely the false-positive class this sentence names.
+
+
 ---
 
 ## Next steps, in order
 
-1. **Capture the champion bout.** Everything is in place except one thing:
-   **it cannot go through `run-arena.ps1`.** All five champion fixtures need
-   eleven extra `-WatchFields`, and only `launch-capture.ps1` exposes both that
-   and `-Stage*` — and it has no snapshot guard. Snapshot by hand first, or add
-   the guard. Winning is not required: the wrapper arms on the first
-   `checkattackroll` and the trace closes on that call's return.
+► **STATE AS OF 2026-09-07. Suite is 808 / 807 / 0 / 1 (fresh-clone profile),
+  re-measured that day; it read 708 / 707 / 0 / 1 from 2026-09-02 until then,
+  and the line's own instruction had been ignored for five days. MEASURE IT, DO
+  NOT COPY THIS LINE** — two commit messages
+  this session said "703 / 702" and were stale by one when written, which is the
+  same error the previous session's last commit existed to fix. Ranked items 2, 3 and 5 of the `…-0130` brief are DONE
+  or REFUTED and item 4 is answered; see
+  `docs/handoffs/2026-09-02-0007--the-wave-refuted-more-than-it-confirmed.md`.
+  **What is left, in order:**
+  ► **RE-MEASURED 2026-09-07 (next session): 816 / 815 / 0 / 1, and the 808 above
+    went stale THE SAME DAY it was written** — `d7ff634` added 128 lines of tests
+    hours later. Three values have now been in play for one quantity: the sweep
+    proposed 787/786, this line was written as 808/807, the truth is 816/815.
+    **The line's own instruction now applies to itself, which is the whole point:
+    any digit written here is stale within a commit.** Keep the instruction; treat
+    every number beside it as expired on sight.
+
+
+  1. **CAPTURE AN ARMOURED FIXTURE — still first, and the vehicle blocker was
+     never real.** `run-arena.ps1` carries `-WatchFields` (`:137` → `:295`),
+     `-StageHero`/`-StageVillain` (`:100-101`) and its own snapshot guard, and
+     it is exercised — five archived rufflelogs emit
+     `{"t":"dbg","at":"watch-extended","added":11}`. Both removal fixtures take
+     the identical flag `-WatchFields "helmet_defence,shoulderguard_defence"`.
+     **Expect no observation from one window**: both pin `staminaleft 105` on
+     both sides, which held in 0 of 38 armed rounds, and six other fields also
+     diverge. Raise the odds first by pinning the approach-step count and
+     extending `-StageVillain` to `speed` and `strength` (`applyStageSide` has
+     no whitelist, so it can already write them).
+     ► **CLOSED 2026-09-02 by `2341789`, and re-verified 2026-09-07. DO NOT
+       RE-CAPTURE.** `golden-armoured-deflection-threshold-cleared` is promoted:
+       `provenance.observationIds` = `["obs-onx1405-a1","obs-onx1521-a1"]`,
+       `repetitions: 2`, and it is the only golden carrying `provenance.staged`.
+       **Goldens are 23, not 22.** This item spans ~90 lines and carried ZERO
+       retraction markers while this same file records the promotion in five other
+       places. Following it would burn the project's single serial, supervised,
+       irreplaceable resource — a Ruffle capture window — on work already done; the
+       2026-09-02 13:40 handoff records that it cost 1,201 unattended rounds. The
+       item's own closing question ("whether they assert a villain state the build
+       can reach at all") is ALSO answered: 2 matches in 1,201 staged rounds, right
+       on its own predicted ~1-in-450.
+
+
+     ► **IT IS NOT A "WINDOW" ANY MORE. A ROUND COSTS 14 SECONDS, AND 150 OF
+       THEM RAN UNATTENDED ON 2026-09-02.** Driven from WSL with the store
+       junction in place (see § "Driving the capture pipeline FROM WSL"),
+       restore → `run-arena.ps1` → ingest is one command and takes 14 s. 150
+       rounds against `candidate-armoured-deflection-threshold-cleared`: 149
+       CAPTURED, 0 matched, 150 divergence reports filed. **The whole framing
+       of this item as a scarce supervised window was a cost estimate nobody
+       had re-measured since the protocol changed.**
+
+       **The yield, measured over those 150 rounds rather than argued:**
+
+       | pinned field | rounds that CLEARED it | rate |
+       | --- | ---: | ---: |
+       | `attackDirection` 5 | 46 | 31% |
+       | hero `staminaleft` 105 | 47 | 31% |
+       | villain `staminaleft` 105 | **5** | **3.3%** |
+       | hero `hitpoints` | 107 | 71% |
+
+       The other 104 directions split 33 / 37 / 34 across 6 / 7 / 8 and never
+       landed outside that band. **Zero rounds cleared direction-5 and
+       villain-105 together**, so the joint rate is at most ~1 in 450 and the
+       villain's stamina is the single binding constraint — its observed mass
+       sits at 85-99, not at 105.
+
+     ► **Refined by a verifier wave, 2026-09-02. Every count above reproduces;
+       three things are added and one confident correction was REFUTED.**
+
+       - **`attack_direction` is the only real draw, and its rate is exactly
+         1/4** — not the ~31% observed. `normal_attack` assigns
+         `randomBetween(5, 8)` at `+0x61f1`, so the band is `{5,6,7,8}` by
+         construction. Pooled over 243 rounds the split is 70/53/60/60,
+         χ² = 2.416 on 3 df: uniform is not rejected, and no direction outside
+         the band has ever been observed.
+       - **Hero stamina is not a draw at all: `heroStam = 110 − walk steps`,
+         holding in 249 of 251 pooled rounds.** So `heroStam == 105` is exactly
+         "the approach took five steps" — which is what "pin the approach-step
+         count" above would fix, and it would fix two constraints at once,
+         because `P(hero hitpoints intact | 5 walks) = 0.718`.
+       - **A FIFTH axis nobody had listed:** `gladiator_dir` flipped in
+         `obs-ondc143` — hero `left`, villain `right` — 1 round in 150. The
+         protocol occasionally starts the gladiators on swapped sides.
+       - **The denominator is wrong by one:** 151 sessions were launched, 150
+         are usable, and `session-ondc224` aborted (one `meta` record, log dies
+         at root frame 164). Not a hidden success, but "150 rounds → 150
+         reports" should read "151 launched, 150 usable, 1 aborted".
+
+       ► **REFUTED, and it is the one that would have changed the protocol:**
+         the wave concluded that villain stamina is "written into the campaign
+         driver, not drawn by the game", that its 1-in-31 rate is a harness
+         setting, and that staging `villain.staminaleft=105` would cut the cost
+         to one success per 5.6 rounds. **It read the `"t":"end"` record's
+         `staged:` string as the driver's staging INPUT. It is the CURRENT
+         value.** Measured on `session-ondc100`: the `{"at":"staged"}` record —
+         which IS the input — says `staminaleft=105`, the `{"t":"state"}`
+         record at arming says **97**, and the `end` record's `staged:` string
+         says 97. Every round of this batch already stages a constant 105; the
+         villain then takes phases and walks it down before the hero's armed
+         action. **The recommendation was to do what the driver has been doing
+         all along.**
+
+         So the binding constraint stands, and it is not settable by staging.
+         Getting 105 at ARMING needs zero villain drift, which means arming
+         before the villain has taken a phase — and `initbattle` puts the
+         villain at `staminamax` = 110 there, not 105. That is the same
+         contradiction recorded below, and it is still the open question.
+
+       **So "run more rounds" is now a real strategy where it was not, but the
+       PROTOCOL is still what decides it.** `initbattle` (`+0xb8a`-`+0xbb6` of
+       `sprite:2249/frame:1/DoAction@0x6e421b`, re-read 2026-09-02) sets
+       `villain.staminaleft = villain.staminamax` unconditionally, so arming on
+       the hero's FIRST action — the change this file recommends two paragraphs
+       up — would put the villain at **110, not the 105 both fixtures pin.** It
+       would make the villain side deterministic and deterministically WRONG
+       against these fixtures. Whether they assert a villain state the build can
+       reach at all is the open question, and it is the same class as "fifteen
+       fixtures assert a hero the build cannot produce". Re-derive from the map;
+       never edit a fixture to fit.
+  2. **Model enchantment DAMAGE** — `+0x320c` and `+0x3326`, both dropped, so an
+     enchanted weapon applies a status and deals no magic damage.
+  3. ~~**Transcribe the static weapon table and make `weapon` declarable**,
+     which closes gap 3 in `ss2-rules.js` rather than restating it.~~
+     ► **THE FIRST HALF IS ALREADY DONE AND THE ITEM AS WRITTEN WOULD BURN A
+       SESSION REDOING IT. Corrected 2026-09-02.**
+       [`docs/integration/ss2-item-tables.md`](docs/integration/ss2-item-tables.md)
+       has carried the transcription since 2026-08-30: §2.3 tabulates weapon
+       ids 1-80 and §2.4 ids 0 and 201-220 — **90 rows, each with the
+       instruction offset of its own literal** — §2.1 gives the meaning of
+       every array index (`[0]` type, `[1]` display name, `[2]` weight and
+       `attack_speed`, `[3]` min damage, `[4]` max damage, `[5]` range
+       multiplier), and §5 does the same for armour. It also SETTLES the
+       licensing boundary this work needs: **display-name string literals are
+       game content and are not reproduced; items are identified by id only.**
+       I re-read two rows from the bytes independently — id 22 at `+0x4174`
+       and id 24 at `+0x41c6` — and both match the document exactly.
+       Neither `ss2-rules.js`'s gap 3 nor this list mentioned that the file
+       exists; both said "the table is not transcribed".
+     ► **BOTH OFFSETS ARE NOW MODELLED, so "both dropped" is closed** — `ss2BattleValues`
+       computes `weapon_enchantment_damage` and `secondary_weapon_enchantment_damage`,
+       proved at runtime rather than by reading: a call with `weapon: 5`,
+       `weapon_enchantment_potency: 3`, `secondary_weapon: 7`,
+       `secondary_weapon_enchantment_potency: 2` returns 49 and 54. **Ranked item 2
+       here still reads "both dropped" and is unstruck while item 3 beside it carries
+       a correction.** ► The sweep's own replacement line numbers for this are
+       themselves stale — find the derivation with
+       `grep -n 'weapon_enchantment_damage' src/team/ss2-rules.js`, not with a
+       number.
+
+
+     ► **AND ALL 90 ROWS ARE NOW MECHANICALLY VERIFIED, so that half is done
+       too.** `node tools/item-table-transcription.mjs` diffs **540 of 540
+       fields** — the per-row instruction offset included — and separately
+       confirms the INDEX CONVENTION from the build rather than assuming it,
+       by reading the `Push <n>; GetMember` at each `battlevalues` reader site
+       (`weapon_type` 0 at `+0x3134`, `weapon_weight` 2 at `+0x3186`,
+       `weapon_min_damage` 3 at `+0x31d0`, `weapon_max_damage` 4 at `+0x31ec`,
+       `weapon_range` 5 at `+0x31aa`). All agree against `77cb545c…`. Without
+       that second check the first proves only that the document's numbers are
+       the build's numbers UNDER THE DOCUMENT'S OWN CONVENTION, which is the
+       shape of an oracle computed from the table under test.
+
+     ► **AND THE REST IS NOW DONE TOO (2026-09-02). RANKED ITEM 3 IS CLOSED.**
+       `src/team/ss2-weapon-table.js` carries the ninety rows, generated from
+       the build's own literals, and `ss2BattleValues` derives the damage pair
+       from a `weapon` id — weapon 24 gives 28 / 52, weapon 0 gives 21 / 23,
+       which is the live save's own gladiator derived rather than read.
+       `secondary_weapon` likewise, at the build's `round(strength * 1)`.
+
+       **An explicit pair OUTRANKS the table, and that is load-bearing, not
+       defensive.** All 22 goldens supply `min_damage`/`max_damage` and none
+       supplies `weapon`, so deriving first would re-datum runtime evidence
+       from a map-derived table. Derivation fills a hole; it never overwrites a
+       measurement.
+► **22 → 23, AND THE UNIVERSAL IS NOW ROLE-SCOPED.** Hero pair present 23/23;
+  villain pair 22/23 — the armoured golden's villain supplies NEITHER
+  `min_damage`/`max_damage` NOR a `weapon` id. **"None supplies `weapon`" HOLDS
+  EXACTLY: 0 of 23 files contain the string.** Third thing neither the document
+  nor the sweep says: on that one fixture the precedence rule is UNEXERCISED, not
+  violated — there is nothing to arbitrate. Adjacent stale in the same block:
+  "ONE test of 718" → 816, and "22 measured damage pairs" → 23 hero, 22 villain.
+
+
+       **And the corpus cannot defend that rule.** Mutating the derivation to
+       overwrite instead of fill fails ONE test of 718 — the new precedence
+       assertion — and the golden replay does not notice, because no golden
+       carries a `weapon` id for the derivation to fire on. One assertion is
+       all that stands between the table and 22 measured damage pairs.
+► **THE MUTATION REPRODUCES EXACTLY; ONLY THE SUITE TOTAL MOVED.** Re-run
+  2026-09-07 in a disposable copy: overwriting instead of filling still fails
+  precisely one test — "an explicit damage pair OUTRANKS a weapon id, so evidence
+  is never re-datumed" — and the golden replay still does not notice, because
+  `grep -l '"weapon"' test/fixtures/ss2-1v1-golden/golden-*.json` is 0 of 23, so
+  no golden fires the derivation. "718" → 816.
+
+
+       Still genuinely open, and NOT needed for the above: `weapon` as a
+       declarable RESOURCE (`SS2_RESOURCE_NAMES`, `SS2_RESOURCE_DEFAULTS`,
+       `CANONICAL_RESOURCE_SOURCES`, `SS2_PROJECTED_COMBATANT_KEYS`). It is
+       read straight off the character object today, because `ss2BattleValues`
+       opens with `const source = { ...character }`.
+  4. **The `COMBATANT_KEYS` schema question is unchanged and still the owner's.**
+
+► ~~**FIVE LIVE INSTRUCTIONS SIT IN `ss2-item-tables.md` §9 THAT THIS LIST HAS
+  NEVER CARRIED, AND AT LEAST TWO ARE STILL UNFIXED (checked 2026-09-02).**~~
+  **RETRACTED THE SAME NIGHT, BY THE WAVE I HAD LAUNCHED. BOTH OF THE TWO I
+  "CHECKED DIRECTLY" WERE WRONG, AND THE FIRST ONE WAS WRONG BECAUSE OF MY OWN
+  TRUNCATED GREP.** The general point survives — §9 is a side document carrying
+  instructions this list never hoisted, and a side document freezes the way a
+  handoff does — but every specific claim below it was mine and is corrected
+  here rather than deleted.
+
+  - **§9.1 — the wrapper must call `onRollOver()` before `.onRelease()`.**
+    ~~It still does not; `onRollOver` appears nowhere in the wrapper.~~
+    **FALSE. It does, and has since before §9.1 was written.**
+    `ss2-capture-wrapper.as:1200-1201` is `chosen.onRollOver(); chosen.onRelease();`
+    inside the `shop-open` block, with a guard at `:1193` that refuses and
+    reports `hasRollOver`/`hasRelease` if either handler is missing.
+    `onRollOver` appears on lines 1177, 1193, 1195 and 1200. It landed in
+    `2df4ba0` at 2026-08-30 22:46:58 -0400 — **four minutes and 41 seconds
+    before `df3a122` created §9.1 asking for it**, so that instruction was
+    stale at the moment it was written.
+
+    **HOW I GOT IT WRONG, because the mechanism matters more than the fact.**
+    I ran `grep -n "onRollOver\|onRelease" <file> | head -10`. The first ten
+    matches are all `onRelease`, at lines 384 through 1137; `head` cut the
+    output off forty lines before the first `onRollOver`. I then read the
+    absence of a match as the absence of a call. **`docs/overnight-agent-plan.md`
+    already names this exact failure** — "whenever you filter it, print what
+    the filter REMOVED" — after `git ls-files test | grep -v fixtures` silently
+    ate three real test files. It is the same mistake with `head` instead of
+    `grep -v`, made by the session that had read the rule that morning. **A
+    truncating pipe is a filter.**
+  - **§9.3 — `ARMOUR_PAGES = ["browse"]`.** The line is still there (`:852`),
+    but the conclusion drawn from it is wrong: `-ShopArmour` does NOT silently
+    reach `shop-unreachable`. `:828-831` refuses up front and emits
+    `{"at":"arena","step":"shop-armour-unimplemented"}`. That is a declared
+    not-implemented with an honest refusal, not a lurking defect, and it should
+    be read as scope rather than as a bug.
+
+  §9.2, §9.4 and §9.5 remain unchecked here. (§9.5 asked the battle map to
+  record the `[3]`/`[4]` indices, which it now does at `:447-452`.)
+  **Treat the rest of §9 as unverified: two for two of the ones I checked were
+  stale, which is what a three-day-old instruction list is worth.**
+
+► **ITEMS 1 AND 2 OF THE 2026-09-01 BRIEF ARE DONE (2026-09-02).**
+  `src/team/ss2-rules.js` exists and the 22 goldens replay through the resolver.
+  What that opened, and what it did NOT close, is in
+  `docs/handoffs/2026-09-02-0130--ss2-rules-and-the-wave-that-broke-it.md` and
+  in § "Found 2026-09-02" below. **The corpus now has a consumer; it still has
+  no armour, no enchantment and no non-tournament coverage, and a mutation
+  sweep showed the suite cannot see most of what the rule set could get wrong
+  in those dimensions. That is an evidence problem — a capture problem — not a
+  test-writing problem, and it is now the top of this list.**
+  ► **ONE THIRD OF THIS IS NOW BACKWARDS AND ALWAYS WAS.** "No armour" is FALSE
+    since 2026-09-02 (villain `armourclass` 79/79, helmet 6, shoulderguard 1,
+    gauntlet 1, greaves 2, expected `armourDamage` 22). "No enchantment" HOLDS —
+    `statusApplied === null` in 23 of 23. **"No non-tournament coverage" IS THE
+    WRONG WAY ROUND.** The build's modes are tournament / duel / misc; 22 of the
+    23 goldens are `misc`, which IS non-tournament, so the corpus has had
+    non-tournament coverage from the first golden. What it LACKED was TOURNAMENT
+    coverage, and that gap closed 2026-09-02. `src/team/ss2-rules.js:156` already
+    carries the correct form. Neither this document nor the sweep spotted it.
+
+
+
+1. ~~**The champion family cannot be captured, and the fixtures must be
+   re-derived.**~~ **RETRACTED 2026-08-31 (`2d0b077`). ALL THREE ARITHMETIC
+   BLOCKS BELOW ARE FALSE. Do not act on this item; capture the armoured family
+   instead (item 2).**
+
+   This was the file's top-ranked next step while the corrections block at the
+   head of the same file already called its first premise false. A session that
+   read the list and not the block would have spent a window re-deriving five
+   fixtures that are capturable as written. **A retraction at the top of a file
+   does not reach a reader who starts at the section that tells them what to do:
+   retract AT THE INSTRUCTION, not only above it.**
+
+   The three blocks, and what each is refuted by — run
+   `node tools/stat-vector-reachability.mjs` for the current answer:
+
+   - ~~"no tool path can change `attack`/`defence` — not levelling"~~ **False.**
+     Root frame 227's level-up panel carries one `+` button per base stat,
+     `attack` (1602) and `defence` (2252) included, and `constructDNA` persists
+     them. Corrected in the block at the head of this file.
+   - ~~"`hitpointsmax` 250 … no reachable (herolevel, vitality) pair"~~ **False.**
+     `L=11, vitality 7` gives `110 + 140 = 250`. Six further odd levels also work.
+   - ~~"`staminamax` 150 needs `stamina` 5. Nothing in the tooling writes
+     `stamina`"~~ **False.** `stamina` is an ordinary level-up stat, button 2254.
+
+   The champion family is reachable at `herolevel 11` (vitality 7, speed 7,
+   stamina 5, weapon 24). It is NOT the cheapest target — weapon 24 costs 4542
+   against a 2500 start, so it needs won purses. See
+   `docs/integration/ss2-battle-map.md` § "The reachability arithmetic, done".
+
+   **The byte answer to why staged hero fields die** — the question runbook §2A.5
+   left open, and it is not the `experience` hypothesis. Overlay frame 1
+   (`initialise`) re-runs once per turn and calls
+   `skincharacter(_root.game.hero, this.hero)` → `initcharacter(hero, avatar,
+   hero.charDNA)`, which rewrites all 40+ DNA fields, then `battlevalues`. The
+   villain is never re-skinned there — which is exactly why `-StageVillain`
+   survives to arming and `-StageHero` does not. **Nothing in the build derives
+   `herolevel` from `experience`**, so the runbook's `experience:0` story was a
+   coincidence: the staged run's experience sits inside the unstaged
+   distribution, and nothing was suppressed. Battle-time `-StageHero` is a
+   one-turn write on the hero and a durable write on the villain.
+
+   **The "arrive empty" idea for the stamina gate is also wrong** and should not
+   be tried: overlay frame 62 refills the hero's stamina AND hitpoints on every
+   won bout, so a hero arriving at the rank-1 bout already has a full bar. The
+   only remaining stamina risk is the number of walk actions before the first
+   `checkattackroll`.
+
+   Do NOT edit the staging string to fit. Re-derive the family's hero from the
+   gladiator the project actually has — `attack` 1, `defence` 1, `magicka` 1,
+   `charisma` 1, `stamina` 1, `vitality` 1 + 4 per level — and recompute the
+   chance, roll and damage chain from that. The champion OPPONENT is unaffected:
+   `hitpointsmax` 110 and `armourclass` 86 are hard-coded DNA and were confirmed
+   again live (fifteen sightings).
+
 2. **Capture `candidate-armoured-*` (5) and `candidate-tournament-*` (3).**
-   Both reachable with the tooling as it stands. `campaign.mjs watch-fields
-   --family <f>` prints what each needs. Staged armour IS honoured
-   (`damagecharacter` reads the live reference at roll time); staged `hitpoints`
-   is NOT (`check_stats` clamps it every phase transition).
+   Both reachable with the tooling as it stands, and neither needs the
+   tournament ladder, so neither carries the level/stamina problem above.
+   `campaign.mjs watch-fields --family <f>` prints what each needs — note the
+   armoured family does NOT agree on one watch list, so it must be run one
+   member at a time. Staged armour IS honoured (`damagecharacter` reads the live
+   reference at roll time); staged `hitpoints` is NOT (`check_stats` clamps it
+   every phase transition). **This is now the cheapest real evidence available
+   and should probably come first.**
+
 3. **The spell family (8) is still blocked** — the hook fix was necessary but
    not sufficient. See below.
 
@@ -8522,6 +13692,2358 @@ has per-fixture commands.
 ---
 
 ## Open items
+
+### Found 2026-09-02: what wiring SS2's arithmetic into the resolver exposed
+
+All of these came out of a 12-agent write-nothing verification wave against
+`src/team/ss2-rules.js` (12 started, 12 returned, **10 BROKEN**). The ones that
+were fixed are recorded in the handoff; these are the ones still open, each with
+the one fact that would settle it.
+
+- **THE MAP WAS RIGHT AND THIS PROJECT OVERRULED IT.** `src/team/ss2-rules.js`
+  was written asserting that `+0x684c` (taunt) was the only site for
+  `hitpoints += 3 + ceil(stamina)`, and dropped the rest branch's heal on that
+  basis — while `ss2-battle-map.md`'s own prose said the taunt copy was a copy.
+  The bytes agree with the prose: `+0x51d5`, inside the rest branch's
+  `struck == null` arm. **The mechanism was that the map's TABLES omitted the
+  row its PROSE described**, and a table is what an implementer reads. Both are
+  corrected. The general lesson is the standing rule running backwards: *derive
+  from the map, and when you think the map is wrong, read the bytes before you
+  write the code that says so.*
+- **A MUTATION SWEEP IS THE ONLY THING THAT MEASURED THE SUITE'S REACH.** Nine
+  mutations of `ss2-rules.js` passed all 685 tests. Seven of the ones tried
+  since are now caught, and the fixes were never "add an assertion" — they were
+  **desaturating the fixtures**: the defender sat at full stamina so the
+  breastplate join clamped and wrote nothing; hero and villain shared
+  `attack == defence` so swapping them was invisible; `stamina 4` makes
+  `round(x/3)` and `floor(x/3)` agree. **A green suite over symmetric,
+  saturated inputs is a suite that cannot see.** Run a mutation sweep on
+  anything load-bearing before believing a green run.
+- **The 22 goldens still cover ONE archetype in ONE dimension.** All 22:
+  `armourclass 0`, eight zero piece ids, no enchantment, `fightMode: "misc"`,
+  hero attack 1 == defence 1, damage exactly equal to the defender's hitpoints,
+  hero at full health. Three clamp sites can each be deleted with the replay
+  file green because no value ever reaches a bound. **The armour-first split,
+  piece destruction, the breastplate stamina join and enchantment status have
+  ZERO runtime backing.** `test/ss2-team-rules.test.js` cross-checks them
+  against the arithmetic itself and says so; that is not evidence about the
+  build. What closes it is a capture, not a test.
+- ~~**`src/golden/ss2-attack-candidate.js:254-264` looks wrong and was NOT
+  touched.**~~ **REFUTED 2026-09-02 FROM THE BYTES. The code is FAITHFUL and
+  must not be "fixed"; the flag was a false positive.** `damagecharacter`'s proc
+  gate is `randomBetween(1,100) < game_attacker.weapon_enchantment_potency * 10`
+  at `+0x1bf1`/`+0x1c09..+0x1c22` — the PRIMARY potency, read unconditionally,
+  in a gate hoisted OUT of and evaluated BEFORE the first `equipped_weapon` test
+  at `+0x1c27`. Only the TYPE branches on the weapon.
+  `secondary_weapon_enchantment_potency` is read NOWHERE in `damagecharacter`;
+  census settles it, since `magicweapon_percentage` occurs exactly twice in the
+  whole build (one write, one read), so there is exactly one enchantment roll.
+  `ss2-battle-map.md:1485` already said so in prose. Derived independently by
+  the main session and by two of three verifiers, and the offsets are now quoted
+  AT the function so the next reader has to delete a derivation rather than redo
+  one. **This is last session's `+0x51d5` lesson from the opposite direction: a
+  plausible bug report against faithful code.**
+  ► **WRONG AS COMMITTED, AND THE SWEEP'S REPLACEMENT IS WRONG TOO — the honest
+    answer is a third thing.** The prose bullet cited was the enchantment bullet
+    BEFORE the very commit this sentence describes inserted an offsets block above
+    it; by the time the sentence was written one commit later, that line was the
+    armour-removal bullet. **So the citation was already ~18 lines stale the moment
+    it was committed.** ► Second flag: "already said so in prose" is itself
+    misleading — the census sentence it now points at was written by that same
+    commit; only a weaker statement pre-existed. Find both with
+    `grep -n 'exactly one enchantment roll' docs/integration/ss2-battle-map.md`.
+
+  ► **STALE, AND ONE CLAUSE IS FALSE AND KNOWN-FALSE ELSEWHERE IN THIS SAME FILE.**
+    Over the 23: villain `armourclass 0` in 22; all 23 carry eight piece keys per
+    side, hero all-zero 23/23 and villain all-zero 22/23; "no enchantment" 23/23
+    HOLDS; `fightMode "misc"` in 22; "hero attack 1 == defence 1" 23/23 HOLDS;
+    "hero at full health" 23/23 HOLDS. **But "damage exactly equal to the
+    defender's hitpoints" is FALSE for every golden** — hero 21–23 against villain
+    hitpoints 10 (×22) or 80 (×1) — and a paragraph further down in this living
+    head says so explicitly ("The premise is false"), while this one was never
+    struck.
+
+
+  **The REAL defect was three lines below, and nobody had named it. FIXED.**
+  Each status arm is `(equipped_weapon == 1 && weapon_enchantment_type == N) ||
+  (equipped_weapon == 2 && secondary_weapon_enchantment_type == N)`
+  (`+0x1c27`/`+0x1c58`, `+0x1cab`/`+0x1cdc`, `+0x1d16`/`+0x1d47`,
+  `+0x1d81`/`+0x1db2`), so any other `equipped_weapon` applies NO status — while
+  the module treated "not 2" as "primary" and applied one. Data-neutral today
+  (all 12 corpus values are 1); it removes a divergence a future enchanted
+  capture could have hit. Three tests pin it; both mutants fail.
+
+  **Still open, and it is the bigger gap: enchantment DAMAGE is unmodelled on
+  both weapons.** `weapon_enchantment_damage` (`+0x320c`) and
+  `secondary_weapon_enchantment_damage` (`+0x3326`) are each
+  `ceil(<max_damage>/3 * <potency>)`. ~~The secondary is absent from the adapter
+  catalogue too (`src/adapter/vanilla-fields.js` carries only the primary) —
+  an asymmetry, not a decision.~~ **STALE since `52bc570` (2026-09-02 06:05),
+  corrected 2026-09-02 evening from the file:** `vanilla-fields.js:150,155`
+  carries BOTH, and `ss2BattleValues` DERIVES both at `ss2-rules.js:472-475`.
+  What is still true is the sentence that opens this bullet: the damage is
+  computed and never APPLIED, because the build applies it as a status phase
+  that replaces the afflicted combatant's next turn. See the 16:59 handoff for
+  the costed fork.
+► **DRIFT — AND THE CITATION WAS NEVER EXACT, AND THE SWEEP'S FIX IS ALSO
+  STALE.** At the commit that wrote this sentence those four lines were the
+  COMMENT BLOCK immediately above the assignments, not the derivation. The
+  substance holds: both are derived, and `src/adapter/vanilla-fields.js:150`
+  and `:155` carry both — those two anchors are still exact. Locate the
+  derivation with `grep -n 'derived.weapon_enchantment_damage' src/team/ss2-rules.js`.
+
+► **CLOSED 2026-09-07 by `86ccb68`** ("Build the status phase: a condition now
+  takes its bearer's turn"), with four commits stacked on top (`1f90d3e`,
+  `dda33d4`, `07773db`, `659dfab`). `resolveStatusPhase`
+  (`src/team/ss2-rules.js:1146`) reads the INFLICTOR's enchantment damage at
+  `:1186-1189`, selects primary vs secondary by the VICTIM's `equipped_weapon`
+  at `:1188` — reproduced, not corrected, and the code says so — and applies it
+  through `applySs2MagicDamageCandidate` at `:1203`. Both weapons are covered,
+  so "unmodelled on both weapons" is closed. Pinned by
+  `test/ss2-team-rules.test.js:1218`.
+
+
+- ~~**`localeCompare` is a desync hazard and survives in two files.**~~
+  **DONE 2026-09-02, and it was FIVE files, not two. The one nobody had found is
+  the one that matters.** `tools/runtime-capture/build-manifest.mjs:136` broke
+  the capture-manifest session tiebreak on `localeCompare`, and that array order
+  is inside the digest **all 22 promoted goldens cite as
+  `provenance.captureManifestSha256`** — so two machines could mint two
+  different, equally "correct" digests for byte-identical evidence. Its own
+  comment four lines up exists to prevent exactly that class one layer higher.
+  ► **COUNT STALE, CLAIM STRONGER: 23 of 23 goldens carry
+    `provenance.captureManifestSha256`.** ► **AND THIS ROW HAS TWO MORE TARGET
+    SITES IN THE SAME PARAGRAPH that a careless application would miss** — "all 22
+    committed manifests" and "0 of 22 reorder" — because the sweep's own table cell
+    contains an escaped pipe and any naive parse of it drops them. Measured: 23
+    committed manifests, **23 of 23 rebuild to the digest their golden cites**, one
+    manifest per golden, none unmatched. The locale census in the same paragraph
+    reproduces exactly (86 sessionIds, 3,655 pairs, az-AZ 682, haw-US 1).
+
+
+  Measured over the 86 committed sessionIds (3,655 pairs): en-US and eleven
+  other locales order every pair as the code-unit comparator does; **haw-US
+  reorders 1 and az-AZ reorders 682.** So the fix is provably free — verified
+  directly, not inferred: all 22 committed manifests still rebuild to the digest
+  their golden cites, and 0 of 22 reorder under six locales. Re-derive with
+  `node tools/stable-order-locale-census.mjs`.
+► **OFF BY ONE, AND WRONG WHEN WRITTEN: it is en-US and TWELVE other locales.**
+  `node tools/stable-order-locale-census.mjs` reports 86 sessionIds / 3,655
+  pairs, az-AZ 682, haw-US 1, and thirteen of the fifteen locales scoring 0. The
+  census already covered the same fifteen locales at the commit that wrote this
+  sentence, so this was an arithmetic slip, not drift. The 86 / 3,655 / 1 / 682
+  figures all HOLD.
+
+
+  **`initiativeOrder` was worse than "the hash diverges".** It drives
+  `currentCombatant` and `advanceTurn`, so a locale difference changes WHO ACTS
+  FIRST: on one blueprint the RNG stream stayed bit-identical (21 draws, same
+  final state) and the WINNER still flipped. It also reaches a sealed campaign
+  record via `src/campaign/from-battle.js`.
+
+  The shared comparator and the whole measurement live in
+  `src/common/stable-order.js`; `test/stable-order.test.js` pins it. **Note it
+  does NOT case-fold** — `["alpha","Beta"]` orders differently from en-US
+  collation — which is pinned by a test rather than papered over.
+
+  **Two traps this produced, both worth keeping.** (1) My first draft of those
+  tests was SATURATED: restoring `localeCompare` left the tests *named for*
+  locale-independence green, because the assertions ran in an en-US process.
+  They now run the real code in a child under `LC_ALL=az-AZ`, each with a
+  vacuity guard. (2) The manifest site had NO test at all, and only a mutation
+  found it — reverting that one line and running all of
+  `capture-campaign.test.js` under `az-AZ` passed **76 of 76**.
+
+- ~~**The RNG tape is not inside the hash.**~~ **CLOSED 2026-09-02 with the
+  CONSUMED-PREFIX digest, decided by the owner. The remedy this file used to
+  prescribe pointed the WRONG WAY and was not taken.**
+  The collision is real and was reproduced directly: two battles whose tapes
+  differ only in an UNCONSUMED sample both hash to `2b429191`, with
+  `rngState 0 / rngCursor 0` on both sides (`rng.js:126` sets `#state = 0` for
+  tape mode, and `toTeamWireState` carries only `rngState`/`rngCursor`).
+  ► **ANCHOR DRIFTED BY TWO, AND THE SECOND CLAUSE IS NOW FALSE.** `toTeamWireState`
+    no longer carries only `rngState`/`rngCursor`: in tape mode it ALSO projects
+    `rngMode` and `rngDrawn` — the consumed-prefix fix this same bullet announces.
+    **The code says so itself**: `src/team/rng.js` reads "`toTeamWireState`
+    **projected** only `rngState` and `rngCursor`", past tense. Locate the
+    tape-mode reset with `grep -n '#state = 0' src/team/rng.js`.
+
+
+  **This file said "projecting the channel mode and a digest of the samples
+  would close it". Projecting a digest of the REMAINING tape closes it and
+  hands every receiver a brute-forceable commitment to undrawn randomness** —
+  measured, with two samples left, recovered in 600 candidates from the labels
+  and bounds the rule set already dictates. **And splitting the wire from the
+  hash does NOT fix that**: with the digest in the hash preimage only, the same
+  search still recovered the values from the transmitted hash in 436 tries,
+  because peers must exchange the hash for a desync check to exist at all. The
+  leak is intrinsic to detecting divergence in samples nobody has drawn yet.
+
+  **The leak-free maximum is a digest of the CONSUMED PREFIX.** It cannot detect
+  a future divergence, but it closes the divergences that have already happened
+  — including the case all three candidate designs miss: two tapes whose
+  ALREADY-DRAWN sample differed while producing identical state.
+
+  So the decision is not "what to project" but **"detect future divergence early
+  and leak future rolls, or detect only past divergence and leak nothing".**
+  A tape-only projection was measured to break 0 tests: the 12 pinned hashes in
+  `test/team-resolver.test.js` are the only literal hashes in the repo and none
+  is a tape battle.
+► **WRONG ON ITS FACE, AND WIDER THAN THE SWEEP SAID — SCOPE IT.** (a) The twelve
+  pins named are real, all seeded, none a tape battle, so that clause holds.
+  (b) There is now a THIRTEENTH `combatStateHash` pin, in
+  `test/ss2-team-rules.test.js`, also seeded, so the tape-only projection still
+  does not move it. (c) **"The only literal hashes in the repo" is false**:
+  `src/golden/pre-nonce-observations.js` alone carries 58 literal 64-hex
+  sha256s, and there are more elsewhere. **Correct scope: "the only literal
+  pinned COMBAT-STATE hashes", and there are 13.** The load-bearing conclusion —
+  the projection landed and the suite is green — survives.
+
+
+- **`ss2BattleValues` reproduces a SUBSET of `battlevalues`, and two omissions
+  change a fight.** `weapon_min_damage`/`weapon_max_damage` are themselves
+  `battlevalues`'s lookups into `_root.weapon[...]` (`+0x31be`, `+0x31da`) and
+  are taken as caller-supplied inputs here, so a gladiator's damage pair cannot
+  be produced from a character record alone; and `weapon_enchantment_damage`
+  (`+0x320c`) is dropped entirely, so an enchanted weapon applies a status and
+  deals no magic damage. Also dropped: ~~`maximum_ammo`'s herolevel tier chain,~~
+  `character_xp`~~, and `weapon_range`'s bow override~~. **(Struck 2026-09-24:
+  only `character_xp` is still dropped — see the correction two bullets down.)**
+- **A fight can run forever.** `phaseTransitionEffects` heals the acting
+  combatant every non-lethal action, so any pair whose per-action self-heal
+  exceeds expected incoming damage never dies (measured at 30,000 actions).
+  This may be faithful — vanilla has the same regeneration — but the resolver
+  has no draw or turn cap, so it surfaces as `AI turn limit reached`.
+- ~~**AGENTS.md's two test profiles are stated in a way that invites a false
+  finding.**~~ **ALREADY CLOSED — verified 2026-09-02 at `AGENTS.md:153-156`,
+  which reads "holding at least one probe session directory under the gitignored
+  `captures/` archive" and says in its own parenthesis that a tree with
+  `captures/` and 1 skipped is CORRECT. Nothing to do; the item outlived its
+  fix.**
+  ► **PURE DRIFT; the quoted wording is word-for-word unchanged.** Find it with
+    `grep -n 'holding at least one probe session directory' AGENTS.md`. (The
+    sweep's replacement span over-reaches — it includes the bold header and the
+    following bullet.)
+
+  ► **BOTH NAMED HALVES ARE NOW FALSE.** `ss2BattleValues` derives the damage pair
+    from a `weapon` id (an explicit pair still wins) and derives
+    `weapon_enchantment_damage`; a call with `weapon: 5` alone returns
+    `min_damage 27 / max_damage 69`. ► ~~**But do NOT sweep away the REST of this
+    bullet's "also dropped" list, which still HOLDS**: no `maximum_ammo` herolevel
+    tier chain (only the `ammo_left` fallback), no `character_xp`, no bow
+    `weapon_range` override.~~ **CORRECTED 2026-09-24: TWO OF THOSE THREE ARE
+    BUILT, and only `character_xp` still holds.** The bow `weapon_range`
+    override (`+0x343e`) is in `ss2BattleValues` since `6926069` (2026-09-11):
+    with `using_bow` it copies `secondary_weapon_range` onto `weapon_range`
+    (weapon 1 / secondary 40 at strength 30 gives 144 without the bow, 232 with
+    it). The `maximum_ammo` herolevel tier chain (`+0x3634`-`+0x378d`) is
+    `ss2MaximumAmmo`, assigned unconditionally by `ss2BattleValues` since
+    `7310583` (2026-09-13). `ss2BattleValues` still derives no `character_xp`
+    (a stated one is only copied through with the rest of the record).
+    The offsets themselves are unchallenged.
+
+
+### Found 2026-09-02 (overnight): what a CAPPED verification wave established
+
+Seven questions, 50 verifiers, **50 returned, 0 dead — status VERIFIED**, after
+the previous four waves died at 119 verdicts of 1,069. Each item below was
+re-derived by the wave and the load-bearing ones re-derived again by the main
+session before anything was written.
+
+- **THE WEAPON TABLE IS NOT RUNTIME-CORROBORATED, AND THE TEST THAT SEEMED TO
+  SHOW IT IS NEAR-TAUTOLOGICAL.** An investigator claimed that inverting
+  `min_damage − round(strength*2)` over the archive lands on a real table pair
+  for 26 of 28 triples, which would have lifted the table above `map-derived`.
+  Broken four ways:
+  1. **The test cannot fail for an honest record.** `battlevalues` derives
+     `min_damage` and `max_damage` from the SAME table row (`+0x31be`, `+0x31da`)
+     and adds the same `round(strength*k)` to both (`+0x3356`, `+0x3386`). So
+     any record the game itself produced inverts back onto a table pair BY
+     CONSTRUCTION. It measures that arithmetic is arithmetic.
+  2. **Measured false-match rate is high.** Perturbing every observed triple by
+     ±1 in min and max — 423 deliberately WRONG triples — still passes 6.1%.
+  3. **No observation carries a weapon-identifying field at all.** `weapon`,
+     `whichweapon`, `using_bow`, `weapon_min_damage`, `secondary_min_damage`
+     and `attack_type` occur ZERO times across all 447 `.jsonl` and 57 `.json`
+     records. Only `ammo_left` appears. So nothing pins WHICH row a match used.
+  4. **Coverage is 10%.** The matching triples collapse to 7 distinct
+     `(min,max)` pairs of the table's 69, compatible with 9 ids of 90 —
+     **81 rows corroborated by nothing.**
+  Also: the inversion formula is wrong in bow mode, where `+0x3416` overwrites
+  the primary pair with the secondary one at `round(strength * 1)`.
+  **The table stays `map-derived`, and `tools/item-table-transcription.mjs`
+  against the build remains the only thing that backs it.**
+     ► **RE-MEASURED 2026-09-07 AND THE COVERAGE IS HIGHER, NOT LOWER: 68 distinct
+       triples, 63 inverting, collapsing to 10 distinct `(min,max)` pairs of the
+       table's 69, compatible with 14 ids of 90 → 76 rows corroborated by nothing,
+       coverage ~15.6%, not 10%.** The table constants are unchanged (90 ids, 69
+       distinct pairs, re-derived from `src/team/ss2-weapon-table.js`), and adding the
+       archive's 57 `.json` files contributes zero new triples, so the result is
+       robust to the scope question. Live growing store — carry the command.
+       ► **SCOPE HAZARD: do NOT push this correction up into the sentence above that
+       says an investigator "claimed … for 26 of 28 triples".** That is a quotation
+       of a past claim, not a live count; rewriting it would falsify the record of
+       what was claimed.
+
+     ► **ONE DENOMINATOR MOVED, THE OTHER MUST NOT BE TOUCHED.** The zero-weapon-field
+       finding HOLDS exactly — `weapon`, `whichweapon`, `using_bow`,
+       `weapon_min_damage`, `secondary_min_damage` and `attack_type` are still ZERO
+       across both file types. **`.jsonl` moved 447 → 1,544; `.json` is still exactly
+       57, so a blanket substitution would falsify the half that is correct.**
+       ► And the claim is true only because it is SCOPED to `.jsonl`/`.json`: the
+       RUFFLELOGS do carry weapon data. `equipped_weapon`/`secondary_weapon` appear
+       in 140 rufflelogs, but only inside `navdiag` property-NAME enumerations, and
+       two arena-shop traces record a real weapon-table id as a VALUE. Neither of
+       those two sessions has a `.jsonl` or any `min_damage` line — **so the
+       conclusion survives for a sharper reason than the one given: the id-bearing
+       and triple-bearing traces are DISJOINT sets.**
+
+
+- **THE THIRD FORGERY IS OPEN, AND WIDER THAN THE HEAD DESCRIBES. The vehicle
+  is `capture.method`, not `callSite`.**
+  - **A purely synthetic `simulateSs2CaptureTrace` output, with only
+    `meta.method` re-stamped to `injected-tape-runtime`, PROMOTED TO A GOLDEN
+    through the unmodified CLI.** That is the vehicle every one of these rides.
+  - `passive-runtime` is **unreachable by the honest pipeline** — the wrapper's
+    only `t:"roll"` emitter is guarded by `config.injected`, so a passive trace
+    has zero samples and ingest refuses a zero-sample trace. Every
+    passive-runtime record is therefore, by construction, not from the wrapper —
+    and only `synthetic-simulator` is refused at promotion. **The promoted
+    golden carries no capture-method field at all.**
+  - The co-forgery must also forge the manifest's `sessions[].method`, or
+    promotion refuses with "disagrees with its manifest session about the
+    capture method". That is the one guard that fires.
+  - ► **"and the suite stays green" is FALSE, and the true statement is worse.**
+    Promoting any new golden from `candidate-lethal-result` fails 15 of 715
+    tests whether or not anything is forged — but the forged and honest suite
+    outputs normalise to a **0-line diff**. The suite is not green; it is
+    BLIND. Do not quote the green form.
+  - The committed forgery probe (`test/capture-campaign.test.js:~903`) forges
+    exactly ONE cited record per iteration, so **the two-sided case — both
+    records agreeing on the same fabrication — is covered by no test.** That is
+    precisely the case the head says still promotes.
+  - `hook` IS caught (DIVERGE at `/mutationTrace/0/hook`, refused at
+    promotion), and `injected` alone is refused at ingest in both directions.
+    So of the head's three named channels, one is closed and one is only open
+    with `method` co-forged.
+    ► **THE SWEEP CALLED THIS UNCHECKABLE. IT IS CHECKABLE, AND THE ANSWER IS A
+      DIFFERENT NUMBER, NOT A STALE DENOMINATOR: 8 failures of 816, not 15 of 715.**
+      Measured 2026-09-07 by actually doing it in a disposable copy: simulate two
+      traces for `candidate-lethal-result` with distinct launch nonces, ingest them,
+      and promote through the UNMODIFIED CLI — the suite then reads 816 / 807 / 8 / 1
+      and the total does not grow. The eight are named in the session record.
+      ► **A TRAP FOR WHOEVER REPEATS THIS: a scratch copy built without `.git` is
+      NOT a valid baseline** — it reads 813/811/1/1, because a transcription test
+      reads the git history and fails at file level, swallowing its own four tests.
+      Copy with `.git` included. ► Also worth stating: **no committed observation
+      targets `candidate-lethal-result`**, so this is a hypothetical about a
+      promotion the corpus cannot currently reach.
+
+
+- **THE CLAMP ITEM IS WRONG IN ITS COUNT, ITS CAUSE AND ITS PREMISE.**
+  The head says "three clamp sites can each be deleted with the replay file
+  green because no value ever reaches a bound".
+  - **The premise is false.** All 22 goldens stage villain `hitpoints` and
+    `hitpointsmax` at 10 against hero `min_damage` 21 / `max_damage` 23 — so
+    damage is NOT "exactly equal to the defender's hitpoints", it hugely
+    exceeds them, and values DO reach bounds: instrumented,
+    `src/team/resolver.js:259` takes 141 arrivals of which 120 land exactly on
+    the floor.
+  - **The count is far worse.** At the head's own bar (the replay file green)
+    **15 of 16** clamp sites delete green. Against the FULL suite, **exactly
+    seven** whole-site deletions stay green: `ss2-rules.js:490`, `:707`,
+    `resolver.js:261`, `roster.js:168`, `ss2-attack-candidate.js:228`, `:237`
+    and `:575`. Only ONE of the head's three is among them.
+  - **`ss2-attack-candidate.js:339` is the only clamp the replay defends**, so
+    that file's own header claim at lines 32-35 that it "proves NO CLAMPING" is
+    false and should be corrected there.
+  - **`ss2-rules.js:784`'s stamina FLOOR is dead code**: deleting just the floor
+    stays green even though `test/ss2-team-rules.test.js:456` drives −38
+    through it, because `src/team/resources.js:252` re-clamps every resource
+    write to the entry's minimum. A guard behind a guard reads as coverage.
+    ► **ANCHORS DRIFTED, SUBSTANCE AND MUTATION BOTH HOLD.** Both were EXACT at the
+      commit that wrote them. **Re-run 2026-09-07: deleting only the floor stays
+      green at 816 / 815 / 0 / 1 — the dead-code claim reproduces.** The −38
+      arithmetic is right (`strengthFactor: 2`, so 1 − round(20×2) + 0 + 1 + 0 = −38).
+      ► **Bonus defect: that test's own inline comment says "1 - 20 + 1 is 0, not 1",
+      using factor 1 — the comment understates its own spend by half.**
+
+    ► **FIVE ANCHORS HOLD, TWO DRIFTED, AND THE MUTATION RESULT REPRODUCES IN FULL.**
+      All seven were EXACT at the commit that wrote them, so this is honest drift,
+      not a bad citation. **Re-run 2026-09-07 in a disposable copy: all seven
+      whole-site deletions applied one at a time, reverting between — seven of seven
+      stay green at 816 / 815 / 0 / 1.** The claim survives at HEAD intact. Locate
+      the two that moved with `grep -nE 'Math\.max|Math\.min|clamp\(' src/team/ss2-rules.js`;
+      the sweep's replacements for them are themselves stale by 14 lines.
+
+    ► **STALE, AND "23" WOULD BREAK IT.** 22 of the 23 goldens stage villain
+      `hitpoints`/`hitpointsmax` at 10; the armoured golden stages 80/80 (hero
+      300/300). The hero `min_damage 21`/`max_damage 23` pair HOLDS across all 23.
+      **So the digit 22 is still a correct COUNT, but "All 22 goldens" misdescribes
+      the corpus — name the subset instead.** The bullet's conclusion survives on
+      BOTH archetypes (21–23 against hitpoints 10; `armourDamage` 22 against
+      `armourclass` 79). The "141 arrivals / 120 on the floor" instrumentation
+      figure beside it was NOT reproduced — carry it as unchecked.
+
+
+- **A METHODOLOGY HAZARD, found by two agents independently and worth keeping:
+  the session scratchpad is SHARED between a wave's agents.** One agent's
+  `dump.mjs` was clobbered mid-run by a sibling; another copied the repo into a
+  path that already held a sibling's copy and got a nested checkout reporting a
+  doubled **1425 tests / 1423 pass**. Agents must namespace into their own
+  subdirectory, and a doubled test count is the symptom.
+
+### Found 2026-09-01 (evening): the armoured family measured at n=38, and what it is actually waiting on
+
+**Read this before the block below it, which it corrects in its ranking.** All 38
+armed `adc` traces were delogged to scratch (27 of them for the first time) and
+run through the repository's OWN matcher — `ingestSs2CaptureTrace` +
+`matchSs2ObservationToFixture` — against all 8 blocked fixtures. Nothing was
+written into the corpus. Re-derive with the archive at
+`/mnt/c/ss2-capture/captures`; `node tools/capture-session.mjs delog --trace <f>
+--out <scratch>` needs no install and no Ruffle.
+
+► **THE FAMILY IS ONE FIELD FROM EVIDENCE, AND THE FIELD IS THE VILLAIN'S
+  `staminaleft`.** Comparing every pinned field the trace actually watches,
+  **35 of 38 armed rounds reproduce the target fixture's scenario exactly except
+  `staminaleft`**; the only other offender is `hero.hitpoints`, in 3. Under the
+  full matcher (samples, mutationTrace, finalState and events included) **4 of 38
+  — `adc33`, `adc35`, `adc37`, `adc42` — diverge on NOTHING BUT `staminaleft`.**
+
+► **THE HERO SIDE IS SOLVED AND NOBODY HAS USED IT.**
+  `hero.staminaleft == 110 − (hero walk count)` holds **38 of 38**, exceptionless.
+  So the hero's value is a deterministic function of a quantity the autopilot
+  CHOOSES. The fixtures' `hero.staminaleft 105` is exactly 5 walks, which
+  occurred in 13 of 38. **Pin the approach-step count and the hero side stops
+  being a lottery** — this is the "fix the capture, not the comparison" remedy
+  § "READ THIS FIRST" already prescribes, and it has never been implemented.
+
+► **THE VILLAIN SIDE IS NOT MERELY UNPINNED — IT IS UNOBSERVED, BY
+  CONSTRUCTION.** The wrapper's action stream comes from ONE hook,
+  `getphase` (wrapper 2347-2357), and `getphase` carries only the HERO's
+  actions: the villain is dispatched through `villaindecisionA` /
+  `villaindecisionB` (`+0x3ac0`, `+0x3b0a`), written by `villainChooseAction`
+  at `sprite:862[overlay]/frame:52/DoAction@0x23f835`. **So the sole determinant
+  of `villain.staminaleft` at arming — the villain's own action sequence — is
+  recorded nowhere in any of the 240 archive entries.** Confirmed live: `adc36`
+  drained 33 villain stamina and its trace records four `phase_action` lines,
+  all the hero's. Widening `DEFAULT_WATCH_FIELDS` cannot reach this; a watch
+  fires on a field, and this is a sequence. **Hooking `villainChooseAction` is
+  the change that would make the villain's stamina explainable from the record.**
+  Not attempted; costed nowhere; and note it is an OBSERVABILITY change, not a
+  determinism one — `villainChooseAction` makes its own random draws.
+  ► **SUBSTANCE HOLDS AND IS STRONGER THAN STATED; ONLY THE DENOMINATOR MOVED.**
+    `villaindecision` (case-insensitive) appears in **ZERO** files anywhere in the
+    live archive — including the 154 decompiled wrapper-source copies — and zero
+    in the frozen replica. The denominator is now ~1,592 entries, not 240; the 240
+    described the pre-relocation archive, and the frozen 2026-08-31 replica still
+    holds 238, which is within two. Live growing store: write
+    `grep -ril 'villaindecision' <archive> | wc -l` rather than a denominator.
+
+
+► **`attackDirection` IS THE SECOND BLOCKER AND IS IRREDUCIBLE AT P = 1/4.**
+  32 of 38 rounds diverge on `/scenario/attackDirection` (observed 4, 8, 10, 11
+  against the pinned 5). `normal_attack` draws it at `+0x61f1` as
+  `randomBetween(5, 8)`. **It cannot be injected**: across all 38 traces the 254
+  recorded rolls are `injected: true` and **not one is a `(5,8)` draw**, because
+  the wrapper arms after the direction is already chosen — `beginAction` READS
+  `ov.attack_direction` rather than serving it. So every armoured round is a
+  1-in-4 lottery on direction before stamina is even considered. The map says
+  the same thing in its own words ("nothing in a run can select the direction");
+  this is that claim confirmed from the traces.
+  ► **THE COUNT HOLDS; THE VALUE LIST IS THE 11 COMMITTED DIVERGENCE REPORTS'
+    VALUES, SILENTLY PRESENTED AS THE 38'S.** Across all 38 the non-5 values are
+    2, 3, 4, 6, 7, 8, 10, 11 and 20. ► **BUT REFUSE THE INFERENCE THE SWEEP DREW
+    FROM THAT.** Attributed by which combatant took the first `damagecharacter`
+    hitpoints write — the battle map's own method — **28 of the 38 are HERO swings
+    and all 28 landed inside `randomBetween(5, 8)`; the 9 out-of-band rounds are
+    VILLAIN swings, which the battle map already states.** Writing "9 of the 38
+    landed outside range, so the P = 1/4 framing is in doubt" would put into the
+    record an implication that the hero's `+0x61f1` draw produced 2, 3 and 20 —
+    contradicting a byte-verified map row, i.e. deriving from a capture instead of
+    from the map. **The framing does not merely survive; the archive now confirms
+    it at n = 1,171**: every one of the 1,171 delogged `session-onx*` rounds is a
+    hero swing and every direction is in {5,6,7,8} — 273 / 287 / 304 / 307, so
+    P(5) = 0.2331 against 0.25 (z = −1.33). The rest of the bullet is exact: 254
+    roll lines, 0 not injected, 0 that are a `(5,8)` draw.
+
+
+► **TWO OF THE EIGHT FIXTURES CANNOT INGEST AT ALL, AND IT IS NOT A DIVERGENCE.**
+  `candidate-armoured-removal-destroys-helmet` and
+  `-destroys-shoulderguard` REFUSE every one of the 38 traces with
+  *"the staged villain state is missing the required field `helmet_defence`"*
+  (`shoulderguard_defence` for the other). Those fields are pinned by the
+  fixtures and absent from the wrapper's 29-key state dump. **The mechanism is
+  already right and is `-WatchFields`, which EXTENDS the default per session** —
+  do NOT widen `DEFAULT_WATCH_FIELDS`, for the reason the wrapper's own comment
+  gives. This is the cheapest unblocking on the list and nothing records it.
+  ► **HALF TRUE, HALF WRONG — AND THE WRONG HALF WAS WRONG WHEN WRITTEN
+    (`d39fb8b`, 2026-09-01 16:41).** "Nothing records it" is false: it was already
+    recorded in three places, two of them PREDATING this sentence —
+    `docs/integration/ss2-staging-runbook.md` §1.1 (rows added `d8642b2`,
+    2026-08-30 22:47) and `tools/runtime-capture/campaign.mjs watch-fields`
+    (`863ac0f`, 2026-08-30 23:19), which DERIVES the string rather than quoting
+    it: `node tools/runtime-capture/campaign.mjs watch-fields --family
+    armoured-removal-destroys-helmet` prints `helmet_defence,shoulderguard_defence`
+    for both fixtures. The CAPTURE is genuinely still open (no
+    `armoured-removal-destroys` fixture or observation is committed). So this is
+    one sentence with a true half and a false half, and only the false half is
+    struck.
+
+  ► **THE PARENTHETICAL IS FALSE.** BOTH removal fixtures pin BOTH
+    `helmet_defence` and `shoulderguard_defence`, in the same key order, and
+    `projectFields` iterates `Object.keys(fixture.scenario.villain)` in file order
+    and fails on the FIRST missing key. **Measured by running the real ingest: 22
+    of 22 runs (2 fixtures × 11 delogged traces) fail on `helmet_defence`;
+    `shoulderguard_defence` never appears.** Everything else HOLDS exactly — the
+    villain dump is 29 keys, neither `*_defence` is in it, 0 of the 38 armed traces
+    carry one, and the `-WatchFields` advice is right. **Two caveats on "every one
+    of the 38": only 11 are delogged, so the refusal is EXECUTED for 11 and
+    INFERRED for 27 from an identical dump shape; and under default options the
+    first refusal today is the null-attestation gate, not the field.**
+
+
+► **ALL 38 ROUNDS TARGETED ONE FIXTURE. Seven of the eight have never had a
+  capture attempt that could match them.** Identified by the injected tape,
+  whose seven values pick out `candidate-armoured-deflection-threshold-cleared`
+  uniquely. `equality-quirk` and the three `tournament-*` stage a different
+  villain (`armourclass 22, helmet 2`) that no `adc` round ever staged. **So
+  "the armoured family has spent 38 rounds" is really "one fixture has".**
+  ► **WRONG ON ITS FOURTH MEMBER; THE CONCLUSION SURVIVES BY TWO ROUTES INSTEAD OF
+    ONE.** Three of the four stage villain `armourclass 22 / helmet 2`, but
+    `candidate-tournament-nonlethal-normal-hit` stages `armourclass 0` and has NO
+    `helmet` key at all. The conclusion is untouched: all 38 armed rounds staged
+    one distinct villain tuple (`armourclass 79, helmet 6, shoulderguard 1`), so
+    neither the ac-22 nor the ac-0 villain was ever staged; and the injected tape
+    is the seven values `(100, 22, 20, 93, 12, 1, 100)`, which among the eight
+    fixtures only `candidate-armoured-deflection-threshold-cleared` matches.
+
+
+► **DELOGGING THE 27 ADDS NO MATCHABLE EVIDENCE, WHICH RETIRES A RANKED ITEM.**
+  The 15:50 handoff ranks "27 archived armed traces were never delogged" third,
+  on the reasoning that the repository can see only a third of the evidence. It
+  can see only a third of the TRACES, but all four staminaleft-only near-misses
+  were already among the 11 delogged. The 27 contribute 0 additional near-misses
+  and diverge on `attackDirection` 27 times out of 27.
+
+► **AND THEY CANNOT BE HONESTLY INGESTED TODAY.** All 38 traces carry
+  `"installHashVerifiedAfter": null`. Ingest's placeholder path then runs
+  `verifyInstallAgainstFingerprint` LIVE and stamps `true` — **asserting a
+  post-session hash check about sessions that ran on 2026-08-31.** That is the
+  quiet conversion of measured evidence into asserted data this project exists
+  to refuse, and there is no committed record to carry the value forward from,
+  because **zero `adc` observation records are committed** (68 observations, none
+  from this family). Measure them in scratch, as this session did; do not ingest
+  them without deciding that question first.
+  ► **68 → 69, and one half of this is now FALSE.** "Zero `adc` observation records
+    are committed" HOLDS — none in `test/observations/ss2-1v1`, and the 11 adc
+    records exist only as divergence reports. **But "none from this family" turns
+    on what "family" means, and on the reading this paragraph is actually about —
+    the ARMOURED family — it is false:** `obs-onx1405-a1` and `obs-onx1521-a1` are
+    committed, target `candidate-armoured-deflection-threshold-cleared`, and both
+    carry `installHashVerifiedAfter: true`. **So the paragraph's load-bearing
+    claim — "there is no committed record to carry the value forward from" — is
+    now false for the armoured family**, though still true for the 38 adc traces.
+
+
+► **THE LOAD-BEARING NEGATIVE UNDER THE WHOLE PLAN HAS NO BYTE CITATION.**
+  "The villain is never re-skinned, so `-StageVillain` is durable" is the
+  foundation of every armoured capture, and it appears only in this file (lines
+  ~716-724, ~897) with no offset, no reference count and no `inspect-swf`
+  command — while its HERO half is fully byte-cited. Observational support does
+  exist and is decent (12 of 12 staged villain fields constant across all 38
+  rounds, while 6 unstaged villain stats vary), but that is not the same as the
+  negative being established. Check it with
+  `inspect-swf --references '"value":"skincharacter"'` before another supervised
+  window is spent on it.
+
+**So the ranked order that follows from the measurements is:** (1) add
+`helmet_defence`/`shoulderguard_defence` via `-WatchFields` — two fixtures
+unblocked for the cost of one parameter; (2) pin the approach-step count, which
+removes the hero-side lottery outright; (3) decide the villain-stamina scenario
+question, which is the owner's call and is now costed honestly (3 values per
+fixture, 0 recalculations — see the correction in the block below); (4) only
+then a gate, and only one that can be exercised by an extended stub. **Nothing
+in (1) through (3) needs Ruffle, the save, or a supervised window.**
+
+### DECIDED 2026-09-01 (evening): the villain-stamina remedy needs a SCHEMA change, and the fixtures were NOT edited
+
+The owner chose the remedy — re-scenario the villain with a stat vector whose
+stamina is invariant to its own action sequence — and it was derived properly
+before being written: a VERIFIED wave (6/6 question-diverse derivers, 18/18
+write-nothing verifiers, 0 errors, **7 of 18 verdicts BROKEN**), forbidden from
+opening any capture, working from the hash-verified SWF. **The derivation says
+the remedy cannot be expressed as a fixture edit today. No fixture was
+changed.** That is the finding, and it is worth more than the edit would have
+been.
+
+► **THE SCHEMA PINS THE OUTPUT AND REFUSES THE INPUT. This is the whole defect,
+  stated exactly, and it is not a fixture-authoring oversight.**
+  `COMBATANT_KEYS` (`src/golden/run-1v1-fixture.js:91`) is a closed allow-list of
+  **42** keys. `staminaleft` and `staminamax` are in it. **`stamina`, `speed`,
+  `vitality` and `herolevel` are NOT** — re-derived directly from the source, not
+  relayed. `assertAllowedKeys` (:216-221) throws
+  `scenario.villain has unsupported fields: stamina.`, measured at
+  **630 / 612 / 17 / 1**. `TOURNAMENT_OPPONENT_PARAMETERS`
+  (`test/ss2-post-tutorial-fixtures.test.js:170`) independently pins the same
+  15-key villain surface, so two places must move together.
+  ► **PURE DRIFT; EVERYTHING SUBSTANTIVE HOLDS AND WAS RE-COUNTED, not relayed.**
+    Both anchors were EXACT at the commit that wrote them. The allow-list holds
+    exactly 42 keys; `staminaleft` and `staminamax` are IN; `stamina`, `speed`,
+    `vitality`, `herolevel` are ABSENT; the throw message is unchanged;
+    `TOURNAMENT_OPPONENT_PARAMETERS` holds exactly 15 keys. **The suite figure in
+    this same bullet describes a DELIBERATELY BROKEN tree — re-measure it, do not
+    substitute today's total into it.**
+
+
+  So a scenario may pin a quantity the game DERIVES while being forbidden from
+  declaring what derives it. Every "unpinned input to a pinned output" finding in
+  this file is a symptom of that one fact.
+
+► **AND GOING GREEN ON A VALUE-ONLY EDIT PROVES NOTHING — measured, and this is
+  the result that stopped the edit.** Setting
+  `villain.staminaleft = staminamax = 300` plus the paired
+  `expected.state.villain.staminaleft` in all 8 fixtures **passes the full suite,
+  630 / 629 / 0 / 1**. But a verifier then set the same fields to **7** and got
+  the identical 630 / 629 / 0 / 1 — and 7 is impossible in the runtime, since
+  `battlevalues` makes `staminamax = 100 + stamina*10 >= 100` always. **The suite
+  cannot tell a derived value from an arbitrary one here**; its only stamina
+  teeth are `clampCombatant`'s `0 <= staminaleft <= staminamax`. A green suite
+  would have been mistaken for a validated remedy.
+
+► **THE MINIMUM STAMINA IS NOT THE CONSTANT 20 I CARRIED INTO THIS. It is a
+  function of four stats the scenario cannot declare.** Byte-derived:
+
+  ```
+  M = max( 2*movement_speed,      chargeleft/right  +0x4214 / +0x4480
+           round(strength*3),     power_attack +0x603c; snipe*/bombard* +0x6bb5
+           round(charisma*2),     taunt +0x67bb
+           round(magicka),        18 cast_* blocks
+           7 )                    block +0x4ca4
+      movement_speed = clamp(round(speed*1.5), 4, 60)
+  regen = 1 + round(stamina/3)       so   stamina_min = 3M - 4
+  ```
+► **OFF BY ONE: the map records 17 `cast_*` SITES covering 20 distinct labels,
+  not 18.** Two rows are shared branches — lightning/frightning bolt at one site,
+  fireball/hell/dire at another — so 15 + 2 + 3 = 20 labels across 17 sites. The
+  table has 42 rows total, exactly matching the "42 assignment sites" the map
+  claims two paragraphs above, so **the table is internally consistent and "18"
+  is not any of these numbers under any counting.** Write 17: this citation is a
+  SITE count in a formula whose other four citations are single sites. The
+  `M = max(...)` derivation is unaffected — every phase in the table reduces to
+  `2*movement_speed`, `round(strength*3)`, `round(charisma*2)`, `round(magicka)`
+  or the constant 7.
+
+
+  `M = 8` — and hence `stamina 20`, `staminamax 300` — holds **only** for a
+  villain with `strength <= 2, charisma <= 4, magicka <= 8, speed <= 2`. **The
+  tournament villain's `strength` is DRAWN by `randomise_gladiator` and was
+  observed ranging 1..8**, so `M` is not fixed: at `strength 8`, `M = 24`,
+  `stamina 68`, `staminamax 780`. There is no single vector without pinning the
+  four stats — which returns to the schema.
+
+► **THE REMEDY HAS A SIDE EFFECT ON A FIELD THESE FIXTURES DO PIN.** `nextphase`
+  regenerates the acting combatant's hitpoints by **`1 + Math.ceil(stamina/2)`**
+  every phase transition (`+0x3305..+0x3346`, immediately before `check_stats`).
+  Raising villain `stamina` to 20 raises that from 2 HP/phase to 11. The 8
+  fixtures pin `villain.hitpoints 80`. **Buying stamina invariance spends
+  hitpoint stability**, and no one had connected the two.
+
+► **`hitpointsmax: 80` CARRIES THE IDENTICAL DEFECT, and it is worse.**
+  `battlevalues` recomputes it unconditionally at `+0x378e` as
+  `herolevel*10 + vitality*20`, and **neither is declarable** either. Worse than
+  `staminamax`, which inverts to a unique `stamina`: `80` is satisfied by
+  herolevel 6/vitality 1, 4/2 AND 2/3, so it does not even pin one vector.
+
+► **THE HERO SIDE IS STRICTLY LESS DETERMINED THAN THE VILLAIN'S, NOT MORE.**
+  Arena `initbattle` resets only the VILLAIN's `staminaleft` to its max
+  (`sprite:2249/frame:1 +0x0b9c`, unconditional). Nothing does it for the hero,
+  and `staminaleft` carries across bouts. So a villain-only fix leaves the same
+  defect on the hero, where the guaranteed starting point does not exist.
+
+► **AND A CAVEAT THAT MAY KILL THE APPROACH OUTRIGHT, flagged by the deriver
+  against its own answer:** three `getphase` branches rewrite the ACTING
+  combatant's own base stats mid-bout — `cast_swiftsandals`, `cast_bloodlust`,
+  `cast_colossus` — and all three are villain-selectable through
+  `villain_cast_spells`. Hardening the invariant against them needs `stamina 122`.
+  **Not verified; treat as the next thing to check**, because if it holds no
+  reachable vector is invariant and the answer is a different remedy entirely.
+
+**What to do with this.** The question is no longer "what value should
+`villain.staminaleft` be". It is: **should `COMBATANT_KEYS` admit the derived
+stats (`stamina`, `speed`, `vitality`, `herolevel`) so a scenario can declare
+what the game derives from?** That is a schema decision for the owner, it is now
+costed and byte-backed rather than vague, and it is the same decision the head
+has been circling since 2026-08-31 under the name "the schema question".
+**Do not land a value-only edit in the meantime** — it would put the conclusion
+of a derivation into a file that refuses to carry the premise, in a suite
+measured to be blind to the difference.
+
+### Found 2026-09-01: the armoured and tournament families are blocked by the FIXTURES, not by capture luck
+
+► **ALL EIGHT REMAINING "REACHABLE" FIXTURES PIN A PATH-DETERMINED OUTPUT WHILE
+  OMITTING THE INPUTS THAT DETERMINE IT. No amount of sampling, throughput or
+  memory fixes this, and the campaign planner's advice — "the remedy is more
+  rounds, not a code change" — is WRONG for this family.** Re-derived from the
+  SWF and the archive 2026-09-01, and independently reproduced by the main
+  session after a question-diverse wave raised it.
+  ► **TWO HALVES, OPPOSITE VERDICTS — AND THE SWEEP'S REPLACEMENT NUMBER IS
+    REFUSED.** The STRUCTURAL half HOLDS, including of the promoted golden, which
+    pins villain `staminaleft 105 / staminamax 110` while its villain block carries
+    no `speed` and no `strength`. **The ABSOLUTE half — "no amount of sampling,
+    throughput or memory fixes this" — is FALSIFIED for exactly one of the eight**:
+    more rounds WAS the remedy for `candidate-armoured-deflection-threshold-cleared`.
+    ► **But the "5 hits" the sweep proposed is wrong: the measured figure is 2.**
+    Running the repo's own matcher over the archive, of 1,171 delogged
+    `session-onx*` traces exactly **2** produce zero differences — precisely the
+    manifest's two. Five traces hit a looser three-condition filter; three of those
+    fail a fourth condition the filter omits (hero `hitpoints`), and a sixth hits
+    the stamina pair but drew direction 7. **So the joint precondition is FOUR-way
+    and it landed 2 in 1,171 (0.17%)**, with the binding constraint being the
+    staged villain `staminaleft` surviving to arming (0.51%), not the direction
+    draw (23.3%). Live growing store — carry the command, not the ratio. Also
+    stale in the same sentence: seven of the eight remain candidates, not eight.
+
+
+  The five `candidate-armoured-*` and three `candidate-tournament-*` all pin
+  hero AND villain at `staminaleft 105 / staminamax 110`. `staminaleft` is
+  PATH-DETERMINED — the battle map says so in its own words, and the bytes agree:
+  `nextphase` (`overlay:862/frame:52/DoAction@0x240c7f` `+0x32a1`–`+0x3304`)
+  subtracts `staminacost` and adds `1 + round(stamina/3)` on `game_attacker`
+  ONLY, unbranched, every phase transition. So the value at any
+  `checkattackroll` is a function of the actions already taken.
+
+  **What the archive measures.** 42 `session-adc*` directories exist, **38 of
+  them armed** (`"at":"action-armed"`), and only 11 were ever delogged to a
+  `.jsonl` — so **27 complete armed traces have never been converted into
+  observations**, and every count taken from the 11 committed divergence reports
+  understates the evidence by 3.5x. Across the 38:
+
+  - hero `staminaleft == 110 − (walk count)`, **38 of 38, no exceptions.** The
+    map's stamina arithmetic is runtime-confirmed at n=38.
+  - hero `== 105` in 13 of 38; villain `== 105` in **1** of 38 (`session-adc21`);
+    **both == 105 in 0 of 38.** Villain range 77–110, wider than the 90–110 the
+    11-report subset shows.
+
+  **Why the villain wanders.** The tournament opponent is drawn by
+  `randomise_gladiator(whichcharacter, whichavatar, herolevel)` — six call sites,
+  including `sprite:1788/frame:69` (x3) and `root/frame:214`. Its `strength` was
+  observed ranging 1..8 across the archived rounds. `staminacost` reads
+  `strength`, `charisma`, `magicka` and `movement_speed` off `game_attacker`, and
+  `movement_speed = clamp(round(speed*1.5), 4, 60)`. **So `speed` and `strength`
+  set the villain's per-phase stamina cost — and the armoured villain block pins
+  NEITHER.** Compare the two families' villain blocks:
+
+  | | villain stats pinned |
+  | --- | --- |
+  | `prisoner-*` (12 goldens) | `attack, strength, charisma, magicka, min_damage, max_damage` + armour |
+  | `armoured-*`/`tournament-*` (0 goldens) | armour pieces + `defence` ONLY |
+► **`armoured-*` now has 1 golden; `tournament-*` still 0.** The stat description
+  reproduces for the armoured villain block (`defence` only, plus armourclass,
+  hitpoints, stamina, four pieces and `gladiator_dir` — no attack/strength/
+  charisma/magicka/min_damage/max_damage). **Two things neither the document nor
+  the sweep states.** (1) The `prisoner-*` row of this same table is also
+  imprecise: the prisoner villain DOES pin `defence`, at 0, which that row omits.
+  (2) **Before escalating the prose under this table from "(0 goldens)" to "the
+  defect is now in a golden", check it**: the promoted armoured golden's expected
+  block carries no villain stamina arithmetic (`staminaleft` 105 unchanged;
+  mutation `armourDamage 22 / hitpointDamage 0`), so "pins an output that its
+  unpinned stats determine" is not obviously true OF THAT GOLDEN.
+
+
+  The armoured fixtures describe a RANDOMISED opponent by its armour alone, then
+  pin an output that its unpinned stats determine. That is the whole defect.
+
+  **`speed` is invisible to the instrument as well.** It is absent from the
+  wrapper's 28-name `DEFAULT_WATCH_FIELDS`, so no archived trace records it and
+  nobody could see it varying. **Do NOT fix that by widening the default** — the
+  wrapper's own comment explains why, and it is right: the watch fires per
+  assignment, so a newly watched field the game writes during an armed action
+  adds mutation lines and DIVERGES EVERY EXISTING GOLDEN. `-WatchFields` already
+  EXTENDS the default per session, which is the correct mechanism.
+
+  **What the runbook does and does not stage.** Its `-StageVillain` string
+  (`ss2-staging-runbook.md` §3) stages `defence, herolevel, vitality, stamina,
+  hitpoints, staminaleft, armourclass, armourclass_max` and the piece ids — and
+  neither `speed` nor `strength`. All 11 rufflelogs show the write-time
+  `{"t":"dbg","at":"staged"}` line carrying `villain.staminaleft=105` exactly as
+  prescribed, and the arming-time readback showing it overwritten. **The operator
+  followed the runbook; the runbook under-specifies the opponent.**
+
+  **RETRACTED THE SAME DAY, BY THE AUTHOR, BEFORE ANY FIXTURE WAS EDITED:
+  ~~THE DERIVED VALUE IS 110, AND THE ARITHMETIC IS CLOSED~~. 110 IS NO BETTER
+  FOUNDED THAN 105.** The 110 derivation assumes the villain took ZERO phases,
+  while the same battle has the hero taking FIVE walks. With `stamina 1` the
+  villain's net is `1 - staminacost` = -1 per walk, so five villain walks give
+  exactly 110-5 = **105 — the value already in the fixture.** Both numbers are
+  derivable under different assumptions about an action sequence the scenario
+  does not declare, which means NEITHER is determined by it.
+
+  Measured across all 38 armed adc traces before acting: villain `staminaleft`
+  is 110 in **2**, is 105 in **1**, and the joint target (hero 105 AND villain
+  110) lands in **1** (`session-adc5`). The hero's walk count and the villain's
+  stamina deficit are **uncorrelated** — 12 hero walks with a deficit of 8, 5
+  hero walks with a deficit of 20. So swapping 105 for 110 would have replaced
+  one under-determined constant with another and moved the family from 0/38
+  matchable to 1/38.
+
+  **THE HONEST FINDING IS STRONGER THAN THE FIX I NEARLY MADE: `staminaleft`
+  cannot be pinned by ANY scenario for an AI-driven combatant on this route.**
+  The value is a function of the opponent's own action sequence, and
+  `randomise_gladiator` redraws that opponent's `speed` and `strength` every
+  round. That is a DESIGN DECISION for the owner, not a fixture edit, and the
+  options are: (a) extend `captureAllowedNow` to refuse arming unless the value
+  matches, turning a silent near-miss into a visible refusal, then sample; (b)
+  choose a villain stat vector whose stamina is invariant — `stamina 2` gives
+  regen `1 + round(2/3) = 2`, exactly the minimum walk cost, so walking is
+  net-zero and `check_stats` clamps it at `staminamax` 120 — which is a new
+  scenario needing every dependent value re-derived, not a correction; or (c)
+  stop pinning it, which the head forbids elsewhere and which should stay
+  forbidden until (a) and (b) are ruled out.
+► **WRONG AS AN ABSOLUTE; THE MECHANISM SENTENCE UNDER IT HOLDS AND MUST BE
+  KEPT.** The repository's own corpus falsifies it: the armoured golden pins
+  villain `staminaleft 105 / staminamax 110` and hero 105/110 at direction 5,
+  `runtimeVerified: true`, `repetitions: 2`, from two independent sessions on
+  this exact route. **But the scenario still cannot DERIVE the value** — the
+  wrapper STAGES it and the villain's own action sequence then usually destroys
+  it, which is what the next sentence says and why it stays. What resolved this
+  was option (a) from this same paragraph: sample, and keep only the runs where
+  the staged value survived. ► **REFUSE the "5 in 1,171" the sweep proposed.**
+  The sweep's own refuter had already broken this row for putting an unmeasured
+  ratio into the record; it has now been MEASURED and it is **2 in 1,171**, so
+  adopting that sentence would have written a wrong unmeasured number in — the
+  exact failure this project exists to prevent. ► **And do not describe option
+  (a) as implemented**: the villain-side gate in `captureAllowedNow` checks the
+  HERO's stamina and only in champion mode; this route ran `"always"`, so the
+  selection was post-hoc through the matcher, not at arming time.
+
+
+  ► **CORRECTED 2026-09-01 (evening), AND THE FRAMING ABOVE IS THE RANKING
+    ERROR: (a) AND (b) ARE NOT ALTERNATIVES — THEY ARE THE SAME PREDICATE.**
+    The only villain `staminaleft` a scenario can legally DERIVE from the map is
+    `staminamax`, because `initbattle` (`+0x0b9c`) assigns
+    `villain.staminaleft = villain.staminamax` unconditionally and the scenario
+    declares no villain actions. So (a)'s only legally-founded gate condition is
+    `villain.staminaleft == villain.staminamax` — byte-identical in shape to the
+    hero predicate the champion branch already computes at wrapper line 2066.
+    **(b) is not an alternative to (a); (b) is the only thing that makes (a)
+    pass more than twice in 38.** Presenting them as either/or costs (a) its
+    success rate and (b) its gate.
+
+  ► **AND `stamina 2` IS WRONG BY AN ORDER OF MAGNITUDE. Byte-verified against
+    the licensed SWF by the main session 2026-09-01, not taken from an agent.**
+    The arithmetic in (b) is right for a WALK and false for the villain's actual
+    action set. `villainChooseAction`
+    (`sprite:862[overlay]/frame:52/DoAction@0x23f835`) writes **25 distinct
+    labels** into `villaindecisionA`, and they include `chargeright`
+    (`+0x0a18`), `chargeleft` (`+0x0d07`) and `jumpleft`/`jumpright` at eight
+    sites. Charge costs `Math.round(movement_speed * 2)` — read off the opcodes
+    at `+0x4214` (chargeright) and `+0x4480` (chargeleft): push `staminacost`,
+    get `game_attacker.movement_speed`, push 2, `Multiply`, `Math.round`. At the
+    `movement_speed` clamp FLOOR of 4 that is **8**, against a `stamina 2` regen
+    of 2. Net −6, every charge.
+
+    Regen is `1 + Math.round(stamina / 3)`, byte-read at `+0x32c9`–`+0x32fc`
+    (the cost subtraction is `+0x32a7`–`+0x32c2`). So invariance to the villain's
+    ENTIRE action set requires `1 + round(stamina/3) >= 8`, i.e.
+    `stamina >= 19.5`, i.e. **`stamina 20` and `staminamax 300`** — not
+    `stamina 2` / `staminamax 120`.
+
+    **A verifier disputed the charge premise and was wrong; the bytes settle
+    it.** It argued charge is wired only as a HERO button and that no byte
+    evidence places it in the villain's set, which would have made the minimum
+    `stamina 8` (no charge) or `stamina 2` (no charge, no jump). Re-derived here
+    with `inspect-swf --references 'villaindecisionA'` over the hash-verified
+    install (`77cb545c…`, matching the pinned fingerprint): 92 references, and
+    charge is in the villain's set at the two offsets above. Record the command,
+    not the argument.
+
+  ► **(b) IS ALSO ROUGHLY TEN TIMES CHEAPER THAN THIS BLOCK CLAIMS.** "A new
+    scenario needing every dependent value re-derived" is false: across all 8
+    fixtures `chance` is 42 and `rollNeeded` 58 (functions of `hero.attack 1` and
+    `villain.defence 3` only), `deflectionThreshold` is `(100 − 1.5*helmet) +
+    greaves`, and `selectedDamage` comes from the hero's own min/max damage.
+    **None of the five reads the villain's stamina vector.** The change is 3
+    values per fixture on the villain side plus new PINS for
+    speed/strength/charisma/magicka/stamina, and **0 calculations re-derived.**
+    Every fixture's purpose survives — the armour-equality quirk is still damage
+    22 against armourclass 22, the deflection fixtures still turn on
+    helmet/greaves, the removal fixtures still on `helmet_defence`/
+    `shoulderguard_defence`.
+
+  *The retracted paragraph is kept below because the arithmetic in it is correct
+  and load-bearing; only the conclusion drawn from it was wrong.*
+
+  **The `initbattle` half still holds (2026-09-01).**
+  `arena` sprite 2249 frame 1 (`initbattle`), `DoAction@0x6e421b` `+0x0b8a`–
+  `+0x0bb6`, assigns `_root.game.villain.staminaleft = _root.game.villain.staminamax`
+  UNCONDITIONALLY — the nearby `character_xp` branch at `+0x0b0c` targets the
+  first instruction of that write, so both arms execute it. A scenario that
+  declares no villain actions therefore determines `staminaleft = staminamax =
+  110`, not 105:
+
+  ```
+  stamina     = (staminamax - 100) / 10 = 1        // battlevalues +0x37b6
+  initbattle  : staminaleft := staminamax = 110
+  villain phases declared by the scenario = 0
+  staminaleft = min(110, 110 + 0) = 110            // check_stats clamp +0x110a
+  ```
+
+  **`obs-adc5` observed exactly that** — villain 110, hero 105 on five walks. So
+  one already-archived round matches the corrected villain value, and the
+  corrected fixture is not a speculative target.
+
+  **WHERE THE 105 CAME FROM, AND WHY IT IS NOT AN ARBITRARY ERROR.** 53 of the 82
+  committed fixtures carry villain `staminaleft == staminamax - 5`, across BOTH
+  staminamax values. On the prisoner/probe route that -5 IS derivable: that
+  villain has all-zero stats, so `speed 0 -> movement_speed` clamps to 4, walk
+  cost `round(4/2) = 2`, `stamina 0 -> regen 1`, net -1 per walk, x5 walks = 95 —
+  and it reproduced in 66 of 66 observations, which is why those 22 goldens
+  promoted. **The constant was carried from a route where it was derivable to a
+  route where it is not.** That is the whole mistake, and it is a much more
+  instructive one than a typo.
+► **53 of 82 → 54 of 83, and "across BOTH staminamax values" is WRONG.** The
+  corpus carries SIX distinct villain `staminamax` values — 100 (59 fixtures),
+  110 (11), 130 (1), 140 (1), 150 (10), 160 (1) — and the −5 pattern occurs at
+  exactly TWO of them: 44 of 59 at 100, 10 of 11 at 110, zero at the other four.
+  **Correct form: "at two of the six staminamax values".** The substantive point
+  (105 = 110 − 5) is untouched.
+
+
+  **The runbook's own rationale is false for exactly one field.**
+  `ss2-staging-runbook.md` argues that staging overwrites the generator's draw
+  "so the draw stops mattering". True of every staged field EXCEPT `staminaleft`:
+  staging runs for `STAGE_APPLY_TICKS = 20` after `_global.battle_started`, the
+  autopilot's first action fires at battle tick 8, and arming is later still — and
+  `staminaleft` is the sole staged field the villain's OWN turns mutate in that
+  gap. Every other staged field is inert across it.
+
+  **The sound remedy is candidate re-derivation, not a capture tweak** — pin the
+  villain's full stat vector the way the prisoner family already does, and stage
+  it (villain staging is durable; the villain is never re-skinned). NOT ATTEMPTED
+  2026-09-01: editing eight candidates is exactly the move this project treats as
+  high-stakes, and it should be done against the map with adversarial
+  verification, not at the end of a session.
+
+  **Two traps this cost, both worth keeping.** (1) The end-line `staged`
+  declaration cannot disagree with the staged state dump — `beginAction` runs
+  `stagedAtArming = stagedSummary()` and `dumpSide("state", ...)` as consecutive
+  statements over the same objects, so ingest's cross-check is a forgery check on
+  hand-edited records, not an overwrite detector. What actually exposed the
+  overwrite was the ordinary fixture-vs-observation diff. (2) The main session
+  first concluded from the 11 reports that "the villain was never staged to 105"
+  and that this was an operator error. Both halves were wrong, and the correction
+  came from reading the wrapper rather than from more measurement. **A perfect
+  correlation between two numbers is worth checking for a shared source before it
+  is worth explaining.**
+
+### Found 2026-08-31, not yet closed
+
+The blocks below are in reverse order of discovery. Read this list first; the
+ones that change what the next session should DO are marked ►.
+
+► ~~**THE FIX FOR THE ARMOURED FAMILY ALREADY EXISTS IN THE WRAPPER, BEHIND A
+  ONE-LINE BYPASS. It is not a schema change and not a fixture edit.**~~
+  **RETRACTED 2026-09-01 (evening) BY MEASUREMENT. Do not act on this item as
+  written — it was ranked FIRST in the 15:50 handoff and it is wrong in its
+  premise, its mechanism and its cost.** The paragraphs below are kept because
+  their byte-level observations are correct; only what was concluded from them
+  is not. Established by a VERIFIED question-diverse wave (6/6 investigators,
+  18/18 write-nothing verifiers, 0 errors) plus direct re-derivation from the
+  licensed SWF by the main session.
+
+  **The four things that refute it, in order of how much they cost to discover:**
+
+  1. **THE GATE IS PROVEN ONLY TO REFUSE, NEVER TO ARM.** Across all four
+     champion rufflelogs the branch was evaluated 931 times and emitted
+     `action-armed` ZERO times. "Proven on another route" is true only in the
+     sense that the answer is "it refuses everything".
+  2. **THE GATE'S HERO PREDICATE CONTRADICTS ALL EIGHT FIXTURES.**
+     `captureAllowedNow()` requires `hero.staminaleft == hero.staminamax`
+     (wrapper line 2066). All 8 target fixtures pin `hero.staminaleft 105` with
+     `staminamax 110`. **A session that satisfies the gate can never match a
+     fixture, and a session that matches a fixture can never pass the gate.**
+     Generalising the branch therefore means REPLACING its stamina predicate,
+     and someone must first decide which of the two is the correct scenario.
+     Measured on the live data: 0 of 38 armed `adc` rounds had the hero at
+     `staminamax`, and in 1091 champion-mode refusals the hero never reached it
+     (highest observed 107 of 110).
+  3. **A NEW BRANCH THERE WOULD BE DEAD CODE UNDER `validate-vehicle.ps1`.**
+     The gate passes no `-Pnavigate`, so `arenaMode` is false and
+     `captureAllowedNow()` returns at line 2024 — BEFORE the champion block at
+     2026. The gate would go green on a branch that never executed. (What the
+     gate DOES reach is the attacker-side guard; see the correction to that
+     script's own PASS text below.)
+  4. **THE WRAPPER HAS NO CHANNEL THROUGH WHICH A FIXTURE'S SCENARIO CAN
+     ARRIVE.** `launch-capture.ps1:278-304` passes `arenaStagedLevel`,
+     `stageHero` and `stageVillain` and nothing else. This is a new FlashVar
+     plumbed through three files (`ss2-capture-wrapper.as`,
+     `launch-capture.ps1`, and `run-arena.ps1`'s `-ArenaCapture` ValidateSet),
+     not "a one-line bypass" above an existing branch.
+     ► **WRONG, AND THIS FILE ALREADY CONTAINS THE RIGHT NUMBER TWELVE LINES BELOW.**
+       There are SEVEN champion rufflelogs across three session directories, not four
+       across however many; six declare `"captureMode":"champion"` and the seventh
+       dies before any `battle-ready` line. Per-file `capture-refused-unstaged`:
+       382, 0, 460, 89, 0, 160, 0 → **1,091 total**. The 931 is 382+460+89+0 — the
+       arena-champ-1/2 files only, silently dropping the third session directory —
+       **and 1,091 is exactly the figure this same document uses twelve lines down.
+       The file states two numbers for one quantity.** The load-bearing half HOLDS:
+       `action-armed` is emitted 0 times in all seven. These come from `arenaLog`,
+       which does NOT dedupe, so unlike the `attack_chances` figures above they ARE
+       genuine event counts — the two families must not be corrected the same way.
+
+
+  **And the yield it was ranked for does not exist.** A gate keyed on the
+  fixtures as written would have armed **0 times in 38** — for every one of the
+  8 fixtures, because all 8 pin `staminaleft 105` on BOTH sides and the observed
+  joint pair `(105,105)` never occurs (33 distinct pairs in 38 rounds; hero 105
+  in 13, villain 105 in 1, both in 0). Re-derived independently three ways.
+
+  **Read that 0/38 narrowly, though — it is not a gate's success rate.**
+  ~~All 38 `adc` rounds ran with NO autopilot: `launcher.log` says "Stage the
+  scenario yourself, perform the one controlled action". A HUMAN chose the
+  arming moment. So 0/38 measures an ungated MANUAL protocol.~~
+  ► **FALSE, AND IT IS THE `launcher.log` BANNER THAT MISLED US. Measured
+    2026-09-02 from the traces themselves.** Every one of the 38 armed `adc`
+    traces records the autopilot DRIVING: `{"t":"dbg","at":"autopilot",
+    "step":"walkright","n":1..5,...,"controller":"longrange_warrior",
+    "policy":"aggressive"}` then `"step":"normal_attack","n":6`, with 5-14
+    autopilot entries per round and the same shape as the `arena-staged`
+    sessions. The banner that says "Launching the instrumented session with NO
+    autopilot. Stage the scenario yourself" is printed by the launcher and is
+    NOT a record of what the wrapper did. **A log line that describes an
+    intention is not evidence of a behaviour** — the same lesson as the
+    `-WatchFields` docs, from the other direction.
+    ► **THE RANGE IS 3 TO 14, NOT 5 TO 14, AND THE QUOTED SHAPE IS NOT UNIVERSAL.**
+      Distribution over the 38 armed rounds: 3×1, 4×1, 5×8, 6×2, 7×12, 8×2, 9×7,
+      10×3, 11×1, 14×1. One session has four `walkright` entries and **no
+      `normal_attack` step at all**; another's is at n:2, another's at n:12 and
+      n:13; and `n` restarts, so two `"n":1` entries open every trace. **The literal
+      "n:1..5 then normal_attack n:6" shape fits at most 2 of the 38.** The
+      load-bearing half HOLDS and is stronger: every one of the 38 records autopilot
+      activity, minimum 3 entries, so the launcher's "NO autopilot" banner is
+      refuted. This set is CLOSED (nothing added since 2026-09-02), so a number is
+      defensible here — unlike the archive-wide rows above.
+
+
+    So 0/38 measures an AUTOPILOT protocol, and the conclusion drawn from it —
+    that the real measurement has never been taken — collapses. It has been
+    taken 38 times.
+  **The measurement that genuinely has not been taken is narrower: arm on the
+  hero's FIRST action of the staged bout rather than after the approach.**
+  `initbattle`
+  (`+0x0b8a`–`+0x0bb6`) assigns `villain.staminaleft = villain.staminamax`
+  unconditionally, so before the villain has taken a phase its value IS
+  determined. Every villain turn after that walks it away from the pin.
+
+  **What survives, and it is the useful half:** the armoured family is much
+  closer to evidence than the family's 0 goldens suggest. Running the
+  repository's OWN matcher over all 38 armed traces (all 38 delogged to scratch;
+  27 of them for the first time): **35 of 38 reproduce the target fixture's
+  scenario on every pinned, watched field except `staminaleft`**, the only other
+  offender being `hero.hitpoints` in 3. And `hero.staminaleft == 110 − (hero
+  walk count)` holds **38 of 38**, so the hero side is deterministic and
+  operator-controllable; only the villain side is not.
+
+  `captureAllowedNow()` in `ss2-capture-wrapper.as` has a champion branch that
+  refuses to arm unless the live hero state matches what the scenario requires
+  (`staminaleft == staminamax`, `herolevel == arenaStagedLevel`), emitting
+  `capture-refused-unstaged`. **It works and it is proven**: `arena-champ-1` and
+  `arena-champ-2` fired it **382 and 460 times** and correctly produced no trace.
+  Its own comment states the doctrine better than this file had:
+
+  > *"The wrapper injects only the RNG tape — it stages no combatant state — so
+  > there is nothing to force here, only something to refuse. Refusing turns a
+  > silent non-match into a visible low success rate, which is the right trade: a
+  > session that cannot be evidence should produce no trace rather than a trace
+  > nobody can reproduce."*
+
+  Three lines above it: `if (arenaCaptureMode == "always") return true;`.
+  **All 38 armed `adc` rounds ran `captureMode: "always"`, and
+  `capture-refused-unstaged` appears ZERO times in any of them.** So the armoured
+  family spent 38 rounds in the one mode that refuses nothing, and banked 11
+  divergence reports against a precondition it never checked.
+► **NEVER RIGHT UNDER EITHER READING OF "IT".** The wrapper is byte-identical at
+  HEAD to its state at the commit that wrote this sentence, so nothing drifted:
+  the `arenaCaptureMode == "always"` early return is ONE line above the champion
+  branch and ~29 lines above the quoted comment block. The blockquote itself
+  checks out. Locate with `grep -n 'arenaCaptureMode' tools/runtime-capture/ss2-capture-wrapper.as`.
+
+
+  *(Corrected 2026-09-01 evening: the 15:50 handoff restated this as "with ZERO
+  refusals logged", which is false. **Seven refusals ARE logged** — all
+  `capture-refused-wrong-side`, in `adc32`, `34`, `35`, `36`, `45`, `47`, `48`.
+  What is genuinely zero is `capture-refused-unstaged`, because `always` returns
+  true at line 2025 before any scenario check while the attacker-side guard three
+  lines earlier still fires. The claim is right about the ARMING gate and wrong as
+  literally stated about refusals.)*
+
+  *(Also corrected: all 38 rounds targeted ONE fixture —
+  `candidate-armoured-deflection-threshold-cleared`, identified by the injected
+  tape, whose seven values match it uniquely. **The other seven of the eight
+  blocked fixtures have never had a single capture attempt that could match
+  them.** Four of the eight share the staged villain profile and differ only in
+  the tape; `equality-quirk` and the three `tournament-*` stage a DIFFERENT
+  villain (armourclass 22, helmet 2) that no `adc` round ever staged.)*
+
+  **THE SCENARIO BLOCK IS A PRECONDITION, NOT A STAGED INPUT** — that distinction
+  is what the family got wrong. `-StageVillain` is only the MECHANISM that tries
+  to make the precondition true; `scenario.villain.staminaleft` is a state the
+  capture must actually be IN when it arms. Staging establishes the fields the
+  game does not touch afterwards (defence, hitpoints, armour pieces, stamina,
+  herolevel, vitality — all durable on the villain). It cannot establish
+  `staminaleft`, because the villain's own turns mutate it between the staging
+  window and arming. **A field staging cannot hold and the gate does not check is
+  a precondition in name only.**
+
+  So the remedy is (c) from the design question, not (d): generalise the champion
+  branch to refuse arming unless the live state matches the target fixture's
+  scenario on the path-determined fields, and run the armoured family under it
+  rather than under `always`. Cost is a wrapper edit — so
+  `validate-vehicle.ps1` must PASS afterwards — plus a low per-round success
+  rate, which is the trade the comment already argues for and the champion route
+  already pays.
+
+  **What this does NOT settle**: how many rounds that then takes. Across the 38
+  armed traces the joint precondition (hero 105 AND villain at its pinned value)
+  held **0 times** at 105/105 and **once** at 105/110. A gate makes the failures
+  visible and the successes trustworthy; it does not make them frequent. Whether
+  to also choose a villain stat vector whose stamina is invariant to its own
+  walk count — `stamina 2` gives regen 2, exactly the minimum walk cost, so
+  walking nets zero and `check_stats` clamps at `staminamax` — is a separate
+  scenario-design decision with every dependent value needing re-derivation.
+
+  **A byte-level fact this uncovered, worth keeping**: `staminaleft` CARRIES
+  ACROSS BOUTS. `battlevalues` resets it only when it is already `<= 0`, arena
+  `initbattle` resets the VILLAIN's only, `restore_char` does not carry it, and
+  root frame 214 resets hitpoints alone. Different opponents mean different turn
+  counts mean different residual stamina — which is why the champion gate had to
+  exist at all.
+
+► **THE WHOLE PROMOTED CORPUS RESTS ON ONE OPPONENT ARCHETYPE, AND `speed` IS AN
+  UNPINNED INPUT TO A PINNED OUTPUT IN ALL 82 FIXTURES.** Measured 2026-09-01
+  across every candidate and golden:
+
+  - **82 of 82** fixtures pin the villain's `staminaleft`.
+  - **0 of 82** pin `speed`, for either combatant.
+  - **All 22 promoted goldens share ONE villain profile**: `attack`, `defence`,
+    `strength`, `charisma`, `magicka` all **zero**.
+    ► **STALE, AND "ALL 23" WOULD BE FALSE.** 22 of the 23 goldens have villain
+      attack/defence/strength/charisma/magicka all present and all zero.
+      `golden-armoured-deflection-threshold-cleared` breaks it with `defence: 3` and
+      the other four **ABSENT — not zero, absent.** Name the subset; do not raise the
+      count.
+
+    ► **DENOMINATOR ONLY: 83 of 83 fixtures pin the villain's `staminaleft`; the
+      invariant HOLDS.** The paired "0 of 82 pin `speed`" is 0 of 83 and is stronger
+      than stated — `grep -rn '"speed"' test/fixtures/` returns NOTHING at all, for
+      either combatant, in any fixture.
+
+
+  `staminacost` for a walk is `round(movement_speed / 2)`, and
+  `movement_speed = clamp(round(speed * 1.5), 4, 60)`. For a zero-speed villain
+  the CLAMP FLOOR of 4 does the work: any `speed <= 2` gives `movement_speed` 4,
+  so the walk costs 2 whatever `speed` actually is, and the unpinned input cannot
+  bite. **That is why the prisoner and probe families promoted and nothing else
+  ever has** — not because those fixtures are better specified, but because their
+  opponent's stat vector makes the missing pin harmless.
+► **FALSIFIED AS A UNIVERSAL, AND CORRECTING ONLY THE COUNT WOULD LEAVE THE
+  EXPLANATION WRONG.** The armoured family promoted 2026-09-02, so "nothing else
+  ever has" is false. But it did NOT promote by the mechanism this sentence
+  describes: `golden-armoured-deflection-threshold-cleared` has no all-zero stat
+  vector (villain `defence 3`, with `attack`/`strength`/`charisma`/`magicka`
+  ABSENT rather than zero) and still pins no `speed`. It promoted because the
+  wrapper's `staged` declaration fixed the villain directly and 1,201 unattended
+  rounds beat a ~1-in-586 joint precondition. **Scope note: the block this sits
+  in is headed "Measured 2026-09-01", so its `82 of 82` / `0 of 82` /
+  `All 22 promoted goldens` are dated measurements that were correct then.**
+  Today: 83 fixtures, 83 of 83 pin villain `staminaleft`, 0 of 83 pin `speed`,
+  and 22 of 23 goldens carry the all-zero villain profile.
+
+
+  Every other family fights an opponent the build DRAWS: `randomise_gladiator`
+  (six call sites, incl. `sprite:1788/frame:69` x3 and `root/frame:214`) redraws
+  `speed` and `strength` each round, and the archived traces show villain
+  `strength` ranging 1..8. There, `speed` is live, unpinned, and unobserved — it
+  is absent from the wrapper's 28-name `DEFAULT_WATCH_FIELDS` too, so no trace
+  records it and nobody could see it vary.
+
+  **22 of the 38 unpromoted candidates pin villain `staminaleft` while pinning
+  NONE of `speed`/`strength`/`charisma`/`magicka`** — the four stats
+  `staminacost` reads. The other 16 (champion 5, spell 8, duel 2, taunt 1) pin
+  some of them but still never `speed`.
+► **FIRST CLAUSE STALE, SECOND CLAUSE EXACT — DO NOT TOUCH THE SECOND.** 21 of
+  the **37** unpromoted candidates, not 22 of 38 (60 candidates less the 23 whose
+  stem has a promoted golden). **"The other 16 (champion 5, spell 8, duel 2,
+  taunt 1)" reproduces EXACTLY**, and 21 + 16 = 37 closes arithmetically. Only
+  the first fraction moves.
+
+
+  **This reframes the roadmap's "the remaining work is breadth".** It is not
+  breadth: 22 goldens covering one opponent archetype is one archetype verified
+  many ways. Extending to a second archetype needs the fixtures to pin what the
+  first one got away with leaving out — which is a schema question about what a
+  scenario must declare, not a capture backlog. **Do not fix this by widening
+  `DEFAULT_WATCH_FIELDS`**; the wrapper's own comment explains why, and it is
+  right: the watch fires per assignment, so a newly watched field the game writes
+  during an armed action adds mutation lines and diverges every existing golden.
+  `-WatchFields` already EXTENDS the default per session, which is the mechanism.
+► **23 goldens covering TWO opponent archetypes.** "One archetype verified many
+  ways" no longer describes the corpus: the armoured golden is defence 3 /
+  armourclass 79 / four pieces / four stats absent / `fightMode` tournament.
+  ► **Sibling that a digit-grep will miss:** the same defect is spelled in WORDS
+  further down this living head as "one archetype twenty-two ways".
+
+
+► **40 DROPPED LAUNCH NONCES ARE RECOVERABLE FROM THE ARCHIVE, AND DOING IT
+  COSTS RE-PROMOTING 20 OF THE 22 GOLDENS.** Measured 2026-09-01 by
+  `node tools/recover-launch-nonces.mjs --archive <dir>` — REPORT ONLY, no write
+  path, and re-run it rather than trusting these numbers:
+  ► **NUMERATOR HOLDS, DENOMINATOR MOVED: 20 of 23.** The tool prints exactly that
+    line today. The same stale "20 of 22" repeats in the table just below. This row
+    already carries the right correction shape — "re-run it rather than trusting
+    these numbers" — so keep the command; note that `--archive` is required by
+    design, so the path is not derivable.
+
+
+  | | count |
+  | --- | --- |
+  | records whose archived trace carries a nonce the record lacks | **40** |
+  | already nonce-bearing (re-ingest is byte-identical) | 9 |
+  | genuinely pre-nonce — ingest REFUSES the trace | 18 |
+  | pre-nonce waiver, today -> if every recovery landed | **58 -> 18** |
+  | **goldens that would need re-promotion** | **20 of 22** |
+► **9 → 11 nonce-bearing.** The whole table as measured 2026-09-07: records
+  examined **69** (the implicit total 40+11+18, not 67); would-recover 40
+  (holds); already nonce-bearing / identical **11** (was 9); genuinely pre-nonce
+  / ingest-refused 18 (holds); waiver 58 → 18 (holds); goldens needing
+  re-promotion 20 of 23. Cross-checked without the tool: 11 records carry
+  `capture.launchNonce`.
+
+
+  Only `obs-pw10` and `obs-qk8` are cited by nothing and are therefore free.
+
+  **VERIFIED WAVE, and it corrected the main session twice.** `wf_8d57104d-417`
+  returned 6 of 6 questions and **209 of 209 verifiers, zero errors** — the first
+  wave this session that is not UNVERIFIED-PARTIAL.
+
+  - **THE HEADLINE SURVIVES: zero of 67 records differ in SUBSTANCE.** The union
+    of every changed JSON pointer across all 67 is exactly three —
+    `/capture/launchNonce`, `/capture/overdraw`, `/digest`. Nothing in
+    `scenario`, `samples`, `mutationTrace`, `events`, `resultEvent`,
+    `finalState`, `build`, `target` or `observationId` moves. 407 samples, 182
+    mutation entries, 189 events and 2,412 `finalState` fields reproduce from the
+    traces alone.
+  - **"27 reproduce byte-identically" was WRONG — only 17 do.** 27 reproduce with
+    zero VALUE difference and an identical digest, but **10 differ in `/scenario`
+    key ORDER alone**: committed `[attackerSide, attackDirection, result, hero,
+    villain, fightMode]` against today's `[attackerSide, result, hero, villain,
+    attackDirection, fightMode]`. The digest is unaffected because
+    `computeSs2ObservationDigest` canonicalises with sorted keys. **The churn is
+    itself evidence**: today's ingest no longer emits the shape that produced
+    those 10, so they were written by an earlier ingest version. They are
+    `obs-20260830-auto1/2/3`, `-e1`, `-t1`, `-u1` and `obs-camp1..4` — currently
+    correct, gaining nothing, and they would still churn a diff.
+  - **The waiver can shrink 58 -> 18 and NEVER to 0.** The 18 traces genuinely
+    never recorded a nonce: `obs-20260830-auto1/2/3`, `-e1`, `-t1`, `-u1`,
+    `camp1..4`, `pw1..pw8`.
+  - **The mis-pairing hazard was real in shape but never fired.** Only two
+    archive dirs hold more than one `.jsonl` (`vehicle-check`, `simulated`), and
+    they are exactly the dirs `NON_SESSION_CAPTURE_DIRS` already exempts; no
+    committed record points at either.
+    ► **FIRST AND LAST CLAUSES HOLD; THE SET-EQUALITY CLAUSE IS FALSE.** Exactly two
+      archive directories hold more than one `.jsonl` — that half is right. But
+      `NON_SESSION_CAPTURE_DIRS` (`test/ss2-divergence-corpus.test.js:121-125`)
+      exempts **THREE**: `simulated`, `vehicle-check` AND `wrapper`, and `wrapper/`
+      exists in the archive holding exactly one `.jsonl`. **The relation is a proper
+      SUBSET, so the word "exactly" is wrong.** "No committed record points at
+      either" HOLDS, and is stronger than stated: the same test file ASSERTS at
+      `:539-548` that no probe report's `sessionId` collides with the exempt set, so
+      it is enforced rather than merely true today.
+
+    ► **ALL FOUR NUMBERS STALE: 421 samples, 184 mutation entries, 191 events, 2,980
+      `finalState` fields across the 69 records.** The deltas are exactly the two
+      records added 2026-09-02. **State the leaf convention when rewriting** — a
+      scalar position, array entries counted individually — because the pairwise
+      tool's own leaf counts differ by whether empty containers count, and that
+      convention difference is what makes the ranges quoted elsewhere look wrong when
+      they are not.
+
+    ► **HEADLINE HOLDS; DENOMINATOR AND POPULATION BOTH NEED SAYING.** Zero of 69
+      records differ in substance, and the union of every changed JSON pointer is
+      exactly three — `/capture/launchNonce`, `/capture/overdraw`, `/digest`.
+      **Precision this sentence loses: 18 of the 69 are ingest-refused and produce no
+      diff at all**, so the union is measured over 51 comparable records, of which 40
+      changed and 11 were byte-identical. "Across all 69" overstates the population.
+
+
+  **The reason this is not obviously worth doing.** A verifier this session
+  resealed `obs-par1`'s digest with (a) its true nonce, (b) a FABRICATED nonce,
+  (c) a nonce STOLEN from `obs-pq1` and (d) no nonce at all. **All four matched
+  with zero differences and passed `validateSs2Observation`**, because
+  `SS2_PAIRWISE_EXCLUDED_KEYS` excludes `capture` wholesale and the matcher never
+  reads it. So nothing downstream can tell a recovered nonce from an invented one,
+  and the only assurance available is that the operation REPRODUCES against the
+  archive — which is what the tool is shaped to give and why it prints its own
+  resolution rule and archive path.
+
+  **Two traps the tool encodes, both of which silently produce a wrong answer.**
+  Resolve a record to its trace by the record's OWN `capture.sessionId` +
+  `observationId`, NEVER by file name — three records are named after a different
+  id than they carry. And carry `installHashVerifiedAfter` FORWARD from the
+  committed record rather than asserting it fresh: a re-ingest today measures
+  nothing about a session that ran days ago, and asserting it would be exactly the
+  quiet conversion of measured evidence into asserted data this project exists to
+  refuse.
+
+► **THE FRESH-NONCE RESIDUAL IS WORSE THAN RECORDED: it also unlocks the
+  authored-from gate, and all four self-citing goldens are re-promotable from
+  the very records they were transcribed from.** Found 2026-08-31 by an
+  adversarial pass driving the real promotion entry point, then reproduced
+  independently by the main session: 4 of 4.
+
+  The gate compares `observation.observationId` to
+  `candidate.provenance.authoredFrom` as a **string**, and `observationId` is
+  both invisible to the matcher and excluded from the pairwise projection. So
+  renaming the authored-from record walks straight past it.
+
+  **The rename alone is NOT enough, and the composition is the finding.** A
+  rename re-digests, which drops the record out of the pre-nonce digest waiver,
+  and the nonce check refuses it — verified, 4 of 4 refused. Mint a fresh nonce
+  as well and all four PROMOTE. So this is the already-known "forger who mints a
+  fresh nonce" residual, which turns out to unlock a second gate nobody had
+  connected it to. It is not a separate hole to close; it is a reason the nonce
+  residual outranks its current billing as "smaller than what it replaced".
+
+  **The re-promotion this bullet pointed at is DONE (2026-08-31), and the
+  advice in it was only half achievable.** The four were re-promoted from
+  independent evidence, and 9 nonce-bearing records are now cited — but
+  "genuinely independent NONCE-BEARING evidence" was not available for all of
+  them: `golden-prisoner-normal-kill` rests on three records of which ONE
+  carries a nonce, so it has zero comparable nonce pairs and its independence is
+  still two operator-chosen strings plus the blanket pre-nonce waiver. The
+  assertion this bullet described no longer exists; see "What the re-promotion
+  did and did not establish" below for what replaced it and why deleting it as
+  its own comment prescribed would have been a mistake.
+
+► **`capture.observedAt` is free end to end, and nothing anywhere checks it.**
+  Its only consumer on the promotion path is the stamp that writes the golden's
+  `provenance.observedAt`. There is no ordering, recency or plausibility check,
+  so a promoted golden's stated observation date is an unverified operator
+  string. Low severity on its own; listed because "when the evidence was taken"
+  is provenance, and every other provenance field here is checked.
+
+- ~~**The promotion gate never compared the two observations to each other.** Now
+  it does, and the gate is DORMANT by measurement (0 of 162 leaves can differ
+  while both still match).~~ **CLOSED 2026-08-31 by measurement. Both bullets
+  struck through here were wrong, in opposite directions.** The gate is NOT
+  dormant, and "162" was never unreproducible. See § "The pairwise gate: what
+  the 2026-08-31 measurement settled" below, and run
+  `node tools/pairwise-gate-dormancy.mjs`.
+- ~~**The "162 leaves" dormancy measurement does not reproduce, and neither does
+  its correction.** No record carries 162 under either, so "162" is not a
+  full-record count.~~ **The RANGES in this bullet are right — full-record
+  101-184, matcher projection 86-157, both reproduced exactly — and the
+  CONCLUSION drawn from them is wrong.** 162 is full-record leaves *minus the
+  digest*, which any probe must rewrite; obs-qk1 and ten siblings carry exactly
+  that, and 142 is that same family's matcher projection. Both disputed numbers
+  name one record family. This is the third time this measurement was re-argued
+  from memory, which is why it is now a committed tool.
+
+► **A candidate was fitted to an observation, and it predates this session.**
+  `staminaleft` 105 was transcribed after the map predicted 110. The same hero
+  block may have carried it into other fixtures — **audit the corpus before
+  trusting any staged scalar.**
+► ~~**The champion family cannot be captured at all** (hero `attack`/`defence` 3
+  is unreachable; `hitpointsmax` 250 and `staminamax` 150 likewise). Five
+  fixtures join the fifteen impossible-hero ones. Re-derive from the map.~~
+  **RETRACTED 2026-08-31 (`2d0b077`), and this copy was missed at the time.**
+  Every clause is false — `attack` and `defence` are ordinary level-up stats,
+  `L=11, vitality 7` gives `hitpointsmax` 250, and `stamina` is button 2254.
+  The family is reachable at `herolevel 11`. Run
+  `node tools/stat-vector-reachability.mjs`; the full retraction is at
+  § "Next steps, in order" item 1.
+  **This is the second copy of one instruction, and the retraction that fixed
+  the first one is the one that teaches "retract AT THE INSTRUCTION, not only
+  above it."** It reached the next-steps entry and not this one. See the
+  standing rule at the top of this file.
+► **All eight reachable fixtures over-pin `staminaleft`**, which nothing in the
+  ATTACK-RESOLUTION chain reads. ~~Fixing it needs a matcher change.~~
+  **CORRECTED 2026-08-31: that is the prescription § "READ THIS FIRST" calls
+  DEAD, and this line was still stating it as the plan. Read that block before
+  doing anything here.** The sound path recorded there is to fix the CAPTURE —
+  pin the approach-step count so the value is deterministic — not the
+  comparison. Two scopes were also being conflated, which is why this line and
+  that block read as contradicting each other when they do not: `staminaleft` is
+  read by nothing in the attack-resolution chain (inventoried by offset in
+  § "The pairwise gate…" below), and it is NOT inert in the build at large — it
+  gates which attack buttons exist, forces the rest phase, and steers the villain
+  AI. Both are true; only the first licenses anything. **The sequencing
+  advice that stood here — "which needs the dormant gate above landed first" —
+  is superseded.** The gate is landed and has teeth, but on nonce-free evidence
+  it is unreachable, so it backstops an exclusion for exactly nothing today.
+  Whoever lands the exclusion cannot lean on it and must bring the adversarial
+  pass named in § "The prescribed fix" below.
+► **The stub is far weaker than the gate implies** — 7 of 15 hook slots have
+  never wrapped in any gate run; `attack_chances`, the production arming point,
+  is exercised 0 times there and ~209 times live.
+- The wrong-side guard read an object the game never writes and was dead on
+  every route. Fixed, and proved to fire in both directions. *(Closed.)*
+- `scenario.attackerSide` is compared against the fixture's own declaration —
+  a self-comparison — and the wrapper's real observation of who swung is
+  discarded before ingest.
+- The 81 divergence-report digests are unverified, and the obvious repair is
+  itself an assertion that cannot fail.
+- Hook attribution forgery. ~~*(Closed this session.)*~~ **NOT CLOSED —
+  corrected 2026-08-31. This bare line was the only place claiming it was**, and
+  two fuller statements disagree: § "Still open, with the evidence below the
+  archive line" calls it "a third working forgery against the promotion gate,
+  and it is open", and § "The pairwise gate…" says that gate "does not close the
+  hook-attribution hole and must not be described as closing it". What was
+  closed that session was narrower — the matcher now TRANSLATES `reason` rather
+  than stripping it. Two records agreeing on the same false attribution still
+  promote.
+  ► **81 → 86 divergence reports, and the "unverified" half HOLDS PROVABLY.** Each
+    carries the digest under key `observationDigest`, never `digest`.
+    `test/ss2-divergence-corpus.test.js:355-359` DOES assert
+    `record.digest === report.observationDigest`, but only inside a
+    `fixtureId` match, and the same test asserts that match count is 0 with the
+    comment "which is why the digest equality above has never once executed
+    against the committed corpus". ► **Duplicate stale 81 further down this living
+    head, under "Still open".**
+
+  ► **FIRST HALF HOLDS EXACTLY; SECOND HALF IS THE SAME CATEGORY ERROR AS ABOVE.**
+    "7 of 15 hook slots have never wrapped in any gate run" re-derives: `hookSlots`
+    is 14 `registerSlot` + 1 `registerNativeSlot("gotoAndPlay")` = 15, the
+    vehicle-check runs emit exactly 8 distinct `wrapped:` names, and no rufflelog
+    anywhere carries more than one `wrapped:randomBetween`, so 7 slots never wrap
+    — attack_chances, check_spells, destroy_armour, magic_damage_character,
+    nextphase, remove_armour, and the second randomBetween slot. "0 times there"
+    HOLDS. **"~209 times live" is a trace count, not an event count** (see the
+    `dbg()` correction above); the `wrapped:` and `called:` file sets are
+    identical. Give the command, not a number.
+
+  ► **POINTER BROKEN — quote the target, do not renumber it.** § "Next steps, in
+    order" contains TWO numbered lists, and "item 1" now selects the wrong one: a
+    reader lands on "CAPTURE AN ARMOURED FIXTURE", which is itself the stale
+    instruction corrected above, so the two failures compound. The champion
+    retraction is intact and unambiguous — find it with
+    `grep -n 'champion' HANDOFF.md` inside that section, or search for its own
+    opening words. It is the first item of the SECOND list.
+
+
+Three claims I recorded during the session were wrong and are corrected in
+place: that the wrong-side defect was arena-specific; that `if (attacker ==
+undefined) return false` was the fix; and that 105 was arithmetically
+unreachable. Each correction sits with the block it belongs to.
+
+**Correction to my own entry above, and the transcription charge is CONFIRMED
+while my reasoning for it was wrong.**
+
+I wrote that "105 is arithmetically unreachable from the fixture's own inputs"
+and that two combatants sharing a non-derivable number was "the signature of a
+transcribed observation". The conclusion is right and the premise is false: 105
+IS arithmetically reachable, and the live data fixes the step size. Do not repeat
+the unreachability argument.
+
+The transcription is established by the repository's own record, not by
+inference. The eight fixtures were created de novo in `6fd3884`
+(2026-08-30 19:52), and their hero block is byte-identical to
+`candidate-prisoner-normal-kill`'s except `hitpoints` 30 → 300. The decisive
+artifact is committed:
+`test/fixtures/ss2-1v1-divergences/provisional-prisoner-kill--obs-20260830-t1-6bf4f120.json`
+records `/scenario/hero/staminaleft` **expected 110, actual 105**. The
+map-derived prediction was 110 — a fresh bout at full stamina — the runtime
+returned 105, and the fixture was re-authored to the runtime's number. The
+authoring commit says so in the test it added: *"the one staged number that is a
+function of the autopilot step count rather than of a formula"*, *"exactly as
+observed in the promoted prisoner sessions"*. The "five walks from 110"
+derivation the documents now carry first appears three hours AFTER the fixtures.
+
+So this is a candidate fitted to an observation, it predates this session, and
+the same hero block may have carried it into other fixtures. **Check the rest of
+the corpus before trusting any staged scalar.**
+
+### The pairwise gate: what the 2026-08-31 measurement settled
+
+`promoteSs2CandidateToGolden` matched every observation against the candidate and
+never against the other observation — so "two matching observations from two
+independent sessions" has always meant two records that each resembled the same
+prediction, never two that resembled each other. `ss2ObservationsMatch` existed,
+was exercised by tests, and was never called from the promotion path.
+
+That gate is now called, and **its dormancy is settled by a committed tool rather
+than by a sentence: `node tools/pairwise-gate-dormancy.mjs`.** It takes a minute.
+Three independent implementations agreed on every number below, and an
+adversarial pass drove the real promotion entry point rather than the functions.
+Do not quote these figures without re-running it — this measurement has now been
+re-argued from memory three times and retracted twice.
+
+**The gate HAS TEETH.** 751 of 11,121 single-leaf perturbations across the 67
+records are free — valid, re-digested, still matching their candidate — and
+**407 of them, every one at `/samples/*/callSite`, this gate alone refuses.**
+The free count is exact, not a lower bound: a leaf the matcher compares cannot
+be free, since every record matches its fixture at baseline.
+► **ALL THREE NUMBERS STALE, VERDICT UNCHANGED: 777 of 11,403 single-leaf
+  perturbations across 69 records are free; 421 of them, every one at
+  `/samples/*/callSite`, the gate alone refuses.** Classification today:
+  refused-by-validation 2,963 + caught-by-matcher 7,663 + free-caught-by-gate 421
+  + free-caught-by-nothing 356. **The ranges quoted a few paragraphs above
+  (full-record 101–184, matcher projection 86–157) still reproduce EXACTLY and
+  need no change** — but only under the counting-empty-containers convention; the
+  other convention gives 100–184 and 85–157. Live/tool kind: the correction is
+  the command, `node tools/pairwise-gate-dormancy.mjs --json`.
+
+
+**And on committed evidence it refuses nothing, for a reason nobody had looked
+at.** ~~Zero of the observation ids the 22 goldens cite carries a `launchNonce`~~
+— **FALSE since the 2026-08-31 re-promotion; corrected 2026-09-01 by
+re-derivation.** All **9** nonce-bearing records ARE cited, across **4** goldens:
+`dir5` (`obs-cachecold`+`obs-cachewarm`), `dir6` (`obs-par2`+`obs-par3`+`obs-pq1`
++`obs-pq2`), `dir8` (`obs-iso2`+`obs-par1`) and `golden-prisoner-normal-kill`
+(`obs-pq3`). The other 18 goldens cite none. The rest of the sentence still
+holds for those 18: each cited record is waived only by its exact digest in
+`pre-nonce-observations.js`, and every forgery re-digests and so leaves the
+waiver. The **nonce check** refuses those 18 goldens' forgeries about forty lines
+before the pairwise loop runs. ~~It fires only on nonce-bearing evidence, of
+which three promotable groups exist (`obs-cachecold`+`obs-cachewarm`,
+`obs-iso2`+`obs-par1`, `obs-par2`+`obs-par3`) and no golden cites any.~~ **Also
+false, and it names the three groups that ARE cited — they are exactly `dir5`,
+`dir8` and `dir6` above.**
+► **9 → 11 records, 4 → 5 goldens — AND "THE OTHER 18" NEEDS NO CHANGE. FLAG
+  THAT LOUDLY.** All 11 nonce-bearing records are cited, across 5 goldens; the
+  four named groups reproduce with the same record lists, and the fifth is
+  `golden-armoured-deflection-threshold-cleared`, **the first golden whose
+  evidence is entirely nonce-bearing**. Numerator and denominator both moved by
+  one, so 23 − 5 = 18 exactly as 22 − 4 = 18 did: **a blanket edit of that 18
+  would break a correct sentence.** The sweep did not flag this. Siblings still
+  carrying the stale 9 are elsewhere in this living head.
+
+
+**This paragraph contradicted line ~715 of this same file**, which has carried
+the corrected "9 nonce-bearing records are now cited" since the re-promotion
+landed. The 2026-08-31-2244 handoff says the correction was written "in the
+gate's own comment, in `pairwise-gate-dormancy.mjs`, `docs/roadmap.md` and
+`ss2-runtime-capture.md`" — four places, none of them here. **That is the
+retract-at-the-instruction rule failing on the exact file that states it, for
+the third time.** Found by an adversarial verifier aimed at a different claim
+entirely, then re-derived directly: 4 goldens, 9 citations, 0 disagreement.
+► **POINTER BROKEN, AND ITS TARGET IS NOW STALE TOO — do not repoint it, rewrite
+  it.** "~line 715" was accurate when written (`4610132`, 2026-09-01: the text
+  really was at line 716 of that revision); the file has since grown ~1,870
+  lines under it. Worse, the sentence it points AT is wrong today: measured
+  2026-09-07 over the corpus, **69 observation records, 11 nonce-bearing, cited
+  by 5 goldens** — not "9 across 4". Repointing would hand the reader a number
+  wrong by two. This is why an intra-file line pointer is never the right
+  citation here.
+
+
+**So the old "DORMANT TODAY" comment was wrong about the function and
+accidentally right about the corpus.** Both halves are now pinned by tests in
+`capture-campaign.test.js`, and both were demonstrated to fail when broken.
+
+**Read the teeth narrowly.** All 407 committed samples carry ONE `callSite`
+literal, because the wrapper has one roll emitter stamping one compile-time
+constant — the same fact that makes a fixture-derived `callSite` comparison
+something this file already refuses to add. These teeth cannot bite two honest
+captures. **And the gate catches disagreement, never falsehood: two records
+carrying the SAME fabricated `callSite` agree, match, and promote.** It does not
+close the hook-attribution hole and must not be described as closing it — the
+same structural reason a pairwise comparison could never have caught the copied
+record, which had to go through the nonce instead.
+► **407 → 421 committed samples; the load-bearing half is untouched** — every one
+  carries `callSite`, and there is exactly ONE distinct literal, so the teeth
+  still cannot bite two honest captures. ► **AND THE SAME STALE COUNTS ARE IN
+  COMMITTED SOURCE, NOT ONLY IN THIS FILE.** `tools/pairwise-gate-dormancy.mjs`'s
+  `doesNotProve` strings say "All 407 committed samples", "NINE of them
+  nonce-bearing across four goldens", "the goldens now cite 60 distinct records",
+  "all 67 records", "all 47 cited slots". Measured today: 421 · 11 · 5 goldens ·
+  62 distinct cited records · 69 records. **A doc-only fix leaves the tool
+  contradicting its own JSON output.**
+
+
+It becomes load-bearing the moment any field stops being compared. With the
+prescribed `staminaleft` exclusion patched in, an auditor promoted two records
+differing by 99,992 stamina — one negative, one 10^13 above `staminamax`. That is
+the debris forgery's second symptom exactly.
+
+**Land any field exclusion only after this, never before — but the old reason
+for that rule is dead.** It used to read as "the gate is a dormant precondition
+that starts protecting the corpus once an exclusion lands." It will not: on
+nonce-free evidence the gate is unreachable, so an exclusion landed today is
+backstopped here by nothing. Free to keep, re-measured: all 29 cited observation
+pairs across the 22 goldens agree under it, so it refuses no promotion that
+already stands.
+► **29 → 81 cited observation pairs, across 23 goldens, all agreeing, none
+  unresolved; the substance HOLDS.** Re-derived independently of the tool as
+  Σ C(n,2) over each golden's `provenance.observationIds` (23 goldens, 62
+  distinct cited records, no record cited twice), and the tool's own `citedPairs`
+  block returns the identical numbers. "It refuses no promotion that already
+  stands" HOLDS. Worth a sentence rather than a number: the tool also reports
+  `citedIdsNotResolvableByFileName: 1` — three records are filed under names
+  other than the id they carry.
+
+
+**ANSWERED FROM THE MAP, BLIND TO THE CAPTURES.** `staminaleft` is read by
+**nothing** in the attack-resolution chain, and the pinned 105 is not derivable
+from the fixtures' own inputs. The analysis was done by an agent forbidden from
+opening `captures/`, the divergence reports, this file, or the staging runbook,
+so its warrant is independent of anything the runs recorded.
+
+Complete reference inventory — 42 `staminaleft` sites, 24 `staminamax`, every one
+attributed by offset:
+
+- `checkattackroll` (overlay `+0x2c30`–`+0x3192`): **zero** stamina references.
+- `attack_chances`: **zero**. Reads `attack`, `defence`, `charisma`, `magicka`,
+  `shield` only.
+- Deflection (`+0x3030`–`+0x3095`): reads `helmet` and `greaves` only.
+- `remove_armour` / `destroy_armour`: **zero**.
+- `damagecharacter`: one touch, and it is a **write** —
+  `game_defender.staminaleft += ceil(breastplate * damage / 100)` at `+0x1928`.
+  Nothing downstream consumes it; the defeat gate reads `hitpoints`.
+- `check_stats`: reads `staminamax` only to clamp `staminaleft`. Self-referential.
+
+**It is path-determined, not scenario-determined.** In `normal_attack` the cost is
+*set* at `+0x61a3`, `attack_direction` drawn at `+0x61f1`, `checkattackroll()` at
+`+0x62ad`, and `staminaleft -= staminacost` only later in `nextphase` (`+0x32a7`).
+So the value at the roll reflects history *before* the attack. Each prior turn
+nets `-staminacost + (1 + round(stamina/3))`, and a walk costs
+`round(movement_speed/2)` where `movement_speed = clamp(round(speed*1.5), 4, 60)`.
+**The fixtures state neither `stamina` nor `speed` for either combatant.**
+
+**And 105 is arithmetically unreachable from the fixture.** `staminamax = 100 +
+stamina*10`, so 110 implies base `stamina` 1 and per-turn regen 1. A fresh bout
+starts full at 110. Reaching 105 needs exactly one prior turn at net −5, i.e. one
+walk at `movement_speed` 11–12, i.e. `speed` 7 or 8 — which the scenario does not
+state. With the stated `strength: 10` a prior *attack* would have cost 20 and
+landed on 91. The same 105/110 is pinned for the villain, whose block states no
+`strength` and no `speed` at all. **Two independent combatants landing on the same
+non-derivable number is the signature of a transcribed observation, not a
+derivation** — which, if so, means this predates the session and is the exact
+discipline failure the pipeline exists to prevent.
+
+`staminamax: 110` is separately over-specified: `battlevalues` recomputes it
+unconditionally from base `stamina` at `+0x37b6`, and `nextphase` runs
+`battlevalues` for both combatants at every phase transition, so a staged
+`staminamax` cannot survive one turn.
+
+**And `expected.state.<side>.staminaleft` carries zero information today.** The
+capture window deliberately closes before `nextphase`
+(`ss2-capture-wrapper.as:2456-2459`), so `finalState.staminaleft` = staged value +
+`staminaBonus`; with `breastplate: 0` in all five armoured fixtures,
+`staminaBonus` is 0 and the field is a pure echo of the scenario value. The pin
+costs six exact-equality constraints per fixture, none related to deflection
+thresholds, armour removal, or the equality quirk these fixtures exist to test.
+
+### What the re-promotion did and did not establish
+
+Landed 2026-08-31. All four self-citing normal-band goldens were re-promoted
+through `campaign.mjs settle`, from every other committed record that matches
+them. **Read the limits before quoting this as an independence result** — a
+write-nothing verifier aimed at exactly that claim returned BROKEN, and it was
+right.
+
+WHAT IS TRUE. Each golden has stopped citing the record its own candidate was
+transcribed from, so each now rests only on records that COULD have refuted it.
+Evidence went 2 -> 3, 2 -> 5, 2 -> 9 and 2 -> 4 records. Nine nonce-bearing
+records are cited where zero were before, and the pairwise gate is now
+REACHABLE from committed evidence for the first time. Scenario, samples and
+expected are byte-identical: this changed provenance, not measurement.
+
+**PARTLY ANSWERED FROM THE RAW TRACES 2026-08-31, and NOT re-derived here.**
+The paragraph below said this question could not be settled from a WSL clone.
+That is still true of THIS tree, but the Windows session ran it: a six-agent
+probe over the raw `rufflelog` archive in `C:\ss2-capture\captures`, four probes
+INDEPENDENT and both adversarial verifiers BROKEN. **Treat every figure in this
+paragraph as unverified here — no one on this side has re-derived them~~, and the
+archive is not reachable from Linux~~.** *(Struck 2026-09-01 evening: the archive
+IS reachable from Linux at `/mnt/c/ss2-capture/captures`; see the correction in
+§ "What to read, and what you may skip". The figures below are still unverified
+here, but they are now CHECKABLE from this side — nothing stops the next WSL
+session re-deriving them.)* What it reports: a 197-sample microsecond
+timestamp series inside each log, 194-195 of 196 inter-line deltas differing,
+RMS divergence 3.5-31.3 ms, chi-squared on microsecond last digits uniform
+across all 25 logs (so not synthetically generated), frame cadence tracking the
+declared fps across six independent 30 fps runs sharing no microsecond, and
+obs-par1/2/3 starting within 14 µs of one another — GPU contention that a copy
+does not produce. **A naive copy preserves in-file timestamps exactly, which is
+what the probes tested for and did not find.**
+
+One conflation to avoid, because a verifier made it: FILE metadata (mtime,
+birthtime) was demonstrated forgeable in a second, unprivileged. That refutes
+the mtime corroboration and NOT the in-file series, which is a different
+artifact. Also destroyed, and it is worth knowing the evidence is gone: the
+relocation in `c85b2ac` rewrote every file into `C:\ss2-capture` and reset NTFS
+ChangeTime — the one field `SetFileTime` cannot write — so ctime can never
+corroborate any of this again. Three copies of the archive exist (the live tree,
+the retired OneDrive tree, and D:), each 1,589 files.
+
+So the independence of these records now rests on ONE strong class of evidence
+that this repository does not contain. That is better than nothing and worse
+than a check, and it lives outside the pipeline entirely.
+
+WHAT IS NOT. **The corpus cannot distinguish an honest repeat from a copy, and
+this change does not alter that.** Measured with the project's own
+`canonicalJsonStringify`: for each of the four candidates, EVERY matching
+record — the refused source record included — collapses to ONE content group
+once `observationId`, `digest`, `capture.sessionId`, `capture.observedAt` and
+the attestation keys are stripped. `obs-camp3` differs from `obs-20260830-t1`
+in exactly four leaves, and from `obs-fr1` in the same four. That is what a
+deterministic outcome recorded twice looks like AND what a copy looks like;
+nothing in the normalized record separates them. The one artifact that could —
+the raw trace — is in `captures/`, which is gitignored and Windows-side, so
+~~**this question is not adjudicable from a WSL clone at all.**~~
+**CORRECTED 2026-09-01 (evening): it is adjudicable from this machine.** The
+gitignored archive is readable from WSL at `/mnt/c/ss2-capture/captures`, so the
+raw traces this paragraph calls out of reach can be opened, delogged and matched
+without leaving Linux — this session delogged all 38 armed `adc` traces and ran
+the repository's own matcher over them. What remains true is the narrower claim
+the paragraph opens with: **the NORMALIZED record cannot separate an honest
+repeat from a copy.** That is a property of the record, not of the operating
+system, and this correction does not touch it.
+
+Read the per-golden strength honestly. `golden-prisoner-normal-kill-dir6` is
+the strong one: 9 records, 4 nonces, two separate launcher invocations, a
+3h49m span. `golden-prisoner-normal-kill` is the weak one: 3 records, ONE
+nonce, so zero comparable nonce pairs, and the other two are four-leaf twins of
+the record the gate just refused.
+
+**THE GATE COUNTS SESSIONS AND CANNOT SEE THAT TWO SESSIONS DIFFER IN THE
+STRENGTH OF THEIR EVIDENCE.** Eight records carrying no launch token satisfy
+"two independent sessions" exactly as well as eight carrying one. That is the
+structural version of everything above, it is not fixed by this change, and it
+is the reason the nonce residual outranks its billing. Found by the Windows
+session's trace pass, 2026-08-31.
+
+An ingest defect fell out of the same pass and is NOT verified here, because it
+needs the raw archive: **`obs-fr1` is reported to carry a `launchNonce` in its
+RAW trace that the ingest path never propagated to the committed record.** If
+that holds, re-ingesting supplies a nonce with no new capture — and it also
+means ingest can silently drop the one identity the operator does not choose.
+`obs-fr1` is cited by `golden-prisoner-normal-kill`, the weakest of the four, so
+this is the cheapest available strengthening. Confirm it against the archive on
+the Windows tree before acting.
+
+Two caveats a future reader should not have to rediscover:
+
+- **`provenance.observedAt` gets LESS informative as evidence grows.** It is
+  the max of the cited records' `capture.observedAt` (and that field is stamped
+  by the launcher BEFORE Ruffle starts, so it is not when anything was
+  observed). dir6's now summarises a 3h49m span in one scalar, with no span
+  field anywhere on the golden.
+- **`repetitions` counts RECORDS, not occasions.** dir6's 9 records come from 7
+  wall-clock occasions: `obs-par2`/`obs-par3` share a timestamp and
+  `obs-pq1`/`obs-pq2` share another, being concurrent arms of one
+  `run-campaign.ps1 -Concurrency 3`. They carry distinct minted nonces, so they
+  are distinct player launches; they are not distinct sittings.
+
+**HOW THIS SECTION CAME TO BE WRITTEN, because it bears on how far to trust it.**
+Two sessions ran in parallel on 2026-08-31 and BOTH stretched past their remit
+without noticing at the time. The Windows session was scoped to migration setup
+and ran an adversarial raw-trace investigation of the corpus; this session was
+scoped to the re-promotion and edited this head five times, the last two
+reactively in response to cross-session messages rather than as planned work.
+Neither is wrong in what it produced — the trace pass answered a question
+nothing else could, and the corrections here were real contradictions — but a
+reader assessing this file should know that a large share of it was written in
+one night, partly reactively, by two agents correcting each other. "Only this
+machine holds the data" is not the same as "this session should run it", and
+that distinction is the one both of us missed.
+
+**One execution-surface fact, because it is easy to collapse.**
+`.claude/workflows/question-fanout-audit.js` is still UNEXERCISED as a file: the
+question-fanout SHAPE ran on 2026-08-31 — six question-diverse investigators,
+six write-nothing verifiers on one named claim each, 12 briefed and 12 returned,
+five BROKEN verdicts that changed the work — but the script was authored inline
+and the committed file has never been invoked. The technique is validated; the
+FILE's own correctness is not. Provisioned is not exercised, which is the same
+distinction that once left three of four workflow components installed and
+never fired.
+► **FALSE SINCE 2026-09-01 — the committed file HAS been invoked, repeatedly.**
+  `a9e690e` (2026-09-01) says in its own commit message that it was run for the
+  first time that session and names the defect that run exposed, and a later
+  2026-09-02 commit records another. **It was invoked again on 2026-09-07 for the
+  wave that produced these very corrections**, with `started == returned` on both
+  phases (6/6 questions, 6/6 verifiers).
+
+
+Three defects were found by the verifiers and fixed in the same commit, each of
+which would have made this change a net loss:
+
+- **`settle` wrote the capture manifest BEFORE asking the gate**, and never
+  rolled it back. A refused run therefore deposited a session-independence
+  attestation for evidence the repository had just refused — and `git checkout
+  -- .` does not remove an untracked file, so the wreckage survived the obvious
+  cleanup with the suite fully green over it. It now promotes first and writes
+  second.
+- **Nothing walked manifest -> golden.** 26 manifests against 22 goldens passed
+  the whole suite. `test/capture-campaign.test.js` now asserts every committed
+  manifest is cited by a golden, and the four attesting the retired pairs were
+  deleted with the promotions that cited them.
+- **The self-citation test's own comment prescribed deleting it, and that was
+  wrong.** Deleting it leaves `goldenPartition.eligible` as a silent filter in
+  front of the reproduction loop: measured, re-planting a self-citing golden
+  REMOVED a failure — nine with the plant, ten without, none naming it. The
+  partition is gone instead, so the reproduction loop runs the gate over all 22
+  goldens and a self-citing one fails by name.
+
+**`captureManifestSha256` is a fact about when `settle` ran, not about the
+evidence.** `buildSs2CaptureManifest` defaults `createdAt` to the wall clock and
+the driver passes nothing, so two settle runs over identical records produce
+different goldens. This is how all 22 committed manifests were made and was NOT
+changed here; reproducibility runs through the committed manifest file, which
+carries its own `createdAt`. Worth fixing, deliberately, as its own change.
+► **22 → 23 committed manifests; the MECHANISM reproduces verbatim** —
+  `tools/runtime-capture/build-manifest.mjs:157` is
+  `createdAt: createdAt ?? new Date().toISOString()` and
+  `tools/runtime-capture/campaign.mjs:1279` passes no `createdAt`. The escape
+  hatch holds too: all 23 goldens' cited `captureManifestSha256` reproduce when
+  the committed manifest's own `createdAt` is fed back in. ► **DO NOT SUBSTITUTE
+  in the nearby sentence "26 manifests against 22 goldens passed the whole
+  suite": that is a HISTORICAL description of a defect predating the fix — 22 was
+  right then, and 23 would falsify it.**
+
+
+### DECIDED 2026-09-01 (evening): two questions this file kept re-asking
+
+Both were put to the owner, who delegated them. **Recorded as decisions with
+their reasons so they stop consuming a session each time they surface** — which
+is the documented pathology here: a true observation that gets re-ranked every
+session and never acted on.
+
+► **THE SCHEMA QUESTION IS DEFERRED, NOT OPEN. Do not re-litigate it without
+  the trigger below.** Should `COMBATANT_KEYS` admit the derived stats
+  (`stamina`, `speed`, `vitality`, `herolevel`) and inventory, so a scenario can
+  declare what the game derives from? **Not now**, for three reasons:
+
+  1. **It is not on the path to a playable mod.** It pays off only for verifying
+     a SECOND opponent archetype to golden standard. The corpus already covers
+     one archetype twenty-two ways and feeds nothing; use beats breadth until
+     something consumes it.
+  2. **The remedy may not work even with the schema change.** Byte-verified this
+     session: `cast_swiftsandals` writes `speed = 10 + backup_speed*2`,
+     `cast_colossus` `strength = backup_strength*3`, `cast_bloodlust`
+     `+ round(backup_strength*1.5)`. All three are villain-selectable through
+     `villain_cast_spells`, and they inflate the COST side of the stamina
+     inequality while regeneration stays fixed. **No stat vector chosen before a
+     fight is invariant during it** unless the villain is also sent in empty —
+     which needs inventory declared too, i.e. a second schema addition and a
+     staging question on top.
+  3. **Better information is about to arrive.** Once `ss2-rules.js` exists and
+     fights are played, which parity actually MATTERS becomes an observation
+     rather than a guess. Deciding the schema first spends the decision before
+     the evidence.
+     ► **THE DEFERRAL'S PREMISE EXPIRED SIX DAYS AGO.** Reason 3 was "Once
+       `ss2-rules.js` exists and fights are played". `src/team/ss2-rules.js` was
+       added by `831bcdc` (2026-09-01 22:58), is **1,794 lines**, and was edited five
+       times on 2026-09-07; `tools/hotseat.mjs:58` imports it and `d7ff634` is titled
+       "Let a person's gladiator fight under SS2's own rules". **Reason 1 is
+       falsified too** — the corpus no longer "covers one archetype twenty-two ways
+       and feeds nothing"; it covers two archetypes 23 ways and feeds `ss2-rules.js`,
+       the hotseat and the campaign circuit. Only reason 2 survives untouched.
+       Whether the reopen trigger has FIRED is not determinable from the tree.
+       ► **And the recommendation below has silently flipped without anyone
+       noticing**: it reads "(b) until `ss2-rules.js` lands, then (a)", and it has
+       landed — so this file now recommends (a), merge wholesale. **That is an
+       owner's decision and it should be made deliberately, not inherited from an
+       expired conditional.** The branch figures beside it are stale by the usual
+       mechanism; measure with `git rev-list --count main..HEAD` and
+       `git diff --shortstat main...HEAD`, never with a fourth written number.
+
+
+  **The trigger to reopen it:** a played fight shows behaviour that needs the
+  second archetype, OR someone states a concrete reason to need it at golden
+  standard. Absent either, this is closed.
+
+► **NO 98-COMMIT PR WAS OPENED, DELIBERATELY — and the divergence that would
+  have blocked one is now gone.** The branch is 98 commits / 95 files /
+  +17,190 −2,398 ahead. **A PR that size is not reviewable, and opening one
+  creates the APPEARANCE of a review gate while providing none** — which is
+  worse than no PR, because the rubber stamp is then on the record.
+  ► **STALE, AND IT CONTRADICTS ANOTHER FIGURE IN THIS SAME DOCUMENT.** Measured
+    2026-09-07: **172 commits / 140 files / +33,337 −1,227**, with `main` a clean
+    ancestor of HEAD, so the clean-superset claim HOLDS. ► **This is exactly the
+    live-moving kind that should never be a written number.** Use
+    `git rev-list --count main..HEAD` and `git diff --shortstat main...HEAD`.
+
+
+  What was actually blocking a clean merge was fixed instead: `main` had
+  diverged, and merging it in surfaced content this branch was silently missing
+  (`.mailmap`, two design docs, README improvements, and a HANDOFF section that
+  reached `main` through PR #2). **The branch is now a clean superset of `main`
+  and merges without conflict whenever the owner wants it.**
+
+  **The owner's live options, and this is a decision for them, not an agent:**
+  (a) merge the branch wholesale as one foundation merge, accepting it is
+  unreviewable and saying so in the merge message; (b) keep working on the
+  branch and merge later, which costs nothing now that the divergence is gone;
+  (c) split it into reviewable PRs, which is real work and buys review of code
+  that is already green and already in use. **Recommended: (b) until
+  `ss2-rules.js` lands, then (a).** There is no third party to review this, so
+  a PR's only real function here is a changelog.
+
+### Nothing states when a branch should reach `main`
+
+Found 2026-09-01 while correcting the two stale `main` SHAs above. The only
+written rule about `main` is a PROHIBITION — `AGENTS.md`: "Do not push to
+`main`. Work happens on feature branches. Ask before pushing anything." No
+document in this repository says when a branch becomes ELIGIBLE to merge: not
+`AGENTS.md`, not this file, not `docs/handoffs/README.md`, not the roadmap, and
+there is no CONTRIBUTING.
+► **NARROWLY TRUE, MISLEADING AS WRITTEN.** `AGENTS.md` now names a thirteen-rule
+  document that explicitly covers "merge eligibility" and says those rules are
+  ENFORCED. The rules live in `claude-harness`, a different repository — which is
+  the only sense in which "no document in THIS repository" survives, and that is
+  a distinction worth stating rather than a gap worth recording.
+
+► **CORRECTED AGAIN 2026-09-25.** `AGENTS.md` says git and GitHub follow
+  `claude-harness/docs/git-hygiene.md` — thirteen rules covering branches,
+  commits, pushing, PRs, and merge eligibility. Enforcement is actor-specific:
+  `.claude/settings.json` mediates Claude Code only, not Codex or a human shell.
+  Rule 7 permits frequent feature-branch pushes without per-push owner
+  approval; `main` pushes and forbidden force-pushes remain prohibited, and
+  only a human merges. Quote current `AGENTS.md`, not either older sentence.
+
+
+The de facto practice, read off the history rather than from any document: a
+branch becomes a GitHub PR and a HUMAN merges it in the web UI. Both merges to
+`main` are PR merges (`e3f14aa`, `4409ec7`), and the only commit in this
+repository not authored by `Codex Local <codex-local@invalid>` was one of those
+web merges. The gate is the owner, exercised through GitHub, not anything an
+agent runs.
+► **WRONG ON BOTH HALVES, INCLUDING THE SHAPE.** There are **two** web-merge
+  commits authored by the owner, not one, so even "the only … one" is wrong. And
+  by the date this was written, **24 further commits were already authored
+  otherwise** — so the sweeping claim about authorship was false when it was
+  made, not merely stale.
+
+
+That is a real gap on a project this careful about writing rules down, and it
+has a cost right now: `arena/champion-capture` is 61 commits ahead of `main`
+with no PR, so every promoted golden, the capture pipeline and the whole
+2026-08-31 corpus repair are unmerged. `gh` is installed and authenticated in
+WSL as of 2026-08-31, so opening one is newly cheap — **but that is a decision
+for the owner, not a cleanup an agent should perform.**
+► **STALE, AND IT CONTRADICTS THE "98 COMMITS" FIGURE a few dozen lines above in
+  this same document.** ~~Measured 2026-09-07: 172 commits ahead.~~ Use
+  `git rev-list --left-right --count github/main...HEAD`, not a carried number.
+  **Integrated-state correction, 2026-09-25:** PR #3 is for this current
+  `design/endless-progression-owner-packet` branch, not a different branch. Its
+  mergeability must be re-read from GitHub after each integration push; only a
+  human merges it.
+
+
+### Still open, with the evidence below the archive line
+
+Hoisted 2026-08-31 when the file was split, because these were live instructions
+sitting in what became frozen evidence. Each is a one-line statement of the work;
+the analysis that established it is below the line. **Correct these HERE.**
+
+- **A third working forgery against the promotion gate, and it is open.** Hook
+  attribution: a record carrying deliberately wrong hook labels, `callSite` or
+  `injected` passes ingest, verify and promotion. Partly narrowed since — the
+  matcher now TRANSLATES `reason` rather than stripping it, and the pairwise gate
+  sees `callSite` — but the gate catches only DISAGREEMENT, so two records
+  agreeing on the same false attribution still promote. **Do NOT "fix" it by
+  adding a fixture-derived `callSite` comparison**: it is a compile-time constant
+  and that would compare one constant to another.
+- **The eight reachable fixtures over-pin `staminaleft`/`staminamax`**, and the
+  prescribed exclusion ~~must not be written before the audit named below~~
+  **is DEAD, not merely deferred — corrected 2026-08-31.** This line read as
+  "write it after an audit"; § "READ THIS FIRST" says the comparison-side fix is
+  the wrong fix and the capture is what to pin. If an exclusion is ever landed
+  anyway it still needs the audit named below AND cannot lean on the pairwise
+  gate, which is unreachable on nonce-free evidence.
+- **The 81 divergence-report digests are unverified**, and the obvious repair is
+  an assertion that cannot fail. A second code path produces them; until it is
+  traced there is nothing to compare against.
+- ~~**`src/adapter/battle-host.js:155` collapses an array `aiFill` to one
+  object**, reproduced end to end, pinned by NO test. Source edit and test
+  rewrite must land together in one owner's hands.~~
+  ► **CLOSED — BOTH CLAUSES ARE STALE, re-derived 2026-09-02.** The defect is
+  gone and the "pinned by NO test" clause is now false, which is the more
+  dangerous half: it invites a session to spend a window writing a test that
+  exists. Line 155 is no longer `{ ...declared, resources: first }`; the site
+  is `declaredFillResources(declared, index)` (`:150-156`), which returns
+  `declared.resources` for an object and `declared[index].resources` for an
+  array, so no array is spread into an object literal at all. Two tests pin
+  it through the REAL host — `test/ss2-adapter-integration.test.js:584` ("a
+  per-slot array aiFill's own resources outrank the template bag, per slot")
+  and `:631` ("a per-slot aiFill array reaches the roster whole") — plus
+  `test/team-resolver.test.js:708` on the resolver entry point. Verified by
+  MUTATION, not by reading: restoring the collapse (`const entry = {
+  ...declared }`) fails 2 tests. The workaround retirement the item was found
+  under is also done — `aiFillWithResources` appears nowhere in `src/`.
+  **This is the third open item in this list to decay the same way; an open
+  list is a claim, and it needs re-deriving before it is actioned.** The
+  frozen copy at ~line 2745 is wrong too and stays there as history.
+- **One `isNum` site survives at ~~`ss2-capture-wrapper.as:1407`~~
+  `ss2-capture-wrapper.as:1435`**, with a
+  demonstrably NaN operand. Fail-closed, so diagnosability rather than
+  corruption — but the claim that the guard is used everywhere is false.
+  ► **LINE NUMBERS MOVED (re-derived 2026-09-24 at `ef48e17`): the site is now
+    `:1435`, still unguarded and still `arenaAbort("final-victory-arm")`, and
+    the twelve lines below now read 653 (the definition), 662, 763, 783, 905,
+    979, 1324, 1524, 1625, 2057, 2093, 2157** — still twelve lines carrying the
+    definition or a call; 904, 1521 and 1623 only mention `isNum` in comments,
+    as the note further down this item says. Every number below is the
+    2026-09-01 file's. Find the
+    site with `grep -n 'currentTournament >= 19 && ranking <= 2'
+    tools/runtime-capture/ss2-capture-wrapper.as`, not by line.
+  ► **THE WORDING IS BACKWARDS AND SENDS A READER TO THE WRONG THING.
+    Corrected 2026-09-01 (evening), re-derived directly from the file.** Line
+    1407 contains **NO `isNum` call**. It reads
+    `if (currentTournament >= 19 && ranking <= 2) {` — a bare doubly-negated
+    comparison on two possibly-undefined game fields, which is precisely the
+    shape the `isNum` comment block forbids: with either field undefined,
+    `NaN >= 19` and `NaN <= 2` are BOTH true and the run takes
+    `arenaAbort("final-victory-arm")`. It is the surviving UNGUARDED NaN site,
+    not a surviving isNum site. `isNum` appears on 12 lines — 625 (the
+    definition), 634, 735, 755, 877, 951, 1296, 1496, 1597, 2029, 2065, 2129 —
+    and none of them is 1407. The severity assessment is unchanged and correct:
+    fail-closed, a spurious abort rather than a false capture. The same wording
+    appears again below the archive line at ~2042 and is wrong there too.
+- **`-StageGold` re-stages on every `-Attempts` retry.** Scope any fix to make
+  the SHOP TRIP idempotent, not the gold write; the obvious fix is worse than the
+  bug.
+- ~~**`validate-vehicle.ps1` launches Ruffle at the REAL save** with no
+  `--save-directory` and no process guard. Its save tripwire also hashes only
+  the FIRST `ss2_data.sol` of three.~~ **CLOSED — all three clauses are stale,
+  corrected 2026-09-01.** The script gives Ruffle its own empty
+  `--save-directory` under `captures\vehicle-check\`, throws if any Ruffle
+  process is already running, and hashes EVERY `.sol` under the shared root.
+  Confirmed twice: in the script's own header, and in a live run this session
+  that printed all three `.sol` hashes before and after and used a private store
+  `save-20260901005702`. Read the tripwire for what it is, though — the stub
+  writes no SharedObject, so a PASS is the absence of a counterexample, not
+  evidence of isolation. **This item is what an open item looks like after the
+  code moved and nobody re-read it; an open list is a claim that decays.**
+- ~~**`run-arena.ps1` kills every Ruffle process rather than its own pid**,
+  which sabotages any concurrent isolated session.~~
+  ► **CLOSED — re-derived 2026-09-02 from the script.** It closes its OWN
+  window by pid: `Get-SessionRuffle` (`:229-241`) reads
+  `captures\<SessionId>\ruffle.pid`, refuses a recycled pid whose process is
+  not named `ruffle`, and `:371-379` does `CloseMainWindow()` then a 5-second
+  `WaitForExit` before forcing. The blanket kill survives only as a warned
+  fallback when the pid file is missing (`:386-387`), and the script refuses to
+  start at all while another Ruffle window is open (`:203-205`). The file's own
+  comment block at `:206-225` records the fix and both harms it closed —
+  including that the name-keyed wait accepted ANY Ruffle, so a foreign process
+  both satisfied the wait and masked this window's death.
+  **Fourth item in this list to decay. The list needs re-deriving as a unit,
+  not item by item as each one happens to be read.**
+- **The spell family (8) cannot arm**; `spell_id` does not exist in the build.
+  The byte-backed candidate arming point is `cast_spell_icon`.
+- **Fifteen fixtures assert a hero the build cannot produce**, and the
+  contradiction is FORCED, not a failed search. Re-derive from the map; never
+  edit them to fit.
+- **Docs known stale, not yet reconciled**: the staging runbook's
+  `parseStageList` mechanism and its "weapon table unmapped" premise;
+  `ss2-arena-route.md` §12 on `armourclass`; `ss2-champion-dna.md` §7 on
+  `fightMode`.
+  ► **ALL THREE WERE RECONCILED 2026-08-31 by `dc334f2`** ("Reconcile three
+    integration documents with what the bytes say", +1340/−207, touching exactly
+    those three files). Verify: the runbook's `parseStageList` mechanism at
+    `:1218`; its weapon-table premise retracted at §5.1 `:1068`;
+    `ss2-arena-route.md` §12 `armourclass` at `:1985-1987`; `ss2-champion-dna.md`
+    §7 `fightMode` at `:764`. **This entry was correct for 2 h 16 min** (written
+    `2d70738` 2026-08-30 23:34, reconciled 01:50 the next morning) and has stood
+    wrong for seven days. `docs/integration/ss2-arena-route.md:1821` has been
+    telling this file so the whole time — "is correct and is now acted on; the
+    entry can be struck" — and nobody read it. **Struck.** (The duplicate below
+    the archive line is frozen; leave it.)
+
+    ► **TWO ANCHORS WERE WRONG THE DAY THEY WERE WRITTEN, TWO HOLD.** The script is
+      byte-identical to the commit that wrote this sentence, so neither is drift.
+      The comment block runs one line longer than stated, and the blanket-kill
+      fallback is one line further down than the range given — that range names the
+      comment tail and the WARNING line, not the kill. **Holding exactly:**
+      `Get-SessionRuffle`'s span, the start-refusal, and the close block.
+
+    ► **SELF-REFERENCE INTO A GROWING FILE — replaced by a search.** Find the
+      duplicate with `grep -n 'isNum. site survives' HANDOFF.md` and take the hit
+      below the archive line. The substance is verified: the wrapper line reads
+      `if (currentTournament >= 19 && ranking <= 2) {` with no `isNum` call.
+      ► **DO NOT "FIX" THE COUNT.** `grep -n isNum` on the wrapper returns 15 lines,
+      but three of them merely MENTION `isNum` in comments. The twelve this document
+      lists are exactly the twelve lines carrying an `isNum` CALL. **The sentence is
+      correct as written; a blanket 12→15 would falsify it.**
+
+    ► **SELF-REFERENCE INTO A GROWING FILE — AND IT WILL BE WRONG AGAIN NEXT COMMIT,
+      SO IT IS REPLACED BY A SEARCH RATHER THAN A NUMBER.** Find the frozen copy with
+      `grep -n 'resources: first' HANDOFF.md` and take the hit BELOW the archive
+      line. ► **AND THE SWEEP'S OWN ROW IS BROKEN HERE, not merely stale**: it claims
+      `declaredFillResources(declared, index)` spans `battle-host.js:150-156`, and
+      that was ALREADY wrong when the sweep measured it. Locate it with
+      `grep -n 'declaredFillResources' src/adapter/battle-host.js`. The two named
+      integration tests have also moved by two lines each; `aiFillWithResources`
+      appearing nowhere in `src/` still HOLDS.
+
+
+---
+
+## THE ARCHIVE LINE
+
+**Everything below is FROZEN EVIDENCE AND HISTORY. Do not append here, and do not
+correct an instruction here — hoist it into the living head above and correct it
+there.** What is below is the analysis that established the items above: it is
+kept because this project's discipline is that a reader must be able to check a
+claim, not because it is current.
+
+---
+
+### The prescribed fix, and why I did not apply it
+
+Dropping `staminaleft`/`staminamax` from `scenario` is a clean deletion —
+`assertAllowedKeys` is an allow-list. But `expected.state.<side>.staminaleft`
+cannot simply follow: `assertExactKeys` makes it mandatory on both sides, and the
+resolver's defaults would then pin `staminamax`, or `0` — **a different wrong
+number rather than none.** So the field has to be excluded from the `/finalState`
+comparison, with `expected.mutation.staminaBonus` carrying the derivable claim
+instead. That split is right in principle: the delta
+`ceil(breastplate * damage / 100)` is a pure function of the scenario; the
+absolute level is not.
+
+**STOP AND AUDIT BEFORE IMPLEMENTING THAT.** Excluding a field from
+`matchSs2ObservationToFixture` repeats the structural shape of one of the two
+forgeries closed in `cc42503`: cosmetic opcode rolls were excluded from sample
+matching by label regex on both sides, and a record carrying 120 fabricated
+debris rolls matched a 7-sample fixture. The analysis cites
+`isCosmeticDebrisSample` as the precedent to follow — but that mechanism *was*
+the vulnerability. An exclusion that is "obviously harmless because the chain
+never reads the field" is exactly the argument that was made for debris rolls.
+
+The next session should implement it, but only behind an adversarial pass whose
+single named claim is **"a record carrying an arbitrary `staminaleft` cannot be
+promoted"**, and it must check the 22 existing goldens, whose `breastplate` is
+not always 0.
+
+Undocumented behaviour found on the way, for the battle map: the `taunt` branch
+carries the rest branch's restoration inline — `+0x684c`
+`hitpoints += 3 + ceil(stamina)` and `+0x6894` `staminaleft += stamina` — guarded
+only by `attacker.struck != null`, i.e. on every completed taunt.
+
+**All eight currently reachable fixtures pin the identical
+`staminaleft: 105 / staminamax: 110` for BOTH combatants** — the five
+`candidate-armoured-*` and the three `candidate-tournament-*`. It reads as one
+derived constant applied uniformly rather than eight independent derivations.
+
+Five independent live direction-5 hero captures disagree with it, and with each
+other: villain `staminaleft` came back 90, 92, 93, 95, 100 and hero 104, 106,
+106, 108. Nothing else observable diverged, except one run where the villain
+landed a blow first and cost the hero 12 hitpoints — which is the predicted
+consequence of the repaired side guard re-arming rather than a surprise.
+
+Be precise about what "nothing else diverged" covers, because the compared
+projection is narrower than it looks. `matchSs2ObservationToFixture` compares
+the scenario, the ordered samples, the ordered mutations with each reason
+translated to a hook, the semantic events, the result event and the final state.
+**`expected.calculation` and `expected.mutation` are candidate-derived and are
+NOT compared at all** — so the hit chance, roll needed, deflection roll and
+threshold, and critical determination were never checked against the runtime.
+And `/samples` is close to a self-comparison on an injected-tape capture,
+because the wrapper emits the fixture's own tape entry rather than the game's
+call arguments.
+
+What genuinely matched five times over is the mutation trace and the final
+state — the damage write, the armour absorption, and the resulting
+`armourclass`. Those are real game outputs.
+
+So the blocker for all eight is one field, and the question is whether it belongs
+in these fixtures at all. **Do not resolve it by editing the fixtures to the
+observed values.** That is the one move this pipeline exists to refuse. It is a
+map question: does `staminaleft` enter the resolution chain, and is its value at
+the first `checkattackroll` determined by the scenario or by the number of
+approach steps the scenario does not specify?
+
+**The 81 divergence-report digests are unverified, and the obvious fix is
+another assertion that cannot fail.** `ss2-divergence-corpus.test.js` compares
+`record.digest` to `report.observationDigest` only inside
+`if (record.target.fixtureId === report.fixtureId)`, a branch dead by
+construction — a report exists *because* the observation did not match that
+fixture — and the file already asserts `sameTarget === 0` and says so.
+
+Measured while looking for a repair, and the measurement is the finding: for all
+six reports that resolve to a committed record, `computeSs2ObservationDigest`
+reproduces the record's **stored** digest exactly (6/6), and the **report's**
+`observationDigest` is a different value in every case. So the report digest is
+not the observation record's digest, despite `promote-1v1-golden.js:207` reading
+`observationDigest: observation.digest` — a second code path produces the ones in
+the corpus. Until that is traced, there is nothing in the repository to compare
+them against.
+
+Do NOT "fix" this by adding
+`assert.equal(record.digest, computeSs2ObservationDigest(record))`.
+`ss2-capture-attestation.test.js:92-104` already establishes that this
+assertion **cannot fail**: `validateSs2Observation` recomputes and compares the
+digest internally and `ingestSs2CaptureTrace` returns through it, so the equality
+holds by construction on any ingested record. That file solves the real problem
+the right way — it adds and removes each attestation and requires the digest to
+MOVE — and any repair here should follow that shape rather than compare a value
+to itself.
+
+Three genuinely redundant assertions also survive in the divergence corpus file:
+the duplicate-pair check at :259 (implied by the filename check above it, since
+a directory cannot hold two files of the same name), and the two closing
+equalities of the archive test, each arithmetically implied by the
+`assert.deepEqual(missing, [])` five lines above. They are noise rather than
+cover for a bug, but they should be given independent derivations or deleted.
+
+**The wrong-side guard does not protect the arena route, and 9 of 20 armed
+captures were mislabelled. CRITICAL, and found live.**
+
+Twenty-two `run-arena.ps1` rounds were run against
+`candidate-armoured-deflection-threshold-cleared` on 2026-08-31 (sessions
+`session-adc1` … `session-adc22`; twenty armed, one aborted, one produced no
+direction). Splitting them by which combatant the first `damagecharacter` write
+landed on:
+
+| Who actually swung | n | `attack_direction` values observed |
+| --- | ---: | --- |
+| hero | 11 | 8, 8, 7, 8, 7, 6, 8, 8, 6, 7, 7 |
+| **villain** | **9** | 4, 10, 11, 20, 3, 2, **5**, 20, 10 |
+
+**Every one of the twenty carries `"attackerSide":"hero"` in its meta line, and
+`capture-refused-wrong-side` was logged exactly zero times.**
+
+This is the failure `captureAllowedNow`'s own comment calls out by name — "arming
+on the villain's swing would file a trace labelled 'hero' that ingest has no way
+to contradict: a false observation, which is worse than no observation." The
+guard is written correctly but is skipped wholesale on this route:
+
+```
+var attacker = gameRoot().game_attacker;
+if (attacker != undefined) {          // <-- on the arena route it IS undefined
+    ...
+    dbg("capture-refused-wrong-side");
+```
+
+`game_attacker` is evidently not set at the moment `captureAllowedNow` runs here.
+**Correction, 2026-08-31.** Both sentences that stood here were wrong, and they
+were mine. I wrote that the guard "is not dead everywhere — six
+`capture-refused-wrong-side` lines exist in older prisoner-route captures — so
+this is arena-specific." Those six matches are in compiled wrapper SOURCE copies
+under `captures/wrapper-cache/` and `captures/vehicle-check/`, not in any trace.
+Across 268 archived rufflelogs the refusal appears **zero** times, and the defect
+was **universal**, not arena-specific.
+
+The cause was one word in one expression: the guard read
+`gameRoot().game_attacker` — `_level1.game_attacker` — and the game never writes
+that path. All 296 `game_attacker` references live inside `sprite:862[overlay]`
+frames 1 and 52, and the only two writes are bare `SetVariable` instructions
+inside `changeCombatants`, which in AVM1 resolve up the scope chain to the clip
+that defined the function. The value lives on the **overlay clip** — the same
+object the wrapper already reads `attack_direction` from at arming time.
+
+I also proposed `if (attacker == undefined) return false;` as the fix. Applied to
+the path as it stood, that would have blocked **every** capture on every route —
+21 of 21 armed rounds and all 193 archive captures — because the read never
+resolves. Fixing the object had to come first.
+
+**Both are now fixed and the guard is proved to fire in both directions**
+(commit `2b483a8`). `stub-game.as` had omitted `game_attacker` entirely, so
+`validate-vehicle.ps1` could not exercise the side guard at all — the gate this
+project mandates after every wrapper edit never noticed the guard was dead,
+because a stub that omits the field a guard reads cannot test that guard, and
+its silence reads exactly like a pass. With the stub binding the attacker:
+
+| stub binds | launcher claims | marker | outcome |
+| --- | --- | --- | --- |
+| hero | hero | `attacker-resolved-hero` | 32 trace lines, MATCH, gate PASSES |
+| villain | hero | `capture-refused-wrong-side` | 2 lines, nothing arms, ingest refuses |
+
+The second row is the first observed refusal in the project's history. A run
+whose log carries no `attacker-resolved-<side>` line has a dead guard again.
+
+**Two things follow, and the second is the dangerous one.**
+
+1. *The battle map's `randomBetween(5, 8)` for `normal_attack` is confirmed,
+   sharply.* All eleven hero swings landed in 6–8 and none outside. The
+   out-of-range directions in the archive (2, 3, 4, 10, 11, 20) are the villain's
+   attacks, not a wider hero range. Direction 20 in particular belongs to no
+   documented hero band.
+
+2. *Direction does NOT discriminate, and must not be used as if it did.*
+   `session-adc18` is a villain swing at **direction 5** — inside the hero's own
+   range. Its mutation path is `/hero/hitpoints` and its method is `critical`.
+   Had the target fixture expected a hero-side mutation, that trace could have
+   MATCHED while being attributed to the wrong combatant, and the promotion gate
+   needs only two such.
+
+Every one of the nine was in fact caught, by `/mutationTrace/0/path` diverging
+(`/villain/armourclass` expected, `/hero/hitpoints` observed). **That is
+incidental, not a designed defence.** It holds only because every currently
+reachable fixture happens to expect a villain-side mutation.
+
+The fix belongs in `ss2-capture-wrapper.as` and so needs the vehicle gate re-run;
+the wrapper was frozen for this session's supervised captures, so this is
+reported rather than fixed. The shape it should take is a REFUSAL when the
+attacker cannot be identified, not a skip — `if (attacker == undefined) return
+false;` — because "I could not tell who swung" and "the right combatant swung"
+are the two cases the current code merges, and it merges them in the unsafe
+direction. Note that this is the same defect class as the `isNum` trap: an
+undefined read taking the permissive branch.
+
+**A third working forgery against the promotion gate. CRITICAL.** Hook
+attribution is not merely unverified — `reason` is stripped from BOTH sides
+before comparison (`src/golden/observation.js:753-760` and `:803-808`,
+`src/golden/promote-1v1-golden.js:373`), so a record carrying deliberately WRONG
+hook labels, `callSite` or `injected` passes ingest, verify AND the promotion
+gate, and yields a golden the committed suite accepts. The mutation trace is the
+documentation's own "substantive evidence", and its attribution to a game
+function is the only thing separating "`damagecharacter` subtracted these
+hitpoints" from "some unnamed code did". This is the same class as the two
+forgeries closed in `cc42503`, and it is open.
+
+The fix is to translate rather than strip — map each fixture entry's static
+reason through the hook table and compare — and it costs no re-capture. **Do
+NOT instead add a fixture-derived `callSite` comparison:** `callSite` is a
+compile-time constant in the wrapper's single roll emitter, so comparing it
+would manufacture the appearance of verification while comparing one hard-coded
+constant to another, which is the defect class this project has now found six
+times.
+
+**`validate-vehicle.ps1`'s new save tripwire hashes only the FIRST file named
+`ss2_data.sol`.** This machine's save root holds three `.sol` files. The gate is
+isolated by `--save-directory` regardless, and the tripwire is documented as
+currently unarmed, but it is narrower than it reads.
+
+**`src/adapter/battle-host.js:155` returns `{ ...declared, resources: first }`,
+and `declared` may legally be an array since `193e54d`.** An array `aiFill`
+collapses to a single object — reproduced end to end against the real modules.
+Pinned by no test. The workaround retirement this was found under is NOT done:
+removing it reddens three assertion sites in `test/ss2-adapter-integration.test.js`,
+one of which pins the defect being removed, so the source edit and its test
+rewrite have to land together in one owner's hands.
+
+*(My error on that track: I briefed the agent with the path `src/team/battle-host.js`.
+The file is `src/adapter/battle-host.js`. The agent correctly stopped and
+reported rather than guessing.)*
+
+**`-StageGold` re-staging on retry: the obvious fix is worse than the bug.**
+Gold gates WHICH weapon the shop scanner accepts, and `hero.weapon` is a
+`battlevalues` input. Making the gold write once-only while leaving the shop
+re-entry in place would let attempt 2 buy a DIFFERENT, cheaper weapon and fight
+with different damage rolls — a real evidence defect, where the current bug only
+fabricates a gold figure no artefact carries. Scope any fix to make the SHOP TRIP
+idempotent, not the gold write.
+
+**One `isNum` site survives, at `ss2-capture-wrapper.as:1407`** — two raw hero
+reads compared with BOTH negated forms, and one operand is demonstrably NaN in a
+committed live trace. Fail-closed (`arenaAbort` only sets flags and logs), so it
+is a correctness and diagnosability defect rather than a corruption path, but the
+claim that the guard is used everywhere it is needed is false.
+
+**The fifteen impossible-hero fixtures: the contradiction is FORCED, not a failed
+search.** The `max_damage - min_damage` spread is strength-free, and exactly one
+row in ninety has spread 8 — so the weapon is uniquely determined before strength
+is considered, and only then does strength turn out to be wrong. And the escape
+hatch is closed: `nextphase` recomputes `battlevalues` for BOTH combatants at
+every phase transition (`ss2-capture-wrapper.as:2078`), so `-StageHero
+"strength:5,min_damage:12,max_damage:20"` cannot reproduce them live either.
+Still deliberately NOT fixed — they must be re-derived from the map, not edited
+to fit — but the reasoning is now a proof rather than an absence.
+
 
 **Evidence chain**
 - Two-session independence still rests on operator strings for every promoted

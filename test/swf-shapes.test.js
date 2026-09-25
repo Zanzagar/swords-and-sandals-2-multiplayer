@@ -1,0 +1,440 @@
+/**
+ * The SWF shape parser, against SYNTHETIC shapes built in this file.
+ *
+ * ► **Nothing here comes from the licensed build, and that is deliberate.** A
+ *   test that embedded real shape bytes would put extracted art in the
+ *   repository, which is the one thing `assets/` exists to prevent. These bytes
+ *   are assembled by `ShapeWriter` below from the SWF specification's own
+ *   encoding, so the parser is checked against the FORMAT rather than against
+ *   one file's contents.
+ *
+ * What the real build contributes is a single number, quoted and not stored:
+ * all 824 of its shapes parse with zero failures. That is reproduced by running
+ * the extractor, never by committing a fixture.
+ */
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { parseShape, shapeToPaths, cssColour, ShapeParseError } from "../tools/swf-shapes.mjs";
+
+/** Assembles the bit-level encoding the parser has to survive. */
+class ShapeWriter {
+  constructor() {
+    this.bytes = [];
+    this.current = 0;
+    this.bitCount = 0;
+  }
+
+  bit(value) {
+    this.current = (this.current << 1) | (value ? 1 : 0);
+    this.bitCount += 1;
+    if (this.bitCount === 8) {
+      this.bytes.push(this.current & 0xff);
+      this.current = 0;
+      this.bitCount = 0;
+    }
+    return this;
+  }
+
+  ub(value, bits) {
+    for (let index = bits - 1; index >= 0; index -= 1) this.bit((value >>> index) & 1);
+    return this;
+  }
+
+  sb(value, bits) {
+    return this.ub(value < 0 ? (1 << bits) + value : value, bits);
+  }
+
+  align() {
+    while (this.bitCount !== 0) this.bit(0);
+    return this;
+  }
+
+  u8(value) {
+    this.align();
+    this.bytes.push(value & 0xff);
+    return this;
+  }
+
+  u16(value) {
+    this.align();
+    this.bytes.push(value & 0xff, (value >>> 8) & 0xff);
+    return this;
+  }
+
+  /** An all-zero RECT: five bits of width, then four zero fields. */
+  rect() {
+    this.align();
+    return this.ub(0, 5).align();
+  }
+
+  buffer() {
+    this.align();
+    return Buffer.from(this.bytes);
+  }
+}
+
+/** DefineShape3 (alpha-bearing) holding one solid fill and one square. */
+function squareShape({ id = 7, colour = { red: 0x11, green: 0x22, blue: 0x33, alpha: 0xff } } = {}) {
+  const writer = new ShapeWriter();
+  writer.u16(id);
+  writer.rect();
+  // FILLSTYLEARRAY: one solid RGBA fill.
+  writer.u8(1).u8(0x00).u8(colour.red).u8(colour.green).u8(colour.blue).u8(colour.alpha);
+  writer.u8(0); // no line styles
+  writer.ub(1, 4).ub(0, 4); // fillBits = 1, lineBits = 0
+
+  // StateMoveTo + StateFillStyle1, then four straight edges, then end.
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(10, 5).sb(0, 10).sb(0, 10);  // move to 0,0
+  writer.ub(1, 1);                        // fillStyle1 = 1
+  const edge = (dx, dy) => {
+    writer.bit(1).bit(1).ub(10 - 2, 4);
+    writer.bit(1).sb(dx, 10).sb(dy, 10);  // general line
+  };
+  edge(200, 0);
+  edge(0, 200);
+  edge(-200, 0);
+  edge(0, -200);
+  writer.bit(0).ub(0, 5);                 // EndShapeRecord
+  return writer.buffer();
+}
+
+test("a solid-filled square becomes one CLOSED SVG path in pixels, not twips", () => {
+  const bytes = squareShape();
+  const shape = parseShape(bytes, 0, bytes.length, 32);
+
+  assert.equal(shape.id, 7);
+  assert.equal(shape.version, 3);
+  assert.equal(shape.fills.length, 1);
+  assert.equal(shape.fills[0].kind, "solid");
+
+  const paths = shapeToPaths(shape);
+  assert.equal(paths.length, 1);
+  // 200 twips is 10 pixels. A parser that forgot the conversion would say 200.
+  // ► **The `Z` is the whole point.** An earlier version emitted open subpaths
+  //   and a renderer closes a FILLED one with a straight chord from its end
+  //   back to its start — which on the real fighter came out as a fan of hard
+  //   wedges across his chest. The path must return to 0,0 and say so.
+  assert.equal(paths[0].d, "M0 0L10 0L10 10L0 10L0 0Z");
+  assert.equal(paths[0].fillRule, "evenodd");
+  assert.equal(paths[0].fill, "#112233");
+  assert.equal(paths[0].fillOpacity, 1);
+  assert.equal(paths[0].approximated, null);
+});
+
+test("alpha survives on a shape version that carries it, and is absent on one that does not", () => {
+  const translucent = squareShape({ colour: { red: 0, green: 0, blue: 0, alpha: 128 } });
+  const shape = parseShape(translucent, 0, translucent.length, 32);
+  assert.equal(shapeToPaths(shape)[0].fillOpacity, 0.502);
+
+  // DefineShape (version 1) fills are RGB with no alpha byte. Reading one as
+  // RGBA desynchronises every record after it, which is why the version drives
+  // the read rather than a guess.
+  const writer = new ShapeWriter();
+  writer.u16(9);
+  writer.rect();
+  writer.u8(1).u8(0x00).u8(0xff).u8(0x00).u8(0x00); // solid RGB, no alpha
+  writer.u8(0);
+  writer.ub(1, 4).ub(0, 4);
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(6, 5).sb(0, 6).sb(0, 6);
+  writer.ub(1, 1);
+  writer.bit(1).bit(1).ub(8 - 2, 4).bit(1).sb(20, 8).sb(0, 8);
+  writer.bit(0).ub(0, 5);
+  const bytes = writer.buffer();
+  const plain = parseShape(bytes, 0, bytes.length, 2);
+  assert.equal(plain.version, 1);
+  assert.equal(shapeToPaths(plain)[0].fill, "#ff0000");
+  assert.equal(shapeToPaths(plain)[0].fillOpacity, 1);
+});
+
+test("a curved edge becomes a quadratic, with the control point absolute", () => {
+  const writer = new ShapeWriter();
+  writer.u16(3);
+  writer.rect();
+  writer.u8(1).u8(0x00).u8(0).u8(0).u8(0).u8(0xff);
+  writer.u8(0);
+  writer.ub(1, 4).ub(0, 4);
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(10, 5).sb(0, 10).sb(0, 10);
+  writer.ub(1, 1);
+  // CurvedEdge: control (20,40) then anchor (60,0) — both deltas.
+  writer.bit(1).bit(0).ub(10 - 2, 4);
+  writer.sb(20, 10).sb(40, 10).sb(60, 10).sb(0, 10);
+  writer.bit(0).ub(0, 5);
+  const bytes = writer.buffer();
+  const paths = shapeToPaths(parseShape(bytes, 0, bytes.length, 32));
+  // The anchor is relative to the CONTROL point, so the end is control+anchor.
+  assert.equal(paths[0].d, "M0 0Q1 2 4 2Z");
+});
+
+test("a gradient is flattened to its first stop and SAYS it was approximated", () => {
+  // A shape that silently vanished would be worse than one drawn flat, and a
+  // flat one that does not admit it is worse than both.
+  const writer = new ShapeWriter();
+  writer.u16(4);
+  writer.rect();
+  writer.u8(1).u8(0x10);            // one LINEAR gradient fill
+  // MATRIX, identity: hasScale=0, hasRotate=0, then a 5-bit translate width of
+  // zero and no translate fields. The first version of this test wrote two
+  // 5-bit runs instead, which is not the MATRIX encoding and desynchronised
+  // everything after it — the parser was right and the fixture was wrong.
+  writer.align();
+  writer.bit(0).bit(0).ub(0, 5).align();
+  writer.u8(2);                     // two stops
+  writer.u8(0).u8(0x10).u8(0x20).u8(0x30).u8(0xff);
+  writer.u8(255).u8(0x90).u8(0xa0).u8(0xb0).u8(0xff);
+  writer.u8(0);
+  writer.ub(1, 4).ub(0, 4);
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(8, 5).sb(0, 8).sb(0, 8);
+  writer.ub(1, 1);
+  writer.bit(1).bit(1).ub(8 - 2, 4).bit(1).sb(20, 8).sb(20, 8);
+  writer.bit(0).ub(0, 5);
+  const bytes = writer.buffer();
+  const shape = parseShape(bytes, 0, bytes.length, 32);
+  assert.equal(shape.fills[0].kind, "gradient");
+  assert.equal(shape.fills[0].stops.length, 2);
+
+  const paths = shapeToPaths(shape);
+  assert.equal(paths[0].fill, "#102030", "the first stop");
+  assert.equal(paths[0].approximated, "gradient", "and it admits the approximation");
+});
+
+/**
+ * A DefineShape3 holding ONE gradient fill and one edge, with the gradient's
+ * type and focal point under the caller's control.
+ *
+ * Built here rather than lifted from the build for the usual reason — nothing
+ * in this file may come from the licensed copy — and lifted from the build is
+ * not an option anyway: **the installed build has ZERO focal gradients** (87
+ * linear, 10 radial, 0 focal across 8,875 fills in 824 shapes, re-counted with
+ * `parseShape` itself). A focal gradient's bytes therefore exist nowhere except
+ * here, which is precisely why the field went unchecked for as long as it did.
+ *
+ * ► **THE 8,875 COUNTS EVERY STYLE-ARRAY GENERATION, and saying so is the
+ *   difference between a number and a claim.** `StateNewStyles` replaces the
+ *   fill array mid-shape — 58 of the 824 shapes do it, 1,743 generations in
+ *   all — while `parseShape` returns `fills: generations[0].fills`. Recount
+ *   the obvious way and you get **7,595 fills, 84 linear, 9 radial**, and this
+ *   comment looks wrong; a verifier reached exactly that conclusion on
+ *   2026-09-14. **Focal is 0 under both countings**, so nothing about this
+ *   fixture or the parser changes either way.
+ */
+function gradientShape({ id = 5, type = 0x10, focalPoint = 0 } = {}) {
+  const writer = new ShapeWriter();
+  writer.u16(id);
+  writer.rect();
+  writer.u8(1).u8(type);
+  writer.align();
+  writer.bit(0).bit(0).ub(0, 5).align();   // identity MATRIX
+  writer.u8(2);                            // spread 0, interpolation 0, two stops
+  writer.u8(0).u8(0x10).u8(0x20).u8(0x30).u8(0xff);
+  writer.u8(255).u8(0x90).u8(0xa0).u8(0xb0).u8(0xff);
+  // FOCALGRADIENT's FocalPoint is a FIXED8 and comes AFTER the stops. The
+  // encoder is the SIGNED one deliberately: a test that wrote the unsigned
+  // form would agree with an unsigned reader and prove nothing.
+  if (type === 0x13) writer.u16(Math.round(focalPoint * 256) & 0xffff);
+  writer.u8(0);                            // no line styles
+  writer.ub(1, 4).ub(0, 4);
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(8, 5).sb(0, 8).sb(0, 8);
+  writer.ub(1, 1);
+  writer.bit(1).bit(1).ub(8 - 2, 4).bit(1).sb(20, 8).sb(20, 8);
+  writer.bit(0).ub(0, 5);
+  return writer.buffer();
+}
+
+test("A FOCAL GRADIENT'S FOCAL POINT IS SIGNED, so a focus past centre is not 255.5", () => {
+  // ► **This read `readUI16() / 256` and the SWF specification states the field
+  //   as a SIGNED 8.8 fixed-point value in -1.0 to 1.0.** Unsigned, -0.5 comes
+  //   back as 255.5: not a coordinate any renderer can place, and not wild
+  //   enough to look like a parse failure. `tools/swf-morph-shapes.mjs` read it
+  //   signed from the day it was written and SAID SO IN A COMMENT about this
+  //   file, so the two parsers disagreed about one field for as long as both
+  //   existed.
+  const negative = gradientShape({ type: 0x13, focalPoint: -0.5 });
+  const shape = parseShape(negative, 0, negative.length, 32);
+  assert.equal(shape.fills[0].kind, "gradient");
+  assert.equal(shape.fills[0].focal, true);
+  assert.equal(shape.fills[0].focalPoint, -0.5, "-0.5, not 255.5");
+
+  // The two readings AGREE on every non-negative value, which is why nothing
+  // drawn today changes — asserted so that a future "simplification" back to
+  // the unsigned read cannot hide behind the positive case passing.
+  const positive = gradientShape({ type: 0x13, focalPoint: 0.75 });
+  assert.equal(parseShape(positive, 0, positive.length, 32).fills[0].focalPoint, 0.75);
+
+  const ends = gradientShape({ type: 0x13, focalPoint: -1 });
+  assert.equal(parseShape(ends, 0, ends.length, 32).fills[0].focalPoint, -1, "the bottom of the stated range");
+});
+
+test("the signed focal point REACHES THE PATH, because a parser nobody reads is not a fix", () => {
+  // The focal point is only useful where a renderer can see it. `shapeToPaths`
+  // copies the gradient across, so a fix in `readFillStyle` that stopped at the
+  // fill style would leave every consumer on the old value.
+  const bytes = gradientShape({ type: 0x13, focalPoint: -0.25 });
+  const paths = shapeToPaths(parseShape(bytes, 0, bytes.length, 32));
+  assert.equal(paths[0].approximated, "gradient");
+  assert.equal(paths[0].gradient.focal, true);
+  assert.equal(paths[0].gradient.focalPoint, -0.25);
+  // A focal-radial gradient is still a RADIAL one to a renderer, and
+  // `test/extraction-honesty.test.js` only admits "linear" and "radial".
+  assert.equal(paths[0].gradient.type, "radial");
+});
+
+test("a NON-focal gradient reads no focal field at all, and its stops stay intact", () => {
+  // ► The focal point is two bytes that are PRESENT only for 0x13. Reading them
+  //   unconditionally would consume the next fill's type byte; not reading them
+  //   for 0x13 would leave them to be read as one. Both desynchronise
+  //   everything after, so the branch is asserted from both sides.
+  const linear = gradientShape({ type: 0x10 });
+  const shape = parseShape(linear, 0, linear.length, 32);
+  assert.equal(shape.fills[0].focal, false);
+  assert.equal(shape.fills[0].focalPoint, 0);
+  assert.equal(shape.fills[0].stops.length, 2);
+  assert.deepEqual(shape.fills[0].stops.map((stop) => stop.ratio), [0, 255]);
+
+  const radial = gradientShape({ type: 0x12 });
+  const radialShape = parseShape(radial, 0, radial.length, 32);
+  assert.equal(radialShape.fills[0].focal, false);
+  assert.equal(shapeToPaths(radialShape)[0].gradient.type, "radial");
+  assert.equal(radialShape.fills[0].stops[1].colour.red, 0x90, "the stops were not eaten by a phantom read");
+});
+
+/**
+ * A square whose four edges are declared OUT OF ORDER and whose two halves put
+ * the fill on opposite sides — which is what the real build does everywhere.
+ *
+ * Edges 1 and 2 run clockwise with `fillStyle1` (fill on the LEFT). Edges 3 and
+ * 4 are declared as a separate run going the other way with `fillStyle0` (fill
+ * on the RIGHT), so a reader that does not reverse them produces two open
+ * fragments instead of one square.
+ */
+function splitSquareShape() {
+  const writer = new ShapeWriter();
+  writer.u16(9);
+  writer.rect();
+  writer.u8(1).u8(0x00).u8(0x40).u8(0x50).u8(0x60).u8(0xff);
+  writer.u8(0);
+  writer.ub(1, 4).ub(0, 4);
+
+  const edge = (dx, dy) => {
+    writer.bit(1).bit(1).ub(10 - 2, 4);
+    writer.bit(1).sb(dx, 10).sb(dy, 10);
+  };
+
+  // Run A: from 0,0 along the top and down the right side, fill on the LEFT.
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(10, 5).sb(0, 10).sb(0, 10);
+  writer.ub(1, 1);
+  edge(200, 0);
+  edge(0, 200);
+
+  // Run B: from 0,0 DOWN the left side and along the bottom, fill on the RIGHT.
+  // Same boundary, opposite traversal — the exact case the old code lost.
+  // `fillStyle1` is explicitly cleared, because style state PERSISTS across
+  // records and leaving it set would put the same fill on both sides.
+  writer.bit(0).ub(0b00111, 5);
+  writer.ub(10, 5).sb(0, 10).sb(0, 10);
+  writer.ub(1, 1); // fillStyle0 = 1
+  writer.ub(0, 1); // fillStyle1 = 0
+  edge(0, 200);
+  edge(200, 0);
+
+  writer.bit(0).ub(0, 5);
+  return writer.buffer();
+}
+
+test("edges are STITCHED into one closed loop, whichever side the fill is on", () => {
+  const bytes = splitSquareShape();
+  const shape = parseShape(bytes, 0, bytes.length, 32);
+  const paths = shapeToPaths(shape);
+
+  assert.equal(paths.length, 1, "one fill style is one path element, not one per run");
+  const d = paths[0].d;
+  assert.equal((d.match(/M/g) || []).length, 1, "a square is ONE subpath, not two fragments");
+  assert.equal((d.match(/Z/g) || []).length, 1);
+  assert.equal(d, "M0 0L10 0L10 10L0 10L0 0Z");
+  assert.equal(paths[0].fill, "#405060");
+});
+
+test("an edge with the SAME fill on both sides is interior and contributes no boundary", () => {
+  // Style state persists across shape records, so a run that sets only
+  // `fillStyle0` inherits the previous run's `fillStyle1`. Walking such an edge
+  // both ways round traverses it twice and derails the stitch — which is how
+  // the first version of the stitching test failed.
+  const writer = new ShapeWriter();
+  writer.u16(13);
+  writer.rect();
+  writer.u8(1).u8(0x00).u8(0x11).u8(0x22).u8(0x33).u8(0xff);
+  writer.u8(0);
+  writer.ub(1, 4).ub(0, 4);
+  const edge = (dx, dy) => {
+    writer.bit(1).bit(1).ub(10 - 2, 4);
+    writer.bit(1).sb(dx, 10).sb(dy, 10);
+  };
+  // fillStyle1 = 1 AND fillStyle0 = 1 on every edge of a closed square.
+  writer.bit(0).ub(0b00111, 5);
+  writer.ub(10, 5).sb(0, 10).sb(0, 10);
+  writer.ub(1, 1).ub(1, 1);
+  edge(200, 0);
+  edge(0, 200);
+  edge(-200, 0);
+  edge(0, -200);
+  writer.bit(0).ub(0, 5);
+  const bytes = writer.buffer();
+
+  const shape = parseShape(bytes, 0, bytes.length, 32);
+  assert.equal(shape.edges.length, 4, "the edges are READ — they are simply not boundary");
+  assert.deepEqual(shapeToPaths(shape), [], "and so the region has no outline to draw");
+});
+
+test("a chain that does not close is still emitted, because the geometry IS in the file", () => {
+  // Two edges that share no endpoint: a malformed or truncated region. Dropping
+  // it would silently lose geometry; the honest output is the open chains.
+  const writer = new ShapeWriter();
+  writer.u16(11);
+  writer.rect();
+  writer.u8(1).u8(0x00).u8(0x10).u8(0x20).u8(0x30).u8(0xff);
+  writer.u8(0);
+  writer.ub(1, 4).ub(0, 4);
+  const edge = (dx, dy) => {
+    writer.bit(1).bit(1).ub(10 - 2, 4);
+    writer.bit(1).sb(dx, 10).sb(dy, 10);
+  };
+  writer.bit(0).ub(0b00101, 5);
+  writer.ub(10, 5).sb(0, 10).sb(0, 10);
+  writer.ub(1, 1);
+  edge(200, 0);
+  writer.bit(0).ub(0b00001, 5);
+  writer.ub(10, 5).sb(1000, 10).sb(1000, 10);
+  edge(200, 0);
+  writer.bit(0).ub(0, 5);
+  const bytes = writer.buffer();
+
+  const paths = shapeToPaths(parseShape(bytes, 0, bytes.length, 32));
+  assert.equal(paths.length, 1);
+  assert.equal((paths[0].d.match(/M/g) || []).length, 2, "two disjoint chains stay two subpaths");
+});
+
+test("a truncated shape throws by name rather than returning half a figure", () => {
+  const bytes = squareShape().subarray(0, 8);
+  assert.throws(
+    () => parseShape(bytes, 0, bytes.length, 32),
+    (error) => error instanceof ShapeParseError
+  );
+});
+
+test("cssColour is total, because a missing style must not crash a drawing", () => {
+  assert.deepEqual(cssColour(null), { fill: "none", opacity: 1 });
+  assert.deepEqual(
+    cssColour({ red: 255, green: 255, blue: 255, alpha: 255 }),
+    { fill: "#ffffff", opacity: 1 }
+  );
+  assert.deepEqual(
+    cssColour({ red: 0, green: 0, blue: 0, alpha: 0 }),
+    { fill: "#000000", opacity: 0 }
+  );
+});

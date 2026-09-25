@@ -19,6 +19,7 @@
  * | `clip-registry.js`  | `clipByCombatantId`, structurally outside deterministic state |
  * | `presentation.js`   | resolved events -> ordered presentation commands             |
  * | `acknowledgement.js`| the animation surface -> once-only campaign settlement        |
+ * | `action-gate.js`    | per-action animation tokens: is the SURFACE ready for the next action? |
  * | `battle-host.js`    | the reference host loop that drives both seams together      |
  *
  * Node builtins only; no assets, no game data, no third-party dependencies.
@@ -30,4 +31,5 @@ export * from "./slot-layout.js";
 export * from "./clip-registry.js";
 export * from "./presentation.js";
 export * from "./acknowledgement.js";
+export * from "./action-gate.js";
 export * from "./battle-host.js";

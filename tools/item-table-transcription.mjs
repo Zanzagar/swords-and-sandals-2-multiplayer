@@ -1,0 +1,561 @@
+/**
+ * Census: does `docs/integration/ss2-item-tables.md` still say what the build says?
+ *
+ * That document is a TRANSCRIPTION of build-constant data — 90 weapon entries,
+ * each a six-element array literal in one run at
+ * `root/frame:35/DoAction@0x3fa9dc`. It was recorded on 2026-08-30 by reading
+ * the bytes, and for three days afterwards two other places in this repository
+ * said the table "is not transcribed", so a ranked next step pointed at work
+ * that was already done. The document is now load-bearing, and a hand-made
+ * table nobody re-checks is exactly the artefact this project distrusts.
+ *
+ * REPORT ONLY. It reads the installed SWF and the committed document, and
+ * writes nothing.
+ *
+ *   node tools/item-table-transcription.mjs
+ *   node tools/item-table-transcription.mjs "/path/to/swords_sandals2_download.swf"
+ *
+ * Exit status is 0 when every row agrees, 1 when any row disagrees, 2 when the
+ * SWF is not reachable. A fresh clone has no licensed build, so this is a tool
+ * a human runs on the capture box rather than a test — the same shape as
+ * `tools/stable-order-locale-census.mjs`.
+ *
+ * ## What it checks, and the part that is easy to miss
+ *
+ * Three independent things, because no one of them is worth much alone:
+ *
+ * 1. **The numbers.** Every field of every row, against the literal the
+ *    document names, INCLUDING the instruction offset. A diff that skipped the
+ *    offset would pass a document whose rows had been silently renumbered.
+ *
+ * 2. **The index convention.** Check 1 only proves the document's numbers are
+ *    the build's numbers UNDER THE DOCUMENT'S OWN CONVENTION — it reads
+ *    `[e, name, d, c, b, a]` out of `Push "weapon<N>", a, b, c, d, <name>, e`
+ *    because the document says that is the order, so a wrong convention would
+ *    be invisible to it. So the reader sites in `battlevalues` are checked
+ *    too: `weapon_min_damage` really is index 3, `weapon_max_damage` index 4,
+ *    and so on, read off the `Push <n>; GetMember` that follows each. THIS IS
+ *    THE HALF THAT MAKES THE OTHER HALF MEAN ANYTHING, and it is the half a
+ *    checker written in a hurry leaves out.
+ *
+ * 3. **What the statement DOES with the column** (added 2026-09-11). Check 2
+ *    proves `weapon_range` reads `[5]` and stops there, and the rest of that
+ *    statement is the whole of `ss2Reach`: `physical_size + [5] * 44`, with
+ *    `physical_size = 80 + round(strength / 1.5)`. **Check 2 was green for
+ *    twelve days while `ss2Reach` returned `physical_size` and ignored the
+ *    column entirely** — the docstring cited `ss2-item-tables.md:58`, which is
+ *    the FIRST of the two lines that expression wraps across, and line 59 is
+ *    the `+ _root["weapon" + c.weapon][5] * 44` it dropped. A document cite
+ *    cannot catch a half-read wrapped line. The bytes can, so the two literals
+ *    and both functions are now swept against them: `ss2PhysicalSize` over
+ *    strengths 0-200, `ss2Reach` over all ninety ids crossed with eight
+ *    strengths, and its undeclared fallback against the build's bare-hands row.
+ *
+ * ## Inspection boundary
+ *
+ * Display names are game content. The document does not reproduce them and
+ * neither does this tool: index `[1]` is parsed only far enough to confirm a
+ * string sits there, and its value is never printed or compared.
+ */
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import process from "node:process";
+import { fileURLToPath } from "node:url";
+
+import { analyseSwfBuffer } from "./inspect-swf.mjs";
+import { SS2_WEAPON_IDS, ss2WeaponEntry } from "../src/team/ss2-weapon-table.js";
+import { SS2_WEAPON_RANGE_STEP, ss2PhysicalSize, ss2Reach } from "../src/team/ss2-rules.js";
+
+const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url));
+const DOC_PATH = path.join(REPO_ROOT, "docs", "integration", "ss2-item-tables.md");
+
+/**
+ * Where the Collection installs on the capture box. Overridable by argument
+ * because the tree has already moved twice, and a literal path in a document
+ * that calls itself load-bearing is the thing that rots.
+ */
+const DEFAULT_SWF =
+  "/mnt/c/Program Files (x86)/Steam/steamapps/common/Swords and Sandals Classic Collection/swf/swords_sandals2_download.swf";
+
+/** The index each `battlevalues` output reads out of the weapon array. */
+const READER_SITES = Object.freeze({
+  weapon_type: 0,
+  weapon_weight: 2,
+  weapon_min_damage: 3,
+  weapon_max_damage: 4,
+  weapon_range: 5
+});
+
+const numeric = (operand) =>
+  operand && (operand.type === "integer" || operand.type === "double" || operand.type === "float")
+    ? operand.value
+    : null;
+
+/**
+ * Every instruction in a block, nested bodies included.
+ *
+ * THE WHOLE TABLE IS NESTED, and a flat scan of `block.instructions` finds
+ * NOTHING — root frame 35 declares the weapon literals inside a `With (body
+ * 282)` at `+0x3d87`, and `battlevalues` is a `DefineFunction2 (body 754)` at
+ * `+0x3062`, so both halves of this census are invisible without the walk. The
+ * first draft of this file scanned flat, and the only reason that was caught
+ * rather than shipped is the vacuity guard below reporting "0 literals" instead
+ * of "no mismatches".
+ *
+ * `inspect-swf.mjs` has its own `instructionChildren`, which is not exported;
+ * this mirrors it. If a future SWF nests actions under some other opcode, this
+ * walk goes quiet — which is why the caller must keep failing on an empty
+ * result rather than treating it as agreement.
+ */
+function* walk(instructions) {
+  for (const instruction of instructions) {
+    yield instruction;
+    const name = instruction.name;
+    if (name === "DefineFunction" || name === "DefineFunction2" || name === "With") {
+      yield* walk(instruction.operand?.body ?? []);
+    } else if (name === "Try") {
+      for (const entry of instruction.operand?.bodies ?? []) yield* walk(entry.body ?? []);
+    }
+  }
+}
+
+/**
+ * Every `_root.weapon<N> = Array(...)` literal in the build.
+ *
+ * Found by SHAPE rather than by address: a Push whose first operand is the
+ * string `weapon<digits>` and whose last two are `6` and `Array`. Keying on
+ * `+0x3c46 … +0x4c9c` would go quiet the moment anything above it in the frame
+ * changed length, and going quiet is the failure mode that matters — a census
+ * that finds nothing looks exactly like a census that finds no problems.
+ */
+function weaponLiteralsIn(analysis) {
+  const table = new Map();
+  const contexts = new Set();
+  for (const block of analysis.actionBlocks) {
+    for (const instruction of walk(block.instructions)) {
+      if (instruction.name !== "Push" || !Array.isArray(instruction.operand)) continue;
+      const operands = instruction.operand;
+      if (operands.length !== 9) continue;
+      const [name, a, b, c, d, display, e, count, constructor] = operands;
+      if (name.type !== "string" && name.type !== "constant") continue;
+      if (typeof name.value !== "string" || !/^weapon\d+$/.test(name.value)) continue;
+      if (numeric(count) !== 6) continue;
+      if (constructor.value !== "Array") continue;
+      // `NewObject` pops the class name, then the count, then the arguments —
+      // so the compiler emits them in reverse and the array is [e, …, a].
+      // Offsets in the map and in `inspect-swf.mjs`'s own output are RELATIVE
+      // to the enclosing action block, which is what the document records.
+      table.set(Number(name.value.slice("weapon".length)), {
+        offset: `+0x${(instruction.offset - block.offset).toString(16)}`,
+        context: block.context,
+        hasDisplayName: display.type === "string" || display.type === "constant",
+        0: numeric(e),
+        2: numeric(d),
+        3: numeric(c),
+        4: numeric(b),
+        5: numeric(a)
+      });
+      contexts.add(block.context);
+    }
+  }
+  return { table, contexts };
+}
+
+/**
+ * WHICH END OF `weaponweights` IS HEAVY — the question the swing cost rests on.
+ *
+ * ► **THIS WAS CARRIED AS AN OPEN QUESTION FOR A DAY, RANKED FIRST, AND THE
+ *   ANSWER WAS ALREADY IN THE DOCUMENT THIS TOOL CHECKS.**
+ *   `MAP_SILENCE.swing-cost` said the array's "VALUES this repository does not
+ *   hold", so `ss2WeaponMass`'s direction was marked AUTHORED and inferred from
+ *   a damage correlation. `docs/integration/ss2-item-tables.md` states it
+ *   outright two lines under the offset the silence entry cites for the
+ *   LOCATION — and has since `df3a122`, 2026-08-30. **Third instance of one
+ *   failure: declaring the map silent without reading the surrounding
+ *   paragraph.** The inference happened to be right, which is the least
+ *   reassuring way for it to end.
+ *
+ * WHAT IS CHECKED, and why it is a direction rather than a transcription.
+ * `weaponweights` holds six STRINGS — human-readable weight classes, so
+ * `attack_speed` is a weight-CLASS index and never a numeric speed. This tool
+ * asserts the SHAPE (six entries, index 0 the empty pad) and the DIRECTION
+ * (index 1 is the heavy end, index 5 the light one) by substring, and
+ * reproduces no entry. That answers the only question the engine asks of it
+ * while keeping the licensing boundary §2.1 sets for the weapon names.
+ *
+ * The array is built by `NewObject`, which pops the class name, then the count,
+ * then the arguments — so the compiler pushes them in REVERSE and the array is
+ * the reverse of the push order. That convention is not assumed here: it is
+ * confirmed against `weapontypes`, whose reversed form the document pins AND
+ * which §2.2 cross-checks from the 90 rows' own `[0]` values.
+ */
+function weightClassDirectionIn(analysis) {
+  const ARRAYS = Object.freeze({ weaponweights: 6, weapontypes: 5 });
+  const found = new Map();
+  for (const block of analysis.actionBlocks) {
+    for (const instruction of walk(block.instructions)) {
+      if (instruction.name !== "Push" || !Array.isArray(instruction.operand)) continue;
+      const operands = instruction.operand;
+      const name = operands[0];
+      if (typeof name?.value !== "string" || !Object.hasOwn(ARRAYS, name.value)) continue;
+      if (found.has(name.value)) continue;
+      const constructor = operands.at(-1);
+      const count = numeric(operands.at(-2));
+      if (constructor?.value !== "Array" || count !== ARRAYS[name.value]) continue;
+      // Reverse of the push order, minus the name, the count and the class.
+      const entries = operands.slice(1, -2).reverse().map((operand) => operand.value);
+      found.set(name.value, {
+        offset: `+0x${(instruction.offset - block.offset).toString(16)}`,
+        entries
+      });
+    }
+  }
+  return found;
+}
+
+/**
+ * The index each `weapon_*` output is actually read from, per the bytes.
+ *
+ * `battlevalues` writes each one as `c.<field> = _root["weapon" + c.weapon][k]`,
+ * which compiles to a Push naming the field, then the lookup, then `Push k;
+ * GetMember`. The scan window is deliberately small: a `Push k` found twenty
+ * instructions away would be some other statement's.
+ */
+function readerIndicesIn(analysis) {
+  const found = new Map();
+  for (const block of analysis.actionBlocks) {
+    const instructions = [...walk(block.instructions)];
+    for (let index = 0; index < instructions.length; index += 1) {
+      const instruction = instructions[index];
+      if (instruction.name !== "Push" || !Array.isArray(instruction.operand)) continue;
+      const field = instruction.operand.find(
+        (operand) => typeof operand.value === "string" && Object.hasOwn(READER_SITES, operand.value)
+      );
+      if (!field || found.has(field.value)) continue;
+
+      // Only the WRITE site interests us, and a write is the one that performs
+      // the `_root["weapon" + c.weapon]` lookup — a Push naming `weapon` twice.
+      // THAT PUSH IS NOT ALWAYS THE SAME ONE THAT NAMES THE FIELD:
+      // `weapon_min_damage` fuses both into `+0x31be`, while `weapon_range`
+      // (`+0x3190`) splits them, because its right-hand side starts with
+      // `physical_size +`. Requiring one fused push found four of the five
+      // sites and reported the fifth as "convention UNVERIFIED" — correctly,
+      // but for the wrong reason.
+      const countsWeapon = (candidate) =>
+        Array.isArray(candidate.operand)
+          ? candidate.operand.filter((operand) => operand.value === "weapon").length
+          : 0;
+      let sawLookup = countsWeapon(instruction) >= 2;
+      for (let ahead = index + 1; ahead < Math.min(index + 12, instructions.length); ahead += 1) {
+        const candidate = instructions[ahead];
+        if (candidate.name !== "Push" || !Array.isArray(candidate.operand)) continue;
+        if (!sawLookup) { sawLookup = countsWeapon(candidate) >= 2; continue; }
+        const value = numeric(candidate.operand[0]);
+        if (value === null) continue;
+        const next = instructions[ahead + 1];
+        if (!next || next.name !== "GetMember") continue;
+        found.set(field.value, {
+          index: value,
+          at: `+0x${(candidate.offset - block.offset).toString(16)}`,
+          block: block.context
+        });
+        break;
+      }
+    }
+  }
+  return found;
+}
+
+/**
+ * THE TWO CONSTANTS THE RANGE FORMULA IS MADE OF, read off `battlevalues`.
+ *
+ * `readerIndicesIn` above proves that `weapon_range` reads column `[5]`. It
+ * proves nothing about what is DONE with it, and the whole of `ss2Reach`
+ * depends on the rest of the statement:
+ *
+ * ```text
+ * physical_size = 80 + Math.round(strength / 1.5)                    +0x30f1
+ * weapon_range  = physical_size + _root["weapon" + weapon][5] * 44   +0x3190
+ * ```
+ *
+ * ► **THIS CHECK EXISTS BECAUSE THE MISSING HALF OF THAT STATEMENT COST NINE
+ *   DAYS.** `ss2Reach` returned `physical_size` for every gladiator and cited
+ *   `ss2-item-tables.md:58` — the FIRST of the two lines the expression wraps
+ *   across — for "an unarmed gladiator's `weapon_range` is exactly
+ *   `physical_size`". Line 59 is `+ _root["weapon" + c.weapon][5] * 44`, and
+ *   there is no unarmed branch anywhere in `battlevalues`. A document cite
+ *   cannot catch that; the bytes can, so from here on they do.
+ *
+ * Located by SHAPE — keyed on the field names the build pushes, never on an
+ * offset. The offsets printed are output, not input.
+ */
+function rangeFormulaIn(analysis) {
+  const result = { step: null, sizeBase: null, sizeDivisor: null, at: {} };
+  for (const block of analysis.actionBlocks) {
+    const instructions = [...walk(block.instructions)];
+    const names = (instruction) =>
+      instruction.name === "Push" && Array.isArray(instruction.operand)
+        ? instruction.operand.filter((operand) => typeof operand.value === "string").map((operand) => operand.value)
+        : [];
+    const cite = (instruction) => `+0x${(instruction.offset - block.offset).toString(16)}`;
+
+    for (let index = 0; index < instructions.length; index += 1) {
+      const pushed = names(instructions[index]);
+
+      // `weapon_range = physical_size + ... * <step>`: the assignment names
+      // BOTH fields in one push, and the multiplier literal is the number
+      // immediately followed by `Multiply` inside the statement.
+      if (result.step === null && pushed.includes("weapon_range") && pushed.includes("physical_size")) {
+        for (let ahead = index + 1; ahead < Math.min(index + 24, instructions.length); ahead += 1) {
+          const value = numeric(instructions[ahead].operand?.[0]);
+          if (value === null) continue;
+          if (instructions[ahead + 1]?.name !== "Multiply") continue;
+          result.step = value;
+          result.at.step = cite(instructions[ahead]);
+          break;
+        }
+      }
+
+      // `physical_size = <base> + Math.round(strength / <divisor>)`: the
+      // assignment fuses the field name and the base into one push, and the
+      // divisor is the literal that `Divide` consumes.
+      if (result.sizeBase === null && pushed.includes("physical_size") && pushed.includes("strength")) {
+        const literals = instructions[index].operand.map(numeric).filter((value) => value !== null);
+        if (literals.length > 0) {
+          result.sizeBase = literals[0];
+          result.at.sizeBase = cite(instructions[index]);
+        }
+        for (let ahead = index + 1; ahead < Math.min(index + 12, instructions.length); ahead += 1) {
+          const value = numeric(instructions[ahead].operand?.[0]);
+          if (value === null) continue;
+          if (instructions[ahead + 1]?.name !== "Divide") continue;
+          result.sizeDivisor = value;
+          result.at.sizeDivisor = cite(instructions[ahead]);
+          break;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * The document's own two tables.
+ *
+ * §2.3 (the shop, ids 1-80) and §2.4 (id 0 and the off-shop ids) carry
+ * different column orders, so each is matched on its own width and on the
+ * literal-offset cell that ends both. Rows are keyed by id, and a duplicate id
+ * across the two is reported rather than silently overwritten.
+ */
+function documentRows(text) {
+  const rows = new Map();
+  const duplicates = [];
+  for (const line of text.replace(/\r\n/g, "\n").split("\n")) {
+    if (!line.startsWith("| ")) continue;
+    const cells = line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+    const id = Number(cells[0]);
+    if (!Number.isInteger(id) || !/^\d+$/.test(cells[0])) continue;
+    const last = cells.at(-1);
+    if (typeof last !== "string" || !last.startsWith("`+0x")) continue;
+    let row = null;
+    // §2.3: id | band | weap_i | itemlevel | gate | [0] | [3] | [4] | [2] | [5] | cost | page | literal
+    if (cells.length === 13) {
+      row = { 0: Number(cells[5]), 3: Number(cells[6]), 4: Number(cells[7]), 2: Number(cells[8]), 5: Number(cells[9]) };
+    // §2.4: id | [0] | [2] | [3] | [4] | [5] | literal
+    } else if (cells.length === 7) {
+      row = { 0: Number(cells[1]), 2: Number(cells[2]), 3: Number(cells[3]), 4: Number(cells[4]), 5: Number(cells[5]) };
+    }
+    if (row === null) continue;
+    row.offset = last.replaceAll("`", "");
+    if (rows.has(id)) duplicates.push(id);
+    rows.set(id, row);
+  }
+  return { rows, duplicates };
+}
+
+function main(argv) {
+  const swfPath = argv[0] ?? DEFAULT_SWF;
+  let buffer;
+  try {
+    buffer = readFileSync(swfPath);
+  } catch (error) {
+    console.error(`Cannot read the licensed build at:\n  ${swfPath}\n${error.message}`);
+    console.error("Pass the path as the first argument. This tool needs the installed SWF and has no fallback:");
+    console.error("for build DATA the only honest oracle is the build.");
+    return 2;
+  }
+
+  const { analysis } = analyseSwfBuffer(buffer);
+  const { table, contexts } = weaponLiteralsIn(analysis);
+  const { rows, duplicates } = documentRows(readFileSync(DOC_PATH, "utf8"));
+
+  console.log(`build: ${swfPath}`);
+  console.log(`       ${buffer.length} bytes`);
+  console.log(`literals found: ${table.size}, all in ${[...contexts].join(", ") || "(none)"}`);
+  console.log(`document rows:  ${rows.size} from ${path.relative(REPO_ROOT, DOC_PATH)}`);
+
+  const problems = [];
+  // Vacuity guards. A census that parses nothing agrees with everything.
+  if (table.size === 0) problems.push("no weapon literals matched in the build — the shape scan is broken, not the document");
+  if (rows.size === 0) problems.push("no rows parsed from the document — the table parse is broken, not the build");
+  for (const id of duplicates) problems.push(`id ${id} appears in both document tables`);
+
+  let comparisons = 0;
+  for (const id of [...new Set([...table.keys(), ...rows.keys()])].sort((a, b) => a - b)) {
+    const built = table.get(id);
+    const documented = rows.get(id);
+    if (!built) { problems.push(`id ${id}: in the document, not in the build`); continue; }
+    if (!documented) { problems.push(`id ${id}: in the build (${built.offset}), not in the document`); continue; }
+    if (!built.hasDisplayName) problems.push(`id ${id}: index [1] is not a string; the shape assumption is wrong`);
+    for (const field of ["0", "2", "3", "4", "5", "offset"]) {
+      comparisons += 1;
+      if (built[field] !== documented[field]) {
+        problems.push(`id ${id} index [${field}]: build ${built[field]}, document ${documented[field]}`);
+      }
+    }
+  }
+  console.log(`compared ${comparisons} fields`);
+
+  // The CODE MODULE, against the same literals. The document and the module are
+  // two independent transcriptions of one source, and only the build arbitrates
+  // between them — comparing them to EACH OTHER would be the oracle-computed-
+  // from-the-table-under-test mistake this project has already paid for once.
+  console.log(`\ncode module: ${SS2_WEAPON_IDS.length} ids from src/team/ss2-weapon-table.js`);
+  if (SS2_WEAPON_IDS.length === 0) problems.push("the code module exports no ids; its check below is vacuous");
+  let moduleComparisons = 0;
+  for (const id of [...new Set([...table.keys(), ...SS2_WEAPON_IDS])].sort((a, b) => a - b)) {
+    const built = table.get(id);
+    const coded = ss2WeaponEntry(id);
+    if (!built) { problems.push(`id ${id}: in the module, not in the build`); continue; }
+    if (!coded) { problems.push(`id ${id}: in the build (${built.offset}), not in the module`); continue; }
+    for (const [field, key] of [["0", "type"], ["2", "weight"], ["3", "minDamage"], ["4", "maxDamage"], ["5", "rangeMultiplier"]]) {
+      moduleComparisons += 1;
+      if (built[field] !== coded[key]) {
+        problems.push(`id ${id} ${key}: build ${built[field]}, module ${coded[key]}`);
+      }
+    }
+  }
+  console.log(`compared ${moduleComparisons} module fields`);
+
+  console.log("\nindex convention, read off `battlevalues` rather than assumed:");
+  const readers = readerIndicesIn(analysis);
+  for (const [field, expected] of Object.entries(READER_SITES)) {
+    const site = readers.get(field);
+    if (!site) {
+      problems.push(`${field}: no reader site found; the convention is UNVERIFIED, not confirmed`);
+      console.log(`  ${field.padEnd(18)} NOT FOUND`);
+      continue;
+    }
+    const ok = site.index === expected;
+    if (!ok) problems.push(`${field}: the build reads index ${site.index}, the document says ${expected}`);
+    console.log(`  ${field.padEnd(18)} index ${site.index} at ${site.at} ${ok ? "" : `!= documented ${expected}`}`);
+  }
+
+  console.log("\nthe range formula itself, because the column index is only half the statement:");
+  const formula = rangeFormulaIn(analysis);
+  if (formula.step === null) {
+    problems.push("the `* 44` in `weapon_range` was not found; SS2_WEAPON_RANGE_STEP is UNVERIFIED");
+    console.log("  range step         NOT FOUND");
+  } else {
+    const ok = formula.step === SS2_WEAPON_RANGE_STEP;
+    if (!ok) problems.push(`weapon_range multiplies [5] by ${formula.step}; SS2_WEAPON_RANGE_STEP is ${SS2_WEAPON_RANGE_STEP}`);
+    console.log(`  weapon_range = physical_size + [5] * ${formula.step}   ${formula.at.step}  ${ok ? "ok" : "DISAGREES"}`);
+  }
+  if (formula.sizeBase === null || formula.sizeDivisor === null) {
+    problems.push("`physical_size = 80 + round(strength / 1.5)` was not found; ss2PhysicalSize is UNVERIFIED");
+    console.log("  physical_size      NOT FOUND");
+  } else {
+    // Checked THROUGH the function rather than against two literals, so a
+    // rounding or ordering change is caught as well as a constant change.
+    const disagreements = [];
+    for (let strength = 0; strength <= 200; strength += 1) {
+      const build = formula.sizeBase + Math.round(strength / formula.sizeDivisor);
+      if (ss2PhysicalSize({ stats: { strength } }) !== build) disagreements.push(strength);
+    }
+    if (disagreements.length > 0) {
+      problems.push(`ss2PhysicalSize disagrees with the build at ${disagreements.length} strengths, first ${disagreements[0]}`);
+    }
+    console.log(
+      `  physical_size = ${formula.sizeBase} + round(strength / ${formula.sizeDivisor})   ` +
+      `${formula.at.sizeBase} / ${formula.at.sizeDivisor}  ${disagreements.length === 0 ? "ok" : "DISAGREES"}`
+    );
+  }
+  if (formula.step !== null && formula.sizeBase !== null && formula.sizeDivisor !== null) {
+    // And the whole of `ss2Reach`, over every id the build declares crossed
+    // with every strength, against the build's own three numbers. This is the
+    // check the old `physical_size`-only reach would have failed on all 90 ids.
+    const wrong = [];
+    for (const id of SS2_WEAPON_IDS) {
+      for (const strength of [0, 1, 5, 9, 20, 40, 70, 100]) {
+        const build = formula.sizeBase + Math.round(strength / formula.sizeDivisor)
+          + ss2WeaponEntry(id).rangeMultiplier * formula.step;
+        const shipped = ss2Reach({ stats: { strength }, resources: { weapon_range: { value: build } } });
+        if (shipped !== build) wrong.push(`id ${id} strength ${strength}: ${shipped} != ${build}`);
+      }
+    }
+    if (wrong.length > 0) problems.push(`ss2Reach disagrees at ${wrong.length} (id, strength) pairs, first ${wrong[0]}`);
+    // The FALLBACK is the build's bare-hands row, not `physical_size`.
+    const bare = formula.sizeBase + Math.round(9 / formula.sizeDivisor) + ss2WeaponEntry(0).rangeMultiplier * formula.step;
+    const fellBack = ss2Reach({ stats: { strength: 9 } });
+    if (fellBack !== bare) {
+      problems.push(`ss2Reach's undeclared fallback is ${fellBack}; weapon 0 at strength 9 is ${bare}`);
+    }
+    console.log(
+      `  ss2Reach over ${SS2_WEAPON_IDS.length} ids x 8 strengths: ${wrong.length === 0 ? "ok" : `${wrong.length} DISAGREE`}` +
+      `   undeclared fallback ${fellBack} (weapon 0 at strength 9: ${bare})`
+    );
+  }
+
+  console.log("\nweight-class direction, read off `weaponweights` rather than inferred:");
+  const arrays = weightClassDirectionIn(analysis);
+  const weights = arrays.get("weaponweights");
+  const types = arrays.get("weapontypes");
+
+  // The reversal convention FIRST, against an array the document pins and §2.2
+  // cross-checks from the 90 rows. Without this the direction below would rest
+  // on an argument about how `NewObject` pops its arguments.
+  const DOCUMENTED_TYPES = ["", "slashing", "bashing", "hacking", "ranged"];
+  if (!types) {
+    problems.push("weapontypes not found; the push-order convention is UNVERIFIED, so the direction below means nothing");
+    console.log("  weapontypes        NOT FOUND");
+  } else {
+    const ok = types.entries.length === DOCUMENTED_TYPES.length &&
+      types.entries.every((entry, index) => entry === DOCUMENTED_TYPES[index]);
+    if (!ok) problems.push(`weapontypes reversed is ${JSON.stringify(types.entries)}, not what the document pins`);
+    console.log(`  push order reverses: ${ok ? "CONFIRMED" : "WRONG"} against weapontypes at ${types.offset}`);
+  }
+
+  if (!weights) {
+    problems.push("weaponweights not found; the swing cost's direction is UNVERIFIED, not confirmed");
+    console.log("  weaponweights      NOT FOUND");
+  } else {
+    // Shape, then direction. Nothing is reproduced: the entries are tested by
+    // substring and never printed, per the licensing boundary in §2.1.
+    if (weights.entries.length !== 6) {
+      problems.push(`weaponweights has ${weights.entries.length} entries, not 6`);
+    }
+    if (weights.entries[0] !== "") {
+      problems.push("weaponweights[0] is not the empty pad; the 1-based reading is wrong");
+    }
+    const heavy = /heav/i.test(String(weights.entries[1]));
+    const light = /light/i.test(String(weights.entries[5]));
+    if (!heavy) problems.push("weaponweights[1] is NOT the heavy end — every swing cost in ss2SwingCost is backwards");
+    if (!light) problems.push("weaponweights[5] is NOT the light end — every swing cost in ss2SwingCost is backwards");
+    console.log(
+      `  weaponweights at ${weights.offset}: 6 entries, [0] empty, ` +
+      `[1] ${heavy ? "heavy" : "NOT HEAVY"}, [5] ${light ? "light" : "NOT LIGHT"}`
+    );
+    console.log("    so ss2WeaponMass's `weightIndexMax - index` runs 1 -> heaviest, 5 -> lightest: " +
+      `${heavy && light ? "DERIVED, not authored" : "REFUTED"}`);
+  }
+
+  if (problems.length === 0) {
+    console.log("\nOK: the document AND the code module both match every literal, and every index matches its reader site.");
+    return 0;
+  }
+  console.log(`\n${problems.length} PROBLEM(S):`);
+  for (const problem of problems) console.log(`  ${problem}`);
+  return 1;
+}
+
+process.exitCode = main(process.argv.slice(2));

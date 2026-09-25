@@ -59,7 +59,10 @@
  */
 
 import assert from "node:assert/strict";
+import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import {
   deriveExpectedEventsFromSs2Fixture,
@@ -259,8 +262,22 @@ test("every post-tutorial fixture stages the one levelled capture gladiator, unc
   }
 });
 
-test("the levelled gladiator's numbers are derived, not chosen", () => {
-  const herolevel = 4;
+test("the levelled gladiator's formula-derived numbers follow from the battle map", () => {
+  // TITLE AND SCOPE NARROWED DELIBERATELY. This test used to be called "the
+  // levelled gladiator's numbers are derived, not chosen" and closed with
+  //
+  //     assert.equal(HERO.staminamax - HERO.staminaleft, 5);
+  //
+  // whose two operands are literals declared 130 lines above in THIS FILE
+  // (staminamax 110, staminaleft 105). 110 - 105 is 5 however the game behaves,
+  // so the assertion could not fail, and its own comment conceded the 5 was
+  // observed rather than derived. An assertion that cannot fail is not weak
+  // evidence, it is no evidence, and this one was standing under a title
+  // claiming the opposite. The stamina drift is now checked against the
+  // promoted goldens instead — see the test below — and this one claims only
+  // what it actually shows: that the numbers with a FORMULA behind them follow
+  // from it.
+  const herolevel = 4;             // tournament 1 requires herolevel >= 4 (arena route §2)
   const vitality = 1 + 3 * 4;      // level-1 vitality 1, plus 4 points per level-up, 1 -> 4
   const staminaStat = 1;           // unchanged from the verified level-1 loadout
   const strength = 10;
@@ -272,15 +289,50 @@ test("the levelled gladiator's numbers are derived, not chosen", () => {
   // Root frame 214 `+0x02a9` heals the hero to hitpointsmax on every arena
   // entry (arena route §2), so the hero enters at full health.
   assert.equal(HERO.hitpoints, HERO.hitpointsmax);
-  // The five `walkright` autopilot steps that carry the hero from
-  // `longrange_warrior` into `closerange_warrior` cost five stamina, exactly as
-  // observed in the promoted prisoner sessions (capture staging guide, "Stamina
-  // drift"). This is the one staged number that is a function of the autopilot
-  // step count rather than of a formula.
-  assert.equal(HERO.staminamax - HERO.staminaleft, 5);
-  // Level 4 is the gate: tournament 1 requires herolevel >= 4 and a fresh
-  // gladiator starts at current_tournament 1 (arena route §2, tournament table).
-  assert.equal(herolevel, 4);
+  // `assert.equal(herolevel, 4)` used to stand here as well, comparing a const
+  // declared in this same test to its own initialiser. Dropped for the same
+  // reason. `herolevel` still earns its place: it is load-bearing in the
+  // hitpointsmax derivation two lines up, where a wrong value does fail.
+});
+
+test("the staged stamina drift is the drift the promoted goldens measured", async () => {
+  // The one staged number with no formula behind it: five `walkright` autopilot
+  // steps carry the hero from `longrange_warrior` into `closerange_warrior` and
+  // cost one stamina each. There is no rule in the battle map to derive that
+  // from — it is a function of the route the autopilot walks — so the only
+  // honest check is against evidence, and the evidence is outside this file:
+  // the runtime-verified prisoner goldens, whose hero walked the same route.
+  //
+  // Every operand here comes from a committed golden fixture, so the assertion
+  // moves when the goldens move. Editing HERO.staminaleft or HERO.staminamax in
+  // this file now fails it, which is exactly what the assertion it replaced
+  // could not do.
+  const goldenDir = fileURLToPath(new URL("fixtures/ss2-1v1-golden/", import.meta.url));
+  const fileNames = (await readdir(goldenDir))
+    .filter((name) => name.startsWith("golden-prisoner-") && name.endsWith(".json"))
+    .sort();
+  assert.ok(
+    fileNames.length >= 4,
+    `only ${fileNames.length} promoted prisoner goldens under ${goldenDir}; this test needs the ` +
+    "runtime evidence it compares against, and must not pass by finding none"
+  );
+
+  const drifts = new Set();
+  for (const fileName of fileNames) {
+    const golden = JSON.parse(await readFile(path.join(goldenDir, fileName), "utf8"));
+    assert.equal(golden.provenance.runtimeVerified, true, fileName);
+    const { hero } = golden.scenario;
+    drifts.add(hero.staminamax - hero.staminaleft);
+  }
+  assert.equal(drifts.size, 1, `the goldens disagree about the walk cost: ${[...drifts].join(", ")}`);
+  const [observedDrift] = drifts;
+
+  assert.equal(
+    HERO.staminamax - HERO.staminaleft,
+    observedDrift,
+    "the post-tutorial hero's staged stamina drift must equal the drift the promoted prisoner " +
+    "goldens actually measured; it is observed, not derived, so the goldens are the only warrant"
+  );
 });
 
 test("the villain block is a declared parameter surface, and every member says so", () => {
@@ -688,16 +740,18 @@ test("the removal pair destroys a real piece and pins the group's selector order
   // debris rolls follow only because a piece was actually equipped
   // (battle map §RNG surface: destroy_armour consumes exactly three rolls, the
   // first facing-selected; the defender faces left, so it is RandomNumber(30)).
+  // The helmet branch calls destroy_armour ONCE (`+0x03c5`, at the head), so
+  // there is one debris clip and one triple.
   assert.deepEqual(helmetArm.expected.mutation.armourRemovals, [{
     request: 1,
     selected: "helmet",
     removed: true,
     defenceRemoved: 60,
-    debrisRolls: {
+    debrisRolls: [{
       horizontal: { source: "randomNumber", value: 10 },
       vertical: 5,
       rotation: 2
-    }
+    }]
   }]);
   assert.equal(helmetArm.expected.state.villain.helmet, 0);
   assert.equal(helmetArm.expected.state.villain.armourclass_max, 79 - 60);
@@ -708,16 +762,28 @@ test("the removal pair destroys a real piece and pins the group's selector order
 
   // Selection 2 -> shoulderguard. 8 defence gone, 71 left, and the same 22
   // damage stays fully absorbed: hitpoints never move.
+  // The shoulderguard branch calls destroy_armour TWICE, unconditionally — at
+  // `Lupperarm` (`+0x0500`) and then `Rupperarm` (`+0x056e`) — so it launches
+  // two debris clips and draws two triples, left limb first. The defence
+  // still leaves each armour pool once (`+0x0477`-`+0x04a2`, before either
+  // call). The second triple's values are chosen inputs, in range.
   assert.deepEqual(shoulderArm.expected.mutation.armourRemovals, [{
     request: 1,
     selected: "shoulderguard",
     removed: true,
     defenceRemoved: 8,
-    debrisRolls: {
-      horizontal: { source: "randomNumber", value: 10 },
-      vertical: 5,
-      rotation: 2
-    }
+    debrisRolls: [
+      {
+        horizontal: { source: "randomNumber", value: 10 },
+        vertical: 5,
+        rotation: 2
+      },
+      {
+        horizontal: { source: "randomNumber", value: 24 },
+        vertical: 12,
+        rotation: 3
+      }
+    ]
   }]);
   assert.equal(shoulderArm.expected.state.villain.shoulderguard, 0);
   assert.equal(shoulderArm.expected.state.villain.armourclass_max, 79 - 8);
@@ -773,24 +839,38 @@ test("every non-lethal tape is exactly the mapped roll order for a hitting direc
     "knockback-roll",
     "enchantment-potency-roll"
   ];
-  const withRemoval = [
+  // One destroy_armour call is one debris clip and three draws (battle map
+  // §RNG surface). How many calls a removal makes is the PIECE's, not the
+  // attack's: remove_armour calls it once for helmet (`+0x03c5`) and twice,
+  // unconditionally, for shoulderguard (`+0x0500` Lupperarm, then `+0x056e`
+  // Rupperarm). `armour-debris-N` is the N-th clip the attack launches.
+  const clip = (n) => [`armour-debris-${n}-x`, `armour-debris-${n}-y`, `armour-debris-${n}-rotation`];
+  const withRemoval = (clips) => [
     "hit-roll",
     "normal-damage-roll",
     "normal-critical-roll",
     "critical-deflection-roll",
     "armour-removal-roll",
     "armour-selection-1",
-    "armour-debris-1-x",
-    "armour-debris-1-y",
-    "armour-debris-1-rotation",
+    ...Array.from({ length: clips }, (_, index) => clip(index + 1)).flat(),
     "knockback-roll",
     "enchantment-potency-roll"
   ];
+  const expectedLabels = {
+    "candidate-armoured-removal-destroys-helmet": withRemoval(1),
+    "candidate-armoured-removal-destroys-shoulderguard": withRemoval(2)
+  };
+  // Every removal arm is named above: a new `candidate-armoured-removal-*`
+  // fixture must say how many clips its piece launches rather than inherit one.
+  assert.deepEqual(
+    POST_TUTORIAL_FAMILY.filter((id) => id.startsWith("candidate-armoured-removal-")),
+    Object.keys(expectedLabels)
+  );
   for (const id of POST_TUTORIAL_FAMILY) {
     const fixture = byId.get(id);
     assert.deepEqual(
       labels(fixture),
-      id.startsWith("candidate-armoured-removal-") ? withRemoval : base,
+      expectedLabels[id] ?? base,
       id
     );
     // Knockback is gated on 5 <= attack_direction <= 12 or 30 (battle map,
@@ -806,9 +886,16 @@ test("every non-lethal tape is exactly the mapped roll order for a hitting direc
   }
   // Cosmetic RandomNumber debris rolls are excluded from observation matching on
   // both sides, so the count a capture can be held to is the randomBetween one.
+  // The shoulderguard's SECOND clip is excluded exactly like its first: were
+  // its labels outside the cosmetic grammar, that arm would count 11 here.
   assert.deepEqual(
     POST_TUTORIAL_FAMILY.map((id) => observedChannels(byId.get(id)).drawCount),
     [7, 7, 7, 7, 7, 7, 8, 8]
+  );
+  assert.deepEqual(
+    ["candidate-armoured-removal-destroys-helmet", "candidate-armoured-removal-destroys-shoulderguard"]
+      .map((id) => byId.get(id).samples.filter((sample) => isCosmeticDebrisSample(sample)).length),
+    [3, 6]
   );
 });
 

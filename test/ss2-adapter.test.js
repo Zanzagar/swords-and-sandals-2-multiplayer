@@ -11,6 +11,7 @@ import {
   currentCombatant,
   defineTeamRuleSet,
   EffectKind,
+  placeholderTeamRules,
   RuleSetVerification,
   toTeamWireState
 } from "../src/team/index.js";
@@ -24,6 +25,8 @@ import {
   assertMirrorAgrees,
   assertWriteProvenance,
   ARENA_Y,
+  assertDistinctPlacements,
+  ALLY_Y_STRIDE,
   buildArenaLayout,
   bindingPlanFor,
   CANONICAL_RESOURCE_SOURCES,
@@ -42,7 +45,10 @@ import {
   facingWrite,
   HERO_SIDE,
   initialStatusEffects,
+  isClipResidentField,
+  isKnownVanillaField,
   isResourceBackedVanillaField,
+  isTimedSpellField,
   LabelProvenance,
   loadoutMirrorDifferences,
   MAP_SILENCE,
@@ -58,6 +64,7 @@ import {
   SlotLayoutError,
   SS2_STATIC_MAP_BINDINGS,
   STATUS_FLAG_FIELDS,
+  TIMED_SPELL_COUNTER_FIELDS,
   toCanonicalCombatantSource,
   toVanillaCombatant,
   VANILLA_FIGHTER_DEPTHS,
@@ -129,12 +136,17 @@ const freshVanillaGladiator = (overrides = {}) => ({
   inventory5: 0,
   inventory6: 0,
   psyche_up: 0,
-  spell_colossus: 0,
-  spell_bloodlust: 0,
+  // ► **`spell_colossus: 0` and `spell_bloodlust: 0` STOOD HERE UNTIL
+  //   2026-09-22, AND THE BUILD NEVER PUTS EITHER ON THIS OBJECT.**
+  //   `check_spells(which_character, which_avatar)` binds the CLIP to r1 and
+  //   reads and writes every timed counter there, and every cast arm writes
+  //   `attacker.spell_X` (battle map §"Five more phases"). A persistent object
+  //   "as the map describes one" does not carry them, so the fixture does not
+  //   either; the tests that need a misplaced counter pass one as an override.
   ...overrides
 });
 
-const brute = (id, agility, controller = "local") => ({
+const brute =(id, agility, controller = "local") => ({
   id,
   name: id,
   controller,
@@ -261,17 +273,173 @@ test("the facing write is the only write that targets the fighter clip", () => {
 });
 
 /* ------------------------------------------------------------------ */
+/* State bridge: the clip-resident timed spell counters                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **ADDED 2026-09-22, WHEN THE ADAPTER'S MODEL OF THESE COUNTERS WAS FOUND
+ *   TO DESCRIBE AN OBJECT THE BUILD NEVER USES FOR THEM.** Until then every
+ *   /^spell_/ key of `_root.game.<side>` was a "timed spell field" and a
+ *   declared resource could write one there. The build keeps all six on the
+ *   fighter CLIP: `check_spells(which_character, which_avatar)` binds
+ *   `which_avatar` to r1 (header flags `0x2a`) and every counter access in its
+ *   body is `register:1`; `nextphase` passes the clip second
+ *   (`check_spells(game_attacker, attacker)`, `+0x3271`); every cast arm writes
+ *   `attacker.spell_X` (battle map §"Five more phases").
+ */
+test("the six timed counters are named, in check_spells order, and are clip-resident, not persistent-object fields", () => {
+  assert.deepEqual([...TIMED_SPELL_COUNTER_FIELDS], [
+    "spell_colossus",
+    "spell_little_fat_kid",
+    "spell_swiftsandals",
+    "spell_bloodlust",
+    "spell_regenerate",
+    "spell_boundless_energy"
+  ]);
+  for (const name of TIMED_SPELL_COUNTER_FIELDS) {
+    assert.equal(isTimedSpellField(name), true, `${name} is a timed counter`);
+    assert.equal(isClipResidentField(name), true, `${name} lives on the fighter clip`);
+    assert.equal(isKnownVanillaField(name), false, `${name} is not a persistent-object field`);
+    assert.match(citationFor(name), /fighter clip/, `${name} must cite where the build keeps it`);
+  }
+  // The prefix is not the classification. `spell_selected` is a real build
+  // name (a timeline variable `use_item` sets, `+0x0388`) and `spell_haste` is
+  // an invented one; neither is a counter.
+  for (const name of ["spell_selected", "spell_haste"]) {
+    assert.equal(isTimedSpellField(name), false, `${name} is not a timed counter`);
+    assert.equal(isClipResidentField(name), false);
+    assert.equal(citationFor(name), null, `${name} is cited by no battle-map section`);
+  }
+});
+
+test("a supplied clip's timed counters are carried on the clip record and back out, and never reach the combat object", () => {
+  const clip = {
+    gladiator_dir: "left",
+    spell_colossus: -1, // what check_spells leaves after the colossus expiry (`+0x24ba`)
+    spell_regenerate: 12,
+    spell_boundless_energy: 0,
+    _xscale: 100 // a clip property the catalogue does not name is not carried
+  };
+  const record = normaliseVanillaCombatant(freshVanillaGladiator(), { clip });
+  assert.deepEqual({ ...record.clip }, {
+    gladiator_dir: "left",
+    spell_colossus: -1,
+    spell_regenerate: 12,
+    spell_boundless_energy: 0
+  });
+  assert.deepEqual([...record.misplacedClipFields], []);
+  for (const name of TIMED_SPELL_COUNTER_FIELDS) {
+    assert.equal(name in record.fields, false, `${name} must not appear on the combat object`);
+  }
+
+  const split = denormaliseVanillaCombatant(record);
+  assert.deepEqual(split.fighterClip, {
+    gladiator_dir: "left",
+    spell_colossus: -1,
+    spell_regenerate: 12,
+    spell_boundless_energy: 0
+  });
+  for (const name of TIMED_SPELL_COUNTER_FIELDS) assert.equal(name in split.combatObject, false);
+
+  // A sync and an applied write carry them forward untouched.
+  const canonical = { id: "red-1", health: 12, maxHealth: 30, status: [], alive: true };
+  assert.deepEqual({ ...toVanillaCombatant(canonical, record).clip }, { ...record.clip });
+  const layout = buildArenaLayout(toTeamWireState(makeBattle(1, 1)));
+  const turned = applyVanillaWrites(record, [facingWrite("red-1", layout.placementFor("red-1"), record, "right")]);
+  assert.deepEqual({ ...turned.clip }, { ...record.clip, gladiator_dir: "right" });
+});
+
+test("a timed counter found on the persistent object is passed through, reported as misplaced, and never lifted onto the clip", () => {
+  // The facing is lifted because something really does fold it onto the
+  // combat-object record: the 1v1 fixtures carry it in the scenario and the
+  // capture wrapper's `dumpSide` folds the clip's value into `fields`. Nothing
+  // folds a counter, and lifting one would hand the build a value it never
+  // read: on the persistent object the counter does nothing, on the clip it
+  // drives `check_spells` and `nextphase`.
+  const record = normaliseVanillaCombatant(
+    freshVanillaGladiator({ spell_regenerate: 17, spell_colossus: 16 }),
+    { clip: { gladiator_dir: "right" } }
+  );
+  assert.deepEqual([...record.misplacedClipFields], ["spell_regenerate", "spell_colossus"]);
+  assert.deepEqual([...record.unknownFields], [], "a known name on the wrong object is misplaced, not unknown");
+  assert.equal(record.fields.spell_regenerate, 17);
+  assert.equal(record.fields.spell_colossus, 16);
+  assert.deepEqual({ ...record.clip }, { gladiator_dir: "right" }, "never lifted");
+  assert.equal("timedSpellFields" in record, false, "the persistent object has no timed spell fields to list");
+
+  const { combatObject, fighterClip } = denormaliseVanillaCombatant(record);
+  assert.equal(combatObject.spell_regenerate, 17);
+  assert.equal(combatObject.spell_colossus, 16);
+  assert.deepEqual(fighterClip, { gladiator_dir: "right" });
+  // The classification survives a sync and an applied write.
+  const canonical = { id: "red-1", health: 12, maxHealth: 30, status: [], alive: true };
+  assert.deepEqual([...toVanillaCombatant(canonical, record).misplacedClipFields], ["spell_regenerate", "spell_colossus"]);
+  assert.deepEqual([...applyVanillaWrites(record, []).misplacedClipFields], ["spell_regenerate", "spell_colossus"]);
+});
+
+/**
+ * ► **THE DRAWING MUST NOT CONTRADICT THE MODEL, and this is the invariant
+ *   that keeps it honest on the second axis.**
+ *
+ * `ALLY_Y_STRIDE` is -10: a legibility stagger so converging ranks do not draw
+ * on top of each other, far too small to be a position. A rule set that models
+ * depth puts its ranks ~97 apart. Drawing those 10 apart would show one pile
+ * while the resolver describes three ranks — the same class of defect as the
+ * back rank painting over the front one, which was found by looking at the
+ * arena and not by any test.
+ */
+/** A wire projection is all `buildArenaLayout` reads, so this is its contract. */
+const wireWithDepth = (depths) => ({
+  teams: ["red", "blue"].map((id) => ({
+    id,
+    combatants: depths.map((y, slotIndex) => ({ id: `${id}-${slotIndex + 1}`, slotIndex, x: 0, y }))
+  }))
+});
+
+test("the layout draws the RESOLVER's depth when the rule set models one", () => {
+  const stride = 97;
+  // What `startingY` produces at rankStride 97: 200, 103, 6.
+  const layout = buildArenaLayout(wireWithDepth([200, 200 - stride, 200 - 2 * stride]));
+
+  // Slot 0 is the vanilla depth on both sides, so 1v1 is the parity case here
+  // exactly as it is on x.
+  assert.equal(layout.placementFor("red-1").y, 200);
+  assert.equal(layout.placementFor("blue-1").y, 200);
+  // And the ranks are drawn where the model puts them, not where the stagger would.
+  assert.equal(layout.placementFor("red-2").y, 200 - stride);
+  assert.equal(layout.placementFor("red-3").y, 200 - 2 * stride);
+  assert.equal(layout.placementFor("blue-3").y, 200 - 2 * stride);
+});
+
+test("a rule set that models no depth keeps the authored legibility stagger", () => {
+  // Every rule set with the second axis off, which is the default. The stagger
+  // is the adapter's own business precisely because the model has no opinion.
+  const layout = buildArenaLayout(wireWithDepth([null, null, null]));
+  assert.equal(layout.placementFor("red-1").y, 200);
+  assert.equal(layout.placementFor("red-2").y, 200 + ALLY_Y_STRIDE);
+  assert.equal(layout.placementFor("red-3").y, 200 + 2 * ALLY_Y_STRIDE);
+});
+
+/* ------------------------------------------------------------------ */
 /* State bridge: totality and round trip                               */
 /* ------------------------------------------------------------------ */
 
-test("normalisation is total: unnamed spell_* fields and unknown fields round-trip unchanged", () => {
-  const source = freshVanillaGladiator({ spell_regenerate: 17, some_future_field: "kept" });
+/**
+ * ► **RENAMED AND REWRITTEN 2026-09-22.** It was "unnamed spell_* fields and
+ *   unknown fields round-trip unchanged" and asserted that `spell_regenerate`
+ *   and `spell_colossus` on the persistent object were `timedSpellFields`.
+ *   The build keeps both on the fighter clip (§"Five more phases"), so the
+ *   round trip it pins is unchanged and the classification is not: a counter
+ *   here is MISPLACED, and a `spell_` name the build does not use is UNKNOWN.
+ */
+test("normalisation is total: misplaced counters and unknown fields round-trip unchanged", () => {
+  const source = freshVanillaGladiator({ spell_regenerate: 17, some_future_field: "kept", spell_haste: 3 });
   const record = normaliseVanillaCombatant(source);
-  assert.ok(record.timedSpellFields.includes("spell_regenerate"));
-  assert.ok(record.timedSpellFields.includes("spell_colossus"));
-  assert.deepEqual(record.unknownFields, ["some_future_field"]);
+  assert.deepEqual([...record.misplacedClipFields], ["spell_regenerate"]);
+  assert.deepEqual([...record.unknownFields], ["some_future_field", "spell_haste"]);
   assert.equal(record.fields.spell_regenerate, 17);
   assert.equal(record.fields.some_future_field, "kept");
+  assert.equal(record.fields.spell_haste, 3);
 
   const { combatObject } = denormaliseVanillaCombatant(record);
   for (const [key, value] of Object.entries(source)) {
@@ -564,6 +732,58 @@ test("a mirror that is wrong about armour is drift now, where it used to be sile
   assert.deepEqual(mirrorDifferences(record, invented), []);
 });
 
+test("the adapter's resource vocabulary is PINNED: changing it re-hashes every adapter-built battle", () => {
+  // WHY THIS EXISTS, and it is a gap that was invisible until 2026-09-07.
+  // `CANONICAL_RESOURCE_SOURCES` IS the supplied-gladiator path's projected
+  // resource bag, and `combatStateHash` covers that projection — so adding one
+  // name to this list moves the hash of every battle the adapter builds, and an
+  // old peer reads the difference as state divergence rather than as
+  // "different code". The rule set's own vocabulary has been pinned this way
+  // since the wire format moved under it (`test/ss2-team-rules.test.js`); the
+  // ADAPTER's had not, so every assertion about this list was RELATIVE
+  // (`[...CANONICAL_RESOURCE_SOURCES].sort()`, `.includes(...)`) and
+  // self-updated silently when the list grew.
+  //
+  // There is a live reason to grow it: `ss2TeamRules` declares 32 resources and
+  // 14 of them never reach a supplied gladiator, so the map-derived rule set
+  // cannot be driven by the host with a gladiator a person controls. That is a
+  // decision with a peer-visible cost, and this pin is what makes it one.
+  assert.deepEqual([...CANONICAL_RESOURCE_SOURCES], [
+    // ammunition and the armour pool
+    "ammo_left", "armourclass", "armourclass_max", "maximum_ammo",
+    // stamina
+    "staminaleft", "staminamax",
+    // the one stat that is a resource
+    "charisma",
+    // ► **THE PSYCHE COUNTER, ADDED 2026-09-16 WITH THE `psyche_up` VERB.** A
+    //   live pool like `staminaleft`, and unlike `criticalhit` it is a real
+    //   member of the persistent combat object — the map lists it under
+    //   "Combatant state objects / Conditions" and the build writes it by name
+    //   at `nextphase` `+0x35c7`-`+0x35ea`, `damagecharacter` `+0x1be4` and the
+    //   discharge's own `+0x6738`. Leaving it out reported every counter
+    //   advance as an unmapped write against a field that plainly exists.
+    "psyche_up",
+    // per-piece armour VALUES — the piece IDS are deliberately absent; see
+    // `docs/ss2-adapter-contract.md`, "Still open" item 2
+    "boot_defence", "breastplate_defence", "gauntlet_defence", "greaves_defence",
+    "helmet_defence", "shield_defence", "shinguard_defence", "shoulderguard_defence",
+    // enchantments, both weapons
+    "secondary_weapon_enchantment_potency", "secondary_weapon_enchantment_type",
+    "weapon_enchantment_damage", "weapon_enchantment_potency", "weapon_enchantment_type"
+  ]);
+  // 20 until 2026-09-16, when the psyche counter joined with its verb.
+  assert.equal(CANONICAL_RESOURCE_SOURCES.length, 21);
+
+  // And the pin is only worth having if it really is the projected bag: a pin
+  // over a list nothing projects would be decoration.
+  const source = toCanonicalCombatantSource(freshVanillaGladiator(), { id: "red-1" });
+  assert.deepEqual(
+    Object.keys(source.combatant.resources).sort(),
+    [...CANONICAL_RESOURCE_SOURCES].sort(),
+    "the supplied path projects exactly this list, which is why changing it moves a hash"
+  );
+});
+
 test("every canonical resource name is a field the battle map already cites", () => {
   for (const name of CANONICAL_RESOURCE_SOURCES) {
     assert.ok(citationFor(name), `${name} must cite a battle-map section`);
@@ -584,6 +804,57 @@ test("maximum health is compared against the rule set, never corrected by the ad
     { derived: report.ruleSetDerived, vanilla: report.vanillaHitpointsMax, agrees: report.agrees },
     { derived: 80, vanilla: 30, agrees: false }
   );
+});
+
+test("a rule set that CANNOT derive maximum health is reported, not allowed to abort the host", () => {
+  // WHY THIS EXISTS. `compareMaximumHealth` blanks `maxHealth` on purpose, so
+  // the rule set has to derive rather than hand back the number the adapter
+  // just read. A rule set that derives from a resource the canonical bag does
+  // not carry therefore cannot answer, and says so by throwing — and this
+  // function used to let that throw escape into `battle-host.js`'s
+  // constructor, where it killed the host over a DIAGNOSTIC.
+  const source = toCanonicalCombatantSource(freshVanillaGladiator(), { id: "red-1" });
+  const cannotDerive = {
+    ...placeholderTeamRules,
+    id: "cannot-derive-maximum-health",
+    maximumHealth(combatant) {
+      if (!Number.isFinite(combatant.maxHealth)) {
+        throw new Error("needs a herolevel resource this bag does not carry");
+      }
+      return combatant.maxHealth;
+    }
+  };
+
+  const report = compareMaximumHealth(cannotDerive, source.combatant, source.vanilla);
+  assert.equal(report.ruleSetDerived, null, "no number is invented when the rule set cannot give one");
+  assert.equal(report.agrees, false, "an underivable formula agrees with nothing");
+  assert.match(report.underivable, /herolevel resource/);
+  assert.equal(report.vanillaHitpointsMax, 30, "the vanilla side is still reported");
+  assert.ok(Object.isFrozen(report));
+
+  // THE MUTANT THIS KILLS: falling back to the vanilla figure. Reporting
+  // vanilla's own number as the rule set's answer would make `agrees` true and
+  // turn the diagnostic into the self-confirming comparison the blanking exists
+  // to prevent.
+  assert.notEqual(report.ruleSetDerived, report.vanillaHitpointsMax);
+});
+
+test("compareMaximumHealth blanks maxHealth, so a rule set cannot agree with itself", () => {
+  const source = toCanonicalCombatantSource(freshVanillaGladiator(), { id: "red-1" });
+  let sawMaxHealth = "unset";
+  const echo = {
+    ...placeholderTeamRules,
+    id: "echoes-max-health",
+    maximumHealth(combatant) {
+      sawMaxHealth = combatant.maxHealth;
+      return Number.isFinite(combatant.maxHealth) ? combatant.maxHealth : -1;
+    }
+  };
+  const report = compareMaximumHealth(echo, source.combatant, source.vanilla);
+  assert.equal(sawMaxHealth, undefined, "the rule set must be handed no maxHealth to echo back");
+  assert.equal(report.ruleSetDerived, -1);
+  assert.equal(report.agrees, false, "echoing the adapter's own number must not read as agreement");
+  assert.equal(report.underivable, null, "returning a number is not the same as refusing to");
 });
 
 /* ------------------------------------------------------------------ */
@@ -846,36 +1117,89 @@ test("writes follow effect order and stay total for unattributed differences", (
 /* State bridge: the write shape, checked rather than described        */
 /* ------------------------------------------------------------------ */
 
-test("every vanilla write declares one of four sources, and the field set is fixed independently of any scenario", () => {
+test("every vanilla write declares one of six sources, and the field set is fixed independently of any scenario", () => {
+  // ► **SIX SINCE 2026-09-23, the owner's "write both back"**: a canonical
+  //   stat onto its vanilla base-stat field, and the battle's crowd onto
+  //   `_global`. Both were REPORTED in `unmapped` until then.
+  assert.deepEqual(Object.values(WriteSource).sort(), [
+    "canonical-health", "canonical-stat", "canonical-status", "clip-facing", "declared-battle-resource",
+    "declared-resource"
+  ]);
   assert.deepEqual(Object.keys(ALLOWED_WRITE_FIELDS).sort(), [...Object.values(WriteSource)].sort());
   assert.deepEqual(ALLOWED_WRITE_FIELDS[WriteSource.CANONICAL_HEALTH], ["hitpoints"]);
   assert.deepEqual([...ALLOWED_WRITE_FIELDS[WriteSource.CANONICAL_STATUS]], [...STATUS_FLAG_FIELDS]);
   assert.deepEqual([...ALLOWED_WRITE_FIELDS[WriteSource.DECLARED_RESOURCE]], [...CANONICAL_RESOURCE_SOURCES]);
   assert.deepEqual(ALLOWED_WRITE_FIELDS[WriteSource.CLIP_FACING], ["gladiator_dir"]);
+  // The map's "Base stats" row, by the vanilla names — `speed` and `defence`,
+  // never the canonical `agility` and `defense` — and nothing else: `charisma`
+  // is a declared resource, not a canonical stat.
+  assert.deepEqual([...ALLOWED_WRITE_FIELDS[WriteSource.CANONICAL_STAT]],
+    ["strength", "speed", "attack", "defence", "vitality", "stamina", "magicka"]);
+  assert.deepEqual([...ALLOWED_WRITE_FIELDS[WriteSource.DECLARED_BATTLE_RESOURCE]], ["crowd_interest"]);
 
   // The whole set, named once, in one place, with no battle in sight.
   const allowed = new Set(Object.values(ALLOWED_WRITE_FIELDS).flatMap((fields) => [...fields]));
-  assert.equal(allowed.size, 1 + STATUS_FLAG_FIELDS.length + CANONICAL_RESOURCE_SOURCES.length + 1);
+  assert.equal(allowed.size, 1 + STATUS_FLAG_FIELDS.length + CANONICAL_RESOURCE_SOURCES.length + 1 + 7 + 1,
+    "no field is owned by two sources");
   // Nothing a rule set can name reaches a field another source owns.
   for (const reserved of ["hitpointsmax", "hitpoints", "gladiator_dir", ...STATUS_FLAG_FIELDS]) {
     assert.equal(isResourceBackedVanillaField(reserved), false, `${reserved} is not a resource's to write`);
   }
   assert.equal(isResourceBackedVanillaField("armourclass"), true);
-  assert.equal(isResourceBackedVanillaField("spell_regenerate"), true, "the timed pools the map declines to name");
-  assert.equal(isResourceBackedVanillaField("psyche_up"), false, "a vanilla field is not a resource by being a field");
+  // ► **THIS WAS `true` UNTIL 2026-09-22, "the timed pools the map declines
+  //   to name".** The map names all six, and the build keeps them on the
+  //   fighter clip, which no declared-resource write reaches. See the write
+  //   path test below for what happens to one instead.
+  for (const name of TIMED_SPELL_COUNTER_FIELDS) {
+    assert.equal(isResourceBackedVanillaField(name), false, `${name} is on the clip, not the combat object a resource writes`);
+  }
+  assert.equal(ALLOWED_WRITE_FIELDS[WriteSource.DECLARED_RESOURCE].some((field) => field.startsWith("spell_")), false);
+  // ► **THIS ASSERTION USED `psyche_up` AS ITS EXAMPLE AND `psyche_up` BECAME A
+  //   RESOURCE ON 2026-09-16.** The RULE it states is unchanged and still
+  //   worth pinning — a field is not a resource by being a field — so it keeps
+  //   the rule and takes a different example.
+  //
+  //   **What changed about `psyche_up` is that a verb started reading it**, not
+  //   that it grew into a field. It is asserted here from the other side, so a
+  //   revert that dropped it from the vocabulary fails this test too.
+  //
+  //   ► **AND THE REPLACEMENT EXAMPLE WAS `inventory1`, WHICH BECAME A DECLARED
+  //     RESOURCE ON 2026-09-19 — three days after it was chosen for not being
+  //     one.** It still satisfies the assertion, because
+  //     `isResourceBackedVanillaField` reads `CANONICAL_RESOURCE_SOURCES` and
+  //     the six slots deliberately stayed out of it until a verb writes one.
+  //     But it stopped ILLUSTRATING the rule the moment `SS2_RESOURCE_NAMES`
+  //     claimed the name, and an example that passes for a reason other than
+  //     the one it is printed to show is the failure this comment already
+  //     records once. `physical_size` is the honest example: a member of the
+  //     persistent combat object (the map groups it under "Derived combat"),
+  //     read by `src/adapter/presentation.js` for the clip scale, and named by
+  //     no resource vocabulary anywhere.
+  //
+  //     **Pick an example that is a field and NOTHING else, or it will be
+  //     promoted out from under the assertion again.**
+  assert.equal(isResourceBackedVanillaField("physical_size"), false,
+    "a vanilla field is not a resource by being a field");
+  assert.equal(isResourceBackedVanillaField("inventory1"), false,
+    "a DECLARED SS2 resource is still not adapter-writable until CANONICAL_RESOURCE_SOURCES names it");
+  assert.equal(isResourceBackedVanillaField("psyche_up"), true,
+    "the psyche counter IS a declared resource: the psyche_up verb reads and writes it");
 
   // And no scenario produces a write outside it. Four vocabularies, four team
-  // sizes, damage / heal / status / resource / facing.
+  // sizes, damage / heal / status / resource / facing / stat / battle pool.
   const observed = new Set();
   for (const [redSize, blueSize] of [[1, 1], [2, 2], [3, 3], [1, 3]]) {
     const battle = makeBattle(redSize, blueSize);
     const layout = buildArenaLayout(toTeamWireState(battle));
     const resources = canonicalResourcesFrom(freshVanillaGladiator());
     const before = projections(battle).map((combatant) => ({ ...combatant, resources }));
+    // The "after" state is authored here, as the resolver's stand-in: a stat
+    // at 30 is simply what this projection holds, not a formula.
     const after = before.map((combatant) => ({
       ...combatant,
       health: Math.max(0, combatant.health - 3),
       status: [...combatant.status, "burning", "invented-status"],
+      stats: { ...combatant.stats, strength: 30 },
       resources: { ...resources, armourclass: { value: 1, min: null, max: null }, momentum: { value: 4, min: null, max: null } }
     }));
     const { writes } = vanillaWritesForResolvedAction({
@@ -886,9 +1210,13 @@ test("every vanilla write declares one of four sources, and the field set is fix
         { kind: "damage", targetId: "blue-1", amount: 3 },
         { kind: "status", targetId: "blue-1", status: "burning", active: true },
         { kind: "status", targetId: "blue-1", status: "invented-status", active: true },
-        { kind: "resource", targetId: "blue-1", resource: "momentum", to: 4 }
+        { kind: "resource", targetId: "blue-1", resource: "momentum", to: 4 },
+        { kind: "stat", targetId: "blue-1", stat: "strength", to: 30 },
+        { kind: "battle-resource", resource: "crowd_interest", to: 12 }
       ],
-      placements: layout.byCombatantId
+      placements: layout.byCombatantId,
+      battleBefore: { crowd_interest: { value: 10, min: null, max: null } },
+      battleAfter: { crowd_interest: { value: 12, min: null, max: null } }
     });
     const all = [
       ...writes,
@@ -901,7 +1229,7 @@ test("every vanilla write declares one of four sources, and the field set is fix
       observed.add(`${write.source}:${write.field}`);
     }
   }
-  // The scenarios really did exercise all four sources.
+  // The scenarios really did exercise all ~~four~~ six sources.
   assert.deepEqual(
     [...new Set([...observed].map((entry) => entry.split(":")[0]))].sort(),
     [...Object.values(WriteSource)].sort()
@@ -964,10 +1292,29 @@ test("a write carrying a value the resolver never produced is refused, however i
   );
 });
 
-test("a resource may not borrow a field canonical health or status already owns", () => {
+test("a moved stat no vanilla base-stat field carries is still REPORTED, while a mapped one is written", () => {
+  // The roster builds only the seven stats `CANONICAL_STAT_SOURCES` maps, so
+  // this takes a hand-built projection — the case the report exists for.
   const battle = makeBattle(1, 1);
   const layout = buildArenaLayout(toTeamWireState(battle));
-  for (const field of ["hitpoints", "hitpointsmax", "burning"]) {
+  const before = projections(battle).map((combatant) => ({ ...combatant, stats: { ...combatant.stats, luck: 1 } }));
+  const after = before.map((combatant) =>
+    combatant.id === "blue-1" ? { ...combatant, stats: { ...combatant.stats, luck: 2, agility: 21 } } : combatant);
+  const result = vanillaWritesForResolvedAction({ before, after, placements: layout.byCombatantId });
+  assert.deepEqual(result.writes.map(({ source, field, to }) => [source, field, to]),
+    [[WriteSource.CANONICAL_STAT, "speed", 21]]);
+  assert.deepEqual(result.unmapped.map(({ combatantId, stat, field }) => [combatantId, stat, field]),
+    [["blue-1", "luck", null]]);
+  assert.match(result.unmapped[0].reason, /no vanilla base-stat field carries/);
+});
+
+test("a resource may not borrow a field canonical health, status or a stat already owns", () => {
+  // ► **`strength` JOINED 2026-09-23**: the `canonical-stat` source owns the
+  //   seven base-stat fields now, so a resource of that name is refused as a
+  //   borrower — and NOT told that "widening the allowlist" would fix it.
+  const battle = makeBattle(1, 1);
+  const layout = buildArenaLayout(toTeamWireState(battle));
+  for (const field of ["hitpoints", "hitpointsmax", "burning", "strength", "speed"]) {
     const before = projections(battle).map((combatant) => ({
       ...combatant,
       resources: { [field]: { value: 0, min: null, max: null } }
@@ -984,7 +1331,84 @@ test("a resource may not borrow a field canonical health or status already owns"
       placements: layout.byCombatantId
     });
     assert.deepEqual(result.writes, [], `a resource named ${field} must not produce a write`);
-    assert.match(result.unmapped[0].reason, /owned by canonical health, canonical status or the clip record/);
+    assert.match(result.unmapped[0].reason, /owned by canonical health, canonical status, a canonical stat or the clip record/);
+    assert.doesNotMatch(result.unmapped[0].reason, /Widening the allowlist/);
+  }
+});
+
+/**
+ * ► **ADDED 2026-09-22. Until then a declared resource named `spell_*` was
+ *   written to `_root.game.<side>`, where the build never reads it** — so a
+ *   staged `game.hero.spell_regenerate` did nothing, and the adapter reported
+ *   it as a successful mirror.
+ *
+ * REFUSED rather than re-aimed at the clip, and the refusal says where the
+ * build keeps the counter. Re-aiming would need a fifth write source, and a
+ * bare counter is not a value the build holds alone: `check_spells`' expiry arm
+ * restores `_xscale`/`_yscale` from the clip's `oldscale` and `strength` /
+ * `attack` from `backup_strength` / `backup_attack` (`+0x2485`–`+0x24b9`), and
+ * the colossus arm sets `oldscale` only on its entry tick (`+0x8084`–`+0x8098`).
+ */
+test("a declared resource naming a timed counter is refused on the combat object, and the refusal says the build keeps it on the clip", () => {
+  const battle = makeBattle(1, 1);
+  const layout = buildArenaLayout(toTeamWireState(battle));
+  for (const field of TIMED_SPELL_COUNTER_FIELDS) {
+    const before = projections(battle).map((combatant) => ({
+      ...combatant,
+      resources: { [field]: { value: 0, min: null, max: null } }
+    }));
+    const after = before.map((combatant) =>
+      combatant.id === "blue-1"
+        ? { ...combatant, resources: { [field]: { value: 20, min: null, max: null } } }
+        : combatant
+    );
+    const result = vanillaWritesForResolvedAction({
+      before,
+      after,
+      effects: [{ kind: "resource", targetId: "blue-1", resource: field, to: 20 }],
+      placements: layout.byCombatantId
+    });
+    assert.deepEqual(result.writes, [], `a resource named ${field} must not produce a combat-object write`);
+    assert.equal(result.unmapped.length, 1);
+    assert.equal(result.unmapped[0].resource, field);
+    assert.match(result.unmapped[0].reason, /fighter clip/);
+    assert.match(result.unmapped[0].reason, /_root\.arena\.gladiators/);
+    assert.doesNotMatch(result.unmapped[0].reason, /Widening the allowlist/,
+      "widening the combat-object allowlist would aim at an object the build does not use for it");
+
+    // A sync neither writes it nor calls it drift: there is nowhere on the
+    // combat object to bring into step.
+    const record = normaliseVanillaCombatant(freshVanillaGladiator());
+    const canonical = { ...after.find((combatant) => combatant.id === "blue-1") };
+    assert.equal(field in toVanillaCombatant(canonical, record).fields, false);
+    assert.equal(mirrorDifferences(record, canonical).some((problem) => problem.startsWith(field)), false);
+
+    // And a write built by hand, whose value IS the resolver's, is still
+    // refused — on either target — with the same message.
+    const handBuilt = {
+      target: WriteTarget.COMBAT_OBJECT,
+      source: WriteSource.DECLARED_RESOURCE,
+      combatantId: "blue-1",
+      side: VILLAIN_SIDE,
+      slotIndex: 0,
+      path: "_root.game.villain",
+      field,
+      from: undefined,
+      to: 20,
+      materialises: true,
+      reason: "resource-effect"
+    };
+    for (const target of [WriteTarget.COMBAT_OBJECT, WriteTarget.FIGHTER_CLIP]) {
+      assert.throws(
+        () => assertWriteProvenance([{ ...handBuilt, target }], after),
+        (error) =>
+          error instanceof AdapterStateError &&
+          new RegExp(`may not write the vanilla field ${field}`).test(error.message) &&
+          /fighter clip/.test(error.message) &&
+          /_root\.arena\.gladiators/.test(error.message),
+        `${field} on the ${target}`
+      );
+    }
   }
 });
 
@@ -1369,13 +1793,28 @@ test("animation labels carry their provenance, and none of them claims verificat
     .filter((command) => command.kind === CommandKind.CLIP_GOTO)
     .map((command) => [command.label, command.labelProvenance]);
 
+  // ► `["hurt21", ASSUMED]` STOOD ON THIS LINE UNTIL 2026-09-10 AND WAS WRONG.
+  //   The map rewrites the ranged band: `"hurt" + (attack_direction - 20)` for
+  //   directions 21-23 (§"Attack roll dispatcher" in the battle map,
+  //   `+0x2093`-`+0x20d6`), so direction 21 plays `hurt1` and the map NAMES it.
+  //   The assertion agreed with the code and neither agreed with the map, which
+  //   is why the suite was green while the adapter emitted a label the build
+  //   has no frame for.
   assert.deepEqual(labels, [
     ["attack7", LabelProvenance.ASSUMED],
     ["hurt7", LabelProvenance.MAP_NAMED],
     ["bombard", LabelProvenance.MAP_NAMED],
-    ["hurt21", LabelProvenance.ASSUMED],
+    ["hurt1", LabelProvenance.MAP_NAMED],
     ["attack7", LabelProvenance.ASSUMED],
-    ["Block", LabelProvenance.MAP_NAMED]
+    // ► `["Block", MAP_NAMED]` STOOD HERE UNTIL 2026-09-14 AND WAS THE WRONG
+    //   CLIP. A miss dispatches `defender_blocked()`, and that function plays
+    //   `"defend" + attack_direction` (`+0x2160`) — one of THIRTEEN active
+    //   parries. `Block` is the STATIC guard, which the build plays during a
+    //   weapon swap and nowhere else. Same failure shape as the `hurt21` line
+    //   above: the assertion agreed with the code and neither agreed with the
+    //   build, so the suite was green while the adapter named a clip the
+    //   defender never plays.
+    ["defend7", LabelProvenance.MAP_NAMED]
   ]);
   assert.equal(
     labels.some(([, provenance]) => provenance === "runtime-verified"),
@@ -1384,6 +1823,254 @@ test("animation labels carry their provenance, and none of them claims verificat
   );
   assert.equal(SS2_STATIC_MAP_BINDINGS.verification, "static-map");
   assert.equal(PLACEHOLDER_ANIMATION_BINDINGS.verification, "placeholder");
+});
+
+test("the ranged hurt band is rewritten exactly as the map's byte offsets say", () => {
+  // §"Attack roll dispatcher" in `docs/integration/ss2-battle-map.md`: the animation label is
+  // `"hurt" + attack_direction` (`+0x2086`), rewritten to
+  // `"hurt" + (attack_direction - 20)` for directions 21-23
+  // (`+0x2093`-`+0x20d6`). The band therefore REUSES the melee hurt clips, and
+  // that collision is the build's arithmetic, not a simplification made here —
+  // so the test asserts the collision rather than avoiding it.
+  const hurtFor = (attackDirection) => {
+    const wire = {
+      version: 1,
+      teams: [
+        { id: "red", name: "red", combatants: [{ id: "red-1", teamId: "red", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] },
+        { id: "blue", name: "blue", combatants: [{ id: "blue-1", teamId: "blue", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] }
+      ],
+      events: [
+        { sequence: 1, turn: 1, type: "attack", actorId: "red-1", targetId: "blue-1", hit: true, attackDirection, dispatchedMethod: "normal" }
+      ]
+    };
+    const layout = buildArenaLayout(wire);
+    const { commands } = presentResolvedEvents(wire, { layout, bindings: SS2_STATIC_MAP_BINDINGS });
+    const target = commands.find((command) => command.kind === CommandKind.CLIP_GOTO && command.role === "target");
+    return [target.label, target.labelProvenance];
+  };
+
+  for (const [direction, expected] of [[21, "hurt1"], [22, "hurt2"], [23, "hurt3"]]) {
+    assert.deepEqual(
+      hurtFor(direction),
+      [expected, LabelProvenance.MAP_NAMED],
+      `direction ${direction} plays ${expected}, and the map NAMES it — it is not an assumption`
+    );
+  }
+
+  // The melee band is untouched by the rewrite, which is what makes the
+  // collision real: 1 and 21 land on the same clip.
+  assert.deepEqual(hurtFor(1), ["hurt1", LabelProvenance.MAP_NAMED]);
+  assert.deepEqual(hurtFor(12), ["hurt12", LabelProvenance.MAP_NAMED]);
+
+  // A direction outside every band is the one case that stays an assumption.
+  assert.deepEqual(hurtFor(Number.NaN), ["hurt5", LabelProvenance.ASSUMED]);
+});
+
+test("a self-targeted action plays its OWN clip, not the idle one, and binds no target label", () => {
+  // ► FOUND BY WATCHING THE BROWSER ARENA, 2026-09-10, then measured over 360
+  //   bouts / 158,317 presentation commands. Every self-targeted action fell
+  //   through to the attack branch, so `attackLabel(NaN)` gave the actor
+  //   `Standing` — THE IDLE CLIP — and `hurtLabel(NaN)` gave a target label
+  //   `hurt5` that had nowhere to play, because actor and target are one clip.
+  //   A resting gladiator stood still; so did a burning one; and each of them
+  //   emitted a spurious `unmapped`. 4,326 of them in the sweep: `rest` 2,929,
+  //   `burning-phase` 824, `poisoned-phase` 573. Now zero.
+  const selfEvent = (extra) => {
+    const wire = {
+      version: 1,
+      teams: [
+        { id: "red", name: "red", combatants: [{ id: "red-1", teamId: "red", slotIndex: 0, health: 8, maxHealth: 10, alive: true, status: [] }] },
+        { id: "blue", name: "blue", combatants: [{ id: "blue-1", teamId: "blue", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] }
+      ],
+      events: [{ sequence: 1, turn: 1, actorId: "red-1", targetId: "red-1", ...extra }]
+    };
+    const layout = buildArenaLayout(wire);
+    return presentResolvedEvents(wire, { layout, bindings: SS2_STATIC_MAP_BINDINGS }).commands;
+  };
+
+  // `rest` is NAMED by the map — "Key fighter animation labels on export 1241
+  // ... `rest` (1380)" — so it is map-named, not assumed.
+  const rest = selfEvent({ type: "rest", staminaGained: 41, healed: 0 });
+  const restClips = rest.filter((command) => command.kind === CommandKind.CLIP_GOTO);
+  assert.deepEqual(
+    restClips.map((command) => [command.role, command.label, command.labelProvenance]),
+    [["actor", "rest", LabelProvenance.MAP_NAMED]],
+    "one clip, playing rest, and the map names it"
+  );
+  assert.deepEqual(rest.filter((command) => command.kind === CommandKind.UNMAPPED), [], "and nothing is unmapped");
+
+  // A condition phase is detected by the event carrying a `condition`, NEVER by
+  // parsing the type string: `poison` is dispatched as `poisoned-phase` and its
+  // vanilla flag is `poisoned`, so all three spellings differ.
+  for (const [type, condition, vanillaLabel] of [
+    ["burning-phase", "burning", "burning"],
+    ["frozen-phase", "frozen", "frozen"],
+    ["poisoned-phase", "poison", "poisoned"],
+    ["life-stolen-phase", "life_stolen", "life_stolen"]
+  ]) {
+    const commands = selfEvent({ type, condition, vanillaLabel, damage: 9, inflictorId: "blue-1" });
+    const clips = commands.filter((command) => command.kind === CommandKind.CLIP_GOTO);
+    assert.deepEqual(
+      clips.map((command) => [command.role, command.label, command.labelProvenance]),
+      [["actor", vanillaLabel, LabelProvenance.ASSUMED]],
+      `${type} plays the build's own flag name, and it is ASSUMED — the map gives ` +
+      "\"condition effects (1911-2004)\" as a range and names no label inside it"
+    );
+    assert.deepEqual(commands.filter((command) => command.kind === CommandKind.UNMAPPED), []);
+  }
+
+  // The regression that would bring it back: any of these playing `Standing`.
+  const everyLabel = [rest, selfEvent({ type: "burning-phase", condition: "burning", vanillaLabel: "burning" })]
+    .flat()
+    .filter((command) => command.kind === CommandKind.CLIP_GOTO)
+    .map((command) => command.label);
+  assert.equal(everyLabel.includes("Standing"), false, "a self-targeted action must never play the idle clip");
+});
+
+/* ------------------------------------------------------------------ */
+/* Movement: the presentation half                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **NOTHING IN THIS REPOSITORY EMITS A MOVEMENT EVENT YET, AND THAT IS WHY
+ *   THESE EVENTS ARE HAND-WRITTEN.** The resolver models no position: a
+ *   combatant projection carries stats, loadout, health, status and resources
+ *   and no `x`. The rule-set half is ranked and preserved as a reference patch
+ *   at `docs/reference/position-in-the-resolver.patch.md`.
+ *
+ *   The order is deliberate and was measured, not argued: landing the resolver
+ *   half FIRST made a walking gladiator emit `clip-goto Standing` — the idle
+ *   clip — plus a spurious `unmapped`, because the bindings had no movement
+ *   case and fell through to the attack branch. The suite went to 72 failures
+ *   and two hanging files. So presentation comes first, and these tests are
+ *   what "first" means.
+ *
+ *   **The COMMANDS are not hand-written.** Only the events are; every command
+ *   asserted below is produced by the real `presentResolvedEvents` from the
+ *   real `SS2_STATIC_MAP_BINDINGS`. When the resolver half lands, the events
+ *   here should be replaced by a real bout's, and the assertions should not
+ *   have to change.
+ */
+function movementCommands(extra) {
+  const wire = {
+    version: 1,
+    teams: [
+      { id: "red", name: "red", combatants: [{ id: "red-1", teamId: "red", slotIndex: 0, health: 9, maxHealth: 10, alive: true, status: [] }] },
+      { id: "blue", name: "blue", combatants: [{ id: "blue-1", teamId: "blue", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] }
+    ],
+    events: [{ sequence: 1, turn: 1, actorId: "red-1", targetId: "red-1", ...extra }]
+  };
+  return presentResolvedEvents(wire, { layout: buildArenaLayout(wire), bindings: SS2_STATIC_MAP_BINDINGS }).commands;
+}
+
+test("each of the build's eight movement phases plays its own gait and moves its own clip", () => {
+  // The eight names and their offsets are the build's, from the battle map's
+  // movement-cost table: `walkleft` `+0x3b37`, `walkright` `+0x3d16`,
+  // `runleft` `+0x3ef5`, `runright` `+0x407e`, `chargeright` `+0x4214`,
+  // `chargeleft` `+0x4480`, `jumpright` `+0x46ec`, `jumpleft` `+0x49c4`.
+  // That they are also CLIP labels is the assumption, which is why every one
+  // is ASSUMED: the map gives movement as the unnamed frame range "movement
+  // and charge (33-104)" while naming `Standing`, `Block`, `rest` and
+  // `knockback` individually.
+  const phases = [
+    "walkleft", "walkright", "runleft", "runright",
+    "chargeleft", "chargeright", "jumpleft", "jumpright"
+  ];
+  let asserted = 0;
+  for (const phase of phases) {
+    const left = phase.endsWith("left");
+    const from = -250;
+    const to = left ? from - 44 : from + 44;
+    const commands = movementCommands({ type: left ? "walk-left" : "walk-right", vanillaLabel: phase, from, to });
+
+    const clips = commands.filter((command) => command.kind === CommandKind.CLIP_GOTO);
+    assert.deepEqual(
+      clips.map((command) => [command.role, command.label, command.labelProvenance]),
+      [["actor", phase, LabelProvenance.ASSUMED]],
+      `${phase} plays its own gait, and the map names no label inside "movement and charge (33-104)"`
+    );
+    assert.deepEqual(
+      commands.filter((command) => command.kind === CommandKind.UNMAPPED),
+      [],
+      `${phase} binds cleanly; a movement event is self-targeted and must not produce a target label`
+    );
+
+    const moves = commands.filter((command) => command.kind === CommandKind.MOVE_CLIP);
+    assert.equal(moves.length, 1, `${phase} moves exactly one clip`);
+    assert.equal(moves[0].combatantId, "red-1");
+    assert.equal(moves[0].from, from);
+    assert.equal(moves[0].to, to);
+    asserted += 1;
+  }
+  assert.equal(asserted, 8, "the sweep has to have found all eight, not zero of them");
+});
+
+test("a move-clip carries the two endpoints and NONE of place-clip's other geometry", () => {
+  // ► WHY THIS IS ITS OWN KIND, and it is a defect rather than a style
+  //   question. `src/render/scene.js` folds `place-clip` by overwriting all
+  //   seven geometry fields, so a partial `place-clip` carrying only a new `x`
+  //   sets `y` to `undefined` — and the browser shell's `toY(undefined)` is
+  //   NaN, so the figure does not move, it VANISHES.
+  const [move] = movementCommands({ type: "walk-left", vanillaLabel: "walkleft", from: -250, to: -294 })
+    .filter((command) => command.kind === CommandKind.MOVE_CLIP);
+  assert.deepEqual(
+    Object.keys(move).sort(),
+    ["actionToken", "combatantId", "from", "instancePath", "kind", "sequence", "to"],
+    "y, facing, xscale, yscale, geometryAuthored and placed are absent ON PURPOSE"
+  );
+  // No `distance`: two endpoints already say how far the step went, and a
+  // third field that could disagree with them is a second source of truth.
+  assert.equal(Object.hasOwn(move, "distance"), false);
+  // Vanilla walks backwards without turning round — `gladiator_dir` is its own
+  // field and the controller frames select ON it rather than being set by it.
+  assert.equal(Object.hasOwn(move, "facing"), false);
+});
+
+test("a movement event that names no phase is reported precisely, and the figure still moves", () => {
+  // The gait is the one thing the geometry cannot supply: `to < from` gives
+  // the direction, but nothing separates a walk from a run, a charge or a
+  // jump. Deriving `walkleft` from the sign would put a guessed gait on screen
+  // every time the action was a charge, so it is reported instead.
+  const commands = movementCommands({ type: "walk-left", from: -250, to: -294 });
+  const unmapped = commands.filter((command) => command.kind === CommandKind.UNMAPPED);
+  assert.equal(unmapped.length, 1);
+  assert.match(unmapped[0].reason, /needs the build's own phase named in `vanillaLabel`/);
+  assert.match(unmapped[0].reason, /jumpright/, "the reason names the eight, so the fix is a field and not a hunt");
+  // Two ways to go unbound, two fixes, and the reason claims to know neither:
+  // `bindings.action` returns null whether the event lacks a label or the
+  // table lacks a movement case.
+  assert.match(unmapped[0].reason, /another binding table needs a movement case of its own/);
+  assert.deepEqual(commands.filter((command) => command.kind === CommandKind.CLIP_GOTO), [], "no clip is guessed");
+
+  // And the geometry still applies. A scene that dropped it would draw the
+  // figure standing where the resolver says it is not, which is the same
+  // failure as swallowing an `unmapped`.
+  const moves = commands.filter((command) => command.kind === CommandKind.MOVE_CLIP);
+  assert.equal(moves.length, 1, "the label is a binding decision; where the figure ends up is not");
+  assert.deepEqual([moves[0].from, moves[0].to], [-250, -294]);
+});
+
+test("a step the arena clamp swallowed is still emitted, so walking into a wall is not silence", () => {
+  const commands = movementCommands({ type: "walk-left", vanillaLabel: "walkleft", from: -2100, to: -2100 });
+  const moves = commands.filter((command) => command.kind === CommandKind.MOVE_CLIP);
+  assert.equal(moves.length, 1, "suppressing it would make 'walked into the wall' and 'never walked' one stream");
+  assert.equal(moves[0].from, moves[0].to);
+  assert.deepEqual(
+    commands.filter((command) => command.kind === CommandKind.CLIP_GOTO).map((command) => command.label),
+    ["walkleft"],
+    "and the gladiator still visibly tries"
+  );
+});
+
+test("a movement step binds its globals, then moves, then animates", () => {
+  // The clip is started LAST so a surface folding the batch knows where the
+  // figure is going before it starts the timeline that carries it there.
+  const kinds = movementCommands({ type: "walk-right", vanillaLabel: "walkright", from: 250, to: 294 })
+    .map((command) => command.kind);
+  assert.deepEqual(
+    kinds.slice(0, 3),
+    [CommandKind.BIND_GLOBALS, CommandKind.MOVE_CLIP, CommandKind.CLIP_GOTO]
+  );
 });
 
 test("an event with no binding is reported as unmapped instead of guessed", () => {
@@ -1398,6 +2085,21 @@ test("an event with no binding is reported as unmapped instead of guessed", () =
   assert.equal(commands.length, 1);
   assert.equal(commands[0].kind, CommandKind.UNMAPPED);
   assert.match(commands[0].reason, /no animation binding/);
+
+  // ► **AND IT IS STILL A RECORD, NOT A THROW, WHEN THE ACTOR HAS NO SLOT.**
+  //   Pinned 2026-09-11 after the movement work nearly broke it: resolving the
+  //   actor's placement moved ABOVE the binding check, and
+  //   `layout.placementFor` throws on a combatant with no slot — so an unbound
+  //   event naming an unknown actor would have become a `SlotLayoutError`
+  //   instead of the report this test is about. The lookup is now inside
+  //   `movementFor`, which returns before it for an event carrying no geometry.
+  const stranger = {
+    ...wire,
+    events: [{ sequence: 1, turn: 1, type: "cartwheel", actorId: "nobody-1", targetId: "blue-1" }]
+  };
+  const reported = presentResolvedEvents(stranger, { layout: buildArenaLayout(wire) }).commands;
+  assert.equal(reported.length, 1);
+  assert.equal(reported[0].kind, CommandKind.UNMAPPED);
 });
 
 /* ------------------------------------------------------------------ */
@@ -1678,19 +2380,46 @@ test("every field the adapter maps cites the battle map, and every silence names
     assert.ok(citationFor(field), `${field} must cite a battle-map section`);
   }
   assert.equal(citationFor("gladiator_dir"), "battle-map: Combatant state objects / clip-resident facing");
-  assert.match(citationFor("spell_regenerate"), /timed spell_\* fields, unnamed/);
+  // ► **WAS `/timed spell_\* fields, unnamed/` UNTIL 2026-09-22** — a
+  //   persistent-object citation for a field the build keeps on the clip.
+  assert.match(citationFor("spell_regenerate"), /Five more phases/);
+  assert.match(citationFor("spell_regenerate"), /fighter clip/);
   assert.equal(citationFor("some_future_field"), null);
   assert.ok(record.unknownFields.length === 0);
 
-  // Pinned so the contract's "seven entries" claim cannot drift silently.
+  // Pinned so the contract's entry-count claim cannot drift silently — and so
+  // that ADDING or REMOVING one is deliberate. `ranged-hurt-label-adjustment`
+  // was removed 2026-09-10 because the map is not silent on it; seven to six
+  // was that removal. `movement-displacement` was added later the same day,
+  // taking it back to seven — for the opposite reason, and that symmetry is
+  // the point of pinning the list rather than the count: one entry left
+  // because the map turned out to SPEAK, and one arrived because a gap nobody
+  // had written down turned out to be real.
+  //
+  // ► **AND `movement-displacement` CAME BACK OUT ON 2026-09-11, which makes it
+  //   the only entry to have been added and removed.** Not because the map
+  //   speaks — it still does not give a distance — but because the BUILD does,
+  //   at `+0x3d78`, two instructions from the stamina cost the entry quoted. The
+  //   displacement is derived in `ss2WalkDisplacement` and held to the build by
+  //   `tools/walk-displacement-derivation.mjs`, so there is no silence left for
+  //   the adapter to work around. Nine to eight. The catalogue's own header
+  //   carries what that cost.
+  //
+  // ► **AND `timed-spell-field-names` CAME OUT ON 2026-09-22. Eight to seven.**
+  //   It said the map "names none of them"; the map named two from 2026-08-31,
+  //   one day after the entry was written — `attacker.spell_boundless_energy`,
+  //   on the CLIP by the map's own binding list, and the `spell_regenerate`
+  //   test (commit 49dcc7a) — and now names all six. Its
+  //   `adapterBehaviour` described the persistent object, which the build never
+  //   uses for them. The catalogue's header records both halves.
   assert.deepEqual([...MAP_SILENCE.map((entry) => entry.id)].sort(), [
+    "crowd-impatience",
     "initiative-order",
     "multi-slot-arena-geometry",
     "panel-bar-instance-names",
     "psyche-up-initialisation",
-    "ranged-hurt-label-adjustment",
     "secondary-weapon-field-names",
-    "timed-spell-field-names"
+    "swing-cost"
   ]);
   for (const entry of MAP_SILENCE) {
     for (const key of ["id", "subject", "silence", "adapterBehaviour", "settledBy"]) {
@@ -1699,4 +2428,106 @@ test("every field the adapter maps cites the battle map, and every silence names
     }
   }
   assert.equal(new Set(MAP_SILENCE.map((entry) => entry.id)).size, MAP_SILENCE.length);
+});
+
+/**
+ * The guarantee `assertDistinctPlacements` DOCSTRINGS and, until 2026-09-10,
+ * did not check: "every combatant id gets a distinct slot, clip instance,
+ * depth, state path, and screen position". Its `seen` map held four keys and
+ * neither `x` nor `y` was one of them.
+ *
+ * This is not a hypothetical. It is unreachable through `buildArenaLayout`
+ * today only because the authored ally stride is non-zero — and the ranked
+ * work this guard sits in front of is putting POSITION in the resolver, after
+ * which two combatants sharing an `x` is an ordinary runtime state rather than
+ * an impossible one. The test drives the exported guard directly, because that
+ * is the surface a future position-aware layout would call.
+ */
+test("assertDistinctPlacements refuses two fighters on the same spot, which its docstring always promised", () => {
+  const base = {
+    combatantId: "a",
+    instanceName: "hero",
+    depth: 301,
+    shadowDepth: 298,
+    stateObjectPath: "adapter.hero",
+    vanillaNative: true,
+    x: -250,
+    y: 200
+  };
+  const other = {
+    ...base,
+    combatantId: "b",
+    instanceName: "ally1",
+    depth: 310,
+    shadowDepth: 311,
+    stateObjectPath: "adapter.ally1",
+    vanillaNative: false
+  };
+
+  // Distinct in every OTHER respect, and standing on exactly the same spot.
+  assert.throws(
+    () => assertDistinctPlacements([base, other]),
+    (error) => error instanceof SlotLayoutError && /same|Duplicate screen position/i.test(error.message),
+    "two fighters at one (x, y) must be refused"
+  );
+
+  // A shared x at a different y is the authored band working, not a collision:
+  // slot 1 sits further back, and that must stay legal.
+  assert.equal(assertDistinctPlacements([base, { ...other, y: 182 }]), true);
+
+  // And the real layout still passes, at every size the six-slot arena serves.
+  for (const perSide of [1, 2, 3]) {
+    const teams = [0, 1].map((side) => ({
+      id: side === 0 ? "blue" : "red",
+      combatants: Array.from({ length: perSide }, (_, index) => ({
+        id: `${side}-${index}`,
+        slotIndex: index
+      }))
+    }));
+    const layout = buildArenaLayout({ teams });
+    assert.equal(assertDistinctPlacements(layout.placements), true, `${perSide}v${perSide} must still pass`);
+  }
+});
+
+test("a MISS plays one of thirteen defends, keyed the same way a hit picks its hurt", () => {
+  // ► `defender_blocked()` at `sprite:862[overlay]/frame:52/DoAction@0x240c7f`
+  //   `+0x2138`:
+  //     +0x2160  animstate = "defend" + attack_direction
+  //     +0x219b  if (attack_direction >= 21 && attack_direction <= 23)
+  //                  animstate = "defend" + (attack_direction - 20)
+  //     +0x21c6  if (attack_direction == 30) animstate = "defend12"
+  //   Read off the installed build 2026-09-14.
+  const defendFor = (attackDirection, dispatchedMethod = "normal") => {
+    const wire = {
+      teams: [
+        { id: "red", combatants: [{ id: "red-1", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] },
+        { id: "blue", combatants: [{ id: "blue-1", slotIndex: 0, health: 10, maxHealth: 10, alive: true, status: [] }] }
+      ],
+      events: [{ sequence: 1, turn: 1, type: "normal", actorId: "red-1", targetId: "blue-1", hit: false, attackDirection, dispatchedMethod }]
+    };
+    const layout = buildArenaLayout(wire);
+    const { commands } = presentResolvedEvents(wire, { layout, bindings: SS2_STATIC_MAP_BINDINGS });
+    const gotos = commands.filter((command) => command.kind === CommandKind.CLIP_GOTO);
+    return gotos[gotos.length - 1];
+  };
+
+  // The melee band is the direction, straight through.
+  for (const direction of [1, 2, 5, 8, 11, 12, 20]) {
+    assert.equal(defendFor(direction).label, `defend${direction}`);
+    assert.equal(defendFor(direction).labelProvenance, LabelProvenance.MAP_NAMED);
+  }
+  // ► THE RANGED BAND REUSES THE MELEE PARRIES, exactly as the hurt band reuses
+  //   the melee hurts: a dodged bombard plays the same clip a dodged
+  //   direction-1 swing plays. The build's arithmetic, not a simplification.
+  assert.equal(defendFor(21).label, "defend1");
+  assert.equal(defendFor(22).label, "defend2");
+  assert.equal(defendFor(23).label, "defend3");
+  // ► AND DIRECTION 30 IS THE ONE PLACE THE TWO DISPATCHERS DISAGREE: a landed
+  //   grievous blow plays `knockback`, a missed one plays `defend12` — by name
+  //   at `+0x21c6`, not by arithmetic.
+  assert.equal(defendFor(30).label, "defend12");
+  assert.notEqual(defendFor(30).label, "knockback");
+  // A missing direction still parries rather than standing still.
+  assert.equal(defendFor(undefined).label, "defend5");
+  assert.equal(defendFor(undefined).labelProvenance, LabelProvenance.ASSUMED);
 });

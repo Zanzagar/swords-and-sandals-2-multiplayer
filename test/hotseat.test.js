@@ -1,0 +1,383 @@
+/**
+ * The hot-seat runner is the only thing in this repository a person can play,
+ * and an unplayed runner rots silently: nothing else imports it, so a rename in
+ * `src/team/` breaks it without failing a single existing test. These drive the
+ * real CLI as a subprocess — the way a person runs it — rather than importing
+ * its internals, because the failure that matters is "the fight will not start".
+ *
+ * They assert BEHAVIOUR, not layout. Banner wording and bar glyphs are free to
+ * change; a fight reaching a winner, the honesty banner naming the rule set's
+ * verification tier, and identical seeds replaying identically are not.
+ */
+
+import assert from "node:assert/strict";
+import test from "node:test";
+import { execFile } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const RUNNER = path.join(REPO_ROOT, "tools", "hotseat.mjs");
+
+/** Runs the CLI with piped stdin and resolves with { code, stdout, stderr }. */
+function runHotseat(args = [], stdin = "") {
+  return new Promise((resolve) => {
+    const child = execFile(
+      process.execPath,
+      [RUNNER, ...args],
+      { cwd: REPO_ROOT, timeout: 60_000 },
+      (error, stdout, stderr) => {
+        resolve({ code: error?.code ?? 0, stdout, stderr });
+      }
+    );
+    child.stdin.end(stdin);
+  });
+}
+
+/** Enough "attack the only foe" choices to finish any fight these tests start. */
+const ALWAYS_ATTACK = "1\n".repeat(40);
+
+test("a hot-seat fight runs from start to a winner", async () => {
+  const { code, stdout, stderr } = await runHotseat(
+    ["--seed", "7", "--hp", "40", "--names", "Ringler,Zainger"],
+    ALWAYS_ATTACK
+  );
+  assert.equal(code, 0, `runner exited ${code}\n${stderr}`);
+  assert.match(stdout, /WINNER: (Ringler|Zainger)\s+\(elimination\)/,
+    "a fight driven to the end must name a winner and why");
+  assert.match(stdout, /turn 1/, "the first turn must be announced");
+  // The loser is shown as down, which is the resolver's `alive` flag surfacing.
+  assert.match(stdout, /\(down\)/, "the defeated fighter must be marked down");
+});
+
+test("the banner names the placeholder tier, and warns that it is not measured", async () => {
+  // This is the honesty guard. The placeholder rules are an invented
+  // approximation, and a playable demo is the easiest place in the project to
+  // let that be mistaken for measured SS2 behaviour.
+  const { stdout } = await runHotseat(["--rules", "placeholder", "--seed", "1", "--hp", "10"], ALWAYS_ATTACK);
+  assert.match(stdout, /verification: placeholder/,
+    "the tier must be on screen, not merely in the source");
+  assert.match(stdout, /NOT SS2 BEHAVIOUR/,
+    "a placeholder rule set must carry an explicit warning");
+  assert.doesNotMatch(stdout, /Backed by \d+ golden/,
+    "a placeholder rule set must never claim golden backing");
+});
+
+test("the default is the SS2 rule set, and the banner refuses to overstate it", async () => {
+  // The default changed the day the corpus got a consumer. `map-derived` is
+  // the easiest tier to misread as "verified", so the banner has to say what
+  // has golden backing and what has none, on every run.
+  const { stdout } = await runHotseat(["--seed", "1", "--hp", "10"], ALWAYS_ATTACK);
+  assert.match(stdout, /verification: map-derived/);
+  assert.match(stdout, /NOT RUNTIME-VERIFIED/);
+  assert.match(stdout, /NO runtime backing/,
+    "the banner must name the parts of the fight no golden covers");
+  assert.doesNotMatch(stdout, /Backed by \d+ golden fixture/,
+    "only a runtime-verified rule set may claim its goldens back the whole fight");
+});
+
+test("the SS2 fight shows the build's own derivation, drawn direction included", async () => {
+  // SS2 draws the attack direction; the player does not choose it. Putting the
+  // draw on screen is what makes that visible rather than merely documented.
+  const { stdout } = await runHotseat(["--seed", "7", "--hp", "40"], ALWAYS_ATTACK);
+  assert.match(stdout, /direction \d+ {3}chance \d+% {3}rolled \d+ vs \d+ {3}(HIT|miss)/);
+  assert.match(stdout, /quick-attack -> /, "the vocabulary on screen must be SS2's, not the placeholder's");
+  assert.match(stdout, /staminaleft \d+\/\d+/, "stamina gates legality, so it has to be visible");
+});
+
+test("an unknown rule set is refused by name", async () => {
+  const { code, stderr } = await runHotseat(["--rules", "bogus"], "");
+  assert.equal(code, 2);
+  assert.match(stderr, /--rules must be one of/);
+});
+
+test("the same seed and the same choices replay identically", async () => {
+  // Determinism is the entire premise of this resolver: two machines must
+  // resolve a battle the same way, or multiplayer is impossible later.
+  const args = ["--seed", "99", "--hp", "50"];
+  const first = await runHotseat(args, ALWAYS_ATTACK);
+  const second = await runHotseat(args, ALWAYS_ATTACK);
+  assert.equal(first.code, 0);
+  assert.equal(first.stdout, second.stdout, "identical seed and choices must produce identical output");
+});
+
+test("the runner decides no combat: every roll it causes is drawn by the rule set", async () => {
+  // This test used to assert only that a positive roll count was printed, and
+  // a verifier showed that a mutant runner which fabricates 2 damage after
+  // every action — printing figures contradicting its own scoreboard — passed
+  // it and all ten of its neighbours. The no-combat property was a property of
+  // the code and of nothing else. Two assertions close that.
+  const { stdout } = await runHotseat(["--seed", "5", "--hp", "40", "--armour", "3"], ALWAYS_ATTACK);
+
+  // 1. The journal is the resolver's own ordered record; the cursor is a
+  //    counter. A runner that drew a roll of its own moves one and not the
+  //    other.
+  const drawn = stdout.match(/rolls drawn: (\d+)   rng cursor: (\d+)/);
+  assert.ok(drawn, "the runner must report both the journal length and the cursor");
+  assert.ok(Number(drawn[1]) > 0, "a completed fight must have drawn at least one roll");
+  assert.equal(drawn[1], drawn[2], "a roll the runner invented would move the cursor and not the journal");
+
+  // 2. Every damage line must be arithmetic the RESOLVER did: the printed
+  //    before/after pair must differ by exactly the printed amount. A runner
+  //    that fabricates state, or that fabricates only the printed number,
+  //    fails here. (Sound because no action in this vocabulary targets its own
+  //    actor with damage, so nothing else moves the target's health.)
+  const damage = [...stdout.matchAll(/takes (\d+) damage {2}\((\d+) -> (\d+)\)/g)];
+  assert.ok(damage.length > 0, "a completed fight must land at least one blow");
+  for (const [line, amount, was, now] of damage) {
+    assert.equal(Number(was) - Number(now), Number(amount), line);
+  }
+});
+
+test("an armour-absorbed hit is reported as a hit, not as a miss", async () => {
+  // The runner must not compute the hit verdict itself. It did, from
+  // `effect.amount === 0`, and armour absorption made that wrong: the blow was
+  // announced as a miss two lines under a derivation line reading HIT.
+  const { stdout } = await runHotseat(["--seed", "5", "--hp", "40", "--armour", "4"], ALWAYS_ATTACK);
+  const blocks = stdout.split("\n\n");
+  for (const block of blocks) {
+    if (!/direction \d+ {3}chance/.test(block)) continue;
+    const hit = /HIT \(/.test(block);
+    if (hit) assert.doesNotMatch(block, /is missed/, "a hit must never be announced as a miss");
+    else assert.doesNotMatch(block, /stopped by armour/, "a miss must not be announced as absorbed");
+  }
+  assert.match(stdout, /stopped by armour/, "the seed must produce at least one absorbed hit");
+});
+
+test("input ending early stops the fight cleanly instead of hanging", async () => {
+  // Measured during development: readline against a closed pipe consumed one
+  // line of eight and then died on an unsettled top-level await. A runner that
+  // hangs on EOF cannot be scripted, demoed, or tested.
+  const { code, stdout } = await runHotseat(["--seed", "2", "--hp", "500"], "1\n");
+  assert.equal(code, 0, "running out of input must not be an error exit");
+  assert.match(stdout, /input ended before the fight did/);
+});
+
+test("quitting is possible, and records no result", async () => {
+  const { code, stdout } = await runHotseat(["--seed", "2", "--hp", "40"], "q\n");
+  assert.equal(code, 0);
+  assert.match(stdout, /No result recorded/);
+  assert.doesNotMatch(stdout, /WINNER/, "quitting must not declare a winner");
+});
+
+test("bad input is rejected without starting a fight", async () => {
+  const bad = await runHotseat(["--bogus"], "");
+  assert.equal(bad.code, 2, "an unknown flag must exit non-zero");
+  assert.match(bad.stderr, /Unknown flag/);
+
+  const badSeed = await runHotseat(["--seed", "not-a-number"], "");
+  assert.equal(badSeed.code, 2);
+  assert.match(badSeed.stderr, /--seed must be a safe integer/);
+
+  // ► **AND AN UNSAFE ONE, which `Number.isInteger` ACCEPTED.** Found by an
+  //   independent Codex review 2026-09-07 and reproduced at the CLI: above
+  //   2^53 the per-bout offset `seed + bout - 1` is lost to floating point, so
+  //   `--seed 1e20 --circuit 3` ran three bouts on the identical tape while
+  //   printing "the same seed and the same choices replay exactly".
+  const unsafeSeed = await runHotseat(["--seed", "100000000000000000000", "--circuit", "3"], "");
+  assert.equal(unsafeSeed.code, 2, "an unsafe integer seed must be refused, not silently collapsed");
+  assert.match(unsafeSeed.stderr, /safe integer/);
+
+  // The message now names the SEAT COUNT and the team shape, because with
+  // `--teams` the required number is no longer always two.
+  const badNames = await runHotseat(["--names", "OnlyOne"], "");
+  assert.equal(badNames.code, 2);
+  assert.match(badNames.stderr, /exactly 2 non-empty names for 1v1/);
+
+  const badTeams = await runHotseat(["--teams", "2x2"], "");
+  assert.equal(badTeams.code, 2);
+  assert.match(badTeams.stderr, /--teams must look like 2v2/);
+});
+
+test("an unparsable choice re-prompts rather than crashing or acting", async () => {
+  const { code, stdout } = await runHotseat(["--seed", "3", "--hp", "40"], `banana\n${ALWAYS_ATTACK}`);
+  assert.equal(code, 0);
+  assert.match(stdout, /is not one of 1-/, "a bad choice must say so");
+  assert.match(stdout, /WINNER/, "and the fight must still be playable afterwards");
+});
+
+/* ------------------------------------------------------------------ */
+/* Team fights: the first time a person can play one                    */
+/* ------------------------------------------------------------------ */
+
+test("a 2v2 runs to a winner, and every seat is a separate human turn", async () => {
+  // The resolver's team paths have been tested since long before anything was
+  // playable, and no person had ever taken a turn in one. `--teams` is the
+  // whole change; the loop, the scoreboard and target selection already worked
+  // for N combatants and are asserted here rather than assumed.
+  // ► **`--flat`, AND THE FLAG EXISTS BECAUSE OF THIS TEST — 2026-09-18.**
+  //   Melee now needs the same lane (`ss2SameLane`, the owner's rule) and
+  //   `startingY` opens ally slot 1 one rank back, so a 2v2 WITH RANKS is two
+  //   parallel duels. This test drives the menu by feeding "1" forever, and
+  //   once a duel ends its winner has no foe in reach — option 1 stops being an
+  //   attack and becomes a walk, so a blind "1" walks for the rest of time and
+  //   the bout never settles. Raising the feed does not fix that; it is not a
+  //   budget problem.
+  //
+  //   The test's own claim is that a team fight is PLAYABLE and that every seat
+  //   takes its own turn, which is about the loop and not about depth. `--flat`
+  //   is the documented one-dimensional arena, so it states the arena it means
+  //   instead of depending on one. Depth's own consequences are measured in
+  //   `test/ss2-position.test.js`.
+  const { code, stdout, stderr } = await runHotseat(
+    ["--teams", "2v2", "--flat", "--hp", "40", "--seed", "3"],
+    "1\n".repeat(400)
+  );
+  assert.equal(code, 0, `runner exited ${code}\n${stderr}`);
+  assert.match(stdout, /WINNER: /, "a team fight must still settle");
+  for (const name of ["Red 1", "Red 2", "Blue 1", "Blue 2"]) {
+    assert.ok(stdout.includes(name), `${name} must appear on the scoreboard`);
+  }
+  assert.match(stdout, /seat red:slot-2/, "the second red seat must take its own turn");
+  assert.match(stdout, /seat blue:slot-2/, "and so must the second blue seat");
+});
+
+test("with two foes standing, an attack must NAME which one it hits", async () => {
+  // At 1v1 the target is implicit and a menu of three verbs is enough. At 2v2
+  // the same three verbs appear per foe, because targeting is a real choice the
+  // resolver has always supported and no interface had ever offered.
+  // `--flat` so both foes are reachable: with ranks on, melee needs the same
+  // lane and each fighter can only ever name ONE foe, which would make this
+  // test assert the opposite of what it is for.
+  const { stdout } = await runHotseat(["--teams", "2v2", "--flat", "--hp", "40", "--seed", "3"], "1\n");
+  assert.match(stdout, /quick-attack -> Red 1/);
+  assert.match(stdout, /quick-attack -> Red 2/);
+  assert.match(stdout, /power-attack -> Red 2/);
+});
+
+test("a 3v3 is playable, and 4 a side is refused rather than quietly allowed", async () => {
+  // Three a side is what the six-slot measurement covered: 2v2 and 3v3 reach
+  // the rendered arena with no new or altered licensed asset. A fourth is not
+  // blocked by the engine — it is UNPROVEN — so the tool refuses it by name.
+  // `--flat` for the reason the 2v2 above gives, and the same blind feed.
+  const ok = await runHotseat(["--teams", "3v3", "--flat", "--hp", "30", "--seed", "5"], "1\n".repeat(700));
+  assert.equal(ok.code, 0, ok.stderr);
+  assert.match(ok.stdout, /WINNER: /);
+  assert.ok(ok.stdout.includes("Blue 3"), "the third seat a side must exist");
+
+  const refused = await runHotseat(["--teams", "4v4"], "");
+  assert.notEqual(refused.code, 0, "4 a side must be refused");
+  assert.match(refused.stderr + refused.stdout, /1-3 fighters a side/);
+});
+
+test("--names must cover every seat, and the count is the team size", async () => {
+  const short = await runHotseat(["--teams", "2v2", "--names", "A,B"], "");
+  assert.notEqual(short.code, 0, "two names cannot fill four seats");
+  assert.match(short.stderr + short.stdout, /exactly 4 non-empty names for 2v2/);
+
+  const named = await runHotseat(["--teams", "2v2", "--names", "A,B,C,D", "--hp", "20", "--seed", "3"], "1\n");
+  assert.equal(named.code, 0, named.stderr);
+  for (const name of ["A", "B", "C", "D"]) assert.ok(named.stdout.includes(name), name);
+});
+
+test("a condition inflicted in a TEAM fight names which foe did it", async () => {
+  // The reason this ordering matters: the status tick reads its damage off the
+  // gladiator the condition RECORDS, and at 2v2 "the other gladiator" names
+  // nobody. Until team fights were playable that rule could not be exercised by
+  // a person at all — it existed only in tests.
+  const { code, stdout, stderr } = await runHotseat(
+    ["--teams", "2v2", "--hp", "90", "--enchant", "burning:3", "--seed", "3"],
+    "1\n".repeat(200)
+  );
+  assert.equal(code, 0, `runner exited ${code}\n${stderr}`);
+  assert.match(stdout, /gains burning \((from Red [12]|from Blue [12])\)/,
+    "the condition must name a specific foe, not just the condition");
+  assert.match(stdout, /is burning — this turn is spent/, "and it must take that fighter's turn");
+});
+
+test("the scoreboard shows conditions by name and never the wire token", async () => {
+  const { stdout } = await runHotseat(
+    ["--teams", "2v2", "--hp", "90", "--enchant", "burning:3", "--seed", "3"],
+    "1\n".repeat(200)
+  );
+  assert.ok(stdout.includes("[burning]"), "a condition is shown by its name");
+  assert.ok(!stdout.includes("[burning:from="), "the inflictor token is wire format, not player-facing");
+  assert.ok(!stdout.includes("facing-left"), "facing is not a condition and must not read as one");
+});
+
+test("--circuit has NO default, and the refusal names the decision that would give it one", async () => {
+  // Four fights is EP-D03 and EP-D03 is `pending` on the design track. A tool
+  // that defaulted to four would adopt an undecided rule by accident, which is
+  // the quiet failure the whole design quarantine exists to prevent.
+  const missing = await runHotseat(["--circuit"], "");
+  assert.equal(missing.code, 2, "a flag with no value is refused");
+  assert.match(missing.stderr, /--circuit needs a value/);
+
+  for (const bad of ["0", "-1", "2.5", "four"]) {
+    const result = await runHotseat(["--circuit", bad], "");
+    assert.equal(result.code, 2, `--circuit ${bad} must be refused`);
+    assert.match(result.stderr, /positive integer/, `--circuit ${bad} must say why`);
+  }
+
+  // And the default really is absent: no flag means exactly one bout, with no
+  // circuit banner and no carry report.
+  const single = await runHotseat(["--seed", "3"], ALWAYS_ATTACK);
+  assert.equal(single.code, 0);
+  assert.doesNotMatch(single.stdout, /CIRCUIT/, "one bout is still one bout");
+  assert.doesNotMatch(single.stdout, /carried into the next bout/);
+  assert.match(single.stdout, /WINNER:/, "and it still reaches a winner");
+});
+
+test("a circuit fights consecutive bouts and carries the survivor between them", async () => {
+  const result = await runHotseat(["--seed", "3", "--circuit", "3"], "1\n".repeat(200));
+  assert.equal(result.code, 0);
+
+  assert.match(result.stdout, /CIRCUIT: 3 bouts/, "the run announces its length");
+  assert.match(result.stdout, /BOUT 2 of 3/, "a second bout actually starts");
+  assert.match(result.stdout, /BOUT 3 of 3/, "and a third");
+  assert.match(result.stdout, /CIRCUIT COMPLETE: 3 bouts fought/);
+
+  // Three bouts means three winners announced, not one.
+  const winners = result.stdout.match(/WINNER:/g) ?? [];
+  assert.equal(winners.length, 3, `expected one winner per bout, got ${winners.length}`);
+
+  // Each bout draws its own seed, so no two share a tape.
+  const seeds = [...result.stdout.matchAll(/seed (\d+)/g)].map((match) => match[1]);
+  assert.equal(new Set(seeds).size, seeds.length, `bouts must not share a seed: ${JSON.stringify(seeds)}`);
+});
+
+test("THE CIRCUIT PRINTS WHAT IT RESTORED, because a record carries no resources", async () => {
+  // The finding this output exists for, measured rather than described: a
+  // fighter whose armour is smashed to zero re-enters the next bout with all
+  // of it back, because `outcomes` carry survival, health, maxHealth and
+  // statuses and carry NO resources, so read-back rebuilds him from his
+  // blueprint. Whether that SHOULD happen is EP-A03, which is not drafted.
+  // Whether it happens silently is this tool's business, and it must not.
+  const result = await runHotseat(
+    ["--seed", "11", "--circuit", "3", "--armour", "30"],
+    "1\n".repeat(300)
+  );
+  assert.equal(result.code, 0);
+  assert.match(result.stdout, /carried into the next bout/, "the carry is reported at all");
+
+  const restored = result.stdout.match(/RESTORED for \S+: .+/g) ?? [];
+  assert.ok(restored.length > 0, "an armoured circuit must report SOMETHING restored");
+
+  // The report must name both numbers. "armourclass changed" cannot be acted
+  // on; "armourclass 168 -> 495" can.
+  const joined = restored.join("\n");
+  assert.match(joined, /\w+ \d+ -> \d+/, "every restoration names what it was and what it becomes");
+  assert.match(joined, /staminaleft \d+ -> \d+/, "stamina is spent by every action, so it must appear");
+
+  // SWEEP, THEN ASSERT YOU FOUND THE CASE. Armour restoration is the whole
+  // point; a pass that saw only stamina would miss it.
+  assert.match(joined, /armourclass \d+ -> \d+/, "armour attrition must be reported as undone");
+});
+
+test("a circuit heals nobody: the carried fighter's wound is visible on the next scoreboard", async () => {
+  const result = await runHotseat(["--seed", "3", "--circuit", "2"], "1\n".repeat(200));
+  assert.equal(result.code, 0);
+
+  const boutTwo = result.stdout.slice(result.stdout.indexOf("BOUT 2 of 2"));
+  assert.ok(boutTwo.length > 0, "bout 2 must have started for this test to mean anything");
+
+  // The first scoreboard of bout 2 must show somebody below full health. If
+  // the circuit healed between bouts, every fighter would open at 60/60.
+  const firstBoard = boutTwo.slice(0, boutTwo.indexOf("actions:"));
+  const healths = [...firstBoard.matchAll(/(\d+)\/(\d+)/g)].map(([, at, max]) => [Number(at), Number(max)]);
+  assert.ok(healths.length > 0, "the scoreboard must show health for this assertion to run");
+  assert.ok(
+    healths.some(([at, max]) => at < max),
+    `somebody must carry a wound into bout 2; saw ${JSON.stringify(healths)}`
+  );
+});

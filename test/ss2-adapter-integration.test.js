@@ -16,6 +16,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 
 import {
   acknowledgeResultAnimation,
@@ -38,8 +39,12 @@ import {
   toTeamWireState
 } from "../src/team/index.js";
 
+import { Ss2ActionType, ss2BattleValues, ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
+import { demoSide } from "../tools/arena/roster.js";
 import {
   AcknowledgementError,
+  ActionAnimationError,
+  assertWriteProvenance,
   BattleHostError,
   bindingPlanFor,
   CANONICAL_RESOURCE_SOURCES,
@@ -53,6 +58,7 @@ import {
   presentResolvedEvents,
   STATUS_FLAG_FIELDS,
   VILLAIN_SIDE,
+  WriteSource,
   WriteTarget
 } from "../src/adapter/index.js";
 
@@ -92,10 +98,32 @@ const vanillaGladiator = (overrides = {}) => ({
   armourclass_max: 44,
   ammo_left: 0,
   maximum_ammo: 0,
-  weapon: 4,
-  weapon_type: 1,
+  // ► **WAS `weapon: 4` (slashing) UNTIL 2026-09-10, and the shop's own gate
+  //   refused it once that gate was imported.** Slashing and ranged are gated
+  //   on SPEED at `3 * band_position` (`ss2-item-tables.md:530-552`), so
+  //   weapon 4 demanded speed 12 while this template declares 6 and callers
+  //   below override it as low as 2 to control initiative order. **No slashing
+  //   weapon exists that a speed-2 gladiator could buy**, so the template had
+  //   to move bands rather than the dozen callers move their speeds.
+  //   Weapon 21 is the first HACKING row, gated on strength at 3, which every
+  //   caller clears (the lowest strength override in this file is 5). The
+  //   declared damage pair below still wins over the table, so no damage, no
+  //   hash and no assertion in this file depends on which id this is.
+  weapon: 21,
+  weapon_type: 3,
   weapon_weight: 9,
-  weapon_range: 1,
+  // ► **THIS FIELD READ `1` UNTIL 2026-09-11, AND `1` IS A MULTIPLIER, NOT A
+  //   RANGE.** `battlevalues` `+0x3190` is
+  //   `weapon_range = physical_size + _root["weapon" + weapon][5] * 44`, and
+  //   this template states `physical_size: 87` (strength 10) with `weapon: 21`,
+  //   whose `[5]` is 1 — so the build's own answer is `87 + 1 * 44` = **131**.
+  //   The old `1` was the `[5]` column pasted into the field it multiplies
+  //   into. It was inert while `ss2Reach` ignored the field and returned
+  //   `physical_size`; the moment `weapon_range` became a declared resource
+  //   (2026-09-11) this fixture's gladiators could reach one unit and the bout
+  //   below stopped settling at all. **A stated derived field that no code
+  //   reads is not verified by a green suite.**
+  weapon_range: 131,
   weapon_min_damage: 1,
   weapon_max_damage: 3,
   weapon_enchantment_type: 0,
@@ -140,8 +168,10 @@ const vanillaGladiator = (overrides = {}) => ({
   inventory4: 0,
   inventory5: 0,
   inventory6: 0,
-  spell_colossus: 0,
-  spell_bloodlust: 0,
+  // ► **`spell_colossus: 0` and `spell_bloodlust: 0` STOOD HERE UNTIL
+  //   2026-09-22.** The build keeps every timed counter on the fighter CLIP
+  //   (`check_spells` r1, battle map §"Five more phases"), never on this
+  //   object, so the round-trip test now supplies them on the clip record.
   ...overrides
 });
 
@@ -173,7 +203,7 @@ const CONTROLLERS = Object.freeze({
  * invents its armour, stamina, ammunition or inventory, and the host refuses
  * to fabricate a combat object.
  */
-function makeHost(size, { tape = hitTape(40), settlements = null, ...options } = {}) {
+function makeHost(size, { tape = hitTape(40), settlements = null, clip = { gladiator_dir: "right" }, ...options } = {}) {
   const member = (side, index, controller) => {
     const speed = side === "red" ? 30 - index : 4 - index;
     const vanilla = vanillaGladiator({
@@ -182,8 +212,8 @@ function makeHost(size, { tape = hitTape(40), settlements = null, ...options } =
       strength: side === "red" ? 40 : 10,
       attack: side === "red" ? 40 : 8
     });
-    if (controller === null) return { fill: "ai", vanilla, clip: { gladiator_dir: "right" } };
-    return { id: `${side}-${index + 1}`, controller, vanilla, clip: { gladiator_dir: "right" } };
+    if (controller === null) return { fill: "ai", vanilla, clip: { ...clip } };
+    return { id: `${side}-${index + 1}`, controller, vanilla, clip: { ...clip } };
   };
   const team = (side) => ({
     id: side,
@@ -455,7 +485,16 @@ test("every combatant declares the same canonical resources, on both sides of th
     if (size > 1) {
       assert.equal(host.combatant("blue-fill-2").aiFilled, true);
       assert.equal(host.combatant("blue-fill-2").resources.armourclass.value, 44);
-      assert.deepEqual(host.diagnostics.aiFillResourceGaps, []);
+      // The whole bag, value for value, is that slot's own vanilla template
+      // read through `canonicalResourcesFrom` — the same reading the supplied
+      // gladiator beside it gets from an identical combat object. A bag
+      // assembled from anywhere else (a default, a subset, another slot's
+      // template) would land here rather than only on a key list.
+      assert.deepEqual(
+        host.combatant("blue-fill-2").resources,
+        host.combatant("blue-1").resources,
+        "an AI-filled slot's bag is its own template, not a default and not a neighbour's"
+      );
     }
     // Both sides of the layout, not just the hero side.
     const sides = new Set(host.layout.placements.map((placement) => placement.side));
@@ -497,31 +536,52 @@ test("an armour write lands on an AI-filled ally at 3v3, which is what declaring
   assert.equal(host.layout.placementFor(filled.id).stateObjectPath, "_root.arena.team_arena.state.villain_2");
 });
 
-test("the roster's one-fill-template-per-team limit is reported, never guessed around", () => {
+/**
+ * THE WORKAROUND THIS REPLACES.
+ *
+ * `src/team/roster.js` used to build every filled slot from one `team.aiFill`,
+ * so two slots mirroring two different gladiators had nowhere to put the second
+ * resource bag. The host's answer was to declare **none** on either slot and
+ * report `diagnostics.aiFillResourceGaps`; the consequence it named is that a
+ * rule set's write to such a slot was refused by the resolver. The roster
+ * carries a per-slot fill source now, and the host puts each slot's bag on that
+ * slot's own empty-slot marker, so there is nothing left to disagree about and
+ * nothing left to report.
+ */
+test("two AI-filled slots that mirror different gladiators each carry their own armour", () => {
   const host = createVanillaBattleHost({
     teams: [
       { id: "red", members: [{ id: "red-1", controller: "local", vanilla: vanillaGladiator({ speed: 30 }) }] },
       {
         id: "blue",
         members: [
-          { fill: "ai", vanilla: vanillaGladiator({ speed: 4, armourclass: 44 }) },
-          { fill: "ai", vanilla: vanillaGladiator({ speed: 3, armourclass: 12 }) }
+          { fill: "ai", vanilla: vanillaGladiator({ speed: 4, armourclass: 88, armourclass_max: 88 }) },
+          { fill: "ai", vanilla: vanillaGladiator({ speed: 3, armourclass: 66, armourclass_max: 66 }) }
         ]
       }
     ],
+    rules: armourFirstRules,
     rngTape: hitTape(8)
   });
 
-  // `src/team/roster.js` builds every filled slot from one `team.aiFill`, so
-  // two templates that disagree about armour have nowhere to both live.
-  // Picking a winner would put an invented number in the state hash.
-  assert.deepEqual(host.diagnostics.aiFillResourceGaps.map((gap) => gap.teamId), ["blue"]);
-  assert.match(host.diagnostics.aiFillResourceGaps[0].reason, /one AI-fill template per team/);
-  for (const combatant of host.battle.teams.find((team) => team.id === "blue").combatants) {
-    assert.deepEqual(combatant.resources, {}, "the filled slots declare nothing rather than the wrong thing");
-  }
+  const [guard, scout] = host.battle.teams.find((team) => team.id === "blue").combatants;
+  assert.deepEqual([guard.aiFilled, scout.aiFilled], [true, true]);
+  assert.deepEqual(
+    [resourceValue(guard, "armourclass"), resourceValue(scout, "armourclass")],
+    [88, 66],
+    "each filled slot reads its own template — not the first one, and not nothing at all"
+  );
 
-  // A caller that says what it wants is obeyed instead.
+  // The write lands on that slot's own number. A 60-point blow leaves 6 of the
+  // scout's 66, which neither an empty bag (the resolver refuses the write and
+  // this throws) nor the guard's 88 (which would leave 28) can produce.
+  host.submit({ actorId: "red-1", type: "strike", targetId: scout.id });
+  assert.equal(resourceValue(host.combatant(scout.id), "armourclass"), 6);
+  assert.equal(host.vanillaState()[scout.id].combatObject.armourclass, 6);
+  assert.equal(resourceValue(host.combatant(guard.id), "armourclass"), 88, "and only on that slot");
+});
+
+test("a caller's own aiFill resources outrank the template bag the host would supply", () => {
   const declared = createVanillaBattleHost({
     teams: [
       { id: "red", members: [{ id: "red-1", controller: "local", vanilla: vanillaGladiator({ speed: 30 }) }] },
@@ -536,8 +596,97 @@ test("the roster's one-fill-template-per-team limit is reported, never guessed a
     ],
     rngTape: hitTape(8)
   });
-  assert.deepEqual(declared.diagnostics.aiFillResourceGaps, []);
-  assert.equal(declared.combatant("blue-fill-1").resources.armourclass.value, 7);
+
+/**
+ * The ARRAY half of `declaredFillResources`, which nothing pinned.
+ *
+ * The test above covers a team-level OBJECT `aiFill` carrying resources. The
+ * array form — one entry per slot, which is the shape per-slot fill exists for —
+ * went through lines 153-155 of battle-host.js and no test reached them: an
+ * adversarial verifier deleted the whole array branch and the suite stayed
+ * green at 602/602. That is this project's signature defect, and it was sitting
+ * inside the fix for a different defect.
+ *
+ * The two slots below declare DIFFERENT bags, which is the case an object
+ * `aiFill` cannot express at all, so a regression cannot hide behind the
+ * object path.
+ */
+test("a per-slot array aiFill's own resources outrank the template bag, per slot", () => {
+  const declared = createVanillaBattleHost({
+    teams: [
+      { id: "red", members: [{ id: "red-1", controller: "local", vanilla: vanillaGladiator({ speed: 30 }) }] },
+      {
+        id: "blue",
+        aiFill: [{ resources: { armourclass: 5 } }, { resources: { armourclass: 9 } }],
+        members: [
+          { fill: "ai", vanilla: vanillaGladiator({ speed: 4, armourclass: 44 }) },
+          { fill: "ai", vanilla: vanillaGladiator({ speed: 3, armourclass: 12 }) }
+        ]
+      }
+    ],
+    rngTape: hitTape(8)
+  });
+
+  // Per SLOT, and neither value is either template's armourclass (44, 12).
+  assert.equal(resourceValue(declared.combatant("blue-fill-1"), "armourclass"), 5);
+  assert.equal(resourceValue(declared.combatant("blue-fill-2"), "armourclass"), 9);
+  assert.deepEqual(Object.keys(declared.combatant("blue-fill-1").resources), ["armourclass"]);
+  assert.deepEqual(Object.keys(declared.combatant("blue-fill-2").resources), ["armourclass"]);
+});
+
+  // The roster treats the empty-slot marker as the nearest fill source, so a
+  // bag put there unconditionally would silently outrank the caller's own
+  // declaration. Both filled slots read 7, from neither template.
+  for (const id of ["blue-fill-1", "blue-fill-2"]) {
+    assert.equal(resourceValue(declared.combatant(id), "armourclass"), 7, id);
+    assert.deepEqual(Object.keys(declared.combatant(id).resources), ["armourclass"], id);
+  }
+});
+
+/**
+ * THE DEFECT THIS CLOSES.
+ *
+ * The retired workaround carried its shared bag by spreading the team's fill
+ * declaration into an object literal, `{ ...team.aiFill, resources }`. Once
+ * `team.aiFill` was allowed to be an array of per-slot templates that became
+ * lossy in a way nothing reported: `{ ...[a, b] }` is `{ 0: a, 1: b }`, which
+ * the roster reads as one nameless, statless template applying to every slot,
+ * so every per-slot declaration the caller made was discarded and the filled
+ * fighters came out as anonymous reserves.
+ *
+ * The two mirror templates here AGREE about their resources on purpose: that
+ * is the branch the workaround took, and the only one in which it collapsed
+ * the array.
+ */
+test("a per-slot aiFill array reaches the roster whole, one template per filled slot", () => {
+  const host = createVanillaBattleHost({
+    teams: [
+      { id: "red", members: [{ id: "red-1", controller: "local", vanilla: vanillaGladiator({ speed: 30 }) }] },
+      {
+        id: "blue",
+        aiFill: [
+          { name: "Vanguard", stats: { agility: 7 } },
+          { name: "Skirmisher", stats: { agility: 2 } }
+        ],
+        members: [
+          { fill: "ai", vanilla: vanillaGladiator({ speed: 4 }) },
+          { fill: "ai", vanilla: vanillaGladiator({ speed: 3 }) }
+        ]
+      }
+    ],
+    rngTape: hitTape(8)
+  });
+
+  const blue = host.battle.teams.find((team) => team.id === "blue").combatants;
+  assert.deepEqual(
+    blue.map((combatant) => combatant.name),
+    ["Vanguard", "Skirmisher"],
+    "a collapsed array leaves no name to read and the roster falls back to `<team> Reserve n`"
+  );
+  assert.deepEqual(blue.map((combatant) => combatant.stats.agility), [7, 2]);
+  // And the bag still arrives, from each slot's own vanilla template, without
+  // anything having been merged into the array to carry it.
+  assert.deepEqual(blue.map((combatant) => resourceValue(combatant, "armourclass")), [44, 44]);
 });
 
 test("there is no second code path: one resolver, one adapter pipeline, four globals, at every size", () => {
@@ -790,7 +939,11 @@ test("presentation output never influences resolved state", () => {
 /* ------------------------------------------------------------------ */
 
 test("a whole battle leaves every field the adapter does not own untouched", () => {
-  const host = makeHost(3);
+  // The clip carries two timed counters in values the build can hold: -1 is
+  // what `check_spells` leaves after a colossus expires (`+0x24ba`), and 0 is
+  // where `spell_regenerate` stops (it only decrements while > 0).
+  const clip = { gladiator_dir: "right", spell_colossus: -1, spell_regenerate: 0 };
+  const host = makeHost(3, { clip });
   const inputs = Object.fromEntries(
     host.layout.placements.map((placement) => [
       placement.combatantId,
@@ -819,7 +972,15 @@ test("a whole battle leaves every field the adapter does not own untouched", () 
     assert.equal(combatObject.staminaleft, 105);
     assert.equal(combatObject.charisma, 7);
     assert.equal(combatObject.inventory1, 0);
-    assert.equal(combatObject.spell_colossus, 0);
+    // ► **WAS `combatObject.spell_colossus === 0` UNTIL 2026-09-22**, which
+    //   pinned a counter on an object the build never keeps one on. The
+    //   counters live on the clip, and a whole battle leaves them there,
+    //   untouched, and puts none on the combat object.
+    const { fighterClip } = after[combatantId];
+    assert.equal(fighterClip.spell_colossus, -1);
+    assert.equal(fighterClip.spell_regenerate, 0);
+    assert.equal("spell_colossus" in combatObject, false);
+    assert.equal("spell_regenerate" in combatObject, false);
   }
 });
 
@@ -1395,7 +1556,44 @@ test("a placeholder rule set that declares no armour effect still writes only hi
   // EffectKind gained a generic resource kind rather than a bespoke armour
   // one: a bespoke kind would put an SS2 noun inside a game-agnostic resolver
   // and need a sibling for stamina, ammo and everything after.
-  assert.deepEqual(Object.values(EffectKind).sort(), ["damage", "heal", "resource", "status"]);
+  //
+  // ► **`position` JOINED THEM 2026-09-11**, on the same reasoning: a generic
+  //   absolute coordinate rather than a bespoke `walk` kind, so the resolver
+  //   stores what it is handed and never learns what an arena is. Like
+  //   `resource` it writes `to` and not `by`, because an effect log must be
+  //   replayable without accumulating drift.
+  //
+  // ► **`lateral` JOINED THEM 2026-09-12**, the second axis, and it is a
+  //   SEPARATE kind rather than a `toY` on `position` because the build has no
+  //   diagonal move: every movement phase it has — `walkleft`, `walkright`,
+  //   `runleft`/`runright`, `chargeleft`/`chargeright`, `jumpleft`/`jumpright`
+  //   — is one named phase changing one coordinate. Widening `position`
+  //   instead would have grown a shape whose consumers silently stop covering
+  //   it, which is the defect `src/render/scene.js` spells out about
+  //   `move-clip`.
+  //
+  // ► **`stat` JOINED THEM 2026-09-22**, for SS2's four stat spells: an
+  //   absolute write of one of a combatant's `stats`, which no kind could
+  //   express. Generic like the rest — the resolver writes a key the stats
+  //   already carry and never learns what strength means. ~~**The adapter does
+  //   not write it** onto the vanilla `strength`/`speed`/`attack`/`defence`
+  //   fields — no `WriteSource` carries a stat — and REPORTS it in `unmapped`
+  //   instead~~ **The adapter WRITES it since 2026-09-23** (the owner's "write
+  //   both back"), through the `canonical-stat` source
+  //   (`test/ss2-stat-spells.test.js`, docs/ss2-adapter-contract.md "Write
+  //   provenance"). ~~it skips kinds it has no arm for~~ — it did, and
+  //   silently, until a Codex review of 2026-09-22.
+  //
+  // ► **`battle-resource` JOINED THEM 2026-09-22**, for SS2's crowd: an
+  //   absolute write of one of the BATTLE's own declared pools, with no
+  //   `targetId` — `crowd_interest` is one `_global` per bout, not a
+  //   combatant's. Generic like the rest: the rule set names the pool. ~~**The
+  //   adapter does not write it either** — no `WriteSource` carries a pool that
+  //   belongs to no combatant — and REPORTS it in `unmapped` with the stat's
+  //   treatment~~ **The adapter WRITES it to `_global` since 2026-09-23**,
+  //   through the `declared-battle-resource` source (`test/ss2-crowd.test.js`).
+  assert.deepEqual(Object.values(EffectKind).sort(),
+    ["battle-resource", "damage", "heal", "lateral", "position", "resource", "stat", "status"]);
 
   // The defeated fighter is at 0 hitpoints with all 44 points of armour still
   // standing, and that is right: `classicStyleRules` has no armour rule, and
@@ -1520,9 +1718,20 @@ test("CLOSED: a rule set reads armour off the canonical view, and the hash cover
   // The rule set still cannot see the vanilla record, and it no longer needs
   // to: `resources` is on the view, and the invariant that makes that sound is
   // that the projection carries everything the view does.
+  // ► **`x` JOINED THE VIEW 2026-09-11**, and it joined the PROJECTION in the
+  //   same commit — which is the invariant the paragraph above is about. This
+  //   rule set models no position, so its combatants carry `x: null`: the key
+  //   is present for every rule set so two peers commit to one projection
+  //   shape, and the null says "no geometry here" rather than leaving them to
+  //   disagree about whether the field exists.
+  // ► **`y` JOINED BOTH 2026-09-12**, the second axis, on identical reasoning
+  //   and in a single commit for the same reason: the invariant is that the
+  //   projection carries everything the view does, so a key added to one and
+  //   not the other is a peer that can read a field nothing commits to. This
+  //   rule set models neither axis, so both are `null` here.
   assert.deepEqual(seen[0], [
     "aiFilled", "alive", "health", "id", "loadout", "maxHealth",
-    "name", "resources", "seatId", "slotIndex", "stats", "status", "teamId"
+    "name", "resources", "seatId", "slotIndex", "stats", "status", "teamId", "x", "y"
   ].sort());
   assert.equal(seen[0].includes("vanilla"), false);
   assert.equal(seen[0].includes("armourclass"), false, "armour arrives inside `resources`, not as a top-level field");
@@ -1713,4 +1922,545 @@ test("GAP: the adapter presents the resolver's initiative and never translates a
     }
   }
   assert.equal(JSON.stringify(commands).includes("nextphase"), false);
+});
+
+/* ------------------------------------------------------------------ */
+/* The per-action animation gate, driven by the host                   */
+/* ------------------------------------------------------------------ */
+
+/** The first blue fighter still standing — blue's second slot is AI-filled. */
+const livingBlue = (host) =>
+  host.battle.teams.find((team) => team.id === "blue").combatants.find((combatant) => combatant.alive).id;
+
+test("the host stamps every action's commands with the RESOLVER's action boundary", () => {
+  const host = makeHost(2);
+  host.constructArena();
+
+  const steps = fightToSettlement(host);
+  assert.ok(steps.length >= 2, `the fight must take several actions: ${steps.length}`);
+
+  let multiSequenceSteps = 0;
+  for (const step of steps) {
+    if (step.commands.length === 0) continue;
+    assert.equal(typeof step.actionBoundary, "number");
+    assert.deepEqual([...step.actionTokens], [step.actionBoundary], "one action, one token");
+    if (new Set(step.commands.map((command) => command.sequence)).size > 1) multiSequenceSteps += 1;
+    for (const command of step.commands) {
+      assert.equal(
+        command.actionToken,
+        step.actionBoundary,
+        `${command.kind}@seq${command.sequence} must carry ${step.actionBoundary}`
+      );
+    }
+  }
+  // The whole point: at least one action bound commands from more than one
+  // event, so the token is demonstrably not `event.sequence`.
+  assert.ok(multiSequenceSteps > 0, "a knockout must put two events under one token");
+});
+
+test("the host never reports an action animation on the surface's behalf", () => {
+  const host = makeHost(2, { awaitAnimations: true });
+  host.constructArena();
+
+  const first = host.submit({ actorId: "red-1", type: "melee", targetId: "blue-1" });
+  assert.deepEqual(host.pipeline, HOST_PIPELINE, "the gate is a step in the pipeline, not a side effect");
+
+  // `submit` observed the token. It did NOT open the gate — a gate that
+  // supplies its own evidence is not a gate, which is the lesson
+  // `acknowledgeResultAnimations` was rewritten to learn.
+  const gate = host.readyForNextAction();
+  assert.equal(gate.enforced, true);
+  assert.equal(gate.ready, false);
+  assert.deepEqual([...gate.pending], [first.actionBoundary]);
+
+  assert.throws(
+    () => host.submit({ actorId: "red-2", type: "melee", targetId: "blue-2" }),
+    (error) =>
+      error instanceof BattleHostError &&
+      /has not reported action/.test(error.message) &&
+      /rebind _global.attacker/.test(error.message)
+  );
+  // Refused BEFORE the resolver was touched: the hazard is a rebind over a
+  // running timeline, and an applied action cannot be taken back.
+  assert.equal(host.steps.length, 1);
+  assert.equal(host.currentCombatantId(), "red-2");
+
+  const reported = host.reportActionAnimation(first.actionBoundary);
+  assert.equal(reported.counted, true);
+  assert.equal(host.readyForNextAction().ready, true);
+  assert.doesNotThrow(() =>
+    host.submit({ actorId: host.currentCombatantId(), type: "melee", targetId: livingBlue(host) })
+  );
+});
+
+test("a host that gives up on a surface says so in its own words, and the reason is kept", () => {
+  const host = makeHost(2, { awaitAnimations: true });
+  host.constructArena();
+  const first = host.submit({ actorId: "red-1", type: "melee", targetId: "blue-1" });
+
+  assert.throws(
+    () => host.abandonActionAnimation(first.actionBoundary),
+    (error) => error instanceof ActionAnimationError && /without a reason/.test(error.message)
+  );
+  assert.equal(host.readyForNextAction().ready, false, "a refused abandonment leaves the gate shut");
+
+  host.abandonActionAnimation(first.actionBoundary, "no animation surface attached (test policy)");
+  assert.equal(host.readyForNextAction().ready, true);
+  assert.deepEqual(
+    host.actionAnimationState().abandoned,
+    [{ token: first.actionBoundary, reason: "no animation surface attached (test policy)" }]
+  );
+  assert.doesNotThrow(() =>
+    host.submit({ actorId: host.currentCombatantId(), type: "melee", targetId: livingBlue(host) })
+  );
+
+  // The adapter owns no timer: nothing here ever abandons anything by itself.
+  const second = host.steps.at(-1);
+  assert.deepEqual([...host.readyForNextAction().pending], [second.actionBoundary]);
+});
+
+test("the gate is ADVISORY by default, so every headless caller is unaffected", () => {
+  const host = makeHost(3);
+  host.constructArena();
+  fightToSettlement(host);
+  reportAnimationSurface(host);
+
+  // A whole battle ran to settlement with nothing ever reporting an action
+  // animation — which is exactly what the goldens, the replay harness and this
+  // suite do, none of which has a surface to report from.
+  const state = host.actionAnimationState();
+  assert.equal(state.ready, false, "the gate observed the actions...");
+  assert.equal(state.reported.length, 0, "...and nothing answered...");
+  assert.deepEqual(state.abandoned, []);
+  assert.equal(host.readyForNextAction().enforced, false, "...because it was never enforcing");
+  assert.equal(state.observed.length, state.pending.length);
+  assert.ok(state.observed.length >= 3, `the battle must have opened it repeatedly: ${state.observed.length}`);
+});
+
+test("an AI turn goes through the same gate a human turn does", () => {
+  const host = makeHost(2, { awaitAnimations: true });
+  host.constructArena();
+  host.submit({ actorId: "red-1", type: "melee", targetId: "blue-1" });
+  // Seat 2 on red is AI-controlled at 2v2, and `runAiTurns` routes it through
+  // `submit` — so it meets the same refusal, rather than slipping past it.
+  assert.throws(() => host.runAiTurns(), BattleHostError);
+  assert.equal(host.steps.length, 1);
+});
+
+test("a token no presentation command carried opens nothing", () => {
+  const host = makeHost(2, { awaitAnimations: true });
+  host.constructArena();
+  const first = host.submit({ actorId: "red-1", type: "melee", targetId: "blue-1" });
+
+  assert.throws(
+    () => host.reportActionAnimation(first.actionBoundary + 999),
+    (error) => error instanceof ActionAnimationError && /no presentation command carried it/.test(error.message)
+  );
+  assert.equal(host.readyForNextAction().ready, false);
+});
+
+/* ------------------------------------------------------------------ */
+/* The host and the map-derived rule set: where the seam actually ends  */
+/* ------------------------------------------------------------------ */
+
+test("the host CONSTRUCTS with ss2TeamRules and supplied gladiators, and says why it cannot derive", () => {
+  // WHY THIS EXISTS, and it is the third time this seam has sent someone to the
+  // wrong throw. `ss2-rules.js`'s own header says a supplied gladiator "now
+  // BUILDS, and fails on its own first swing instead". Measured 2026-09-07: it
+  // did NOT build — `compareMaximumHealth`, a DIAGNOSTIC the host runs once per
+  // combatant in its constructor, let the rule set's refusal-to-derive escape
+  // and killed the host before any swing. The header was describing the
+  // intended state; a different throw was firing first and hiding it.
+  const host = makeHost(1, { rules: ss2TeamRules });
+  assert.ok(host, "a diagnostic must not be able to refuse a battle");
+
+  // The refusal is now a FINDING, and it names the missing resource — which is
+  // the real statement about this seam: the canonical bag is too narrow for
+  // this rule set.
+  const reports = host.diagnostics.maximumHealthReports;
+  assert.equal(reports.length, 2);
+  for (const report of reports) {
+    assert.equal(report.ruleSetDerived, null);
+    assert.equal(report.agrees, false);
+    assert.match(report.underivable, /herolevel/);
+  }
+});
+
+test("and the wall it hits is the ATTACKER's damage pair, at the swing, not at construction", () => {
+  const host = makeHost(1, { rules: ss2TeamRules });
+  host.constructArena();
+  // Walked into contact first, because the wall is at the SWING and a bout now
+  // opens out of melee range. Driven through the real host — `submit` — rather
+  // than by writing positions behind it, so the approach this test steps over
+  // is the same one a player takes.
+  let guard = 0;
+  while (guard < 40 && !host.legalActions().some((option) => /attack$/.test(option.type))) {
+    guard += 1;
+    const actor = host.currentCombatantId();
+    const foe = host.wire().teams.flatMap((team) => team.combatants).find((c) => c.id !== actor);
+    const mine = host.wire().teams.flatMap((team) => team.combatants).find((c) => c.id === actor);
+    const toward = foe.x > mine.x ? "walk-right" : "walk-left";
+    const option = host.legalActions().find((o) => o.type === toward) ?? host.legalActions()[0];
+    host.submit({ actorId: actor, ...option });
+  }
+  assert.ok(guard > 0, "the bout must actually have opened out of range, or this steps over nothing");
+
+  // Construction is past; the arithmetic is where the canonical bag runs out.
+  // `CANONICAL_RESOURCE_SOURCES` carries neither `min_damage` nor `max_damage`,
+  // and ss2TeamRules demands them of whoever ATTACKS at the moment the swing
+  // resolves — role-based, never of a pure defender.
+  // ► **`legalActions()[0]` IS NO LONGER AN ATTACK, so the swing is selected by
+  //   name.** With position modelled the opening options are the two walks, and
+  //   a walk needs no damage pair — correctly: a gladiator still crossing the
+  //   arena should not have to declare what it hits for. So the wall this test
+  //   is about is reached only by actually swinging.
+  const swing = (surface) =>
+    surface.legalActions().find((option) => /attack$/.test(option.type)) ?? surface.legalActions()[0];
+  assert.throws(
+    () => host.submit({ actorId: host.currentCombatantId(), ...swing(host) }),
+    (error) => /max_damage, min_damage/.test(error.message) && /ATTACKS/.test(error.message)
+  );
+
+  // Pinned so the next person does not go to the wrong throw again: the
+  // AI-FILLED path has no such wall, because `team.aiFill.resources` bypasses
+  // `CANONICAL_RESOURCE_SOURCES` entirely and can carry the full SS2 bag.
+  assert.equal(
+    CANONICAL_RESOURCE_SOURCES.includes("min_damage") || CANONICAL_RESOURCE_SOURCES.includes("herolevel"),
+    false,
+    "if this ever becomes true, the two walls above have moved and both tests must be re-derived"
+  );
+});
+
+/* ------------------------------------------------------------------ */
+/* The opt-in resource bag: a SUPPLIED gladiator under ss2TeamRules     */
+/* ------------------------------------------------------------------ */
+
+/** The SS2 bag as flat numbers, which is the shape a caller declares. */
+function ss2Bag(overrides = {}) {
+  const combatant = ss2Combatant(
+    { ...vanillaGladiator(overrides), gladiator_dir: "right" },
+    { id: "template", name: "Template", controller: "local", derive: false }
+  );
+  return Object.fromEntries(
+    Object.entries(combatant.resources).map(([name, entry]) => [name, typeof entry === "object" ? entry.value : entry])
+  );
+}
+
+function ss2SuppliedHost({ resources = true } = {}) {
+  const member = (id, speed) => ({
+    id,
+    controller: "local",
+    vanilla: vanillaGladiator({ character_name: id, speed }),
+    clip: { gladiator_dir: "right" },
+    ...(resources ? { resources: ss2Bag({ speed }) } : {})
+  });
+  return createVanillaBattleHost({
+    rules: ss2TeamRules,
+    seed: 7,
+    teams: [
+      { id: "red", name: "Red", members: [member("hero", 30)] },
+      { id: "blue", name: "Blue", members: [member("villain", 6)] }
+    ]
+  });
+}
+
+test("a SUPPLIED gladiator can be driven by ss2TeamRules once the caller declares the bag", () => {
+  // THE POINT OF THIS TEST. Before 2026-09-07 the adapter host could drive the
+  // map-derived rule set only through an AI-FILLED slot, whose bag comes from
+  // `team.aiFill.resources` and bypasses `CANONICAL_RESOURCE_SOURCES`. A
+  // gladiator a PERSON controls had no equivalent and was refused at its first
+  // swing — so the one seam meant to drive both layers together could not host
+  // SS2's own arithmetic with a human in the seat.
+  const host = ss2SuppliedHost();
+  host.constructArena();
+
+  let actions = 0;
+  while (!host.battle.result && actions < 300) {
+    actions += 1;
+    const actorId = host.currentCombatantId();
+    const options = host.legalActions(actorId);
+    assert.ok(options.length > 0, "a living actor always has an action");
+    host.submit({ actorId, ...options[0] });
+  }
+
+  assert.ok(host.battle.result, `the bout must settle; ran ${actions} actions`);
+  assert.equal(host.battle.result.reason, "elimination");
+  assert.ok(actions > 3, `and it must be a real fight, not one swing: ${actions} actions`);
+  // WHAT THIS DOES NOT BUY, stated because a silent gap would be a lie. The
+  // rule set destroys armour PIECES, and a piece id is outside the adapter's
+  // declared-resource write allowlist — so the resolved value reaches combat
+  // state and the hash, and does NOT reach the vanilla mirror. It is REPORTED,
+  // which is the contract's "Still open" item 2 arriving in practice.
+  // ► ~~**THE CROWD IS REPORTED BESIDE THEM SINCE 2026-09-22, AND SEPARATELY.**~~
+  //   **THE CROWD IS WRITTEN SINCE 2026-09-23** (the owner's "write both
+  //   back"): `crowd_interest` is the battle's own pool, so it reaches
+  //   `_global` through the `declared-battle-resource` source and is no longer
+  //   in `unmapped` at all; `test/ss2-crowd.test.js` pins it. Checked here so
+  //   this test goes on asking exactly the question it was written for.
+  const crowdWrites = host.steps.flatMap((step) => step.writes)
+    .filter((write) => write.source === WriteSource.DECLARED_BATTLE_RESOURCE);
+  assert.ok(crowdWrites.length > 0, "a bout of completed phases moves the crowd");
+  assert.ok(crowdWrites.every((write) => write.field === "crowd_interest" && write.target === WriteTarget.GLOBAL));
+  const reported = host.steps.flatMap((step) => step.unmapped ?? []);
+  assert.equal(reported.some((entry) => Object.hasOwn(entry, "battleResource")), false, "the crowd is no longer reported");
+  const unmapped = reported;
+  assert.ok(unmapped.length > 0, "this fixture wears armour, so a piece removal must actually occur");
+  const pieces = new Set(unmapped.map((entry) => entry.resource));
+  for (const resource of pieces) {
+    assert.ok(
+      [
+        "boot", "breastplate", "gauntlet", "greaves", "helmet", "shield", "shinguard", "shoulderguard",
+        // ► **`criticalhit` JOINED THE UNMAPPED LIST 2026-09-13, AND UNLIKE THE
+        //   ARMOUR PIECES IT IS NOT A GAP — IT IS THE RIGHT ANSWER.**
+        //
+        //   A piece id is unmapped because the adapter's write allowlist has
+        //   not been widened to cover it, which is a real if reported hole.
+        //   `criticalhit` is unmapped because **there is nothing to mirror it
+        //   TO**: the build keeps it as a bare `SetVariable` on the overlay
+        //   timeline inside `checkattackroll` (`+0x2e7e`, `+0x2eeb`), not as a
+        //   field on either gladiator. A vanilla mirror that grew a
+        //   `criticalhit` member on a character would be inventing a save-schema
+        //   field the build does not have.
+        //
+        //   So this entry staying reported-and-unwritten is the contract
+        //   working, and widening the allowlist to "fix" it would be the defect.
+        "criticalhit"
+      ].includes(resource),
+      `only armour piece ids and the criticalhit transient should be unmapped here, not ${resource}`
+    );
+  }
+  // And the reason must name the real problem: the field EXISTS and is cited.
+  for (const entry of unmapped) {
+    assert.match(entry.reason, /not in the adapter's declared-resource write allowlist/);
+  }
+
+  // WHY THAT IS A REPORTED GAP AND NOT A BLOCKER, measured 2026-09-07 rather
+  // than assumed: the campaign layer cannot want a destroyed piece, because it
+  // carries no resource of any kind. `grep -c resources src/campaign/from-battle.js`
+  // is 0, and an outcome projects combatantId, name, teamId, seatId, slotIndex,
+  // aiFilled, survived, health, maxHealth and statuses — nothing else. If a
+  // record ever gains a resources block, re-derive this: the unmapped piece
+  // above becomes a real defect at that moment.
+
+  // The whole 39-name SS2 vocabulary reaches the projection, which is what the
+  // arithmetic needs and what the closed 20-name list could not supply.
+  // ► **32 UNTIL 2026-09-11, WHEN `weapon_range` JOINED `SS2_RESOURCE_NAMES`.**
+  //   It is the controller gate's own input (`fightdistance < weapon_range`,
+  //   frame 4 `DoAction@0x238bbf` `+0x00f6`), and a supplied gladiator that
+  //   could not carry it reached the fight with the wrong reach.
+  // ► **33 UNTIL 2026-09-13, WHEN THE RANGED VOCABULARY ADDED SIX**:
+  //   `ammo_left`, `maximum_ammo`, `criticalhit`, and the three
+  //   `secondary_weapon_*` numbers the bow fights with. The count is asserted
+  //   rather than the list because the list itself is pinned in
+  //   `ss2-team-rules.test.js`; what this one is for is that the SUPPLIED path
+  //   carries all of it, which is the thing the closed list used to break.
+  // ► **39 UNTIL 2026-09-14, WHEN THE TWO WEAPON IDS JOINED** so the renderer
+  //   could draw the weapon a gladiator is holding. They are the first entries
+  //   here that no rule reads — pure appearance selectors — and they are in the
+  //   bag rather than beside it because the bag is the only per-combatant
+  //   channel that is on the view AND the projection AND `combatStateHash`.
+  const projected = Object.keys(host.wire().teams[0].combatants[0].resources);
+  // ► 40, not 41: this gladiator carries a melee weapon and NO bow, so
+  //   `secondary_weapon` is not declared. Absent is not zero, and zero is a
+  //   real weapon row — see the three-tier note in `ss2-team-rules.test.js`.
+  // ► **41 SINCE 2026-09-16, AND THE REASON IS NOT A DEFAULT.** `psyche_up`
+  //   joined `SS2_RESOURCE_NAMES` with NO `SS2_RESOURCE_DEFAULTS` entry, so
+  //   nothing is filled in — but this gladiator's VANILLA RECORD states the
+  //   field (`src/adapter/vanilla-fields.js` groups it under Conditions, and
+  //   the map's own "Combatant state objects" section lists it there), so the
+  //   bag picks up a value the record really carries. **That is the intended
+  //   shape**: absent means "this record never mentioned a counter", stated
+  //   means "this is what it holds", and neither is invented here.
+  // ► **47 SINCE 2026-09-19, FOR EXACTLY THE `psyche_up` REASON ONE BLOCK UP.**
+  //   `inventory1`-`inventory6` joined `SS2_RESOURCE_NAMES` with no defaults,
+  //   and `vanillaGladiator()` above STATES all six — so the bag picks up six
+  //   values the record really carries, and this count moves by six while the
+  //   23 golden replay hashes do not move at all (measured before and after).
+  //   **This is the only count in the suite that the declaration moved**, which
+  //   is the tell that it is a stated-field change and not a default fill.
+  assert.equal(projected.length, 47);
+  for (const name of ["herolevel", "min_damage", "max_damage", "helmet", "equipped_weapon",
+    "weapon_range", "weapon", "inventory1", "inventory6"]) {
+    assert.ok(projected.includes(name), `${name} must reach the projection`);
+  }
+  // And the number it carries is the BUILD's, not the `[5]` multiplier this
+  // fixture used to state: `physical_size` 87 + weapon 21's `[5]` of 1 × 44.
+  assert.equal(host.wire().teams[0].combatants[0].resources.weapon_range.value, 131);
+});
+
+test("the opt-in is OPT-IN: without it the bag and the refusal are exactly as before", () => {
+  const plain = ss2SuppliedHost({ resources: false });
+  assert.deepEqual(
+    Object.keys(plain.wire().teams[0].combatants[0].resources).sort(),
+    [...CANONICAL_RESOURCE_SOURCES].sort(),
+    "a caller that asks for nothing gets the closed list, so its hash cannot have moved"
+  );
+  // Walked into contact for the same reason as the test above: the wall is at
+  // the SWING, and a bout now opens out of melee range. A walk costs this
+  // gladiator nothing it has not declared — correctly, since crossing the
+  // arena needs no damage pair — so the approach runs clean and the refusal
+  // still lands the moment it tries to hit somebody.
+  let plainGuard = 0;
+  while (plainGuard < 40 && !plain.legalActions().some((option) => /attack$/.test(option.type))) {
+    plainGuard += 1;
+    const actor = plain.currentCombatantId();
+    const everyone = plain.wire().teams.flatMap((team) => team.combatants);
+    const mine = everyone.find((c) => c.id === actor);
+    const foe = everyone.find((c) => c.id !== actor);
+    const toward = foe.x > mine.x ? "walk-right" : "walk-left";
+    plain.submit({ actorId: actor, ...(plain.legalActions().find((o) => o.type === toward) ?? plain.legalActions()[0]) });
+  }
+  assert.ok(plainGuard > 0, "the bout must actually have opened out of range");
+  const plainSwing = plain.legalActions().find((option) => /attack$/.test(option.type));
+  assert.ok(plainSwing, "and the approach must have reached melee range");
+  assert.throws(
+    () => plain.submit({ actorId: plain.currentCombatantId(), ...plainSwing }),
+    (error) => /max_damage, min_damage/.test(error.message)
+  );
+
+  // And declaring the bag MOVES THE HASH. That is the cost, it is paid only by
+  // a caller who asks, and it is pinned here so it can never be paid silently.
+  assert.notEqual(ss2SuppliedHost().hash(), plain.hash());
+});
+
+test("the opt-in bag admits only map-cited vanilla fields, and only numbers", () => {
+  const build = (resources) => () => createVanillaBattleHost({
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", name: "Red", members: [{ id: "hero", controller: "local", vanilla: vanillaGladiator({ speed: 30 }), clip: { gladiator_dir: "right" }, resources }] },
+      { id: "blue", name: "Blue", members: [{ id: "villain", controller: "local", vanilla: vanillaGladiator(), clip: { gladiator_dir: "right" }, resources: ss2Bag() }] }
+    ]
+  });
+
+  // An invented name would put an unverifiable quantity into a hashed, replayed
+  // projection that no peer, capture or document could ever check.
+  assert.throws(build({ ...ss2Bag({ speed: 30 }), momentum: 9 }), (error) => /no battle-map section cites/.test(error.message));
+  assert.throws(build({ ...ss2Bag({ speed: 30 }), herolevel: "5" }), (error) => /finite numbers only/.test(error.message));
+  assert.throws(build("not-an-object"), (error) => /plain object/.test(error.message));
+  // The guard is the same one `CANONICAL_RESOURCE_SOURCES` itself passes.
+  assert.doesNotThrow(build(ss2Bag({ speed: 30 })));
+});
+
+/* ------------------------------------------------------------------ */
+/* Stats and the crowd are WRITTEN BACK (owner, 2026-09-22), and        */
+/* nothing else moved                                                   */
+/* ------------------------------------------------------------------ */
+
+/** The two write sources added 2026-09-23. Everything else must be byte-for-byte what it was. */
+const WRITE_BACK_SOURCES = Object.freeze(["canonical-stat", "declared-battle-resource"]);
+const digestOf = (value) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+const priorWrites = (steps) =>
+  steps.flatMap((step) => step.writes).filter((write) => !WRITE_BACK_SOURCES.includes(write.source));
+const priorUnmapped = (steps) => steps.flatMap((step) => step.unmapped)
+  .filter((entry) => !Object.hasOwn(entry, "stat") && !Object.hasOwn(entry, "battleResource"));
+
+/** The arena's own 1v1 (`tools/arena/main.js`'s path), red-1 carrying `itemId`, arena built. */
+function demoHost(itemId) {
+  const red = demoSide("red", 1, { ss2Combatant, ss2BattleValues });
+  red.members[0] = {
+    ...red.members[0],
+    vanilla: { ...red.members[0].vanilla, inventory1: itemId },
+    resources: { ...red.members[0].resources, inventory1: itemId }
+  };
+  const host = createVanillaBattleHost({
+    teams: [red, demoSide("blue", 1, { ss2Combatant, ss2BattleValues })],
+    rules: ss2TeamRules,
+    seed: 3
+  });
+  host.constructArena();
+  return host;
+}
+
+/** That host, played to a result by the rule set's AI — opening with a colossus when red-1 carries one. */
+function demoBout(itemId) {
+  const host = demoHost(itemId);
+  if (itemId === 42) host.submit({ actorId: "red-1", type: Ss2ActionType.CAST_COLOSSUS, targetId: "red-1" });
+  for (let actions = 0; !host.battle.result && actions < 400; actions += 1) {
+    host.submit({ actorId: host.currentCombatantId(), ...host.suggestAction() });
+  }
+  assert.ok(host.battle.result, "the bout must settle");
+  return host;
+}
+
+test("battles without stat or crowd changes produce exactly the writes they did before the write-back", () => {
+  // THE PINS ARE THE PRE-CHANGE CODE'S OUTPUT, measured 2026-09-23 on e8ccdcf
+  // with this test's own drivers before `src/adapter/` was touched. They are
+  // not derived here and must never be refreshed to make this test pass: a
+  // different digest means a write that is NOT a stat or the crowd changed.
+  //
+  // A placeholder bout moves neither, so its WHOLE write list is pinned.
+  for (const [size, expected] of [[1, "f50482dfa1a86b604eb32dc1038646b5e13f63909e7ac8f77d3cdeae708ad2ca"], [3, "4c7eb1d6d604eca55381945fa0b23505150b8c9b0ca24935ea8f63c486b6c3b0"]]) {
+    const host = makeHost(size);
+    fightToSettlement(host);
+    const writes = host.steps.flatMap((step) => step.writes);
+    assert.equal(digestOf(writes), expected, `${size}v${size}: the whole write list`);
+    assert.deepEqual(host.steps.flatMap((step) => step.unmapped), [], `${size}v${size}: nothing unmapped`);
+    assert.deepEqual([host.vanillaGlobals(), host.diagnostics.globalSyncs], [{}, []], "no battle pool, so no `_global`");
+  }
+
+  // An SS2 bout moves the crowd on every completed phase and a colossus moves
+  // two stats, so there the pin is on everything EXCEPT the two new sources —
+  // and on what is still reported, minus the two kinds that are now written.
+  const supplied = ss2SuppliedHost();
+  supplied.constructArena();
+  for (let actions = 0; !supplied.battle.result && actions < 300; actions += 1) {
+    const actorId = supplied.currentCombatantId();
+    supplied.submit({ actorId, ...supplied.legalActions(actorId)[0] });
+  }
+  assert.ok(supplied.battle.result);
+  assert.equal(digestOf(priorWrites(supplied.steps)), "49dbacb8b26833d40e51b6820c9853f6501604c1a50302b275f394ddcc767e69", "ss2SuppliedHost: every write but a stat or the crowd");
+  assert.equal(digestOf(priorUnmapped(supplied.steps)), "88b28481e2951c74ef07f1deecd1f68643476a22392c4cc2e566af398434eb9a", "ss2SuppliedHost: everything still reported");
+
+  for (const [itemId, writesPin, unmappedPin] of [[0, "edce76a069b5489c197d30e3894724b7964220f94201fce9f1fde022dc3bc186", "43ecebe11b33a89bee87f3c36c06f4adcfa53efdb96b0c4568a52820d2fd15cf"], [42, "2b7d8eba2e0de047ab44af3e650dd0593aa9475f919e6ef59f2288a5e02e9365", "8c5605a33d13d78334191b4065b660f4ac5cf270ae811d3b15a26ff9bb94f791"]]) {
+    const host = demoBout(itemId);
+    assert.equal(digestOf(priorWrites(host.steps)), writesPin, `demo bout, item ${itemId}: writes`);
+    assert.equal(digestOf(priorUnmapped(host.steps)), unmappedPin, `demo bout, item ${itemId}: unmapped`);
+  }
+});
+
+test("the host's agreement check compares STATS after every submission, now that stats are written", () => {
+  // `includeStats` defaulted to false in the per-action check because a stat
+  // was never written: comparing one would have refused every colossus. Now a
+  // stat IS written, and leaving it out would hide exactly the drift Codex
+  // found (a stat moved, nothing reached the mirror, the check saw nothing).
+  // Simulated here by moving a stat where no write can follow it.
+  const host = makeHost(1);
+  const blue = host.battle.teams.find((team) => team.id === "blue").combatants[0];
+  blue.stats.strength = 99;
+  assert.throws(
+    () => host.submit({ actorId: host.currentCombatantId(), type: "melee", targetId: blue.id }),
+    (error) => /has drifted from resolved state/.test(error.message) && /strength 10 != strength 99/.test(error.message)
+  );
+});
+
+test("a hand-built stat or crowd write carrying a COMPUTED value is refused by provenance, and so is a misaimed one", () => {
+  // A real bloodlust through the host: red-1's strength 9 -> 24, and the crowd 8 -> 11.
+  const host = demoHost(41);
+  const step = host.submit({ actorId: "red-1", type: Ss2ActionType.CAST_BLOODLUST, targetId: "red-1" });
+  const wire = host.wire();
+  const after = wire.teams.flatMap((team) => team.combatants);
+  const check = (writes, battleResources = wire.battleResources) => () =>
+    assertWriteProvenance(writes, after, { battleResources });
+  const strength = step.writes.find((write) => write.source === WriteSource.CANONICAL_STAT && write.field === "strength");
+  const crowd = step.writes.find((write) => write.source === WriteSource.DECLARED_BATTLE_RESOURCE);
+  assert.deepEqual([strength.from, strength.to, crowd.from, crowd.to], [9, 24, 8, 11]);
+  assert.doesNotThrow(check(step.writes), "what the host emitted is identical to the projection");
+
+  // The build's formula re-run in the adapter, without the round the rule set
+  // applied: `10 + backup_strength * 1.5` is 23.5, and the projection holds 24.
+  assert.throws(check([{ ...strength, to: 10 + 9 * 1.5 }]),
+    /canonical-stat write to red-1\.strength carries 23\.5, but the resolved projection holds 24/);
+  // The crowd moved AGAIN by the verb's own `crowd_action` (3, `+0x8a84`),
+  // after the resolver already applied it: 14, where the battle holds 11.
+  assert.throws(check([{ ...crowd, to: crowd.to + 3 }]),
+    /declared-battle-resource write to _global\.crowd_interest carries 14, but the resolved battle holds 11/);
+  // Nothing to be identical to: a crowd write checked with no battle pools.
+  assert.throws(check([crowd], null), /names a pool the resolved battle does not declare/);
+
+  // And the shape: each source keeps its own target and its own owner.
+  assert.throws(check([{ ...crowd, target: WriteTarget.COMBAT_OBJECT }]), /writes the global, not the combat-object/);
+  assert.throws(check([{ ...strength, target: WriteTarget.GLOBAL }]), /writes the combat-object, not the global/);
+  assert.throws(check([{ ...crowd, combatantId: "red-1" }]), /belongs to no combatant/);
+  assert.throws(check([{ ...strength, field: "charisma" }]), /may not write the vanilla field charisma/);
+  assert.throws(check([{ ...crowd, field: "crowdlevel" }]), /may not write the vanilla field crowdlevel/);
 });

@@ -1,0 +1,1221 @@
+/**
+ * A clip label -> a keyframe schedule. This module is where the renderer owns
+ * TIME, and it owns it because nothing upstream does.
+ *
+ * MEASURED, NOT ASSUMED: the presentation stream carries no timing at all. No
+ * command has a duration, a frame number or a completion signal, and
+ * `place-clip` is emitted only during arena construction — so after the arena
+ * is built, nothing in the stream ever moves a clip again. Every millisecond
+ * and every pose below is therefore the renderer's invention, and the module
+ * says so in each schedule's `provenance`.
+ *
+ * ► **EXCEPT WHERE THE BUILD'S OWN FRAMES ARE DRAWN, corrected 2026-09-24.**
+ *   The stream still carries no time, but the extracted rig draws the build's
+ *   frames, and the build plays those at a rate its SWF header states
+ *   (`build-timing.js`). A schedule whose length is a frame count of the
+ *   fighter clip plays it at that rate (`buildSchedule`, and every run
+ *   `clip-sequences.js` records) and says `provenance: "build-frames"`; the
+ *   poses are still this module's. Every other length is still authored.
+ *
+ * ► **ONE CLAUSE OF THAT IS NOW FALSE, corrected 2026-09-11 at the sentence.**
+ *   `move-clip` moves a clip after the arena is built, so "nothing in the
+ *   stream ever moves a clip again" no longer holds. **The claim the paragraph
+ *   is actually about still holds exactly**: the stream carries no TIME. A
+ *   `move-clip` names two endpoints and no duration, so how long the step takes
+ *   and how the figure gets there are still authored here — see `travelAt`.
+ *   The difference is that the DESTINATION is no longer invented by this
+ *   module; it is the resolver's, and inventing one would now be a divergence
+ *   from state a peer hashes rather than a harmless flourish.
+ *
+ * ---
+ *
+ * **PART 4 OF THE ANIMATION SEAM LANDS HERE, AND IT IS A DECISION.**
+ *
+ * `src/adapter/action-gate.js` implements parts 2 and 3 of the per-action
+ * acknowledgement seam and then stops, deliberately:
+ *
+ *   "**It never times out.** Nothing here counts wall-clock, holds a timer or
+ *   gives up on a surface. A timeout is a policy decision about a particular
+ *   animation surface, and no capture of the vanilla timeline's own completion
+ *   signal exists to derive one from."
+ *
+ * That was correct, and it left part 4 implemented nowhere — because until now
+ * this repository had no animation surface to have a policy about. It has one
+ * now, so the policy is stated here, in the surface that owns it, rather than
+ * pushed back into the gate:
+ *
+ * - a timeline that has run **more than `ANIMATION_TIMEOUT_MS` past its own
+ *   scheduled duration** is abandoned, not reported. `abandon(token, reason)`
+ *   records that the gate was opened by this surface giving up, which is a
+ *   different fact from the animation having finished, and the gate keeps them
+ *   apart on purpose;
+ * - the timeout is generous rather than tight, because the cost of waiting one
+ *   extra beat is a pause and the cost of abandoning early is an action whose
+ *   animation is still playing while the next one rebinds the globals under it;
+ * - **the number is authored and is not derived from anything.** It cannot be:
+ *   no capture records the vanilla timeline's completion signal. If one ever
+ *   does, this constant is the thing it settles.
+ */
+
+import { CLIP_SEQUENCES } from "./clip-sequences.js";
+import { BUILD_FRAME_MS, buildFramesMs } from "./build-timing.js";
+import { ss2ColossusYscaleAfter } from "../common/ss2-figure.js";
+
+export class TimelineError extends Error {
+  constructor(message, options = {}) {
+    super(message, options);
+    this.name = new.target.name;
+  }
+}
+
+/**
+ * How long past its scheduled end a timeline may run before the surface stops
+ * waiting. Authored; see this module's header for why it cannot be derived.
+ */
+export const ANIMATION_TIMEOUT_MS = 4000;
+
+/**
+ * The reference beat every AUTHORED duration is a multiple of.
+ *
+ * ► **A BEAT IS NOT ONE OF THE BUILD'S FRAMES, and treating it as one is what
+ *   made four clips run 3.6 times the build's length** (found 2026-09-24).
+ *   `psyche`, `psyche:discharge` and `celebrate` were given one beat per pack
+ *   frame — "nine frames is the pack's own length", "27 beats, which is the
+ *   build's own run" — and a beat is 120 ms where the build's frame is 33.3.
+ *   A length the build's frames set is `buildSchedule`'s, in frames; this is
+ *   for lengths this module invents, and only those.
+ */
+const BEAT_MS = 120;
+
+/** A schedule whose length this module invented, in beats. */
+const AUTHORED_TIMING = "authored-timing";
+
+/**
+ * A schedule whose length is the BUILD'S: a frame count read off the fighter
+ * clip, at the oracle's frame rate (`build-timing.js`). Still no capture
+ * settles it — it is the SWF header's nominal rate, not a measured playback —
+ * but nothing in it was invented here.
+ */
+const BUILD_FRAMES = "build-frames";
+
+const DEATH_VARIANTS = Object.freeze(["slain", "yield", "taunt", "arrow", "grievous"]);
+
+/**
+ * The vanilla condition FLAG names, which are what a condition phase emits as
+ * its actor label. `poison` the condition has the flag `poisoned`; the flag is
+ * the label, so this list is the flags.
+ */
+const CONDITION_LABELS = Object.freeze(new Set(["burning", "frozen", "poisoned", "life_stolen"]));
+
+/**
+ * The build's eight movement phases, each mapped to the GAIT it animates.
+ *
+ * The eight names and their byte offsets are the build's, from the battle
+ * map's movement-cost table: `walkleft` `+0x3b37`, `walkright` `+0x3d16`,
+ * `runleft` `+0x3ef5`, `runright` `+0x407e` (all `round(movement_speed / 2)`);
+ * `chargeright` `+0x4214`, `chargeleft` `+0x4480` (`round(movement_speed * 2)`);
+ * `jumpright` `+0x46ec`, `jumpleft` `+0x49c4` (`round(movement_speed)`). That
+ * they are also the CLIP labels is the adapter's assumption, which is why
+ * every one of them arrives marked `assumed`.
+ *
+ * **Four gaits, not eight schedules.** Direction is not a schedule: the figure
+ * travels from the command's `from` to its `to` whichever way that points, and
+ * a mirrored pose is the surface's business. Grouping by cost band would give
+ * three; grouping by gait gives four, because a run and a walk cost the same
+ * and should not read the same.
+ */
+const MOVEMENT_GAITS = Object.freeze(new Map([
+  ["walkleft", "walk"], ["walkright", "walk"],
+  ["runleft", "run"], ["runright", "run"],
+  ["chargeleft", "charge"], ["chargeright", "charge"],
+  ["jumpleft", "jump"], ["jumpright", "jump"],
+  // ► **AUTHORED, AND IT IS THE ONLY ENTRY HERE THAT IS.** The eight above are
+  //   the build's own phase names with byte offsets. `sidestep` names no
+  //   vanilla phase — the build has no lane to change — so it is spelled
+  //   without a direction, because a lane change has none: the figure travels
+  //   from the command's `fromY` to its `toY` whichever way that points.
+  ["sidestep", "sidestep"]
+]));
+
+/**
+ * The build's six `wincrowd` clips, each to the family whose schedule is its
+ * own length rounded to the beat (the table is at the families in
+ * `clip-labels.js`). The label is the build's own string: the `wincrowd` phase
+ * builds it as `"wincrowd" + wincrowd_move` and `cast_adulation` pushes
+ * `"wincrowd1"`.
+ */
+const WINCROWD_FAMILIES = Object.freeze(new Map([
+  ["wincrowd1", "wincrowd"], ["wincrowd3", "wincrowd"], ["wincrowd6", "wincrowd"],
+  ["wincrowd2", "wincrowd:2"], ["wincrowd4", "wincrowd:4"], ["wincrowd5", "wincrowd:5"]
+]));
+
+/**
+ * A pose is a set of normalised offsets a painter applies to the figure. All
+ * zero is a neutral standing gladiator; the ranges are authored.
+ */
+const NEUTRAL = Object.freeze({
+  lean: 0,        // -1 back .. +1 forward
+  armSwing: 0,    // -1 wound up .. +1 fully extended
+  legSpread: 0,   // 0 together .. 1 wide
+  weaponAngle: 0, // turns, -0.25 .. +0.25
+  bob: 0,         // -1 crouched .. +1 on toes
+  recoil: 0,      // 0 none .. 1 fully knocked back
+  fade: 0,        // 0 opaque .. 1 gone
+  /**
+   * How far the figure has stepped TOWARD its opponent, 0..1, applied by the
+   * surface as a translation rather than a bend.
+   *
+   * ► **THIS EXISTS BECAUSE THE FIGURES DID NOT WALK, and they could not.**
+   *   The presentation stream emits `place-clip` only during arena
+   *   construction, so nothing ever moves a clip again — and it cannot, because
+   *   **the resolver models no position at all**: a combatant projection
+   *   carries stats, loadout, health, status and resources, and no x. Vanilla
+   *   does move gladiators (`nextphase` clamps the active x to [-2100, 2100]),
+   *   so this is a real gap, and closing it properly means putting position in
+   *   the resolver — which puts it in `combatStateHash`, which makes it a
+   *   protocol change. That is ranked, not done here.
+   *
+   *   What IS legitimate here is a lunge: the attacker steps in on the swing
+   *   and back out after it, within its own slot. That is interpolation of a
+   *   pose this module authored, which is presentation; it invents no position
+   *   the resolver owns, and the figure ends where it started.
+   *
+   *   ► **HALF OF THAT IS NOW DONE — the PRESENTATION half, 2026-09-11.** The
+   *     stream has a `move-clip` command, this module has four movement gaits,
+   *     and `travelAt` carries a figure between the two endpoints a
+   *     `move-clip` names. **The resolver still models no position**, so
+   *     nothing in this repository emits a `move-clip` yet: the rule-set half
+   *     is still ranked and is preserved as a reference patch at
+   *     `docs/reference/position-in-the-resolver.patch.md`. The order is
+   *     deliberate — landing the resolver half first made a walking gladiator
+   *     play `Standing`, the idle clip, because there was no movement binding
+   *     for it to reach.
+   *
+   *     `advance` stays exactly what it was, and the movement gaits leave it
+   *     at 0 so the two displacements can never compound.
+   */
+  advance: 0
+});
+
+function pose(overrides) {
+  return Object.freeze({ ...NEUTRAL, ...overrides });
+}
+
+/** A schedule whose length this module AUTHORED, in 120 ms beats. */
+function schedule(family, beats, keyframes, options) {
+  return scheduleOf(family, beats * BEAT_MS, AUTHORED_TIMING, keyframes, options);
+}
+
+/**
+ * A schedule whose length is the BUILD'S — `frames` of the fighter clip at the
+ * oracle's frame rate — with poses that are still this module's own. The unit
+ * is in the name so a frame count can never again be passed as beats.
+ */
+function buildSchedule(family, frames, keyframes, options) {
+  return scheduleOf(family, buildFramesMs(frames), BUILD_FRAMES, keyframes, options);
+}
+
+function scheduleOf(family, durationMs, provenance, keyframes, { loop = false, travel = false, depthTravel = false } = {}) {
+  return Object.freeze({
+    family,
+    durationMs,
+    loop,
+    /**
+     * True when the figure TRAVELS across this schedule — its x runs from the
+     * `move-clip`'s `from` to its `to` — rather than posing in place. It is a
+     * flag rather than something a surface infers from the family name, so a
+     * surface never has to know which families are movement.
+     */
+    travel,
+    /**
+     * The same for the SECOND axis: the figure's y runs from the
+     * `move-clip-depth`'s `fromY` to its `toY`.
+     *
+     * A separate flag rather than a wider `travel`, for the reason the command
+     * kinds are separate: a schedule that travels in x must never be handed a
+     * depth motion~~, and a lane change must never slide the figure sideways~~.
+     * No schedule sets both, and nothing yet needs one that does.
+     *
+     * ► **CORRECTED 2026-09-23: a lane change DOES slide sideways when its own
+     *   batch moved the figure in x** — joining an occupied lane shifts x as
+     *   well (`engine-vs-screen` F5), and that x step now rides the sidestep so
+     *   the two axes move together instead of x jumping on the first frame.
+     *   What still holds is the reason the flags are separate: a sidestep with
+     *   no x step in its batch has no `motion` and never moves sideways. See
+     *   `figureXAt` and `timelinesForStep`.
+     */
+    depthTravel,
+    keyframes: Object.freeze(keyframes.map((frame) => Object.freeze({ at: frame.at, pose: pose(frame.pose) }))),
+    // Not decoration: nothing upstream carries timing, so a surface must be
+    // able to say that what it just played was invented here — or, for a
+    // `buildSchedule`, that its length is the build's.
+    provenance
+  });
+}
+
+/**
+ * The label families this module recognises, derived from the label STRING
+ * because that is all a command carries. The families are:
+ *
+ * - `attackN` / `bombard` / `snipe` / `taunt` — the actor's swing;
+ * - `hurtN` / `Block` / `taunted` / `knockback` — the target's answer;
+ * - a death variant — `slain` / `yield` / `taunt` / `arrow` / `grievous`,
+ *   which the adapter marks ASSUMED because the map records "death variants
+ *   (585-1083)" without naming any of them;
+ * - one of the build's eight movement phases, which collapse to four gaits and
+ *   are the only family whose schedules TRAVEL;
+ * - `Standing` and `rest`.
+ *
+ * Note the collision the build itself has: `taunt` is BOTH an attack label and
+ * a death variant. This module resolves it by ROLE, which the command carries,
+ * rather than by guessing from the string — see `timelineFor`.
+ */
+function familyOf(label, role) {
+  if (typeof label !== "string" || label.length === 0) return "unknown";
+  if (role === "defeated") return DEATH_VARIANTS.includes(label) ? `death:${label}` : "death:unknown";
+  if (label === "Standing") return "standing";
+  if (label === "rest") return "rest";
+  // The build's own condition FLAG names, which `SS2_STATIC_MAP_BINDINGS`
+  // emits as the actor label for a condition phase. Matched by name rather
+  // than by pattern: `poison` is dispatched as `poisoned-phase` and its flag is
+  // `poisoned`, so the three spellings differ and only the exact flag is safe.
+  if (CONDITION_LABELS.has(label)) return `condition:${label}`;
+  // Matched against the build's own eight phase names, never by a
+  // /^(walk|run|charge|jump)(left|right)$/ pattern: a pattern would also
+  // accept `sprintleft`, and silently giving an invented phase a recognised
+  // gait is how a guess stops looking like one.
+  if (MOVEMENT_GAITS.has(label)) return `movement:${MOVEMENT_GAITS.get(label)}`;
+  if (label === "Block") return "block";
+  if (label === "knockback") return "knockback";
+  // ► **THE PULLED VICTIM'S CLIP, added 2026-09-22 with `cast_command`.**
+  //   `defender.gotoAndPlay("knockback_mov")` at `+0x7c5e` is the one site in
+  //   the build that dispatches the continuation directly: 13 frames
+  //   (1434-1446), one `Stop`, no `struck`. It is already a member of the
+  //   `knockback` family in `clip-labels.js`, so the extracted rig draws it by
+  //   its own name. ~~`clip-sequences.js` records the family's pace as nine beats
+  //   to 13 frames, which is this clip's own length, so the family's duration
+  //   IS that pace and no override is needed.~~ **The nine beats were never a
+  //   pace (corrected 2026-09-24): they predate the extraction. The family is
+  //   13 of the build's frames now — this clip's own length at the build's
+  //   rate — so the family's duration still needs no override.** Matched by
+  //   exact name for the gait comment's reason.
+  if (label === "knockback_mov") return "knockback";
+  // ► **THE SHOVER'S OWN CLIP, and it had no family until 2026-09-22.**
+  //   `attacker.gotoAndPlay("shove")` at `+0x5e27`; frames 1447-1481, ending in
+  //   `this.struck = true; Stop` — which only the ACTING clips do. Until a
+  //   shove was found moving the wrong gladiator, its actor label came out of
+  //   the movement branch and nobody noticed it drew the `unknown` schedule.
+  if (label === "shove") return "shove";
+  // ► **THE DRINKER'S CLIP, added 2026-09-22 with the verb.**
+  //   `attacker.gotoAndPlay("drink_potion")` at `+0x57c6`; frames 1887-1910,
+  //   ending in `this.struck = true; Stop`. Matched by the build's exact
+  //   string, which is also the phase label — the one clip here that is.
+  if (label === "drink_potion") return "drink";
+  if (label === "taunted") return "taunted";
+  if (label === "taunt") return "taunt";
+  if (label === "bombard" || label === "snipe") return "ranged";
+  // ► **THE SPELL CLIPS, matched by the BUILD'S exact strings.** `Cast2` is
+  //   `attacker.gotoAndPlay("Cast2")` at `+0x8515`, capitalised as the build
+  //   writes it; `lightning` is `magic_damage_character`'s `damage_method`,
+  //   played on the victim by `defenderClip.gotoAndPlay(damage_method)`. Added
+  //   2026-09-22, after the bolt verbs had shipped two days earlier with both
+  //   labels falling to `unknown` here.
+  //
+  //   ~~`cast1` is deliberately NOT matched: it is `cast_gale`'s and the
+  //   fireball family's clip, and neither has a verb, so nothing dispatches it.~~
+  //   **`Cast1` IS MATCHED NOW, because `cast_gale` dispatches it** —
+  //   `attacker.gotoAndPlay("Cast1")` at `+0x7b30`, capitalised as the build
+  //   writes it. Same family as `Cast2`: 23 frames against 21, the same six
+  //   beats at 30 fps.
+  //   `lightning` is its own family rather than a `condition:*` one because it
+  //   is not a condition — no flag carries it. The four condition clips ARE
+  //   the same mechanism, though: a status tick and a spell both reach the
+  //   victim's clip through `damage_method`, and a fireball will play
+  //   `burning` through the family that already exists for it.
+  if (label === "Cast2") return "cast";
+  if (label === "Cast1") return "cast";
+  if (label === "lightning") return "magic:lightning";
+  // ► **THE REFILL'S CLIP, added 2026-09-22 after its verb (8ff985d) shipped
+  //   drawing the `unknown` schedule.** `attacker.gotoAndPlay("Rejuvinate")` at
+  //   `+0x8ded` — capital R, which is the string the event carries — while the
+  //   clip's own `FrameLabel` is lowercase `rejuvinate` (2169-2199). AVM1 finds
+  //   one with the other; this matches the build's CALL, exactly as `Cast2` is
+  //   matched, and the rig and the sound lower-case it to find the clip.
+  if (label === "Rejuvinate") return "rejuvinate";
+  // The colossus's clip, the same day and for the same reason, after its verb
+  // (d551c57): `attacker.gotoAndPlay("Colossus")` at `+0x806f`, frames
+  // 2147-2168 — the call and the `FrameLabel` spelled alike this time.
+  if (label === "Colossus") return "colossus";
+  // And the little fat kid's VICTIM clip, played on the defender by name:
+  // `defender.gotoAndPlay("little_fat_kid")` at `+0x82a2`.
+  if (label === "little_fat_kid") return "little_fat_kid";
+  // ► **PLAYING TO THE CROWD, added 2026-09-22 when `cast_adulation` began
+  //   dispatching `wincrowd1` (`+0x7732`).** The `wincrowd` phase assembles
+  //   `"wincrowd" + wincrowd_move` (`+0x50de`), so all six are reachable and
+  //   all six are matched — by exact name, never by `/^wincrowd\d$/`, for the
+  //   gait comment's reason. Four families because the six lengths round to
+  //   four schedules; `clip-labels.js` has the table.
+  if (WINCROWD_FAMILIES.has(label)) return WINCROWD_FAMILIES.get(label);
+  // ► **TWO PSYCHE FAMILIES AND NOT ONE, BECAUSE THE THIRD CLIP IS LONGER AND
+  //   IS THE ONE THAT SWINGS.** In the extracted pack `psyche_up` runs frames
+  //   1609-1617 and `psyche_up2` 1627-1635 — nine each — while `psyche_up3` is
+  //   1644-1656, thirteen, and carries its own baked discharge-burst art as a
+  //   seventeenth placement. Folding all three into one schedule would play the
+  //   discharge at the charge's length, which is the kind of averaging this
+  //   table exists to avoid.
+  //
+  //   Matched by exact name, not by a `/^psyche/` pattern, for the reason the
+  //   gait comment above gives: a pattern would also accept `psyche_charging`,
+  //   which is a CONTINUATION this engine never dispatches, and silently giving
+  //   it a recognised schedule is how a guess stops looking like one.
+  if (label === "psyche_up" || label === "psyche_up2") return "psyche";
+  if (label === "psyche_up3") return "psyche:discharge";
+  // ► **THE HELD STANCE, AND IT IS THE ONLY IDLE HERE THAT IS NOT `Standing`.**
+  //   `changeCombatants` poses a charged gladiator with `gotoAndStop`, so these
+  //   two labels name a FRAME the figure rests on between actions rather than
+  //   an animation it performs. Matched by exact name for the reason the
+  //   `psyche` pair above is: a `/^psyche/` pattern would have swallowed them
+  //   into the performance family, which is where they do not belong.
+  if (label === "psyche_charging") return "stance:psyche";
+  if (label === "psyche_charging2") return "stance:psyche2";
+  // The victory celebration, which is an IDLE and not a performance: the build
+  // loops it until something else moves the figure, and in a finished bout
+  // nothing does. Matched by exact name like the two above.
+  if (label === "celebrate1") return "celebrate";
+  if (/^attack\d+$/.test(label)) return "attack";
+  if (/^hurt\d+$/.test(label)) return "hurt";
+  // ► **`defendN` IS ITS OWN FAMILY AND NOT `block`.** A miss dispatches
+  //   `defender_blocked()`, which plays one of thirteen ACTIVE parries keyed on
+  //   the attack direction; `Block` is the STATIC guard held during a weapon
+  //   swap. Folding them together is tempting because the build's function is
+  //   called `defender_blocked` — and it would give a parry the guard's pose.
+  if (/^defend\d+$/.test(label)) return "defend";
+  return "unknown";
+}
+
+const FAMILIES = Object.freeze({
+  standing: () => schedule("standing", 12, [
+    { at: 0, pose: {} },
+    { at: 0.5, pose: { bob: 0.12 } },
+    { at: 1, pose: {} }
+  ], { loop: true }),
+
+  rest: () => schedule("rest", 10, [
+    { at: 0, pose: {} },
+    { at: 0.45, pose: { bob: -0.55, lean: 0.15, armSwing: -0.3 } },
+    { at: 1, pose: { bob: -0.1 } }
+  ]),
+
+  attack: () => schedule("attack", 7, [
+    { at: 0, pose: {} },
+    { at: 0.28, pose: { armSwing: -0.7, lean: -0.25, weaponAngle: -0.18, bob: 0.15, advance: -0.12 } },
+    { at: 0.52, pose: { armSwing: 1, lean: 0.55, weaponAngle: 0.2, legSpread: 0.6, advance: 1 } },
+    { at: 0.75, pose: { armSwing: 0.45, lean: 0.3, legSpread: 0.35, advance: 0.55 } },
+    { at: 1, pose: {} }
+  ]),
+
+  ranged: () => schedule("ranged", 9, [
+    { at: 0, pose: {} },
+    { at: 0.35, pose: { armSwing: -0.55, lean: -0.2, weaponAngle: -0.08 } },
+    { at: 0.6, pose: { armSwing: -0.85, lean: -0.05, bob: 0.1 } },
+    { at: 0.72, pose: { armSwing: 0.65, lean: 0.2 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * A condition taking its bearer's turn: burning, frozen, poisoned,
+   * life_stolen. Four schedules rather than one, because they should not read
+   * alike — but every millisecond of all four is AUTHORED, and the map records
+   * "condition effects (1911-2004)" as a frame range naming no label inside it.
+   */
+  "condition:burning": () => schedule("condition:burning", 7, [
+    { at: 0, pose: {} },
+    { at: 0.2, pose: { recoil: 0.35, lean: -0.3, bob: 0.12, armSwing: 0.3 } },
+    { at: 0.45, pose: { recoil: 0.2, lean: 0.2, bob: -0.1, armSwing: -0.2 } },
+    { at: 0.7, pose: { recoil: 0.3, lean: -0.2, bob: 0.08, armSwing: 0.25 } },
+    { at: 1, pose: {} }
+  ]),
+  "condition:frozen": () => schedule("condition:frozen", 8, [
+    { at: 0, pose: {} },
+    // Rigid on purpose: almost nothing moves, which is the whole read.
+    { at: 0.3, pose: { bob: -0.08, legSpread: 0.05, lean: -0.04 } },
+    { at: 0.72, pose: { bob: -0.05, legSpread: 0.02, lean: 0.03 } },
+    { at: 1, pose: {} }
+  ]),
+  "condition:poisoned": () => schedule("condition:poisoned", 9, [
+    { at: 0, pose: {} },
+    { at: 0.35, pose: { lean: -0.55, bob: -0.45, armSwing: -0.35, legSpread: 0.25 } },
+    { at: 0.7, pose: { lean: -0.35, bob: -0.3, armSwing: -0.2 } },
+    { at: 1, pose: {} }
+  ]),
+  "condition:life_stolen": () => schedule("condition:life_stolen", 8, [
+    { at: 0, pose: {} },
+    { at: 0.4, pose: { bob: -0.5, lean: -0.15, armSwing: -0.45, fade: 0.18 } },
+    { at: 0.75, pose: { bob: -0.25, armSwing: -0.2, fade: 0.08 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * The four gaits. **Every millisecond and every pose is AUTHORED**, and the
+   * map is more silent here than it is about the conditions: it gives one
+   * unnamed frame range, "movement and charge (33-104)", for all eight phases
+   * together, so it does not even separate a walk from a charge.
+   *
+   * All four keep `advance` at 0 throughout, and that is load-bearing rather
+   * than an omission. `advance` is the within-slot LUNGE the surface applies
+   * with its own `ADVANCE_UNITS`; a movement schedule's displacement comes
+   * from the `move-clip`'s two endpoints instead, through `travelAt`. A
+   * schedule that used both would move the figure twice and the second
+   * displacement would be one this module invented.
+   *
+   * The legs carry the read: a walk paces, a run leans in and spreads wider, a
+   * charge commits the weapon forward, a jump leaves the ground (`bob` peaks
+   * near 1 and the feet come together at the apex).
+   */
+  "movement:walk": () => schedule("movement:walk", 8, [
+    { at: 0, pose: {} },
+    { at: 0.25, pose: { legSpread: 0.45, bob: 0.06, lean: 0.08, armSwing: -0.15 } },
+    { at: 0.5, pose: { legSpread: 0.08, bob: -0.04, lean: 0.05 } },
+    { at: 0.75, pose: { legSpread: 0.45, bob: 0.06, lean: 0.08, armSwing: 0.15 } },
+    { at: 1, pose: {} }
+  ], { travel: true }),
+
+  /**
+   * ► **THE LANE CHANGE, AND IT IS AUTHORED TWICE OVER.** The build has no
+   *   sidestep phase — its eight movement phases all change `_x` — so there is
+   *   no clip label to be faithful to and no frame count to copy. This is mod
+   *   surface for the second axis, named so it cannot be mistaken for one of
+   *   the six map-named gaits above it.
+   *
+   * `depthTravel` rather than `travel`, and the distinction is the whole
+   * point: `travel` means "interpolate the actor's X from its `motion`", and a
+   * lane change moves the other axis. A schedule that set `travel` would have
+   * the shell slide the figure sideways across the arena.
+   *
+   * Longer than a walk (10 frames against 8) on purpose: a lane change moves
+   * 97 arena units of depth, which reaches the screen as 1.16 times the
+   * figure's own drawn height. Covering that in a walk's time is what made the
+   * first version read as a leap.
+   */
+  "movement:sidestep": () => schedule("movement:sidestep", 10, [
+    { at: 0, pose: {} },
+    { at: 0.2, pose: { legSpread: 0.3, bob: 0.04, lean: 0.06 } },
+    { at: 0.5, pose: { legSpread: 0.5, bob: 0.02, lean: 0.02 } },
+    { at: 0.8, pose: { legSpread: 0.3, bob: 0.04, lean: -0.04 } },
+    { at: 1, pose: {} }
+  ], { depthTravel: true }),
+
+  "movement:run": () => schedule("movement:run", 6, [
+    { at: 0, pose: {} },
+    { at: 0.22, pose: { legSpread: 0.75, bob: 0.22, lean: 0.3, armSwing: -0.35 } },
+    { at: 0.5, pose: { legSpread: 0.15, bob: 0.05, lean: 0.34 } },
+    { at: 0.78, pose: { legSpread: 0.75, bob: 0.22, lean: 0.3, armSwing: 0.35 } },
+    { at: 1, pose: { lean: 0.1 } }
+  ], { travel: true }),
+
+  "movement:charge": () => schedule("movement:charge", 7, [
+    { at: 0, pose: {} },
+    { at: 0.18, pose: { lean: -0.2, armSwing: -0.5, bob: -0.1, weaponAngle: -0.12 } },
+    { at: 0.55, pose: { lean: 0.6, armSwing: 0.55, legSpread: 0.7, weaponAngle: 0.1, bob: 0.1 } },
+    { at: 0.85, pose: { lean: 0.45, armSwing: 0.4, legSpread: 0.5, weaponAngle: 0.08 } },
+    { at: 1, pose: { lean: 0.15 } }
+  ], { travel: true }),
+
+  "movement:jump": () => schedule("movement:jump", 7, [
+    { at: 0, pose: {} },
+    { at: 0.18, pose: { bob: -0.6, legSpread: 0.35, lean: 0.1 } },
+    { at: 0.5, pose: { bob: 0.95, legSpread: 0.05, lean: 0.2, armSwing: -0.25 } },
+    { at: 0.82, pose: { bob: -0.35, legSpread: 0.5, lean: 0.05 } },
+    { at: 1, pose: {} }
+  ], { travel: true }),
+
+  /**
+   * BUILDING UP: no contact, no advance, and that is the point.
+   *
+   * ► ~~**EVERY MILLISECOND HERE IS AUTHORED and the FRAME COUNT is not.**~~
+   *   **THE LENGTH IS THE BUILD'S, and until 2026-09-24 it was 3.6 times it**:
+   *   nine frames were written as nine 120 ms BEATS, so the charge drew over
+   *   1,080 ms (2,160 with its continuation) where the build plays 300 (600).
+   *   Nine frames is the pack's own length for `psyche_up` (1609-1617) and
+   *   `psyche_up2` (1627-1635), now at the build's rate. The poses between them
+   *   are this engine's, like every other schedule in this table — the map
+   *   records frame ranges and names no pose inside one.
+   *
+   *   `advance: 0` throughout is a derivation rather than a choice: the build
+   *   gates the discharge on a range test it does not move to satisfy, so a
+   *   gladiator who psyches up stands exactly where he stood.
+   */
+  psyche: () => buildSchedule("psyche", 9, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: -0.5, lean: -0.3, bob: 0.3, legSpread: 0.35 } },
+    { at: 0.62, pose: { armSwing: -0.85, lean: -0.15, bob: 0.55, legSpread: 0.5 } },
+    { at: 0.85, pose: { armSwing: -0.6, lean: 0.05, bob: 0.3, legSpread: 0.3 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * THE THIRD PRESS, which is a grievous blow.
+   *
+   * Thirteen frames, the pack's own length for `psyche_up3` (1644-1656) — the
+   * longest of the three and the only one that reaches `checkattackroll`. It
+   * keeps the charge's wind-up and then commits, so the two read as one
+   * escalating gesture rather than two unrelated animations. At the build's
+   * rate since 2026-09-24 (433 ms); ~~thirteen beats~~, 1,560 ms, before.
+   */
+  "psyche:discharge": () => buildSchedule("psyche:discharge", 13, [
+    { at: 0, pose: {} },
+    { at: 0.22, pose: { armSwing: -0.9, lean: -0.35, bob: 0.5, legSpread: 0.45 } },
+    { at: 0.45, pose: { armSwing: -1, lean: -0.4, bob: 0.7, legSpread: 0.6 } },
+    { at: 0.62, pose: { armSwing: 1, lean: 0.6, weaponAngle: 0.3, legSpread: 0.7, advance: 0.5 } },
+    { at: 0.8, pose: { armSwing: 0.5, lean: 0.35, legSpread: 0.45, advance: 0.2 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * THE CHARGED STANCE — a gladiator holding a psych-up charge, between
+   * actions.
+   *
+   * ► **IT IS A HELD FRAME AND THE SCHEDULE SAYS SO IN THREE WAYS**: one
+   *   keyframe, so every `at` interpolates to the same pose; `loop: true`, so
+   *   nothing treats it as a performance that ends and hands back; and
+   *   `src/render/stance.js` holds `at` at 0 so the extracted rig shows
+   *   `psyche_charging`'s FIRST frame, which is where `gotoAndStop` leaves the
+   *   playhead. Any one of the three alone would let the stance drift into
+   *   looking like an animation.
+   *
+   * ► **THE DURATION IS NOT A DURATION.** A held pose has none; the build holds
+   *   it until the counter changes. One beat is the smallest value that keeps
+   *   `poseAt`'s arithmetic and the shell's `% durationMs` from dividing by
+   *   zero, and nothing reads it as a length.
+   *
+   * ► **AND THE AUTHORED POSE IS THE ONLY PART OF THIS A CLONE WITH NO PACK
+   *   SEES.** With the extraction present the build's own frame is drawn and
+   *   these numbers never show. The read wanted is BRACED — weight down and
+   *   forward, arms drawn in, not the neutral stand.
+   */
+  "stance:psyche": () => schedule("stance:psyche", 1, [
+    { at: 0, pose: { bob: -0.12, lean: 0.18, legSpread: 0.3, armSwing: -0.35 } }
+  ], { loop: true }),
+
+  /** The deeper charge: lower, wider, wound further in. */
+  "stance:psyche2": () => schedule("stance:psyche2", 1, [
+    { at: 0, pose: { bob: -0.22, lean: 0.3, legSpread: 0.5, armSwing: -0.6, weaponAngle: -0.12 } }
+  ], { loop: true }),
+
+  /**
+   * THE VICTORY CELEBRATION, and the one schedule here that is meant to run
+   * forever.
+   *
+   * ► **~~27~~ 26 FRAMES, WHICH IS THE BUILD'S OWN RUN**: `celebrate1` is 9
+   *   frames (1400-1408) and runs on into `celebrate1a`'s 18 (1409-1426), and
+   *   ~~`clip-sequences.js` gives the renderer all 27 poses~~ **the build
+   *   SHOWS 17 of those 18: 1426 is the `GoToLabel` and jumps before it
+   *   renders** (corrected 2026-09-24 by an adversarial verifier;
+   *   `clipPassesFor`), so the renderer draws 26 poses. Only reachable through
+   *   `celebrate1`, whose run length overrides it in `timelineFor`; stated
+   *   here so the two agree. ~~One beat a frame,
+   *   because the `psyche` family set that precedent for a clip whose length
+   *   the pack states.~~ **A beat is not a frame (corrected 2026-09-24): 27
+   *   beats drew the run over 3,240 ms where the build plays it in 900, and
+   *   the precedent was the `psyche` family's own unit error.**
+   *
+   * ► ~~**THE BUILD LOOPS ONLY THE TAIL AND THIS LOOPS THE WHOLE RUN, which is a
+   *   stated approximation rather than an oversight.**~~ *(Superseded
+   *   2026-09-18: `idleFrameFor` in `stance.js` takes `celebratingSince` and
+   *   cycles only the tail; the paragraph below is the reasoning it replaced.)* Frame 1426 is
+   *   `GoToLabel("celebrate1a"); Play`, so vanilla plays the 9-frame entry ONCE
+   *   and then cycles the 18-frame body. Reproducing that needs a loop-start
+   *   offset, and a loop-start offset needs to know when the celebration BEGAN
+   *   — which this module deliberately does not know, because `idleFrameFor`
+   *   is stateless and takes only the frame's clock. **The cost is that the
+   *   winner re-plays his opening flourish once a cycle**; the benefit is that
+   *   no part of the renderer has to hold when a bout ended.
+   */
+  celebrate: () => buildSchedule("celebrate", 26, [
+    { at: 0, pose: {} },
+    { at: 0.18, pose: { armSwing: 0.9, bob: 0.45, lean: -0.2 } },
+    { at: 0.36, pose: { armSwing: 0.5, bob: 0.1, legSpread: 0.5 } },
+    { at: 0.58, pose: { armSwing: 1, bob: 0.55, lean: -0.15, legSpread: 0.3 } },
+    { at: 0.8, pose: { armSwing: 0.6, bob: 0.2, legSpread: 0.45 } },
+    { at: 1, pose: {} }
+  ], { loop: true }),
+
+  /**
+   * The push — 35 frames at the build's 30 fps is 1,167 ms, ten beats. The
+   * POSES are authored, like every other pose here, and the extracted rig's own
+   * `shove` clip overrides them.
+   */
+  shove: () => schedule("shove", 10, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { lean: -0.2, armSwing: -0.4 } },
+    { at: 0.55, pose: { lean: 0.5, armSwing: 0.9, legSpread: 0.5, advance: 0.6 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * The drink — 24 frames (1887-1910) at the build's 30 fps is 800 ms, 6.67
+   * beats, and the nearest beat is SEVEN = 840 ms: the rule that made
+   * `shove`'s 35 frames ten beats and `Cast2`'s 21 six. The POSES are
+   * authored — head back, arm up — and the extracted rig's own `drink_potion`
+   * clip overrides them.
+   */
+  drink: () => schedule("drink", 7, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: -0.7, lean: -0.25, bob: 0.1 } },
+    { at: 0.65, pose: { armSwing: -0.9, lean: -0.4, bob: 0.2 } },
+    { at: 1, pose: {} }
+  ]),
+
+  taunt: () => schedule("taunt", 10, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: 0.8, bob: 0.4, lean: -0.3 } },
+    { at: 0.6, pose: { armSwing: 0.5, bob: 0.15, legSpread: 0.5 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * THE CAST AND THE BOLT'S ANSWER — added 2026-09-22.
+   *
+   * The DURATIONS are the build's frame counts at 30 fps, rounded to the beat,
+   * because neither family was authored at a pace (`clip-sequences.js`'s rule):
+   * `Cast2` is frames 2126-2146 and `lightning` 1989-2003, and both end in a
+   * `Stop` inside their own span. `Cast1` (the gale's, 2103-2125, 23 frames =
+   * 767 ms = 6.39 beats) rounds to the same six, so it shares this schedule
+   * rather than needing its own. **The POSES are authored**, like every other
+   * pose in this file, and the extracted rig overrides them wherever the
+   * player has extracted the pack.
+   */
+  cast: () => schedule("cast", 6, [
+    { at: 0, pose: {} },
+    { at: 0.35, pose: { armSwing: -0.9, lean: -0.3, bob: 0.25 } },
+    { at: 0.6, pose: { armSwing: 0.8, lean: 0.35, bob: 0.1 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * The refill — `rejuvinate`, frames 2169-2199 ending in `struck = true;
+   * Stop`: 31 frames at 30 fps is 1,033 ms, 8.61 beats, and the nearest beat
+   * is NINE = 1,080 ms, the rule `cast` and `drink` follow. The POSES are
+   * authored — arms raised, lifted onto the toes, then settling — and the
+   * extracted rig's own `rejuvinate` clip overrides them. Frame 2169 also
+   * sets the face (`head.eyes` "Large", `head.mouth` "happy"), which
+   * `face.js` reads from the pack's bindings by label; nothing here.
+   */
+  rejuvinate: () => schedule("rejuvinate", 9, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: -0.8, lean: -0.2, bob: 0.35 } },
+    { at: 0.6, pose: { armSwing: -1, lean: -0.3, bob: 0.5, legSpread: 0.3 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * The colossus — `Colossus`, frames 2147-2168 ending in `struck = true;
+   * Stop`: 22 frames at 30 fps is 733 ms, 6.11 beats, so SIX = 720 ms, the
+   * same six `Cast2`'s 21 and `Cast1`'s 23 round to. The POSES are authored — a
+   * flex, arms driven down and out, feet planted wide — and the extracted rig's
+   * own `colossus` clip overrides them. The caster's GROWTH is not in this
+   * schedule: it is the arm's `_yscale` write, not a frame of the clip — and
+   * since 2026-09-24 it is drawn, tick by tick from this clip's first frame,
+   * by `figureYscaleAt`.
+   */
+  colossus: () => schedule("colossus", 6, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: -0.6, lean: -0.15, legSpread: 0.5, bob: -0.2 } },
+    { at: 0.65, pose: { armSwing: 0.4, lean: 0.1, legSpread: 0.8, bob: 0.3 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * The little fat kid, on its VICTIM. The clip's span runs to the fighter
+   * clip's end (2222) but the build stops at 2216 (`struck = true; Stop`), so
+   * the length is what it PLAYS: 2200-2216, 17 frames = 567 ms = 4.72 beats,
+   * so FIVE = 600 ms. The POSES are authored — a crouch, drawn in — and the
+   * extracted rig's own clip overrides them. The victim's SHRINK to 50% is the
+   * arm's `_yscale` snap, not a frame of the clip, and is not drawn here — it
+   * is drawn by `figureYscaleAt` (since 2026-09-24), from this clip's first
+   * frame, which is the tick the build snaps it.
+   */
+  little_fat_kid: () => schedule("little_fat_kid", 5, [
+    { at: 0, pose: {} },
+    { at: 0.35, pose: { bob: -0.6, lean: -0.2, legSpread: 0.2, armSwing: -0.3 } },
+    { at: 0.7, pose: { bob: -0.45, lean: 0.1, legSpread: 0.3 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * Playing to the crowd — four schedules for the six clips, each the build's
+   * own length at 30 fps rounded to the beat: `wincrowd` 8 beats = 960 ms
+   * (`wincrowd1` 30 frames, `wincrowd3` 29, `wincrowd6` 28), `wincrowd:2` 10 =
+   * 1,200 (35), `wincrowd:5` 14 = 1,680 (50), `wincrowd:4` 16 = 1,920 (58).
+   * ONE authored gesture — arms up to the stands, a bounce, back — stretched
+   * over each, because the poses are authored and a pack-less clone has no
+   * six performances to tell apart; the extracted rig draws each clip as
+   * itself.
+   */
+  wincrowd: () => wincrowdSchedule("wincrowd", 8),
+  "wincrowd:2": () => wincrowdSchedule("wincrowd:2", 10),
+  "wincrowd:4": () => wincrowdSchedule("wincrowd:4", 16),
+  "wincrowd:5": () => wincrowdSchedule("wincrowd:5", 14),
+
+  "magic:lightning": () => schedule("magic:lightning", 4, [
+    { at: 0, pose: {} },
+    { at: 0.25, pose: { recoil: 0.6, lean: -0.35, bob: 0.3, armSwing: 0.6 } },
+    { at: 0.5, pose: { recoil: 0.3, lean: 0.2, bob: -0.2, armSwing: -0.5 } },
+    { at: 0.75, pose: { recoil: 0.45, lean: -0.25, bob: 0.2, armSwing: 0.4 } },
+    { at: 1, pose: {} }
+  ]),
+
+  taunted: () => schedule("taunted", 8, [
+    { at: 0, pose: {} },
+    { at: 0.4, pose: { lean: -0.4, bob: -0.25 } },
+    { at: 1, pose: {} }
+  ]),
+
+  hurt: () => schedule("hurt", 5, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { recoil: 0.7, lean: -0.5, bob: -0.2 } },
+    { at: 0.65, pose: { recoil: 0.3, lean: -0.2 } },
+    { at: 1, pose: {} }
+  ]),
+
+  block: () => schedule("block", 5, [
+    { at: 0, pose: {} },
+    { at: 0.35, pose: { armSwing: 0.3, lean: -0.25, legSpread: 0.4, bob: -0.15 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * THE ACTIVE PARRY — what a gladiator does when a blow MISSES.
+   *
+   * ► **IT IS THE ANSWER TO `hurt`, AND THE SHAPE SAYS SO.** `hurt` recoils
+   *   BACKWARD off a blow that landed; this drives the arm ACROSS to meet one
+   *   that did not, and the body turns into it rather than away. Six frames
+   *   against `hurt`'s five, because a parry is a committed movement and a
+   *   flinch is not.
+   *
+   * ► **AUTHORED, LIKE EVERY OTHER POSE IN THIS FILE, and the extracted rig
+   *   overrides it.** `paintExtractedFigure` prefers the build's own thirteen
+   *   `defend` clips when the player has extracted them; this is the fallback a
+   *   clone with no assets gets, and it exists so the label has somewhere to
+   *   play rather than freezing the bout — which is exactly what
+   *   `test/render-arena-host.test.js` caught when the label landed without it.
+   */
+  defend: () => schedule("defend", 6, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { armSwing: 0.75, lean: 0.2, legSpread: 0.35, bob: -0.1 } },
+    { at: 0.6, pose: { armSwing: 0.45, lean: 0.1, legSpread: 0.5 } },
+    { at: 1, pose: {} }
+  ]),
+
+  /**
+   * THE KNOCKBACK, at the build's own length since 2026-09-24: `knockback_mov`'s
+   * 13 frames (1434-1446) when it is dispatched on its own, and the 19-frame
+   * run when `knockback` is (`timelineFor`'s sequenced path). ~~Nine beats~~ —
+   * written 2026-09-10 for the authored figure, before the fighter had been
+   * extracted, and later read back as "the pace" of a 13-frame clip, which
+   * drew a knockback at 2.5 times the build's length. The POSES are authored.
+   */
+  knockback: () => buildSchedule("knockback", 13, [
+    { at: 0, pose: {} },
+    { at: 0.25, pose: { recoil: 1, lean: -0.9, bob: 0.3 } },
+    { at: 0.6, pose: { recoil: 0.8, lean: -0.6, bob: -0.4, legSpread: 0.7 } },
+    { at: 1, pose: { recoil: 0.15, lean: -0.1 } }
+  ]),
+
+  unknown: () => schedule("unknown", 6, [
+    { at: 0, pose: {} },
+    { at: 0.5, pose: { bob: -0.2 } },
+    { at: 1, pose: {} }
+  ])
+});
+
+/** The one authored crowd-pleasing gesture, at a `wincrowd` family's own length. */
+function wincrowdSchedule(family, beats) {
+  return schedule(family, beats, [
+    { at: 0, pose: {} },
+    { at: 0.25, pose: { armSwing: -0.9, lean: -0.25, bob: 0.3 } },
+    { at: 0.5, pose: { armSwing: -0.6, lean: -0.1, bob: 0.1, legSpread: 0.35 } },
+    { at: 0.75, pose: { armSwing: -1, lean: -0.3, bob: 0.4, legSpread: 0.2 } },
+    { at: 1, pose: {} }
+  ]);
+}
+
+function deathSchedule(variant) {
+  const beats = variant === "yield" ? 12 : 10;
+  return schedule(`death:${variant}`, beats, [
+    { at: 0, pose: {} },
+    { at: 0.3, pose: { recoil: 0.6, lean: -0.5, bob: -0.3 } },
+    { at: 0.7, pose: { lean: -0.9, bob: -0.9, legSpread: 0.8, fade: 0.2 } },
+    { at: 1, pose: { lean: -1, bob: -1, legSpread: 0.9, fade: variant === "yield" ? 0.35 : 0.6 } }
+  ]);
+}
+
+/**
+ * @param {string} label the clip label from a `clip-goto` command
+ * @param {{role?: string}} options the command's own `role` — "actor",
+ *   "target" or "defeated". Passed rather than inferred because `taunt` is both
+ *   an attack label and a death variant, and only the role tells them apart.
+ * @returns {object} a frozen keyframe schedule; never throws on an unknown
+ *   label, because the adapter legitimately emits assumed ones and the arena
+ *   must still advance.
+ */
+export function timelineFor(label, { role = "actor" } = {}) {
+  const family = familyOf(label, role);
+  if (family.startsWith("death:")) {
+    const variant = family.slice("death:".length);
+    return Object.freeze({
+      ...deathSchedule(variant === "unknown" ? "slain" : variant),
+      label,
+      recognised: variant !== "unknown"
+    });
+  }
+  const build = FAMILIES[family] ?? FAMILIES.unknown;
+  const built = build();
+  // ► **A SEQUENCED LABEL NEEDS LONGER, AND THE ALTERNATIVE IS NOT "UNCHANGED"
+  //   BUT "TWICE AS FAST".** The family's duration was authored for the clip
+  //   that carries the label's name; `clip-sequences.js` has the build running
+  //   on past it, so the surface has up to twice the poses to show in the same
+  //   slot. ~~Six labels carry their own authored beat count there — see that
+  //   module's header for the rule they were chosen under, and note that they
+  //   are AUTHORED exactly like the numbers above, which is why the provenance
+  //   below is untouched.~~
+  //
+  // ► **AND SINCE 2026-09-24 THE RUN PLAYS AT THE BUILD'S OWN FRAME RATE —
+  //   `frames` of it, each `BUILD_FRAME_MS` — and no longer at an authored beat
+  //   count.** The table's `beats` kept "the pace the family was authored at",
+  //   and measured against the drawing that pace was wrong for four of the five
+  //   it was applied to: `psyche_up` and `psyche_up2` ran at one 120 ms beat per
+  //   FRAME, 3.6 times the build's length; `hurt8` and `knockback` scaled five
+  //   and nine beats that were written on 2026-09-10 (473ef59), three days
+  //   before any frame of the fighter was extracted (ede9350), so no clip length
+  //   was ever in them — a knockback drew 1,560 ms where the build plays 633.
+  //   The fifth, `burning`, was already "the build's own 30 fps" rounded to the
+  //   beat, and moves ~~13 ms~~ **80 ms, 1,080 to 1,000**. ~~The run's frame
+  //   count is the tool-derived half of the table (`tools/clip-sequences.mjs`),
+  //   which is why the provenance says whose clock this is.~~
+  //
+  // ► **CORRECTED THE SAME DAY BY AN ADVERSARIAL VERIFIER, at both halves of
+  //   that sentence.** (1) `burning`'s count is NOT the tool's: its repeat is
+  //   read by hand (`repeats.derivedBy: "hand"` at the field), and the 32 this
+  //   first timed was the frame SLOTS the playhead passes — 1963 jumps before it
+  //   renders, twice, so the build shows 30 (`clipPassesFor`), and `celebrate1`
+  //   shows 26 of its 27 for the same reason. Timing the slots drew the burn
+  //   67 ms long with 1963's art on screen twice. (2) The other four runs'
+  //   counts ARE the tool's spans. `frames` is what the build SHOWS, and the
+  //   provenance says whose clock that is — the SWF header's nominal rate over
+  //   the build's own frames, with no capture yet timing either loop.
+  const key = typeof label === "string" ? label.toLowerCase() : "";
+  const runFrames = Object.hasOwn(CLIP_SEQUENCES, key) ? CLIP_SEQUENCES[key].frames : null;
+  const timed = Number.isInteger(runFrames) && runFrames > 0
+    ? { ...built, durationMs: buildFramesMs(runFrames), provenance: BUILD_FRAMES }
+    : built;
+  return Object.freeze({ ...timed, label, recognised: family !== "unknown" });
+}
+
+/**
+ * Linear interpolation between the two keyframes bracketing `at`.
+ *
+ * Presentation arithmetic only: it interpolates poses this module authored. It
+ * touches no combat value and reads nothing the resolver owns.
+ */
+export function poseAt(timeline, at) {
+  if (!timeline || !Array.isArray(timeline.keyframes) || timeline.keyframes.length === 0) {
+    throw new TimelineError("poseAt needs a timeline from timelineFor().");
+  }
+  const clamped = at < 0 ? 0 : at > 1 ? 1 : at;
+  const frames = timeline.keyframes;
+  let previous = frames[0];
+  for (const frame of frames) {
+    if (frame.at <= clamped) previous = frame;
+    else {
+      const span = frame.at - previous.at;
+      const ratio = span === 0 ? 0 : (clamped - previous.at) / span;
+      const blended = {};
+      for (const key of Object.keys(NEUTRAL)) {
+        blended[key] = previous.pose[key] + (frame.pose[key] - previous.pose[key]) * ratio;
+      }
+      return Object.freeze(blended);
+    }
+  }
+  return previous.pose;
+}
+
+/**
+ * Where a travelling figure is, `at` fraction of the way through its gait.
+ *
+ * The endpoints are the resolver's, read off the scene's `motion` record; only
+ * the CURVE between them is this module's, and it is deliberately the dullest
+ * one available. An ease would look better and would put the figure somewhere
+ * the resolver never said it was for most of the step; linear is the only
+ * interpolation that is wrong nowhere except in taste.
+ *
+ * Called with a motion whose `to` equals its `from` — a step the arena clamp
+ * swallowed — it returns that coordinate throughout, which is the right
+ * picture of walking into a wall.
+ *
+ * @param {{from: number, to: number}} motion the scene actor's `motion` record
+ * @param {number} at 0..1, clamped
+ * @returns {number} the arena x
+ */
+export function travelAt(motion, at) {
+  if (!motion || !Number.isFinite(motion.from) || !Number.isFinite(motion.to)) {
+    throw new TimelineError("travelAt needs a scene actor's `motion` record, carrying finite from and to.");
+  }
+  if (!Number.isFinite(at)) {
+    throw new TimelineError("travelAt needs the fraction of the way through the gait.");
+  }
+  const clamped = at < 0 ? 0 : at > 1 ? 1 : at;
+  return motion.from + (motion.to - motion.from) * clamped;
+}
+
+/**
+ * How far a full `advance` steps, in arena units. Authored, and deliberately
+ * smaller than the gap between two slots: a lunge is a step inside your own
+ * ground, not a walk across the arena.
+ *
+ * ► **IT LIVED IN `tools/arena/main.js` UNTIL 2026-09-11, AND MOVING IT IS THE
+ *   POINT OF `figureXAt` BELOW.** The shell is the one part of the renderer the
+ *   suite cannot reach, so a constant that only the shell could see was a
+ *   number no test could be wrong about.
+ */
+export const ADVANCE_UNITS = 74;
+
+/**
+ * Where a figure draws this frame, in arena x. The two displacements a figure
+ * can have, resolved into one coordinate.
+ *
+ * ► **WHY THIS IS NOT IN THE SHELL, which is the same reason `cursor.js` is not
+ *   in the shell.** The browser arena's first spectated bout froze after one
+ *   action, and it was hard to diagnose because the logic lived in a
+ *   `requestAnimationFrame` callback the suite could not reach; the decision
+ *   moved into `src/render/` and the shell kept only the clock. Movement added
+ *   a second such decision — lunge or travel — and it goes the same way. The
+ *   shell now reads a coordinate rather than computing one.
+ *
+ * THE TWO DISPLACEMENTS, and they are different things:
+ *
+ * - **the LUNGE.** `pose.advance` is a fraction of a step toward the opponent,
+ *   authored in this module. It invents no position the resolver owns, and the
+ *   figure ends exactly where it started.
+ * - **the STEP.** A travelling gait runs between the two endpoints its own
+ *   `move-clip` named, which are the RESOLVER's.
+ *
+ * A travelling figure ignores `restingX` entirely. That is not belt-and-braces
+ * over the gaits' `advance: 0`: `restingX` is the scene's fold, which is
+ * already the DESTINATION, so adding a lunge to it would overshoot the end of
+ * the very step being drawn.
+ *
+ * @param {object} options.restingX the scene actor's `x` — already the destination
+ * @param {string} options.facing "left" or "right"; which way a lunge carries
+ * @param {object} options.pose from `poseAt`
+ * @param {object} [options.timeline] the running schedule, or null when idle
+ * @param {object} [options.motion] the scene actor's `motion`, or null
+ * @param {number} [options.at] 0..1 through the schedule; NEGATIVE for a clip
+ *   that has not begun (a reaction queued behind a delay, or a frame whose
+ *   clock predates the stamp), which puts every motion at its `from` — where
+ *   the batch found the figure. Added 2026-09-23; see the shell's `placedAt`.
+ */
+/**
+ * WHERE A FIGURE IS DRAWN ON THE SECOND AXIS, part-way through a lane change.
+ *
+ * ► **Without this a lane change is a single-frame TELEPORT, and the owner
+ *   played it and said so: "the lane jump looked like a jump and there was no
+ *   animation".** It was worse than unanimated — it was a whole-body vertical
+ *   translation of 1.16 figure-heights with no horizontal component and no
+ *   scale change, which in THIS game is the definition of a leap, because
+ *   vanilla spends `_y` on the jump arc.
+ *
+ * The mirror of `figureXAt` and deliberately the same shape: the scene actor's
+ * `y` is already the DESTINATION — the fold is not a tween — and
+ * `depthMotion` carries the origin to interpolate from.
+ */
+export function figureYAt({ restingY, timeline = null, depthMotion = null, at = 0 }) {
+  if (!Number.isFinite(restingY)) {
+    throw new TimelineError("figureYAt needs the scene actor's own y; an actor with no depth has none to draw at.");
+  }
+  if (!Number.isFinite(at)) {
+    throw new TimelineError("figureYAt needs the fraction of the way through the gait.");
+  }
+  if (timeline?.depthTravel && depthMotion) return travelAt(depthMotion, at);
+  return restingY;
+}
+
+export function figureXAt({ restingX, facing, pose, timeline = null, motion = null, at = 0 }) {
+  if (!Number.isFinite(restingX)) {
+    throw new TimelineError("figureXAt needs the scene actor's own x; an unplaced actor has none to draw at.");
+  }
+  if (!pose || !Number.isFinite(pose.advance)) {
+    throw new TimelineError("figureXAt needs a pose from poseAt().");
+  }
+  const lunge = pose.advance * ADVANCE_UNITS * (facing === "left" ? -1 : 1);
+  // ► **A BLINK IS HELD AWAY FOR THE CLIP AND RESTED AT `to` AFTER** (added
+  //   2026-09-23 with the ghost strike's). The build puts the caster at
+  //   `defender._x ± physical_size` BEFORE its swing (`+0x7e64`-`+0x7eac`) and
+  //   restores `attacker_old_x` on the completion tick (`+0x7f9f`), or leaves it
+  //   beside the body after a kill — so `blink` for the whole clip, `to` once it
+  //   ends, and `from` before it has begun (`at < 0`: a clip queued behind a
+  //   delay has not started, so nothing has blinked yet). The lunge is kept, as
+  //   the teleport keeps it: the figure swings an ordinary clip where it stands.
+  if (motion && Number.isFinite(motion.blink) && Number.isFinite(motion.from) && Number.isFinite(motion.to)) {
+    const held = at < 0 ? motion.from : at >= 1 ? motion.to : motion.blink;
+    return held + lunge;
+  }
+  // ► **A TELEPORT IS A STEP FUNCTION, NOT A CURVE** (added 2026-09-22 with
+  //   `cast_teleport`). The build writes `attacker._x = randomBetween(-2000,
+  //   2000)` only once the caster's `Cast2` has reported (`+0x7646`-`+0x767b`),
+  //   so the figure plays the whole clip where it stood and is at the
+  //   destination when the clip ends — `from` for every `at < 1`, `to` at 1.
+  //   Tested first, so no schedule can turn it into a slide. The lunge is
+  //   kept, around the HELD x: the figure is playing an ordinary clip in
+  //   place, and only its resting point differs from the scene's.
+  if (motion && motion.teleported === true && Number.isFinite(motion.from) && Number.isFinite(motion.to)) {
+    const held = at >= 1 ? motion.to : motion.from;
+    return held + lunge;
+  }
+  // A travelling gait, or a PUSH riding whatever the victim plays. The build's
+  // `knockback()` tweens over its own second, independent of the clip; riding
+  // the victim's timeline instead is this engine's one approximation of it.
+  // Since the knockback run plays at the build's rate (2026-09-24) that slide
+  // is 633 ms, 367 short of the build's second — it was 1,560, 560 over.
+  //
+  // ► **AND A LANE CHANGE'S x STEP rides its sidestep** (added 2026-09-23):
+  //   joining an occupied lane moves the figure sideways as well as in depth,
+  //   and the two now slide together — see `timelinesForStep`. `depthTravel`
+  //   still never slides a figure sideways on its own: with no x step in the
+  //   batch there is no `motion`, and the figure stays at `restingX`.
+  if (motion && (timeline?.travel || timeline?.depthTravel || motion.pushed === true)) return travelAt(motion, at);
+  return restingX + lunge;
+}
+
+/**
+ * WHICH WAY A FIGURE IS DRAWN FACING THIS FRAME — the scene's `facing`, or the
+ * facing it had before a turn whose action is still playing.
+ *
+ * ► **ADDED 2026-09-22 WITH `face-clip`, AND THE TIMING IS THE BUILD'S.** The
+ *   build writes `gladiator_dir` only in `changeCombatants`, which `nextphase`
+ *   runs when a phase completes — so every gladiator an action turns, the actor
+ *   and every bystander alike, turns when the action is OVER. A teleporting
+ *   caster plays the whole of `Cast2` facing the way it stood and turns as it
+ *   reappears (`figureXAt` puts it at `to` on the same frame, because the frame
+ *   loop drains finished timelines before it draws); a walker walks past its
+ *   foe still facing forward and then turns round.
+ *
+ * ► **KEYED ON THE ACTION'S TOKEN, NOT ON THE FIGURE'S OWN CLIP.** A bystander
+ *   turned by somebody else's walk plays nothing, and an actor whose victim is
+ *   still reacting has finished its own clip; both must hold until the ACTION
+ *   has finished, which is exactly when the surface stops listing its token as
+ *   pending. That is this engine's phase advance.
+ *
+ * A turn with no token — a caller that supplied no action boundaries — is
+ * drawn at once: there is nothing to wait for, and waiting on nothing would
+ * hold it for ever.
+ *
+ * ► **AND A TURN AT THE START OF ITS ACTION IS DRAWN AT ONCE TOO — added
+ *   2026-09-24.** The resolver turns an actor to face the foe he aims a swing,
+ *   a shot, a taunt or a spell at BEFORE the phase (`ss2TurnToTarget`), so the
+ *   presentation marks that one turn `at: "action-start"` and it is not held:
+ *   the verb is drawn facing its target from its first frame. Holding it would
+ *   draw the caster casting away from his victim and turning round afterwards
+ *   — the picture the owner asked to have fixed.
+ *
+ * @param {string} options.facing the scene actor's `facing`, already the facing AFTER any turn
+ * @param {object} [options.turn] the scene actor's `turn`, or null
+ * @param {Array<number>} [options.pendingTokens] the tokens the surface is still waiting on
+ */
+export function figureFacingAt({ facing, turn = null, pendingTokens = [] }) {
+  if (facing !== "left" && facing !== "right") {
+    throw new TimelineError(`figureFacingAt needs the scene actor's facing, "left" or "right", not ${String(facing)}.`);
+  }
+  if (!Array.isArray(pendingTokens)) {
+    throw new TimelineError("figureFacingAt needs the list of tokens the surface is still waiting on.");
+  }
+  if (!turn || turn.actionToken === null || turn.actionToken === undefined) return facing;
+  if (turn.at === "action-start") return facing;
+  return pendingTokens.includes(turn.actionToken) ? turn.from : facing;
+}
+
+/**
+ * One tick of the build's frame clock: its onEnterFrame handlers run at the
+ * movie's 30 fps, and colossus's arm writes the scale once a tick. The same
+ * clock the build-frame schedules run on (`build-timing.js`), read from one
+ * place since 2026-09-24 rather than stated here a second time.
+ */
+const SCALE_TICK_MS = BUILD_FRAME_MS;
+
+/**
+ * HOW BIG A FIGURE IS DRAWN THIS FRAME — its `_yscale` as a percentage: the
+ * scene's `yscale`, or the size it has part-way through a colossus, a little
+ * fat kid or their expiry. Added 2026-09-24, when the owner watched a little
+ * fat kid land and the victim stay his own size.
+ *
+ * ► **THE TIMING IS THE BUILD'S, stage by stage** (`CommandKind.SCALE_CLIP`
+ *   in `src/adapter/presentation.js` works out each one):
+ *
+ *   - **little fat kid SNAPS at the victim's `little_fat_kid` clip.** The arm
+ *     starts that clip and writes 50 in the same tick, before any frame is
+ *     drawn (`+0x82a2`, `+0x83b0`-`+0x83d7`): the old size until the victim's
+ *     clip begins (`elapsedMs < 0`), 50 from its first frame.
+ *   - **colossus GROWS from the caster's `Colossus` clip**, a tick at a time by
+ *     the arm's own recurrence (`ss2ColossusYscaleAfter`): the first frame
+ *     already shows the first tick's value, because the once-block and the
+ *     first write run in one call, and it settles within nine ticks — 300 ms,
+ *     inside the clip. With no clock to read (the caster's own clip is not the
+ *     one running), the growth is over and `to` is drawn.
+ *   - **an expiry is HELD until its action has finished**, because
+ *     `check_spells` runs in `nextphase`: the old size while the token is
+ *     pending, `yscale` after — `figureFacingAt`'s rule for a phase-advance
+ *     turn, and for its reason.
+ *
+ *   One action can carry a cast AND an expiry for one figure — a little fat
+ *   kid on a victim whose own colossus runs out that phase — and then the
+ *   cast is drawn while the action runs and the restore once it is over.
+ *
+ * A change with no token (a caller that supplied no action boundaries) is
+ * drawn at once, as a turn with none is.
+ *
+ * @param {number|null} options.yscale the scene actor's `yscale` — already the size AFTER any change
+ * @param {object} [options.rescale] the scene actor's `rescale`, or null
+ * @param {Array<number>} [options.pendingTokens] the tokens the surface is still waiting on
+ * @param {number|null} [options.elapsedMs] how long THIS figure's clip for the
+ *   rescale's action has been running — negative before it begins, null when
+ *   the running clip is not that action's
+ * @returns {number|null} the `_yscale` to draw, or the scene's own when nothing is changing
+ */
+export function figureYscaleAt({ yscale, rescale = null, pendingTokens = [], elapsedMs = null }) {
+  if (!Array.isArray(pendingTokens)) {
+    throw new TimelineError("figureYscaleAt needs the list of tokens the surface is still waiting on.");
+  }
+  if (!rescale || !Array.isArray(rescale.stages) || rescale.stages.length === 0) return yscale;
+  if (rescale.actionToken === null || rescale.actionToken === undefined) return yscale;
+  if (!pendingTokens.includes(rescale.actionToken)) return yscale;
+  const start = rescale.stages.findLast((stage) => stage.at !== "phase-advance") ?? null;
+  const advance = rescale.stages.find((stage) => stage.at === "phase-advance") ?? null;
+  if (start === null) return advance.from;
+  const clock = Number.isFinite(elapsedMs) ? elapsedMs : null;
+  if (clock !== null && clock < 0) return start.from;
+  if (start.growth && clock !== null) {
+    // Tick 1 is the clip's first frame. The recurrence settles on the
+    // adapter's own `to` (it ran the same arithmetic for the whole phase).
+    return ss2ColossusYscaleAfter(start.from, Math.floor(clock / SCALE_TICK_MS) + 1, start.growth.newscale);
+  }
+  return start.to;
+}
+
+/**
+ * The surface's own timeout policy, stated as a function so it can be tested
+ * and so the reason reaching the gate is never an empty string.
+ *
+ * Returns null while the surface should keep waiting.
+ */
+export function abandonReasonFor(timeline, elapsedMs) {
+  if (!Number.isFinite(elapsedMs)) {
+    throw new TimelineError("abandonReasonFor needs the elapsed milliseconds.");
+  }
+  const overrun = elapsedMs - timeline.durationMs;
+  if (overrun <= ANIMATION_TIMEOUT_MS) return null;
+  return (
+    `the browser arena stopped waiting for "${timeline.label}" after ${Math.round(elapsedMs)}ms ` +
+    `(${timeline.durationMs}ms scheduled, ${ANIMATION_TIMEOUT_MS}ms grace). This surface gave up; ` +
+    "the animation did not report."
+  );
+}

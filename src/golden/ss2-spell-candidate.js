@@ -43,27 +43,73 @@ const ALL_ARMOUR = Object.freeze([
 const FIGHT_MODES = Object.freeze(new Set(["tournament", "duel", "misc"]));
 
 /**
- * The mapped direct-damage spell callers (map lines 384-397 for the ranges,
- * map lines 415-419 for the inventory ID table).
+ * The mapped direct-damage spell callers. The ranges and the inventory ID
+ * table are in the battle map under §"Spell ingress `magic_damage_character`"
+ * and §"Spell and vanilla AI surface"; the phase arms that carry them are
+ * under §"The two bolt phases, in full" and ~~§"The fireball family, in
+ * full"~~ §"The fireball family and molten death" *(the section is titled that
+ * way; the old name cited a heading that never existed — found 2026-09-22 by
+ * the fireball implementer)*.
+ *
+ * *(The line-number citations this block used to carry — "map lines 384-397",
+ * "415-419", "366-371", "348-350" — were stale: an adversarial verifier
+ * followed them on 2026-09-20 and two of them landed on BLANK LINES, the rest
+ * inside a weapon-enchantment section added 2026-09-15. A citation that moves
+ * when the document grows is a citation that stops being checkable, so these
+ * are section names now.)*
  *
  * `magic_damage_character` itself contains **no** RNG call and no
- * `RandomNumber` opcode (map lines 366-371): "Spell damage rolls therefore all
- * happen in the callers (the mapped `randomBetween` ranges)". So the single
- * ordered-roll sample this family consumes belongs to the caller, not to the
- * ingress, and the ingress core (`applySs2MagicDamageCandidate`) takes the
+ * `RandomNumber` opcode: "Spell damage rolls therefore all happen in the
+ * callers (the mapped `randomBetween` ranges)". So the single ordered-roll
+ * sample this family consumes belongs to the caller, not to the ingress, and
+ * the ingress core (`applySs2MagicDamageCandidate`) takes the
  * already-calculated `damage` argument with no tape at all.
  *
- * `damageMethod` is the ingress's `damage_method` argument, which for this
- * ingress is the defender's animation label (map lines 348-350). The map
- * records a label only for fireball ("burning") and lightning bolt
- * ("lightning"); the remaining direct-damage spells have no recorded label, so
- * they carry `null` rather than an invented one. The "burning" animation label
- * is NOT the `burning` status flag — this ingress sets no status flags.
+ * ## `damageMethod` IS A PROPERTY OF THE ARM, NOT OF THE SPELL
+ *
+ * ► ~~The map records a label only for fireball ("burning") and lightning bolt
+ *   ("lightning"); the remaining direct-damage spells have no recorded label,
+ *   so they carry `null` rather than an invented one.~~ **WRONG, AND IT WAS
+ *   WRONG THE DAY IT WAS WRITTEN — corrected 2026-09-20.** Ids 31, 32 and 35
+ *   carried `null` for three weeks. They are `"burning"`, `"burning"` and
+ *   `"lightning"`.
+ *
+ * ► **THE BYTES HAVE ONE CALL PER ARM, NOT ONE PER SPELL.** All three
+ *   fireballs share a single `magic_damage_character` at `+0x91c1` and both
+ *   bolts share a single one at `+0x85af`; the per-label divergence inside each
+ *   arm is only the icon number, the `randomBetween` range and a presentation
+ *   frame, and the arms converge before the call. So the fifth and sixth
+ *   arguments are pushed ONCE for the whole family — `"burning"`/4 for the
+ *   fireballs, `"lightning"`/8 for the bolts — and a table with one row per
+ *   spell structurally cannot record that. **The row shape is what produced the
+ *   nulls**, which is why the map was corrected first and this table second.
+ *
+ * ► **AND THE REPOSITORY ALREADY HELD THE MEASUREMENT.**
+ *   `tools/runtime-capture/ss2-capture-wrapper.as` has named these exact
+ *   literals at these exact offsets — *"burning" (fireball group +0x91c1,
+ *   death-from-above boulders +0x88e5), "lightning" (bolt group +0x85af)* —
+ *   since `7601888`, five hours after `8c3fc0a` wrote the nulls. It even says
+ *   **group**. Nobody propagated it. This was an internal contradiction for
+ *   three weeks, not an unread byte.
+ *
+ * ► **A NULL HERE IS A LIVE FALSE-DIVERGENCE TRAP, which is why it is not
+ *   cosmetic even though it moves no number.** `src/golden/observation.js`
+ *   derives a `magic-damage` event's `method` from
+ *   `fixture.expected.calculation.damageMethod` and deep-compares `/events`
+ *   against a capture, while the wrapper emits the build's real `arguments[4]`.
+ *   That file's own header says it: *"a spell whose label the map does not
+ *   record carries `null` in its candidate and diverges loudly against a live
+ *   capture"*. `candidate-spell-lethal-slain` is `spellId` 32 and is an ACTIVE
+ *   staged capture target, so this null was scheduled to fire.
+ *
+ * The "burning" animation label is NOT the `burning` status flag — this
+ * ingress sets no status flags.
  *
  * ID 33 (little fat kid) is a transformation, not a direct-damage spell, and
  * ID 49 (death from above / molten death) schedules 10-20 separate 40-damage
- * impacts (map line 393), i.e. many ingress invocations; neither is a
- * single-invocation direct-damage caller, so neither is mapped here.
+ * impacts, each a separate ingress invocation with a fixed `damage` of 40 and
+ * the same `"burning"`/4 pair (`+0x88e5`); neither is a single-invocation
+ * direct-damage caller, so neither is mapped here.
  */
 export const SS2_DIRECT_DAMAGE_SPELLS = Object.freeze({
   30: Object.freeze({
@@ -78,14 +124,16 @@ export const SS2_DIRECT_DAMAGE_SPELLS = Object.freeze({
     rollLabel: "hell-fireball-damage-roll",
     min: 150,
     max: 450,
-    damageMethod: null
+    // Shares the fireball arm's single call site `+0x91c1`. See the arm note
+    // above: this was `null` from 8c3fc0a until 2026-09-20.
+    damageMethod: "burning"
   }),
   32: Object.freeze({
     name: "dire-fireball",
     rollLabel: "dire-fireball-damage-roll",
     min: 300,
     max: 600,
-    damageMethod: null
+    damageMethod: "burning"
   }),
   34: Object.freeze({
     name: "lightning-bolt",
@@ -99,7 +147,9 @@ export const SS2_DIRECT_DAMAGE_SPELLS = Object.freeze({
     rollLabel: "frightning-bolt-damage-roll",
     min: 200,
     max: 400,
-    damageMethod: null
+    // Shares the BOLT arm's single call site `+0x85af`, so a frightning bolt
+    // plays the `lightning` hurt clip exactly as a lightning bolt does.
+    damageMethod: "lightning"
   })
 });
 

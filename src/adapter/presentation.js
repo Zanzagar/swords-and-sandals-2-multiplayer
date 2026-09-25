@@ -27,47 +27,62 @@
  *
  * ---
  *
- * **DESIGN GAP, stated and deliberately not filled: per-action animation
- * acknowledgement.**
+ * **PER-ACTION ANIMATION ACKNOWLEDGEMENT — the part of it that lives here.**
  *
- * Every command carries the resolver `sequence` it came from, which orders
- * them relative to each other. Nothing orders them relative to *time*. There
- * is no acknowledgement anywhere between an action's commands and the next
- * action's: `BIND_GLOBALS` and `CLIP_GOTO` carry a sequence and no completion
- * token, the binder's cursor advances on drain rather than on anything the
- * surface reports, and the only acknowledgement in the whole adapter is the
- * terminal one in `acknowledgement.js`, which fires once per battle.
+ * This was a stated, deliberately unfilled gap until 2026-09-07. The hazard it
+ * names is real: a host that submits action N+1 while action N's timeline is
+ * still running rebinds `_global.attacker` / `_global.defender` /
+ * `game_attacker` / `game_defender` underneath it, and vanilla's mapped
+ * functions read those globals rather than parameters captured at dispatch.
  *
- * So a host that submits action N+1 while action N's timeline is still running
- * will rebind `_global.attacker` / `_global.defender` / `game_attacker` /
- * `game_defender` underneath it, and vanilla's mapped functions read those
- * globals rather than parameters captured at dispatch. That is a real hazard
- * and it is not mitigated here.
+ * The seam has four parts. Part 1 is here — **every command bound from an
+ * event carries an `actionToken` naming the resolved action it belongs to** —
+ * and parts 2 and 3 are the gate in `src/adapter/action-gate.js`. Part 4, what
+ * happens when a surface never reports, is a host policy decision and is
+ * deliberately implemented nowhere: see that module's header.
  *
- * What a seam that closed it would have to offer, so nobody has to guess:
+ * **A TOKEN IS NOT `event.sequence`, and the old sketch here said it was.**
+ * "The resolver sequence is already unique per action and would do" was wrong.
+ * `addEvent` stamps `sequence: battle.events.length + 1`, so it is unique per
+ * EVENT; one action emits one, two or four of them (measured over 5,708
+ * actions — see `action-gate.js`), so a token read off `event.sequence` would
+ * split a killing blow into four actions.
  *
- * 1. a per-action token on the commands of one resolved action — the resolver
- *    sequence is already unique per action and would do, but it has to be
- *    carried on `BIND_GLOBALS` and `CLIP_GOTO` and echoed back, not merely
- *    stamped;
- * 2. a reporting call the surface makes when that action's timeline reaches
- *    its terminal frame, naming the token, shaped like
- *    `reportDeathAnimation` — accepted once, duplicates answered rather than
- *    thrown, an unknown token refused;
- * 3. a gate the host consults before submitting the next action, so "the
- *    resolver is ready" and "the surface is ready" are two separate questions
- *    with two separate answers;
- * 4. an answer for what happens when the surface never reports — a timeout is
- *    a policy decision and belongs to the host, not to this module.
+ * The boundary that does work is `lastResolvedAction(battle).firstEventSequence`,
+ * which the resolver already computes. It is NOT in `toTeamWireState`, and
+ * that is load-bearing: `combatStateHash` hashes the whole projection, so
+ * projecting an action boundary would move every pinned battle hash. **So the
+ * boundary is carried IN by the caller** — `actionBoundaries` here,
+ * `drain(wire, { actionBoundary })` on the binder. A caller that supplies none
+ * gets `actionToken: null` on every command, which says "nobody told us where
+ * this action began" rather than inventing an answer. It is null, not absent,
+ * so a host cannot read a missing field as "no gating needed".
  *
- * None of that is implemented. Inventing a mechanism here without a capture of
- * the vanilla timeline's own completion signal would put a guess at the centre
- * of the action loop, which is worse than a documented gap.
+ * ► **THIS PARAGRAPH USED TO END "and is never derived from the wire", AND
+ *   THAT WAS WRONG — corrected 2026-09-10.** The boundary is *exactly*
+ *   `toTeamWireState(battle).events.length + 1` taken immediately BEFORE
+ *   `applyAction`, because `addEvent` (`src/team/resolver.js:236`) is the sole
+ *   appender to `battle.events` and stamps `sequence = events.length + 1`, so
+ *   the sequences are dense. Measured here, not argued: 0 mismatches over 193
+ *   actions across 1v1, 2v2 and 3v3 under `ss2TeamRules`, pinned by
+ *   `the action boundary IS derivable from the wire, prospectively` in
+ *   `test/action-animation-gate.test.js`. **The reason it is not projected is
+ *   HASH STABILITY, never underivability**, and the distinction matters to a
+ *   host: a caller inside the action loop can always compute the boundary for
+ *   itself and needs no resolver trace. What is genuinely impossible is
+ *   recovering boundaries RETROSPECTIVELY from a finished event log — four
+ *   events at 7,8,9,10 are indistinguishable from four one-event actions.
  */
 
 import { EliminationEvent } from "../team/elimination.js";
+import { ss2ArrowFrameFor, ss2RangedWeaponFor } from "../team/ss2-weapon-table.js";
+import { SS2_ARENA, SS2_STAT_SPELLS, Ss2ActionType, ss2FacingToAct, ss2PhysicalSize } from "../team/ss2-rules.js";
+import {
+  SS2_COLOSSUS_NEWSCALE, SS2_FIGURE_HALF_WIDTH, SS2_LITTLE_FAT_KID_YSCALE, ss2ColossusYscaleAfter
+} from "../common/ss2-figure.js";
 import { BATTLE_RESULT_PENDING_TYPE } from "../team/settlement.js";
 import { bindingPlanFor, resultLabelsFor } from "./slot-layout.js";
+import { CANONICAL_FACING_LEFT } from "./state-bridge.js";
 import { GLADIATOR_CLIP_ROOT, HERO_SIDE, isPlainVanillaObject } from "./vanilla-fields.js";
 
 export class PresentationError extends Error {
@@ -80,6 +95,221 @@ export class PresentationError extends Error {
 export const CommandKind = Object.freeze({
   ATTACH_CLIP: "attach-clip",
   PLACE_CLIP: "place-clip",
+  /**
+   * Move an already-placed clip along the arena's x, and change NOTHING else.
+   *
+   * **It is a separate kind from `PLACE_CLIP` because reusing that one is a
+   * defect, not a style choice.** `src/render/scene.js` folds `place-clip` by
+   * overwriting all seven geometry fields — `x`, `y`, `facing`, `xscale`,
+   * `yscale`, `geometryAuthored` and `placed` — so a partial `place-clip`
+   * carrying only a new `x` sets `y` to `undefined`, and the browser shell's
+   * `toY(undefined)` is `NaN`: the figure does not move, it VANISHES. Measured
+   * 2026-09-10 while proving out the resolver-side position model.
+   *
+   * It carries `from` and `to` and no distance. The two endpoints already say
+   * how far the step went, and a third field that could disagree with them is
+   * a second source of truth for one fact. `from` is carried rather than left
+   * to the consumer's own memory because every other command here is
+   * self-describing, and a surface resuming from `fromSequence` has no memory
+   * to consult.
+   *
+   * It never touches `facing`. Vanilla walks backwards without turning round —
+   * `gladiator_dir` is its own field, and the controller frames select on it
+   * (battle map, "Buttons wired per controller frame") rather than being set
+   * by the walk.
+   */
+  MOVE_CLIP: "move-clip",
+  /**
+   * A move along the SECOND axis — a rank change.
+   *
+   * ► **ITS OWN KIND RATHER THAN A WIDER `move-clip`, and `src/render/scene.js`
+   *   states the reason in advance**: the `move-clip` fold writes only `x` and
+   *   `motion`, spelled out field by field precisely so "a future field added
+   *   to `place-clip`'s fold must not silently start being overwritten by a
+   *   step sideways". A depth move IS that step sideways. Widening `move-clip`
+   *   with an optional second pair would also break the movement DETECTOR,
+   *   which keys on a finite `from`/`to` — the X endpoints — so a rank change
+   *   would have been read as a walk and slid the figure across the arena
+   *   playing `walkleft`.
+   *
+   * It carries no clip label because the build has no sidestep phase to name.
+   * The figure moves; what it is playing while it moves is whatever it was
+   * already playing, which is the honest answer and not a gap.
+   */
+  /**
+   * An arrow leaves the bow.
+   *
+   * ► **THE BUILD ATTACHES A CLIP FOR THIS AND SO DOES THIS COMMAND, which is
+   *   why it is not a `clip-goto` or an `attach-clip`.** Vanilla's ranged phase
+   *   does `arena.gladiators.attachMovie("bullet", …)` at depth 45000
+   *   (`+0x6da2`), flies it with its own `onEnterFrame`, and
+   *   `removeMovieClip()`s it on impact (`+0x6d41`). It is a clip with a
+   *   LIFETIME rather than a label a figure plays, and nothing else in this
+   *   vocabulary has one: every other kind here addresses a figure that is
+   *   already on the arena and stays there.
+   *
+   * It carries the two ENDPOINTS and not a trajectory. The flight is the
+   * renderer's arithmetic (`src/render/projectile.js`, which derives it from
+   * the build), exactly as `clip-goto` carries a label and lets the renderer
+   * resolve the schedule — and for the same reason: the adapter names what
+   * happened, the renderer decides what it looks like, and the adapter does not
+   * import from `src/render/`.
+   *
+   * ► **IT IS COSMETIC, AND SAYING SO IS LOAD-BEARING.** The build resolves a
+   *   ranged attack when the arrow ARRIVES — `checkattackroll()` is called from
+   *   the impact test (`+0x6d29`) — and this engine resolves it synchronously
+   *   when the action is submitted. So the arrow here DISPLAYS an outcome that
+   *   is already decided and cannot change it. Wiring it the build's way would
+   *   be a resolver change, not a renderer one; a surface that dropped this
+   *   command entirely would show a bout that is correct in every number and
+   *   merely missing an arrow.
+   */
+  FIRE_PROJECTILE: "fire-projectile",
+  /**
+   * A spell attaches its own clip at its victim — added 2026-09-22 for the
+   * bolt, whose phase runs `arena.gladiators.attachMovie("lightning_bolt_combat",
+   * ..., {_x: defender._x, _y: 50})` at `+0x852a` and removes it when the
+   * victim's hurt clip reports back (`+0x85ed`).
+   *
+   * ► **ITS OWN KIND, for the reason `fire-projectile` is.** The clip belongs
+   *   to `arena.gladiators`, not to either fighter, so folding it into an actor
+   *   would give a gladiator something it does not have. And it is NOT a
+   *   projectile: it does not travel, and it ends when a CLIP ends rather than
+   *   when a flight does — so it names that clip (`endsWithClip`) instead of
+   *   carrying endpoints.
+   *
+   * ► **COSMETIC, like the arrow.** The damage was resolved before this command
+   *   existed; nothing here can change a number.
+   *
+   * ► **AND MOLTEN DEATH'S BOULDERS, since 2026-09-23** — one per boulder,
+   *   `effect: "boulder_combat"`, because the build attaches each to
+   *   `arena.gladiators` the same way (`+0x870f`). A boulder DOES move — it
+   *   falls straight down at one x — so it carries its `fall` (the four
+   *   numbers its closure reads) instead of `endsWithClip`, which is null. A
+   *   surface routes on `effect`; see `bouldersFor`.
+   */
+  ATTACH_EFFECT: "attach-effect",
+  MOVE_CLIP_DEPTH: "move-clip-depth",
+  /**
+   * A gladiator turns round — the resolver's facing changed during the batch.
+   *
+   * ► **ADDED 2026-09-22, BECAUSE NOTHING ELSE IN THIS VOCABULARY COULD SAY
+   *   IT.** `facing` reached a scene from exactly one command, the `place-clip`
+   *   the arena is built with, and the resolver has recomputed facing from
+   *   position on every move since 2026-09-12 (`ss2FacingEffects`). So a
+   *   teleport past a foe, a shove or a gale that carried a victim past
+   *   somebody, and a plain walk past a foe all left the figure drawn the way
+   *   it faced at construction.
+   *
+   * ► **ITS OWN KIND, for the reason `move-clip` is one.** A partial
+   *   `place-clip` overwrites all seven geometry fields and makes the figure
+   *   vanish, and `move-clip` is documented as never touching `facing` —
+   *   vanilla walks backwards without turning round. A turn is a different fact
+   *   from a step, and in the build it happens at a different TIME.
+   *
+   * ► **IT HAPPENS AT THE PHASE ADVANCE, NOT WHEN THE ACTION STARTS.** The
+   *   build's six writes to `gladiator_dir` are two at arena setup and four in
+   *   `changeCombatants` (`+0x28f3`-`+0x2ae3`, cited at `ss2FacingEffects`),
+   *   which `nextphase` calls when a phase completes. So a teleporting caster
+   *   plays the whole of `Cast2` facing the way it stood and turns when it
+   *   reappears, and a bystander turns when the action is over, not when it
+   *   begins. The stream carries no time, so this command is emitted LAST in
+   *   its batch and carries the batch's `actionToken`; the painter holds `from`
+   *   until that token finishes (`figureFacingAt` in `src/render/timeline.js`).
+   *
+   * It carries `from` and `to` for the reason `move-clip` does: every command
+   * here is self-describing, and a surface resuming from `fromSequence` has no
+   * memory to consult.
+   *
+   * **Emitted only when the caller carries in the projection the batch STARTED
+   * from** (`before`). A rule set that models no facing leaves the token off
+   * every status list for the whole bout, so a comparison against what the
+   * construction DREW would turn every villain round on the first action; a
+   * comparison of the resolver against itself cannot.
+   *
+   * ► **AND ONE TURN HAPPENS AT THE START OF THE ACTION, NOT AT ITS PHASE
+   *   ADVANCE: the actor's turn to the foe he aims at. Added 2026-09-24.** The
+   *   resolver turns a gladiator to face the foe a swing, a shot, a taunt or a
+   *   spell is aimed at BEFORE the phase reads his facing
+   *   (`ss2FacingToAct`/`ss2TurnToTarget` in `src/team/ss2-rules.js`) — so the
+   *   verb is thrown, loosed or cast FACING its target, which is what the owner
+   *   asked to see (2026-09-24). That turn is a `face-clip` carrying
+   *   `at: "action-start"`, emitted BEFORE the actor's own clip, and
+   *   `figureFacingAt` draws it at once instead of holding it. The
+   *   phase-advance turn at the end of the batch is then measured FROM the
+   *   facing the actor acted with, so a caster who turns to gale a man behind
+   *   him and is re-faced to the man in front once the gale has blown is drawn
+   *   turning twice — once to cast, once as the phase advances — where the
+   *   batch's net change is none. **Until 2026-09-24 this command carried only
+   *   the NET change**, which is why a swing's turn (resolved since
+   *   2026-09-23) was drawn after the swing or not at all
+   *   (`test/render-facing.test.js`, the shove at the man behind).
+   */
+  FACE_CLIP: "face-clip",
+  /**
+   * A gladiator's clip changes SIZE — its `_yscale`, which the build writes at
+   * battle entry and then only in two spell arms and their expiry.
+   *
+   * ► **ADDED 2026-09-24, BECAUSE THE OWNER WATCHED A LITTLE FAT KID LAND AND
+   *   THE VICTIM STAY HIS OWN SIZE.** The resolver applied both spells' stats
+   *   from the day they were built (d551c57), and `yscale` reached a scene from
+   *   the construction's `place-clip` alone, so a size change was never drawn.
+   *
+   * ► **THE CLIP SCALE IS NOT ENGINE STATE**, and `SS2_STAT_SPELLS` says so:
+   *   nothing in the resolver reads it, and nothing here adds it to the
+   *   projection (which `combatStateHash` covers). It is worked out HERE, from
+   *   what the engine does expose — the cast event (`counter`, `targetId`) and
+   *   the two counters' expiry between the batch's two projections — and it is
+   *   the build's own arithmetic, `src/common/ss2-figure.js`:
+   *
+   *   - **little fat kid** (`counter: "spell_little_fat_kid"`, on its VICTIM):
+   *     `at: "action-start"`, a snap to 50 in the tick the victim's
+   *     `little_fat_kid` clip is started;
+   *   - **colossus** (`counter: "spell_colossus"`, on its CASTER):
+   *     `at: "action-start"`, carrying `growth` — the arm's own per-tick
+   *     recurrence, which `figureYscaleAt` in `src/render/timeline.js` draws
+   *     from the first frame of `Colossus` — and `to`, where it settles (150
+   *     from any start the build can reach);
+   *   - **either counter's expiry**: `at: "phase-advance"`, a restore, which
+   *     the painter holds back until the action that expired it has finished
+   *     — `check_spells` runs in `nextphase`, as `changeCombatants`' turn does
+   *     (`CommandKind.FACE_CLIP`).
+   *
+   *   A change that leaves the size where it was (a colossus recast at 150) is
+   *   not emitted, as a batch that turns nobody emits no `face-clip`.
+   *
+   * ► **THE RESTORE IS TO THE SIZE HE ENTERED AT, NOT TO THE BUILD'S
+   *   `oldscale` — A DIVERGENCE, DECIDED HERE AND NAMED.** In the build both
+   *   spells capture `oldscale` from the scale they find and BOTH expiries
+   *   restore from that one field (map, `cast_colossus`, VERIFIED; re-read off
+   *   the frame-52 dump for this edit: `+0x8084`, `+0x82b7`, `+0x2485`,
+   *   `+0x2513`), so a fighter who carried both ends at the later cast's
+   *   capture, and one recast while resized keeps that size FOR GOOD. **The
+   *   engine restores the stats the same two expiries touch from `backup_*`,
+   *   the fight-start values, never from a capture** (`check_spells`
+   *   `+0x24a0`, `+0x252e`; `SS2_TIMED_SPELL_EXPIRY`): one slot, the last
+   *   writer wins, and ANY expiry resets it to the start. The drawn size
+   *   follows the engine's rule: the scale is one slot the two spells write,
+   *   and any expiry of either resets it to the entry size, exactly when the
+   *   engine resets their strength and attack — so a figure is never drawn
+   *   shrunken once the engine has put him back at full strength and full
+   *   `physical_size`. (Bloodlust writes strength and no scale, in the build
+   *   as here.) Measured before this was decided, over seeds 1-25 of the
+   *   arena's own host: the build's `oldscale` left EVERY front-liner of a
+   *   `?items=crowd` 3v3 (50 of 50) at 50 for the rest of the bout — each is
+   *   shrunk by a second foe's little fat kid while already small — and 7 of
+   *   25 `?items=42,33` 2v2 bouts ended with a gladiator stuck at 150. Neither
+   *   happens in 1v1 with one of each item, where the two rules agree unless
+   *   the two spells overlap on one fighter. Reproducing the build is the
+   *   restore's one line (`scaleRestoresFor`) plus a remembered capture.
+   *
+   * It carries `from` and `to` for the reason `face-clip` does: every command
+   * here is self-describing. Where `from` came from is the binder's memory of
+   * each resized clip (`createPresentationBinder`); a clip no spell has
+   * resized is at the size the build enters a gladiator at, `80 +
+   * round(strength / 1.5)` at his BUILT strength (`builtYscaleOf`).
+   */
+  SCALE_CLIP: "scale-clip",
   BIND_GLOBALS: "bind-globals",
   CLIP_GOTO: "clip-goto",
   PANEL_REFRESH: "panel-refresh",
@@ -146,6 +376,27 @@ export const PLACEHOLDER_ANIMATION_BINDINGS = Object.freeze({
 
 /** Map, "Attack roll dispatcher": which directions are the ranged band. */
 const RANGED_DIRECTIONS = Object.freeze(new Set([21, 22, 23]));
+/**
+ * Which directions actually LOOSE something — 21 and 22, and NOT 23.
+ *
+ * ► **A SEPARATE SET FROM `RANGED_DIRECTIONS` ABOVE, and collapsing the two
+ *   would put an arrow in the air for a bash.** Direction 23 is in the ranged
+ *   BAND for the purpose that set serves — the hurt label is rewritten
+ *   `direction - 20` for all three (`+0x2093`-`+0x20d6`) — but `bash_attack` is
+ *   a blow with the bow, not a shot: its branch (`+0x6463`) attaches no
+ *   `bullet`, sets no `bullet_in_air`, and plays `Attack2`. Only the shared
+ *   ranged branch at `+0x6b53` fires one.
+ */
+const PROJECTILE_DIRECTIONS = Object.freeze(new Map([[21, "bombard"], [22, "snipe"]]));
+/** Map `+0x2093`–`+0x20d6`: the ranged band's hurt label is `direction - 20`. */
+const RANGED_DIRECTION_OFFSET = 20;
+
+/**
+ * The grievous blow's direction. Named because the two dispatchers disagree
+ * about it and the disagreement is the build's: `defender_hurt` sends 30 to
+ * `knockback`, `defender_blocked` sends it to `defend12` (`+0x21c6`).
+ */
+const GRIEVOUS_DIRECTION = 30;
 
 /**
  * SS2 vocabulary bindings, derived from the static map only.
@@ -164,17 +415,260 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
     "No capture has observed a clip label; every entry is map-named at best.",
   action(event) {
     const direction = Number(event.attackDirection);
+
+    // ► SELF-TARGETED ACTIONS USED TO FALL THROUGH TO THE ATTACK BRANCH, and
+    //   that was wrong twice over (found 2026-09-10 by watching the browser
+    //   arena, then measured over 360 bouts / 158,317 commands):
+    //
+    //   1. the ACTOR played `Standing` — the idle clip — because
+    //      `attackLabel(NaN)` returns it. A resting gladiator stood still; so
+    //      did a burning one. 4,326 times in the sweep.
+    //   2. the TARGET label `hurt5` had nowhere to play, because actor and
+    //      target are one clip, so every one of those actions ALSO emitted an
+    //      `unmapped`. Same 4,326: `rest` 2,929, `burning-phase` 824,
+    //      `poisoned-phase` 573.
+    //
+    //   `presentResolvedEvents` was right to refuse to guess which of the two
+    //   labels wins — the bug was upstream, here, in handing it two labels for
+    //   one clip in the first place.
+
+    // Map, "Key fighter animation labels on export 1241": `rest` (1380). The
+    // map NAMES this one, so it is map-named, not assumed.
+    if (event.type === "rest") {
+      return Object.freeze({ actor: label("rest", LabelProvenance.MAP_NAMED), target: null });
+    }
+
+    // ► **THE SWAP PLAYS `Block`, AND THE BUILD SAYS SO OUTRIGHT.** The
+    //   `swap_weapons` phase is four statements and the third is
+    //   `attacker.gotoAndPlay("Block")` — overlay frame 52
+    //   `DoAction@0x240c7f` `+0x4d65`, read off the installed build
+    //   2026-09-13. So this is MAP_NAMED, not assumed: the guard stance is
+    //   what a gladiator does while it changes weapons.
+    //
+    //   **And it is SILENT, correctly.** `Block` and `BlockForward` carry no
+    //   `StartSound` at all, which `src/render/clip-labels.js` records at the
+    //   `block` family — so a swap makes no noise, because the build binds none
+    //   rather than because anything here decided it should not.
+    //
+    //   Matched on the type rather than on a field, like `rest` above it and
+    //   unlike movement: a swap carries no geometry to detect it by, and its
+    //   own `vanillaLabel` is the PHASE name (`swap_weapons`), which is not a
+    //   clip label — the same phase-name-is-not-a-clip-name distinction the
+    //   ranged verbs turn on.
+    if (event.type === "swap-weapons") {
+      return Object.freeze({ actor: label("Block", LabelProvenance.MAP_NAMED), target: null });
+    }
+
+    // MOVEMENT. Detected by the event carrying arena geometry — a finite
+    // `from` and `to` — never by parsing the type string, for the same reason
+    // the condition case below does not: the engine's token (`walk-left`) and
+    // the build's phase label (`walkleft`) are different spellings, and only
+    // the fields are reliable.
+    //
+    // The label is ASSUMED, and the map is the reason: export 1241's labels
+    // are catalogued one by one — `Standing` (2), `Block` (118/179), `rest`
+    // (1380), `knockback` (1428) — and movement is the unnamed frame RANGE
+    // "movement and charge (33-104)" (battle map, "Key fighter animation
+    // labels on export 1241"). The build names the eight PHASES with byte
+    // offsets (`walkleft` `+0x3b37` through `jumpleft` `+0x49c4`); that those
+    // phase names are also the clip labels is the assumption, and it is the
+    // same one the death variants and the condition flags already carry.
+    //
+    // **The GAIT is not derivable and is not guessed.** `to < from` gives the
+    // direction, but nothing in the geometry separates a walk from a run, a
+    // charge or a jump — they differ only in stamina cost, which is the
+    // resolver's business. So the event must NAME the build's phase in
+    // `vanillaLabel`, exactly as a condition phase does; an event that carries
+    // geometry and no label is reported by `presentResolvedEvents`, which says
+    // which field was missing. Deriving `walkleft`/`walkright` from the sign
+    // would put a guessed gait on screen every time the action was a charge.
+    // ► **A DEPTH MOVE PLAYS NOTHING, AND THAT IS A BINDING DECISION RATHER
+    //   THAN A MISSING ONE. Added 2026-09-12, after the sweep guard caught the
+    //   first version reporting 3,483 of them as unbound.**
+    //
+    //   A rank change is self-targeted, so without a case of its own it fell
+    //   through to the ATTACK branch below and was handed an actor label and a
+    //   `hurt5` for the target — **a step sideways bound as a blow.** The
+    //   sweep guard is what found it; nothing else would have.
+    //
+    //   Detected by `fromY`/`toY`, never by parsing the type string, for the
+    //   same reason every other case here is: the engine's token and the
+    //   build's label are different spellings and only the fields are
+    //   reliable. Here there is no build label at all — the build has no
+    //   sidestep phase — so the honest binding is BOTH ROLES NULL: the figure
+    //   moves (see `depthMovementFor`), and no clip is asked to play.
+    //
+    //   Returning `null` instead would report it as `unmapped`, which means
+    //   "this table has no answer". This table HAS an answer and the answer is
+    //   "nothing plays".
+    if (Number.isFinite(event.fromY) && Number.isFinite(event.toY)) {
+      return Object.freeze({ actor: null, target: null });
+    }
+
+    // ► **A SHOVE AND A TAUNT ARE BOUND BEFORE THE MOVEMENT BRANCH BELOW,
+    //   because their `from`/`to` are the VICTIM's and that branch reads them
+    //   as the actor's walk.** Until 2026-09-22 a shove reached it and came out
+    //   as the shover playing an ASSUMED `shove` walk, and a displacing taunt
+    //   came out as the taunter walking. See `displacementOf`.
+    //
+    //   `shove` is the build's own clip — `attacker.gotoAndPlay("shove")` at
+    //   `+0x5e27`, a label on the fighter clip (frames 1447-1481) — so it is
+    //   MAP_NAMED. The victim plays `knockback` only above the force gate
+    //   (`+0x5ed3`, `+0x5f94`); the displacement is unconditional and the
+    //   resolver reports which, as `knockbackAnimation`.
+    if (event.type === "shove") {
+      return Object.freeze({
+        actor: label("shove", LabelProvenance.MAP_NAMED),
+        target: event.knockbackAnimation === true ? label("knockback", LabelProvenance.MAP_NAMED) : null
+      });
+    }
+    if (event.type === "taunt") return tauntLabels(event);
+
+    // ► **A SELF-CAST SPELL NAMES ONE CLIP, AND IT IS BOUND BEFORE THE MOVEMENT
+    //   BRANCH BELOW because the first one carries the CASTER's own move.**
+    //   `cast_teleport` (added 2026-09-22) plays `attacker.gotoAndPlay("Cast2")`
+    //   at `+0x7620` and nothing on anybody else, and its event carries
+    //   `from`/`to` because the move IS the actor's. Without this case it
+    //   reached the movement branch and came out as the caster playing an
+    //   ASSUMED `cast_teleport` — no clip at all, so the `unknown` schedule —
+    //   measured before this case existed.
+    //
+    //   **Detected by a `casterClip` with NO `victimClip`**, the field rule the
+    //   two-clip spell case below follows, so the next self-cast verb carries
+    //   its own clip rather than needing a case here. MAP_NAMED because the
+    //   string is the build's.
+    //
+    //   `drink_potion` (the same day, in a parallel worktree) needed the same
+    //   rule and wrote its own copy BELOW the two-clip case; merged here as one.
+    //   Before either, the drinker played `Standing` stamped MAP_NAMED. The
+    //   build plays `attacker.gotoAndPlay("drink_potion")` (`+0x57c6`) and
+    //   nothing on anybody else, so the resolver says `victimClip: null` and
+    //   this returns `target: null` — an answer ("nothing plays there"), not an
+    //   `unmapped`.
+    if (typeof event.casterClip === "string" && event.casterClip.length > 0
+      && !(typeof event.victimClip === "string" && event.victimClip.length > 0)) {
+      return Object.freeze({ actor: label(event.casterClip, LabelProvenance.MAP_NAMED), target: null });
+    }
+
+    if (Number.isFinite(event.from) && Number.isFinite(event.to)) {
+      const phase = typeof event.vanillaLabel === "string" && event.vanillaLabel.length > 0
+        ? event.vanillaLabel
+        : null;
+      // Passed through rather than checked against the eight: the closed set
+      // of movement labels belongs to `src/render/timeline.js`, which reports
+      // `recognised: false` for anything outside it. Duplicating it here would
+      // be two lists to keep in step.
+      return phase === null ? null : Object.freeze({ actor: label(phase, LabelProvenance.ASSUMED), target: null });
+    }
+
+    // A condition phase: burning, frozen, poisoned, life_stolen. Detected by
+    // the event carrying a `condition`, never by parsing the type string —
+    // `poison` is dispatched as `poisoned-phase` and its vanilla flag is
+    // `poisoned`, so the three names differ and only the fields are reliable.
+    //
+    // The label is the build's own flag name, and it is ASSUMED: the map
+    // records "condition effects (1911–2004)" as a frame RANGE and names no
+    // label inside it — exactly the position the death variants are in.
+    if (typeof event.condition === "string" && event.condition.length > 0) {
+      const conditionLabel = typeof event.vanillaLabel === "string" && event.vanillaLabel.length > 0
+        ? event.vanillaLabel
+        : event.condition;
+      return Object.freeze({ actor: label(conditionLabel, LabelProvenance.ASSUMED), target: null });
+    }
+
+    // ► **`psyche_up` CARRIES ITS OWN CLIP, BECAUSE NOTHING HERE COULD DERIVE
+    //   ONE.** Its phase label is a single word for all three presses and its
+    //   direction is 30 for the discharge and for `cast_whirlwind` alike, so
+    //   both of the things this function normally reads are ambiguous. The
+    //   resolver knows the counter and therefore knows the clip — `psyche_up`,
+    //   `psyche_up2` or `psyche_up3` for 1, 2 and >= 3 (`+0x658a`, `+0x65b9`,
+    //   `+0x65ef`) — and puts it on the event.
+    //
+    //   MAP_NAMED because the build names all three outright: they are frame
+    //   labels on the fighter clip, not strings assembled from a number.
+    //
+    // ► **THE TARGET HALF DEPENDS ON WHETHER THIS PRESS DISCHARGED.** A charge
+    //   is self-targeted and has no victim label at all; a discharge is an
+    //   ordinary grievous blow and the `dispatchedMethod` switch below already
+    //   knows what that looks like, so it is left to fall through.
+    if (event.type === "psyche-up" && typeof event.clip === "string" && event.clip.length > 0) {
+      const actorLabel = label(event.clip, LabelProvenance.MAP_NAMED);
+      if (event.discharged !== true) {
+        return Object.freeze({ actor: actorLabel, target: null });
+      }
+      if (event.hit === false) {
+        return Object.freeze({ actor: actorLabel, target: defendLabel(direction) });
+      }
+      // Map: direction 30 dispatches `defender_hurt("grievous")`; knockback is
+      // frame 1428 — the same target label the grievous case below uses.
+      return Object.freeze({ actor: actorLabel, target: label("knockback", LabelProvenance.MAP_NAMED) });
+    }
+
+    // ► **A SPELL NAMES BOTH CLIPS ITSELF, AND UNTIL 2026-09-22 THIS TABLE
+    //   IGNORED THEM.** The two bolt verbs shipped on 2026-09-20 with
+    //   `casterClip` and `victimClip` on their event and no case here, so a
+    //   bolt fell through to the ATTACK branch below: `attackLabel(NaN)` put
+    //   the caster in `Standing` — stamped MAP_NAMED, a provenance it had not
+    //   earned — and the victim in an assumed `hurt5`. **That is the exact
+    //   failure the head of this function records for rests and condition
+    //   phases**, measured at 4,326 actions in 2026-09-10's sweep, reintroduced
+    //   by a new verb twelve days later.
+    //
+    //   Both clips are the build's own strings: the caster's is
+    //   `attacker.gotoAndPlay("Cast2")` at `+0x8515`, and the victim's is
+    //   `magic_damage_character`'s `damage_method` argument — the literal
+    //   `"lightning"` pushed at `+0x858f` and played at the ingress's step 1 by
+    //   `defenderClip.gotoAndPlay(damage_method)`. So both are MAP_NAMED.
+    //
+    //   **Detected by the event carrying both fields, not by its type**, which
+    //   is how the condition and movement cases above work and for the same
+    //   reason: the resolver is the thing that knows which clips a spell
+    //   plays, and the next spell verb (`cast_gale` plays `Cast1` and
+    //   `knockback`) will carry its own rather than needing a new case here.
+    if (typeof event.casterClip === "string" && event.casterClip.length > 0
+      && typeof event.victimClip === "string" && event.victimClip.length > 0) {
+      return Object.freeze({
+        actor: label(event.casterClip, LabelProvenance.MAP_NAMED),
+        target: label(event.victimClip, LabelProvenance.MAP_NAMED)
+      });
+    }
+    // ► **A TAUNT PLAYS BOTH CLIPS ~~AND PLAYS THEM WHATEVER IT ROLLED~~** —
+    //   **the victim's is superseded in the same tick by a strike and by a
+    //   failed roll; see `tauntLabels` (2026-09-23).** The
+    //   build fires `attacker.gotoAndPlay("taunt")` at `+0x6905` and
+    //   `defender.gotoAndPlay("taunted")` at `+0x690c` BEFORE the roll, so a
+    //   taunt that fails outright still animates both — which is the whole
+    //   reason it reads as a taunt rather than as a fumble.
+    //
+    //   Only `taunt_effect == 1` reaches the dispatcher; ~~that arm falls
+    //   through to the attack cases below and keeps the `taunted` target label
+    //   from here, because the build never replaces it.~~ **FALSE, corrected
+    //   2026-09-23: the build DOES replace it, in the same frame.** The
+    //   dispatcher it reaches calls `defender_hurt("taunt")` on a hit
+    //   (`+0x30ff`), which plays `"hurt" + 20` = `hurt20` (`+0x2086`,
+    //   `+0x2136`), and `defender_blocked()` on a miss, which plays `defend20`
+    //   (`+0x2160`, `+0x224a`) — both synchronously after `taunted` at
+    //   `+0x690c`, so `taunted` is never drawn. Nor does a taunt event reach
+    //   the cases below: `event.type === "taunt"` returns `tauntLabels` first.
+    //   A struck victim stood in `taunted` while losing hitpoints — 26 of 26
+    //   damaging taunts on the plain 3v3 arena at bf53d81, 38 of 38 with the
+    //   tricks kit. See `tauntLabels`.
+    // (The taunt's own case moved above the movement branch on 2026-09-22 and
+    // lives in `tauntLabels`; see the shove case there.)
+
     if (event.hit === false) {
       // Map, "Attack roll dispatcher": "A miss calls `defender_blocked()`."
-      return Object.freeze({ actor: attackLabel(direction), target: label("Block", LabelProvenance.MAP_NAMED) });
+      // ► **AND `defender_blocked()` DOES NOT PLAY `Block`.** It plays one of
+      //   THIRTEEN `defend` clips, picked by the same `attack_direction` that
+      //   picks the `hurt` clip when the blow lands. See `defendLabel`.
+      return Object.freeze({ actor: attackLabel(direction), target: defendLabel(direction) });
     }
     switch (event.dispatchedMethod) {
-      case "taunt":
-        // Map: `taunt`/`taunted` at frames 1482/1512 — the actor taunts, the target is taunted.
-        return Object.freeze({
-          actor: label("taunt", LabelProvenance.MAP_NAMED),
-          target: label("taunted", LabelProvenance.MAP_NAMED)
-        });
+      // ~~case "taunt": `taunt`/`taunted` — the actor taunts, the target is
+      // taunted.~~ **REMOVED 2026-09-23: unreachable and wrong.** Only a taunt
+      // dispatches direction 20, and a taunt event returns `tauntLabels` above;
+      // had it been reached, `defender_hurt("taunt")` plays `hurt20`
+      // (`+0x30ff`, `+0x2086`), which is what `default` below now gives it.
       case "grievous":
         // Map: direction 30 dispatches `defender_hurt("grievous")`; `knockback` is frame 1428.
         return Object.freeze({ actor: attackLabel(direction), target: label("knockback", LabelProvenance.MAP_NAMED) });
@@ -192,6 +686,55 @@ export const SS2_STATIC_MAP_BINDINGS = Object.freeze({
   }
 });
 
+/**
+ * A TAUNT PLAYS BOTH CLIPS ~~AND PLAYS THEM WHATEVER IT ROLLED~~ **— but the
+ * victim's `taunted` is superseded in the same tick by a strike (below, since
+ * 2026-09-23) and, NOT MODELLED, by a failed roll (last paragraph).** The
+ * build fires `attacker.gotoAndPlay("taunt")` at `+0x6905` and
+ * `defender.gotoAndPlay("taunted")` at `+0x690c` BEFORE the roll, so a taunt
+ * that fails outright still animates both — which is the whole reason it reads
+ * as a taunt rather than as a fumble.
+ *
+ * The knockback clip is the build's own, and only above its force gate —
+ * `defender.gotoAndPlay("knockback")` at `+0x6a21`/`+0x6a91` against the
+ * UNCONDITIONAL displacement at `+0x6ab1`. The resolver reports which, because
+ * the threshold is not recoverable from the two endpoints.
+ *
+ * ► **THE STRIKE REPLACES `taunted` TOO, and until 2026-09-23 this played
+ *   `taunted` over it.** `taunt_effect == 1` sets `attack_direction = 20`
+ *   (`+0x6981`) and calls `checkattackroll()` (`+0x698c`) in the same tick as
+ *   `+0x690c`: a hit dispatches `defender_hurt("taunt")` (`+0x30ff`), which
+ *   plays `"hurt" + 20` (`+0x2086`, `+0x2136`); a miss dispatches
+ *   `defender_blocked()`, which plays `"defend" + 20` (`+0x2160`, `+0x224a`).
+ *   So the victim of a landed strike plays `hurt20` and the parrier of a
+ *   blocked one `defend20` — `hurtLabel`/`defendLabel` at direction 20, the
+ *   same functions every other dispatched blow uses. Recognised by `hit`
+ *   being a boolean, which only a dispatched strike carries.
+ *
+ * ► **NOT MODELLED, NAMED — the FAILED roll replaces `taunted` as well.**
+ *   `diceroll >= taunt_percentage` jumps to `+0x6b0e`, `defender_blocked()`,
+ *   with `attack_direction` NOT written in this arm (its only write in the
+ *   taunt phase is `+0x6981`), so the victim plays `"defend" + ` whatever
+ *   the last attack phase in the bout wrote there — a timeline variable on
+ *   overlay frame 52, shared by both gladiators. Reproducing that needs the
+ *   bout-global last direction, which no event carries; `taunted` stays here
+ *   and the gap is recorded rather than guessed.
+ */
+function tauntLabels(event) {
+  const actorLabel = label("taunt", LabelProvenance.MAP_NAMED);
+  if (typeof event.hit === "boolean") {
+    const direction = Number(event.attackDirection);
+    return Object.freeze({
+      actor: actorLabel,
+      target: event.hit ? hurtLabel(direction) : defendLabel(direction)
+    });
+  }
+  if (event.knockbackAnimation === true) {
+    return Object.freeze({ actor: actorLabel, target: label("knockback", LabelProvenance.MAP_NAMED) });
+  }
+  return Object.freeze({ actor: actorLabel, target: label("taunted", LabelProvenance.MAP_NAMED) });
+}
+
 function attackLabel(direction) {
   // Map: "attack directions 1-12 (190-360)". The frame range is recorded; the
   // label strings are not, so the naming is assumed.
@@ -199,15 +742,120 @@ function attackLabel(direction) {
   if (direction === 20) return label("taunt", LabelProvenance.MAP_NAMED);
   if (direction === 21) return label("bombard", LabelProvenance.MAP_NAMED);
   if (direction === 22) return label("snipe", LabelProvenance.MAP_NAMED);
+  // ► **DIRECTION 23 IS `bash_attack` AND IT PLAYS `Attack2` — read off the
+  //   installed build 2026-09-13, not inferred from the number.**
+  //
+  //   `+0x64c3` sets `attack_direction = 23`, and the very next statement is
+  //   `attacker.gotoAndPlay("Attack2")` at `+0x64ce`. The fall-through below
+  //   would have produced `attack23`, and **there is no such clip**: the
+  //   fighter carries `attack1`-`attack12` and nothing higher, so a bash would
+  //   have found no animation and silently dropped to authored art.
+  //
+  //   That is exactly the shape of the `hurt21`/`hurt22`/`hurt23` error this
+  //   function's own block below records — a label invented by arithmetic on a
+  //   direction number, when the build names one outright a few bytes away. It
+  //   is MAP_NAMED because the build names it.
+  if (direction === 23) return label("attack2", LabelProvenance.MAP_NAMED);
+  // ► **DIRECTION 30 IS NOT AN ATTACK CLIP AT ALL, AND THE FALL-THROUGH BELOW
+  //   WAS INVENTING ONE — the same defect the block above records for 23, one
+  //   number later and found by an agent reading for something else.**
+  //
+  //   The map gives direction 30 exactly two producers (§"Attack roll
+  //   dispatcher"): the `psyche_up` counter, facing right at `+0x669e` and left
+  //   at `+0x6717`, and `cast_whirlwind` at `+0x79d0`/`+0x7a49`. **Neither names
+  //   a clip here**, and for `psyche_up` no clip COULD be named from the
+  //   direction: the animation is chosen by the COUNTER, not the direction —
+  //   `psyche_up`, `psyche_up2` and `psyche_up3` for values 1, 2 and >= 3
+  //   (`+0x658a`, `+0x65b9`, `+0x65ef`). A function handed only a direction is
+  //   being asked a question the build answers somewhere else.
+  //
+  //   So it returns ABSENT rather than a guess. `attack30` has never existed —
+  //   the fighter carries `attack1`..`attack12` — and `animationFor` answers a
+  //   missing label by silently falling back, which is how a wrong gait reaches
+  //   the screen with nothing reporting it.
+  //
+  // ► **AND THE GUARD IS THE RANGE, NOT THE ONE NUMBER**, because the bug is the
+  //   invention and not the 30. Every direction outside 1..12 that no branch
+  //   above claims has no clip to name, and inventing `attack${direction}` for
+  //   it is the same mistake with a different digit waiting to happen.
+  if (!Number.isInteger(direction) || direction < 1 || direction > 12) {
+    return label("Standing", LabelProvenance.ASSUMED);
+  }
   return label(`attack${direction}`, LabelProvenance.ASSUMED);
 }
 
+/**
+ * WHAT A GLADIATOR DOES WHEN A BLOW MISSES — one of thirteen, not one of one.
+ *
+ * ► **THIS ENGINE PLAYED `Block` ON EVERY MISS, AND `Block` IS A DIFFERENT
+ *   THING.** `Block` (11 frames) and `BlockForward` (18) are the STATIC GUARD —
+ *   what a gladiator holds while it swaps weapons, which the build says
+ *   outright at `+0x4d65`. A miss dispatches `defender_blocked()`, and that
+ *   function plays an ACTIVE parry keyed on the attack:
+ *
+ * ```text
+ *   sprite:862[overlay]/frame:52/DoAction@0x240c7f  — defender_blocked()
+ *     +0x2160   animstate = "defend" + attack_direction
+ *     +0x219b   if (attack_direction >= 21 && attack_direction <= 23)
+ *                   animstate = "defend" + (attack_direction - 20)
+ *     +0x21c6   if (attack_direction == 30) animstate = "defend12"
+ *     +0x224a   defender.gotoAndPlay(animstate)
+ * ```
+ *
+ * ► **IT IS THE EXACT MIRROR OF `hurtLabel`, INCLUDING THE RANGED REWRITE** —
+ *   the same `- 20` over directions 21-23, so a dodged bombard plays `defend1`,
+ *   the same clip a dodged direction-1 swing plays. The one asymmetry is
+ *   direction 30: a landed grievous blow plays `knockback`, a missed one plays
+ *   `defend12`. That asymmetry is the build's, not a simplification here.
+ *
+ * ► **AND `clip-labels.js` RECORDED THIS MAPPING AS UNDERIVABLE FOR TWO
+ *   SESSIONS.** Its note said guessing an index mapping across two
+ *   thirteen-member sets was the move this project keeps retracting — correct —
+ *   and then concluded that only a capture could settle it, which was not. The
+ *   selector is twelve instructions in a function the map already names.
+ *   **Refusing to guess is right; recording something as underived without
+ *   asking the bytes is the failure that refusal is supposed to prevent.**
+ */
+function defendLabel(direction) {
+  // A non-numeric direction lands on the middle of the band, exactly as
+  // `hurtLabel` does — a gladiator that parries something is better than one
+  // that stands still while a sword goes through it.
+  if (!Number.isFinite(direction)) return label("defend5", LabelProvenance.ASSUMED);
+  // Direction 30 is the grievous blow. `defender_hurt` sends it to `knockback`;
+  // `defender_blocked` sends it to `defend12`, by name rather than by
+  // arithmetic, which is why it is written out rather than folded in.
+  if (direction === GRIEVOUS_DIRECTION) return label("defend12", LabelProvenance.MAP_NAMED);
+  if (RANGED_DIRECTIONS.has(direction)) {
+    return label(`defend${direction - RANGED_DIRECTION_OFFSET}`, LabelProvenance.MAP_NAMED);
+  }
+  return label(`defend${direction}`, LabelProvenance.MAP_NAMED);
+}
+
 function hurtLabel(direction) {
-  // Map: `defender_hurt` "selects an animation label (`hurtN`, adjusted for
-  // ranged directions, or `knockback`)" — the adjustment is not given, so
-  // every ranged-band hurt label is assumed. See MAP_SILENCE.
+  // Map, §"Attack roll dispatcher" in `docs/integration/ss2-battle-map.md`:
+  // the animation label is `"hurt" + attack_direction` (`+0x2086`), REWRITTEN to
+  // `"hurt" + (attack_direction - 20)` for directions 21–23
+  // (`+0x2093`–`+0x20d6`), and replaced by `knockback` at direction 30
+  // (`+0x20dd`–`+0x20ec`, reached here through `dispatchedMethod: "grievous"`).
+  //
+  // ► THIS FUNCTION USED TO EMIT `hurt21`/`hurt22`/`hurt23` AND MARK THEM
+  //   `ASSUMED`, ON THE STRENGTH OF A `MAP_SILENCE` ENTRY THAT SAID THE MAP
+  //   GAVE THE PHRASE "adjusted for ranged directions" "without giving the
+  //   adjustment". The map gives it, with byte offsets, one sentence later —
+  //   the silence entry quoted the summary and stopped reading. So the label
+  //   was wrong AND its provenance understated the evidence, and
+  //   `test/ss2-adapter.test.js` pinned the wrong value, which is why the
+  //   suite was green. Corrected 2026-09-10; the silence entry is gone and
+  //   `the ranged hurt band is rewritten exactly as the map's byte offsets
+  //   say` pins the rule instead.
+  //
+  // The rewrite makes the ranged band REUSE the melee hurt animations: a
+  // bombard (21) plays `hurt1`, the same clip a direction-1 melee hit plays.
+  // That is the build's own arithmetic, not a simplification made here.
   if (!Number.isFinite(direction)) return label("hurt5", LabelProvenance.ASSUMED);
-  if (RANGED_DIRECTIONS.has(direction)) return label(`hurt${direction}`, LabelProvenance.ASSUMED);
+  if (RANGED_DIRECTIONS.has(direction)) {
+    return label(`hurt${direction - RANGED_DIRECTION_OFFSET}`, LabelProvenance.MAP_NAMED);
+  }
   return label(`hurt${direction}`, LabelProvenance.MAP_NAMED);
 }
 
@@ -319,6 +967,850 @@ function panelRefresh(sequence, placement, combatant) {
   });
 }
 
+/**
+ * The `move-clip` for an event that carries arena geometry, or null.
+ *
+ * **Geometry is not a label decision, so it is not a binding decision.** The
+ * binding table chooses which clip plays; where the figure ends up is the
+ * resolver's own reported fact, read off the event and copied. That split is
+ * why a movement event whose gait the bindings cannot name still MOVES: the
+ * scene would otherwise draw a figure standing where the resolver says it is
+ * not, which is the same failure as swallowing an `unmapped`.
+ *
+ * A step the arena clamp swallowed — `to === from` — is still emitted. It is
+ * inert to fold, and suppressing it would make "walked into the wall" and
+ * "never walked" the same stream.
+ */
+/**
+ * The `fire-projectile` for an event that loosed one, or null.
+ *
+ * **Detected by `attackDirection`, never by parsing the type string** — the
+ * same rule every other case in this file follows, and here it is the strongest
+ * it ever gets: 21 and 22 are the build's own constants, assigned at `+0x6c67`
+ * and `+0x6c8c`, while the engine's tokens (`bombard`, `snipe`) are this
+ * repository's spelling and could be renamed tomorrow.
+ *
+ * **Null when either end models no position**, which is a rule set that models
+ * no geometry — `fixtureReplay`, or a position-blind archer. There is nothing
+ * to fly an arrow BETWEEN, and inventing two points to fly it between would put
+ * a trajectory on screen that the model does not have.
+ */
+/**
+ * One numeric resource off a PROJECTED combatant.
+ *
+ * The projection wraps each resource as `{value, min, max}` — `resources.js`'s
+ * own shape — so a bare `combatant.resources[name]` is an object and reads as
+ * NaN through arithmetic. Named here rather than reaching for the team
+ * resolver's `resourceValue`, because the adapter does not import it.
+ */
+function resourceValueOf(combatant, name) {
+  const entry = combatant?.resources?.[name];
+  const value = entry && typeof entry === "object" ? entry.value : entry;
+  return Number.isFinite(value) ? value : null;
+}
+
+/**
+ * HOW FAR SHORT OF THE TARGET'S CENTRE THE ARROW STOPS — `physical_size`
+ * normally, and ZERO when stopping there would park it inside somebody else.
+ *
+ * ► **THE OWNER WATCHED A 3v3 AND ASKED WHETHER THE AI WAS SHOOTING ITS OWN
+ *   TEAMMATE. IT WAS NOT, AND THE PICTURE SAID IT WAS — 2026-09-18.**
+ *   Measured on the arena's own host and roster: **85 of 120 shots ended at a
+ *   coordinate inside a living teammate's body, at the same depth, painted over
+ *   them.** The resolver is innocent — 2,064 AI actions over 25 seeded 3v3
+ *   bouts, 0 ally-targeted, because ranged options are built from `view.foes`
+ *   and cannot name an ally.
+ *
+ * ► **IT IS TWO CORRECT RULES LANDING ON ONE NUMBER, which is why neither side
+ *   looked wrong on its own.** `ss2WalkDestination` parks a gladiator against a
+ *   body at `target.x ∓ physical_size`. The stop-short — added after the owner
+ *   reported an arrow clipping into the model — ends the flight at
+ *   `target.x ∓ physical_size`. **The same point, by construction rather than
+ *   by luck**, and the front-liner of the shooter's own side is the gladiator
+ *   the walk clamp puts there.
+ *
+ * ► **THE ARC WAS NOT THE PROBLEM, and the claim that it was needs correcting
+ *   too.** `ss2-rules.js` says a bombard flies `>= 1.055` ~~figure heights~~
+ *   "everywhere a body could stand". Re-derived off `src/render/projectile.js`:
+ *   the true global minimum is **0.789** on the claim's own terms and **0.636**
+ *   once this file's real `targetSize` is passed, both at the LAUNCH end. Over
+ *   an interposed body the lob really does clear — 1.04 to 1.34 ~~figure
+ *   heights~~. What it does is **STOP** there: the terminal frame sits at
+ *   0.64-0.99 ~~figure heights~~, which is chest to head height, on the ally's
+ *   own x.
+ *   **UNIT CORRECTED 2026-09-23: every number in this paragraph is in BOMBARD
+ *   LAUNCH HEIGHTS** — `projectile.js`'s `height`, where 1 is the shooter's
+ *   own `_yscale * 2 + 30` (230 arena units at the `_yscale` 100 these were
+ *   measured at), and a gladiator the shooter's size is 0.937-1.048 of one,
+ *   not 1.0. They were taken with the stop-short of their day, `physical_size`
+ *   (86); re-derived that day: 0.636 is sequence 3's, all eleven velocities
+ *   go to 0.429 with that stop, and with the DRAWN stop that replaced it
+ *   (41.45 at strength 9, below) the lowest point between bodies is 1.055 —
+ *   `ss2-rules.js`'s own number. The 0.789, 1.04-1.34 and 0.64-0.99 were not
+ *   re-derived. And they are the ARC's; what the screen draws over a body is
+ *   `lobLiftAt`'s.
+ *
+ * ► **SO THE FIX IS THE ENDPOINT, NOT THE ARC AND NOT THE LEGALITY.** When the
+ *   stop-short would land inside another living body, fall back to `0` — which
+ *   is the BUILD's own literal behaviour, `bullet._x > defender._x` at
+ *   `+0x6cb4`, an arrow that crosses the target's centre and is removed on the
+ *   same tick. The cosmetic approximation is kept exactly where it improves the
+ *   picture and dropped exactly where it makes it worse.
+ *
+ * ► **THE SURFACE IS THE DRAWN BODY'S, NOT `physical_size`, since 2026-09-23.**
+ *   ~~`target.x ∓ physical_size`~~ was the walk clamp's personal space (86 at
+ *   strength 9), and once the gladiator was drawn at the build's size it left
+ *   every arrow ~45 units IN FRONT of a body only ~41 units half-wide. The stop
+ *   is now the target's drawn front surface, `SS2_FIGURE_HALF_WIDTH` (the
+ *   `standing` clip's own bounds, `src/common/ss2-figure.js`) at its
+ *   `physical_size`, and "inside another body" is judged against that body's
+ *   drawn half-width the same way. BOTH LESSONS ABOVE STAND: the arrow stops at
+ *   the surface rather than inside the model, and it still drops to the
+ *   build's centre-x end when that surface is inside somebody else. The walk
+ *   clamp parks the shooter's front-liner `physical_size` from the target, so
+ *   between two strength-9 gladiators there are ~3 units between his back and
+ *   the target's front — the stop now lands in that gap, on the target, where
+ *   it used to land on the front-liner.
+ *
+ * ► **AND "DRAWN" MEANS THE CLIP'S `_yscale`, NOT `physical_size`, since
+ *   2026-09-24.** The two are the same number at battle entry and part company
+ *   the moment colossus or little fat kid lands: the build snaps the victim's
+ *   clip to 50 and grows the caster's to 150, while `battlevalues` recomputes
+ *   `physical_size` from the new strength (83 and 98 at strength 9). The walk
+ *   clamp and the reach keep `physical_size` — they are the engine's, and the
+ *   build's — but an arrow stops against the body ON SCREEN, so every width
+ *   here is read at `yscaleOf`, the binder's drawn size (`SCALE_CLIP`). A
+ *   gladiator no spell has resized draws at `80 + round(strength / 1.5)` of
+ *   his BUILT strength, which is his live `physical_size` unless a stat spell
+ *   moved it — so bloodlust, which writes strength and no scale, no longer
+ *   moves his stop either.
+ */
+function stopShortFor(shooter, target, combatants, yscaleOf = builtYscaleOf) {
+  const size = yscaleOf(target);
+  if (!Number.isFinite(size) || size <= 0) return 0;
+  const surface = drawnHalfWidthOf(target, yscaleOf);
+  if (!Number.isFinite(shooter?.x) || !Number.isFinite(target?.x)) return surface;
+  const direction = target.x >= shooter.x ? 1 : -1;
+  const terminal = target.x - direction * surface;
+  for (const other of combatants.values()) {
+    if (!other || other === shooter || other === target) continue;
+    if (other.alive === false) continue;
+    if (!Number.isFinite(other.x)) continue;
+    // Depth first: a body in another rank is not in the way of anything, and
+    // `null` on either end means this rule set models no depth at all.
+    if (Number.isFinite(other.y) && Number.isFinite(target.y) && other.y !== target.y) continue;
+    if (Math.abs(other.x - terminal) <= drawnHalfWidthOf(other, yscaleOf)) return 0;
+  }
+  return surface;
+}
+
+/** How far a gladiator's drawn body reaches either side of its `x`, at its drawn size. */
+function drawnHalfWidthOf(combatant, yscaleOf = builtYscaleOf) {
+  return SS2_FIGURE_HALF_WIDTH * yscaleOf(combatant) / 100;
+}
+
+/* ------------------------------------------------------------------ */
+/* The clip's size: colossus, little fat kid, and their expiry         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The two counters whose `== 0` block in `check_spells` restores the clip's
+ * scale, in the build's own order: `spell_colossus` (`+0x2485`), then
+ * `spell_little_fat_kid` (`+0x2513`). Swift sandals and bloodlust expire too,
+ * and write no scale.
+ */
+const SCALE_COUNTERS = Object.freeze([
+  SS2_STAT_SPELLS[Ss2ActionType.CAST_COLOSSUS].counter,
+  SS2_STAT_SPELLS[Ss2ActionType.CAST_LITTLE_FAT_KID].counter
+]);
+
+/**
+ * The size the build ENTERS a gladiator at — root frame 221's `_xscale =
+ * _yscale = 80 + round(strength / 1.5)` (`+0x061e`-`+0x06a1`) — at the
+ * strength he was BUILT with: his `backup_strength` where a stat spell
+ * declared one (`backup_char` runs before the bout and never during it),
+ * his strength otherwise, which then never changes. The formula is the rule
+ * set's (`ss2PhysicalSize`), called rather than restated.
+ */
+function builtYscaleOf(combatant) {
+  const strength = resourceValueOf(combatant, "backup_strength") ?? combatant?.stats?.strength ?? 0;
+  return ss2PhysicalSize({ stats: { strength } });
+}
+
+/**
+ * The binder's memory of every clip a spell has resized and nothing has reset,
+ * as a mutable working copy: combatant id -> its `_yscale`. A gladiator absent
+ * from it is at the size he entered at, `builtYscaleOf`.
+ */
+function clipScaleState(clipScales) {
+  const state = new Map();
+  const entries = clipScales instanceof Map ? clipScales.entries() : Object.entries(clipScales ?? {});
+  for (const [combatantId, yscale] of entries) {
+    if (Number.isFinite(yscale)) state.set(combatantId, yscale);
+  }
+  return state;
+}
+
+function frozenClipScales(state) {
+  return Object.freeze(Object.fromEntries(state));
+}
+
+/**
+ * The `scale-clip` a stat spell's cast makes, or null: colossus on its caster,
+ * little fat kid on its victim. **Detected by the event's `counter`** — the
+ * build's own clip field, which only the stat spells carry — never by parsing
+ * the type, the rule every case in this file follows; swift sandals and
+ * bloodlust carry a counter too and write no scale, so they return null.
+ *
+ * The resolver runs a stat spell's once-block on every cast, so every cast
+ * resizes — a recast included, and a little fat kid on a colossus, who then
+ * shrinks from 150 as the engine's strength is halved over the tripled value.
+ * Null when the size does not change.
+ */
+function castScaleFor(layout, combatants, scales, event) {
+  const counter = event.counter;
+  if (!SCALE_COUNTERS.includes(counter)) return null;
+  const bearer = combatants.get(event.targetId);
+  const placement = layout.byCombatantId?.get(event.targetId)
+    ?? layout.placements?.find((entry) => entry.combatantId === event.targetId);
+  if (!bearer || !placement) return null;
+  const from = scales.get(bearer.id) ?? builtYscaleOf(bearer);
+  const colossus = counter === SS2_STAT_SPELLS[Ss2ActionType.CAST_COLOSSUS].counter;
+  // Colossus's phase ends through the stall watchdog, and its arm writes the
+  // scale on every one of those ticks: where it settles is the recurrence run
+  // that long (150 from any start between 1 and 450). Little fat kid's first
+  // tick completes it at 50, whatever it started at.
+  const to = colossus
+    ? ss2ColossusYscaleAfter(from, SS2_STAT_SPELLS[Ss2ActionType.CAST_COLOSSUS].watchdogTicks)
+    : SS2_LITTLE_FAT_KID_YSCALE;
+  scales.set(bearer.id, to);
+  if (to === from) return null;
+  return Object.freeze({
+    kind: CommandKind.SCALE_CLIP,
+    sequence: event.sequence,
+    combatantId: bearer.id,
+    instancePath: placement.instancePath,
+    from,
+    to,
+    counter,
+    at: "action-start",
+    // Only on colossus: the arm's `newscale`, which each tick's
+    // `ceil((newscale - _yscale) / 2)` chases. ► **ITS 2 px-A-TICK DRIFT
+    //   (`+0x8139`-`+0x8191`) IS NOT HERE AND IS NOT DRAWN** — it is POSITION,
+    //   engine state, and deferred by decision (`SS2_STAT_SPELLS`). Modelled,
+    //   it would be the resolver's move, reach this stream as a `move-clip`
+    //   riding the `Colossus` clip, and be drawn tick by tick beside the
+    //   growth in `figureXAt`.
+    ...(colossus ? { growth: Object.freeze({ newscale: SS2_COLOSSUS_NEWSCALE }) } : {})
+  });
+}
+
+/**
+ * A `scale-clip` for every colossus or little fat kid counter that EXPIRED in
+ * the batch and changed its bearer's size — a counter at 0 or above on the
+ * projection the batch started from and at the build's -1 on the one it ended
+ * at (`check_spells` writes -1 in the same block as the restore, `+0x24ba`,
+ * `+0x2548`). Each restores the clip to the size he ENTERED at, the way the
+ * engine restores the two stats from `backup_*` — NOT to the build's shared
+ * `oldscale`; see `CommandKind.SCALE_CLIP` for that decision and its
+ * measurement. In `check_spells`' order; the second of two in one phase finds
+ * nothing left to change and is not emitted.
+ *
+ * `sequence` is the batch's highest and the command is marked
+ * `at: "phase-advance"`, because `check_spells` runs in `nextphase`: the
+ * painter holds the old size until the action has finished.
+ *
+ * **Emitted only when the caller carries in the projection the batch STARTED
+ * from** (`before`), for `facingChangesFor`'s reason. Exact for a batch of one
+ * action — how `battle-host` drains; a batch that spanned an expiry AND a
+ * recast of the same counter would see neither end of the expiry.
+ *
+ * A bearer the binder never saw resized (a stream resumed mid-bout) is taken
+ * to be at `builtYscaleOf` already, so nothing is emitted for him.
+ */
+function scaleRestoresFor(layout, before, wire, scales, sequence) {
+  if (before === null) return [];
+  const started = combatantIndex(before);
+  const ended = combatantIndex(wire);
+  const restores = [];
+  for (const placement of layout.placements) {
+    const was = started.get(placement.combatantId);
+    const now = ended.get(placement.combatantId);
+    if (!was || !now) continue;
+    for (const counter of SCALE_COUNTERS) {
+      const from = resourceValueOf(was, counter);
+      const to = resourceValueOf(now, counter);
+      if (!(from !== null && from >= 0 && to !== null && to < 0)) continue;
+      const restored = builtYscaleOf(now);
+      const yscale = scales.get(placement.combatantId) ?? restored;
+      scales.delete(placement.combatantId);
+      if (yscale === restored) continue;
+      restores.push(Object.freeze({
+        kind: CommandKind.SCALE_CLIP,
+        sequence,
+        combatantId: placement.combatantId,
+        instancePath: placement.instancePath,
+        from: yscale,
+        to: restored,
+        counter,
+        at: "phase-advance"
+      }));
+    }
+  }
+  return restores;
+}
+
+/**
+ * The clip a spell attaches at its victim, or null.
+ *
+ * Detected by the event carrying `boltFrame`, which only the bolt branch in
+ * `src/team/ss2-rules.js` sets — the same rule the spell binding above
+ * follows: the resolver knows which clip a spell plays, and this layer reads
+ * the fields rather than parsing the type.
+ *
+ * `endsWithClip` is the VICTIM's clip, the one whose report-back removes the
+ * bolt, handed in from the binding that chose it so the two cannot disagree.
+ */
+function spellEffectFor(combatants, event, victimClip) {
+  if (!Number.isInteger(event.boltFrame)) return null;
+  const target = combatants.get(event.targetId);
+  if (!Number.isFinite(target?.x)) return null;
+  return Object.freeze({
+    kind: CommandKind.ATTACH_EFFECT,
+    sequence: event.sequence,
+    casterId: event.actorId,
+    targetId: event.targetId,
+    // The build's own linkage name — the export `tools/extract-props.mjs`
+    // takes as `lightning_bolt_combat`.
+    effect: "lightning_bolt_combat",
+    frame: event.boltFrame,
+    x: target.x,
+    y: Number.isFinite(target.y) ? target.y : null,
+    endsWithClip: victimClip ?? null
+  });
+}
+
+/**
+ * The frame `fireball_combat` is drawn on in flight, for ALL THREE spells.
+ *
+ * The arm assigns `fireball_frame` 1, 2 or 3 and then calls
+ * `bullet.gotondStop(fireball_frame)` (`+0x9276`) — a typo for `gotoAndStop`,
+ * naming a MovieClip method that does not exist, so the call does nothing and
+ * the clip stays on the frame it was attached on. The hell and dire art on
+ * frames 2 and 3 is never shown by the build, and is not shown here.
+ */
+const FIREBALL_FLIGHT_FRAME = 1;
+
+/**
+ * The `fire-projectile` for a fireball, or null.
+ *
+ * **Detected by `xVelocity`**, which only the fireball branch in
+ * `src/team/ss2-rules.js` sets — the field rule `spellEffectFor` follows for
+ * `boltFrame`, and for the same reason. It rides the ARROW's command kind
+ * because it is the same thing in the build: a clip attached to
+ * `arena.gladiators` at depth 45000 (`+0x9225`, the arrow's `+0x6d81`) that
+ * flies on its own `onEnterFrame` and holds the phase while it does
+ * (`bullet_in_air`, `+0x8fdf`/`+0x91f5`). `projectile: "fireball"` is what a
+ * surface routes on; the flight arithmetic is `fireballFlight`'s in
+ * `src/render/projectile.js`, not this module's.
+ *
+ * `gladiatorDir` is the CASTER's facing at the cast, carried by the resolver,
+ * because the build flies the bullet that way and not toward the target.
+ * `targetSize` is 0: the build's impact point is past the victim's centre and
+ * the fireball, unlike the arrow, is not stopped short of the body.
+ */
+function fireballFor(combatants, event) {
+  if (!Number.isFinite(event.xVelocity)) return null;
+  const caster = combatants.get(event.actorId);
+  const target = combatants.get(event.targetId);
+  if (!Number.isFinite(caster?.x) || !Number.isFinite(target?.x)) return null;
+  return Object.freeze({
+    kind: CommandKind.FIRE_PROJECTILE,
+    sequence: event.sequence,
+    combatantId: event.actorId,
+    targetId: event.targetId,
+    projectile: "fireball",
+    artFrame: FIREBALL_FLIGHT_FRAME,
+    targetSize: 0,
+    from: Object.freeze({ x: caster.x, y: Number.isFinite(caster.y) ? caster.y : null }),
+    to: Object.freeze({ x: target.x, y: Number.isFinite(target.y) ? target.y : null }),
+    // It cannot miss: the impact test has no other exit.
+    hit: true,
+    xVelocity: event.xVelocity,
+    gladiatorDir: event.gladiatorDir === "left" ? "left" : "right"
+  });
+}
+
+/**
+ * THE BOULDERS a molten death drops, one `attach-effect` per boulder, or an
+ * empty list.
+ *
+ * ► **ADDED 2026-09-23, AND UNTIL THEN A MOLTEN DEATH DREW NOTHING.** The
+ *   resolver has carried every boulder's numbers on the event since the verb
+ *   was built — `boulders[]`, commented "FOR A RENDERER" — and no command
+ *   presented them, so the caster played `Cast2` and the victim died on the
+ *   same clock with no rock in the sky. The owner watched it as "dying
+ *   immediately after one hit and no spell animations".
+ *
+ * **Detected by the event carrying a `boulders` array**, which only the
+ * molten-death branch of `src/team/ss2-rules.js` sets — the field rule
+ * `spellEffectFor` follows for `boltFrame` and `fireballFor` for `xVelocity`.
+ *
+ * ► **AN `attach-effect` AND NOT A `fire-projectile`, because that is what the
+ *   build does**: `arena.gladiators.attachMovie("boulder_combat", ...)`
+ *   (`+0x870f`) N times, each clip falling on its own `onEnterFrame`
+ *   (`+0x882f`). It does not fly between two bodies — it falls straight down
+ *   at one x — so it has no endpoints to carry; it carries the four numbers
+ *   the closure reads instead, under `fall`, and the renderer does the
+ *   arithmetic (`boulderDrawAt` in `src/render/spell-effect.js`).
+ *
+ * ► **ONE COMMAND PER BOULDER IS RIGHT BECAUSE EVERY BOULDER IS ITS OWN CLIP —
+ *   read, not assumed.** Asked 2026-09-23 and answered by the main session
+ *   from the dump (block `0x240c7f`): the call at `+0x8758`-`+0x8773` is
+ *   `gladiators.attachMovie("boulder_combat", "boulder_combat" + i,
+ *   gladiators.getNextHighestDepth(), {_x: defender._x, _y: -600})`, the depth
+ *   from `getNextHighestDepth()` at `+0x8747`-`+0x874c`. Unique names, unique
+ *   depths: no boulder replaces another, so all N are on screen together and
+ *   the engine's "every boulder lands" (`SS2_DEATH_FROM_ABOVE`) stands.
+ *
+ * - `x` is `defender._x + randomBetween(-300, 300)` (`+0x878b`), in arena
+ *   units, which is the space the gladiators' own `_x` lives in.
+ * - `y` is the victim's DEPTH, the bolt's rule: the build has one rank.
+ * - `fall` is `_y` (`y0`), `yspeed`, `_xscale`/`_yscale` and the invocation
+ *   of its own `onEnterFrame` it lands on, all read off the event.
+ * - `lethal` names the ONE boulder whose ingress killed — the event's
+ *   `killingHit`, which indexes `hits` in LANDING order, mapped back to its
+ *   boulder — so a surface can start the victim's death when that rock lands
+ *   rather than when the spell is cast. See `reactionDelaysFor`.
+ *
+ * `endsWithClip` is null: a boulder is not removed by any clip's report. The
+ * arm never removes it at all; ~~how long a landed rock stays is the renderer's
+ * stated choice.~~ **Corrected 2026-09-23: how long a landed rock stays is the
+ * BUILD's answer, read off the pack** — the landing child on `boulder_combat`'s
+ * frame 4 is character 27, whose only frame script is `_parent.removeMovieClip()`
+ * on its frame 23, and the renderer asks `boulderLandedFramesFor` in
+ * `src/render/props.js` (22 on the real pack; 0 for the authored rock). See
+ * `BOULDER_LANDED_FRAMES` there for the reading.
+ */
+function bouldersFor(combatants, event) {
+  if (!Array.isArray(event.boulders)) return [];
+  const target = combatants.get(event.targetId);
+  if (!Number.isFinite(target?.x)) return [];
+  const killingHit = Number.isInteger(event.killingHit) && Array.isArray(event.hits)
+    ? event.hits[event.killingHit - 1]
+    : null;
+  const killer = Number.isInteger(killingHit?.boulder) ? killingHit.boulder : null;
+  const out = [];
+  for (const boulder of event.boulders) {
+    if (!Number.isFinite(boulder?.xOffset) || !Number.isFinite(boulder?.landingFrame)) continue;
+    out.push(Object.freeze({
+      kind: CommandKind.ATTACH_EFFECT,
+      sequence: event.sequence,
+      casterId: event.actorId,
+      targetId: event.targetId,
+      // The build's own linkage name, sprite 33.
+      effect: "boulder_combat",
+      // `gotoAndStop(4)` on landing; frame 1 (`Stop`, `DoAction@0xcb53`) until then.
+      frame: 1,
+      boulder: boulder.index,
+      x: target.x + boulder.xOffset,
+      y: Number.isFinite(target.y) ? target.y : null,
+      fall: Object.freeze({
+        y0: boulder.y0,
+        ySpeed: boulder.ySpeed,
+        scale: boulder.scale,
+        landingFrame: boulder.landingFrame
+      }),
+      lethal: killer !== null && boulder.index === killer,
+      endsWithClip: null
+    }));
+  }
+  return out;
+}
+
+function projectileFor(wire, combatants, event, yscaleOf = builtYscaleOf) {
+  const projectile = PROJECTILE_DIRECTIONS.get(Number(event.attackDirection));
+  if (!projectile) return null;
+  const shooter = combatants.get(event.actorId);
+  const target = combatants.get(event.targetId);
+  if (!Number.isFinite(shooter?.x) || !Number.isFinite(target?.x)) return null;
+  // ► **WHICH ARROW, and it is a TABLE READ rather than an inference.** The
+  //   build picks the art with `gotoAndStop(secondary_weapon - 60)`
+  //   (`+0x6dd4`), and equipment identity deliberately does not survive into
+  //   the resolver — but the weapon table's own raw damage columns do, because
+  //   the swing needs them. `ss2RangedWeaponFor` searches the ranged band
+  //   alone, where all twenty pairs are distinct; see its header for why the
+  //   band restriction is the build's own and not a convenience.
+  //
+  //   **Null is a real answer** and the renderer draws its authored arrow for
+  //   it: a gladiator whose secondary slot holds something the shop would never
+  //   have put there has no bow art to ask for.
+  const bow = ss2RangedWeaponFor(
+    resourceValueOf(shooter, "secondary_weapon_min_damage"),
+    resourceValueOf(shooter, "secondary_weapon_max_damage")
+  );
+  return Object.freeze({
+    kind: CommandKind.FIRE_PROJECTILE,
+    sequence: event.sequence,
+    combatantId: event.actorId,
+    targetId: event.targetId,
+    projectile,
+    /** 1-based, as `gotoAndStop` indexes it, or null when the bow is unknown. */
+    artFrame: ss2ArrowFrameFor(bow),
+    /**
+     * How far short of the TARGET's centre the flight ends: its drawn body's
+     * half-width at its `physical_size`, so the arrow ends at its body rather
+     * than inside it — the owner watched an arrow clip into the model — or 0
+     * when that point is inside somebody else. See `stopShortFor`.
+     *
+     * ~~The target's `physical_size`~~ until 2026-09-23: the walk clamp's
+     * number, which left the arrow ~45 units in front of a body drawn at the
+     * build's size. **At its DRAWN size since 2026-09-24** — the clip's
+     * `_yscale`, which a little fat kid halves — so the arrow lands on the
+     * body on screen (`stopShortFor`).
+     */
+    targetSize: stopShortFor(shooter, target, combatants, yscaleOf),
+    // ► **`y` IS ARENA DEPTH AND IS CARRIED EVEN WHEN NULL**, the same rule the
+    //   combatant projection follows for `x` and `y`: present on every command
+    //   so two surfaces commit to one shape, and `null` meaning "this rule set
+    //   models no depth" rather than "the field is missing". The renderer reads
+    //   a null pair as a flat, one-lane flight.
+    from: Object.freeze({ x: shooter.x, y: Number.isFinite(shooter.y) ? shooter.y : null }),
+    to: Object.freeze({ x: target.x, y: Number.isFinite(target.y) ? target.y : null }),
+    // Whether the shot LANDED, so a surface can stop the arrow at the body or
+    // carry it past. The build cannot express this — its arrow resolves the
+    // attack on arrival, so there is no outcome yet to report — and here there
+    // always is, because the shot is already resolved. Cosmetic either way.
+    hit: event.hit === true
+  });
+}
+
+/**
+ * WHOSE move an event describes — the actor's own, or its VICTIM's.
+ *
+ * ► **ADDED 2026-09-22, AFTER A SHOVE WAS FOUND MOVING THE SHOVER.** Every
+ *   movement event puts its endpoints in `from`/`to`, and this file read them
+ *   as the ACTOR's — right for a walk, a charge, a taunted flee. But `shove`
+ *   and a displacing `taunt` put the TARGET's displacement in those same two
+ *   fields, so the screen walked the pusher into the victim's spot and left the
+ *   victim standing; `cast_gale` uses `targetFrom`/`targetTo` and moved nobody.
+ *   Live since `shove` shipped on 2026-09-19; found by the `cast_gale`
+ *   implementer measuring a shove, and independently by a Codex review of gale.
+ *
+ *   **The events are inside `combatStateHash`**, so their fields are not
+ *   renamed; this is the one place that decides whose move they are:
+ *
+ *   - `targetFrom`/`targetTo` — the gale's own spelling — are the target's;
+ *   - `from`/`to` on a `shove` or a `taunt` are the target's, matched on the
+ *     TYPE because those two events' own fields cannot say so, the same way
+ *     `rest` and `swap-weapons` are matched above;
+ *   - anything else with `from`/`to` is the actor's own move.
+ *
+ * ► **AND ONE OF THE ACTOR'S OWN MOVES IS NOT TRAVELLED AT ALL** (added
+ *   2026-09-22 with `cast_teleport`). The teleport's `from`/`to` are the
+ *   caster's, correctly, and read as a walk they slid the caster across the
+ *   arena on `Cast2`. In the build the figure plays `Cast2` where it stood and
+ *   `attacker._x` is written only when that clip reports (`+0x7646`-`+0x767b`).
+ *   So the move is flagged `teleported`, matched on the TYPE for the reason the
+ *   shove and the taunt are: nothing else in the event's own fields separates
+ *   a blink from a step.
+ */
+function displacementOf(event, { before = null, after = null } = {}) {
+  if (Number.isFinite(event.targetFrom) && Number.isFinite(event.targetTo)) {
+    return { combatantId: event.targetId, from: event.targetFrom, to: event.targetTo, pushed: true };
+  }
+  // ► **A GHOST STRIKE BLINKS ITS CASTER BESIDE THE VICTIM FOR THE SWING**
+  //   (2026-09-23). The build writes `attacker_old_x = _x` (`+0x7e3c`), puts
+  //   the caster at `defender._x ± physical_size` (`+0x7e64`-`+0x7eac`), THEN
+  //   swings and rolls (`+0x7f77`), and restores `attacker_old_x` on the
+  //   completion tick (`+0x7f9f`) — which `death()` deletes, so after a KILL the
+  //   caster stays beside the body. The move-clip says both halves: `blink` is
+  //   where the figure stands while its clip plays, `to` where it rests after.
+  //
+  //   **This was a one-way teleport drawn AFTER the swing, and only on a kill,
+  //   until 2026-09-23.** A strike that did not kill emitted nothing, and the
+  //   AI only casts it beyond 500 (`fightdistance > 500`, ladder arm 21), so
+  //   every ghost strike was drawn as a power blow at nobody from across the
+  //   sands — the owner's "hitting each other not in melee range" on the tricks
+  //   kit (`out-of-range-hits` F3, `spell-animations` F4, both CONFIRMED; the
+  //   refuter found the kill's teleport ALSO swung from across the arena).
+  //
+  //   The lethal landing is the resolver's own (`casterFrom`/`casterTo`, its own
+  //   field names because `from`/`to` would bind the event as a WALK below).
+  //   Otherwise it is the build's expression on the `before` projection — the
+  //   same `ghostLanding` arithmetic the resolver judges the back attack from,
+  //   the caster's facing choosing the side — clamped where the build's clip
+  //   clamp puts the drawn figure. **No `before`, no blink**: the victim may have
+  //   been knocked back since, so the ending projection cannot say where it
+  //   stood.
+  if (event.type === "cast-ghost-strike") {
+    if (Number.isFinite(event.casterFrom) && Number.isFinite(event.casterTo)) {
+      return { combatantId: event.actorId, from: event.casterFrom, to: event.casterTo, pushed: false, blink: event.casterTo };
+    }
+    const blink = ghostLandingOf(before, event);
+    if (blink === null) return null;
+    const rest = after?.get(event.actorId)?.x;
+    return {
+      combatantId: event.actorId,
+      from: blink.from,
+      to: Number.isFinite(rest) ? rest : blink.from,
+      pushed: false,
+      blink: blink.landing
+    };
+  }
+  if (!Number.isFinite(event.from) || !Number.isFinite(event.to)) return null;
+  if (event.type === "shove" || event.type === "taunt") {
+    return { combatantId: event.targetId, from: event.from, to: event.to, pushed: true };
+  }
+  if (event.type === "cast-teleport") {
+    return { combatantId: event.actorId, from: event.from, to: event.to, pushed: false, teleported: true };
+  }
+  return { combatantId: event.actorId, from: event.from, to: event.to, pushed: false };
+}
+
+/**
+ * Where a ghost strike's caster stands for its swing, from the projection the
+ * batch STARTED at: `defender._x - physical_size` facing right, `+` facing left
+ * (`+0x7e4c`-`+0x7eac`), clamped to the arena. Null when either end is not on
+ * that projection.
+ *
+ * **The facing is the one the caster STRIKES with** — turned to its victim
+ * first (`ss2FacingToAct`, 2026-09-24), exactly as the resolver's own
+ * `ghostLanding` reads it — and the projected facing only for a co-located pair,
+ * which has no side to turn to. Reading the projected facing alone put the
+ * blink on the far side of a victim behind the caster, where the resolver no
+ * longer lands it.
+ */
+function ghostLandingOf(before, event) {
+  const caster = before?.get(event.actorId);
+  const target = before?.get(event.targetId);
+  if (!Number.isFinite(caster?.x) || !Number.isFinite(target?.x)) return null;
+  const size = ss2PhysicalSize(caster);
+  const facing = ss2FacingToAct(event.type, caster, target) ?? projectedFacingOf(caster);
+  const raw = facing === "left" ? target.x + size : target.x - size;
+  const landing = Math.min(SS2_ARENA.clamp.max, Math.max(SS2_ARENA.clamp.min, raw));
+  return { from: caster.x, landing };
+}
+
+function movementFor(layout, event, projections = {}) {
+  const displacement = displacementOf(event, projections);
+  if (displacement === null) return null;
+  // Resolved HERE rather than by the caller, and that is not tidiness. This is
+  // called before the binding is known, and `layout.placementFor` THROWS on a
+  // combatant with no slot — so hoisting the lookup to the call site turned an
+  // unbound event naming an unknown actor from an `unmapped` record into a
+  // `SlotLayoutError`. Caught by reading the diff; pinned by
+  // `an event with no binding is reported as unmapped instead of guessed`.
+  const placement = layout.placementFor(displacement.combatantId);
+  return Object.freeze({
+    kind: CommandKind.MOVE_CLIP,
+    sequence: event.sequence,
+    combatantId: placement.combatantId,
+    instancePath: placement.instancePath,
+    from: displacement.from,
+    to: displacement.to,
+    // A PUSH rides whatever clip its victim plays, where a walk rides only a
+    // travelling gait — see `timelinesForStep` and `figureXAt`. Present only
+    // on a push, so every existing move-clip is byte-for-byte what it was.
+    ...(displacement.pushed ? { pushed: true } : {}),
+    // A TELEPORT is held at `from` for the whole of the caster's clip and put
+    // at `to` when it ends — see `figureXAt`. Present only on a teleport, for
+    // the reason `pushed` is present only on a push.
+    ...(displacement.teleported ? { teleported: true } : {}),
+    // A BLINK stands the figure at this x for the whole of its clip and rests
+    // it at `to` when the clip ends — the ghost strike's. Present only on one.
+    ...(Number.isFinite(displacement.blink) ? { blink: displacement.blink } : {})
+  });
+}
+
+/**
+ * The `move-clip-depth` for an event that carries a rank change, or null.
+ *
+ * Detected by `fromY`/`toY`, exactly as `movementFor` is detected by `from`
+ * and `to`, and for the same reason: the engine's token and the build's phase
+ * label are different spellings and only the fields are reliable. There is no
+ * build phase here at all, which makes the fields the only thing there is.
+ */
+function depthMovementFor(layout, event) {
+  if (!Number.isFinite(event.fromY) || !Number.isFinite(event.toY)) return null;
+  // Resolved here rather than by the caller, for the reason `movementFor`
+  // gives: this runs before the binding is known and `placementFor` throws on
+  // a combatant with no slot.
+  const placement = layout.placementFor(event.actorId);
+  return Object.freeze({
+    kind: CommandKind.MOVE_CLIP_DEPTH,
+    sequence: event.sequence,
+    combatantId: placement.combatantId,
+    instancePath: placement.instancePath,
+    fromY: event.fromY,
+    toY: event.toY
+  });
+}
+
+/**
+ * Which way a PROJECTED combatant faces, or null when it has no status list.
+ *
+ * Two-valued, as the resolver carries it: `facing-left` on the status list, or
+ * its absence for right (`ss2-rules.js`, `SS2_FACING_LEFT`, which spells the
+ * same token `CANONICAL_FACING_LEFT` does). It is only ever COMPARED with
+ * itself across a batch — see `facingChangesFor` — so a rule set that models no
+ * facing reads "right" on both ends for everybody and never turns anyone.
+ */
+function projectedFacingOf(combatant) {
+  if (!combatant || !Array.isArray(combatant.status)) return null;
+  return combatant.status.includes(CANONICAL_FACING_LEFT) ? "left" : "right";
+}
+
+/**
+ * The actor's turn to the foe his verb is aimed at, as a `face-clip` drawn at
+ * the START of the action (`at: "action-start"`), or null when he already faces
+ * that way or the verb decides nothing about his facing.
+ *
+ * **The rule is the resolver's, called, not restated**: `ss2FacingToAct` is the
+ * one statement of it, and `ss2TurnToTarget` resolves the phase with the actor
+ * turned exactly this way. It reads the projection the batch STARTED from, as
+ * `ghostLandingOf` does, so it is exact for a batch of one action — how
+ * `battle-host` drains — and `presentResolvedEvents` asks it only for the
+ * batch's first action; a later action in a batch reports its turn in the net
+ * phase-advance change alone.
+ *
+ * A combatant with no status list (a rule set that models no facing) is never
+ * turned, for the reason `facingChangesFor` gives.
+ */
+function actionStartTurnFor(layout, before, event, drawnFacing) {
+  if (before === null) return null;
+  const actor = before.get(event.actorId);
+  const target = before.get(event.targetId);
+  const from = drawnFacing.get(event.actorId) ?? projectedFacingOf(actor);
+  if (from === null) return null;
+  const to = ss2FacingToAct(event.type, actor, target);
+  if (to === null || to === from) return null;
+  const placement = layout.placementFor(event.actorId);
+  return Object.freeze({
+    kind: CommandKind.FACE_CLIP,
+    sequence: event.sequence,
+    combatantId: event.actorId,
+    instancePath: placement.instancePath,
+    from,
+    to,
+    at: "action-start"
+  });
+}
+
+/**
+ * The `face-clip` for every placed combatant whose facing differs between the
+ * projection the batch started from and the one it ended at.
+ *
+ * Iterated over the LAYOUT rather than the wire, so a combatant with no slot is
+ * skipped rather than handed to `placementFor`, which throws. In layout order,
+ * so two surfaces fed the same batch see the same stream.
+ *
+ * `sequence` is the batch's highest event sequence: the turn belongs to the
+ * action that ended the batch, because it happens at that action's phase
+ * advance. A batch spanning several actions reports only the NET change — the
+ * intermediate facings are not in either projection, which is the same
+ * position `panel-refresh` is in for health.
+ *
+ * `actedFacing` holds, per combatant, the facing an `action-start` turn left
+ * him with (`actionStartTurnFor`): his phase-advance turn is measured from
+ * THAT, not from where the batch started, or a turn the stream had already
+ * drawn would be drawn a second time and held back to the old facing.
+ */
+function facingChangesFor(layout, before, wire, sequence, actedFacing = new Map()) {
+  if (before === null) return [];
+  const started = combatantIndex(before);
+  const ended = combatantIndex(wire);
+  const changes = [];
+  for (const placement of layout.placements) {
+    const from = actedFacing.get(placement.combatantId) ?? projectedFacingOf(started.get(placement.combatantId));
+    const to = projectedFacingOf(ended.get(placement.combatantId));
+    if (from === null || to === null || from === to) continue;
+    changes.push(Object.freeze({
+      kind: CommandKind.FACE_CLIP,
+      sequence,
+      combatantId: placement.combatantId,
+      instancePath: placement.instancePath,
+      from,
+      to
+    }));
+  }
+  return changes;
+}
+
+/**
+ * A pushed `move-clip` (and a `move-clip-depth`) for every placed combatant
+ * whose projected position changed across the batch WITHOUT the batch's own
+ * moves carrying it there. Totality for POSITION, as `facingChangesFor` is for
+ * facing.
+ *
+ * ► **ADDED 2026-09-23, BECAUSE A KNOCKBACK WAS NEVER PRESENTED.** The
+ *   resolver's `damagecharacter` knockback moves its victim with a POSITION
+ *   effect and records only `knockback: {roll, force, animation}` on the event
+ *   — no endpoints — so `displacementOf` had nothing to read and the victim was
+ *   drawn where it had stood until its own next step: normal and power blows
+ *   (directions 5-12), the whirlwind and the ghost strike alike. Found by the
+ *   `engine-vs-screen` and `out-of-range-hits` investigators, both CONFIRMED by
+ *   write-nothing refuters; re-measured at bf53d81 over 24 seeds of 3v3: tricks
+ *   kit 91 knockbacks and buffs kit 31, NONE presented, and a figure drawn up
+ *   to 191 units from its engine x (buffs; 133 with tricks). **The events are inside
+ *   `combatStateHash`**, so the fix is here, and it is general rather than one
+ *   more event case: whatever moved a figure, the batch now says so.
+ *
+ *   "Carried there" is decided the way the scene fold decides it: a batch's
+ *   LAST `move-clip` for a combatant is where the scene will rest it
+ *   (`scene.js`, the move-clip case), and with none it rests where the batch
+ *   found it. Only a disagreement with the ENDING projection is emitted, so a
+ *   batch whose own moves already put everyone where the resolver did adds
+ *   nothing, and its stream is exactly what it was.
+ *
+ *   `pushed`, because that is what an unannounced move IS in this engine: the
+ *   victim is carried while it plays whatever it plays (`timelinesForStep`
+ *   pairs a push with any clip), the build's `knockback(defender, force)`.
+ *
+ * `sequence` is the batch's highest, for the reason `facingChangesFor` gives.
+ */
+function positionChangesFor(layout, before, wire, earlier, sequence) {
+  if (before === null) return [];
+  const started = combatantIndex(before);
+  const ended = combatantIndex(wire);
+  const restingX = new Map();
+  const restingY = new Map();
+  for (const command of earlier) {
+    if (command.kind === CommandKind.MOVE_CLIP) restingX.set(command.combatantId, command.to);
+    if (command.kind === CommandKind.MOVE_CLIP_DEPTH) restingY.set(command.combatantId, command.toY);
+  }
+  const changes = [];
+  for (const placement of layout.placements) {
+    const from = started.get(placement.combatantId);
+    const to = ended.get(placement.combatantId);
+    if (!from || !to) continue;
+    const x = restingX.has(placement.combatantId) ? restingX.get(placement.combatantId) : from.x;
+    if (Number.isFinite(x) && Number.isFinite(to.x) && x !== to.x) {
+      changes.push(Object.freeze({
+        kind: CommandKind.MOVE_CLIP,
+        sequence,
+        combatantId: placement.combatantId,
+        instancePath: placement.instancePath,
+        from: x,
+        to: to.x,
+        pushed: true
+      }));
+    }
+    const y = restingY.has(placement.combatantId) ? restingY.get(placement.combatantId) : from.y;
+    if (Number.isFinite(y) && Number.isFinite(to.y) && y !== to.y) {
+      changes.push(Object.freeze({
+        kind: CommandKind.MOVE_CLIP_DEPTH,
+        sequence,
+        combatantId: placement.combatantId,
+        instancePath: placement.instancePath,
+        fromY: y,
+        toY: to.y
+      }));
+    }
+  }
+  return changes;
+}
+
 function clipGoto(sequence, placement, chosen, role) {
   return Object.freeze({
     kind: CommandKind.CLIP_GOTO,
@@ -332,30 +1824,119 @@ function clipGoto(sequence, placement, chosen, role) {
 }
 
 /**
+ * Normalises the caller-supplied action boundaries.
+ *
+ * Each entry is one resolved action's `lastResolvedAction(battle).firstEventSequence`.
+ * They must be positive integers in strictly ascending order, because an
+ * action that began at a lower sequence than the one before it is not a thing
+ * the resolver can produce, and silently sorting the caller's list would hide
+ * a host that had lost track of its own action order.
+ */
+function assertActionBoundaries(actionBoundaries) {
+  if (!Array.isArray(actionBoundaries)) {
+    throw new PresentationError(
+      "actionBoundaries must be an array of resolver sequence numbers, one per resolved action."
+    );
+  }
+  let previous = 0;
+  for (const boundary of actionBoundaries) {
+    if (!Number.isInteger(boundary) || boundary <= 0) {
+      throw new PresentationError(
+        `An action boundary is a positive integer resolver sequence, not ${String(boundary)}.`
+      );
+    }
+    if (boundary <= previous) {
+      throw new PresentationError(
+        `Action boundaries must ascend strictly; ${boundary} follows ${previous}. ` +
+        "Each one is an action's firstEventSequence, and the resolver stamps those in order."
+      );
+    }
+    previous = boundary;
+  }
+  return actionBoundaries;
+}
+
+/**
  * Converts resolver events into ordered presentation commands.
+ *
+ * `actionBoundaries` is how the per-action animation token gets here. The
+ * resolver's own action boundary lives on `battle.lastResolution`, which
+ * `toTeamWireState` deliberately does not project because `combatStateHash`
+ * covers everything it does project. Supply none and every command carries
+ * `actionToken: null`.
+ *
+ * This used to say the boundary is "NOT derivable from `wire`". It is — see
+ * the correction in this module's header. Not projected, for hash stability;
+ * not the same thing as not derivable.
  *
  * @param {object} wire `toTeamWireState(battle)`
  * @param {object} options.layout from `buildArenaLayout`
  * @param {object} [options.bindings] the animation binding table
  * @param {number} [options.fromSequence] resume point; only events after it are bound
- * @returns {{ commands: object[], nextSequence: number }}
+ * @param {number[]} [options.actionBoundaries] each action's `firstEventSequence`, ascending
+ * @param {object} [options.before] `toTeamWireState(battle)` taken BEFORE the
+ *   batch's actions were applied. Carried in by the caller for the reason the
+ *   boundaries are: it is where a `face-clip` is detected from, and without it
+ *   no facing change is reported — see `CommandKind.FACE_CLIP`. A spell's
+ *   EXPIRY (`scale-clip` at the phase advance) is detected from it too.
+ * @param {object} [options.clipScales] the clips a spell has resized and no
+ *   expiry has reset, `{ [combatantId]: yscale }` (or a Map) — the previous
+ *   batch's returned `clipScales`. PRESENTATION state, never combat state: the
+ *   build keeps `_yscale` on the clip, not on the character, and nothing the
+ *   resolver reads or hashes holds it. The binder threads it.
+ * @returns {{ commands: object[], nextSequence: number, actionTokens: number[], clipScales: object }}
  */
 export function presentResolvedEvents(wire, {
   layout,
   bindings = PLACEHOLDER_ANIMATION_BINDINGS,
-  fromSequence = 0
+  fromSequence = 0,
+  actionBoundaries = [],
+  before = null,
+  clipScales = null
 } = {}) {
   assertCombatProjection(wire);
   if (!layout || typeof layout.placementFor !== "function") {
     throw new PresentationError("Presentation needs an arena layout from buildArenaLayout().");
   }
+  assertActionBoundaries(actionBoundaries);
+  // Refused by shape exactly as `wire` is: a live battle handed in here would
+  // be the same way into mutable state, from the other end of the batch.
+  if (before !== null && before !== undefined) assertCombatProjection(before);
+  // The action an event belongs to is the last one that began at or before it.
+  // Linear rather than clever: the boundaries ascend and so do the events, but
+  // this is called with a whole event log often enough that a scan per event
+  // is the honest cost of not assuming the caller's list is aligned.
+  const tokenFor = (sequence) => {
+    let token = null;
+    for (const boundary of actionBoundaries) {
+      if (boundary > sequence) break;
+      token = boundary;
+    }
+    return token;
+  };
   const combatants = combatantIndex(wire);
+  // Every clip a spell has resized, and to what — carried in from the last
+  // batch and written as this one's casts and expiries land. See `SCALE_CLIP`.
+  const scales = clipScaleState(clipScales);
+  const yscaleOf = (combatant) => scales.get(combatant?.id) ?? builtYscaleOf(combatant);
+  // The two ends of the batch, for a move whose endpoints the event does not
+  // carry — the ghost strike's blink. See `displacementOf`.
+  const projections = { before: before ? combatantIndex(before) : null, after: combatants };
   const commands = [];
   let nextSequence = fromSequence;
+  // The facing each actor's `action-start` turn left him with, so the
+  // phase-advance turn is measured from it. See `actionStartTurnFor`.
+  const actedFacing = new Map();
+  // The action the batch's first event belongs to: the only one `before` is
+  // exact for. `undefined` until an event is seen; `null` when the caller
+  // supplied no boundaries, which reads every event as that first action — the
+  // single-action batch every host here drains.
+  let firstActionToken;
 
   for (const event of wire.events ?? []) {
     if (!Number.isFinite(event.sequence) || event.sequence <= fromSequence) continue;
     nextSequence = Math.max(nextSequence, event.sequence);
+    if (firstActionToken === undefined) firstActionToken = tokenFor(event.sequence);
 
     if (event.type === EliminationEvent.COMBATANT_DEFEATED) {
       // A knockout plays a death animation and nothing else. No overlay label,
@@ -413,13 +1994,44 @@ export function presentResolvedEvents(wire, {
     }
 
     const chosen = bindings.action(event);
+    const movement = movementFor(layout, event, projections);
+    // A rank change. Detected and emitted independently of the binding, for
+    // the reason `movementFor` gives: where the figure ends up is the
+    // resolver's own reported fact, and a scene that drew a figure where the
+    // resolver says it is NOT is the same failure as swallowing an `unmapped`.
+    const depthMovement = depthMovementFor(layout, event);
+    // A colossus or a little fat kid resizes its bearer, whatever clip the
+    // bindings choose — the size is state, not a label, for `movementFor`'s
+    // reason. Worked out here, pushed after the clips below.
+    const resized = castScaleFor(layout, combatants, scales, event);
     if (!chosen) {
       commands.push(Object.freeze({
         kind: CommandKind.UNMAPPED,
         sequence: event.sequence,
-        reason: `no animation binding for event type ${event.type} in ${bindings.id}`,
+        reason: depthMovement && !movement
+          // A rank change is AUTHORED and has no build phase to name, so the
+          // "you forgot vanillaLabel" advice below would send the reader to
+          // fix something that is deliberately absent.
+          ? `${event.type} is an authored depth move with no vanilla phase to bind; ` +
+            "the figure still moves and no clip is played for it"
+          : movement
+          // Named precisely, because a movement event has TWO ways to go
+          // unbound and they have different fixes. It does not claim to know
+          // which: `bindings.action` returns null either way, and guessing
+          // would send half the readers to the wrong file.
+          ? `${event.type} carried arena geometry and ${bindings.id} bound no label for it. ` +
+            "SS2_STATIC_MAP_BINDINGS needs the build's own phase named in `vanillaLabel` " +
+            "(walkleft, walkright, runleft, runright, chargeleft, chargeright, jumpleft, jumpright), " +
+            "because the geometry gives the direction and never the gait; another binding table needs " +
+            "a movement case of its own."
+          : `no animation binding for event type ${event.type} in ${bindings.id}`,
         detail: Object.freeze({ eventType: event.type })
       }));
+      // The figure still moves. See `movementFor`.
+      if (movement) commands.push(movement);
+      if (depthMovement) commands.push(depthMovement);
+      // And still changes size.
+      if (resized) commands.push(resized);
       continue;
     }
     const actorPlacement = layout.placementFor(event.actorId);
@@ -430,7 +2042,43 @@ export function presentResolvedEvents(wire, {
       sequence: event.sequence,
       globals: bindingPlanFor(layout, { actorId: event.actorId, targetId: event.targetId ?? null })
     }));
+    // Before the clip, so a surface folding the batch knows where the figure
+    // is going before it starts the timeline that carries it there.
+    if (movement) commands.push(movement);
+    if (depthMovement) commands.push(depthMovement);
+    // The actor's turn to the foe he aims at, BEFORE his clip: the resolver
+    // turned him before the phase read his facing, so the verb is drawn facing
+    // its target. See `actionStartTurnFor` and `CommandKind.FACE_CLIP`.
+    if (tokenFor(event.sequence) === firstActionToken) {
+      const startTurn = actionStartTurnFor(layout, projections.before, event, actedFacing);
+      if (startTurn) {
+        commands.push(startTurn);
+        actedFacing.set(event.actorId, startTurn.to);
+      }
+    }
     if (chosen.actor) commands.push(clipGoto(event.sequence, actorPlacement, chosen.actor, "actor"));
+    // AFTER the actor's clip, because the bow has to be drawn before the arrow
+    // leaves it. The build is stricter still — it will not attach the `bullet`
+    // until the fighter animation sets `attacker.fired` at its own release
+    // frame (`+0x6d59`) — and a surface that wants that fidelity has the
+    // actor's timeline in hand to take the cue from. Ordering the two commands
+    // is as far as this vocabulary can carry it.
+    const projectile = projectileFor(wire, combatants, event, yscaleOf);
+    if (projectile) commands.push(projectile);
+    // The fireball leaves in the same place in the order, and in the build's:
+    // `gotoAndPlay("Cast1")` at `+0x90f4`, the `attachMovie` at `+0x9246` in the
+    // same frame, and the ingress that plays the victim's clip frames later.
+    const fireball = fireballFor(combatants, event);
+    if (fireball) commands.push(fireball);
+    // AFTER the caster's clip and BEFORE the victim's, which is the build's own
+    // order: `gotoAndPlay("Cast2")` at `+0x8515`, the `attachMovie` at
+    // `+0x852a`, then the ingress that plays the victim's clip at `+0x85af`.
+    const spellEffect = spellEffectFor(combatants, event, chosen.target?.label);
+    if (spellEffect) commands.push(spellEffect);
+    // The boulders take the same place, and it is the build's order too:
+    // `gotoAndPlay("Cast2")` at `+0x86d8`, the loop's `attachMovie` at
+    // `+0x870f`, and the victim's `burning` only when the first one lands.
+    commands.push(...bouldersFor(combatants, event));
     if (chosen.target && targetPlacement) {
       commands.push(clipGoto(event.sequence, targetPlacement, chosen.target, "target"));
     } else if (chosen.target && selfTargeted) {
@@ -451,6 +2099,11 @@ export function presentResolvedEvents(wire, {
         })
       }));
     }
+    // A colossus or a little fat kid resizes its bearer's clip, AFTER the clip
+    // it plays, which is the build's order in both arms: `gotoAndPlay` first
+    // (`+0x806f`, `+0x82a2`), then `oldscale` and the scale (`+0x8084`,
+    // `+0x82b7`). See `CommandKind.SCALE_CLIP`.
+    if (resized) commands.push(resized);
     // Totality, the same rule `vanillaWritesForResolvedAction` step 2 applies:
     // every combatant whose panel could be stale is refreshed, not only the
     // ones the event names. An event names one actor and at most one target,
@@ -476,27 +2129,111 @@ export function presentResolvedEvents(wire, {
     for (const placement of layout.placements) refresh(placement);
   }
 
-  return Object.freeze({ commands: Object.freeze(commands), nextSequence });
+  // Every position the batch's own moves did not account for — a knockback,
+  // above all. After the clips, so the pairing reads the batch whole; see
+  // `positionChangesFor`. A batch that moved nobody unannounced adds nothing.
+  commands.push(...positionChangesFor(layout, before ?? null, wire, commands, nextSequence));
+
+  // A colossus or little fat kid that ran out restores its bearer's size — in
+  // `check_spells`, which `nextphase` runs BEFORE `changeCombatants` turns
+  // anybody (`+0x3271`/`+0x3289` against `+0x3638`/`+0x365f`), so before the
+  // turns below. See `scaleRestoresFor`.
+  commands.push(...scaleRestoresFor(layout, before ?? null, wire, scales, nextSequence));
+
+  // LAST, after every clip the batch plays, because that is WHEN it happens:
+  // the build turns its gladiators in `changeCombatants` at the phase advance,
+  // once the action's clips have reported. See `CommandKind.FACE_CLIP`. A batch
+  // that turns nobody adds nothing here, so its stream is exactly what it was.
+  // An actor already turned at the START of his action (`actionStartTurnFor`)
+  // is measured from the facing he acted with.
+  commands.push(...facingChangesFor(layout, before ?? null, wire, nextSequence, actedFacing));
+
+  // Stamped here rather than at each push site, because the action a command
+  // belongs to is a pure function of the `sequence` it already carries — the
+  // last boundary at or before it. So a knockout, its `team-eliminated` and the
+  // terminal `battle-result-pending` all inherit the token of the killing blow,
+  // which is the action whose timeline is actually playing.
+  const tokensSeen = [];
+  const stamped = commands.map((command) => {
+    const actionToken = tokenFor(command.sequence);
+    if (actionToken !== null && !tokensSeen.includes(actionToken)) tokensSeen.push(actionToken);
+    return Object.freeze({ ...command, actionToken });
+  });
+  return Object.freeze({
+    commands: Object.freeze(stamped),
+    nextSequence,
+    // The distinct tokens this batch carried, in order, so a gate can register
+    // them without rescanning the commands.
+    actionTokens: Object.freeze(tokensSeen),
+    // Every clip a spell has resized, as the batch left it — the next batch's
+    // `clipScales`. See `SCALE_CLIP`.
+    clipScales: frozenClipScales(scales)
+  });
 }
 
 /**
  * A stateful cursor over `presentResolvedEvents`, so a host can drain new
  * commands after each action without rebinding the whole event log. The cursor
- * holds a sequence number and nothing else — no combat state.
+ * holds a sequence number and the action boundaries it has been told about —
+ * no combat state.
+ *
+ * `drain(wire, { actionBoundary })` is how the per-action animation token gets
+ * in. Pass `lastResolvedAction(battle).firstEventSequence` after each
+ * `applyAction` and every command this binder emits for that action carries it.
+ * Pass nothing and every command carries `actionToken: null`, because the
+ * boundary is not in the wire projection and this module will not guess one —
+ * see the header for why `event.sequence` is NOT that boundary.
+ *
+ * `drain(wire, { before })` is how a turn gets in, by the same route: the
+ * projection taken before `applyAction`, which is what a `face-clip` is
+ * detected against. The binder does not remember the last wire it was handed
+ * to stand in for it — that would be combat state held here, and the first
+ * drain would have nothing to compare against.
+ *
+ * ► **WHAT IT DOES REMEMBER, since 2026-09-24: each resized clip's
+ *   `_yscale`** (`clipScales`, see `CommandKind.SCALE_CLIP`). That is the
+ *   build's CLIP field, not the character's, so it is not combat state and is
+ *   not in the projection — and which spell's size is standing depends on the
+ *   ORDER of casts and expiries, which no single projection can say (a little
+ *   fat kid still counting after a colossus's expiry reset him is drawn at his
+ *   entry size, one cast after it at 50). So the binder keeps it, as it keeps
+ *   its cursor, and every `scale-clip` still carries both ends.
  */
 export function createPresentationBinder({ layout, bindings = PLACEHOLDER_ANIMATION_BINDINGS } = {}) {
   let cursor = 0;
+  const actionBoundaries = [];
+  let clipScales = null;
   return Object.freeze({
     get sequence() {
       return cursor;
     },
-    drain(wire) {
-      const result = presentResolvedEvents(wire, { layout, bindings, fromSequence: cursor });
+    /** The action boundaries this binder has been told about, in order. */
+    get actionBoundaries() {
+      return Object.freeze([...actionBoundaries]);
+    },
+    drain(wire, { actionBoundary, before = null } = {}) {
+      if (actionBoundary !== undefined && actionBoundary !== null) {
+        // Validated against the whole list, so a host that hands the same
+        // boundary twice — or an older one — fails here rather than producing
+        // commands stamped with a token for an action that already finished.
+        assertActionBoundaries([...actionBoundaries, actionBoundary]);
+        actionBoundaries.push(actionBoundary);
+      }
+      const result = presentResolvedEvents(wire, {
+        layout, bindings, fromSequence: cursor, actionBoundaries, before, clipScales
+      });
       cursor = result.nextSequence;
+      clipScales = result.clipScales;
       return result.commands;
+    },
+    /** Every clip a spell has resized and nothing has reset, `{ [combatantId]: yscale }`. */
+    get clipScales() {
+      return clipScales ?? Object.freeze({});
     },
     reset() {
       cursor = 0;
+      actionBoundaries.length = 0;
+      clipScales = null;
     }
   });
 }

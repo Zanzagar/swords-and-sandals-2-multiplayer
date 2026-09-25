@@ -71,6 +71,7 @@
 import { ControllerKind, createControllerRegistry } from "./controllers.js";
 import { BattleError } from "./errors.js";
 import { normaliseResourceBag } from "./resources.js";
+import { byCodeUnit } from "../common/stable-order.js";
 
 export const MIN_TEAM_SLOTS = 1;
 export const MAX_TEAM_SLOTS = 3;
@@ -129,7 +130,7 @@ function normaliseStatus(source) {
  * Normalises one combatant source. This is the only combatant constructor in
  * the codebase; AI fill goes through it too.
  */
-export function normaliseCombatant(source, teamId, index, rules) {
+export function normaliseCombatant(source, teamId, index, rules, teamIndex = 0) {
   const stats = {
     strength: source.stats?.strength ?? DEFAULT_STATS.strength,
     agility: source.stats?.agility ?? DEFAULT_STATS.agility,
@@ -161,8 +162,93 @@ export function normaliseCombatant(source, teamId, index, rules) {
     maxHealth: source.maxHealth,
     health: source.health,
     alive: true,
-    status: normaliseStatus(source.status)
+    status: normaliseStatus(source.status),
+    /**
+     * Where this gladiator stands, in the build's own arena coordinates.
+     *
+     * `null` for a rule set that models no position — which is every rule set
+     * declaring no `startingPosition`, the placeholder included — and a finite
+     * number for one that does. **It is not optional-and-absent: the key is
+     * ALWAYS present**, so `combatStateHash` commits to the same projection
+     * shape for every rule set, and a `null` says "this battle has no
+     * geometry" rather than leaving two peers to disagree about whether the
+     * field exists at all.
+     *
+     * A blueprint may state it outright and that wins, exactly as a declared
+     * `maxHealth` overrules the derived one.
+     */
+    x: null,
+    /**
+     * The SECOND axis, and the same contract as `x` in every respect: `null`
+     * for a rule set that models no depth, a finite number for one that does,
+     * and the key is ALWAYS present so two peers hash the same projection
+     * shape whatever their rule set.
+     *
+     * **A rule set may model `x` and not `y`.** That is the state of every
+     * rule set in the tree before the second axis is switched on, and it is
+     * why this is a separate hook rather than a widened `startingPosition`:
+     * `y === null` means "this battle has no depth", which is exactly what a
+     * one-dimensional arena is, and it reaches `ss2FightDistance` as 0.
+     *
+     * ► **THIS IS DEPTH, NOT HEIGHT, and the distinction is load-bearing the
+     *   moment anything jumps.** The build spends its own `_y` on the leap arc
+     *   and counts it in `getfightdistance`; this field means which rank you
+     *   stand in. A jump must NOT be written here — it needs its own axis. See
+     *   the height-versus-depth block in `ss2FightDistance`.
+     */
+    y: null
   };
+  combatant.x = Number.isFinite(source.x)
+    ? source.x
+    : (typeof rules.startingPosition === "function"
+      ? rules.startingPosition({ teamIndex, slotIndex: index, combatant })
+      : null);
+  if (combatant.x !== null && !Number.isFinite(combatant.x)) {
+    throw new BattleError(
+      `Rule set ${rules.id} returned a non-finite starting position for ${combatant.id}. ` +
+      "startingPosition must return a finite number or null."
+    );
+  }
+  combatant.y = Number.isFinite(source.y)
+    ? source.y
+    : (typeof rules.startingY === "function"
+      ? rules.startingY({ teamIndex, slotIndex: index, combatant })
+      : null);
+  if (combatant.y !== null && !Number.isFinite(combatant.y)) {
+    throw new BattleError(
+      `Rule set ${rules.id} returned a non-finite starting depth for ${combatant.id}. ` +
+      "startingY must return a finite number or null."
+    );
+  }
+  /**
+   * ► **DEPTH REQUIRES A POSITION. Found 2026-09-12 by `/adversarial-review`
+   *   and reproduced here before it was believed.**
+   *
+   * A blueprint-stated coordinate wins over the rule set's hook — deliberately,
+   * and `x` has always worked that way (the seeded pins stage a pair at +/-30
+   * with it). The second axis inherited that, and inheriting it opened a state
+   * nothing should be able to reach: a combatant with `x: null` and a finite
+   * `y`. Measured, under `fixtureReplay: true`, that gladiator was offered
+   * `rank-back` while `ss2FightDistance` returned `null` for every pair —
+   * half a geometry, with the reach gate answering "not modelled" and the rank
+   * verbs answering "modelled".
+   *
+   * **The asymmetry is the rule, not an oversight.** `x` without `y` is the
+   * one-dimensional arena and is the normal case for every rule set with the
+   * second axis off. `y` without `x` is depth with nowhere to be deep.
+   *
+   * It is checked HERE rather than in the rule set because it is a property of
+   * the combatant the resolver builds, and a rule set cannot see a blueprint
+   * that bypassed its hooks — which is exactly how this got in.
+   */
+  if (combatant.y !== null && combatant.x === null) {
+    throw new BattleError(
+      `Combatant ${combatant.id} states a depth of ${combatant.y} but no position. ` +
+      "A gladiator that models the second axis must model the first: `y` without `x` is depth " +
+      "with nowhere to be deep, and it reaches the rule set as a combatant whose reach gate says " +
+      "\"no geometry\" while its rank verbs say \"geometry\"."
+    );
+  }
   combatant.maxHealth = rules.maximumHealth(combatant);
   combatant.health = clamp(combatant.health ?? combatant.maxHealth, 0, combatant.maxHealth);
   combatant.alive = combatant.health > 0;
@@ -322,7 +408,7 @@ export function buildRoster({ teams, rules }) {
       // The marker itself is this slot's nearest fill source, so it is passed
       // through rather than discarded once `isEmptySlot` has read it.
       const source = filled ? aiFillSource({ ...team, id, name }, index, entry) : entry;
-      const combatant = normaliseCombatant(source, id, index, rules);
+      const combatant = normaliseCombatant(source, id, index, rules, teamIndex);
       combatant.aiFilled = filled;
       combatants.push(combatant);
       // A filled slot's seat is the AI's by construction; `assertFillTemplate`
@@ -362,11 +448,29 @@ export function buildRoster({ teams, rules }) {
   return { teams: built, controllers };
 }
 
-/** Stable initiative: agility descending, then combatant id ascending. */
+/**
+ * Stable initiative: agility descending, then combatant id ascending.
+ *
+ * The tiebreak used `localeCompare` until 2026-09-02, and the consequence was
+ * worse than the desync it was reported as. `battle.initiative` is read by
+ * `currentCombatant` (`resolver.js`) and drives `advanceTurn`, so two peers in
+ * different locales did not merely hash differently — **a different fighter
+ * acted first**. Measured on one blueprint with two agility-tied fighters and
+ * the same seed: the RNG stream stayed bit-identical, 21 draws with the same
+ * final state, and the WINNER still flipped, because identical draws were
+ * applied to different actors. The order also reaches a sealed campaign record
+ * (`src/campaign/from-battle.js`), so it is persisted, not only transient.
+ *
+ * The suite could not have caught this: every id pair in the committed fixtures
+ * collates identically in every locale tested, so a green run was never
+ * evidence either way. See `src/common/stable-order.js` for the census, and
+ * note it does NOT case-fold — `["alpha", "Beta"]` orders differently here than
+ * under en-US collation, which the test below this pins.
+ */
 export function initiativeOrder(teams) {
   return teams
     .flatMap((team) => team.combatants)
     .slice()
-    .sort((a, b) => b.stats.agility - a.stats.agility || a.id.localeCompare(b.id))
+    .sort((a, b) => b.stats.agility - a.stats.agility || byCodeUnit(a.id, b.id))
     .map((combatant) => combatant.id);
 }

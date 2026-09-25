@@ -189,6 +189,71 @@ test("fixture validation pins the licensed-build fingerprint", () => {
   }
 });
 
+test("a candidate's provenance kind decides whether it must name a source record", () => {
+  // Before `transcribed-observation` existed, the schema FORCED every candidate
+  // to declare `synthetic-static-map`, so a fixture derived from the bytecode
+  // map and a fixture copied verbatim out of a live state dump made the same
+  // provenance claim and the field carried no information about provenance.
+  // These four cases are the whole content of the repair: the kind and the
+  // source field can no longer disagree in either direction.
+  const fixture = fixturesById.get("candidate-normal-threshold-hit");
+  assert.equal(fixture.provenance.kind, GoldenProvenance.SYNTHETIC);
+
+  const transcribed = cloneJson(fixture);
+  transcribed.provenance.kind = GoldenProvenance.TRANSCRIBED;
+  transcribed.provenance.authoredFrom = "obs-20260830-t1";
+  assert.equal(validateSs2OneVsOneFixture(transcribed), transcribed);
+
+  // Transcribed but silent about its source: the exact shape the four prisoner
+  // normal-band candidates had for their whole life.
+  const unnamedSource = cloneJson(transcribed);
+  delete unnamedSource.provenance.authoredFrom;
+  assert.throws(
+    () => validateSs2OneVsOneFixture(unnamedSource),
+    (error) => error instanceof GoldenFixtureValidationError && /requires provenance.authoredFrom/.test(error.message)
+  );
+
+  // Synthetic yet naming a source: the same falsehood wearing the other label.
+  const synthethicWithSource = cloneJson(fixture);
+  synthethicWithSource.provenance.authoredFrom = "obs-20260830-t1";
+  assert.throws(
+    () => validateSs2OneVsOneFixture(synthethicWithSource),
+    (error) => error instanceof GoldenFixtureValidationError && /must not carry provenance.authoredFrom/.test(error.message)
+  );
+
+  // A transcribed candidate is still a candidate: where its numbers came from
+  // says nothing about whether the runtime has confirmed them.
+  const transcribedClaimingVerification = cloneJson(transcribed);
+  transcribedClaimingVerification.provenance.runtimeVerified = true;
+  assert.throws(
+    () => validateSs2OneVsOneFixture(transcribedClaimingVerification),
+    GoldenFixtureValidationError
+  );
+
+  for (const authoredFrom of [42, null, "", "not a token", "x".repeat(129)]) {
+    const malformed = cloneJson(transcribed);
+    malformed.provenance.authoredFrom = authoredFrom;
+    assert.throws(() => validateSs2OneVsOneFixture(malformed), GoldenFixtureValidationError);
+  }
+
+  // And a golden may not borrow the field: its evidence is `observationIds`.
+  const golden = cloneJson(fixture);
+  golden.classification = GoldenClassification.GOLDEN;
+  golden.provenance = {
+    kind: GoldenProvenance.LICENSED,
+    runtimeVerified: true,
+    sourceRefs: cloneJson(fixture.provenance.sourceRefs),
+    observedAt: "2026-08-30T00:00:00Z",
+    captureToolVersion: "test-capture/1",
+    repetitions: 2,
+    observationIds: ["observation-1", "observation-2"],
+    observationDigests: ["1".repeat(64), "2".repeat(64)],
+    captureManifestSha256: "3".repeat(64),
+    authoredFrom: "obs-20260830-t1"
+  };
+  assert.throws(() => validateSs2OneVsOneFixture(golden), GoldenFixtureValidationError);
+});
+
 test("fixture classification and provenance must agree", () => {
   const fixture = fixturesById.get("candidate-normal-threshold-hit");
 
@@ -376,6 +441,206 @@ test("armour removal preserves selection and native cosmetic roll order", () => 
   ]);
 });
 
+/**
+ * One `destroy_armour` call's draws, written from the BYTES and not from the
+ * candidate (overlay frame 52 `DoAction@0x23d7fe`, `destroy_armour`):
+ *
+ *   +0x0dfb  xspeed = -30 + RandomNumber(20)        whichavatar facing "right"
+ *   +0x0e28  xspeed =  10 + RandomNumber(30)        facing "left"
+ *   +0x0e30  xspeed = randomBetween(-30, 60)        any other facing
+ *   +0x0e5b  dy = -40 + RandomNumber(20)            always
+ *   +0x0e6f  rotationspeed = -5 + RandomNumber(5)   always
+ *
+ * The `onEnterFrame` closure it defines at `+0x0e86` draws nothing. So one
+ * call is exactly three draws, in that order, and only the first depends on
+ * facing. `armour-debris-N` is the N-th debris clip the attack launches.
+ */
+function debrisClipSamples(clip, facing, [x, y, rotation]) {
+  const horizontal = facing === "right"
+    ? { source: RollSource.RANDOM_NUMBER, min: 0, max: 19 }
+    : facing === "left"
+      ? { source: RollSource.RANDOM_NUMBER, min: 0, max: 29 }
+      : { source: RollSource.RANDOM_BETWEEN, min: -30, max: 60 };
+  return [
+    { label: `armour-debris-${clip}-x`, ...horizontal, value: x },
+    { label: `armour-debris-${clip}-y`, source: RollSource.RANDOM_NUMBER, min: 0, max: 19, value: y },
+    { label: `armour-debris-${clip}-rotation`, source: RollSource.RANDOM_NUMBER, min: 0, max: 4, value: rotation }
+  ];
+}
+
+/**
+ * Every piece `remove_armour` can destroy, and the `destroy_armour` calls its
+ * branch makes (overlay frame 52 `DoAction@0x23d7fe`, CallFunction offsets).
+ * Each call launches the one debris clip the branch has just attached at a
+ * limb, so a paired piece is two clips — left limb, then right — and a single
+ * piece is one:
+ *
+ *   helmet         +0x03c5 head
+ *   shoulderguard  +0x0500 Lupperarm, +0x056e Rupperarm
+ *   breastplate    +0x06c1 torso
+ *   gauntlet       +0x07a2 Llowerarm, +0x0810 Rlowerarm
+ *   greaves        +0x08f1 Lupperleg, +0x095f Rupperleg
+ *   shinguard      +0x0a8d Llowerleg, +0x0afb Rlowerleg
+ *   boot           +0x0bdc Lfoot,     +0x0c4a Rfoot
+ *   shield         +0x0d2b Rlowerarm
+ *
+ * Direction and selection per the battle map's group table: 5 is the top group
+ * (`randomBetween(1, 2)`), 6 the middle and 7 the lower (`randomBetween(1, 3)`).
+ */
+const REMOVABLE_PIECES = [
+  { piece: "helmet", direction: 5, selection: 1, groupSize: 2, clips: 1 },
+  { piece: "shoulderguard", direction: 5, selection: 2, groupSize: 2, clips: 2 },
+  { piece: "breastplate", direction: 6, selection: 1, groupSize: 3, clips: 1 },
+  { piece: "gauntlet", direction: 6, selection: 2, groupSize: 3, clips: 2 },
+  { piece: "greaves", direction: 6, selection: 3, groupSize: 3, clips: 2 },
+  { piece: "shinguard", direction: 7, selection: 1, groupSize: 3, clips: 2 },
+  { piece: "boot", direction: 7, selection: 2, groupSize: 3, clips: 2 },
+  { piece: "shield", direction: 7, selection: 3, groupSize: 3, clips: 1 }
+];
+
+// Distinct per clip, so a collapsed, repeated or re-ordered clip shows up in
+// the returned values and not only in the tape's labels. Chosen, in range.
+const CLIP_VALUES = {
+  right: [[10, 5, 2], [17, 12, 3]],
+  left: [[10, 5, 2], [24, 12, 3]],
+  neither: [[-7, 5, 2], [44, 12, 3]]
+};
+
+function removeOnePiece({ piece, direction, selection, groupSize, clips }, facing) {
+  const scenario = physicalScenario({
+    attackDirection: direction,
+    villain: {
+      armourclass: 20,
+      armourclass_max: 20,
+      [piece]: 1,
+      [`${piece}_defence`]: 5,
+      gladiator_dir: facing
+    }
+  });
+  const debris = [];
+  for (let clip = 1; clip <= clips; clip += 1) {
+    debris.push(...debrisClipSamples(clip, facing, CLIP_VALUES[facing][clip - 1]));
+  }
+  const { outcome, trace } = runPhysicalScenario(scenario, [
+    betweenSample("hit-roll", 1, 100, 50),
+    betweenSample("normal-damage-roll", 12, 20, 12),
+    betweenSample("normal-critical-roll", 1, 20, 7),
+    betweenSample("critical-deflection-roll", 1, 100, 42),
+    betweenSample("armour-removal-roll", 1, 100, 67),
+    betweenSample("armour-selection-1", 1, groupSize, selection),
+    ...debris,
+    betweenSample("knockback-roll", 1, 4, 1),
+    betweenSample("enchantment-potency-roll", 1, 100, 100)
+  ]);
+  return { outcome, trace, debris };
+}
+
+test("a paired piece launches two debris clips: six draws, the first limb's three then the second's", () => {
+  const paired = REMOVABLE_PIECES.filter((entry) => entry.clips === 2);
+  assert.deepEqual(
+    paired.map((entry) => entry.piece),
+    ["shoulderguard", "gauntlet", "greaves", "shinguard", "boot"]
+  );
+  for (const entry of paired) {
+    for (const facing of ["right", "left", "neither"]) {
+      const context = `${entry.piece} facing ${facing}`;
+      // The tape is strict and positional: a candidate drawing three instead of
+      // six reaches `knockback-roll` with `armour-debris-2-x` still on the tape
+      // and is refused at the cursor, and `finish()` refuses anything unused.
+      const { outcome, trace, debris } = removeOnePiece(entry, facing);
+      assert.equal(debris.length, 6, context);
+      assert.deepEqual(trace.slice(6, 12), debris, context);
+      assert.equal(trace[12].label, "knockback-roll", context);
+
+      const [removal] = outcome.mutation.armourRemovals;
+      assert.equal(removal.selected, entry.piece, context);
+      assert.equal(removal.removed, true, context);
+      assert.deepEqual(removal.debrisRolls, CLIP_VALUES[facing].map(([x, y, rotation]) => ({
+        horizontal: {
+          source: facing === "neither" ? RollSource.RANDOM_BETWEEN : RollSource.RANDOM_NUMBER,
+          value: x
+        },
+        vertical: y,
+        rotation
+      })), context);
+
+      // Two clips, ONE removal: the defence leaves each armour pool once
+      // (e.g. shoulderguard `+0x0477`-`+0x04a2`, ahead of both calls).
+      assert.equal(removal.defenceRemoved, 5, context);
+      assert.equal(outcome.state.villain[entry.piece], 0, context);
+      assert.equal(outcome.state.villain.armourclass_max, 15, context);
+    }
+  }
+});
+
+test("a single piece launches one debris clip: exactly three draws", () => {
+  const single = REMOVABLE_PIECES.filter((entry) => entry.clips === 1);
+  assert.deepEqual(single.map((entry) => entry.piece), ["helmet", "breastplate", "shield"]);
+  for (const entry of single) {
+    for (const facing of ["right", "left", "neither"]) {
+      const context = `${entry.piece} facing ${facing}`;
+      const { outcome, trace, debris } = removeOnePiece(entry, facing);
+      assert.equal(debris.length, 3, context);
+      assert.deepEqual(trace.slice(6, 9), debris, context);
+      assert.equal(trace[9].label, "knockback-roll", context);
+
+      const [removal] = outcome.mutation.armourRemovals;
+      assert.equal(removal.selected, entry.piece, context);
+      const [x, y, rotation] = CLIP_VALUES[facing][0];
+      assert.deepEqual(removal.debrisRolls, [{
+        horizontal: {
+          source: facing === "neither" ? RollSource.RANDOM_BETWEEN : RollSource.RANDOM_NUMBER,
+          value: x
+        },
+        vertical: y,
+        rotation
+      }], context);
+      assert.equal(outcome.state.villain[entry.piece], 0, context);
+    }
+  }
+});
+
+test("remove_armour's zero-clamp runs even when the direction selects no piece group", () => {
+  // The three group tests' miss branches (`+0x02ee` -> `+0x0595`, `+0x05e9` ->
+  // `+0x0986`, `+0x09b6` -> `+0x0d4d`) chain into the trailing clamp, so a
+  // direction in no group — 20-23 and 30 — draws nothing and still runs
+  // `if (armourclass < 0) armourclass = 0` (`+0x0d4d`-`+0x0d78`) and the same
+  // for `armourclass_max` (`+0x0d79`-`+0x0da4`). Only a staged negative can
+  // make that clamp write anything: in play `check_stats` floors `armourclass`
+  // at the end of each damage ingress, and `armourclass_max`'s only in-battle
+  // writer is `remove_armour` itself, which floors it.
+  const scenario = physicalScenario({
+    attackDirection: 30,
+    villain: { armourclass: -3, armourclass_max: -5 }
+  });
+  const { outcome, trace } = runPhysicalScenario(scenario, [
+    betweenSample("hit-roll", 1, 100, 50),
+    betweenSample("critical-deflection-roll", 1, 100, 42),
+    betweenSample("armour-removal-roll", 1, 100, 66),
+    betweenSample("knockback-roll", 1, 4, 1),
+    betweenSample("enchantment-potency-roll", 1, 100, 100)
+  ]);
+
+  assert.deepEqual(trace.map((sample) => sample.label), [
+    "hit-roll",
+    "critical-deflection-roll",
+    "armour-removal-roll",
+    "knockback-roll",
+    "enchantment-potency-roll"
+  ]);
+  // The grievous's unconditional call; the roll of 66 adds no second one. The
+  // result keeps the shape `candidate-grievous-knockback` pins.
+  assert.deepEqual(outcome.mutation.armourRemovals, [{ request: 1, selected: null, removed: false }]);
+  // Both floors land inside remove_armour, BEFORE the damage writes.
+  assert.deepEqual(outcome.mutationTrace.slice(0, 3), [
+    { sequence: 1, path: "/villain/armourclass", before: -3, after: 0, reason: "remove-armour-clamp" },
+    { sequence: 2, path: "/villain/armourclass_max", before: -5, after: 0, reason: "remove-armour-clamp" },
+    { sequence: 3, path: "/villain/hitpoints", before: 100, after: 70, reason: "physical-damage" }
+  ]);
+  assert.equal(outcome.state.villain.armourclass, 0);
+  assert.equal(outcome.state.villain.armourclass_max, 0);
+});
+
 test("fully absorbed armour damage still grants breastplate stamina", () => {
   // Byte-verified: the vanilla stamina block is an unconditional join, so an
   // armour-absorbed hit grants ceil(breastplate * fullDamage / 100).
@@ -444,6 +709,71 @@ test("secondary enchantment type still uses primary potency", () => {
   assert.equal(outcome.mutation.statusApplied, null);
   assert.equal(outcome.state.villain.burning, false);
 });
+
+/**
+ * The positive half of the test above. Without it, "statusApplied is null"
+ * could be passing because the secondary branch is broken rather than because
+ * the potency gate refused — and those are opposite conclusions.
+ */
+test("the secondary weapon's TYPE is what fires, gated on the primary potency", () => {
+  const scenario = physicalScenario({
+    hero: {
+      equipped_weapon: 2,
+      // Primary potency 10 -> threshold 100, so the roll of 50 clears it.
+      weapon_enchantment_potency: 10,
+      // Primary type 5 (life_stolen) must NOT be the one applied.
+      weapon_enchantment_type: 5,
+      secondary_weapon_enchantment_type: 2,
+      secondary_weapon_enchantment_potency: 0
+    }
+  });
+  const { outcome } = runPhysicalScenario(scenario, enchantmentTape());
+  assert.equal(outcome.mutation.statusApplied, "burning");
+  assert.equal(outcome.state.villain.burning, true);
+  assert.equal(outcome.state.villain.life_stolen, false, "the PRIMARY type must not fire on a secondary weapon");
+});
+
+/**
+ * `damagecharacter` tests `equipped_weapon == 1` and `equipped_weapon == 2`
+ * explicitly (`+0x1c27` / `+0x1c58`, repeated per status arm), so any other
+ * value satisfies neither conjunct and applies NO status. This module used to
+ * treat "not 2" as "primary", which applied one.
+ *
+ * Nothing in the corpus stages such a value today; these pin the branch so a
+ * future armoured or enchanted capture cannot silently diverge on it.
+ */
+for (const equipped of [0, 3]) {
+  test(`equipped_weapon ${equipped} applies no enchantment, as the build does not`, () => {
+    const scenario = physicalScenario({
+      hero: {
+        equipped_weapon: equipped,
+        weapon_enchantment_potency: 10,
+        weapon_enchantment_type: 2,
+        secondary_weapon_enchantment_type: 2,
+        secondary_weapon_enchantment_potency: 10
+      }
+    });
+    const { outcome } = runPhysicalScenario(scenario, enchantmentTape());
+    assert.equal(outcome.mutation.statusApplied, null);
+    assert.equal(outcome.state.villain.burning, false);
+    // The roll is still DRAWN — the build draws it before any weapon test — so
+    // the RNG stream must not depend on which weapon is equipped.
+    assert.equal(outcome.mutation.enchantmentRoll, 50);
+  });
+}
+
+/** The seven samples the physical scenarios above consume, in order. */
+function enchantmentTape() {
+  return [
+    betweenSample("hit-roll", 1, 100, 50),
+    betweenSample("normal-damage-roll", 12, 20, 12),
+    betweenSample("normal-critical-roll", 1, 20, 7),
+    betweenSample("critical-deflection-roll", 1, 100, 42),
+    betweenSample("armour-removal-roll", 1, 100, 66),
+    betweenSample("knockback-roll", 1, 4, 1),
+    betweenSample("enchantment-potency-roll", 1, 100, 50)
+  ];
+}
 
 test("the result bridge delivers the final pending result only once", () => {
   const resultEvent = fixturesById.get("candidate-lethal-result").expected.resultEvent;

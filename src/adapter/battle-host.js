@@ -29,6 +29,24 @@
  *    comes from `lastResolvedAction(battle)` — the authoritative trace of what
  *    actually happened, rather than a recording wrapper's guess at it.
  *
+ * **The per-action animation gate (2026-09-07).** `submit` now stamps each
+ * action's presentation commands with the resolver's own action boundary
+ * (`lastResolvedAction(battle).firstEventSequence` — NOT `event.sequence`,
+ * which is per event and would split a killing blow into four) and registers
+ * that token with `src/adapter/action-gate.js`. Two things about it are
+ * deliberate and easy to undo by accident:
+ *
+ * - **Nothing here ever calls `gate.report`.** Only the animation surface
+ *   does, through `reportActionAnimation`. This is the same rule
+ *   `acknowledgeResultAnimations` was rewritten to obey after it was found
+ *   fabricating the death reports and the arena label it was itself waiting
+ *   for: a gate that supplies its own evidence is not a gate.
+ * - **It is advisory unless `awaitAnimations: true`.** Every headless caller —
+ *   the goldens, the replay harness, the suite — has no surface to report
+ *   from, and a gate that blocked them would wait forever. Enforcing hosts
+ *   refuse in `submit` BEFORE `applyAction`, because an applied action cannot
+ *   be taken back.
+ *
  * Node builtins only; no assets, no game data.
  */
 
@@ -38,6 +56,7 @@ import {
   assertTeamRuleSet,
   BATTLE_RESULT_ACK_TYPE,
   chooseAiAction,
+  suggestAction,
   combatantById,
   combatStateHash,
   createTeamBattle,
@@ -46,27 +65,35 @@ import {
   lastResolvedAction,
   legalActions,
   placeholderTeamRules,
-  toTeamWireState
+  previewAction,
+  toTeamWireState,
+  unavailableActions
 } from "../team/index.js";
 
+import { createActionAnimationGate } from "./action-gate.js";
 import { createResultAcknowledgementBridge } from "./acknowledgement.js";
 import { ClipRegistry } from "./clip-registry.js";
 import { createPresentationBinder, PLACEHOLDER_ANIMATION_BINDINGS, presentArenaConstruction } from "./presentation.js";
 import { buildArenaLayout } from "./slot-layout.js";
 import {
+  applyGlobalWrites,
   applyVanillaWrites,
+  assertGlobalMirrorAgrees,
   assertMirrorAgrees,
   canonicalResourcesFrom,
   compareMaximumHealth,
   denormaliseVanillaCombatant,
   facingWrite,
+  GLOBAL_OBJECT_PATH,
   initialStatusEffects,
   loadoutMirrorDifferences,
   mirrorDifferences,
   normaliseVanillaCombatant,
   toCanonicalCombatantSource,
   toVanillaCombatant,
-  vanillaWritesForResolvedAction
+  vanillaGlobalsFrom,
+  vanillaWritesForResolvedAction,
+  WriteTarget
 } from "./state-bridge.js";
 import { isPlainVanillaObject } from "./vanilla-fields.js";
 
@@ -92,6 +119,7 @@ export const HOST_PIPELINE = Object.freeze([
   "applyVanillaWrites",
   "assertMirrorAgrees",
   "presentResolvedEvents",
+  "actionGate.observe",
   "bridge.sync"
 ]);
 
@@ -120,39 +148,39 @@ function assertMember(member, teamId, index) {
 }
 
 /**
- * Carries the canonical resource bag onto a team's AI-filled slots.
+ * The `resources` declaration that already covers one AI-filled slot, read in
+ * `src/team/roster.js`'s own precedence order: an array `aiFill`'s entry for
+ * that slot, or a team-wide `aiFill` object. `undefined` means the caller
+ * declared none for this slot, which is the case the host fills in.
  *
  * A supplied gladiator gets its resources from its own combat object
  * (`toCanonicalCombatantSource`), and it has to: the resolver refuses a write
  * to an undeclared resource, and the hero/villain surface is a binding rebound
  * per action, so *every* combatant must declare the set or an armour write
- * would succeed or throw depending on whose turn it was.
+ * would succeed or throw depending on whose turn it was. An AI-filled slot has
+ * no combat object of its own, so its bag comes from the caller's mirror
+ * template — and it goes on **that slot's own empty-slot marker**, which the
+ * roster reads as the nearest and highest-priority fill source.
  *
- * An AI-filled slot is the one case the adapter cannot serve per slot.
- * `src/team/roster.js` builds a filled slot from `team.aiFill` — **one
- * template per team, not per slot** — so when two slots on one team are filled
- * from two different vanilla templates there is nowhere to put the second bag.
- * That is reported rather than papered over: guessing which template wins
- * would put an invented number in the state hash.
+ * This used to be a team-level injection, `{ ...team.aiFill, resources }`,
+ * from when the roster carried one fill template per team and two disagreeing
+ * templates had nowhere to both live. Two things were wrong with it. Filled
+ * slots on such a team declared **no** resources at all, reported as
+ * `diagnostics.aiFillResourceGaps`, and a rule set's write to one was refused
+ * by the resolver. And once `aiFill` was allowed to be an array of per-slot
+ * templates, spreading it into an object literal collapsed the whole array —
+ * `{ ...[a, b] }` is `{ 0: a, 1: b }`, which the roster reads as one nameless
+ * template applying to every slot, so every per-slot name, stat and loadout
+ * the caller declared was silently discarded. Per-slot markers have neither
+ * problem: nothing is merged across slots, so nothing has to agree about its
+ * resources and there is no array to flatten.
  */
-function aiFillWithResources(teamId, declared, fillResources, gaps) {
-  if (fillResources.length === 0) return declared;
-  // A caller that declared resources on `aiFill` has said what it wants.
-  if (declared?.resources !== undefined) return declared;
-  const [first, ...rest] = fillResources;
-  const serialised = JSON.stringify(first);
-  if (rest.some((bag) => JSON.stringify(bag) !== serialised)) {
-    gaps.push(Object.freeze({
-      teamId,
-      reason:
-        `Team ${teamId} AI-fills ${fillResources.length} slots from templates that disagree about their ` +
-        "canonical resources, and src/team/roster.js carries one AI-fill template per team rather than " +
-        "one per slot. The filled slots therefore declare no resources, and a rule set's write to one " +
-        "will be refused. Supply real gladiators, matching templates, or an explicit `aiFill.resources`."
-    }));
-    return declared;
-  }
-  return { ...declared, resources: first };
+function declaredFillResources(declared, index) {
+  if (declared === null || typeof declared !== "object") return undefined;
+  if (!Array.isArray(declared)) return declared.resources;
+  const entry = declared[index];
+  if (entry === null || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+  return entry.resources;
 }
 
 /* ------------------------------------------------------------------ */
@@ -164,8 +192,12 @@ class VanillaBattleHost {
   #layout;
   #binder;
   #bridge;
+  #gate = createActionAnimationGate();
+  #awaitAnimations;
   #clips = new ClipRegistry();
   #mirrors = new Map();
+  /** The `_global` fields the battle's own pools mirror to (the crowd). Added 2026-09-23. */
+  #globals = Object.freeze({});
   #steps = [];
   #pipeline = [];
   #diagnostics;
@@ -177,8 +209,13 @@ class VanillaBattleHost {
     rngTape = null,
     heroTeamId = null,
     bindings = PLACEHOLDER_ANIMATION_BINDINGS,
-    onCampaignSettled = null
+    onCampaignSettled = null,
+    awaitAnimations = false
   } = {}) {
+    if (typeof awaitAnimations !== "boolean") {
+      throw new BattleHostError("awaitAnimations is a boolean: whether `submit` refuses while an action animation is unreported.");
+    }
+    this.#awaitAnimations = awaitAnimations;
     if (!Array.isArray(teams) || teams.length !== 2) {
       throw new BattleHostError("A hosted battle needs exactly two teams.");
     }
@@ -188,12 +225,10 @@ class VanillaBattleHost {
     const sources = [];
     const templates = new Map();
     const aiFilledSlots = [];
-    const aiFillResourceGaps = [];
     const blueprintTeams = teams.map((team, teamIndex) => {
       const teamId = team.id ?? `team-${teamIndex + 1}`;
       const members = Array.isArray(team.members) ? team.members : [];
       if (members.length === 0) throw new BattleHostError(`Team ${teamId} has no slots.`);
-      const fillResources = [];
       const combatants = members.map((member, index) => {
         const filled = assertMember(member, teamId, index);
         if (filled) {
@@ -210,18 +245,33 @@ class VanillaBattleHost {
           }
           const template = normaliseVanillaCombatant(member.vanilla, { clip: member.clip ?? null });
           templates.set(`${teamId}#${index}`, template);
-          // The roster invents the fighter; its resources still come from the
-          // caller's template, so the filled slot declares the same bag every
-          // other combatant does and can be written on either side.
-          fillResources.push(canonicalResourcesFrom(template.fields));
-          return { fill: "ai" };
+          // The roster invents the fighter; its resources still come from THIS
+          // slot's own template, so the filled slot declares the same bag every
+          // other combatant does and can be written on either side. Two filled
+          // slots no longer have to agree, because the bag rides the marker.
+          if (declaredFillResources(team.aiFill, index) !== undefined) {
+            // A caller that declared resources for this slot has said what it
+            // wants, and the marker would outrank it.
+            return { fill: "ai" };
+          }
+          return { fill: "ai", resources: canonicalResourcesFrom(template.fields) };
         }
         const source = toCanonicalCombatantSource(member.vanilla, {
           id: member.id,
           name: member.name,
           teamId,
           controller: member.controller,
-          clip: member.clip ?? null
+          clip: member.clip ?? null,
+          // OPT-IN, and absent by default. A supplied gladiator's bag is the
+          // closed `CANONICAL_RESOURCE_SOURCES` list unless the caller names a
+          // wider one — which is what a rule set declaring more than those 20
+          // needs, and what `ss2TeamRules` (32 names) needs to be driven with a
+          // gladiator a PERSON controls. An AI-filled slot has always had this
+          // through `team.aiFill.resources`; the supplied path had nothing.
+          // Declaring it moves this battle's hash, which is why it is opt-in:
+          // `combatStateHash` covers the projected bag, and a caller that does
+          // not ask for a wider one hashes exactly as it did before.
+          resources: member.resources ?? null
         });
         sources.push(source);
         templates.set(`${teamId}#${index}`, source.vanilla);
@@ -232,7 +282,10 @@ class VanillaBattleHost {
         name: team.name ?? teamId,
         slots: members.length,
         combatants,
-        aiFill: aiFillWithResources(teamId, team.aiFill, fillResources, aiFillResourceGaps)
+        // Passed through exactly as the caller declared it, in whichever form
+        // the roster accepts. The host adds nothing here: a per-slot bag rides
+        // that slot's marker, so nothing has to be merged into this value.
+        aiFill: team.aiFill
       };
     });
 
@@ -252,6 +305,15 @@ class VanillaBattleHost {
     this.#layout = buildArenaLayout(wire, { heroTeamId });
     this.#binder = createPresentationBinder({ layout: this.#layout, bindings });
     this.#bridge = createResultAcknowledgementBridge(this.#battle, { layout: this.#layout });
+
+    /* 3b. `_global`, brought into step with the battle's opening pools. No
+     *     caller supplies a `_global` — the build opens `crowd_interest`
+     *     itself, from two levels where the resolved battle sums every
+     *     combatant's — so the mirror starts at the resolved value, and is
+     *     reported as a sync so a surface knows to set it. */
+    this.#globals = vanillaGlobalsFrom(wire.battleResources);
+    const globalSyncs = Object.entries(this.#globals)
+      .map(([field, to]) => Object.freeze({ field, path: GLOBAL_OBJECT_PATH, to }));
 
     /* 4. mirrors, brought into step with the canonical state the roster built. */
     const canonicalSyncs = [];
@@ -332,7 +394,11 @@ class VanillaBattleHost {
           record = toVanillaCombatant(combatant, record);
           canonicalSyncs.push(Object.freeze({ combatantId: combatant.id, differences: Object.freeze(differences) }));
         }
-        assertMirrorAgrees(record, combatant);
+        // Stats included (2026-09-23), and never synced: the canonical stats
+        // were read from this very record, so a disagreement means something
+        // rewrote a licensed gladiator's base stats, and it is refused here
+        // rather than surfacing as "drift" on the first submitted action.
+        assertMirrorAgrees(record, combatant, { includeStats: true });
         this.#mirrors.set(combatant.id, record);
       }
     }
@@ -340,12 +406,6 @@ class VanillaBattleHost {
     this.#diagnostics = Object.freeze({
       /** Slots the roster AI-filled. Their mirror came from a caller template. */
       aiFilledSlots: Object.freeze(aiFilledSlots.map((entry) => Object.freeze({ ...entry }))),
-      /**
-       * Teams whose AI-filled slots could not be given canonical resources,
-       * because the roster carries one fill template per team and theirs
-       * disagreed. Empty in every other case.
-       */
-      aiFillResourceGaps: Object.freeze(aiFillResourceGaps),
       /**
        * Where an AI-filled slot's template had to be rewritten to describe the
        * fighter the roster actually invented — stats and maximum health, which
@@ -359,6 +419,12 @@ class VanillaBattleHost {
       aiFillLoadoutGaps: Object.freeze(aiFillLoadoutGaps),
       /** Where the mirror had to be pulled to canonical state before turn one. */
       canonicalSyncs: Object.freeze(canonicalSyncs),
+      /**
+       * The `_global` fields set before turn one (2026-09-23): the battle's
+       * opening crowd, which every later `declared-battle-resource` write
+       * continues from. Empty for a battle with no such pool.
+       */
+      globalSyncs: Object.freeze(globalSyncs),
       /** Reported, never corrected: `hitpointsmax` is a vanilla formula. */
       maximumHealthReports: Object.freeze(maximumHealthReports),
       /**
@@ -419,10 +485,38 @@ class VanillaBattleHost {
     return legalActions(this.#battle, actorId);
   }
 
+  /**
+   * What one legal action would do — hit chance, damage band, energy, effect
+   * kind — for a button's label and hover. `actorId` defaults to whoever is
+   * due. Pure: nothing hashed moves and no roll is drawn. `null` for an action
+   * not on offer. See `previewAction` in `src/team/resolver.js`.
+   */
+  previewAction(action) {
+    return previewAction(this.#battle, { actorId: this.currentCombatantId(), ...action });
+  }
+
+  /**
+   * The rule set's menu for `actorId` against the SELECTED foe `targetId`:
+   * every verb it would show, and why each one not on offer is not (hidden or
+   * greyed). Pure, like `previewAction`. See `unavailableActions` in
+   * `src/team/resolver.js`.
+   */
+  unavailableActions(actorId = this.currentCombatantId(), targetId = null) {
+    return unavailableActions(this.#battle, actorId, targetId);
+  }
+
   mirrorFor(combatantId) {
     const record = this.#mirrors.get(combatantId);
     if (!record) throw new BattleHostError(`No vanilla mirror for combatant ${String(combatantId)}.`);
     return record;
+  }
+
+  /**
+   * The `_global` fields the adapter mirrors (the battle's crowd), as a plain
+   * copy. Added 2026-09-23 with the `declared-battle-resource` writes.
+   */
+  vanillaGlobals() {
+    return { ...this.#globals };
   }
 
   /** The two objects vanilla stores each combatant in, per combatant id. */
@@ -460,8 +554,24 @@ class VanillaBattleHost {
    * battle became decided. Nothing here computes a combat value.
    */
   submit(action) {
+    // The animation gate, consulted BEFORE the resolver is touched. Refusing
+    // here rather than after `applyAction` is the whole point: the hazard is a
+    // second action's globals rebinding over a running timeline, and an action
+    // the resolver has already applied cannot be taken back.
+    if (this.#awaitAnimations && !this.#gate.isReady) {
+      throw new BattleHostError(
+        `Cannot submit: the animation surface has not reported action ${this.#gate.pending.join(", ")}. ` +
+        "Submitting now would rebind _global.attacker/_global.defender under a running timeline. " +
+        "Report it with reportActionAnimation(token), or state a policy with " +
+        "abandonActionAnimation(token, reason) — this host will not decide to stop waiting on your behalf."
+      );
+    }
     const pipeline = [];
-    const before = projectionsOf(this.wire());
+    // Kept whole as well as projected: the presentation binder detects a TURN
+    // against it (`CommandKind.FACE_CLIP`), which is the one presentation fact
+    // that needs where the batch started as well as where it ended.
+    const beforeWire = this.wire();
+    const before = projectionsOf(beforeWire);
     pipeline.push("toTeamWireState:before");
 
     applyAction(this.#battle, action);
@@ -482,29 +592,67 @@ class VanillaBattleHost {
       after,
       effects,
       placements: this.#layout.byCombatantId,
-      mirrors: this.#mirrors
+      mirrors: this.#mirrors,
+      // The battle's own pools (SS2's `crowd_interest`): ~~reported and never
+      // written~~ WRITTEN to `_global` since 2026-09-23, the owner's "write
+      // both back" — see `vanillaWritesForResolvedAction`.
+      battleBefore: beforeWire.battleResources ?? null,
+      battleAfter: wire.battleResources ?? null,
+      globals: this.#globals
     });
     pipeline.push("vanillaWritesForResolvedAction");
 
     const byCombatant = new Map();
+    const globalWrites = [];
     for (const write of writes) {
+      // `_global` belongs to no combatant, so its writes go to their own mirror.
+      if (write.target === WriteTarget.GLOBAL) {
+        globalWrites.push(write);
+        continue;
+      }
       if (!byCombatant.has(write.combatantId)) byCombatant.set(write.combatantId, []);
       byCombatant.get(write.combatantId).push(write);
     }
     for (const [combatantId, combatantWrites] of byCombatant) {
       this.#mirrors.set(combatantId, applyVanillaWrites(this.mirrorFor(combatantId), combatantWrites));
     }
+    this.#globals = applyGlobalWrites(this.#globals, globalWrites);
     pipeline.push("applyVanillaWrites");
 
     // The mirror is a mirror: if it has drifted from resolved state, that is a
     // bug in the host, and it fails here rather than desyncing quietly.
+    //
+    // ► **STATS ARE COMPARED HERE SINCE 2026-09-23.** `includeStats` was left
+    //   at its `false` default while an in-battle stat change was REPORTED and
+    //   never written — comparing would have refused every colossus. Once the
+    //   owner's "write both back" made it a `canonical-stat` write, the default
+    //   would only have hidden the drift Codex found: a stat that moved with
+    //   nothing reaching the mirror. Every mirror agrees on its stats from
+    //   construction on (a supplied gladiator's are read from its own record,
+    //   an AI-filled slot's are rewritten there), so this can only fail on a
+    //   write that was missed.
     for (const [combatantId, record] of this.#mirrors) {
-      assertMirrorAgrees(record, afterById.get(combatantId));
+      assertMirrorAgrees(record, afterById.get(combatantId), { includeStats: true });
     }
+    // And `_global`, compared for every pool the build keeps one for, so a
+    // crowd that moved with no write reaching it is drift here too.
+    assertGlobalMirrorAgrees(this.#globals, wire.battleResources ?? null);
     pipeline.push("assertMirrorAgrees");
 
-    const commands = this.#binder.drain(wire);
+    // The action boundary the presentation token is built from. It comes off
+    // the resolver's own trace — NOT off `event.sequence`, which is stamped per
+    // event and would split this one action into as many as four. See
+    // `src/adapter/action-gate.js` for the measurement.
+    const actionBoundary = lastResolvedAction(this.#battle)?.firstEventSequence ?? null;
+    const commands = this.#binder.drain(wire, { actionBoundary, before: beforeWire });
     pipeline.push("presentResolvedEvents");
+
+    // Registering what to wait for. It does NOT report anything: nothing in
+    // this host ever calls `gate.report`, because a gate that supplies its own
+    // evidence is not a gate — the lesson `acknowledgeResultAnimations` below
+    // was rewritten to learn.
+    const { observed } = this.#gate.observe(commands);
+    pipeline.push("actionGate.observe");
 
     const bridgeStatus = this.#bridge.sync();
     pipeline.push("bridge.sync");
@@ -516,12 +664,103 @@ class VanillaBattleHost {
       writes,
       unmapped,
       commands,
+      actionBoundary,
+      actionTokens: observed,
       bridgeStatus,
       result: this.#battle.result ? Object.freeze({ ...this.#battle.result }) : null,
       hash: this.hash()
     });
     this.#steps.push(step);
     return step;
+  }
+
+  /**
+   * "Is the animation surface ready for the next action?" — the second of the
+   * two questions, kept separate from "has the resolver finished?".
+   *
+   * Advisory unless the host was built with `awaitAnimations: true`, in which
+   * case `submit` refuses while `ready` is false. Advisory is the default so
+   * that every headless caller — the goldens, the replay harness, the test
+   * suite — is unaffected: none of them has an animation surface, and a gate
+   * that blocked them would be waiting for a report nobody can make.
+   */
+  readyForNextAction() {
+    return Object.freeze({
+      ready: this.#gate.isReady,
+      enforced: this.#awaitAnimations,
+      pending: this.#gate.pending,
+      abandoned: this.#gate.abandoned
+    });
+  }
+
+  /**
+   * The animation surface reports that one action's timeline reached its
+   * terminal frame, naming the `actionToken` its commands carried.
+   *
+   * This is the ONLY way a gate opens by evidence. The host never calls it for
+   * you, and there is no "acknowledge everything pending" convenience: that is
+   * exactly the shape `acknowledgeResultAnimations` had to have removed.
+   */
+  reportActionAnimation(actionToken) {
+    return this.#gate.report(actionToken);
+  }
+
+  /**
+   * The host states that it is no longer waiting for one action's timeline,
+   * and why.
+   *
+   * A timeout lands here. The adapter owns no timer and no deadline — nothing
+   * has ever captured the vanilla timeline's own completion signal, so any
+   * duration this module chose would be a guess at the centre of the action
+   * loop. The reason is mandatory so that a gate opened by giving up is
+   * distinguishable, in the record, from one opened by a surface reporting.
+   */
+  abandonActionAnimation(actionToken, reason) {
+    return this.#gate.abandon(actionToken, reason);
+  }
+
+  /** JSON-safe animation-gate state, for diagnostics and host/client compare. */
+  actionAnimationState() {
+    return this.#gate.toJSON();
+  }
+
+  /**
+   * ONE action, chosen by the rule set's own AI, NOT submitted.
+   *
+   * `runAiTurns` below submits a whole run and is a fast-forward: no animation
+   * ever plays. A surface that wants to WATCH a bout play itself needs the
+   * opposite — one action at a time, through its own gate — and until
+   * 2026-09-12 `tools/arena/main.js` had no way to ask for that, so it invented
+   * a choice policy instead:
+   *
+   * ```js
+   * const action = options[host.battle.turnNumber % options.length];
+   * ```
+   *
+   * **That policy never reaches a swing.** Out of range the SS2 option list is
+   * `[walk-left, walk-right, rest]`, and cycling 0, 1, 2 through it is
+   * net-zero displacement forever; the gladiators oscillate on the spot until
+   * the crowd's patience kills them. Measured over 24 bouts: 20,712 actions and
+   * **0 attacks**. Its own comment called it "deterministic, so a spectated
+   * bout replays exactly like a played one" — which it is, and which is not the
+   * same thing as being a choice.
+   *
+   * `chooseAiAction` is deterministic too (it is the rule set's, over the
+   * resolver's own `actorView`), so the property that comment wanted is kept
+   * and the bout actually happens.
+   *
+   * **It returns rather than submits on purpose.** The animation gate belongs
+   * to the shell; a method that submitted would take that decision away from
+   * the one caller whose whole job is to hold it.
+   *
+   * **And it is `suggestAction`, not `chooseAiAction`**: the demo roster's
+   * seats are all `controller: "local"`, and the resolver's AI door refuses a
+   * non-AI combatant on purpose, so that `runAiTurns` can never take a human's
+   * turn. A spectator is asking a different question about a deliberately human
+   * seat, and it gets its own door rather than a relaxed guard on that one.
+   */
+  suggestAction(actorId = this.currentCombatantId()) {
+    return suggestAction(this.#battle, actorId);
   }
 
   /**

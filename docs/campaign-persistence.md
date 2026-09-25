@@ -75,7 +75,11 @@ it to a key the store really minted.
    `assertNoVanillaFieldNames()` walks the whole record and refuses it if any
    object key anywhere is a name the vanilla surface uses. The catalogue comes
    from `src/adapter/vanilla-fields.js` (the battle map's per-combatant groups,
-   the unnamed timed `spell_*` fields, the clip-resident facing) plus the
+   ~~the unnamed timed `spell_*` fields, the clip-resident facing~~ the
+   clip-resident fields — the facing and, named since 2026-09-22, the six timed
+   spell counters) plus, kept in the screen itself, every `spell_`-prefixed
+   name (the adapter stopped treating the prefix as a classification that day;
+   the screen keeps refusing it on purpose — see `SPELL_NAME_PREFIX`) plus the
    route map's save-container and progression names
    (`goldpieces`, `battlesfought`, `battleswon`, `battleslost`, `score`,
    `character_xp`, `experiencelast`, `heroDNA`, `characterDNA`,
@@ -190,12 +194,23 @@ handed from a remote peer to the AI mid-battle records only where it ended up.
 - `runtimeVerified` must agree with `verification`; a record cannot claim more
   than its rule set could.
 - `placeholder` must not pin a build hash and must not cite goldens.
+- **`map-derived` must declare `runtimeVerified: false`, must pin a 64-hex
+  build SHA-256, and must cite at least one promoted golden.** ► *Added to the
+  list 2026-09-07: `RecordedRuleSetVerification` has had FOUR values since the
+  `map-derived` tier landed, and this bullet list named three. Re-derived —
+  `{placeholder, map-derived, runtime-verified, unknown}`.*
 - `runtime-verified` must pin a 64-hex build SHA-256 **and** cite at least one
   promoted golden fixture id.
 - `unknown` is legal only on a migrated record (see below).
 
-Today every record this layer can produce says `placeholder`, because
-`classicStyleRules` is an explicit placeholder and no verified rule set exists.
+~~Today every record this layer can produce says `placeholder`.~~ ►
+**CORRECTED 2026-09-07.** A record built on the default rule set still says
+`placeholder`; a record built on `ss2TeamRules` (`src/team/ss2-rules.js`) says
+**`map-derived`**, pins the build SHA-256 and cites 23 goldens.
+`test/campaign-circuit.test.js` and `test/campaign-read-back.test.js` build such
+records today, and `node tools/hotseat.mjs --circuit <n>` produces them at
+runtime. No RUNTIME-VERIFIED record is producible, which is the claim that
+still holds and the one this paragraph should always have been making.
 `describeCampaignRecord()` surfaces `verification` and `runtimeVerified` first
 for exactly that reason: a campaign built on placeholder maths has to stay
 identifiable later, and must never be presented as measured behaviour.
@@ -251,9 +266,26 @@ Synchronous and string-valued because the AVM1 SharedObject surface is both, and
 because the write is driven from the campaign-settlement callback: an async
 store would make settlement async, which the once-only latch in
 `src/team/settlement.js` is not built for. A host that needs async buffers
-behind this interface. Two backends ship: `createMemoryBackend()` (the tests run
-entirely on it, so no filesystem is needed) and `createNamespacedBackend()`
-described above.
+behind this interface. ~~Two backends ship~~ **Three backends ship (corrected
+2026-09-24; the third since `6c3a1bf`, 2026-09-19):** `createMemoryBackend()`
+(`test/campaign-persistence.test.js` runs its stores on it), `createNamespacedBackend()`
+described above, and `createFileBackend({ directory })` in
+`src/campaign/file-backend.js`, which keeps one file per key in a directory on
+`node:fs` — the backend the one runnable persistent host uses today. (The
+namespaced backend is as durable as the container it is given: its intended
+host is a `SharedObject` this project owns, flushed as described below, and no
+code in the repository runs it on one yet.) It is deliberately NOT
+re-exported from `src/campaign/index.js`; import it by path. It has no static
+`node:fs` import: `createFileBackend` fetches `node:fs` lazily, through
+`process.getBuiltinModule`, only when it is called without an injected `{ fs }`,
+so importing the module (and its key/filename helpers) works anywhere, while
+constructing the default backend outside Node throws and asks for `{ fs }`.
+*(Re-derived 2026-09-24, after a review of this correction caught it repeating
+the module's own header, which says the file imports `node:fs`; it never has,
+since its first commit `6c3a1bf`.)*
+`tools/arena-campaign.mjs` (`fight`, `list`, `show`, each with a required
+`--dir`) is the runnable host built on it, and `test/campaign-file-backend.test.js`
+pins both, the tool through a subprocess.
 
 ### Committing, and admitting when a commit was refused
 
@@ -431,14 +463,25 @@ correct response to one is to fix the caller. It propagates.
 ## What this layer does not do
 
 - **No rewards.** The roadmap's Stage 5 line covers "campaign roster/save/reward
-  integration"; only the save half is built here. Computing a reward is a
+  integration"; **two of its three halves are built here** — the save
+  (`store.js` / `record.js` / `recorder.js`) and the roster read-back
+  (`to-battle.js`, consumed by `circuit.js`). Only the reward half is unbuilt.
+  *(This bullet said "only the save half" until 2026-09-07, three weeks after
+  read-back landed on the same day this file was last read.)* Computing a reward is a
   formula, and formulas belong in a rule set. The record carries what a reward
   calculation would need to read — the result, the survivors, the AI-filled
   slots, and the provenance of the maths — and stops there.
-- **No roster write-back.** Nothing here advances a gladiator, and nothing here
-  reads one. A campaign that wants to apply consequences does so through
-  vanilla's own surface, or through a future adapter path, with full knowledge
-  that the town square will flush over it.
+- **No roster WRITE-back.** ► **Corrected in place 2026-09-07: this bullet used
+  to end "and nothing here reads one", and reading is exactly what landed.**
+  `rosterFromCampaignRecord()` (`src/campaign/to-battle.js`) takes a settled
+  record plus the bout's blueprints and rebuilds the next bout's teams, writing
+  `health`, `status` and `maxHealth` onto a `structuredClone` of each survivor;
+  `advanceCircuit()` (`src/campaign/circuit.js`) chains bouts with the survivors
+  carried and reports `restoredResources` rather than deciding it. Nothing here
+  still ADVANCES a gladiator: no stat rises, no reward is paid, and a campaign
+  that wants to apply consequences does so through vanilla's own surface, or
+  through a future adapter path, with full knowledge that the town square will
+  flush over it.
 - **No action journal.** The record stores the outcome, the seed, the RNG
   cursor and the combat state hash, not the ordered action stream a replay would
   need. That is a bigger artefact with a different lifetime, and adding it later
@@ -450,7 +493,13 @@ correct response to one is to fix the caller. It propagates.
 
 ## Tests
 
-`test/campaign-persistence.test.js`, 68 tests, filesystem-free. They cover the
+`test/campaign-persistence.test.js`, ~~68~~ 70 tests (**re-counted 2026-09-24**
+by running the file; count them with `node --test test/campaign-persistence.test.js`
+rather than trusting this number), filesystem-free in the sense that every store
+runs on the memory backend — one test reads the `src/campaign/*.js` sources to
+check their imports. `test/campaign-file-backend.test.js` (14 tests on
+2026-09-24) covers the file backend and `tools/arena-campaign.mjs` and does use
+the filesystem, in temporary directories. The first file's tests cover the
 schema and its round trip, the AI-fill/AI-controller distinction, the
 seat/combatant split, the provenance gate in both directions (with the build
 hash pinned by **value**, not by shape — a shape check passes for `"0".repeat(64)`),

@@ -47,11 +47,24 @@
  *   - the extra watch fields a fixture needs are the fields its own staged
  *     scenario names that the default list omits;
  *   - the fight modes already in the archive are read off the committed
- *     runtime observations.
+ *     runtime observations;
+ *   - what earlier rounds of a fixture actually landed on is read off the
+ *     committed divergence reports, which `ingest-round` writes itself;
+ *   - how many action identities share the profile a fixture's round would
+ *     resolve is PROBED out of `src/golden/ss2-attack-candidate.js`, the same
+ *     engine the promoted goldens are checked against.
  *
  * So each of those answers moves when the repository moves. Nothing here says
  * a fixture IS reachable: absence of a derived blocker is absence of evidence,
  * and `plan` words it that way.
+ *
+ * The blocker/note split carries the one distinction an operator's decision
+ * turns on. A BLOCKER predicts a refused round and names what clears it — a
+ * flag, or a change to the wrapper. A NOTE is a fact about the round that no
+ * change clears, and `action-identity-not-sampled` is the sampling case: the
+ * identity is reachable, the round is a lottery, and the only remedy is more
+ * rounds. Reporting that as a blocker would tell an operator to write code
+ * where the answer is to book time.
  *
  * Nothing here fabricates evidence. Observations come from
  * `ingestSs2CaptureTrace`, matching from `matchSs2ObservationToFixture`,
@@ -82,9 +95,11 @@ import {
   PromotionBlockedError,
   buildSs2DivergenceReport,
   goldenFixtureIdFor,
-  promoteSs2CandidateToGolden
+  promoteSs2CandidateToGolden,
+  ss2ObservationIsCandidatesOwnSource
 } from "../../src/golden/promote-1v1-golden.js";
 import { validateSs2OneVsOneFixture } from "../../src/golden/run-1v1-fixture.js";
+import { resolveSs2PhysicalAttackCandidate } from "../../src/golden/ss2-attack-candidate.js";
 import { buildSs2CaptureManifest } from "./build-manifest.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -244,22 +259,45 @@ async function wrapperEmittedEventTypes() {
  *
  * The gap between the two is the operational fact a fixture needing both runs
  * into, and it is a fact about the scripts, so it is read from the scripts.
+ *
+ * Every entry of `VEHICLE_SCRIPTS` must resolve, and an unreadable one is a
+ * refusal rather than an omission — the same terms `readWrapperSource` states
+ * for the wrapper, and for a sharper reason. A capability is read off a file;
+ * a file that cannot be opened reads as a capability the launcher does not
+ * have, and that under-report is silent AND points the wrong way. With
+ * `run-arena.ps1` missing, `plan`'s staging line names `launch-capture.ps1` —
+ * the route with no snapshot guard — as the only vehicle for a staged capture,
+ * and with all four missing it prints "Exposed by: nothing." one line after
+ * telling the operator which `-WatchFields` string to pass. Both are exit 0,
+ * and the next supervised session is planned on them.
  */
 async function captureVehicles() {
   const vehicles = [];
+  const missing = [];
   for (const name of VEHICLE_SCRIPTS) {
     let text;
     try {
       text = await readFile(path.join(LAUNCHER_DIR, name), "utf8");
     } catch (error) {
-      if (error.code === "ENOENT") continue;
-      throw error;
+      if (error.code !== "ENOENT") throw error;
+      missing.push(name);
+      continue;
     }
     vehicles.push({
       script: `tools/runtime-capture/${name}`,
       watchFields: /\[string\]\s*\$WatchFields\b/.test(text),
       staging: /\[string\]\s*\$Stage(?:Hero|Villain)\b/.test(text)
     });
+  }
+  if (missing.length > 0) {
+    throw new Error(
+      `Cannot read ${missing.length} of the ${VEHICLE_SCRIPTS.length} capture launchers under ` +
+      `${LAUNCHER_DIR}: ${missing.join(", ")}. The driver reads each launcher's -WatchFields and ` +
+      "-Stage* support out of that launcher's own param(...) block rather than carrying a table " +
+      "of capabilities, so a script it cannot open would be reported as a script that cannot " +
+      "stage or watch anything. It refuses rather than under-reporting, because the vehicle table " +
+      "is what a supervised session is planned on."
+    );
   }
   return vehicles;
 }
@@ -306,6 +344,242 @@ function unstageableScenarioFieldsFor(fixture) {
   return unstageable;
 }
 
+// ---------------------------------------------------------------------------
+// What rounds have already landed on: the divergence archive
+//
+// `ingest-round` writes a divergence report every time a session's trace
+// disagrees with the candidate it was aimed at, and those reports are
+// committed. They are the repository's only record of what a round of a given
+// fixture ACTUALLY produced — and `plan` did not read them. A fixture carrying
+// six committed reports from six distinct sessions reported `observations: []`,
+// `sessionCount: 0`, `blockers: []`, which is byte-identical to the report for
+// a fixture nobody has ever run.
+//
+// Nothing here converts a report into a refusal. A round that drew a different
+// action identity is not a fixture that cannot be captured; it is a fixture
+// whose round is a lottery, and the operator's question is how many rounds to
+// budget. That is a NOTE, not a blocker — see `samplingNoteFor`.
+// ---------------------------------------------------------------------------
+
+/**
+ * The difference paths that say a round resolved a different action than the
+ * fixture stages. They are the two halves of `actionIdentityFor`, projected by
+ * `matchSs2ObservationToFixture` under `/scenario`.
+ */
+const IDENTITY_DIFFERENCE_PATHS = Object.freeze(new Set([
+  "/scenario/attackDirection",
+  "/scenario/spellId"
+]));
+
+/** Every committed divergence report, bucketed by the fixture it names. */
+async function loadDivergenceReportsByFixtureId() {
+  const byFixtureId = new Map();
+  for (const entry of await readJsonDir(DIVERGENCE_DIR)) {
+    const report = entry.value;
+    const bucket = byFixtureId.get(report.fixtureId);
+    if (bucket === undefined) byFixtureId.set(report.fixtureId, [report]);
+    else bucket.push(report);
+  }
+  return byFixtureId;
+}
+
+/**
+ * What this fixture's own divergence reports say about its action identity:
+ * which identities the rounds actually recorded, and how many recorded the one
+ * the fixture stages and diverged for some other reason.
+ *
+ * The second number is the one that decides blocker-versus-note. A report that
+ * carries no identity difference is a round that DID land on this identity, so
+ * the identity is not out of reach; whatever went wrong that round went wrong
+ * downstream of it.
+ */
+function samplingRecordFor(action, reports) {
+  const recorded = [];
+  const sessions = new Set();
+  let identityMatched = 0;
+  for (const report of reports) {
+    const difference = (report.differences ?? [])
+      .find((entry) => IDENTITY_DIFFERENCE_PATHS.has(entry.path));
+    if (difference === undefined) {
+      identityMatched += 1;
+      sessions.add(report.sessionId);
+      continue;
+    }
+    // A report whose `expected` is not the identity this fixture claims TODAY
+    // was written against an earlier version of the fixture. It is evidence
+    // about a scenario that no longer exists, and counting it would report a
+    // sampling problem the current fixture does not have.
+    if (difference.expected !== action.id) continue;
+    recorded.push(difference.actual);
+    sessions.add(report.sessionId);
+  }
+  return {
+    recorded,
+    identityMatched,
+    sessionCount: sessions.size
+  };
+}
+
+/**
+ * The scan bound for the band probe below. It bounds the SEARCH, not the
+ * answer: which directions inside it exist at all is the candidate engine's
+ * refusal to resolve the rest.
+ */
+const IDENTITY_PROBE_CEILING = 40;
+
+/**
+ * The engine's own resolution of one direction, with the direction itself
+ * removed — so two directions that resolve identically produce one string.
+ *
+ * The probe forces a MISS: `calculateSs2AttackChances` clamps every chance it
+ * returns to at most 99, so `rollNeeded` is at least 1 and a hit-roll of 0
+ * cannot clear it for any scenario.
+ *
+ * Be exact about what that buys, because the obvious reason to want it is not
+ * true. Past the hit the engine branches on the direction's ARMOUR GROUP,
+ * which cuts across the bands — 1, 5, 8 and 9 share one — but that branch
+ * reaches the mutation trace, never `calculation`, so letting the hit through
+ * would NOT split a band. It was checked: driving this probe at the top of the
+ * roll range instead leaves every band on the committed corpus unchanged. What
+ * the miss buys is the shortest path through the engine: the profile's own
+ * rolls and nothing else, no armour removal, no defender mutation, and no
+ * exposure to a refusal thrown somewhere downstream of the identity being
+ * probed. The falsifier for this function is not the roll value — it is
+ * `delete profile.attackDirection`, without which every direction is its own
+ * band.
+ */
+function resolutionSignatureAt(scenario, direction) {
+  const draft = JSON.parse(JSON.stringify(scenario));
+  draft.attackDirection = direction;
+  const rolls = { randomBetween: (label, min) => (label === "hit-roll" ? 0 : min) };
+  const profile = { ...resolveSs2PhysicalAttackCandidate(draft, rolls).calculation };
+  delete profile.attackDirection;
+  return JSON.stringify(profile);
+}
+
+/**
+ * The action identities a round of this fixture's own attack could land on
+ * instead: the directions this repository's candidate engine resolves through
+ * the SAME profile as the one the fixture stages.
+ *
+ * Derived by probing `resolveSs2PhysicalAttackCandidate`, never transcribed.
+ * The bands belong to the game's dispatcher, and every written copy of them in
+ * this repository is a document that can go stale; the engine is the copy the
+ * promoted goldens are checked against, so it is the copy to ask. Two
+ * directions are in one band exactly when the engine's `calculation` is
+ * identical for both apart from `attackDirection`.
+ *
+ * `undefined` for the spell ingress (a spell id is not drawn from a band) and
+ * for a scenario the engine refuses outright — in both cases the caller says
+ * nothing about band size rather than guessing at one.
+ */
+function actionIdentityBandFor(fixture, action) {
+  if (action?.ingress !== "attack") return undefined;
+  let own;
+  try {
+    own = resolutionSignatureAt(fixture.scenario, action.id);
+  } catch {
+    return undefined;
+  }
+  const band = [];
+  for (let direction = 1; direction <= IDENTITY_PROBE_CEILING; direction += 1) {
+    let signature;
+    try {
+      signature = resolutionSignatureAt(fixture.scenario, direction);
+    } catch {
+      continue; // the engine implements no such direction
+    }
+    if (signature === own) band.push(direction);
+  }
+  return band;
+}
+
+/**
+ * The sampling note for one uncaptured fixture, or `undefined` when the
+ * archive holds nothing to say.
+ *
+ * This is deliberately a NOTE and not a blocker, and the distinction is the
+ * whole point of the derivation. A blocker in this driver is a refusal waiting
+ * to happen: a round WILL fail, and either a flag or a code change is what
+ * clears it. A fixture whose rounds keep drawing a different action identity
+ * is in neither state — the identity is reachable, the round is simply a
+ * lottery, and no code change shortens it. What an operator needs from `plan`
+ * before spending a supervised session is therefore the budget: how many
+ * rounds have already been spent, what they landed on, and how many identities
+ * share the profile this fixture's round would resolve.
+ *
+ * The report count is a FLOOR on rounds spent, never a count of them: only a
+ * round whose trace reached `ingest-round` leaves a report behind.
+ */
+function samplingNoteFor(fixture, action, reports) {
+  const sampled = samplingRecordFor(action, reports);
+  if (sampled.recorded.length === 0) return undefined;
+
+  const noun = action.ingress === "spell" ? "spell id" : "attack direction";
+  const values = [...sampled.recorded].sort((left, right) => left - right);
+  const sentences = [];
+
+  const total = sampled.recorded.length + sampled.identityMatched;
+  let opening =
+    `${total} committed divergence report(s) for this fixture, across ${sampled.sessionCount} ` +
+    `session(s): ${sampled.recorded.length} recorded ${noun} ${values.join(", ")} rather than the ` +
+    `${action.label} it stages`;
+  if (sampled.identityMatched > 0) {
+    // NOT "so the identity is reachable". A divergence report records the
+    // direction that was drawn; it does NOT record which combatant swung. Nine
+    // of twenty live arena rounds recorded the VILLAIN's swing while labelled
+    // attackerSide hero, and one of those nine (session-adc18) drew direction 5
+    // — the very identity this note would otherwise be citing as proof the hero
+    // can reach it. Reachability is established from the opcodes instead:
+    // randomBetween is `a + floor(random() * (b - a + 1))`, inclusive of both
+    // bounds, and normal_attack calls it with the literals (5, 8). Citing a
+    // report here would be citing a possibly-mislabelled observation for a fact
+    // the bytes already settle, which is the one inference this pipeline exists
+    // to refuse.
+    opening +=
+      `, and ${sampled.identityMatched} recorded that identity and diverged for another reason — ` +
+      "count those as rounds spent, not as evidence the hero reached the identity, because a " +
+      "report does not record which combatant swung";
+  }
+  sentences.push(`${opening}.`);
+
+  const band = actionIdentityBandFor(fixture, action);
+  if (band !== undefined && band.length > 1) {
+    const outside = sampled.recorded.filter((value) => !band.includes(value)).length;
+    let sentence =
+      "The identity is observed, not forced: this repository's own candidate engine resolves " +
+      `${noun} ${band.join(", ")} through one profile, so a round that resolves that profile has ` +
+      `${band.length} identities to land on and this fixture claims one of them — about one round ` +
+      `in ${band.length}, if the draw is uniform across the band`;
+    if (outside > 0) {
+      sentence +=
+        `. ${outside} of the ${sampled.recorded.length} recorded an identity OUTSIDE that band, so ` +
+        "those rounds resolved a different profile altogether and no per-round odds taken from the " +
+        "band account for them";
+    }
+    sentences.push(`${sentence}.`);
+  } else if (band !== undefined) {
+    sentences.push(
+      `The candidate engine resolves ${action.label} through a profile no other identity shares, ` +
+      "so the recorded alternatives are not a draw within a band: those rounds ran a different " +
+      "action, and the band says nothing about how many rounds this one needs."
+    );
+  }
+
+  sentences.push(
+    "No flag reaches this and nothing in the repository bounds it: the remedy is more rounds, not " +
+    "a code change. It is a note rather than a blocker because nothing here refuses the round in " +
+    "advance, and the report count is a FLOOR on the rounds already spent rather than a count of " +
+    "them — only a round whose trace was ingested leaves a report."
+  );
+
+  return {
+    code: "action-identity-not-sampled",
+    fields: values.map(String),
+    detail: sentences.join(" ")
+  };
+}
+
 /**
  * The reasons, derived from this repository, that a round for this fixture
  * would not produce filed evidence today.
@@ -316,8 +590,15 @@ function unstageableScenarioFieldsFor(fixture) {
  * in the repository says this cannot be captured" — which is not the same
  * claim as "this is reachable", and `plan` prints it as the former.
  */
-function deriveBlockers(fixture, context) {
-  const { defaultWatchFields, emittedEventTypes, observedFightModes, runtimeObservationCount } = context;
+function deriveBlockers(member, context) {
+  const { fixture, action, alreadyCaptured } = member;
+  const {
+    defaultWatchFields,
+    emittedEventTypes,
+    observedFightModes,
+    runtimeObservationCount,
+    divergenceReportsByFixtureId
+  } = context;
   const blockers = [];
   const notes = [];
 
@@ -368,7 +649,19 @@ function deriveBlockers(fixture, context) {
     });
   }
 
-  return { blockers, notes, extraWatchFields };
+  // The archive is consulted only for a member that has no evidence yet. For a
+  // captured one the question the note answers — how many rounds will this
+  // take — is already answered, and its own losing rounds are usually still in
+  // the archive: 73 of the 81 committed reports name a candidate that is now a
+  // promoted golden. Reporting a sampling budget there would read as an
+  // obstacle on a fixture that has none.
+  const reports = divergenceReportsByFixtureId.get(fixture.fixtureId) ?? [];
+  if (!alreadyCaptured) {
+    const sampling = samplingNoteFor(fixture, action, reports);
+    if (sampling !== undefined) notes.push(sampling);
+  }
+
+  return { blockers, notes, extraWatchFields, divergenceReports: reports.length };
 }
 
 /**
@@ -625,17 +918,61 @@ async function computeCoverage(family) {
     defaultWatchFields,
     emittedEventTypes,
     observedFightModes,
-    runtimeObservationCount: runtimeObservations.length
+    runtimeObservationCount: runtimeObservations.length,
+    divergenceReportsByFixtureId: await loadDivergenceReportsByFixtureId()
   };
 
   const rows = members.map((member) => {
-    const matching = observations.filter(
-      (observation) => matchSs2ObservationToFixture(member.fixture, observation.value).match
+    // Everything the matcher accepts, and then the split the GATE will apply
+    // anyway. A record a candidate was transcribed from matches by
+    // construction — the fixture's scenario and tape were copied out of it —
+    // so `matchSs2ObservationToFixture` cannot report anything but a match and
+    // the match carries no information. `promoteSs2CandidateToGolden` refuses
+    // such a record; coverage used to count it regardless, and the two
+    // disagreeing was not harmless bookkeeping. `settle` promotes from
+    // `row.observations`, so counting an ineligible record meant handing the
+    // gate a set it would refuse — after having already written the capture
+    // manifest for it. Measured on this tree: deleting the four self-citing
+    // goldens and running `settle` left four NEW manifests attesting the
+    // tainted pairs, un-rolled-back, and `git checkout -- .` does not remove an
+    // untracked file. The suite was fully green over them.
+    //
+    // THIS REVERSES A DECISION THIS REPOSITORY MADE DELIBERATELY, and the
+    // argument it reverses is worth stating rather than deleting. It read:
+    // "coverage answers 'which records match this fixture', which is a
+    // different question from 'which records are evidence for it' ... a
+    // coverage row is a shortlist, and the gate is what decides." That is true
+    // of a REPORT and false of a WORK LIST, and this row is both — `plan`
+    // prints it and `settle` promotes from it. The shortlist reading is what
+    // let settle build an attestation for evidence it could never promote.
+    // What is kept from that argument is its real content: the distinction
+    // must stay VISIBLE. So the ineligible record is not dropped, it is moved
+    // to a field of its own and printed, and `plan --json` carries it.
+    const eligibility = Object.groupBy(
+      observations.filter(
+        (observation) => matchSs2ObservationToFixture(member.fixture, observation.value).match
+      ),
+      (observation) =>
+        ss2ObservationIsCandidatesOwnSource(member.fixture, observation.value)
+          ? "ineligible"
+          : "matching"
     );
+    const matching = eligibility.matching ?? [];
+    const ineligible = eligibility.ineligible ?? [];
     const sessions = new Set(matching.map((observation) => observation.value.capture.sessionId));
     const goldenId = goldenFixtureIdFor(member.fixture.fixtureId);
     const hasGolden = goldenIds.has(goldenId);
-    const { blockers, notes, extraWatchFields } = deriveBlockers(member.fixture, blockerContext);
+    const { blockers, notes, extraWatchFields, divergenceReports } = deriveBlockers(
+      {
+        fixture: member.fixture,
+        action: member.action,
+        // Counts the ineligible record. Whether a round has been burned on
+        // this fixture is a different question from whether that round is
+        // evidence for it, and the derived blockers answer the first one.
+        alreadyCaptured: hasGolden || matching.length + ineligible.length > 0
+      },
+      blockerContext
+    );
     return {
       // The whole identity, not just its value: a reader of `plan --json`
       // has to be able to tell a spell id from an attack direction, and the
@@ -650,6 +987,24 @@ async function computeCoverage(family) {
         sessionId: observation.value.capture.sessionId,
         filePath: observation.filePath
       })),
+      // Records that MATCH this candidate and are refused as evidence for it,
+      // with the reason. Never empty-by-omission: a row that dropped a record
+      // must not read like a row that never had one. Without this field the
+      // exclusion above is a silent cap, and the fixture it hides is real —
+      // `candidate-duel-firstblood-normal-kill`'s only matching record is its
+      // own source, so its row would otherwise be field-for-field identical to
+      // a fixture nobody has ever run. This file already forbids exactly that,
+      // for the divergence count, two fields below.
+      ineligibleObservations: ineligible.map((observation) => ({
+        observationId: observation.value.observationId,
+        sessionId: observation.value.capture.sessionId,
+        filePath: observation.filePath,
+        reason: "authored-from",
+        detail:
+          `${member.fixture.fixtureId} declares provenance.authoredFrom ` +
+          `${JSON.stringify(member.fixture.provenance.authoredFrom)}, so this record is the original ` +
+          "its scenario and tape were copied out of and cannot confirm it"
+      })),
       sessionCount: sessions.size,
       promotable:
         !hasGolden &&
@@ -660,6 +1015,11 @@ async function computeCoverage(family) {
       // too, rather than suppressed: a promoted golden with a derived blocker
       // would mean the derivation is wrong, and hiding it would hide that.
       extraWatchFields,
+      // How many committed divergence reports name this fixture. Zero and
+      // non-zero have to be distinguishable in `plan --json`: a row for a
+      // fixture that has already burned rounds must never read identically to
+      // a row for one nobody has ever run.
+      divergenceReports,
       blockers,
       notes
     };
@@ -687,6 +1047,18 @@ function printCoverage(coverage) {
       `  ${row.fixtureId.padEnd(width)}  ${row.action.label}  ${state.padEnd(12)} ` +
       `obs ${row.observations.length} / sessions ${row.sessionCount}  [${cited}]`
     );
+    // ABOVE the `hasGolden` continue, deliberately. Blockers and notes below
+    // are suppressed for a promoted member, and a golden that CITES the record
+    // being refused is precisely the row a reader must not be able to miss —
+    // that is the state this exclusion was written for. Printing it here also
+    // keeps a row that dropped a record distinguishable from a row that never
+    // had one, which is the silent-cap failure this file forbids by name.
+    for (const excluded of row.ineligibleObservations) {
+      console.log(
+        `      refused as evidence (${excluded.reason}): ${excluded.observationId}` +
+        `@${excluded.sessionId} — ${excluded.detail}`
+      );
+    }
     if (row.hasGolden) continue;
     for (const blocker of row.blockers) console.log(`      blocked (${blocker.code}): ${blocker.detail}`);
     if (row.blockers.length === 0) {
@@ -916,19 +1288,30 @@ async function commandSettle(options) {
     // is the session-independence attestation for a golden that already cites
     // its digest, so overwriting one destroys evidence.
     const manifestPath = path.join(MANIFEST_DIR, `${row.fixtureId.replace(/^candidate-/, "")}.json`);
-    try {
-      await writeJson(manifestPath, manifest, { overwrite: false });
-    } catch (error) {
-      if (error.code !== "EEXIST") throw error;
-      throw new Error(
-        `${manifestPath} already exists; refusing to overwrite a capture manifest. ` +
-        "If a golden already cites its digest, overwriting it destroys that golden's attestation."
-      );
-    }
 
     try {
+      // PROMOTE FIRST, WRITE SECOND. The manifest used to be written here,
+      // before the gate had been asked anything, and a refused promotion left
+      // it on disk. That is not a tidiness problem: a capture manifest is a
+      // session-independence ATTESTATION, so a blocked run deposited a signed
+      // claim about evidence the repository had just refused. Measured on this
+      // tree before the fix — delete the four self-citing goldens, run settle,
+      // and four untracked manifests appear attesting exactly the tainted
+      // pairs; `git checkout -- .` restores the deleted files and leaves those
+      // four behind, `node --test` stays green over all of them, and the next
+      // settle dies on `already exists` demanding a hand `rm` inside the
+      // evidence directory. Nothing here is written until the gate has passed.
       const { golden, captureManifestSha256 } = promoteSs2CandidateToGolden(candidate, observations, manifest);
       const goldenPath = path.join(GOLDEN_DIR, `${golden.fixtureId}.json`);
+      try {
+        await writeJson(manifestPath, manifest, { overwrite: false });
+      } catch (error) {
+        if (error.code !== "EEXIST") throw error;
+        throw new Error(
+          `${manifestPath} already exists; refusing to overwrite a capture manifest. ` +
+          "If a golden already cites its digest, overwriting it destroys that golden's attestation."
+        );
+      }
       await writeJson(goldenPath, golden, { overwrite: false });
       console.log(`Promoted ${candidate.fixtureId} -> ${golden.fixtureId}`);
       console.log(`  repetitions: ${golden.provenance.repetitions}`);
@@ -1100,6 +1483,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 }
 
 export {
+  actionIdentityBandFor,
   actionIdentityFor,
   campaignShapeFor,
   captureVehicles,

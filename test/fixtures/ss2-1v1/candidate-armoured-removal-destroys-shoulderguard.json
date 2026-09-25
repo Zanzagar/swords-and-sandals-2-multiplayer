@@ -125,6 +125,27 @@
       "value": 2
     },
     {
+      "label": "armour-debris-2-x",
+      "source": "randomNumber",
+      "min": 0,
+      "max": 29,
+      "value": 24
+    },
+    {
+      "label": "armour-debris-2-y",
+      "source": "randomNumber",
+      "min": 0,
+      "max": 19,
+      "value": 12
+    },
+    {
+      "label": "armour-debris-2-rotation",
+      "source": "randomNumber",
+      "min": 0,
+      "max": 4,
+      "value": 3
+    },
+    {
       "label": "knockback-roll",
       "source": "randomBetween",
       "min": 1,
@@ -167,14 +188,24 @@
           "selected": "shoulderguard",
           "removed": true,
           "defenceRemoved": 8,
-          "debrisRolls": {
-            "horizontal": {
-              "source": "randomNumber",
-              "value": 10
+          "debrisRolls": [
+            {
+              "horizontal": {
+                "source": "randomNumber",
+                "value": 10
+              },
+              "vertical": 5,
+              "rotation": 2
             },
-            "vertical": 5,
-            "rotation": 2
-          }
+            {
+              "horizontal": {
+                "source": "randomNumber",
+                "value": 24
+              },
+              "vertical": 12,
+              "rotation": 3
+            }
+          ]
         }
       ],
       "knockback": {

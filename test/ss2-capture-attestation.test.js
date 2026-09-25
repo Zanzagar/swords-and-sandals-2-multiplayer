@@ -12,9 +12,15 @@
  * assurance at all rather than failing loudly.
  *
  * `staged` answers a different question: not "was the capture sound" but "whose
- * scenario is this". All 22 promoted goldens rest on scenarios the game itself
- * produced; the armoured and tournament families cannot be reached that way, so
- * the wrapper will write combatant state directly. That is a legitimate
+ * scenario is this". 22 of the 23 promoted goldens rest on scenarios the game
+ * itself produced; the armoured and tournament families cannot be reached that
+ * way, so the wrapper writes combatant state directly.
+ *
+ * ► **That last sentence was a prediction when it was written, and it CAME
+ *   TRUE on 2026-09-02.** `golden-armoured-deflection-threshold-cleared` is
+ *   the first promoted golden with a `provenance.staged` string, and as of
+ *   2026-09-07 it is still the only one. Measured, not counted from a brief.
+ *   That is a legitimate
  * experimental input — the game still resolves the action — but it is a
  * materially different kind of evidence, and nothing in the repository
  * distinguished the two.
@@ -34,21 +40,28 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { CaptureTraceError, ingestSs2CaptureTrace } from "../src/golden/capture-ingest.js";
+import { SS2_PRE_NONCE_OBSERVATION_DIGESTS } from "../src/golden/pre-nonce-observations.js";
 import {
   ObservationValidationError,
   SS2_CAPTURE_ATTESTATION_KEYS,
   SS2_SIMULATED_CAPTURE_METHOD,
   computeSs2ObservationDigest,
   matchSs2ObservationToFixture,
+  parseSs2StagedDeclaration,
   ss2ObservationsMatch,
   validateSs2Observation
 } from "../src/golden/observation.js";
 import {
   PromotionBlockedError,
   PromotionError,
+  computeSs2CaptureManifestDigest,
   promoteSs2CandidateToGolden
 } from "../src/golden/promote-1v1-golden.js";
-import { GoldenClassification, validateSs2OneVsOneFixture } from "../src/golden/run-1v1-fixture.js";
+import {
+  GoldenClassification,
+  GoldenFixtureValidationError,
+  validateSs2OneVsOneFixture
+} from "../src/golden/run-1v1-fixture.js";
 import { simulateSs2CaptureTrace } from "../src/golden/simulate-capture-trace.js";
 
 import { loadSs2Fixtures } from "./ss2-fixture-files.js";
@@ -79,8 +92,46 @@ const committedById = new Map(
   committedObservations.map((observation) => [observation.observationId, observation])
 );
 
+/** The promoted corpus, for the staging cross-check below. */
+const committedGoldens = await Promise.all(
+  (await readdir(GOLDEN_DIR))
+    .filter((name) => name.endsWith(".json"))
+    .map((name) => loadJson(path.join(GOLDEN_DIR, name)))
+);
+
 const parseTrace = (trace) => trace.trim().split("\n").map((line) => JSON.parse(line));
 const writeTrace = (lines) => `${lines.map((line) => JSON.stringify(line)).join("\n")}\n`;
+
+/**
+ * Every attestation moves the record's digest, so none can be edited into or
+ * out of a committed record without breaking it.
+ *
+ * That sentence used to sit above `assert.equal(record.digest,
+ * computeSs2ObservationDigest(record))`, which does not establish it and in
+ * fact cannot fail. `validateSs2Observation` recomputes and compares the digest
+ * itself, and `ingestSs2CaptureTrace` returns THROUGH it, so on any ingested
+ * record that equality holds by construction: an implementation that broke it
+ * would throw at the ingest call and the assertion would never be reached in a
+ * failing state. Worse, it is blind to the thing it was cited for — a digest
+ * that dropped `capture.launchNonce` before hashing would drop it on both sides
+ * and agree, which is exactly the shape that would let a nonce be edited in or
+ * out and defeat the promotion independence gate.
+ *
+ * So the claim is tested directly: add or remove each attestation and require
+ * the digest to move.
+ */
+function assertDigestCoversAttestations(record, label) {
+  for (const key of SS2_CAPTURE_ATTESTATION_KEYS) {
+    const edited = cloneJson(record);
+    if (Object.hasOwn(edited.capture, key)) delete edited.capture[key];
+    else edited.capture[key] = key === "overdraw" ? 0 : `${key}-probe`;
+    assert.notEqual(
+      computeSs2ObservationDigest(edited),
+      record.digest,
+      `${label}: the observation digest does not cover capture.${key}`
+    );
+  }
+}
 
 /**
  * A raw trace for `fixture` with a chosen capture method and a chosen `end`
@@ -164,11 +215,11 @@ test("ingest carries the over-draw count and the launch nonce into capture.*", (
 
   assert.equal(record.capture.overdraw, 0);
   assert.equal(record.capture.launchNonce, "417238-1900311477");
+  // Validation recomputes the digest and compares it, so this covers the
+  // record's own integrity; what it does not cover is WHICH fields the digest
+  // is taken over, which is the next line's job.
   assert.equal(validateSs2Observation(record), record);
-  // The digest covers the whole record, so a reviewer recomputing it is
-  // recomputing over the attestations too: they cannot be edited into a
-  // committed record after the fact without breaking it.
-  assert.equal(record.digest, computeSs2ObservationDigest(record));
+  assertDigestCoversAttestations(record, "obs-carry");
   // And carrying them changes nothing about what the observation is evidence
   // for: the fixture comparison never reads the capture block.
   assert.equal(matchSs2ObservationToFixture(baseFixture, record).match, true);
@@ -208,10 +259,14 @@ test("an injected-tape trace with no over-draw count is refused, naming the one 
 });
 
 test("the escape hatch admits an archived pre-overdraw trace, which then claims nothing", () => {
-  // The reason this option exists: 113 of the 177 archived .jsonl traces under
-  // the ignored captures/ directory carry `overdraw`; the rest predate the
-  // field, and regenerating divergence reports from them must not be blocked by
-  // evidence they could not have recorded.
+  // The reason this option exists: some archived .jsonl traces under the
+  // ignored captures/ directory predate `overdraw`, and regenerating divergence
+  // reports from them must not be blocked by evidence they could not have
+  // recorded. The ratio this comment used to quote ("113 of the 177") was stale
+  // by 2026-09-01 — the same count read 153 of 221, and moved by three files
+  // mid-audit because a capture was writing to the archive. The archive lives
+  // outside the repo and grows, so the number is not restated here; see the
+  // `allowMissingOverdraw` block in src/golden/capture-ingest.js.
   const bare = { t: "end", installHashVerifiedAfter: true };
   const record = injectedTapeRecord({
     observationId: "obs-archived",
@@ -350,8 +405,22 @@ test("the live capture path never passes the escape hatch", async () => {
 // The record schema: optional by necessity, strict where it is present
 // ---------------------------------------------------------------------------
 
-test("all three attestations are optional, which is what keeps the committed evidence intact", () => {
-  assert.deepEqual([...SS2_CAPTURE_ATTESTATION_KEYS].sort(), ["launchNonce", "overdraw", "staged"]);
+test("the optional capture keys are optional, which is what keeps the committed evidence intact", () => {
+  // ► **THIS SAID "all three" AND THERE ARE FOUR, WHICH IS THE TEST DOING ITS
+  //   JOB RATHER THAN A TEST THAT NEEDED FIXING.** Adding `traceWindow` to the
+  //   record's optional keys turned it red and made its author say why in the
+  //   same commit, which is exactly what a pinned key set is for.
+  //
+  //   `traceWindow` is present only when a capture used the WIDE recording
+  //   window (`phase`), which closes the trace at `nextphase` instead of at
+  //   `checkattackroll`'s return. **It obeys the same omission rule as the other
+  //   three, and for the same reason**: an observation's digest covers its own
+  //   record, so a field appearing on legacy records would rewrite every digest
+  //   and invalidate the provenance of every golden citing them. And like
+  //   `staged`, its absence is the substantive claim — this trace was taken at
+  //   the boundary the whole archive was taken at.
+  assert.deepEqual([...SS2_CAPTURE_ATTESTATION_KEYS].sort(),
+    ["launchNonce", "overdraw", "staged", "traceWindow"]);
   assert.ok(committedObservations.length > 0, "no committed observations to check");
 
   const legacy = [];
@@ -391,19 +460,39 @@ test("all three attestations are optional, which is what keeps the committed evi
   withAttestation.capture.overdraw = 0;
   assert.notEqual(computeSs2ObservationDigest(withAttestation), legacy[0].digest);
 
-  // `staged` is the same story told once more, and at the moment its whole
-  // population is the legacy one: no wrapper has staged anything yet, so every
-  // committed record is evidence the game produced unaided. Asserted as an
-  // observation about today, not as an invariant — the armoured and tournament
-  // families are expected to file staged records, and this line is then the one
-  // to update, exactly as the attested/legacy split above already had to be.
-  for (const observation of committedObservations) {
-    assert.equal(
-      Object.hasOwn(observation.capture, "staged"),
-      false,
-      `${observation.observationId} claims staging; if that is intentional, update this assertion ` +
-      "and check the goldens citing it record the staging too"
+  // `staged` is the same story told once more, and THE DAY THIS LINE WARNED
+  // ABOUT ARRIVED: 2026-09-02, when the armoured family filed its first two
+  // records. This assertion used to say no committed record claims staging, and
+  // said in its own comment that "the armoured and tournament families are
+  // expected to file staged records, and this line is then the one to update".
+  //
+  // It is asserted as an exact SET rather than relaxed to "some may", because
+  // the whole point of the field is that a scenario written in must be
+  // distinguishable from one the game produced unaided. A record that starts
+  // claiming staging without anyone noticing is precisely what this catches.
+  const STAGED_OBSERVATIONS = ["obs-onx1405-a1", "obs-onx1521-a1"];
+  assert.deepEqual(
+    committedObservations
+      .filter((observation) => Object.hasOwn(observation.capture, "staged"))
+      .map((observation) => observation.observationId)
+      .sort(),
+    [...STAGED_OBSERVATIONS].sort(),
+    "the set of committed records claiming staging changed; a record that newly claims it must be " +
+    "deliberate, and every golden citing it has to record the staging too"
+  );
+
+  // And the second half of the old warning, checked rather than trusted: every
+  // golden citing a staged record declares the staging on its own face. This is
+  // the assertion that would have caught a promotion silently dropping the
+  // field — the outcome `assertGoldenCanRecordStaging` exists to prevent.
+  for (const golden of committedGoldens) {
+    const citesStaged = (golden.provenance.observationIds ?? []).some((id) => STAGED_OBSERVATIONS.includes(id));
+    if (!citesStaged) continue;
+    assert.ok(
+      typeof golden.provenance.staged === "string" && golden.provenance.staged.length > 0,
+      `${golden.fixtureId} cites a staged observation but declares no provenance.staged`
     );
+    parseSs2StagedDeclaration(golden.provenance.staged, `${golden.fixtureId} provenance.staged`);
   }
   const withStaging = cloneJson(legacy[0]);
   withStaging.capture.staged = "hero.strength=40";
@@ -475,19 +564,16 @@ test("promotion refuses two observations minted by the same player launch", () =
   );
 });
 
-test("promotion accepts distinct nonces, absent nonces, and a mix of the two", () => {
+test("promotion accepts distinct nonces, and refuses a nonce-free record it cannot place", () => {
   const withNonce = (suffix, launchNonce) =>
     injectedTapeRecord({
       observationId: `obs-ok-${suffix}`,
       sessionId: `session-ok-${suffix}`,
       end: wrapperEnd({ launchNonce })
     });
-  // An ARCHIVED trace, ingested through the one documented hatch. A fresh
-  // injected-tape trace can no longer omit the nonce: an adversarial pass
-  // showed the forgery it exists to stop still worked by simply deleting the
-  // key from a duplicated trace, so absence is refused at ingest now. What the
-  // hatch models here is the only honest way a nonce-less record exists — a
-  // trace captured before the field did.
+  // A nonce-free record, made the only way one can still be made: through the
+  // archived-trace hatch, which the live capture path never passes. Ingest has
+  // refused a fresh injected-tape trace without the nonce since cc42503.
   const withoutNonce = (suffix) =>
     injectedTapeRecord({
       observationId: `obs-ok-${suffix}`,
@@ -496,22 +582,123 @@ test("promotion accepts distinct nonces, absent nonces, and a mix of the two", (
       options: { allowMissingOverdraw: true }
     });
 
-  const cases = {
-    "two distinct nonces": [withNonce("d1", "111-1"), withNonce("d2", "222-2")],
-    // Legacy records carry no nonce at all. Absence must never be treated as a
-    // shared value, or every committed golden would stop promoting.
+  const distinct = [withNonce("d1", "111-1"), withNonce("d2", "222-2")];
+  const promotion = promoteSs2CandidateToGolden(baseFixture, distinct, manifestFor(distinct));
+  assert.equal(promotion.golden.classification, GoldenClassification.GOLDEN);
+  assert.equal(promotion.matches.length, 2);
+
+  // THIS IS THE FORGERY, and until the pre-nonce waiver was enumerated it
+  // promoted. Both records are nonce-free, so neither shares a nonce with the
+  // other; both carry their own id and sessionId; both match the candidate;
+  // and their comparison projections are identical, which is what the pairwise
+  // gate is looking FOR. Absence used to mean "legacy, wave it through". It now
+  // means "name the record", and a record minted today cannot be named.
+  for (const [label, observations] of Object.entries({
     "two records with no nonce": [withoutNonce("n1"), withoutNonce("n2")],
     "one of each": [withNonce("m1", "333-3"), withoutNonce("m2")]
-  };
-  for (const [label, observations] of Object.entries(cases)) {
-    const promotion = promoteSs2CandidateToGolden(
-      baseFixture,
-      observations,
-      manifestFor(observations)
+  })) {
+    assert.throws(
+      () => promoteSs2CandidateToGolden(baseFixture, observations, manifestFor(observations)),
+      (error) =>
+        error instanceof PromotionError &&
+        /carries no capture.launchNonce and is not one of the records that predate the field/
+          .test(error.message),
+      label
     );
-    assert.equal(promotion.golden.classification, GoldenClassification.GOLDEN, label);
-    assert.equal(promotion.matches.length, 2, label);
   }
+
+  // And the waiver is a set of DIGESTS, not of shapes: it is not enough to look
+  // like a pre-nonce record. The end-to-end proof that the enumerated records
+  // still promote is "the committed evidence still promotes untouched under the
+  // nonce gate" above, which runs the real candidate against real records.
+  assert.equal(SS2_PRE_NONCE_OBSERVATION_DIGESTS.has(withoutNonce("n1").digest), false);
+});
+
+// ---------------------------------------------------------------------------
+// The pre-nonce waiver, which is the only way a nonce-free record still promotes
+// ---------------------------------------------------------------------------
+
+/**
+ * The size the list had when it was frozen. It is a CEILING, not an equality:
+ * entries leave when the record they name is re-captured with a nonce, and
+ * nothing captured from here on can ever qualify to join, because ingest
+ * refuses to emit a nonce-free injected-tape-runtime record at all. So a list
+ * that has grown is a list somebody widened to let something through.
+ */
+const PRE_NONCE_CEILING = 58;
+
+test("no raw instrumentation trace is committed under the observation corpus", async () => {
+  // THE ARCHIVE IS EXTERNAL ON PURPOSE, and that is a load-bearing property
+  // rather than tidiness: the raw traces are the only artifact that can
+  // distinguish two independent captures from a copy, so a committed copy
+  // quietly changes what a clone can settle about its own evidence.
+  //
+  // This exists because it happened. On 2026-09-01 a subagent script with an
+  // undefined path variable wrote 67 traces into
+  // test/observations/ss2-1v1/undefined/arch/, and one `git add -A` committed
+  // and pushed every one. Nothing refused it: .gitignore covered `captures/`
+  // only, and no test looked. An independent Codex review found it; the suite
+  // did not.
+  //
+  // Derived from a directory walk rather than a count, so a stray fails by NAME
+  // and the next reader knows which file to delete and what to go and fix.
+  const strays = [];
+  const walk = async (dir, prefix) => {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) await walk(path.join(dir, entry.name), rel);
+      else if (entry.name.endsWith(".jsonl")) strays.push(rel);
+    }
+  };
+  await walk(OBSERVATION_DIR, "");
+  assert.deepEqual(
+    strays,
+    [],
+    "raw .jsonl traces are committed under test/observations/ss2-1v1/. They belong only in " +
+    "the external archive; delete them, and find what wrote them there."
+  );
+});
+
+test("the pre-nonce waiver may only ever shrink", () => {
+  assert.ok(
+    SS2_PRE_NONCE_OBSERVATION_DIGESTS.size <= PRE_NONCE_CEILING,
+    `the pre-nonce waiver has grown to ${SS2_PRE_NONCE_OBSERVATION_DIGESTS.size} entries. It is the ` +
+    "hatch that lets a nonce-free record promote, and no capture taken since cc42503 can qualify for " +
+    "it. Adding an entry is a claim that a record predating 2026-08-30 23:18 was overlooked; if that " +
+    "is really what happened, lower PRE_NONCE_CEILING's justification here rather than raising it."
+  );
+});
+
+test("every waived digest names a committed record that actually lacks a nonce", () => {
+  // A digest in that file is a promotion the gate will not refuse, so an entry
+  // that names nothing is a hole with no record behind it. And because a digest
+  // covers the whole record and validateSs2Observation verifies it against the
+  // contents, an entry names one exact record byte for byte — it cannot be
+  // moved onto different content by relabelling.
+  const byDigest = new Map(committedObservations.map((observation) => [observation.digest, observation]));
+  for (const digest of SS2_PRE_NONCE_OBSERVATION_DIGESTS) {
+    const observation = byDigest.get(digest);
+    assert.ok(observation, `waived digest ${digest} names no committed observation record`);
+    assert.equal(
+      Object.hasOwn(observation.capture, "launchNonce"),
+      false,
+      `${observation.observationId} carries a nonce and has no business in the pre-nonce waiver`
+    );
+    assert.equal(validateSs2Observation(observation), observation);
+  }
+});
+
+test("no committed record lacks a nonce without being waived", () => {
+  // Not a rule the gate needs — an unwaived nonce-free record simply cannot
+  // promote. It is a tripwire on the corpus: it means every nonce-free record
+  // in the repository today is one this waiver was written against, so a
+  // nonce-free record appearing later is visible as an addition rather than
+  // blending into 58 lookalikes.
+  const unwaived = committedObservations
+    .filter((observation) => !Object.hasOwn(observation.capture, "launchNonce"))
+    .filter((observation) => !SS2_PRE_NONCE_OBSERVATION_DIGESTS.has(observation.digest))
+    .map((observation) => observation.observationId);
+  assert.deepEqual(unwaived, [], "these committed records carry no nonce and are not waived, so they cannot promote");
 });
 
 test("a shared nonce never discards divergence evidence", () => {
@@ -548,22 +735,110 @@ test("a shared nonce never discards divergence evidence", () => {
   assert.equal(blocked.divergences[0].observationId, "obs-div-bad");
 });
 
+/**
+ * The two end-to-end regressions below promote dir6 from an ELIGIBLE PAIR —
+ * `obs-gold3` and `obs-camp2` — rather than from the golden's full cited set.
+ * Neither is the record the candidate was transcribed from, and both are
+ * nonce-free and staging-free, which is what these two tests are about.
+ *
+ * WHAT IS COMPARED, and why it changed. This used to project four
+ * evidence-naming fields out of both goldens and deep-equal the rest, so
+ * `repetitions` was compared against the committed golden's. That worked only
+ * because the pair happened to be the same size as the committed golden's
+ * evidence. When dir6 was re-promoted onto nine records the two counts parted,
+ * and every obvious repair was a weakening: adding `repetitions` to the
+ * projection deletes the only check that a promotion counts its evidence at
+ * all; widening the pair to the golden's nine records forces the deletion of
+ * the per-record `launchNonce` assertion, because four of the nine carry one.
+ *
+ * So the comparison is split instead of relaxed, and it comes out stronger.
+ * The BODY — everything a promotion copies rather than derives — is deep-equal
+ * to the committed golden. The PROVENANCE is checked in full against what the
+ * offered evidence entails: not a subset compared to a golden that happens to
+ * agree, but every field derived from the two records in hand. A field that
+ * used to be compared by coincidence is now compared on purpose.
+ */
+const DIR6_ELIGIBLE_PAIR = ["obs-gold3", "obs-camp2"];
+
+/** The fixture apart from its provenance: what promotion copies, not derives. */
+function goldenBody(golden) {
+  const projected = cloneJson(golden);
+  delete projected.provenance;
+  return projected;
+}
+
+/**
+ * Every provenance field a promotion from `observations` must produce, derived
+ * from the records and the candidate rather than read off the committed golden.
+ */
+function expectedProvenance(candidate, observations, manifest) {
+  return {
+    kind: "licensed-observation",
+    runtimeVerified: true,
+    sourceRefs: cloneJson(candidate.provenance.sourceRefs),
+    observedAt: observations
+      .map((observation) => observation.capture.observedAt)
+      .sort((left, right) => Date.parse(left) - Date.parse(right))
+      .at(-1),
+    captureToolVersion: manifest.captureToolVersion,
+    repetitions: observations.length,
+    observationIds: observations.map((observation) => observation.observationId),
+    observationDigests: observations.map((observation) => observation.digest),
+    captureManifestSha256: computeSs2CaptureManifestDigest(manifest)
+  };
+}
+
 test("the committed evidence still promotes untouched under the nonce gate", async () => {
-  // The end-to-end regression that matters: real records, the real manifest,
-  // and the real candidate, none of which carry a nonce.
+  // The end-to-end regression that matters: real records, a real manifest, and
+  // the real candidate, none of which carry a nonce.
   const golden = await loadJson(path.join(GOLDEN_DIR, "golden-prisoner-normal-kill-dir6.json"));
   const candidate = await loadJson(path.join(FIXTURE_DIR, "candidate-prisoner-normal-kill-dir6.json"));
-  const manifest = await loadJson(path.join(MANIFEST_DIR, "prisoner-dir6.json"));
-  const observations = golden.provenance.observationIds.map((observationId) => {
+  const observations = DIR6_ELIGIBLE_PAIR.map((observationId) => {
     const observation = committedById.get(observationId);
-    assert.ok(observation, `missing cited observation ${observationId}`);
+    assert.ok(observation, `missing observation ${observationId}`);
+    assert.notEqual(observationId, candidate.provenance.authoredFrom, "the pair must be eligible");
     assert.equal(Object.hasOwn(observation.capture, "launchNonce"), false, observationId);
     return observation;
   });
 
+  const manifest = manifestFor(observations);
   const promotion = promoteSs2CandidateToGolden(candidate, observations, manifest);
-  assert.equal(promotion.captureManifestSha256, golden.provenance.captureManifestSha256);
-  assert.deepEqual(promotion.golden, golden);
+  assert.deepEqual(promotion.golden.provenance.observationIds, DIR6_ELIGIBLE_PAIR);
+  assert.deepEqual(goldenBody(promotion.golden), goldenBody(golden));
+  assert.deepEqual(promotion.golden.provenance, expectedProvenance(candidate, observations, manifest));
+  // The committed golden rests on more evidence than this pair, and says so.
+  assert.equal(golden.provenance.repetitions, golden.provenance.observationIds.length);
+  assert.ok(golden.provenance.repetitions >= promotion.golden.provenance.repetitions);
+});
+
+test("a candidate's own source record is refused as evidence, however well it matches", async () => {
+  // obs-diag is not a divergent record, a duplicate, a same-session repeat or a
+  // nonce collision — it matches candidate-prisoner-normal-kill-dir6 perfectly,
+  // and it is cited by the committed golden. It matches perfectly BECAUSE the
+  // candidate's scenario and tape were copied out of it, which is exactly why
+  // its agreement is worth nothing.
+  const candidate = await loadJson(path.join(FIXTURE_DIR, "candidate-prisoner-normal-kill-dir6.json"));
+  assert.equal(candidate.provenance.kind, "transcribed-observation");
+  assert.equal(candidate.provenance.authoredFrom, "obs-diag");
+
+  const source = committedById.get("obs-diag");
+  const other = committedById.get("obs-gold3");
+  // It really does match — the refusal is not the matcher quietly disagreeing.
+  assert.equal(matchSs2ObservationToFixture(candidate, source).match, true);
+
+  const observations = [source, other];
+  assert.throws(
+    () => promoteSs2CandidateToGolden(candidate, observations, manifestFor(observations)),
+    (error) =>
+      error instanceof PromotionError &&
+      /obs-diag is the record candidate-prisoner-normal-kill-dir6 was authored from/.test(error.message) &&
+      /cannot fail/.test(error.message)
+  );
+
+  // And the taint is one record deep: swap the source out for any independent
+  // capture and the same candidate promotes.
+  const eligible = DIR6_ELIGIBLE_PAIR.map((id) => committedById.get(id));
+  assert.equal(promoteSs2CandidateToGolden(candidate, eligible, manifestFor(eligible)).matches.length, 2);
 });
 
 // ---------------------------------------------------------------------------
@@ -606,9 +881,7 @@ test("ingest carries the staging declaration into capture.staged, and its absenc
   const staged = stagedRecord({ observationId: "obs-staged", sessionId: "session-staged" });
   assert.equal(staged.capture.staged, STAGED_DECLARATION);
   assert.equal(validateSs2Observation(staged), staged);
-  // The digest covers it, so the claim cannot be added to or removed from a
-  // committed record after the fact.
-  assert.equal(staged.digest, computeSs2ObservationDigest(staged));
+  assertDigestCoversAttestations(staged, "obs-staged");
 
   // Staging is a scenario INPUT: the game still resolved the action, so the
   // observation is still evidence for the same fixture.
@@ -617,7 +890,9 @@ test("ingest carries the staging declaration into capture.staged, and its absenc
   const unstaged = injectedTapeRecord({ observationId: "obs-unstaged", sessionId: "session-unstaged" });
   assert.equal(Object.hasOwn(unstaged.capture, "staged"), false);
   assert.equal(validateSs2Observation(unstaged), unstaged);
-  assert.equal(unstaged.digest, computeSs2ObservationDigest(unstaged));
+  // Absence is a claim too, so it has to be digest-covered in the same way:
+  // adding `staged` to a record that says it staged nothing must break it.
+  assertDigestCoversAttestations(unstaged, "obs-unstaged");
   assert.equal(matchSs2ObservationToFixture(baseFixture, unstaged).match, true);
 });
 
@@ -785,21 +1060,54 @@ test("the end line's key set is still closed, so an unknown attestation cannot s
  * `staged`. Probed rather than hard-coded so the tests below assert the rule —
  * a promoted golden must state that its scenario was wrapper-staged — and not a
  * snapshot of which day the schema change landed.
+ *
+ * The probe decides which of two UNEQUAL arms the test below takes, so it has
+ * to be able to tell "the schema rejects this key" from "something else broke".
+ * It could not: it used to end `catch { return false }`, and the arm that
+ * selects only has to witness a refusal — which a validator broken in any way
+ * at all also produces. Demonstrated, not argued. Teach the schema `staged` but
+ * give it a validator that rejects every value of the field — the single most
+ * likely regression, since the promotion gate's own error message tells the
+ * next author to add the key and validate it — and the pre-fix file reported 29
+ * passed / 0 failed, with the one test that exists to prove a staged golden
+ * says so on its own face reporting success by taking the "not yet" branch.
+ *
+ * So exactly one error selects that branch now and every other throw is
+ * rethrown. Evaluated lazily rather than at module load, so the rethrow is
+ * attributed to the test that consumes it instead of taking the other 28 down
+ * with it as an uncaught exception.
  */
-const goldenSchemaAdmitsStaged = (() => {
+const STAGED_KEY_REFUSED_BY_SCHEMA = /^golden provenance has unsupported fields: staged\.$/;
+
+function goldenSchemaAdmitsStaged() {
   const observations = ["p1", "p2"].map((suffix) =>
     producedRecord({ observationId: `obs-probe-${suffix}`, sessionId: `session-probe-${suffix}` })
   );
   const { golden } = promoteSs2CandidateToGolden(baseFixture, observations, manifestFor(observations));
+  // The probe reads the schema only if its own baseline is sound. A validator
+  // that rejects this golden for any OTHER reason rejects the mutated probe
+  // too, and the probe would report that as "the schema has not learned
+  // `staged` yet" — so the baseline is checked before the mutation is made.
+  assert.equal(
+    validateSs2OneVsOneFixture(golden),
+    golden,
+    "the staging probe's baseline golden does not validate, so the probe measures nothing"
+  );
   const probe = cloneJson(golden);
   probe.provenance.staged = "hero.strength=40";
   try {
     validateSs2OneVsOneFixture(probe);
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    if (
+      error instanceof GoldenFixtureValidationError &&
+      STAGED_KEY_REFUSED_BY_SCHEMA.test(error.message)
+    ) {
+      return false;
+    }
+    throw error;
   }
-})();
+}
 
 test("the scenario comparison cannot see staging, which is why the gate has to", () => {
   // The load-bearing demonstration. These two observations agree on every
@@ -890,9 +1198,10 @@ test("unstaged evidence promotes exactly as before, adding no key to the golden"
 
   assert.equal(promotion.golden.classification, GoldenClassification.GOLDEN);
   assert.equal(promotion.staged, null);
-  // Not `staged: null`, not `staged: ""` — no key. That is what keeps all 22
-  // committed goldens byte-identical, and it is also the honest claim: no
-  // wrapper wrote this scenario.
+  // Not `staged: null`, not `staged: ""` — no key. That is what keeps the 22
+  // unstaged committed goldens byte-identical, and it is also the honest
+  // claim: no wrapper wrote this scenario. (The 23rd, the armoured golden, DOES
+  // carry the key, because a wrapper did.)
   assert.equal(Object.hasOwn(promotion.golden.provenance, "staged"), false);
 });
 
@@ -903,7 +1212,7 @@ test("a golden promoted from staged evidence must say so on its own face", () =>
   const promote = () =>
     promoteSs2CandidateToGolden(baseFixture, observations, manifestFor(observations));
 
-  if (goldenSchemaAdmitsStaged) {
+  if (goldenSchemaAdmitsStaged()) {
     const promotion = promote();
     assert.equal(promotion.staged, STAGED_DECLARATION);
     // A reader opening the golden sees the staging without chasing observation
@@ -917,6 +1226,23 @@ test("a golden promoted from staged evidence must say so on its own face", () =>
   // dropping it. Emitting a golden that silently read as game-produced is the
   // exact outcome `staged` exists to prevent, so failing loudly with the
   // required change is the only honest option left to this track.
+  //
+  // NOT also asserted here: that `error.cause` is the schema's refusal of this
+  // one key. It reads like the natural companion to the narrowed probe above,
+  // and it is decoration — `assertAllowedKeys(provenance, GOLDEN_PROVENANCE_KEYS)`
+  // runs BEFORE every other golden check, so while `staged` is an unsupported
+  // key that refusal masks any other defect in the golden and the cause matches
+  // by construction; and once the key is supported this arm is not taken at
+  // all. An assertion that cannot fail in either state is worth less than the
+  // comment saying why, so this is the comment.
+  //
+  // The real hazard it looked like it was covering lives in
+  // src/golden/promote-1v1-golden.js and is reported, not patched from here:
+  // `assertGoldenCanRecordStaging` relabels ANY golden validation failure as
+  // "the schema does not admit provenance.staged" whenever staging is present.
+  // Harmless today for the ordering reason above; the day `staged` joins
+  // GOLDEN_PROVENANCE_KEYS it will start telling the next author to make a
+  // change they have already made.
   assert.throws(
     promote,
     (error) =>
@@ -927,20 +1253,75 @@ test("a golden promoted from staged evidence must say so on its own face", () =>
 });
 
 test("the committed evidence promotes untouched under the staging gate", async () => {
-  // The regression that matters most: real records, the real manifest, the real
-  // candidate, none of which mention staging, producing the committed golden
-  // byte for byte.
+  // The regression that matters most: real records, a real manifest, the real
+  // candidate, none of which mention staging, producing the committed golden's
+  // every derived field. The evidence pair is the eligible one — see
+  // DIR6_ELIGIBLE_PAIR above for why, and for what is compared.
   const golden = await loadJson(path.join(GOLDEN_DIR, "golden-prisoner-normal-kill-dir6.json"));
   const candidate = await loadJson(path.join(FIXTURE_DIR, "candidate-prisoner-normal-kill-dir6.json"));
-  const manifest = await loadJson(path.join(MANIFEST_DIR, "prisoner-dir6.json"));
-  const observations = golden.provenance.observationIds.map((observationId) => {
+  const observations = DIR6_ELIGIBLE_PAIR.map((observationId) => {
     const observation = committedById.get(observationId);
-    assert.ok(observation, `missing cited observation ${observationId}`);
+    assert.ok(observation, `missing observation ${observationId}`);
     assert.equal(Object.hasOwn(observation.capture, "staged"), false, observationId);
     return observation;
   });
 
+  const manifest = manifestFor(observations);
   const promotion = promoteSs2CandidateToGolden(candidate, observations, manifest);
   assert.equal(promotion.staged, null);
-  assert.deepEqual(promotion.golden, golden);
+  assert.equal(Object.hasOwn(promotion.golden.provenance, "staged"), false);
+  assert.deepEqual(goldenBody(promotion.golden), goldenBody(golden));
+  assert.deepEqual(promotion.golden.provenance, expectedProvenance(candidate, observations, manifest));
+  assert.equal(Object.hasOwn(golden.provenance, "staged"), false, "the committed golden is unstaged too");
+});
+
+/* ------------------------------------------------------------------ *
+ * THE RECORDING WINDOW — and the proof that widening it is INERT by default.
+ * ------------------------------------------------------------------ */
+
+const WRAPPER = fileURLToPath(new URL("../tools/runtime-capture/ss2-capture-wrapper.as", import.meta.url));
+
+test("the trace window defaults to `action`, so every archived trace's boundary is unchanged", async () => {
+  // ► **WHY A TEST READS AN ActionScript FILE.** The wrapper runs inside a Flash
+  //   player and no node test can execute it; `validate-vehicle.ps1` is the real
+  //   gate and it needs portable Ruffle, ffdec and a JRE under `.tools`, which
+  //   are installed in the WINDOWS capture vehicle and not here. This pins the
+  //   one property that decides whether an unvalidated edit is dangerous: that
+  //   the new mode is OPT-IN and the default path is untouched.
+  //
+  //   **It pins a contract, not a behaviour, and cannot replace the gate.**
+  const source = await readFile(WRAPPER, "utf8");
+
+  // The flag starts false and only the exact string "phase" turns it on.
+  assert.match(source, /var traceWindowPhase = false;/,
+    "the wide window is not opt-in, so an archived-boundary trace is no longer the default");
+  assert.match(source, /if \(String\(rawTraceWindow\) == "phase"\)/,
+    "the wide window is selected by something other than the exact string `phase`");
+  // An unknown value must be REFUSED rather than fall back, because a typo
+  // silently selecting the narrow window is how a capture comes back missing the
+  // writes it was run to observe.
+  assert.match(source, /trace-window-refused/,
+    "an unknown traceWindow value is not refused by name");
+
+  // The ONLY behavioural difference on the default path: this one guard.
+  assert.match(source, /if \(armed && actionDepth == 0 && !traceWindowPhase\) finishTrace\(\);/,
+    "the checkattackroll close is no longer guarded solely by the opt-in flag");
+
+  // And the end line gains a field ONLY in the new mode, so an ordinary trace
+  // stays byte-comparable with the archive exactly as `staged` does.
+  assert.match(source, /if \(traceWindowPhase\) endLine\.traceWindow = "phase";/,
+    "the end line does not declare a non-default window, so a wide trace could be read as a narrow one");
+  assert.ok(!/endLine\.traceWindow = "action"/.test(source),
+    "the default mode writes a field onto the end line, which breaks byte-comparability with the archive");
+});
+
+test("the launcher offers the same two values and defaults to neither", async () => {
+  // An empty default means "say nothing", which the wrapper reads as the action
+  // window — the same shape every other optional FlashVar here uses.
+  const launcher = await readFile(
+    fileURLToPath(new URL("../tools/runtime-capture/launch-capture.ps1", import.meta.url)), "utf8");
+  assert.match(launcher, /\[ValidateSet\("", "action", "phase"\)\]/,
+    "the launcher does not constrain -TraceWindow, so a typo reaches the wrapper");
+  assert.match(launcher, /\$TraceWindow = ""/, "the launcher's default is not empty");
+  assert.match(launcher, /"-PtraceWindow=\$TraceWindow"/, "the launcher does not pass the parameter through");
 });

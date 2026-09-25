@@ -117,6 +117,10 @@ var rawNavigate = _root.navigate;
 //   arenaPolicy       "aggressive" (default) — close and attack every turn
 //   arenaCapture      "never" (default for a levelling run) | "champion" |
 //                     "always"
+//   traceWindow       "action" (default) | "phase" — where the recording window
+//                     CLOSES. See rawTraceWindow below; "action" is what every
+//                     archived trace was taken with and its behaviour is
+//                     byte-identical to before this parameter existed.
 //   timeOfDayCeiling  abort if _global.time_of_day reaches this (default 150;
 //                     the game's special event fires at 200)
 //   sessionLimitSec   abort after this much wall clock (default 900)
@@ -132,6 +136,30 @@ var rawStageVillain = _root.stageVillain;
 var rawStageGold = _root.stageGold;
 var rawShopWeapon = _root.shopWeapon;
 var rawShopArmour = _root.shopArmour;
+// ► **WHERE THE RECORDING WINDOW CLOSES, AND WHY IT IS A PARAMETER RATHER THAN
+//   A CHANGE.** By default `finishTrace` fires on `checkattackroll`'s RETURN,
+//   so the window is exactly that call. That boundary is deliberate — it
+//   matches the single-action fixture scope, and the `nextphase` hook closes
+//   before its stamina and regen accounting for the same reason.
+//
+//   **It also makes some of the build unobservable.** `psyche_up`'s counter is
+//   written at `+0x6738` (the discharge writing itself back to 1) and at
+//   `+0x6761` (the animation callback adding one), and BOTH execute after
+//   `checkattackroll` has returned. `docs/integration/ss2-capture-staging.md`
+//   says "two consecutive presses recorded live decide it"; with this window
+//   they decide nothing, because neither write is inside it.
+//
+//   `traceWindow=phase` defers the close to the `nextphase` boundary, which the
+//   hook below already recognises, so everything the phase does after the roll
+//   lands inside the armed window.
+//
+// ► **THE DEFAULT IS UNCHANGED AND MUST STAY THAT WAY.** All 69 observation
+//   records and every archived manifest were taken with the action window. A
+//   wider trace carries MORE lines by construction, so a run in one mode is not
+//   comparable with a run in the other, and the `end` line says which mode it
+//   was — but only when it is not the default, so every ordinary trace stays
+//   byte-comparable with the archive exactly as the staged fields do.
+var rawTraceWindow = _root.traceWindow;
 var rawTimeOfDayCeiling = _root.timeOfDayCeiling;
 var rawSessionLimitSec = _root.sessionLimitSec;
 var config = {
@@ -1972,18 +2000,55 @@ function captureAllowedNow() {
     // BOTH combatants, and on the arena route the villain fights back - so the
     // first call with a numeric attack_direction is not guaranteed to be the
     // hero's. `attackerSide` is a launcher FlashVar the game never sees, so
-    // arming on the villain's swing would file a trace labelled "hero" that
-    // ingest has no way to contradict: a false observation, which is worse than
-    // no observation.
-    var attacker = gameRoot().game_attacker;
-    if (attacker != undefined) {
-        var isHero = (attacker == gameRoot().game.hero);
-        var claimed = (config.attackerSide == "hero");
-        if (isHero != claimed) {
-            dbg("capture-refused-wrong-side");
-            return false;
-        }
+    // arming on the villain's swing files a trace labelled "hero" that ingest
+    // has no way to contradict: a false observation, which is worse than no
+    // observation.
+    //
+    // THIS GUARD WAS DEAD ON EVERY ROUTE UNTIL NOW, AND IT WAS MEASURED DEAD.
+    // It read gameRoot().game_attacker - _level1.game_attacker - and the game
+    // never writes that path. All 296 game_attacker references in the build
+    // live inside sprite:862[overlay] frames 1 and 52, and the only two writes
+    // are bare SetVariable instructions inside changeCombatants
+    // (DoAction@0x240c7f +0x2ba2 villain, +0x2c18 hero). A bare SetVariable in
+    // AVM1 resolves up the scope chain and stops at the clip that defined the
+    // function, so the value lives on the OVERLAY CLIP - the same object every
+    // hook slot is read from, and the same object attack_direction is read from
+    // at arming time in all 193 armed sessions.
+    //
+    // The cost of the wrong path was not theoretical: across 268 archived
+    // rufflelogs, `capture-refused-wrong-side` appears ZERO times, while nine of
+    // twenty live arena rounds demonstrably recorded the villain's swing under
+    // a "hero" label. (HANDOFF previously said six such refusals existed in
+    // older prisoner captures and that the defect was arena-specific. Both were
+    // wrong: those six matches are in compiled wrapper SOURCE copies, not in
+    // any trace, and the defect was universal.)
+    //
+    // Now FAIL-CLOSED, and that costs no session. changeCombatants binds
+    // game_attacker before checkattackroll's body begins - it runs at overlay
+    // frame 52 top level (+0x318c) and again inside nextphase (+0x3646,
+    // +0x366d), always before the turn's action - so an unresolved attacker
+    // means something is wrong, not that the answer is pending. And a refusal
+    // latches nothing: beginAction tests this BEFORE setting actionCaptured,
+    // and tappedRandom serves the tape only while armed, so the wrapper simply
+    // arms on the hero's next attack in the same bout.
+    var ov = overlayClip();
+    var attacker = (ov == undefined) ? undefined : ov.game_attacker;
+    var isHero = (attacker != undefined && attacker == gameRoot().game.hero);
+    var isVillain = (attacker != undefined && attacker == gameRoot().game.villain);
+    // Both false means unresolved; both true is impossible unless hero and
+    // villain are the same object. Either way the identity is not established.
+    if (isHero == isVillain) {
+        dbg("capture-refused-attacker-unresolved");
+        return false;
     }
+    if (isHero != (config.attackerSide == "hero")) {
+        dbg("capture-refused-wrong-side");
+        return false;
+    }
+    // Not decoration: this is how the next operator can tell the guard RESOLVED
+    // the side from how it looked when it was silently resolving nothing. A run
+    // whose log carries no attacker-resolved line has a dead guard again.
+    dbg("attacker-resolved-" + (isHero ? "hero" : "villain"));
     if (!arenaMode) return true;
     if (arenaCaptureMode == "always") return true;
     if (arenaCaptureMode == "champion") {
@@ -2105,6 +2170,18 @@ function parseStageList(raw) {
         out.push({ field: pair[0], value: value });
     }
     return out;
+}
+// Refused BY NAME rather than falling back to the default: a typo silently
+// selecting the narrow window is how a capture comes back missing the very
+// writes it was run to observe, and reads as "the build does not do that".
+var traceWindowPhase = false;
+if (rawTraceWindow != undefined && String(rawTraceWindow).length > 0) {
+    if (String(rawTraceWindow) == "phase") {
+        traceWindowPhase = true;
+    } else if (String(rawTraceWindow) != "action") {
+        trace("{\"t\":\"dbg\",\"at\":\"trace-window-refused\",\"raw\":\"" +
+            String(rawTraceWindow) + "\",\"why\":\"not-action-or-phase\"}");
+    }
 }
 var stageHeroFields = parseStageList(rawStageHero);
 var stageVillainFields = parseStageList(rawStageVillain);
@@ -2251,6 +2328,11 @@ function finishTrace() {
     if (stageHeroFields.length > 0 || stageVillainFields.length > 0) {
         endLine.staged = stagedAtArming;
     }
+    // Same rule as `staged`: present ONLY when it is not the default, so the
+    // field's presence is itself the signal and an ordinary trace stays
+    // byte-comparable with the archive. A wider trace must never be silently
+    // read as a narrow one.
+    if (traceWindowPhase) endLine.traceWindow = "phase";
     emit(endLine);
     finalsDumped = true;
     traceClosed = true;
@@ -2346,7 +2428,10 @@ function hookBattle() {
             var result = original.apply(this, arguments);
             actionDepth--;
             currentHook = previous;
-            if (armed && actionDepth == 0) finishTrace();
+            // In "phase" mode the window stays open past this return, so the
+            // writes the phase makes AFTER the roll are recorded. `nextphase`
+            // closes it instead. See rawTraceWindow.
+            if (armed && actionDepth == 0 && !traceWindowPhase) finishTrace();
             return result;
         };
     });

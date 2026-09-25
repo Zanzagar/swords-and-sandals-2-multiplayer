@@ -1,0 +1,637 @@
+/**
+ * Presentation commands -> an immutable SCENE, which is the thing a painter
+ * can draw without knowing anything about combat.
+ *
+ * WHY THIS MODULE EXISTS AT ALL. `src/adapter/presentation.js` has emitted
+ * ordered, JSON-safe presentation commands since long before anything could
+ * draw them, and until now its only callers were tests. That is the same shape
+ * the campaign record was in before 2026-09-07 — written and never read back —
+ * and closing that gap is what found the defects in the record's format. This
+ * module is the read-back.
+ *
+ * THE DIVISION OF LABOUR, measured rather than assumed:
+ *
+ * - the command stream is complete for **what to show** and empty of **when**.
+ *   No command carries a duration, a frame number or a completion signal, and
+ *   `place-clip` is constructed at exactly one site — inside
+ *   `presentArenaConstruction` — so *nothing in the stream ever moves a clip
+ *   again after the arena is built*. All motion, tweening and timing therefore
+ *   belong to the renderer, and this module is where that boundary is drawn.
+ *
+ *   ► **THE SECOND HALF OF THAT IS NOW FALSE, AND IT IS CORRECTED HERE RATHER
+ *     THAN ABOVE IT (2026-09-11).** `move-clip` exists, and it moves a clip
+ *     after the arena is built. What survives, and is the part that mattered:
+ *     the stream still carries no TIME. A `move-clip` says where a figure ends
+ *     up and never how long it takes to get there, so the tween is still the
+ *     renderer's — see `travelAt` in `timeline.js`. What changed is that the
+ *     DESTINATION is no longer the renderer's to invent; it is the resolver's,
+ *     and it arrives as data like every other bound field.
+ *
+ *     `place-clip` is still constructed at exactly one site. `move-clip` is a
+ *     separate kind precisely because folding a partial `place-clip` here
+ *     would set `y` to `undefined` and make the figure vanish.
+ *
+ *     **And `face-clip` (2026-09-22) TURNS a clip after the arena is built**,
+ *     for the same reason and with the same discipline: until it existed the
+ *     construction's `facing` was the only one a scene ever held, so every
+ *     turn the resolver made was drawn facing the old way. It carries no time
+ *     either; when the turn is DRAWN is `figureFacingAt`'s in `timeline.js`.
+ *
+ *     **And `scale-clip` (2026-09-24) RESIZES one** — colossus, little fat
+ *     kid and their expiry, which until then left every figure at its
+ *     construction size. No time again: when and how fast the size changes is
+ *     `figureYscaleAt`'s.
+ * - so a scene holds two kinds of field: **bound** ones, which came from a
+ *   command and may never be invented here, and **presentational** ones, which
+ *   are this module's own and are marked as such.
+ *
+ * WHAT THIS MODULE REFUSES TO DO:
+ *
+ * - **It computes no combat value.** Health, maxHealth, alive and status are
+ *   copied out of `panel-refresh` verbatim. There is no arithmetic here beyond
+ *   ordering by depth.
+ * - **It never drops `labelProvenance`.** Every clip label carries map-named /
+ *   assumed / placeholder, and that flag is the only thing distinguishing a
+ *   label the battle map names from one this project guessed. A scene that
+ *   swallowed it would let a rendered arena present a guess as measured, which
+ *   is the failure mode this whole repository exists to prevent.
+ * - **It never silently discards an `unmapped` command.** They accumulate in
+ *   `scene.unmapped` so a surface can show them. An arena that renders nothing
+ *   for an event the adapter could not map looks identical to an arena where
+ *   nothing happened.
+ * - **It never invents geometry.** A combatant with no `place-clip` has
+ *   `placed: false` and no coordinates, rather than a default position.
+ */
+
+export class SceneError extends Error {
+  constructor(message, options = {}) {
+    super(message, options);
+    this.name = new.target.name;
+  }
+}
+
+/**
+ * Command kinds this module understands. Deliberately a local list rather than
+ * an import of `CommandKind`: a scene that silently ignored a NEW command kind
+ * would be the same defect as swallowing an `unmapped`, so an unknown kind
+ * throws and names itself.
+ */
+const HANDLED = Object.freeze([
+  "attach-clip",
+  "place-clip",
+  "move-clip",
+  "move-clip-depth",
+  "face-clip",
+  "scale-clip",
+  "fire-projectile",
+  "attach-effect",
+  "bind-globals",
+  "clip-goto",
+  "panel-refresh",
+  "overlay-goto",
+  "arena-goto",
+  "unmapped"
+]);
+
+const EMPTY_ACTOR = Object.freeze({
+  combatantId: null,
+  instanceName: null,
+  instancePath: null,
+  depth: null,
+  vanillaNative: null,
+  shadow: null,
+  placed: false,
+  x: null,
+  y: null,
+  facing: null,
+  xscale: null,
+  yscale: null,
+  geometryAuthored: null,
+  clip: null,
+  panel: null,
+  /**
+   * The step this actor is in the middle of, from the last `move-clip`, or
+   * null. `x` above is already the DESTINATION — the fold is not a tween — and
+   * this is the origin the surface interpolates from while the gait animation
+   * runs. It is left in place once the step is over: a stale `motion` whose
+   * `to` equals the current `x` interpolates to a standstill, which is exactly
+   * what a figure that has finished walking should do.
+   */
+  motion: null,
+  /**
+   * The rank change this actor is in the middle of, from the last
+   * `move-clip-depth`, or null. Separate from `motion` for the same reason the
+   * COMMAND is separate: a surface interpolating a step along one axis must
+   * not be handed the other axis's origin. `y` above is already the
+   * destination; this is where the step began.
+   */
+  depthMotion: null,
+  /**
+   * The turn this actor is in the middle of, from the last `face-clip`, or
+   * null. `facing` above is already the facing AFTER the turn — the fold is not
+   * a tween, exactly as `x` is already the destination — and this carries the
+   * facing to hold until the action that turned it has finished, which is when
+   * the build turns a gladiator (`changeCombatants`, at the phase advance).
+   * `figureFacingAt` in `timeline.js` makes that decision; a stale `turn`
+   * whose action has finished draws `facing`, which is what a gladiator that
+   * has already turned should do. A turn carrying `at: "action-start"` (the
+   * actor's turn to the foe he aims at, 2026-09-24) holds nothing: it is drawn
+   * from the start of its action.
+   */
+  turn: null,
+  /**
+   * The size change this actor is in the middle of, from the last
+   * `scale-clip`s, or null — colossus, little fat kid, and their expiry
+   * (added 2026-09-24). `yscale` above is already the size AFTER them — the
+   * fold is not a tween, exactly as `x` is already the destination — and this
+   * carries what `figureYscaleAt` in `timeline.js` needs to draw the change
+   * at the build's moment: `{ sequence, actionToken, stages }`, one stage per
+   * `scale-clip` of ONE action, in stream order, each `{ from, to, at }` and a
+   * colossus's `growth`. A stale one whose action has finished draws
+   * `yscale`, as a stale `turn` draws `facing`.
+   */
+  rescale: null
+});
+
+function frozenActor(actor) {
+  return Object.freeze({ ...actor });
+}
+
+/** An empty scene. Every field is present so a painter never branches on absence. */
+export function emptyScene() {
+  return Object.freeze({
+    actors: Object.freeze({}),
+    /** Combatant ids in DRAW ORDER: ascending depth, ties broken by id. */
+    drawOrder: Object.freeze([]),
+    globals: null,
+    overlayLabel: null,
+    arenaLabel: null,
+    /** The completion token the surface must hand back to settle. Null until a result. */
+    completionToken: null,
+    /**
+     * Arrows loosed by the batch just folded, and ONLY that batch.
+     *
+     * ► **THE ONE FIELD HERE THAT DOES NOT CARRY FORWARD, and it is deliberate
+     *   rather than an oversight — a third behaviour among three needs a
+     *   reason.** `actors`, `globals` and the two labels are STATE: they persist
+     *   because the arena still looks like that. `unmapped` ACCUMULATES because
+     *   it is a diagnostic log and losing an entry would lose the report.
+     *
+     *   **An arrow is neither. It is an EVENT**, belonging to the action that
+     *   loosed it, and the build says so in the plainest possible way: it
+     *   `attachMovie`s the bullet on release and `removeMovieClip()`s it on
+     *   impact (`+0x6da2`, `+0x6d41`). Carrying one forward would leave arrows
+     *   hanging in the air over later turns; accumulating them would fill the
+     *   arena with every shot of the bout.
+     *
+     *   A batch is one action and an action looses at most one arrow, so this
+     *   is empty or a single entry in practice — an array because the shape
+     *   should not have to change the first time something fires twice.
+     */
+    projectiles: Object.freeze([]),
+    effects: Object.freeze([]),
+    unmapped: Object.freeze([]),
+    /** The highest resolver sequence any command in this scene carried. */
+    sequence: 0
+  });
+}
+
+/**
+ * Draw order: FURTHEST BACK first, so nearer figures paint over further ones.
+ *
+ * ► **THIS SORTED BY CLIP `depth` UNTIL 2026-09-12, AND THAT IS BACKWARDS FOR
+ *   PAINTING.** A clip depth is a Flash display-list slot, chosen by
+ *   `slot-layout.js` to avoid colliding with the two depths the battle map
+ *   records (hero 301, villain 300) — so the ally band runs 322, 324, 332, 334
+ *   and has no relationship to how far back a gladiator stands. Measured: the
+ *   hero's FRONT rank is depth 301 and its BACK rank is 324, so the back rank
+ *   drew LAST and painted over the figure in front of it. Invisible while the
+ *   ranks were spread across the arena; obvious the moment a team converges,
+ *   which is what a team does as soon as it closes.
+ *
+ * Arena `y` is the depth that matters here: 200 at the front rank and DECREASING
+ * further back (`slot-layout.js`'s `ALLY_Y_STRIDE` is negative), so ascending
+ * `y` is back-to-front and that is exactly paint order.
+ *
+ * **`depth` remains the tie-break, which is what keeps 1v1 byte-identical.**
+ * Vanilla's two fighters are both at `y` 200, so they never reach the `y`
+ * comparison and fall through to 300 before 301 — the villain under the hero,
+ * as the map has it and as this function has always produced.
+ */
+function withDrawOrder(actors) {
+  const rank = (id, key) => {
+    const value = actors[id][key];
+    return Number.isFinite(value) ? value : null;
+  };
+  const compare = (left, right, key) => {
+    const leftValue = rank(left, key);
+    const rightValue = rank(right, key);
+    if (leftValue === rightValue) return 0;
+    // A null sorts FIRST, as it always has: an actor the stream never placed
+    // has no position to argue from and must not paint over one that does.
+    if (leftValue === null) return -1;
+    if (rightValue === null) return 1;
+    return leftValue - rightValue;
+  };
+  const ids = Object.keys(actors).sort((left, right) =>
+    compare(left, right, "y") || compare(left, right, "depth") || (left < right ? -1 : 1));
+  return Object.freeze(ids);
+}
+
+function actorFor(actors, combatantId) {
+  return actors[combatantId] ?? { ...EMPTY_ACTOR, combatantId };
+}
+
+/**
+ * Folds one batch of presentation commands into a new scene.
+ *
+ * Pure: the input scene is never mutated and the output is frozen all the way
+ * down. Call it with the construction batch first, then once per drained batch.
+ *
+ * @param {object} scene the scene so far, from `emptyScene()`
+ * @param {Iterable<object>} commands presentation commands, in emitted order
+ * @returns {object} a new frozen scene
+ */
+export function applyCommands(scene, commands) {
+  if (!scene || typeof scene !== "object") {
+    throw new SceneError("applyCommands needs a scene; start from emptyScene().");
+  }
+  if (!commands || typeof commands[Symbol.iterator] !== "function") {
+    throw new SceneError("applyCommands needs an iterable of presentation commands.");
+  }
+
+  const actors = { ...scene.actors };
+  // NOT seeded from `scene.projectiles`: an arrow belongs to the action that
+  // loosed it. See `emptyScene`.
+  const projectiles = [];
+  // Batch-local for the reason `projectiles` is: a spell's clip belongs to the
+  // action that attached it, and the next batch does not inherit it.
+  const effects = [];
+  const unmapped = [...scene.unmapped];
+  let globals = scene.globals;
+  let overlayLabel = scene.overlayLabel;
+  let arenaLabel = scene.arenaLabel;
+  let completionToken = scene.completionToken;
+  let sequence = scene.sequence;
+
+  for (const command of commands) {
+    if (!command || typeof command.kind !== "string") {
+      throw new SceneError("A presentation command must be an object carrying a string `kind`.");
+    }
+    if (!HANDLED.includes(command.kind)) {
+      throw new SceneError(
+        `Unknown presentation command kind "${command.kind}". A scene that ignored it would draw an ` +
+        "arena missing whatever it meant, and look identical to one where nothing happened."
+      );
+    }
+    if (Number.isFinite(command.sequence)) sequence = Math.max(sequence, command.sequence);
+
+    switch (command.kind) {
+      case "attach-clip": {
+        const actor = actorFor(actors, command.combatantId);
+        // The shadow is a second attach for the same combatant. It is told
+        // apart by its linkage, never by name-matching, because ally instance
+        // names are authored and a name test would be a guess about them.
+        const isShadow = typeof command.linkage === "string" && command.linkage.endsWith("_shadow");
+        actors[command.combatantId] = frozenActor(
+          isShadow
+            ? {
+                ...actor,
+                shadow: Object.freeze({
+                  instanceName: command.instanceName,
+                  depth: command.depth,
+                  linkage: command.linkage
+                })
+              }
+            : {
+                ...actor,
+                instanceName: command.instanceName,
+                instancePath: `${command.parentPath}.${command.instanceName}`,
+                depth: command.depth,
+                vanillaNative: command.vanillaNative,
+                linkage: command.linkage
+              }
+        );
+        break;
+      }
+
+      case "place-clip": {
+        const actor = actorFor(actors, command.combatantId);
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          placed: true,
+          x: command.x,
+          y: command.y,
+          facing: command.facing,
+          xscale: command.xscale,
+          yscale: command.yscale,
+          geometryAuthored: command.geometryAuthored
+        });
+        break;
+      }
+
+      case "move-clip": {
+        const actor = actorFor(actors, command.combatantId);
+        // ONLY `x` and `motion`. Not `y`, `facing`, `xscale`, `yscale`,
+        // `geometryAuthored` or `placed` — that is the whole reason this is
+        // not a `place-clip`, and the reason it is spelled out rather than
+        // spread: a future field added to `place-clip`'s fold must not
+        // silently start being overwritten by a step sideways.
+        //
+        // `placed` is deliberately NOT set true. A combatant that never got a
+        // `place-clip` has no `y`, no facing and no scale, and a painter that
+        // drew it would be inventing five fields to use one. The move is still
+        // recorded, so the scene and the resolver never disagree about where
+        // the figure is — it simply cannot be drawn yet.
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          x: command.to,
+          motion: Object.freeze({
+            from: command.from,
+            to: command.to,
+            sequence: command.sequence,
+            actionToken: command.actionToken ?? null,
+            // A push rides the victim's clip whatever it is; a walk rides only
+            // a travelling gait. Carried so a surface need not re-derive it.
+            ...(command.pushed === true ? { pushed: true } : {}),
+            // A teleport is held at `from` and put at `to` when its clip ends;
+            // carried for the same reason.
+            ...(command.teleported === true ? { teleported: true } : {}),
+            // A blink stands the figure at `blink` for its clip and rests it at
+            // `to` after — the ghost strike's (2026-09-23). Same reason.
+            ...(Number.isFinite(command.blink) ? { blink: command.blink } : {})
+          })
+        });
+        break;
+      }
+
+      case "attach-effect": {
+        // ► **IT TOUCHES NO ACTOR**, like an arrow: the build attaches the bolt
+        //   to `arena.gladiators`, not to a fighter. Carried through unchanged;
+        //   where it is drawn and for how long is `spell-effect.js`'s.
+        effects.push(Object.freeze({
+          casterId: command.casterId,
+          targetId: command.targetId,
+          effect: command.effect,
+          frame: command.frame,
+          x: command.x,
+          y: command.y,
+          endsWithClip: command.endsWithClip ?? null,
+          sequence: command.sequence,
+          actionToken: command.actionToken ?? null,
+          // ► **A BOULDER'S FALL, PRESENT ONLY ON A BOULDER** (added 2026-09-23),
+          //   so a bolt's record is byte-for-byte what it was — the rule the
+          //   fireball's two flight inputs follow below. Where each rock is and
+          //   when it lands is `boulderDrawAt`'s arithmetic, not this fold's.
+          ...(command.fall && typeof command.fall === "object"
+            ? { fall: command.fall, boulder: command.boulder ?? null, lethal: command.lethal === true }
+            : {})
+        }));
+        break;
+      }
+
+      case "fire-projectile": {
+        // ► **IT TOUCHES NO ACTOR AT ALL, which is what makes it different
+        //   from every other kind in this fold.** An arrow is its own clip in
+        //   the build — attached to `arena.gladiators` at depth 45000, not to
+        //   either fighter — so folding it into the shooter would give a
+        //   gladiator a position it does not have and a painter something to
+        //   draw twice.
+        //
+        // The endpoints are carried through UNCHANGED rather than turned into
+        // a trajectory here, because a scene is a description of what is on the
+        // arena and the flight is arithmetic. `src/render/projectile.js` owns
+        // that, derives it from the build, and is where a surface goes for the
+        // curve.
+        projectiles.push(Object.freeze({
+          combatantId: command.combatantId,
+          targetId: command.targetId,
+          projectile: command.projectile,
+          from: command.from,
+          to: command.to,
+          hit: command.hit === true,
+          sequence: command.sequence,
+          /**
+           * Which of the build's five arrows this bow looses — 1-based, as
+           * `gotoAndStop` indexes it, or null when the bow could not be
+           * identified. `src/adapter/presentation.js` derives it; a scene
+           * carries it so a surface never has to reach back for the weapon
+           * table.
+           */
+          artFrame: Number.isFinite(command.artFrame) ? command.artFrame : null,
+          /** The target's own body extent; the flight stops at it, not in it. */
+          targetSize: Number.isFinite(command.targetSize) ? command.targetSize : 0,
+          // The ACTION this arrow belongs to, carried through because a surface
+          // that holds its gate open for the flight needs to know which token
+          // to hold — and reading it back off the command stream instead would
+          // give the shell a second source for a fact the scene already has.
+          // `presentResolvedEvents` stamps it onto every command it emits.
+          actionToken: command.actionToken ?? null,
+          // ► **A FIREBALL'S TWO FLIGHT INPUTS, PRESENT ONLY ON A FIREBALL**, so
+          //   an arrow's record is byte-for-byte what it was. The build flies
+          //   it at `Xvelocity` along the CASTER's facing; `fireballFlight` in
+          //   `projectile.js` does the arithmetic.
+          ...(Number.isFinite(command.xVelocity) ? { xVelocity: command.xVelocity } : {}),
+          ...(typeof command.gladiatorDir === "string" ? { gladiatorDir: command.gladiatorDir } : {})
+        }));
+        break;
+      }
+
+      case "move-clip-depth": {
+        const actor = actorFor(actors, command.combatantId);
+        // ONLY `y` and `depthMotion`. The same discipline as `move-clip`
+        // above, and for the same reason spelled out there: a step along one
+        // axis must never fold a field belonging to the other. `x` in
+        // particular is deliberately untouched — a rank change does not move a
+        // gladiator across the arena.
+        //
+        // `placed` is deliberately NOT set true, exactly as in `move-clip`: a
+        // combatant the stream never placed has no facing and no scale, and a
+        // painter drawing it would be inventing four fields to use one.
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          y: command.toY,
+          depthMotion: Object.freeze({
+            from: command.fromY,
+            to: command.toY,
+            sequence: command.sequence
+          })
+        });
+        break;
+      }
+
+      case "face-clip": {
+        const actor = actorFor(actors, command.combatantId);
+        // ONLY `facing` and `turn`, spelled out for the reason `move-clip`'s
+        // fold is: a turn is not a step, and it must not start overwriting a
+        // field `place-clip` owns. **`xscale` is deliberately left alone** —
+        // its sign is the construction's mirror, bound from the build's own
+        // "Battle entry" step 5, and the battle map records no `_xscale` write
+        // in `changeCombatants`, only the four `gladiator_dir` writes. The
+        // painter mirrors on `facing`, not on `xscale`. HOW the build draws a
+        // turned clip is not recorded anywhere in this repository and was not
+        // re-derived here.
+        //
+        // `placed` is deliberately NOT set true, as in `move-clip`: a turn is
+        // recorded for a combatant the stream never placed, and it is still
+        // not drawable.
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          facing: command.to,
+          turn: Object.freeze({
+            from: command.from,
+            to: command.to,
+            sequence: command.sequence,
+            actionToken: command.actionToken ?? null,
+            // Only when present, so a phase-advance turn folds exactly as it
+            // always has. See `figureFacingAt`.
+            ...(command.at === "action-start" ? { at: command.at } : {})
+          })
+        });
+        break;
+      }
+
+      case "scale-clip": {
+        const actor = actorFor(actors, command.combatantId);
+        // ONLY `xscale`, `yscale` and `rescale`, spelled out for the reason
+        // `move-clip`'s fold is. **Copied, never computed**: the command carries
+        // both ends, worked out by the adapter from the engine's cast and expiry
+        // (`CommandKind.SCALE_CLIP`), so this fold holds no `oldscale` and does
+        // no arithmetic.
+        //
+        // ► **`xscale` KEEPS ITS SIGN.** The build writes a POSITIVE `_xscale`
+        //   (`_xscale = _yscale`, `+0x8124`, `+0x837a`, `+0x2485`), which is how
+        //   it loses a villain's mirrored facing for good (map, `cast_colossus`,
+        //   "THE FACING SIGN IS LOST"). That loss is NOT reproduced: the sign
+        //   here is the construction's mirror and the painter faces a figure by
+        //   `facing`, which only `face-clip` moves — the owner's rule for a
+        //   quirk the build applies to one side only (HANDOFF.md, 2026-09-22).
+        //
+        // `placed` is deliberately NOT set true, as in `move-clip`.
+        const signed = Number.isFinite(actor.xscale) && actor.xscale < 0 ? -command.to : command.to;
+        const stage = Object.freeze({
+          from: command.from,
+          to: command.to,
+          at: command.at === "phase-advance" ? "phase-advance" : "action-start",
+          ...(command.growth && typeof command.growth === "object" ? { growth: Object.freeze({ ...command.growth }) } : {})
+        });
+        const token = command.actionToken ?? null;
+        // One action's stages accumulate — a little fat kid on a victim whose
+        // own colossus runs out in the same phase shrinks him at the cast and
+        // restores him at the phase advance — and the next action's replace them.
+        const earlier = actor.rescale && token !== null && actor.rescale.actionToken === token
+          ? actor.rescale.stages
+          : [];
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          xscale: signed,
+          yscale: command.to,
+          rescale: Object.freeze({
+            sequence: command.sequence,
+            actionToken: token,
+            stages: Object.freeze([...earlier, stage])
+          })
+        });
+        break;
+      }
+
+      case "bind-globals":
+        globals = Object.freeze({ ...command.globals, sequence: command.sequence });
+        break;
+
+      case "clip-goto": {
+        const actor = actorFor(actors, command.combatantId);
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          clip: Object.freeze({
+            label: command.label,
+            // Carried, never dropped: this is the only signal separating a
+            // label the map names from one this project guessed.
+            provenance: command.labelProvenance,
+            role: command.role,
+            sequence: command.sequence,
+            actionToken: command.actionToken ?? null
+          })
+        });
+        break;
+      }
+
+      case "panel-refresh": {
+        const actor = actorFor(actors, command.combatantId);
+        actors[command.combatantId] = frozenActor({
+          ...actor,
+          panel: Object.freeze({
+            root: command.panelRoot,
+            vanillaNative: command.vanillaNativePanel,
+            widgets: Object.freeze(command.widgets.map((widget) => Object.freeze({ ...widget }))),
+            // Verbatim. Nothing here recomputes a combat value.
+            values: Object.freeze({ ...command.values }),
+            sequence: command.sequence
+          })
+        });
+        break;
+      }
+
+      case "overlay-goto":
+        overlayLabel = command.label;
+        completionToken = command.completionToken ?? completionToken;
+        break;
+
+      case "arena-goto":
+        arenaLabel = command.label;
+        completionToken = command.completionToken ?? completionToken;
+        break;
+
+      case "unmapped":
+        unmapped.push(Object.freeze({
+          sequence: command.sequence ?? null,
+          reason: command.reason,
+          detail: Object.freeze({ ...command.detail }),
+          actionToken: command.actionToken ?? null
+        }));
+        // A draw carries its completion token on an `unmapped`, because there
+        // is no arena transition to read one off. Losing it here would leave a
+        // decided battle that can never settle.
+        if (command.detail && command.detail.completionToken !== undefined) {
+          completionToken = command.detail.completionToken;
+        }
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  const frozenActors = Object.freeze({ ...actors });
+  return Object.freeze({
+    actors: frozenActors,
+    drawOrder: withDrawOrder(frozenActors),
+    globals,
+    overlayLabel,
+    arenaLabel,
+    completionToken,
+    projectiles: Object.freeze(projectiles),
+    effects: Object.freeze(effects),
+    unmapped: Object.freeze(unmapped),
+    sequence
+  });
+}
+
+/**
+ * Every clip label the scene is currently showing, with its provenance.
+ *
+ * A surface is expected to render this somewhere a player can see. The project
+ * decided long ago that a playable demo is "the easiest place in the world" to
+ * present a guess as a measurement; a prettier surface makes that easier still,
+ * not harder.
+ */
+export function labelProvenanceSummary(scene) {
+  const counts = { "map-named": 0, assumed: 0, placeholder: 0 };
+  for (const id of scene.drawOrder) {
+    const clip = scene.actors[id].clip;
+    if (!clip) continue;
+    if (counts[clip.provenance] === undefined) counts[clip.provenance] = 0;
+    counts[clip.provenance] += 1;
+  }
+  return Object.freeze(counts);
+}

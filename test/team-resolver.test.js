@@ -19,6 +19,7 @@ import {
   completionTokenMatchesOutcome,
   ControllerKind,
   controllerOf,
+  createOrderedRngChannel,
   createTeamBattle,
   currentCombatant,
   DEFAULT_STATS,
@@ -601,6 +602,73 @@ test("AI fill is pure: it never consumes the ordered RNG channel", () => {
  * The blueprints that must not move, and the hashes they produced **before**
  * per-slot fill existed.
  *
+ * ► **EVERY `combat` LITERAL MOVED ON 2026-09-11, AND EVERY `legacy` ONE DID
+ *   NOT — which is the more informative half.** `x` joined
+ *   `combatantProjection`, so the team projection rehashed for every rule set,
+ *   `null` included; `src/engine.js`'s façade projection does not carry it and
+ *   its six hashes are byte-identical. That asymmetry is the check that
+ *   position stayed inside the seam it was added to:
+ *
+ *     79952a5d -> 32e85f6d, b629f6a2 -> ae3bb07a, fefc60d4 -> ef1cbb43,
+ *     8d2f19d4 -> 6ef57cf4, 2007fba4 -> fcb5bdd6, and the last -> 132fea31.
+ *
+ *   These fills run under the PLACEHOLDER rule set, which declares no
+ *   `startingPosition`, so every combatant here carries `x: null`. The hash
+ *   moved on the key existing, not on any position being taken.
+ *
+ * ► **ALL SIX COMBAT HASHES MOVED 2026-09-12 AND ALL SIX LEGACY HASHES DID
+ *   NOT, which is the asymmetry this pair of columns exists to show.** `y`
+ *   joined `combatantProjection` as the second axis:
+ *
+ *     32e85f6d -> 587a06a9    ae3bb07a -> 8aa7093a    ef1cbb43 -> 2d3b42b3
+ *     6ef57cf4 -> 3f2c43a4    fcb5bdd6 -> c6d2995a    132fea31 -> 7d672ad1
+ *
+ *   The legacy column is byte-identical because `src/engine.js`'s façade
+ *   projects neither `x` nor `y` — so this re-pin is positive evidence that
+ *   the second axis is contained to the team seam and did not leak into the
+ *   compatibility projection. Every value here is `null`: `rankStride`
+ *   defaults to 0 and these blueprints use the placeholder rules, so nothing
+ *   about fill behaviour changed, only the serialised shape.
+ *
+ * ► **ALL SIX COMBAT HASHES MOVED 2026-09-13 AND ALL SIX LEGACY HASHES DID
+ *   NOT — the same asymmetry, from a different cause.** `BATTLE_STATE_VERSION`
+ *   stopped being a hand-written `1` and became a hash of
+ *   `COMBATANT_PROJECTION_FIELDS`, so the version travelling in the combat
+ *   projection changed value:
+ *
+ *     587a06a9 -> 65644544    8aa7093a -> 55da0ba5    2d3b42b3 -> 38990090
+ *     3f2c43a4 -> c789c001    c6d2995a -> cb72c02b    7d672ad1 -> 36fc4dea
+ *
+ *   **The legacy column is byte-identical, and it took a fix to keep it that
+ *   way.** `src/engine.js` projected `battle.version`, so the derived number
+ *   leaked straight into the façade and moved all six legacy hashes too — this
+ *   test caught it, and its own name is the reason it should have. A
+ *   projection frozen at a historical field list cannot take its version from
+ *   a format it does not project, so the façade now carries its own
+ *   `LEGACY_WIRE_VERSION = 1`. **Nothing that has ever moved the team version
+ *   — `x`, `weapon_range`, `y`, the limb matrices — is in the façade's shape.**
+ *
+ *   **NO GOLDEN MOVED**: the 23 replay against hashes computed within the same
+ *   run, not against stored constants, and all 13 golden tests stayed green
+ *   throughout.
+ *
+ * ► **ALL SIX COMBAT HASHES MOVED 2026-09-23 AND ALL SIX LEGACY HASHES DID
+ *   NOT — the 2026-09-13 cause again, one step further.** The owner decided
+ *   `BATTLE_STATE_VERSION` should see the TOP-LEVEL keys too
+ *   (`TEAM_WIRE_STATE_KEYS`), so it moved `573176825` -> `2858363730` and the
+ *   version travelling in the combat projection moved with it:
+ *
+ *     65644544 -> 2fd85ab9    55da0ba5 -> de55766a    38990090 -> d6bc0663
+ *     c789c001 -> eb3cf674    cb72c02b -> 4f69c72a    36fc4dea -> fd9b9941
+ *
+ *   Nothing else about these battles changed: the placeholder rule set
+ *   declares no battle pool and none is on a tape, so their key sets are what
+ *   they were. **Measured, not argued**: with the version put back to the
+ *   combatant-only derivation by a one-line mutation, all six returned to
+ *   their old literals exactly; the mutation was undone by its exact inverse.
+ *   The legacy column is byte-identical because the façade carries its own
+ *   `LEGACY_WIRE_VERSION = 1`, the fix the 2026-09-13 entry above records.
+ *
  * These literals were not hand-written. They were read off a run of the roster
  * at the commit before this change, over the five shapes a single-template team
  * can take: implicit empty slots, `null` and `{ fill: "ai" }` markers, the two
@@ -612,7 +680,7 @@ test("AI fill is pure: it never consumes the ordered RNG channel", () => {
 const UNCHANGED_FILL_BLUEPRINTS = [
   {
     name: "implicit empty slots",
-    combat: "79952a5d",
+    combat: "2fd85ab9",
     legacy: "ecffd39f",
     blueprint: {
       seed: 3,
@@ -624,7 +692,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "null and object markers",
-    combat: "b629f6a2",
+    combat: "de55766a",
     legacy: "5a573636",
     blueprint: {
       seed: 3,
@@ -636,7 +704,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "string markers",
-    combat: "fefc60d4",
+    combat: "d6bc0663",
     legacy: "b2dfc69d",
     blueprint: {
       seed: 5,
@@ -648,7 +716,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a populated team template",
-    combat: "8d2f19d4",
+    combat: "eb3cf674",
     legacy: "1529c5aa",
     blueprint: {
       seed: 7,
@@ -672,7 +740,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a template carrying an explicit id",
-    combat: "2007fba4",
+    combat: "4f69c72a",
     legacy: "be79738c",
     blueprint: {
       seed: 11,
@@ -684,7 +752,7 @@ const UNCHANGED_FILL_BLUEPRINTS = [
   },
   {
     name: "a team that supplies no fighters at all",
-    combat: "5b5bafa7",
+    combat: "fd9b9941",
     legacy: "8e29b02b",
     blueprint: {
       seed: 13,
@@ -786,6 +854,55 @@ test("the nearest declaration wins, and the merge is shallow", () => {
   // rather than merging through.
   assert.equal(plain.stats.strength, 9);
   assert.equal(champion.stats.strength, DEFAULT_STATS.strength);
+});
+
+/**
+ * The one combination the tests above leave open, and the one a per-slot
+ * *adapter* actually needs: a team-level ARRAY entry and that same slot's
+ * marker, composing on one slot.
+ *
+ * The tests above cover the array alone, the marker alone, and an object
+ * template under a marker. They never put an array entry and a marker on the
+ * same slot — which is exactly the shape a caller who declares
+ * `aiFill: [...]` for names and stats gets once a layer above supplies each
+ * filled slot's resource bag on the marker. If the array entry were displaced
+ * by the marker rather than merged under it, that caller's declaration would
+ * vanish silently, which is the failure mode the module header calls "a fill
+ * field that vanishes is how an AI ally ends up fighting as somebody else".
+ */
+test("a per-slot array entry and that slot's own marker compose, with the marker nearest", () => {
+  const battle = createTeamBattle({
+    seed: 3,
+    teams: [
+      {
+        id: "red",
+        slots: 3,
+        combatants: [
+          brute("r1", 40),
+          // Slot 2: the array entry names the fighter, the marker supplies the
+          // one key the array entry left open.
+          { fill: "ai", resources: { armourclass: 44 } },
+          // Slot 3: both declare `resources`, so the nearer one wins outright.
+          { fill: "ai", resources: { armourclass: 12 } }
+        ],
+        aiFill: [
+          null,
+          { name: "Vanguard", stats: { agility: 7 } },
+          { name: "Skirmisher", resources: { armourclass: 99, staminaleft: 30 } }
+        ]
+      },
+      { id: "blue", combatants: [brute("b1", 20)] }
+    ]
+  });
+  const [, vanguard, skirmisher] = battle.teams[0].combatants;
+  // The array entry survives the marker instead of being displaced by it.
+  assert.deepEqual([vanguard.name, skirmisher.name], ["Vanguard", "Skirmisher"]);
+  assert.equal(vanguard.stats.agility, 7);
+  assert.equal(resourceValue(vanguard, "armourclass"), 44);
+  // Where both declare the key, the marker wins — and the merge is shallow, so
+  // the array entry's whole bag is replaced rather than merged into.
+  assert.equal(resourceValue(skirmisher, "armourclass"), 12);
+  assert.deepEqual(resourceNames(skirmisher), ["armourclass"]);
 });
 
 /**
@@ -1197,6 +1314,43 @@ test("the resolver rejects malformed rule-set output", () => {
     () => applyAction(start(() => null), { actorId: "r1", type: "poke", targetId: "b1" }),
     TeamRuleSetError
   );
+});
+
+test("an action's itemId is part of its identity: compared for legality, carried to the rule set", () => {
+  // Added 2026-09-22 with SS2's `drink-potion`, where one label serves eight
+  // items. Before it the resolver compared type/targetId/spellKind only and
+  // built the request from the same three, so an `itemId` was silently
+  // dropped: an option for item 2 licensed a submission naming item 5.
+  const seen = [];
+  const rules = defineTeamRuleSet({
+    id: "test-item-id",
+    verification: RuleSetVerification.PLACEHOLDER,
+    provenance: { kind: "test-double", runtimeVerified: false, note: "Test double." },
+    actionTypes: ["use", "poke"],
+    maximumHealth: () => 20,
+    legalActions: (view, actorId) => [
+      { type: "use", targetId: actorId, itemId: 2 },
+      { type: "use", targetId: actorId, itemId: 6 },
+      ...view.foes.map((foe) => ({ type: "poke", targetId: foe.id }))
+    ],
+    resolveAction(request) {
+      seen.push(request.itemId);
+      return { effects: [], events: [{ type: request.type, actorId: request.actorId }] };
+    },
+    chooseAiAction: (view, actorId, options) => options[0]
+  });
+  const start = () => createTeamBattle({
+    rules,
+    teams: [{ id: "red", combatants: [brute("r1", 40)] }, { id: "blue", combatants: [brute("b1", 20)] }]
+  });
+
+  assert.throws(() => applyAction(start(), { actorId: "r1", type: "use", targetId: "r1", itemId: 5 }),
+    /Illegal action/);
+  assert.throws(() => applyAction(start(), { actorId: "r1", type: "use", targetId: "r1" }), /Illegal action/);
+  // An option that carries none still matches a submission that carries none.
+  applyAction(start(), { actorId: "r1", type: "poke", targetId: "b1" });
+  applyAction(start(), { actorId: "r1", type: "use", targetId: "r1", itemId: 6 });
+  assert.deepEqual(seen, [null, 6]);
 });
 
 test("createTeamBattle refuses anything that is not a rule set", () => {
@@ -1617,6 +1771,28 @@ test("the resource bag is typed, not a grab-bag", () => {
   );
   // Declared out of range is clamped on the way in, exactly as `health` is.
   assert.equal(normaliseResourceBag({ armour: { value: 90, max: 44 } }).armour.value, 44);
+
+  // ► **AND THE SHORTHAND IS CLAMPED TOO, which it was not until 2026-09-10.**
+  //   `normaliseEntry` returned early for a plain number, so the shorthand was
+  //   the one path into the bag that skipped the clamp directly above: `-250`
+  //   constructed as `{ value: -250, min: 0 }` — a value below its own declared
+  //   minimum — and the first `writeResource` snapped it to 0, a silent
+  //   250-unit jump on a write that was moving it the other way. The two
+  //   assertions below are the two halves of "shorthand and long form agree"
+  //   that nobody had written down, and both fail if the early return comes
+  //   back.
+  assert.deepEqual(
+    normaliseResourceBag({ armour: -250 }),
+    normaliseResourceBag({ armour: { value: -250 } }),
+    "the shorthand must mean exactly what the long form means"
+  );
+  assert.equal(normaliseResourceBag({ armour: -250 }).armour.value, 0);
+  // A negative value is legal when the DECLARATION makes room for it — which
+  // is the only honest way to carry something signed, such as an arena x.
+  assert.deepEqual(
+    normaliseResourceBag({ arenaX: { value: -250, min: -2100, max: 2100 } }).arenaX,
+    { value: -250, min: -2100, max: 2100 }
+  );
   // Nothing declared is an empty bag, never a missing one.
   assert.deepEqual(normaliseResourceBag(undefined), {});
 
@@ -1817,4 +1993,327 @@ test("a drawn battle settles through the resolver's own two gates", () => {
   assert.equal(campaignSettlement(battle).reason, ResultReason.DRAW);
   // Idempotent, exactly as a decided battle is.
   assert.equal(acknowledgeResultAnimation(battle, ackFor(battle)), false);
+});
+
+/* ------------------------------------------------------------------ */
+/* The RNG tape inside the state hash (decided by the owner 2026-09-02) */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A tape channel has no generator state — `rng.js` sets `#state = 0` and leaves
+ * it — so `toTeamWireState`'s `rngState`/`rngCursor` pair let two peers holding
+ * DIFFERENT tapes agree they are in sync. `toTeamWireState` now also projects
+ * `rngMode` and `rngDrawn`, a digest of the samples ALREADY DRAWN, in tape mode
+ * only.
+ *
+ * Why the consumed prefix and not the remainder: digesting the REMAINING tape
+ * detects a divergence one action earlier and publishes a brute-forceable
+ * commitment to randomness nobody has drawn yet (measured: two remaining
+ * samples recovered in 600 candidates), and moving the digest out of the wire
+ * message does not help, because peers must exchange the hash for a desync
+ * check to exist at all. See `OrderedRngChannel.drawnDigest`.
+ */
+const unitSample = (value, label = "hit-roll") => ({ label, source: "unit", min: 0, max: 1, value });
+
+const tapeBattle = (tape) => createTeamBattle({
+  seed: 1,
+  rngTape: tape,
+  rules: placeholderTeamRules,
+  teams: [
+    { id: "red", combatants: [{ id: "r1", stats: { agility: 5 } }] },
+    { id: "blue", combatants: [{ id: "b1", stats: { agility: 4 } }] }
+  ]
+});
+
+test("two peers whose DRAWN sample differed no longer hash the same", () => {
+  // The case every other candidate projection misses: the visible state is
+  // identical -- same health, same cursor -- and only the consumed sample
+  // differs. Both rolls miss, so nothing downstream records the difference.
+  const run = (value) => {
+    const battle = tapeBattle([unitSample(value), unitSample(0.5)]);
+    const action = legalActions(battle)[0];
+    applyAction(battle, { ...action, actorId: currentCombatant(battle).id });
+    return {
+      hash: combatStateHash(battle),
+      health: battle.teams[1].combatants[0].health,
+      cursor: battle.rngCursor
+    };
+  };
+  const a = run(0.9);
+  const b = run(0.95);
+  assert.equal(a.health, b.health, "the fixture must be a same-state case or it proves nothing");
+  assert.equal(a.cursor, b.cursor, "same cursor, or the old projection would have caught it anyway");
+  assert.notEqual(a.hash, b.hash, "a divergent drawn sample must change the hash");
+});
+
+test("the digest commits to sample IDENTITY, not just to drawn values", () => {
+  // A peer that drew the right NUMBER under the wrong label has diverged, and a
+  // value-only digest would call that in sync. Driven on the channel directly,
+  // because the placeholder rule set draws exactly one label.
+  const channel = (label) => createOrderedRngChannel({
+    tape: [{ label, source: "unit", min: 0, max: 1, value: 0.5 }]
+  });
+  const left = channel("hit-roll");
+  const right = channel("block-roll");
+  assert.equal(left.drawnDigest, right.drawnDigest, "before any draw both prefixes are empty");
+  left.unit("hit-roll");
+  right.unit("block-roll");
+  assert.equal(left.cursor, right.cursor, "same count drawn");
+  assert.notEqual(left.drawnDigest, right.drawnDigest, "the label must be inside the commitment");
+
+  // And the same label with a different value must differ too.
+  const other = createOrderedRngChannel({
+    tape: [{ label: "hit-roll", source: "unit", min: 0, max: 1, value: 0.6 }]
+  });
+  other.unit("hit-roll");
+  assert.notEqual(left.drawnDigest, other.drawnDigest, "the value must be inside it as well");
+});
+
+/**
+ * THE HONEST LIMIT, PINNED SO NOBODY MISTAKES IT FOR A BUG.
+ *
+ * A divergence in samples NEITHER peer has drawn yet is undetectable, and no
+ * projection can close it without committing to undrawn randomness. This test
+ * asserts that limit deliberately: if someone later "fixes" it by digesting the
+ * remainder, this fails and they must read why first.
+ */
+test("a divergence in the UNDRAWN tail is deliberately invisible", () => {
+  const a = tapeBattle([unitSample(0.5), unitSample(0.1)]);
+  const b = tapeBattle([unitSample(0.5), unitSample(0.99)]);
+  assert.equal(
+    combatStateHash(a),
+    combatStateHash(b),
+    "if this now differs, someone projected the REMAINING tape -- read " +
+    "OrderedRngChannel.drawnDigest before keeping the change"
+  );
+});
+
+test("a seeded battle's projection is untouched, so no pinned hash moves", () => {
+  const seeded = createTeamBattle({
+    seed: 7,
+    rules: placeholderTeamRules,
+    teams: [
+      { id: "red", combatants: [{ id: "r1", stats: { agility: 5 } }] },
+      { id: "blue", combatants: [{ id: "b1", stats: { agility: 4 } }] }
+    ]
+  });
+  const wire = toTeamWireState(seeded);
+  assert.equal(Object.hasOwn(wire, "rngMode"), false, "seeded battles must not gain fields");
+  assert.equal(Object.hasOwn(wire, "rngDrawn"), false);
+  assert.equal(seeded.rng.drawnDigest, null);
+  // And the presence of those fields is itself what separates a tape peer from
+  // a seeded peer sitting at state 0 / cursor 0, who would otherwise collide.
+  assert.equal(Object.hasOwn(toTeamWireState(tapeBattle([unitSample(0.5)])), "rngMode"), true);
+});
+
+/* ------------------------------------------------------------------ */
+/* THE WIRE VERSION IS DERIVED FROM THE WIRE SHAPE                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * ► **`BATTLE_STATE_VERSION` WAS A HAND-WRITTEN `1` AND THE FORMAT CHANGED
+ *   FOUR TIMES UNDER IT** — `x`, `weapon_range`, `y`, and the limb matrices.
+ *   Two peers on either side of any of those both advertised version 1 and
+ *   disagreed about identical battles, and turning the feature off could not
+ *   restore compatibility because the SHAPE had moved, not the behaviour.
+ *
+ *   Four sessions noticed and deferred it. **Owner's decision, 2026-09-13:
+ *   DERIVE it rather than bump it** — bumping fixes the instance, deriving
+ *   removes the failure mode.
+ *
+ * These tests are the half that makes the derivation trustworthy: the declared
+ * field list is checked against what the projection ACTUALLY emits, so a field
+ * added without declaring it fails here rather than silently keeping the old
+ * version number.
+ */
+test("the declared projection fields are EXACTLY what the wire carries", () => {
+  const battle = createTeamBattle({
+    teams: [
+      { id: "red", combatants: [{ id: "red-1", name: "Red" }] },
+      { id: "blue", combatants: [{ id: "blue-1", name: "Blue" }] }
+    ],
+    seed: 3
+  });
+  const wire = toTeamWireState(battle);
+  const combatant = wire.teams[0].combatants[0];
+  assert.deepEqual(
+    Object.keys(combatant).sort(),
+    [...resolver.COMBATANT_PROJECTION_FIELDS].sort(),
+    "a field added to combatantProjection must be declared, or the version cannot notice it"
+  );
+});
+
+/**
+ * ► **THE TOP-LEVEL KEYS, ADDED TO THE VERSION 2026-09-23 (owner's decision).**
+ *   `battleResources` joined the wire at `cefaf83` and the version could not
+ *   see it, because it hashed the combatant fields only — so a peer with the
+ *   crowd and one without advertised the same version while disagreeing from
+ *   their first hash exchange. The two tape fields went through the same gap
+ *   on 2026-09-02.
+ *
+ * Three of the fifteen keys are CONDITIONAL — `rngMode` and `rngDrawn` in tape
+ * mode only, `battleResources` only when the rule set declares a pool — so no
+ * single battle carries them all. This test therefore builds one battle per
+ * combination and checks both directions: **no battle may carry a key the list
+ * does not name** (the version would not see it), and **the list may name no
+ * key that no battle carries** (a declared conditional key must be reached
+ * here, so declaring one means adding the battle that exercises it).
+ *
+ * ► **A key under a NEW condition is not this test's to catch, and it cannot**:
+ *   measured with a key emitted only after turn 1, which these four battles
+ *   never reach — this test stayed green. `toTeamWireState` refuses an
+ *   undeclared key on every call instead, which failed 9 tests in two files
+ *   against the same mutation. **No test here reaches that refusal, and none
+ *   can**: every key the projection emits is a literal in `resolver.js`, so
+ *   the only way to make it emit an undeclared one is to edit that module. It
+ *   was proved by that mutation (2026-09-23) and undone by its exact inverse.
+ */
+const everyWireMode = () => {
+  const teams = () => [
+    { id: "red", combatants: [{ id: "red-1", name: "Red" }] },
+    { id: "blue", combatants: [{ id: "blue-1", name: "Blue" }] }
+  ];
+  // Invented: a pool of 5 belonging to the battle. Not SS2 behaviour.
+  const pooled = defineTeamRuleSet({
+    ...placeholderTeamRules,
+    id: "test-wire-keys-pool",
+    openingBattleResources: () => ({ tide: 5 })
+  });
+  const tape = () => [unitSample(0.5)];
+  return {
+    seeded: createTeamBattle({ seed: 3, teams: teams() }),
+    tape: createTeamBattle({ seed: 3, rngTape: tape(), teams: teams() }),
+    "seeded + battle pool": createTeamBattle({ seed: 3, rules: pooled, teams: teams() }),
+    "tape + battle pool": createTeamBattle({ seed: 3, rngTape: tape(), rules: pooled, teams: teams() })
+  };
+};
+
+test("the declared top-level keys are EXACTLY what the wire can carry, in every mode that adds one", () => {
+  const declared = new Set(resolver.TEAM_WIRE_STATE_KEYS);
+  const reached = new Set();
+  for (const [mode, battle] of Object.entries(everyWireMode())) {
+    for (const key of Object.keys(toTeamWireState(battle))) {
+      assert.ok(declared.has(key),
+        `${mode}: toTeamWireState carries "${key}", which TEAM_WIRE_STATE_KEYS does not name — ` +
+        "declare it, or BATTLE_STATE_VERSION cannot notice it");
+      reached.add(key);
+    }
+  }
+  assert.deepEqual([...reached].sort(), [...declared].sort(),
+    "every declared key must be carried by some battle here; a new condition needs a new battle above");
+  assert.equal(declared.size, resolver.TEAM_WIRE_STATE_KEYS.length, "no key is declared twice");
+});
+
+/** The version of a format whose two declared lists are these. */
+const versionOf = ({
+  wireStateKeys = resolver.TEAM_WIRE_STATE_KEYS,
+  combatantFields = resolver.COMBATANT_PROJECTION_FIELDS
+} = {}) => resolver.deriveBattleStateVersion({ wireStateKeys, combatantFields });
+
+test("the version is derived from BOTH declared lists", () => {
+  assert.equal(versionOf(), resolver.BATTLE_STATE_VERSION);
+});
+
+test("the version CHANGES when the combatant field set does, which is the whole point", () => {
+  const current = versionOf();
+  const fields = resolver.COMBATANT_PROJECTION_FIELDS;
+  // Adding a field — which is what happened four times under a constant 1.
+  assert.notEqual(versionOf({ combatantFields: [...fields, "facing"] }), current);
+  // Removing one.
+  assert.notEqual(versionOf({ combatantFields: fields.filter((f) => f !== "y") }), current);
+  // And RENAMING one, which a hand-written integer would never catch.
+  assert.notEqual(versionOf({ combatantFields: fields.map((f) => (f === "x" ? "posX" : f)) }), current);
+});
+
+test("the version CHANGES when the TOP-LEVEL key set does: a peer with the crowd and one without disagree", () => {
+  const current = versionOf();
+  const keys = resolver.TEAM_WIRE_STATE_KEYS;
+  // THE CASE THIS WAS DECIDED FOR: the format before `cefaf83`, which could
+  // not carry the battle's own pool. Under the combatant-only derivation these
+  // two were ONE version.
+  assert.notEqual(versionOf({ wireStateKeys: keys.filter((k) => k !== "battleResources") }), current,
+    "a build that cannot carry battleResources must not advertise this build's version");
+  // And the format before 2026-09-02, which could not carry the tape fields.
+  assert.notEqual(
+    versionOf({ wireStateKeys: keys.filter((k) => k !== "rngMode" && k !== "rngDrawn") }),
+    current
+  );
+  // Adding a top-level key, and renaming one.
+  assert.notEqual(versionOf({ wireStateKeys: [...keys, "weather"] }), current);
+  assert.notEqual(versionOf({ wireStateKeys: keys.map((k) => (k === "events" ? "log" : k)) }), current);
+});
+
+test("a name MOVING between the combatant and the top level is a format change", () => {
+  // The two lists are hashed as two scopes, not one merged list, so `x` on
+  // every combatant and `x` on the battle are different formats.
+  assert.notEqual(
+    versionOf({ combatantFields: resolver.COMBATANT_PROJECTION_FIELDS.filter((f) => f !== "x"),
+      wireStateKeys: [...resolver.TEAM_WIRE_STATE_KEYS, "x"] }),
+    versionOf()
+  );
+});
+
+test("REORDERING either list is not a format change, because the sort comes first", () => {
+  assert.equal(
+    versionOf({
+      wireStateKeys: [...resolver.TEAM_WIRE_STATE_KEYS].reverse(),
+      combatantFields: [...resolver.COMBATANT_PROJECTION_FIELDS].reverse()
+    }),
+    resolver.BATTLE_STATE_VERSION,
+    "a peer must not be invalidated by somebody tidying either literal"
+  );
+});
+
+test("the version reaches the battle, and it is an IDENTITY rather than an ordering", () => {
+  const battle = createTeamBattle({
+    teams: [
+      { id: "red", combatants: [{ id: "red-1", name: "Red" }] },
+      { id: "blue", combatants: [{ id: "blue-1", name: "Blue" }] }
+    ],
+    seed: 1
+  });
+  assert.equal(battle.version, resolver.BATTLE_STATE_VERSION);
+  // ► Nothing may infer "newer" from a bigger number — that is exactly the
+  //   mistake a hand-maintained integer invites, and the reason this is opaque.
+  // A POSITIVE INTEGER, because `provenance.battle.stateVersion` in a sealed
+  // campaign record is contracted to be one — handing it `fnv1a`'s hex string
+  // failed 90 tests on that single schema line.
+  assert.equal(typeof resolver.BATTLE_STATE_VERSION, "number");
+  assert.ok(Number.isInteger(resolver.BATTLE_STATE_VERSION));
+  assert.ok(resolver.BATTLE_STATE_VERSION > 0);
+});
+
+/**
+ * ► **THE FORMAT'S VERSION, NOT THE BATTLE'S** — decided with the top-level
+ *   keys, 2026-09-23. A battle with no battle pool, one with a pool, and a tape
+ *   battle carry three different key sets and ONE version, because the
+ *   conditional keys are declared unconditionally. A per-battle version would
+ *   fail here, and would let two builds that differ only in a key neither
+ *   battle used share a number.
+ */
+test("the version is the FORMAT'S, not the battle's: every mode advertises the same one", () => {
+  for (const [mode, battle] of Object.entries(everyWireMode())) {
+    assert.equal(battle.version, resolver.BATTLE_STATE_VERSION, `${mode}: battle.version`);
+    assert.equal(toTeamWireState(battle).version, resolver.BATTLE_STATE_VERSION, `${mode}: on the wire`);
+  }
+});
+
+/**
+ * ► **THE VERSION'S OWN PIN, so a list edit is a conscious one.** Derived, so
+ *   it cannot fail to change when a declared list does; pinned, so the change
+ *   is read, named and explained rather than discovered as a wall of moved
+ *   hashes elsewhere. Every `combatStateHash` pin moves with it, because the
+ *   version is a field of the state that hash covers.
+ *
+ *     1          hand-written, until 2026-09-13
+ *     573176825  2026-09-13  fnv1a over the sorted COMBATANT_PROJECTION_FIELDS
+ *     2858363730 2026-09-23  both lists, as two scopes: the top-level keys
+ *                            joined, so `battleResources` (cefaf83) and the two
+ *                            tape fields (2026-09-02) are seen at last
+ *
+ * Opaque: nothing may read the larger number as newer.
+ */
+test("the version is pinned, and says why each time it moves", () => {
+  assert.equal(resolver.BATTLE_STATE_VERSION, 2858363730,
+    "a declared list changed: re-derive, re-pin, add the line above, and move every combatStateHash pin with it");
 });

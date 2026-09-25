@@ -2,12 +2,13 @@
  * Promotion gate from static candidate fixtures to runtime-observed goldens.
  *
  * A candidate is promoted only when at least two matching observations from
- * at least two independent capture sessions exist, no two of them share a
- * player-minted `capture.launchNonce`, they agree about whether the wrapper
- * staged the scenario, every observation is covered by a validated capture
- * manifest, and each observation's digest verifies. Any divergent observation
- * blocks promotion and yields a divergence report that must be preserved
- * instead of discarded.
+ * at least two independent capture sessions exist, every one of them carries a
+ * player-minted `capture.launchNonce` (or is one of the enumerated records
+ * that predate the field), no two of them share a nonce, they agree about
+ * whether the wrapper staged the scenario, every observation is covered by a
+ * validated capture manifest, and each observation's digest verifies. Any
+ * divergent observation blocks promotion and yields a divergence report that
+ * must be preserved instead of discarded.
  *
  * A golden promoted from wrapper-staged evidence carries that fact in
  * `provenance.staged`, so the fixture says so on its own face rather than
@@ -19,9 +20,11 @@
 import {
   SS2_SIMULATED_CAPTURE_METHOD,
   matchSs2ObservationToFixture,
+  ss2ObservationsMatch,
   sha256OfCanonicalJson,
   validateSs2Observation
 } from "./observation.js";
+import { SS2_PRE_NONCE_OBSERVATION_DIGESTS } from "./pre-nonce-observations.js";
 import {
   GoldenClassification,
   GoldenProvenance,
@@ -257,6 +260,37 @@ export function validateSs2DivergenceReport(report) {
 }
 
 /**
+ * Is this observation the very record the candidate was transcribed from?
+ *
+ * Exported because TWO surfaces have to answer it identically and they live in
+ * different files: this gate, which refuses such a record as evidence, and
+ * `computeCoverage` in tools/runtime-capture/campaign.mjs, which must not offer
+ * one to the gate in the first place. When those two disagreed, `settle` built
+ * a capture manifest over evidence the gate then refused — and, because the
+ * manifest was written before the promotion was attempted, left that manifest
+ * on disk attesting the tainted pair.
+ *
+ * Duplicating the comparison in the driver was the obvious alternative and is
+ * the worse one. It is a string equality over two fields; a drift in either
+ * would silence the driver's exclusion in the PERMISSIVE direction, and nothing
+ * would fail. One exported predicate cannot drift from itself.
+ *
+ * Keyed on `observationId`, never on the record's FILE NAME. Three committed
+ * records disagree with their own file names — obs-20260830-auto1.json carries
+ * `obs-diag`, auto2 carries `obs-nav6`, auto3 carries `obs-gold3` — so a
+ * filename-keyed implementation silently no-ops for three of the five
+ * transcribed candidates, which is exactly the shape of bug this project keeps
+ * finding.
+ */
+export function ss2ObservationIsCandidatesOwnSource(candidate, observation) {
+  return (
+    candidate?.provenance?.kind === GoldenProvenance.TRANSCRIBED &&
+    observation?.observationId !== undefined &&
+    observation.observationId === candidate.provenance.authoredFrom
+  );
+}
+
+/**
  * Promote one candidate fixture to a runtime-observed golden fixture.
  *
  * Returns `{ golden, captureManifestSha256, matches }`. Throws
@@ -278,10 +312,23 @@ export function promoteSs2CandidateToGolden(candidate, observations, manifest, o
   // launchNonce -> the first observation that claimed it. The nonce is minted
   // inside the player, from values the launcher does not supply, so two records
   // agreeing on one came from a single launch however different their
-  // operator-chosen sessionIds look. Legacy records carry no nonce (the field
-  // was validated and discarded before it was carried into the record), and
-  // they must still promote — so this gate binds only observations that
-  // actually carry one, and says nothing about the ones that do not.
+  // operator-chosen sessionIds look.
+  //
+  // This map used to be the whole of the rule, and binding only the records
+  // that HAPPENED to carry a nonce made it optional for exactly the person it
+  // was aimed at. The forgery: copy a record, change the observation and
+  // session ids, delete the nonce from the copy. Two ids, two sessionIds, no
+  // shared nonce, byte-identical comparison projections — and a golden claiming
+  // two independent confirmations of a single run. Nothing else in the pipeline
+  // can see it. The pairwise gate below CHECKS FOR agreement, so two copies are
+  // exactly what it is looking for; the matcher is satisfied by both for the
+  // same reason it was satisfied by the original; the manifest is hand-authored
+  // and will attest two sessions as readily as one.
+  //
+  // So absence is now enumerated rather than tolerated. See
+  // ./pre-nonce-observations.js for the closed list, and for what this still
+  // does NOT close — a forger who mints a fresh nonce for the copy is refused
+  // by none of this.
   const nonceOwners = new Map();
   // The staging claim -> the first observation that made it. The key is the
   // declaration string, or `null` for "the wrapper staged nothing", which is
@@ -332,10 +379,51 @@ export function promoteSs2CandidateToGolden(candidate, observations, manifest, o
       defer(new PromotionError(`Observation ${observation.observationId} is supplied more than once.`));
       continue;
     }
+    // A RECORD THE CANDIDATE WAS COPIED FROM CANNOT CONFIRM THE CANDIDATE.
+    //
+    // Every other independence rule here asks whether two observations are two
+    // experiments. This one asks something prior: whether the observation is
+    // evidence at all. When a candidate's scenario and tape were transcribed
+    // out of a live state dump, comparing the fixture to that dump compares the
+    // copy to its own original. `matchSs2ObservationToFixture` cannot report
+    // anything but a match, whatever the game does — the comparison has no way
+    // to come out false, so a pass carries no information.
+    //
+    // This is not hypothetical. Four goldens were promoted citing exactly such
+    // a record as one of their two observations, and the authoring commit said
+    // so in plain words while drawing the opposite conclusion: that a verbatim
+    // copy "carries no transcription" and so counts as observation 1 of the 2.
+    //
+    // Note what this does NOT do. It taints ONE record, not the fixture. A
+    // transcribed candidate stays fully promotable from two other observations
+    // — the numbers in it may well be right, and independent captures can still
+    // establish that. What it may never do is count its own source.
+    if (ss2ObservationIsCandidatesOwnSource(candidate, observation)) {
+      defer(new PromotionError(
+        `Observation ${observation.observationId} is the record ${candidate.fixtureId} was authored ` +
+        "from (provenance.authoredFrom), so it cannot serve as evidence for it. The candidate's " +
+        "scenario and tape were copied out of this record; matching them against it compares the copy " +
+        "to its own original and cannot fail, so a match establishes nothing. Promote from two " +
+        "observations that were captured independently of the transcription."
+      ));
+      continue;
+    }
     observationIds.add(observation.observationId);
     sessionIds.add(observation.capture.sessionId);
     const launchNonce = observation.capture.launchNonce;
-    if (launchNonce !== undefined) {
+    if (launchNonce === undefined) {
+      if (!SS2_PRE_NONCE_OBSERVATION_DIGESTS.has(observation.digest)) {
+        defer(new PromotionError(
+          `Observation ${observation.observationId} carries no capture.launchNonce and is not one of ` +
+          "the records that predate the field. The nonce is the only identity on a record that the " +
+          "operator did not choose, so a record without one can be copied into a second session for " +
+          "free — which is the forgery the nonce exists to refuse. Ingest has required it on every " +
+          "injected-tape-runtime trace since cc42503, so a capture taken with the current tooling " +
+          "always carries one; re-capture rather than promoting this. The pre-nonce waiver is the " +
+          "closed digest set in src/golden/pre-nonce-observations.js, and it may only ever shrink."
+        ));
+      }
+    } else {
       const owner = nonceOwners.get(launchNonce);
       if (owner !== undefined) {
         defer(new PromotionError(
@@ -402,6 +490,115 @@ export function promoteSs2CandidateToGolden(candidate, observations, manifest, o
     throw new PromotionError(
       "Promotion requires observations from at least two independent capture sessions."
     );
+  }
+
+  // THE OBSERVATIONS MUST AGREE WITH EACH OTHER, NOT ONLY EACH WITH THE FIXTURE.
+  //
+  // SETTLED 2026-08-31 BY MEASUREMENT. Run `node tools/pairwise-gate-dormancy.mjs`
+  // rather than quoting any number from this comment; it is a committed tool
+  // precisely because this block has been re-argued from memory three times.
+  //
+  // THIS LOOP HAS TEETH. 751 of 11,121 single-leaf perturbations across the 67
+  // committed records are FREE — valid, re-digested, and still matching their
+  // candidate — and 407 of them, every one at `/samples/*/callSite`, are
+  // refused by this loop and by nothing else. The FREE count is exact rather
+  // than a sample: a leaf the matcher compares cannot be free, because every
+  // record matches its fixture at baseline, so FREE is exactly the set of
+  // matcher-blind leaves that admit any valid alternative value.
+  //
+  // TWO CLAIMS THAT STOOD HERE ARE WITHDRAWN, and they failed in opposite
+  // directions:
+  //
+  //   "ZERO can differ ... so this loop cannot currently refuse anything" —
+  //   FALSE, and false on what is almost certainly its own record. obs-qk1
+  //   carries 163 full-record leaves, 162 probeable (the 163rd is `digest`,
+  //   which any probe must rewrite), and TEN of those 162 are free.
+  //
+  //   "the leaf COUNT does not reproduce ... NO record has 162 under either" —
+  //   also FALSE. 162 reproduces exactly; it is full-record leaves MINUS the
+  //   digest, for obs-qk1 and ten siblings, and 142 is that same record's
+  //   matcher projection. That retraction measured two surfaces the original
+  //   claim never used. The count was right and only the conclusion was wrong.
+  //
+  // THIS LOOP IS NOW REACHABLE FROM COMMITTED EVIDENCE, AND IT WAS NOT BEFORE.
+  // Do not restate the paragraph this replaces without re-measuring it.
+  //
+  // What stood here, and was true when written: ZERO of the observation ids
+  // the 22 goldens cited carried a `capture.launchNonce`; each was waived only
+  // by having its exact digest listed in `pre-nonce-observations.js`; every
+  // forgery re-digests, so each dropped out of the waiver and was refused by
+  // the nonce check above — which `defer`s and throws roughly forty lines
+  // BEFORE this loop is reached. Excising the loop changed zero verdicts.
+  //
+  // Re-promoting the four self-citing normal-band goldens off their own
+  // transcription sources moved that. The goldens now cite 60 distinct
+  // records, NINE of which carry a nonce (obs-cachecold, obs-cachewarm,
+  // obs-iso2, obs-par1-3, obs-pq1-3), spread across four goldens. Forging one
+  // of those nine leaves the waiver irrelevant, so the refusal falls through
+  // to this loop. `test/capture-campaign.test.js` pins the prediction rather
+  // than either count: forging a nonce-free cited record must be refused by
+  // the NONCE gate, forging a nonce-bearing one by THIS loop, and both
+  // branches must be non-empty — if the pairwise count returns to zero the
+  // gate is unreachable again and this comment is wrong again.
+  //
+  // BUT STILL DO NOT READ "HAS TEETH" AS "THIS GATE IS PROTECTING THE CORPUS."
+  // Reachable is not the same as load-bearing: what reaches it are FORGERIES
+  // the tests construct, and on honest evidence the loop refuses nothing that
+  // already stands.
+  //
+  // AND THE TEETH ARE NARROWER THAN THE COUNT SUGGESTS. All 407 committed
+  // samples carry ONE callSite literal, because the wrapper has one roll
+  // emitter stamping one compile-time constant — the same fact that makes a
+  // fixture-derived callSite comparison a thing this project has refused to
+  // add. So these teeth cannot bite two honest captures. And this loop catches
+  // DISAGREEMENT, never falsehood: two records carrying the SAME fabricated
+  // callSite agree, match, and promote. Nothing here closes the open hook
+  // attribution hole, and nothing here should be described as closing it.
+  //
+  // It exists because the hole opens the moment any field stops being compared
+  // against the fixture. An auditor demonstrated exactly that: with the
+  // prescribed `staminaleft` exclusion patched in, two records differing by
+  // 99,992 stamina — one negative, one 10^13 above `staminamax` — both matched
+  // the candidate and both promoted. That is the second symptom of the debris
+  // forgery closed in cc42503, where two observations differing by 120
+  // fabricated draws corroborated each other.
+  //
+  // `ss2ObservationsMatch` has existed and been exercised by tests the whole
+  // time; it was simply never called from the promotion path, so "two matching
+  // observations from two independent sessions" has always meant two records
+  // that each resembled the same prediction, never two that resembled one
+  // another. This compares the FULL projection rather than the fixture's key
+  // set, which is why it survives a matcher-side exclusion.
+  //
+  // Measured free, and RE-MEASURED 2026-08-31: all 29 cited observation pairs
+  // across the 22 promoted goldens agree under it, so no existing golden rests
+  // on the weaker rule and this loop refuses nothing that already stands.
+  //
+  // LAND ANY FIELD EXCLUSION ONLY AFTER THIS, never before. THE DIRECTIVE
+  // STANDS AND ITS OLD REASON DOES NOT, so read the new one: it used to say
+  // this loop was a dormant precondition that would start protecting the
+  // corpus once an exclusion landed. It will not. On the evidence the goldens
+  // cite, this loop is unreachable behind the nonce check, so an exclusion
+  // landed today is backstopped by NOTHING here. "The pairwise gate covers it"
+  // is not an argument available to whoever lands the `staminaleft` exclusion
+  // — it would have been under the old, wrong reading. The exclusion still
+  // needs its own adversarial pass against the named claim "a record carrying
+  // an arbitrary `staminaleft` cannot be promoted", and this loop only starts
+  // helping once the evidence being promoted carries launch nonces.
+  //
+  for (let left = 0; left < observations.length; left += 1) {
+    for (let right = left + 1; right < observations.length; right += 1) {
+      const agreement = ss2ObservationsMatch(observations[left], observations[right]);
+      if (agreement.match) continue;
+      const paths = agreement.differences.map((difference) => difference.path).join(", ");
+      throw new PromotionError(
+        `Observations ${observations[left].observationId} and ${observations[right].observationId} ` +
+        `both match ${candidate.fixtureId} but disagree with EACH OTHER at: ${paths}. ` +
+        "Two records that agree with one prediction while contradicting one another are not two " +
+        "independent confirmations of it — they are evidence that the prediction does not pin " +
+        "whatever differs. Re-derive the candidate to cover it, or re-capture."
+      );
+    }
   }
 
   const observedAt = observations

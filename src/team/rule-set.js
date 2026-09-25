@@ -1,10 +1,15 @@
 /**
  * The seam: what a rule set must provide to drive the shared team resolver.
  *
- * This module contains no formulas. It is the typed injection point that a
- * runtime-verified rule set is dropped into once the capture campaign promotes
- * goldens, and the gate that keeps an unverified formula from *claiming* to be
- * verified.
+ * This module contains no formulas. It is the typed injection point a rule set
+ * is dropped into, and the gate that keeps an unverified formula from
+ * *claiming* to be verified.
+ *
+ * Three tiers, and the middle one carries the weight: `placeholder` is invented,
+ * `map-derived` was read out of the licensed build's bytecode with partial
+ * golden backing, and `runtime-verified` was observed running. **Only
+ * `runtime-verified` may set `runtimeVerified: true`** — a map-derived rule set
+ * declares `false` and cites its map sections and goldens instead.
  *
  * A rule set owns: the action vocabulary, legality, the outcome of one action
  * (including which RNG draws it makes, in what order), the derived maximum
@@ -21,6 +26,22 @@ export const TEAM_RULE_SET_CONTRACT_VERSION = 1;
 export const RuleSetVerification = Object.freeze({
   /** A documented approximation. Never presented as SS2 behaviour. */
   PLACEHOLDER: "placeholder",
+  /**
+   * Reconstructed from the byte-level battle map, with partial golden backing.
+   *
+   * Stronger than a placeholder: the arithmetic was read out of the licensed
+   * build's bytecode, and some of it is checked against promoted goldens.
+   * Weaker than runtime-verified: no capture session observed the paths this
+   * rule set actually runs, so `runtimeVerified` is false and stays false.
+   *
+   * THE TIER EXISTS BECAUSE ITS ABSENCE WAS BLOCKING THE PROJECT. SS2's real
+   * arithmetic fits neither neighbour: calling it `placeholder` understates
+   * evidence that was read out of the build, and calling it
+   * `runtime-verified` is a lie about what was observed. With only two tiers
+   * the honest move was to write nothing, so nothing was written — a corpus of
+   * 22 goldens sat unused while the resolver ran invented formulas.
+   */
+  MAP_DERIVED: "map-derived",
   /** Backed by promoted goldens from the licensed build. */
   RUNTIME_VERIFIED: "runtime-verified"
 });
@@ -47,7 +68,98 @@ export const EffectKind = Object.freeze({
   DAMAGE: "damage",
   HEAL: "heal",
   STATUS: "status",
-  RESOURCE: "resource"
+  RESOURCE: "resource",
+  /**
+   * Move a combatant to an absolute arena x.
+   *
+   * **Absolute, never a delta, for the same reason `RESOURCE` writes `to` and
+   * not `by`**: an effect log has to be replayable out of order without
+   * accumulating drift, and a rule set that has already clamped is entitled to
+   * have its clamped value survive the resolver. Signed, unlike an `amount` —
+   * walking left is a negative COORDINATE, not a negative distance.
+   */
+  POSITION: "position",
+  /**
+   * Move a combatant to an absolute arena y — the SECOND axis.
+   *
+   * Absolute and signed for exactly the reasons `POSITION` is; this docstring
+   * does not repeat them.
+   *
+   * ► **WHY THIS IS A SEPARATE KIND RATHER THAN A `toY` ON `POSITION`.** The
+   *   build has no diagonal move: its movement phases are `walkleft`,
+   *   `walkright`, `runleft`/`runright`, `chargeleft`/`chargeright` and
+   *   `jumpleft`/`jumpright`, each of which changes ONE coordinate (the jump
+   *   changes `_y` over its frames and `_x` over its frames, but it is one
+   *   named phase either way). A move along x and a move along y are different
+   *   phases, so they are different effects, and `POSITION`'s validator stays
+   *   untouched.
+   *
+   *   The alternative — widening `POSITION` with an optional second field —
+   *   was rejected for the reason `src/render/scene.js` gives about
+   *   `move-clip`: a shape that silently grows a field is a shape whose
+   *   consumers silently stop covering it.
+   *
+   * **A rule set that emits this must declare `startingY`**, exactly as a
+   * `POSITION` emitter must declare `startingPosition`. The resolver enforces
+   * it the same way and with the same message shape.
+   */
+  LATERAL: "lateral",
+  /**
+   * Set one of a combatant's `stats` to an absolute value, for the rest of the
+   * battle — `{ kind: "stat", targetId, stat, to }`.
+   *
+   * ► **ADDED 2026-09-22, BECAUSE A VERB HAD NO WAY TO CHANGE A STAT AT ALL.**
+   *   `stats` reached a rule set frozen and left every battle as it entered
+   *   it, so a spell whose whole effect is "strength is now three times what
+   *   it was" (SS2's colossus, bloodlust, swift sandals and little fat kid)
+   *   could not be expressed.
+   *
+   * **Absolute, never a delta, for the reason `RESOURCE` writes `to`**: a
+   * replayed log lands on the same value whatever the peer thought the stat
+   * held a moment earlier, and a buff that is RE-cast writes the same number
+   * again instead of stacking.
+   *
+   * **The resolver creates no stat.** `stat` must name a key the combatant's
+   * `stats` already carries (`roster.normaliseCombatant` builds a fixed set),
+   * for the reason a resource must be declared at construction: a field that
+   * exists only on the branch one peer took is a desync with a delay fuse.
+   *
+   * **Nothing is clamped**: a stat has no declared bounds, and the rule set
+   * owns any it has, as it owns the arena bound a `POSITION` carries.
+   *
+   * **Why a kind of its own rather than stats as resources.** Every reader a
+   * rule set already has reads `stats`, so writing the stat IN PLACE keeps
+   * each of them reading the in-battle value with no edit; the value it was
+   * built with, where a rule set needs it, is that rule set's own declared
+   * resource. And a combatant nothing writes keeps a byte-identical
+   * projection — `stats` was always projected and hashed — so the kind costs
+   * no existing battle anything.
+   */
+  STAT: "stat",
+  /**
+   * Set one of the BATTLE's own resources to an absolute value —
+   * `{ kind: "battle-resource", resource, to }`, and **no `targetId`**.
+   *
+   * ► **ADDED 2026-09-22, FOR ONE NUMBER THAT BELONGS TO NOBODY.** SS2 keeps
+   *   one `_global.crowd_interest` per bout, fed by every completed phase of
+   *   BOTH fighters and read once to scale the victory purse. A per-combatant
+   *   resource cannot hold it honestly: six copies of one crowd is six chances
+   *   for the copies to disagree, and the build has one.
+   *
+   * **The resolver learns one concept and no noun**: "a declared, clamped
+   * numeric pool the battle owns" — `resources.js`'s pool, at battle scope.
+   * The rule set names it (`rules.openingBattleResources`), exactly as a
+   * blueprint names a combatant's resources, so `crowd_interest` never
+   * appears here.
+   *
+   * **Absolute, never a delta, for the reason `RESOURCE` writes `to`**, and
+   * clamped to the declared bounds the same way. A name the battle did not
+   * declare at construction is refused, not created (constraint 2 of
+   * `resources.js`). **A `targetId` is REFUSED rather than ignored**: carrying
+   * one says the rule set meant a combatant's pool, and silently writing the
+   * battle's instead would be the wrong number in the right place.
+   */
+  BATTLE_RESOURCE: "battle-resource"
 });
 
 const REQUIRED_FUNCTIONS = Object.freeze([
@@ -93,6 +205,52 @@ function assertProvenance(verification, provenance) {
     if (provenance.goldenFixtureIds !== undefined) {
       throw new TeamRuleSetError("A placeholder rule set must not cite golden fixtures.");
     }
+    // Found 2026-09-01 while adding the map-derived tier: this validator and
+    // `assertRuleSetProvenance` in src/campaign/record.js are documented as
+    // mirrors and were not. record.js REFUSES a placeholder that pins a build
+    // hash; this one allowed it, so such a rule set was constructible here and
+    // its battles were then unrecordable at settlement — a failure that
+    // surfaces only after a fight is fought.
+    if (provenance.buildSha256 !== undefined) {
+      throw new TeamRuleSetError(
+        "A placeholder rule set must not pin a build SHA-256: it is not derived from that build."
+      );
+    }
+    return;
+  }
+  if (verification === RuleSetVerification.MAP_DERIVED) {
+    // Every requirement here is the difference between this tier and the
+    // placeholder it would otherwise collapse into. An unenforced "may cite
+    // evidence" becomes "does not", and the tier would be a nicer word for
+    // guesswork — which is precisely the substitution this project exists to
+    // refuse.
+    if (provenance.runtimeVerified !== false) {
+      throw new TeamRuleSetError(
+        "A map-derived rule set must declare runtimeVerified: false. Deriving arithmetic from the " +
+        "build's bytecode is not observing the build run."
+      );
+    }
+    if (!SHA256.test(String(provenance.buildSha256 ?? ""))) {
+      throw new TeamRuleSetError(
+        "A map-derived rule set must pin the licensed build SHA-256 it was derived from: a derivation " +
+        "with no build behind it is a derivation from nothing."
+      );
+    }
+    if (!Array.isArray(provenance.mapSourceRefs) || provenance.mapSourceRefs.length === 0) {
+      throw new TeamRuleSetError(
+        "provenance.mapSourceRefs must cite at least one battle-map section; it is this tier's whole claim."
+      );
+    }
+    if (provenance.mapSourceRefs.some((ref) => typeof ref !== "string" || ref.trim().length === 0)) {
+      throw new TeamRuleSetError("Every provenance.mapSourceRefs entry must be a non-empty string.");
+    }
+    assertTokenList(provenance.goldenFixtureIds, "provenance.goldenFixtureIds");
+    if (provenance.goldenFixtureIds.length === 0) {
+      throw new TeamRuleSetError(
+        "A map-derived rule set must cite at least one promoted golden. Partial runtime backing is what " +
+        "separates this tier from a placeholder."
+      );
+    }
     return;
   }
   if (provenance.runtimeVerified !== true) {
@@ -123,7 +281,7 @@ export function assertTeamRuleSet(rules) {
   }
   if (!Object.values(RuleSetVerification).includes(rules.verification)) {
     throw new TeamRuleSetError(
-      `A rule set must declare verification as ${Object.values(RuleSetVerification).join(" or ")}.`
+      `A rule set must declare verification as one of: ${Object.values(RuleSetVerification).join(", ")}.`
     );
   }
   assertTokenList(rules.actionTypes, "actionTypes");
@@ -173,6 +331,7 @@ export function describeTeamRuleSet(rules) {
     verification: rules.verification,
     runtimeVerified: rules.provenance.runtimeVerified === true,
     goldenFixtureIds: Object.freeze([...(rules.provenance.goldenFixtureIds ?? [])]),
+    mapSourceRefs: Object.freeze([...(rules.provenance.mapSourceRefs ?? [])]),
     buildSha256: rules.provenance.buildSha256 ?? null,
     note: rules.provenance.note
   });
@@ -191,6 +350,25 @@ export function assertActionOutcome(outcome, ruleSetId) {
     if (!isPlainObject(effect) || !Object.values(EffectKind).includes(effect.kind)) {
       throw new TeamRuleSetError(`Rule set ${ruleSetId} produced an effect with an unsupported kind.`);
     }
+    if (effect.kind === EffectKind.BATTLE_RESOURCE) {
+      // The one kind with no target: the pool is the battle's. Checked before
+      // the target test below, which every other kind still meets.
+      if ("targetId" in effect) {
+        throw new TeamRuleSetError(
+          `Rule set ${ruleSetId} produced a battle-resource effect carrying a targetId; a battle resource ` +
+          "belongs to no combatant. Use a resource effect for a combatant's pool."
+        );
+      }
+      if (typeof effect.resource !== "string" || effect.resource.length === 0) {
+        throw new TeamRuleSetError(`Rule set ${ruleSetId} produced a battle-resource effect without a resource name.`);
+      }
+      if (!Number.isFinite(effect.to)) {
+        throw new TeamRuleSetError(
+          `Rule set ${ruleSetId} produced a battle-resource effect without a finite absolute \`to\` value.`
+        );
+      }
+      continue;
+    }
     if (typeof effect.targetId !== "string" || effect.targetId.length === 0) {
       throw new TeamRuleSetError(`Rule set ${ruleSetId} produced an effect without a target id.`);
     }
@@ -207,6 +385,33 @@ export function assertActionOutcome(outcome, ruleSetId) {
       if (!Number.isFinite(effect.to)) {
         throw new TeamRuleSetError(
           `Rule set ${ruleSetId} produced a resource effect without a finite absolute \`to\` value.`
+        );
+      }
+    } else if (effect.kind === EffectKind.POSITION) {
+      // Absolute for the same reason RESOURCE is, and SIGNED unlike an amount,
+      // which is why this arm cannot fall through to the `>= 0` check below.
+      if (!Number.isFinite(effect.to)) {
+        throw new TeamRuleSetError(
+          `Rule set ${ruleSetId} produced a position effect without a finite absolute \`to\` value.`
+        );
+      }
+    } else if (effect.kind === EffectKind.LATERAL) {
+      // Its own arm rather than `POSITION ||` above, so that a future change to
+      // either axis cannot silently re-validate the other.
+      if (!Number.isFinite(effect.to)) {
+        throw new TeamRuleSetError(
+          `Rule set ${ruleSetId} produced a lateral effect without a finite absolute \`to\` value.`
+        );
+      }
+    } else if (effect.kind === EffectKind.STAT) {
+      // Absolute, and unbounded here: see `EffectKind.STAT`. Whether the stat
+      // exists is the resolver's to check, against the combatant it names.
+      if (typeof effect.stat !== "string" || effect.stat.length === 0) {
+        throw new TeamRuleSetError(`Rule set ${ruleSetId} produced a stat effect without a stat name.`);
+      }
+      if (!Number.isFinite(effect.to)) {
+        throw new TeamRuleSetError(
+          `Rule set ${ruleSetId} produced a stat effect without a finite absolute \`to\` value.`
         );
       }
     } else if (!Number.isFinite(effect.amount) || effect.amount < 0) {

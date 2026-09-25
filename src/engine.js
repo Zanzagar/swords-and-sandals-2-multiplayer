@@ -5,12 +5,26 @@
  * team seam in `src/team/`. 1v1, 2v2 and 3v3 all run through
  * `src/team/resolver.js`; there is no separate 1v1 combat path.
  *
- * The formulas still live in `src/team/placeholder-rules.js` and are still
+ * ~~The formulas still live in `src/team/placeholder-rules.js` and are still
  * placeholders. They will be replaced by injecting a *second* rule set that
  * satisfies the contract in `src/team/rule-set.js`, once runtime-verified
- * goldens are promoted from the capture campaign. Nothing in the resolver,
- * roster, controller, elimination, or settlement modules changes at that
- * point — see `docs/ss2-adapter-contract.md`.
+ * goldens are promoted from the capture campaign.~~ **Corrected 2026-09-24:
+ * the second rule set EXISTS and is injected — but this façade's DEFAULT is
+ * still the placeholder.** `src/team/ss2-rules.js` (`ss2TeamRules` /
+ * `createSs2TeamRules`) is a map-derived rule set satisfying that contract,
+ * and every playable host injects it: `tools/hotseat.mjs` by default since
+ * `831bcdc` (2026-09-01), `tools/arena/main.js` since `473ef59` (2026-09-10),
+ * and `tools/arena-campaign.mjs`. It declares
+ * `verification: "map-derived"`, not runtime-verified, although 23 goldens are
+ * promoted and replay through it. What still reaches
+ * `src/team/placeholder-rules.js` is any caller that names no rule set: here,
+ * `createBattle`'s `rules = classicStyleRules` resolves to
+ * `placeholderTeamRules`, and so does `createTeamBattle`'s own default in
+ * `src/team/resolver.js`. The commit that injected it (`831bcdc`) touched none
+ * of the resolver, roster, controller, elimination or settlement modules
+ * (`src/team/index.js` gained a re-export), as this paragraph predicted; they
+ * have changed since for reasons of their own — see
+ * `docs/ss2-adapter-contract.md`.
  *
  * External guarantees preserved by the façade: the action protocol, the
  * `toWireState` projection, `stateHash`, deterministic replay, and the
@@ -128,10 +142,26 @@ export function createBattle({ teams, seed = 1, rules = classicStyleRules, ...op
  * or the hash is not a desync check — so a battle whose rule set uses
  * resources must be compared with `combatStateHash`, not `stateHash`. See the
  * note on `stateHash` below.
+ *
+ * ► **AND IT CARRIES ITS OWN FROZEN VERSION, which it did not until 2026-09-13.**
+ *   It used to project `battle.version`. That was harmless while the team
+ *   resolver's version was a hand-written `1` that never changed — and the
+ *   moment that version became DERIVED from the team wire format's shape, this
+ *   façade's hash moved with it. **A projection frozen at a historical field
+ *   list cannot take its version from a format it does not project**: this one
+ *   carries neither `x`, nor `y`, nor the resource bag, so nothing that has
+ *   changed the team version has ever changed THIS shape.
+ *
+ *   The test that caught it says so in its own name — "the pinned hashes do
+ *   not move" — and it was right: the façade's six legacy hashes are
+ *   byte-identical again, which is the evidence that deriving the team version
+ *   stayed inside the team seam.
  */
+export const LEGACY_WIRE_VERSION = 1;
+
 export function toWireState(battle) {
   return {
-    version: battle.version,
+    version: LEGACY_WIRE_VERSION,
     seed: battle.seed,
     rngState: battle.rngState,
     teams: battle.teams.map((team) => ({

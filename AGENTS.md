@@ -48,7 +48,7 @@ there never reaches the next reader.
   things back later we note that and do it when we have to."*
 - **Two narrow operational facts remain, and NEITHER is an ethics boundary:**
   1. **The installed SWF stays byte-identical, because it is the MEASUREMENT
-     ORACLE.** All 23 promoted goldens, 70 observation records and every capture
+     ORACLE.** All 23 promoted goldens, 69 observation records and every capture
      manifest cite its sha256. Change the install by one byte and the corpus
      stops describing anything — not a licence problem, an evidence problem.
      **When modding the build becomes the work, put the modded copy in a SECOND
@@ -95,12 +95,11 @@ and Plan agents), so these rules bind you as well:
 
 Standing rules to paste into every agent prompt are in
 `docs/overnight-agent-plan.md` — **ABOVE its `## THE ARCHIVE LINE` only**;
-below that line is the frozen record of two runs in August, not guidance. A
-branch that carries `.claude/workflows/` has the Claude-only runnable form;
-absence is not permission to recreate it inline. *(This pointer used to name
-the whole file, which is how a plan written for ONE night in August became
-doctrine loaded by every agent. See that file's own header for what the
-omission cost.)*
+below that line is the frozen record of two runs in August, not guidance. The
+runnable Claude-only form is in `.claude/workflows/`; its presence is not
+permission to recreate or widen it inline. *(This pointer used to name the
+whole file, which is how a plan written for ONE night in August became doctrine
+loaded by every agent. See that file's own header for what the omission cost.)*
 
 - **PRECEDENCE, decided by the owner 2026-09-02 (harness `docs/adr/0001`):
   Pocock's decision discipline is the default workflow, Codex adversarial
@@ -198,9 +197,21 @@ and the path is unreachable from Linux anyway.
 - A capture-bearing tree, holding at least one probe session directory under
   the gitignored `captures/` archive: **all tests pass, 0 skipped.** (The
   directory merely existing is not enough — it is committed, holding a manifest
-  and a README — so a tree with `captures/` and 1 skipped is CORRECT.)
-- A fresh clone or worktree without that archive: **1 skipped**, and the skip is
-  the raw-trace archive existence check. This is EXPECTED, not a defect.
+  and a README — so a tree with `captures/` and 1 skipped is CORRECT. **Nor is
+  a SESSION directory enough: it must hold an observation `.jsonl`.** This tree
+  has `captures/psyche-probe-1` and still skips 1, because that session aborted
+  before a battle and left only a `.rufflelog`. Measured 2026-09-16, after the
+  line above read as though any session directory sufficed.)
+- A working tree with `assets/` but no probe session: **1 skipped**, the
+  raw-trace archive existence check. EXPECTED, not a defect.
+- **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS ~~9~~ ~~10~~ 11 —
+  measured 2026-09-23 with the fight pop-ups** (10 at b51ad05; 9 on 2026-09-15,
+  where this line used to say 1 and mean the tree above). Besides the archive
+  check, 8 are gated on the extracted TEXT pack, 1, since 2690559, on the
+  extracted PROPS pack (the boulder test), and 1 on the ICONS and TEXT packs
+  together (`test/render-popups.test.js`), all gitignored like every other
+  asset. A cloner who measures 11 against a documented 1 has a correct tree and
+  a wrong document.
 
 **Otherwise a skipped test is a real finding, not noise.** Expect the exact count
 the newest handoff states; if you measure a different number, say so rather than

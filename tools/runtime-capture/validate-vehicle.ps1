@@ -11,11 +11,34 @@ Exits 0 only when the round trip MATCHES.
 Run this after every wrapper edit and before trusting any real capture.
 Traces produced here are validation artifacts (ids prefixed stubcheck-);
 never place their observation records under test/observations/.
+
+The run is isolated from the licensed save. Ruffle gets its own empty
+--save-directory under captures\vehicle-check\ (throwaway, like every other
+artifact in that directory), EVERY .sol under the shared Ruffle save root
+(three of them on this machine, not just ss2_data.sol) is hashed before and
+after, and the gate refuses to start while any other Ruffle window is open.
+That before/after check is a tripwire the stub cannot currently trip - see
+the PASS text at the bottom for exactly what it does and does not establish.
+
+None of the isolation was here originally: the gate ran at the real
+SharedObject root with no process guard, which is a poor property for the one
+script the project mandates running most often.
 #>
 [CmdletBinding()]
 param(
     [string] $FixturePath = 'test/fixtures/ss2-1v1/candidate-lethal-result.json',
-    [int] $RunSeconds = 12
+    [int] $RunSeconds = 12,
+    # WHERE THE RECORDING WINDOW CLOSES — passed through to the wrapper so the
+    # non-default mode can be exercised here rather than only asserted.
+    #
+    # ► **AN OPT-IN MODE NOBODY HAS RUN IS AN APPROXIMATION NOBODY COUNTS.** The
+    #   `phase` window defers finishTrace from checkattackroll's return to
+    #   nextphase; with "" (the default) this gate behaves exactly as it did
+    #   before the parameter existed, which is what its PASS has always meant.
+    #   A `phase` run is expected to produce MORE trace lines and is NOT
+    #   comparable with the archive — the trace's end line says so.
+    [ValidateSet("", "action", "phase")]
+    [string] $TraceWindow = ""
 )
 
 $ErrorActionPreference = 'Stop'
@@ -23,6 +46,72 @@ Set-StrictMode -Version Latest
 
 $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $projectRoot
+
+# Captured BEFORE Build-Movie can redirect it. tools/ffdec.ps1 points APPDATA
+# and LOCALAPPDATA at .tools/ffdec-profile for the whole PROCESS while FFDec
+# runs; it restores them in a finally block, but launch-capture.ps1 keeps its
+# own copy for exactly this reason and so does this script. Reading the
+# redirected value here would make the save-root check below hash a path
+# inside .tools/ that does not exist, and report ABSENT -> ABSENT for a tree it
+# never looked at. That leak already cost this project a session once.
+$realLocalAppData = $env:LOCALAPPDATA
+
+# Read-only. Descended from Get-SaveState in run-arena.ps1: the size and hash of
+# the shared Ruffle SharedObject root's contents, or ABSENT when there are none.
+# ABSENT is a legitimate state (a machine that has never run the game), and
+# ABSENT before and after is a pass - the assertion is that this gate CHANGED
+# nothing, not that a save exists.
+#
+# EVERY .sol under the root, not the first file named ss2_data.sol. The narrow
+# version read as "the licensed save is untouched" and meant "one of the files
+# in the shared store is untouched": this machine's root holds three .sol files
+# (localhost\probe_b.sol, the ss2_data.sol under the Steam swf key, and
+# localhost\...\captures\wrapper\probe.swf\probe_a.sol), so two thirds of the
+# store it claims to watch were unwatched, and a wrapper that wrote a NEW
+# SharedObject under a new key - which is exactly the future this tripwire
+# exists to catch - would have been invisible to it. Whole-tree also means a
+# file appearing or disappearing changes the string, not just a file's contents
+# changing.
+#
+# Widening does not ARM it; see the PASS text at the bottom of this script.
+#
+# Extension test rather than -Filter '*.sol'. The FileSystem provider's -Filter
+# is a Win32 wildcard, not a suffix test, and it OVER-matches - measured on this
+# machine, in a scratch directory holding a.sol, b.SOL, c.solx, d.sol.bak, e.so
+# and longnamethatis.solid, `-Filter '*.sol'` returned a.sol, b.SOL, c.solx AND
+# longnamethatis.solid, while `Where-Object { $_.Extension -eq '.sol' }` returned
+# exactly a.sol and b.SOL. -eq is case-insensitive, which is what NTFS is. (The
+# narrow version used -Filter 'ss2_data.sol', a literal with no wildcard, so this
+# is a hazard the widening introduces rather than one it inherits.) An
+# over-matching filter would not make the tripwire unsafe - it would watch MORE -
+# but "every .sol under the root" has to be true in both directions or the check
+# again means something other than what it reads as meaning.
+#
+# Sorted so the before/after strings are order-stable; the relative path is
+# carried in the string so a rename inside the root is a change like any other.
+# Nothing here writes, opens for write, or deletes: Get-ChildItem and
+# Get-FileHash only.
+function Get-SaveRootState {
+    $root = Join-Path $realLocalAppData 'ruffle\SharedObjects'
+    if (-not (Test-Path $root)) { return 'ABSENT' }
+    $files = @(Get-ChildItem -LiteralPath $root -Recurse -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.Extension -eq '.sol' } |
+        Sort-Object -Property FullName)
+    if ($files.Count -eq 0) { return 'ABSENT' }
+    $lines = @(foreach ($file in $files) {
+        $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+        # Guarded rather than a bare Substring: a reparse point under the root
+        # could yield a FullName that does not start with it, and a throw here
+        # would abort the gate over a diagnostic string.
+        $relative = if ($file.FullName.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) {
+            $file.FullName.Substring($root.Length).TrimStart('\')
+        } else {
+            $file.FullName
+        }
+        "$relative : $($file.Length) bytes sha256 $hash"
+    })
+    return ($lines -join "`n")
+}
 
 $node = Get-Command node -ErrorAction SilentlyContinue
 $nodeExe = if ($node) { $node.Source } else {
@@ -32,12 +121,65 @@ $ruffle = Get-ChildItem -LiteralPath (Join-Path $projectRoot '.tools') -Filter '
     Select-Object -First 1
 if (-not $ruffle) { throw 'Portable Ruffle is not installed. Run tools/install-ruffle.ps1 first.' }
 
+# Refused OUTRIGHT, and refused here rather than after ~7s of builds so the
+# operator gets the message before the work is spent.
+#
+# launch-capture.ps1 and run-capture.ps1 lift this same guard for a session that
+# brings its own -SaveDirectory, because for them the hazard was one SHARED save
+# store and nothing else. This gate now brings its own store too, so on that
+# reasoning alone the guard could be lifted here as well. It is kept anyway:
+# run-arena.ps1 drives the one route that mutates the licensed save, it uses the
+# shared store by necessity, and it refuses to START while any Ruffle window is
+# open. This is the other half of that refusal - without it, the gate is the one
+# script in the repository that can walk into a supervised save-mutating route.
+#
+# (run-arena.ps1 used to key its own bookkeeping on the process NAME, so a
+# stub-check window would also have satisfied its wait, masked the real
+# window's death, and been killed mid-check by its blanket kill. That is fixed -
+# it now waits on, polls and closes its own pid from captures\<SessionId>\
+# ruffle.pid - so this guard no longer stands on that, only on the shared store.)
+#
+# Cost of a false refusal is one re-run of a gate that mutates nothing.
+if (Get-Process ruffle -ErrorAction SilentlyContinue) {
+    throw 'A Ruffle window is already open; close every Ruffle window before running the vehicle gate.'
+}
+
 $work = Join-Path $projectRoot 'captures\vehicle-check'
 # Ruffle receives RELATIVE paths: PowerShell 5.1 native-argument passing
 # mangles absolute paths containing spaces (this repo's path has them).
 $workRelative = 'captures\vehicle-check'
 New-Item -ItemType Directory -Path $work -Force | Out-Null
 $stamp = Get-Date -Format 'yyyyMMddHHmmss'
+
+# This gate's own Ruffle SharedObject store, empty and per-run.
+#
+# Without --save-directory Ruffle's store root is
+# %LOCALAPPDATA%\ruffle\SharedObjects - the licensed save's own directory. The
+# gate compares a trace to a fixture; it has no business reading or writing
+# that tree at all. The stub creates no SharedObject today, so nothing was
+# observed to land there, but this is the script the project mandates running
+# after EVERY wrapper edit - i.e. the one most likely to be pointed at a
+# wrapper that has just started writing something new. Isolation makes "the
+# gate cannot touch the save" true by construction instead of by inspection,
+# and keeps this run from adding files to a save root whose emptiness
+# save-state.ps1 uses as its snapshot precondition.
+#
+# Deliberately NOT seeded from the master store, which is where this differs
+# from launch-capture.ps1: that seed exists so the licensed GAME finds its
+# gladiator, and the stub has no save to read. An empty private store is the
+# correct starting state here, and copying the licensed save in would hand the
+# gate a licensed save it could lose.
+#
+# Per-run rather than reused so the store is fresh by construction - no delete
+# step that can fail silently and leave the previous run's state in place.
+# These directories are throwaway on the same terms as the stubcheck-* logs
+# beside them.
+#
+# RELATIVE for the same reason every other path handed to Ruffle here is:
+# Start-Process joins -ArgumentList with plain spaces and adds no quoting, and
+# this repo's absolute path contains spaces.
+$saveRelative = "$workRelative\save-$stamp"
+New-Item -ItemType Directory -Path (Join-Path $projectRoot $saveRelative) -Force | Out-Null
 
 function Build-Movie([string] $shell, [string] $source, [string] $outSwf) {
     & $nodeExe tools/runtime-capture/make-wrapper-shell.mjs $shell | Out-Null
@@ -71,25 +213,59 @@ $tape = & $nodeExe tools/capture-session.mjs tape --fixture $FixturePath
 if ($LASTEXITCODE -ne 0) { throw 'Reading the fixture tape failed.' }
 
 $log = Join-Path $work "stubcheck-$stamp.rufflelog"
-$env:RUST_LOG = 'avm_trace=info'
+# Raised to the level launch-capture.ps1 uses for an ISOLATED session, and for
+# its reason. 'avm_trace=info' alone sets Ruffle's GLOBAL level to off, which
+# suppresses every storage diagnostic it emits - including the
+# `Unable to read file "..."` warning that names the exact SharedObject key it
+# wanted. That suppression is why --save-directory was misdiagnosed as broken
+# for a whole session. This gate now passes --save-directory, so a store Ruffle
+# quietly declined to use would otherwise leave no trace anywhere and the BLAST
+# RADIUS line below would be asserting an isolation nothing could observe.
+#
+# Cannot perturb the round trip: extractCaptureTraceFromRuffleLog
+# (tools/capture-session.mjs:315-338) skips every line without an `avm_trace:`
+# prefix outright, and the dropped count it reports is a message, not a
+# threshold.
+$env:RUST_LOG = 'warn,ruffle=info,ruffle_frontend_utils=info,avm_trace=info'
 $ruffleArgs = @(
     '--no-gui', '--width', '200', '--height', '150',
     '--filesystem-access-mode', 'allow',
+    '--save-directory', $saveRelative,
     '-PgameUrl=stub-game.swf',
     "-PobservationId=stubcheck-obs-$stamp",
     "-PsessionId=stubcheck-session-$stamp",
     '-PtoolVersion=ss2-capture/0.1.0',
     "-PobservedAt=$((Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'))",
     '-PhashBefore=true', '-PattackerSide=hero', '-Pinjected=true',
+    "-PtraceWindow=$TraceWindow",
     "-Ptape=$tape",
     "$workRelative\ss2-capture-wrapper.swf"
 )
 Write-Host "Running wrapper against the stub for $RunSeconds seconds..."
+$saveBefore = Get-SaveRootState
+# Stopped by PID, never by image name. `Get-Process ruffle | Stop-Process` is
+# the sabotage pattern run-capture.ps1:86-104 exists to avoid; this script was
+# already correct on that point and stays correct.
 $proc = Start-Process -FilePath $ruffle.FullName -ArgumentList $ruffleArgs `
     -RedirectStandardOutput $log -PassThru -NoNewWindow
 Start-Sleep -Seconds $RunSeconds
 if (-not $proc.HasExited) { Stop-Process -Id $proc.Id -Force -Confirm:$false }
 Start-Sleep -Seconds 1
+
+# Asserted, not assumed - the same discipline launch-capture.ps1 applies to its
+# seed. --save-directory is the mechanism; this is the check that the mechanism
+# worked. It is deliberately placed before the pipeline: a mutated licensed
+# save matters more than whether the round trip matched, and the raw trace is
+# already on disk either way.
+$saveAfter = Get-SaveRootState
+if ($saveBefore -ne $saveAfter) {
+    throw "The shared Ruffle save root changed during the vehicle check.`n" +
+        "BEFORE:`n$saveBefore`nAFTER:`n$saveAfter`n" +
+        "This gate must never touch it; restore from a snapshot with save-state.ps1 and " +
+        "find out what wrote to %LOCALAPPDATA%\ruffle\SharedObjects before running anything else. " +
+        "A change to a probe .sol rather than to ss2_data.sol is still a finding: nothing in " +
+        "this gate may write to that tree at all."
+}
 
 $jsonl = Join-Path $work "stubcheck-$stamp.jsonl"
 $observation = Join-Path $work "stubcheck-$stamp-observation.json"
@@ -116,3 +292,19 @@ Write-Host 'route. It proves the wrapper compiles, wraps and re-wraps overlay'
 Write-Host 'functions, serves an injected tape, and round-trips one lethal action'
 Write-Host 'through the pipeline. Save corruption is outside its observable'
 Write-Host 'universe entirely - it compares a trace to a fixture, never a save.'
+Write-Host ''
+Write-Host 'BLAST RADIUS OF THIS RUN. Ruffle was given its own empty store at'
+Write-Host "$saveRelative and never the shared one. EVERY .sol file under"
+Write-Host '%LOCALAPPDATA%\ruffle\SharedObjects read'
+foreach ($stateLine in ($saveBefore -split "`n")) { Write-Host "  $stateLine" }
+Write-Host 'before the run and read exactly that again after.'
+Write-Host ''
+Write-Host 'Read those lines for what they are. The stub writes no SharedObject at'
+Write-Host 'all, so the before/after check is a tripwire that nothing in this gate'
+Write-Host 'can currently trip: deleting --save-directory above would not fail it,'
+Write-Host 'and widening it from the first ss2_data.sol to the whole store did not'
+Write-Host 'change that. It is here to catch a FUTURE wrapper that starts writing a'
+Write-Host 'save, and until then a PASS on these lines is the absence of a'
+Write-Host 'counterexample, not evidence of isolation. It does NOT soften the'
+Write-Host 'paragraph above: what the wrapper does to a REAL save during a REAL'
+Write-Host 'capture remains untested here.'

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The twenty-six screens — and the invoice for each one</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #e8e4dc;
+    --ink-dim: #9a9287;
+    --ink-faint: #635c54;
+    --ground: #17151a;
+    --panel: #211e26;
+    --edge: #3a3542;
+    --warn: #d8a13a;
+    --bad: #d2644e;
+    --good: #7aa860;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 14px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--edge);
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 15px; margin: 0; font-weight: 600; letter-spacing: .02em; }
+  #screen-name { color: var(--warn); font-weight: 700; font-size: 13px; letter-spacing: .04em; }
+  #frame-note { color: var(--ink-dim); font-size: 11.5px; }
+  .picker { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+  select, button {
+    font: inherit; font-size: 12.5px; cursor: pointer;
+    background: #2c2833; color: var(--ink);
+    border: 1px solid var(--edge); border-radius: 5px; padding: 4px 8px;
+  }
+  select { max-width: 230px; }
+  button:hover:not(:disabled) { background: #383243; }
+  button:disabled { opacity: .35; cursor: default; }
+  button.on { border-color: var(--warn); color: var(--warn); }
+  main { flex: 1; display: flex; gap: 0; flex-wrap: wrap; align-items: stretch; }
+  #stage { flex: 1 1 620px; min-width: 320px; position: relative; }
+  canvas { display: block; width: 100%; height: 100%; }
+  aside {
+    flex: 0 1 360px;
+    min-width: 300px;
+    border-left: 1px solid var(--edge);
+    background: var(--panel);
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+  h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--ink-dim); margin: 0 0 4px;
+    border-bottom: 1px solid var(--edge); padding-bottom: 3px;
+  }
+  .toggles { display: flex; flex-wrap: wrap; gap: 5px; }
+  .invoice { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; }
+  .invoice .row { display: flex; justify-content: space-between; gap: 10px; padding: 0 0 1px; }
+  .invoice .row .k { color: var(--ink-dim); }
+  .invoice .row .v { font-weight: 600; white-space: nowrap; }
+  .invoice .row.zero .k, .invoice .row.zero .v { color: var(--ink-faint); font-weight: 400; }
+  .invoice .row.hot .v { color: var(--warn); }
+  .invoice .row.bad .v { color: var(--bad); }
+  .invoice .row.ok .v { color: var(--good); }
+  .invoice .why { color: var(--ink-faint); font-size: 10.5px; padding: 0 0 3px 10px; line-height: 1.3; }
+  .log { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--ink-dim); }
+  .log div { padding: 1px 0; }
+  .log .warn { color: var(--warn); }
+  .log .bad { color: var(--bad); }
+  .provenance { font-size: 11.5px; color: var(--ink-dim); }
+  .provenance b { color: var(--ink); font-weight: 600; }
+  footer {
+    padding: 7px 16px; border-top: 1px solid var(--edge);
+    font-size: 11px; color: var(--ink-dim);
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>The twenty-six screens</h1>
+    <span id="screen-name">loading…</span>
+    <span id="frame-note"></span>
+    <div class="picker">
+      <button id="prev" title="previous screen (left arrow)">‹</button>
+      <select id="picker"></select>
+      <button id="next" title="next screen (right arrow)">›</button>
+    </div>
+  </header>
+  <main>
+    <div id="stage"><canvas id="screen"></canvas></div>
+    <aside>
+      <section>
+        <h2>What is drawn</h2>
+        <div class="toggles" id="toggles"></div>
+      </section>
+      <section>
+        <h2>The invoice</h2>
+        <div class="invoice" id="invoice"></div>
+      </section>
+      <section>
+        <h2>What you are looking at</h2>
+        <div class="provenance" id="provenance"></div>
+      </section>
+      <section>
+        <h2>Surface log</h2>
+        <div class="log" id="log"></div>
+      </section>
+    </aside>
+  </main>
+  <footer id="footer"></footer>
+  <script type="module" src="/tools/screens/main.js"></script>
+</body>
+</html>

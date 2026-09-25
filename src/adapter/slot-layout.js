@@ -65,7 +65,17 @@ export const VANILLA_FRONT_X = Object.freeze({ [HERO_SIDE]: -250, [VILLAIN_SIDE]
 export const ARENA_Y = 200;
 /** Map, "Battle entry" step 5: hero faces right, villain faces left. */
 export const SIDE_FACING = Object.freeze({ [HERO_SIDE]: "right", [VILLAIN_SIDE]: "left" });
-/** Map, `nextphase` step 1: the active x position is clamped to [-2100, 2100]. */
+/**
+ * The arena's x bound, `[-2100, 2100]`.
+ *
+ * **CITATION CORRECTED 2026-09-17.** This said "Map, `nextphase` step 1". That
+ * block exists and is DEAD: it clamps `game_attacker._x`/`game_defender._x` on
+ * `_root.game.hero`/`.villain`, which are plain `new Object()`s that nothing in
+ * the SWF reads or writes `._x` on. The live clamp is in `attacker.onEnterFrame`
+ * (sprite 862 frame 52, `+0x38fd`/`+0x3988` for `attacker._x`,
+ * `+0x3a13`/`+0x3a3f` for `defender._x`) and acts on the display CLIPS. Same
+ * numbers, different function — and this constant's USE below is unaffected.
+ */
 export const ARENA_X_CLAMP = Object.freeze({ min: -2100, max: 2100 });
 /** Map, "Battle result": overlay controller labels and the arena timeline labels. */
 export const RESULT_LABELS = Object.freeze({
@@ -94,7 +104,7 @@ export const ALLY_SIDE_DEPTH_STRIDE = 10;
 export const ALLY_SLOT_DEPTH_STRIDE = 2;
 /** Authored. Rear slots step outward from centre and slightly up-stage. */
 export const ALLY_X_STRIDE = 130;
-export const ALLY_Y_STRIDE = -18;
+export const ALLY_Y_STRIDE = -10;
 /** Authored. The adapter's own scratch root; not a vanilla path. */
 export const ADAPTER_STATE_ROOT = "_root.arena.team_arena.state";
 
@@ -146,7 +156,7 @@ function panelWidgetsFor(side, slotIndex) {
  * placement is derived entirely from the wire projection plus the hero-side
  * choice, so two peers that agree on combat state agree on the layout.
  */
-function placementFor({ combatantId, teamId, side, slotIndex }) {
+function placementFor({ combatantId, teamId, side, slotIndex, modelY = null }) {
   const instanceName = slotIndex === 0 ? side : allyName(side, slotIndex);
   const stateKey = `${side}_${slotIndex + 1}`;
   return Object.freeze({
@@ -181,9 +191,31 @@ function placementFor({ combatantId, teamId, side, slotIndex }) {
       ARENA_X_CLAMP.min,
       ARENA_X_CLAMP.max
     ),
-    y: ARENA_Y + ALLY_Y_STRIDE * slotIndex,
+    /**
+     * ► **THE MODEL'S OWN DEPTH WINS WHEN IT HAS ONE. Added 2026-09-12 with
+     *   the second axis, and without it the drawing would LIE.**
+     *
+     * `ALLY_Y_STRIDE` is -10: a legibility stagger, authored so converging
+     * ranks do not draw on top of each other, and deliberately far too small
+     * to be a position. Once a rule set models depth its ranks are ~97 apart,
+     * and drawing them 10 apart would show one pile while the resolver
+     * describes three ranks — the exact class of defect `withDrawOrder` and
+     * `figureScaleFor` were rewritten to remove one commit ago, arriving from
+     * the other direction.
+     *
+     * So this is the same division as `x`: the RESOLVER owns where a gladiator
+     * is, and the adapter owns how a gladiator that has no position is laid
+     * out. `modelY` is `combatant.y` off the wire, `null` for every rule set
+     * that models no depth — which is every rule set with the second axis off,
+     * the default — and those keep the authored stagger exactly.
+     */
+    y: Number.isFinite(modelY) ? modelY : ARENA_Y + ALLY_Y_STRIDE * slotIndex,
     panel: panelWidgetsFor(side, slotIndex),
-    /** Authored geometry for every slot past the first; vanilla cannot settle it. */
+    /**
+     * Authored geometry for every slot past the first; vanilla cannot settle
+     * it. Slot 0 is the vanilla pair exactly, on both axes: `VANILLA_FRONT_X`
+     * and `ARENA_Y` 200, and a model depth of 200 is the same number.
+     */
     geometryAuthored: slotIndex > 0
   });
 }
@@ -219,7 +251,9 @@ export function buildArenaLayout(wire, { heroTeamId = null } = {}) {
       if (slotIndex !== index) {
         throw new SlotLayoutError(`Team ${team.id} has a gap or duplicate at slot index ${String(slotIndex)}.`);
       }
-      placements.push(placementFor({ combatantId: combatant.id, teamId: team.id, side, slotIndex }));
+      placements.push(placementFor({
+        combatantId: combatant.id, teamId: team.id, side, slotIndex, modelY: combatant.y ?? null
+      }));
     });
   }
 
@@ -253,7 +287,28 @@ export function buildArenaLayout(wire, { heroTeamId = null } = {}) {
  */
 export function assertDistinctPlacements(placements) {
   const seen = { combatantId: new Set(), instanceName: new Set(), depth: new Set(), stateObjectPath: new Set() };
+  // ► **SCREEN POSITION WAS IN THE DOCSTRING AND NOT IN THE CHECK until
+  //   2026-09-10.** The `seen` map above holds four keys and neither `x` nor
+  //   `y` is one of them, so "every combatant id gets a distinct ... screen
+  //   position" was a promise this function did not keep.
+  //
+  //   It was unreachable when it was written and it is not any more, which is
+  //   why it is being closed now rather than noted: with the authored band,
+  //   slot `i` of a side sits at `frontX + stride * i`, so two placements
+  //   could only collide if the stride were zeroed. **The moment anything
+  //   MOVES a gladiator — which is the ranked work this guard sits in front of
+  //   — two combatants sharing an `x` becomes an ordinary runtime state, and
+  //   the function that promises to catch it has to actually look.**
+  //   Kept separate from the `seen` loop because it is a COMPOSITE key: a
+  //   shared `x` at different `y` is two fighters in different ranks, which is
+  //   the authored band working, not a collision.
+  const seenPositions = new Set();
   for (const placement of placements) {
+    const position = `${placement.x},${placement.y}`;
+    if (seenPositions.has(position)) {
+      throw new SlotLayoutError(`Duplicate screen position in the arena layout: (${position}).`);
+    }
+    seenPositions.add(position);
     for (const key of Object.keys(seen)) {
       const value = placement[key];
       if (seen[key].has(value)) {

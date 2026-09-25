@@ -1,0 +1,271 @@
+<title>Team Arena Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --ground: #eeece7;
+  --surface: #fbfaf8;
+  --lane: #f5f3ef;
+  --ink: #1c2023;
+  --ink-soft: #50575d;
+  --ink-faint: #858b90;
+  --rule: #dad6ce;
+  --bronze: #95602a;
+  --bronze-soft: #efe2d0;
+  --c-needs: #9a4b44;
+  --c-ready: #57539a;
+  --c-doing: #1e6d9b;
+  --c-gaps: #8f6212;
+  --c-done: #3a7a4b;
+  --decision: #b3452e;
+  --shadow: 0 1px 2px rgba(28, 32, 35, .07);
+  --display: "Cinzel", "Trajan Pro", Georgia, serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #141719; --surface: #1f2326; --lane: #191c1f;
+    --ink: #e8e5de; --ink-soft: #b2afa8; --ink-faint: #80858a; --rule: #2e3438;
+    --bronze: #d49a58; --bronze-soft: #37291a;
+    --c-needs: #e39d95; --c-ready: #b1acec; --c-doing: #7fbfe6; --c-gaps: #e4b866; --c-done: #8ed19c;
+    --decision: #ef8a72;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .35);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #141719; --surface: #1f2326; --lane: #191c1f;
+  --ink: #e8e5de; --ink-soft: #b2afa8; --ink-faint: #80858a; --rule: #2e3438;
+  --bronze: #d49a58; --bronze-soft: #37291a;
+  --c-needs: #e39d95; --c-ready: #b1acec; --c-doing: #7fbfe6; --c-gaps: #e4b866; --c-done: #8ed19c;
+  --decision: #ef8a72;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35);
+}
+* { box-sizing: border-box; }
+body { background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.45; }
+.wrap { padding-block: 22px 48px; padding-inline: 16px; max-width: 1640px; margin: 0 auto; display: grid; gap: 18px; }
+
+/* Header */
+header { display: grid; gap: 12px; }
+.titlerow { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: baseline; justify-content: space-between; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 28px; letter-spacing: .05em; margin: 0; }
+.stamp { color: var(--ink-soft); font-size: 13px; font-variant-numeric: tabular-nums; }
+.stamp code { font-family: var(--mono); font-size: 12px; color: var(--ink); }
+.lede { margin: 0; color: var(--ink-soft); max-width: 72ch; }
+.flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.flow .step { border-top: 4px solid var(--c); padding-top: 6px; display: grid; gap: 1px; }
+.flow .step b { font: 600 22px var(--body); font-variant-numeric: tabular-nums; color: var(--ink); }
+.flow .step span { font-size: 12px; color: var(--ink-soft); }
+@media (max-width: 560px) { .flow { grid-template-columns: repeat(3, 1fr); row-gap: 10px; } }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { font: 500 12.5px var(--body); border: 1px solid var(--rule); background: var(--surface); color: var(--ink-soft); border-radius: 999px; padding: 4px 11px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+.chip.decision[aria-pressed="true"] { background: var(--decision); border-color: var(--decision); color: #fff; }
+#q { font: 13px var(--body); padding: 5px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); flex: 1 1 180px; max-width: 280px; min-width: 0; }
+:focus-visible { outline: 2px solid var(--bronze); outline-offset: 2px; }
+
+/* Board */
+.boardwrap { overflow-x: auto; }
+.board { min-width: 1080px; display: grid; gap: 10px; }
+.colheads, .cells { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.colheads { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 2; background: var(--ground); padding-block: 6px; }
+.colhead { border-bottom: 3px solid var(--c); padding: 0 4px 5px; display: flex; justify-content: space-between; align-items: baseline; }
+.colhead h2 { margin: 0; font-size: 12.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--c); }
+.colhead .n { font: 500 12px var(--mono); color: var(--ink-faint); }
+.lane { background: var(--lane); border: 1px solid var(--rule); border-radius: 12px; padding: 10px; display: grid; gap: 8px; }
+.lanehead { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; padding: 0 2px; }
+.lanehead h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 16px; letter-spacing: .04em; }
+.lanehead .ln { font-size: 12px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.cell { display: grid; gap: 6px; align-content: start; min-height: 28px; }
+.cell .cl { display: none; }
+.card { text-align: left; width: 100%; background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--c); border-radius: 7px; padding: 7px 9px; box-shadow: var(--shadow); cursor: pointer; font: inherit; color: inherit; display: grid; gap: 3px; }
+.card:hover { border-color: var(--c); }
+.card .t { font-weight: 600; font-size: 13px; line-height: 1.3; }
+.card .s { font-size: 12px; color: var(--ink-soft); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card .flag { justify-self: start; font: 600 10.5px var(--body); letter-spacing: .03em; color: var(--decision); border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; }
+.hide { display: none !important; }
+
+/* Phone: lanes stack, each cell labels its own column */
+@media (max-width: 820px) {
+  .board { min-width: 0; }
+  .colheads { display: none; }
+  .cells { grid-template-columns: 1fr; }
+  .cell .cl { display: block; font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--c); padding: 4px 2px 0; }
+  .cell.emptycell { display: none; }
+}
+
+/* Recently moved */
+.recent { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; }
+.recent h2 { margin: 0; font-size: 12.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-soft); }
+.recent ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.recent li { font-size: 13px; display: flex; gap: 10px; flex-wrap: wrap; }
+.recent time { font: 12px var(--mono); color: var(--ink-faint); min-width: 84px; }
+
+/* Details */
+dialog { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); color: var(--ink); padding: 0; width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 48px); box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+dialog::backdrop { background: rgba(20, 23, 25, .45); }
+.dlg { padding: 18px 20px 20px; display: grid; gap: 12px; }
+.dlg .top { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pill { font: 600 11px var(--body); letter-spacing: .05em; text-transform: uppercase; color: var(--c); border: 1px solid var(--c); border-radius: 4px; padding: 1px 6px; }
+.areatag { font: 500 11.5px var(--body); color: var(--bronze); background: var(--bronze-soft); border-radius: 4px; padding: 1px 7px; }
+.dlg h2 { margin: 0; font-size: 19px; line-height: 1.25; text-wrap: balance; }
+.dlg p { margin: 0; }
+.dlg dl { margin: 0; display: grid; gap: 10px; }
+.dlg dt { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-faint); }
+.dlg dd { margin: 2px 0 0; overflow-wrap: anywhere; white-space: pre-line; }
+.dlg dd.mono { font: 12px/1.55 var(--mono); color: var(--ink-soft); }
+.dlg dd.dec { color: var(--decision); }
+.dlg .close { justify-self: end; font: 600 13px var(--body); border: 1px solid var(--rule); background: transparent; color: var(--ink); border-radius: 7px; padding: 5px 12px; cursor: pointer; }
+.foot { font-size: 12px; color: var(--ink-faint); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="titlerow">
+      <h1>Team Arena Board</h1>
+      <div class="stamp" id="stamp"></div>
+    </div>
+    <p class="lede" id="lede"></p>
+    <div class="flow" id="flow"></div>
+    <div class="controls" role="toolbar" aria-label="Filter the board">
+      <div class="controls" id="lanes"></div>
+      <button class="chip decision" id="onlyDecisions" type="button" aria-pressed="false">Needs the owner's call</button>
+      <input id="q" type="search" placeholder="Search cards" aria-label="Search cards">
+    </div>
+  </header>
+  <div class="boardwrap"><div class="board" id="board"></div></div>
+  <section class="recent" id="recent" aria-label="Recently moved"></section>
+  <p class="foot" id="foot"></p>
+</div>
+<dialog id="dlg" aria-labelledby="dlgTitle"><div class="dlg" id="dlgBody"></div></dialog>
+
+<script type="application/json" id="board-data">__BOARD_DATA__</script>
+<script>
+const BOARD = JSON.parse(document.getElementById("board-data").textContent);
+const COLUMNS = [
+  { id: "needs-design", label: "Needs design", c: "var(--c-needs)" },
+  { id: "ready", label: "Ready to build", c: "var(--c-ready)" },
+  { id: "in-progress", label: "In progress", c: "var(--c-doing)" },
+  { id: "gaps", label: "Built, gaps open", c: "var(--c-gaps)" },
+  { id: "done", label: "Done", c: "var(--c-done)" }
+];
+const colOf = (id) => COLUMNS.find((c) => c.id === id) || COLUMNS[0];
+const state = { lane: null, onlyDecisions: false, q: "" };
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+const cards = BOARD.cards.filter((c) => COLUMNS.some((k) => k.id === c.column));
+const lanes = BOARD.lanes.filter((l) => cards.some((c) => c.lane === l.id));
+
+function matches(card) {
+  if (state.lane && card.lane !== state.lane) return false;
+  if (state.onlyDecisions && !card.ownerDecision) return false;
+  if (state.q) {
+    const hay = [card.title, card.summary, card.next, card.gaps, card.evidence, card.ownerDecision].join(" ").toLowerCase();
+    if (!hay.includes(state.q)) return false;
+  }
+  return true;
+}
+
+function header() {
+  $("stamp").textContent = "";
+  $("stamp").append(document.createTextNode("Updated " + BOARD.updatedAt + " · main at "), el("code", null, BOARD.head));
+  $("lede").textContent = BOARD.lede;
+  const flow = $("flow"); flow.innerHTML = "";
+  for (const col of COLUMNS) {
+    const s = el("div", "step"); s.style.setProperty("--c", col.c);
+    s.append(el("b", null, String(cards.filter((c) => c.column === col.id).length)), el("span", null, col.label));
+    flow.append(s);
+  }
+  const box = $("lanes"); box.innerHTML = "";
+  const all = el("button", "chip", "All areas"); all.type = "button"; all.setAttribute("aria-pressed", String(!state.lane));
+  all.onclick = () => { state.lane = null; render(); }; box.append(all);
+  for (const l of lanes) {
+    const b = el("button", "chip", l.label); b.type = "button"; b.setAttribute("aria-pressed", String(state.lane === l.id));
+    b.onclick = () => { state.lane = state.lane === l.id ? null : l.id; render(); }; box.append(b);
+  }
+  const n = cards.filter((c) => c.ownerDecision).length;
+  $("onlyDecisions").textContent = "Needs the owner's call (" + n + ")";
+  $("onlyDecisions").setAttribute("aria-pressed", String(state.onlyDecisions));
+}
+
+function openCard(card) {
+  const col = colOf(card.column); const body = $("dlgBody"); body.innerHTML = ""; body.style.setProperty("--c", col.c);
+  const top = el("div", "top"); const pill = el("span", "pill", col.label); pill.style.setProperty("--c", col.c);
+  const lane = BOARD.lanes.find((l) => l.id === card.lane);
+  top.append(pill); if (lane) top.append(el("span", "areatag", lane.label));
+  const h = el("h2", null, card.title); h.id = "dlgTitle";
+  body.append(top, h);
+  if (card.summary) body.append(el("p", null, card.summary));
+  const dl = el("dl");
+  const row = (label, text, cls) => { if (!text) return; dl.append(el("dt", null, label), el("dd", cls || null, text)); };
+  row("Needs the owner's call", card.ownerDecision, "dec");
+  row("Next step", card.next);
+  row("Gaps", card.gaps);
+  row("Evidence", card.evidence, "mono");
+  row("Last moved", card.updated);
+  body.append(dl);
+  const close = el("button", "close", "Close"); close.type = "button"; close.onclick = () => $("dlg").close();
+  body.append(close);
+  $("dlg").showModal(); close.focus();
+}
+$("dlg").addEventListener("click", (e) => { if (e.target === $("dlg")) $("dlg").close(); });
+
+function cardButton(card) {
+  const col = colOf(card.column);
+  const b = el("button", "card"); b.type = "button"; b.style.setProperty("--c", col.c);
+  b.append(el("span", "t", card.title));
+  if (card.summary) b.append(el("span", "s", card.summary));
+  if (card.ownerDecision) b.append(el("span", "flag", "Owner's call"));
+  b.setAttribute("aria-label", card.title + ", " + col.label + (card.ownerDecision ? ", needs the owner's call" : ""));
+  b.onclick = () => openCard(card);
+  return b;
+}
+
+function render() {
+  header();
+  const board = $("board"); board.innerHTML = "";
+  const heads = el("div", "colheads");
+  for (const col of COLUMNS) {
+    const h = el("div", "colhead"); h.style.setProperty("--c", col.c);
+    h.append(el("h2", null, col.label), el("span", "n", String(cards.filter((c) => c.column === col.id && matches(c)).length)));
+    heads.append(h);
+  }
+  board.append(heads);
+  let shown = 0;
+  for (const lane of lanes) {
+    if (state.lane && state.lane !== lane.id) continue;
+    const laneCards = cards.filter((c) => c.lane === lane.id && matches(c));
+    if (!laneCards.length) continue;
+    shown += laneCards.length;
+    const L = el("section", "lane"); L.setAttribute("aria-label", lane.label);
+    const lh = el("div", "lanehead"); lh.append(el("h3", null, lane.label), el("span", "ln", laneCards.length + " card" + (laneCards.length === 1 ? "" : "s")));
+    if (lane.note) lh.append(el("span", "ln", lane.note));
+    L.append(lh);
+    const cells = el("div", "cells");
+    for (const col of COLUMNS) {
+      const inCol = laneCards.filter((c) => c.column === col.id).sort((a, b) => (a.order ?? 99) - (b.order ?? 99) || a.title.localeCompare(b.title));
+      const cell = el("div", "cell" + (inCol.length ? "" : " emptycell")); cell.style.setProperty("--c", col.c);
+      const cl = el("div", "cl", col.label + " · " + inCol.length); cl.style.setProperty("--c", col.c); cell.append(cl);
+      for (const k of inCol) cell.append(cardButton(k));
+      cells.append(cell);
+    }
+    L.append(cells);
+    board.append(L);
+  }
+  if (!shown) board.append(el("p", "foot", "No cards match these filters."));
+  const r = $("recent"); r.innerHTML = "";
+  if (BOARD.changes?.length) {
+    r.append(el("h2", null, "Recently moved"));
+    const ul = el("ul");
+    for (const ch of BOARD.changes.slice(0, 10)) { const li = el("li"); li.append(el("time", null, ch.date), el("span", null, ch.text)); ul.append(li); }
+    r.append(ul);
+  } else r.hidden = true;
+  $("foot").textContent = BOARD.foot || "";
+}
+$("onlyDecisions").onclick = () => { state.onlyDecisions = !state.onlyDecisions; render(); };
+$("q").addEventListener("input", (e) => { state.q = e.target.value.trim().toLowerCase(); render(); });
+render();
+</script>

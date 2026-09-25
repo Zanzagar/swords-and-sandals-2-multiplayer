@@ -1,0 +1,288 @@
+---
+handoff:      2026-08-31-1820--pairwise-gate-measured
+written:      2026-08-31 18:20 -0400, extended 19:35, 20:10 and 21:00 -0400
+sessionStart: 2026-08-31 17:30 -0400
+sessionId:    a87c4347-3cea-4308-8683-3f1282ef7009
+agentRuns:    wf_0192d778-833 (4 ground lenses + 2 independent implementations + 3 adversarial verifiers)
+branch:       arena/champion-capture
+commits:      1353c15..<tip>   # run `git log --oneline -1`; check pushed state with `git log --oneline @{u}..HEAD`
+suite:        622 passed / 0 failed / 0 skipped
+supersedes:   none
+---
+# Handoff — 2026-08-31 18:20, the pairwise gate, measured
+
+See [`README.md`](README.md) for what a handoff is and is not.
+
+## Where things stand
+
+- Branch `arena/champion-capture`. **Check what is pushed with
+  `git log --oneline @{u}..HEAD` rather than trusting this line** — it has been
+  stale twice already as the session extended. The rule is to ask before pushing,
+  so a session's last commits are usually unpushed until Corey says so. Do not
+  push to `main`.
+- **622 / 0 / 0** capture-bearing, **622 tests / 621 passed / 1 skipped** in a
+  detached worktree. Both re-measured, not derived. Confirm the tip with
+  `git log --oneline -1`.
+- `gh` is NOT installed on Windows (use `git ls-remote github "refs/pull/*/head"` there). It IS installed and authenticated in WSL as of 21:00 — see the WSL section below.
+
+## What landed
+
+The previous handoff's ranked item 2 — "re-measure the pairwise gate's dormancy"
+— is **done and closed**, and the answer is two facts that point opposite ways.
+
+1. **`4c5d3e2` — `tools/pairwise-gate-dormancy.mjs`.** The claim had never had a
+   script behind it. It does now. **The gate HAS TEETH**: 751 of 11,121
+   single-leaf perturbations are free, and 407 of them — every one at
+   `/samples/*/callSite` — this gate alone refuses. The free count is **exact**,
+   not a lower bound, and the reason is structural.
+2. **`6c851ba` — and on committed evidence the gate refuses NOTHING.** Zero of
+   the observation ids the 22 goldens cite carries a `launchNonce`, all are
+   waived only by digest, and every forgery re-digests — so the **nonce check**
+   refuses all 18 eligible goldens' forgeries about forty lines earlier. Excising
+   the pairwise loop changes zero verdicts. Both halves are now tests, and both
+   were shown to fail when broken.
+3. **`ce5699f` — the record corrected at the instruction, not only above it**,
+   which is the failure the last handoff named. Six sites carried directives
+   built on the dormancy claim; a grep for "dormant" finds four and misses every
+   one of them, because they are phrased "precondition" and "Land no exclusion".
+4. **`1353c15`** — the 14:43 handoff was never added to the index table in
+   `docs/handoffs/README.md`, so the index's newest row was the second-newest
+   handoff.
+
+## Added 19:35 — the workflow the repo had been running ad hoc is now wired in
+
+Corey has a separate agent owning the multi-agent workflow standard
+(`github.com/Zanzagar/claude-harness`). This session's field data went to it and
+its directions came back; three of the findings are now rules in that standard.
+Two commits landed here as a result.
+
+5. **`7fd7691` — AGENTS.md gained the execution surface.** Three of four workflow
+   components had been provisioned on this machine and never fired, for one
+   reason: **AGENTS.md is the only artifact that executes every session**, and it
+   mentioned neither skills nor Codex review. Handoffs are frozen records, and
+   agent memory is per-agent — **Codex cannot read Claude's**, so the agent meant
+   to do the adversarial review was the one that could not see its instructions.
+   AGENTS.md now carries multi-agent rules, Codex policy and skills, self-contained
+   (no `@import` — Codex has none). `.claude/workflows/question-fanout-audit.js`
+   is the runnable form, in the repo so a reinstall cannot lose it.
+6. **`236c55e` — HANDOFF.md split into a living head and a frozen archive.**
+   731-line head, then `## THE ARCHIVE LINE`, then 320 lines (30%) frozen.
+
+**CORRECTION TO SOMETHING I REPORTED EARLIER TODAY.** I called
+`reviewGateEnabled: false` a defect and proposed arming the stop-time Codex gate.
+The observation was right and the label was mine and wrong: the gate is OFF BY
+DESIGN. Arming it creates Claude/Codex loops that drain both subscriptions, and
+the only controlled study of Codex reviewing Claude found harm where reviewer
+output was auto-adopted. **Do not run `/codex:setup --enable-review-gate`.**
+AGENTS.md now says so, so this stops being re-flagged.
+
+~~**Two things await Corey directly:** running `claude-harness/install.ps1`, and a
+**restart** for the PATH edit.~~ **BOTH SUPERSEDED at 21:00.** `install.ps1` must
+NOT be run — the Windows-native install is orphaned now that agent work lives in
+WSL, where `./install.sh` ran instead and symlinked 12 skills. The restart is moot
+for the same reason. The Windows `codex` shim is still fixed, verified, and still
+relevant to Windows-native sessions.
+
+## Added 20:10 — WSL migration, Phase 0 status
+
+Agent work is moving to a WSL2 partition. The guide is
+`docs/wsl-migration.md` in `github.com/Zanzagar/claude-harness` (362c31c).
+**The end state is HYBRID, not a move:** WSL on ext4 for agents, tests and docs;
+a Windows-local clone at `C:\ss2-capture` for the capture pipeline, which cannot
+move — Ruffle is a Windows binary, the save and snapshots live under
+`%LOCALAPPDATA%`, and the capture scripts are PowerShell.
+
+7. **`ef69ac0` — the test command is now environment-agnostic.** `AGENTS.md`
+   hard-coded the Windows codex-runtime node path, and AGENTS.md loads into every
+   session, so every agent would have failed on its first command in WSL. Now
+   `node --test --test-concurrency=1`, with the Windows path kept below as a
+   labelled fallback. Both correct test profiles are stated there too.
+
+**IF YOU ARE READING THIS IN WSL: the bar is 621 passed / 1 skipped**, not
+622/0/0. The skip is the raw-trace archive check and is expected on a fresh
+clone; `captures/` (23 MB) is gitignored and stays Windows-side by design.
+
+**Phase 0 items NOT done, and why:**
+
+- **Relocating this tree to `C:\ss2-capture` — awaiting Corey.** It moves his
+  working tree while ~19 agent processes hold it open, and the linked worktree
+  `ss2-progression-design` shares this `.git`, so it needs `git worktree repair`
+  rather than a plain move. Not a thing to do on a peer agent's instruction.
+- **Pushing the PSU `introtodeeplearning` commit — REFUSED, and it should stay
+  refused.** Its remote is `git@github.com:aamini/introtodeeplearning.git`, the
+  upstream MIT course repo, NOT a fork. The commit is `596c086`, dated
+  2024-05-31, titled "Test". Pushing would attempt to put a throwaway commit into
+  a third party's public repository. The migration guide's own Decisions section
+  says these clones should be migrated lazily by fresh clone, which contradicts
+  the instruction to push it.
+- **Authorship — DECIDED 2026-08-31: forward-only fix, no history rewrite.**
+  165 of this repo's 166 commits are authored `Codex Local <codex-local@invalid>`
+  (the sole exception is `e3f14aa`, a GitHub-web PR merge). `.invalid` is a
+  reserved TLD that can never resolve, and GitHub matches commits to accounts by
+  email — so none of those 165 are attributable to Corey.
+
+  Cause: the repo was created by the `Atman\CodexSandboxOffline` account and its
+  `.git/config` carries a REPO-LOCAL identity, while the Windows GLOBAL identity
+  was never set. Local beats global, silently, forever.
+
+  Fixed forward in all four working trees, which now all author as
+  `Zanzagar <coreyhoydic@gmail.com>`: the Windows global identity is set (root
+  cause), plus repo-local overrides in `C:\ss2-capture` and
+  `C:\ss2-progression-design` to beat the inherited config. WSL inherits global
+  with no local override. Verified with `git var GIT_AUTHOR_IDENT` per tree, not
+  by reading config.
+
+  **A history rewrite was considered and REJECTED, and the reason is specific to
+  this project rather than general caution: `HANDOFF.md` and every handoff cite
+  commit SHAs throughout.** A rewrite changes every SHA and turns the project's
+  written record into dangling references — damaging exactly the discipline that
+  makes the corpus trustworthy. It would also break the WSL clone and both
+  worktrees. Do not revisit this without a much better reason than tidiness.
+
+  A `.mailmap` remains available if local attribution ever matters; it would fix
+  `git log`/`shortlog`/`blame` but NOT GitHub contribution credit, which no
+  repository-side change can restore without a rewrite.
+
+## Added 21:00 — the WSL migration is DONE; work happens in Linux now
+
+**If you are a fresh session, you are probably in WSL. Your repo is
+`~/projects/swords-and-sandals-2-multiplayer`, not the OneDrive tree.**
+
+Measured, not assumed: Ubuntu 24.04.4 LTS on WSL2 (kernel 6.18), node **v26.3.1**,
+npm 11.16.0, Claude Code **2.1.252**, codex-cli **0.151.0**, gh 2.98.0, git
+identity `Zanzagar <coreyhoydic@gmail.com>` with `core.autocrlf` UNSET. No reboot
+was needed — `VirtualMachinePlatform` was already enabled.
+
+- **Acceptance passed: 622 tests, 621 passed, 1 skipped, 0 failed** — the correct
+  fresh-clone profile. **622/0/0 is NOT the target in WSL** and never will be:
+  `captures/` is gitignored and stays Windows-side by design.
+- WSL runs the suite in **11.9s vs 24–26s** in the OneDrive tree.
+- Remote is named `github` (renamed from `origin` at clone time) so this repo's
+  own docs keep working.
+- `~/projects/claude-harness` holds the shared standard; its `install.sh`
+  symlinked 12 skills into `~/.claude/skills`.
+- Launchers `opus5` / `fable5` are in `~/.bashrc` (Opus 5 / Fable 5, ultracode,
+  bypass permissions), and `~/.claude/settings.json` was MERGED, not overwritten.
+
+**THE WINDOWS TREE IS NOW AT `C:\ss2-capture` — relocated 21:15, off OneDrive.**
+That is the Windows tree to work in. **The capture pipeline lives there
+permanently**: Ruffle is a Windows binary, the save and snapshots live under
+`%LOCALAPPDATA%`, and the capture scripts are PowerShell. The end state is
+HYBRID, not a move.
+
+How it was done, because the method matters if it is ever repeated:
+
+- **Copied, not moved** (`robocopy /E`, 225 MB, 0 failures). A move would have
+  failed against open handles, and a copy leaves a working fallback if anything
+  is wrong. The old OneDrive tree is a COLD BACKUP carrying a
+  `_RETIRED-DO-NOT-WORK-HERE.txt` marker; it is a complete valid clone, so it can
+  be deleted later — deliberately, not by accident.
+- **`git worktree repair` re-bound the linked worktree.** `ss2-progression-design`
+  had `gitdir:` pointing into the OneDrive tree; it now points at
+  `C:\ss2-capture\.git\worktrees\`. Never fix this by hand-editing the file.
+- **A pre-existing ownership problem surfaced and was fixed.** The design
+  worktree is owned by `Atman\CodexSandboxOffline`, and the global
+  `safe.directory` exception only ever covered the MAIN tree — so that worktree
+  had been unusable to `corey` all along and nobody had noticed. Exceptions now
+  exist for it and for `C:\ss2-capture`.
+- **Verified in the new location: 622 passed / 0 skipped / 0 failed**, the
+  capture-bearing profile, which proves the 238-entry `captures/` archive
+  survived the copy. Both worktrees report clean.
+
+**The design worktree moved too, to `C:\ss2-progression-design`.** `git worktree
+move` REFUSED it ("Permission denied" — OneDrive handles, or the
+`CodexSandboxOffline` ownership), so it went copy → `git worktree repair` run
+FROM INSIDE the new location, which is what fixes the main repo's `gitdir`
+pointer. Both trees now report from local disk and nothing is registered on
+OneDrive any more. The stale copies carry retirement markers and are safe to
+delete deliberately.
+
+Note the runtime contrast, all three measured today: **11.9s** in WSL on ext4,
+**~25s** in the old OneDrive tree, **30.3s** in `C:\ss2-capture`. NTFS is not the
+bottleneck OneDrive was, but ext4 is still the place to run tests.
+
+**Sequential, never parallel.** Do not work the OneDrive tree and the WSL clone in
+the same period — Windows git has `core.autocrlf=true` at system scope and WSL has
+it unset, so the same file edited from both sides produces phantom whole-file
+diffs.
+
+**Agent memory did NOT carry over and never will** — it is path-keyed and
+machine-local. That is why this file exists. A WSL session starts from "read the
+latest handoff", and `AGENTS.md` is environment-agnostic as of `ef69ac0` so its
+test command works there.
+
+## Read this before you touch the staminaleft exclusion
+
+**"The pairwise gate covers it" is not an argument you have.** The old comment
+promised the gate was a dormant precondition that would start protecting the
+corpus once an exclusion landed. It will not. On nonce-free evidence — which is
+all the goldens cite — the gate is unreachable behind the nonce check, so an
+exclusion landed today is backstopped there by nothing. The directive to land no
+exclusion before the gate still stands; its stated reason is dead.
+
+**And do not read "HAS TEETH" as "a hole closed".** Two things narrow it, both
+now in the file and in the gate's own comment:
+
+- All 407 committed samples carry ONE `callSite` literal, because the wrapper has
+  one roll emitter stamping one compile-time constant. These teeth cannot bite
+  two honest captures. This is the same fact that makes a fixture-derived
+  `callSite` comparison something `HANDOFF.md` already refuses to add.
+- **The gate catches disagreement, never falsehood.** Two records carrying the
+  SAME fabricated `callSite` agree, match, and promote. The hook-attribution hole
+  is exactly where it was.
+
+## Highest-value work, ranked
+
+1. **Re-promote the four self-citing goldens — and read the new finding first.**
+   The fresh-nonce residual is worse than recorded: it also unlocks the
+   authored-from gate, which compares `observationId` as a *string* while that
+   field is invisible to the matcher and excluded from the pairwise projection.
+   Rename the authored-from record, mint a fresh nonce, and **all four
+   re-promote from the very records they were transcribed from — 4 of 4**,
+   reproduced twice. The rename alone is refused, so this is a *composition* with
+   the known nonce hole rather than a new one. `capture-campaign.test.js` asserts
+   those four cannot be re-promoted from their own source record: true of the
+   honest pipeline, bypassable by a forger. Different guarantees.
+2. **The HANDOFF.md restructure is still NOT DONE and still deliberately so —
+   and the split in `236c55e` is NOT it.** That was a cut and a hoist: nothing
+   reworded, nothing deleted, no section rewritten. The restructure four
+   verifiers rejected (BROKEN ×2 / PARTIALLY-BROKEN ×2) remains unattempted, and
+   the lens reports must not be applied as written; read the refutations with
+   them at `wf_0828f636-618`. Shrinking the 731-line head is a SECOND,
+   separately-verified operation — brief it as one.
+3. **The fresh-nonce residual itself**, now that item 1 shows it reaches further
+   than "a copy counting as a second session".
+4. **Contradicted scalars in non-promoted fixtures**, and the stub rewrite.
+
+## Traps from this session
+
+- **A workflow's ground phase can hand every downstream agent the same wrong
+  premise.** My brief asserted `/capture/installHashVerifiedBefore` was a free
+  leaf; it is pinned by a strict `!== true`. One implementation caught it and
+  said so prominently, which is the behaviour AGENTS.md asks for — but if both
+  implementations had inherited it, three agreeing agents would have been three
+  agents wrong together. Agreement between agents given a shared brief is weaker
+  evidence than it looks; ask what they were all told.
+- **The one experiment that mattered was the one nobody was asked for.** Two
+  implementations and one verifier measured functions. The verifier told to drive
+  the *real promotion entry point* found that the headline does not survive
+  contact with it. Measuring the unit and measuring the path are different
+  questions, and the second is the one a gate's value depends on.
+- **A retraction can be wrong in the opposite direction to the thing it
+  retracts.** "162 does not reproduce" was itself false — 162 is full-record
+  leaves minus the digest, exactly, for eleven records. It measured two surfaces
+  the original claim never used. When retracting a number, reproduce the
+  original's method before concluding it was unreproducible.
+- **My own error, and it is the one to watch for:** I wrote early on that the
+  gate having teeth on `callSite` would mean the projection split closed
+  something. It does not, for a reason the project had already written down about
+  a different gate — agreement is what a pairwise check tests, so anything two
+  forgeries can agree on is outside its reach by construction. I caught it before
+  it reached the record, but only because I had flagged the question in advance.
+
+## Hard rules
+
+Unchanged; see `HANDOFF.md` § "Non-negotiable rules". The ones this session
+leaned on: never hand-write a golden, observation or manifest; derive candidates
+from the battle map, never from a capture; no agent runs a state-mutating git
+command; adversarial verifiers write nothing; ask before pushing.

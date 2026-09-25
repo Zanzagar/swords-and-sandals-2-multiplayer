@@ -628,10 +628,13 @@ test("every spell fixture round-trips through simulate -> ingest -> verify", () 
 });
 
 test("a spell action is observed as the spell ingress, never as a hit or a miss", () => {
-  // Map lines 366-371: the complete call inventory of magic_damage_character
+  // Map §"Spell ingress `magic_damage_character`": the complete call inventory
   // contains neither defender_hurt nor defender_blocked, so neither event may
   // appear. `method` is its damage_method argument — the defender animation
-  // label (map lines 346-350), null where the map records none.
+  // label — and it is a property of the ARM, so every member of a family
+  // carries the same one. **There is no longer a null case to assert**: the
+  // three that carried one (31, 32, 35) were corrected on 2026-09-20 from the
+  // bytes of the two shared call sites, `+0x91c1` and `+0x85af`.
   const observed = (fixtureId) => {
     const fixture = fixturesById.get(fixtureId);
     return ingestSs2CaptureTrace(
@@ -648,12 +651,25 @@ test("a spell action is observed as the spell ingress, never as a hit or a miss"
     { type: "death", side: "villain" },
     { type: "overlay-label", label: "combatwon" }
   ]);
-  // dire fireball: the map records a damage range but no animation label.
+  // Dire fireball. **This asserted `method: null` until 2026-09-20**, and the
+  // null was a live false-divergence trap: the capture wrapper emits the
+  // build's real `arguments[4]`, which at `+0x91c1` is the literal `"burning"`
+  // pushed once for all three fireballs, and this fixture is an ACTIVE staged
+  // capture target. The assertion agreed with the candidate and both were
+  // wrong; a green test is not a measurement.
   assert.deepEqual(observed("candidate-spell-lethal-slain"), [
-    { type: "magic-damage", method: null },
+    { type: "magic-damage", method: "burning" },
     { type: "death", side: "hero" },
     { type: "overlay-label", label: "combatlost" }
   ]);
+  // And the bolt family's own shared label, which no fixture carried before:
+  // a frightning bolt (35) plays `lightning` exactly as a lightning bolt (34)
+  // does, because they share the call site at `+0x85af`.
+  assert.equal(SS2_DIRECT_DAMAGE_SPELLS[35].damageMethod, "lightning");
+  assert.equal(SS2_DIRECT_DAMAGE_SPELLS[34].damageMethod, "lightning");
+  assert.equal(SS2_DIRECT_DAMAGE_SPELLS[31].damageMethod, "burning");
+  assert.equal(SS2_DIRECT_DAMAGE_SPELLS[32].damageMethod, "burning");
+  assert.equal(SS2_DIRECT_DAMAGE_SPELLS[30].damageMethod, "burning");
   for (const fixture of fixtures) {
     const events = observed(fixture.fixtureId);
     assert.equal(events.some((event) => event.type === "defender-hurt"), false);

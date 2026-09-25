@@ -25,10 +25,15 @@ The capture vehicle is **validated end to end against a structural stub**:
    isolation, event emission and ordering, and the whole
    delog→ingest→verify pipeline.
 3. Validated against the licensed build itself, by the sessions behind all
-   **22 promoted goldens** — twelve prisoner kills across every melee attack
-   direction and ten probe arms: the real instance path
+   ~~**22 promoted goldens**~~ **23 promoted goldens** (corrected 2026-09-24;
+   count them with `ls test/fixtures/ss2-1v1-golden/*.json | wc -l`) — twelve
+   prisoner kills across every melee attack
+   direction and ten probe arms, **plus the tournament golden
+   `golden-armoured-deflection-threshold-cleared` (`2341789`): `fightMode:
+   "tournament"`, a villain wrapper-staged at `armourclass 79`**: the real
+   instance path
    `arena.gladiators.overlay`, live battle-flow timing, the `misc` fight
-   mode, the direction-gated arming, the Math-shadow interception, and the
+   mode (and, for that one, `tournament`), the direction-gated arming, the Math-shadow interception, and the
    whole unattended navigate-fight-close cycle. Non-lethal outcomes are
    exercised too: the six `probe-*-rollneeded-miss` records close on
    `defender-blocked` with no result event.
@@ -36,10 +41,13 @@ The capture vehicle is **validated end to end against a structural stub**:
    fallback for a trace that did not auto-finish, and no unattended run has
    needed it — the wrapper closes its own trace); the archer controllers
    (this fight forces `using_bow = false`, so `bombard*`/`snipe*`/`bash_attack`
-   need a gladiator that owns a bow); and any scenario **staged** with armour
-   or status flags. Note that the armour probes do not close that last gap:
+   need a gladiator that owns a bow); and any scenario **staged** with ~~armour
+   or~~ status flags. Note that the armour probes do not close that last gap:
    they stage `armourclass: 0` and vary only an injected roll value, so what
    they measure is the armour-selection *draw*, not armour absorption.
+   **(Corrected 2026-09-24: ARMOUR has been exercised live — the tournament
+   golden above stages its villain at `armourclass 79` and measures absorption
+   79 → 57. Status flags still have not.)**
 
 Run `validate-vehicle.ps1` after every wrapper edit; run
 `launch-capture.ps1` for real sessions (it verifies hashes, rebuilds,

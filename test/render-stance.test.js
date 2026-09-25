@@ -1,0 +1,554 @@
+/**
+ * THE CHARGED STANCE — what a gladiator holds between actions.
+ *
+ * WHY THIS FILE EXISTS: the idle pose was two lines inside the browser shell's
+ * draw loop, so "which pose does a gladiator rest in" was a decision the suite
+ * could not reach and nothing had ever asked. The build's answer is not
+ * `Standing` for everyone.
+ *
+ * WHAT IS THE BUILD'S AND WHAT IS THIS ENGINE'S:
+ *
+ * - **The build's**, in `changeCombatants` (overlay frame 52,
+ *   `DoAction@0x240c7f`, anonymous function at `+0x27a6`): both fighters are
+ *   reset with `gotoAndPlay("Standing")` (`+0x27db`, `+0x27ef`) and then
+ *   whichever holds a charge is overridden with `gotoAndStop` — counter 2 to
+ *   `psyche_charging` (`+0x281e` attacker, `+0x287c` defender), counter 3 to
+ *   `psyche_charging2` (`+0x284d`, `+0x28ab`). `gotoAndStop`, so ONE frame.
+ * - **This engine's**: the two authored fallback poses, the decision to derive
+ *   the stance at the draw site rather than push it down the presentation
+ *   stream, and holding `at` at 0.
+ */
+import assert from "node:assert/strict";
+import nodeFs from "node:fs";
+import nodePath from "node:path";
+import { fileURLToPath as toPath } from "node:url";
+import test from "node:test";
+
+import { clipLabelsFor } from "../src/render/clip-labels.js";
+import { CLIP_SEQUENCES } from "../src/render/clip-sequences.js";
+import { animationFor, figureEffectGroupsFor, figurePackFrom, poseIndexAt } from "../src/render/extracted-figure.js";
+import { chooseSound, soundLabelsFor } from "../src/render/sound.js";
+import {
+  CELEBRATION_LABEL,
+  STANCE_CLIPS,
+  STANCE_RESOURCE,
+  StanceError,
+  allStanceLabels,
+  idleFrameFor,
+  isStanceFamily,
+  stanceFamiliesCover,
+  stanceLabelFor
+} from "../src/render/stance.js";
+import { SS2_PSYCHE_UP } from "../src/team/ss2-rules.js";
+import { poseAt, timelineFor } from "../src/render/timeline.js";
+
+function readRealPack(relative) {
+  const at = nodePath.join(toPath(new URL("..", import.meta.url)), relative);
+  return nodeFs.existsSync(at) ? JSON.parse(nodeFs.readFileSync(at, "utf8")) : null;
+}
+const REAL_SHAPES = readRealPack("assets/figure/shapes.json");
+const REAL_ANIMATIONS = readRealPack("assets/figure/animations.json");
+const REAL_PACK = REAL_SHAPES && REAL_ANIMATIONS ? figurePackFrom(REAL_SHAPES, REAL_ANIMATIONS) : null;
+
+/** A combatant as `toTeamWireState` projects one, carrying only what matters here. */
+const charged = (value) => ({
+  id: "hero",
+  alive: true,
+  resources: value === null ? {} : { [STANCE_RESOURCE]: { value, min: 0, max: null } }
+});
+
+/* ------------------------------------------------------------------ *
+ * WHICH POSE
+ * ------------------------------------------------------------------ */
+
+test("A CHARGED GLADIATOR DOES NOT STAND IN `Standing`, which is the whole finding", () => {
+  assert.equal(stanceLabelFor(charged(2)), "psyche_charging");
+  assert.equal(stanceLabelFor(charged(3)), "psyche_charging2");
+  assert.equal(idleFrameFor(charged(2), { now: 4321 }).label, "psyche_charging");
+  assert.equal(idleFrameFor(charged(3), { now: 4321 }).label, "psyche_charging2");
+});
+
+test("THE FLOOR IS NOT A CHARGE, and neither is a value the build cannot reach", () => {
+  // ► **1 IS THE FLOOR AND IT MUST NOT POSE.** Both of the build's resets write
+  //   1 — `nextphase` on any other decision, `damagecharacter` on the defender
+  //   of a landed blow — so 1 is the state every uncharged gladiator is in. A
+  //   stance at 1 would put the whole roster in the charged pose.
+  assert.equal(stanceLabelFor(charged(1)), null);
+  assert.equal(idleFrameFor(charged(1), { now: 0 }).label, "Standing");
+
+  // The build tests EQUALITY against two constants, so nothing outside {2,3}
+  // poses. 4 is unreachable — at 3 the next press discharges — and a range
+  // check (`>= 2`) would have posed it anyway.
+  assert.equal(stanceLabelFor(charged(4)), null);
+  assert.equal(stanceLabelFor(charged(0)), null, "a below-floor value is fresh, not charged");
+  assert.equal(stanceLabelFor(charged(2.5)), null);
+});
+
+test("AN ABSENT COUNTER IS NOT A ZERO, and every golden's gladiator has one absent", () => {
+  // ► **`psyche_up` HAS NO `SS2_RESOURCE_DEFAULTS` ENTRY, deliberately** — a
+  //   defaulted name moves all 23 golden replay hashes — so a combatant carries
+  //   the resource only when its record states one. If `undefined` threw, or
+  //   posed, every golden combatant would be affected the moment it was drawn.
+  assert.equal(stanceLabelFor(charged(null)), null);
+  assert.equal(stanceLabelFor({}), null);
+  assert.equal(stanceLabelFor(null), null);
+  assert.equal(stanceLabelFor(undefined), null);
+  assert.equal(idleFrameFor({}, { now: 0 }).label, "Standing");
+});
+
+/* ------------------------------------------------------------------ *
+ * HELD, NOT PLAYED
+ * ------------------------------------------------------------------ */
+
+test("A STANCE IS HELD AT 0 AND THAT IS THE `gotoAndStop`", () => {
+  // ► **RUNNING A CLOCK OVER IT WOULD ANIMATE A POSE THE BUILD FREEZES.** With
+  //   the extracted pack, `psyche_charging` is nine frames; `at` chases
+  //   `poseIndexAt` across all nine, so a moving `at` plays the charge as a
+  //   loop rather than holding the frame `gotoAndStop` leaves the playhead on.
+  for (const now of [0, 137, 4321, 999999]) {
+    assert.equal(idleFrameFor(charged(2), { now }).at, 0, `held at ${now}ms`);
+  }
+  // The ordinary idle DOES breathe, and on the caller's clock.
+  const standing = timelineFor("Standing", { role: "actor" });
+  assert.equal(idleFrameFor(charged(1), { now: 0 }).at, 0);
+  assert.notEqual(idleFrameFor(charged(1), { now: standing.durationMs / 2 }).at, 0);
+  assert.equal(idleFrameFor(charged(1), { now: standing.durationMs }).at, 0, "and it wraps");
+});
+
+test("`now` IS AN ARGUMENT, so the idle's phase is reachable rather than wall-clock", () => {
+  // A module that read the clock itself could not be asked where in the cycle
+  // it is, which is the whole reason this decision left the shell.
+  const standing = timelineFor("Standing", { role: "actor" });
+  assert.equal(idleFrameFor(charged(1), { now: standing.durationMs / 4 }).at, 0.25);
+  // A caller that passes nothing gets the start of the cycle, not NaN.
+  assert.equal(idleFrameFor(charged(1)).at, 0);
+  assert.equal(idleFrameFor(charged(1), { now: Number.NaN }).at, 0);
+  assert.equal(idleFrameFor(charged(1), { now: Number.POSITIVE_INFINITY }).at, 0);
+  // ► **AND A NEGATIVE `now`, which this guard used to let straight through.**
+  //   `%` keeps the sign of the dividend, so `now = -500` gave `at = -0.347`
+  //   while the docstring promised normalisation. `poseAt` clamps it, so
+  //   nothing drew wrongly — the promise was what was broken. Found by a
+  //   verifier; unreachable from `performance.now()`, which is the reason to
+  //   fix the guard rather than to trust the caller.
+  assert.equal(idleFrameFor(charged(1), { now: -500 }).at, 0);
+  assert.equal(idleFrameFor(charged(1), { now: Number.NEGATIVE_INFINITY }).at, 0);
+});
+
+test("A CORPSE HAS NO STANCE, even one that died holding a charge", () => {
+  // ► **THE SHELL GUARDS THIS AND THAT WAS THE WHOLE DEFENCE.** `render` takes
+  //   the `!combatant.alive` branch to the death pose before it ever asks for
+  //   an idle, so a verifier had to hand-forge a dead-and-charged combatant to
+  //   expose it — and got `psyche_charging` back. One call site is not a
+  //   contract, and a glowing corpse braced for a blow is a wrong picture with
+  //   no error.
+  const deadAndCharged = { id: "hero", alive: false, resources: { [STANCE_RESOURCE]: { value: 3 } } };
+  assert.equal(stanceLabelFor(deadAndCharged), "psyche_charging2", "the counter is still readable");
+  assert.equal(idleFrameFor(deadAndCharged, { now: 0 }).label, "Standing",
+    "but the dead hold no stance");
+  // Absent `alive` is NOT dead: most of this module's callers pass a projection
+  // that always carries it, but a fixture that omits it must still pose.
+  assert.equal(idleFrameFor({ resources: { [STANCE_RESOURCE]: { value: 3 } } }, { now: 0 }).label,
+    "psyche_charging2");
+  assert.equal(idleFrameFor({ alive: true, resources: { [STANCE_RESOURCE]: { value: 3 } } }, { now: 0 }).label,
+    "psyche_charging2");
+});
+
+test("the held pose is CONSTANT, so nothing can make it drift by moving `at`", () => {
+  // Belt and braces with the `at` of 0 above: one keyframe means every `at`
+  // interpolates to the same pose, so a surface that ignored `at` — or a future
+  // one that tweened into the stance — still rests where the build rests.
+  const { timeline } = idleFrameFor(charged(2), { now: 0 });
+  assert.equal(timeline.keyframes.length, 1);
+  assert.deepEqual(poseAt(timeline, 0), poseAt(timeline, 0.5));
+  assert.deepEqual(poseAt(timeline, 0), poseAt(timeline, 1));
+  assert.equal(timeline.loop, true, "an idle loops; it does not end and hand back");
+});
+
+test("THE TWO LEVELS DO NOT READ ALIKE, which is why they are two families", () => {
+  const one = idleFrameFor(charged(2), { now: 0 }).timeline;
+  const two = idleFrameFor(charged(3), { now: 0 }).timeline;
+  assert.equal(one.family, "stance:psyche");
+  assert.equal(two.family, "stance:psyche2");
+  assert.notDeepEqual(poseAt(one, 0), poseAt(two, 0), "a deeper charge must look deeper");
+  // And the deeper one is braced further: lower, wider, wound further in.
+  assert.ok(poseAt(two, 0).bob < poseAt(one, 0).bob);
+  assert.ok(poseAt(two, 0).legSpread > poseAt(one, 0).legSpread);
+});
+
+/* ------------------------------------------------------------------ *
+ * THE JOINS
+ * ------------------------------------------------------------------ */
+
+test("every stance label resolves through its own family, or the pack is ignored silently", () => {
+  // ► **MEMBERSHIP IS THE GUARD IN `animationFor`**, so a stance whose family
+  //   does not list its own label falls back to authored art on a machine that
+  //   HAS the extraction — a wrong picture with no error anywhere.
+  assert.equal(stanceFamiliesCover(), true);
+  for (const { label, family } of STANCE_CLIPS.values()) {
+    assert.ok(clipLabelsFor(family).includes(label), `${family} must list ${label}`);
+    assert.equal(timelineFor(label).family, family);
+    assert.equal(timelineFor(label).recognised, true);
+  }
+  assert.deepEqual(allStanceLabels(), ["psyche_charging", "psyche_charging2"]);
+});
+
+test("THE STANCE KEYS ARE COUPLED TO THE COUNTER, or the two drift in silence", () => {
+  // ► **NOTHING TIED THESE TWO HALVES TOGETHER AND A VERIFIER SAID SO.** The
+  //   stance table keys on 2 and 3; `SS2_PSYCHE_UP` owns the floor (1) and the
+  //   discharge point (3). Raise the floor to 2, or `dischargeAt` to 4, and
+  //   `STANCE_CLIPS` goes stale — posing an uncharged gladiator, or posing
+  //   nobody — **with all of this file's other tests still green**, because it
+  //   imported nothing from the rule set and `test/ss2-psyche-up.test.js`
+  //   imports no stance function. This is the edge that was missing.
+  //
+  //   The charged states are exactly the values strictly above the floor and at
+  //   most the discharge point: with floor 1 and dischargeAt 3, that is {2, 3}.
+  const chargedValues = [];
+  for (let value = SS2_PSYCHE_UP.floor + 1; value <= SS2_PSYCHE_UP.dischargeAt; value += 1) {
+    chargedValues.push(value);
+  }
+  assert.deepEqual([...STANCE_CLIPS.keys()], chargedValues,
+    "the stance table must key on exactly the counter's charged states");
+  // And the floor itself is never a stance, which is the other half of the same
+  // fact: a gladiator who has taken any other turn sits at the floor.
+  assert.equal(stanceLabelFor(charged(SS2_PSYCHE_UP.floor)), null);
+  assert.ok(stanceLabelFor(charged(SS2_PSYCHE_UP.dischargeAt)) !== null,
+    "a fully charged gladiator must be posed");
+});
+
+test("THE UNCHARGED SET IS {0, 1}, because the arena's own roster authors 0", () => {
+  // ► **`tools/arena/roster.js` STATES `psyche_up: 0`**, below the build's
+  //   floor of 1, and the rule set reconciles it with `Math.max(floor, stated)`
+  //   at press time rather than at authoring time — so an arena gladiator
+  //   really does hold 0 until his first press, and that press takes him
+  //   straight to 2. This module's header argued only about 1.
+  for (const value of [0, 1]) {
+    assert.equal(stanceLabelFor(charged(value)), null, `${value} is not a charge`);
+  }
+});
+
+test("A STANCE IS SILENT, and the build's own bindings are not what makes it so", () => {
+  // Both charging clips carry no `StartSound`, so this changes nothing on the
+  // shipped build — which is exactly why the policy is written down rather than
+  // relied upon. It would change the day someone bound one.
+  assert.ok(isStanceFamily("stance:psyche"));
+  assert.equal(isStanceFamily("psyche"), false);
+  assert.deepEqual(soundLabelsFor("stance:psyche"), []);
+  assert.equal(chooseSound({ psyche_charging: ["1194.mp3"] }, "stance:psyche", 0, "psyche_charging"), null,
+    "even a bound stance stays silent: the psych-up sound already played on the action");
+});
+
+test("a stance label with no family FAILS LOUDLY rather than resting in `unknown`", () => {
+  // Unreachable while `clip-labels.js` and `timeline.js` agree. It throws
+  // because the alternative is a charged gladiator resting in the `unknown`
+  // schedule, which looks like an ordinary idle and is a pose nothing chose.
+  const orphan = { resources: { [STANCE_RESOURCE]: { value: 2 } } };
+  assert.equal(idleFrameFor(orphan, { now: 0 }).label, "psyche_charging");
+  assert.throws(() => {
+    // The guard by hand, since the real tables are frozen and agree.
+    const timeline = timelineFor("psyche_not_a_clip", { role: "actor" });
+    if (!timeline.recognised) throw new StanceError("no family");
+  }, StanceError);
+});
+
+/* ------------------------------------------------------------------ *
+ * AGAINST THE REAL PACK
+ * ------------------------------------------------------------------ */
+
+test("THE CHARGED GLADIATOR GLOWS, and that is the resource made visible", () => {
+  if (!REAL_PACK) {
+    assert.equal(REAL_PACK, null, "no extraction on this machine");
+    return;
+  }
+  // ► **THIS IS THE FIRST TIME ANY FIGURE EFFECT GROUP REACHES A RESTING
+  //   GLADIATOR.** `tools/arena/main.js` recorded, measured 2026-09-15, that
+  //   `figureEffectGroupsFor` returns ZERO group records for every psyche label
+  //   at every `at` — true then, because nothing dispatched a psyche clip. The
+  //   stance holds one every frame a charge is banked.
+  for (const value of [2, 3]) {
+    const idle = idleFrameFor(charged(value), { now: 0 });
+    const groups = figureEffectGroupsFor(REAL_PACK, {
+      family: idle.timeline.family, label: idle.label, at: idle.at, height: 1
+    });
+    assert.equal(groups.length, 1, `counter ${value} must draw its glow`);
+    // ► **THE RECORD MUST CARRY A REAL FILTER STRING, not just exist.** A
+    //   group with `filter: null` would satisfy a count and draw nothing, which
+    //   is the shape of "the feature works over a population of zero" this
+    //   project has now recorded twice.
+    assert.match(groups[0].filter, /^drop-shadow\(/, `counter ${value}'s group must carry a CSS filter`);
+    assert.match(groups[0].filter, /rgba\(0, 255, 255, 1\)/, "and the psych-up glow is cyan");
+    assert.equal(groups[0].character, 1195, "drawn from the build's own `guard_charge` sprite");
+  }
+  // The control: an uncharged gladiator's idle carries none.
+  const plain = idleFrameFor(charged(1), { now: 0 });
+  assert.equal(figureEffectGroupsFor(REAL_PACK, {
+    family: plain.timeline.family, label: plain.label, at: plain.at, height: 1
+  }).length, 0);
+});
+
+test("the stance draws ONE frame of the build's clip, not the run", () => {
+  if (!REAL_PACK) {
+    assert.equal(REAL_PACK, null, "no extraction on this machine");
+    return;
+  }
+  // ► **`psyche_charging` IS NOT A SEQUENCE ENTRY AND MUST NOT BECOME ONE.** It
+  //   is the TAIL of `psyche_up`'s run; entering at it plays it alone, which is
+  //   what `gotoAndStop` does more strongly still. If `clip-sequences.js` ever
+  //   gained an entry for it, a resting gladiator would hold a concatenation.
+  const idle = idleFrameFor(charged(2), { now: 0 });
+  const { label, animation } = animationFor(REAL_PACK, { family: idle.timeline.family, label: idle.label });
+  assert.equal(label, "psyche_charging");
+  assert.equal(animation.poses.length, 9, "its own nine frames, and no continuation");
+  assert.equal(animation.playsSequence, undefined);
+  // And the frame shown is the FIRST one, which is frame 1618 in the build.
+  assert.equal(animation.firstFrame, 1618);
+});
+
+test("THE GLOW RADIUS FOLLOWS THE SCALE, which is the test `filtersScaled` waited for", () => {
+  if (!REAL_PACK) {
+    assert.equal(REAL_PACK, null, "no extraction on this machine");
+    return;
+  }
+  // ► **`tools/arena/main.js` SET THIS CONDITION AND COULD NOT MEET IT.**
+  //   `figureRouteFor()` returned `filtersScaled: false` with the reason
+  //   written out: *"`figureEffectGroupsFor` returns ZERO group records for
+  //   every psyche label at every `at`, so there is no figure filter string in
+  //   this repository to read at two scales and compare, and
+  //   `filtersScaled: true` would be an assertion no test could go red on.
+  //   Flip it in the commit that makes a figure group observable, beside a test
+  //   that reads two `figureEffectGroupsFor` results at two scales and asserts
+  //   the radius moved."* This is that test, and the stance is what made it
+  //   possible: the glow is now on a RESTING gladiator, every frame.
+  //
+  // ► **AND THE FAMILY IS WHAT SELECTS THE CLIP HERE, NOT THE LABEL** — a
+  //   verifier measured that `animationFor(pack, {family: "stance:psyche",
+  //   label: X})` resolves to `psyche_charging` for EVERY `X` it tried,
+  //   including `"Standing"`, because the family holds one clip and wins. So
+  //   passing the label proves nothing, and this test varies the FAMILY to show
+  //   the two levels really are two different glows.
+  const radiiAt = (family, scale) => {
+    const [group] = figureEffectGroupsFor(REAL_PACK, { family, at: 0, height: 1, scale });
+    return [...group.filter.matchAll(/drop-shadow\(0px 0px ([\d.]+)px/g)].map((match) => Number(match[1]));
+  };
+  // The two charge levels carry DIFFERENT radii, so a renderer that collapsed
+  // them into one clip would be visibly wrong rather than merely imprecise.
+  assert.notDeepEqual(radiiAt("stance:psyche", 1), radiiAt("stance:psyche2", 1));
+  // ► **AT SCALE 1 THE RADIUS IS THE FILTER'S OWN SIGMA IN CLIP PIXELS**, because
+  //   one clip pixel is one arena unit (`ARENA_UNITS_PER_CLIP_PIXEL`): the outer
+  //   glows are `blurX` 22 and 13 in the pack, and `sqrt((w^2 - 1) / 12)` is
+  //   6.3443 and 3.7417. ~~"4.2742" and "2.5208"~~ until 2026-09-23 — the same
+  //   two numbers times 150 / 222.65, the authored figure's height fitted to the
+  //   clip, which drew the whole gladiator at two thirds of the build's size.
+  assert.equal(radiiAt("stance:psyche", 1)[1].toFixed(4), "6.3443", "the first charge's outer glow");
+  assert.equal(radiiAt("stance:psyche2", 1)[1].toFixed(4), "3.7417", "the deeper charge's is tighter");
+  const one = radiiAt("stance:psyche", 1);
+  assert.equal(one.length, 2, "the psych-up glow is two drop-shadows, inner and outer");
+  // ► **LINEAR IN THE SCALE, WHICH IS WHAT "ARRIVES IN DEVICE PIXELS" MEANS.**
+  //   The shell passes `(origin.size ?? 1) * view.scale`, exactly the factor its
+  //   CTM carries, so a radius that tracks the argument is a radius already in
+  //   the space the canvas draws in.
+  for (const scale of [2, 4, 0.5]) {
+    const scaled = radiiAt("stance:psyche", scale);
+    scaled.forEach((radius, index) => {
+      assert.ok(Math.abs(radius - one[index] * scale) < 1e-3,
+        `radius ${index} at scale ${scale}: expected ${one[index] * scale}, got ${radius}`);
+    });
+  }
+  // The assertion that could have varied: a radius that IGNORED the argument
+  // would pass a "two scales differ" check written carelessly, so this pins
+  // that they differ BY THE FACTOR.
+  assert.notEqual(radiiAt("stance:psyche", 2)[1], one[1]);
+});
+
+/* ------------------------------------------------------------------ *
+ * THE VICTORY CELEBRATION
+ * ------------------------------------------------------------------ */
+
+test("A SURVIVING WINNER CELEBRATES, and does not go back to breathing", () => {
+  // ► **THE BUILD'S OWN ANSWER, at two overlay frames.** Frame 65, inside the
+  //   `combatwon` span (62-73), runs
+  //   `_root.arena.gladiators.hero.gotoAndPlay("celebrate1")`; frame 77, inside
+  //   `combatlost` (74-84), runs the same on `villain`. `celebrate1` carries no
+  //   `Stop`, runs on into `celebrate1a`, and frame 1426 is
+  //   `GoToLabel("celebrate1a"); Play` — so the winner celebrates until
+  //   something moves him, and in a finished bout nothing does.
+  const of = (o, options) => idleFrameFor({ id: "h", teamId: "red", alive: true, resources: {}, ...o }, options);
+  assert.equal(of({}, { now: 0, winnerTeamId: "red" }).label, CELEBRATION_LABEL);
+  assert.equal(of({}, { now: 0, winnerTeamId: "blue" }).label, "Standing", "the loser does not");
+  assert.equal(of({}, { now: 0 }).label, "Standing", "and nor does anyone while the bout runs");
+  assert.equal(of({}, { now: 0, winnerTeamId: null }).label, "Standing");
+});
+
+test("THE DEAD DO NOT CELEBRATE, even on the winning side", () => {
+  // A 3v3 can be won with casualties. The shell draws the death pose for the
+  // dead before it asks for an idle, and this is the same belt-and-braces the
+  // charged stance carries — one call site is not a contract.
+  const fallen = { id: "h", teamId: "red", alive: false, resources: {} };
+  assert.equal(idleFrameFor(fallen, { now: 0, winnerTeamId: "red" }).label, "Standing");
+});
+
+test("THE CELEBRATION OUTRANKS THE CHARGE, because a finished bout has nothing to spend it on", () => {
+  // ► **ORDER IS THE WHOLE ASSERTION.** A gladiator can win while still
+  //   holding a charge; both idles would claim him, and the celebration is the
+  //   later fact. The control is the same combatant on the losing side, who
+  //   keeps the charged pose.
+  const charged = { id: "h", teamId: "red", alive: true, resources: { [STANCE_RESOURCE]: { value: 3 } } };
+  assert.equal(idleFrameFor(charged, { now: 0, winnerTeamId: "red" }).label, CELEBRATION_LABEL);
+  assert.equal(idleFrameFor(charged, { now: 0, winnerTeamId: "blue" }).label, "psyche_charging2");
+  assert.equal(idleFrameFor(charged, { now: 0 }).label, "psyche_charging2");
+});
+
+test("it LOOPS, and the whole run is drawn rather than just the entry clip", () => {
+  const { timeline, at } = idleFrameFor(
+    { id: "h", teamId: "red", alive: true, resources: {} }, { now: 0, winnerTeamId: "red" }
+  );
+  assert.equal(timeline.loop, true, "a victory idle must not end and hand back");
+  assert.equal(at, 0);
+  // ~~27 beats~~ ~~27 of the build's FRAMES~~ the 26 frames the build SHOWS,
+  // at its 30 fps since 2026-09-24: the 9-frame `celebrate1` plus
+  // `celebrate1a`'s 1409-1425. Its 18th frame, 1426, is
+  // `GoToLabel("celebrate1a"); Play` and jumps before it renders
+  // (`clipPassesFor`) — ~~900 ms~~ 866.7 ms a pass.
+  assert.ok(Math.abs(timeline.durationMs - 2600 / 3) < 1e-9, `${timeline.durationMs} ms a pass`);
+  // And it breathes on the caller's clock, unlike the held stance.
+  assert.notEqual(idleFrameFor(
+    { id: "h", teamId: "red", alive: true, resources: {} },
+    { now: timeline.durationMs / 2, winnerTeamId: "red" }
+  ).at, 0);
+
+  if (!REAL_PACK) {
+    assert.equal(REAL_PACK, null, "no extraction on this machine");
+    return;
+  }
+  // ► **~~27~~ 26 POSES, NOT 9.** `celebrate1` runs on into `celebrate1a`, so a
+  //   winner who drew only the entry clip would flourish for a third of a
+  //   second and then snap back to the start. (26 since 2026-09-24: the jump
+  //   frame 1426 is never drawn.)
+  const { label, animation } = animationFor(REAL_PACK, { family: "celebrate", label: CELEBRATION_LABEL });
+  assert.equal(label, CELEBRATION_LABEL);
+  assert.equal(animation.poses.length, 26);
+  assert.deepEqual([...animation.playsSequence], ["celebrate1", "celebrate1a"]);
+});
+
+test("the winner test is STRICT, so a draw and a mistyped id both fall back to `Standing`", () => {
+  // ► **MEASURED RATHER THAN ARGUED**, because each of these is a way a caller
+  //   could get a celebration it did not mean — and the shell passes
+  //   `host.battle.result?.winnerTeamId`, which is null for a draw and for a
+  //   bout still running.
+  const one = (combatant, options) => idleFrameFor(combatant, options).label;
+  const red = { id: "h", teamId: "red", alive: true, resources: {} };
+
+  assert.equal(one(red, { now: 0, winnerTeamId: null }), "Standing", "a draw, or a bout still running");
+  assert.equal(one({ id: "h", alive: true, resources: {} }, { now: 0, winnerTeamId: "red" }), "Standing",
+    "a combatant with no teamId cannot be on the winning side");
+  assert.equal(one(null, { now: 0, winnerTeamId: "red" }), "Standing");
+
+  // Numeric team ids work, and are NOT coerced across types — the projection is
+  // consistent about its own types, and a loose `==` here would celebrate for a
+  // caller that had mixed them up.
+  assert.equal(one({ id: "h", teamId: 1, alive: true, resources: {} }, { now: 0, winnerTeamId: 1 }),
+    CELEBRATION_LABEL);
+  assert.equal(one({ id: "h", teamId: 1, alive: true, resources: {} }, { now: 0, winnerTeamId: "1" }),
+    "Standing");
+
+  // ► **AND `alive` IS TESTED FOR `=== false`, NOT FOR TRUTHINESS, which is the
+  //   same rule the charged stance uses and is deliberate.** A fixture that
+  //   omits `alive` is not a corpse, and every golden combatant is such a
+  //   fixture; requiring `alive === true` would silently stop them celebrating.
+  assert.equal(one({ id: "h", teamId: "red", resources: {} }, { now: 0, winnerTeamId: "red" }),
+    CELEBRATION_LABEL, "absent `alive` is not dead");
+  assert.equal(one({ ...red, alive: false }, { now: 0, winnerTeamId: "red" }), "Standing");
+});
+
+/* ------------------------------------------------------------------ */
+/* The celebration loops its TAIL, not its entry                       */
+/* ------------------------------------------------------------------ */
+
+test("THE VICTORY FLOURISH PLAYS ONCE, and the owner reported the version that did not", () => {
+  // ► **FRAME 1426 IS `GoToLabel("celebrate1a"); Play`, so the loop target is
+  //   the CONTINUATION.** Vanilla plays the 9-frame `celebrate1` entry once and
+  //   then cycles `celebrate1a`'s 18 forever. This engine looped all 27, which
+  //   `timeline.js` recorded as a stated approximation — *"the winner re-plays
+  //   his opening flourish once a cycle"* — until the owner watched a bout end
+  //   and reported it: **"the guy keeps victory emoting at the end too."**
+  //
+  //   A stated approximation is still a wrong picture. The split point is
+  //   DERIVED from `CLIP_SEQUENCES` (`entryFrames / frames`, 9 of ~~27~~ 26)
+  //   rather than authored as 0.333.
+  const winner = { id: "w", teamId: "red", alive: true };
+  const run = CLIP_SEQUENCES[CELEBRATION_LABEL];
+  const entry = run.entryFrames / run.frames;
+  const duration = idleFrameFor(winner, { now: 0, winnerTeamId: "red" }).timeline.durationMs;
+  const at = (cycles) => idleFrameFor(winner, {
+    now: 1000 + duration * cycles, winnerTeamId: "red", celebratingSince: 1000
+  }).at;
+
+  // The first pass plays the whole run, entry included.
+  assert.equal(at(0), 0);
+  assert.ok(Math.abs(at(entry / 2) - entry / 2) < 1e-9, "the entry plays at its own pace");
+  assert.ok(at(0.9) > entry, "and the body follows it");
+
+  // Every pass after the first starts at the continuation and never returns to
+  // the flourish.
+  for (const cycles of [1, 1.2, 2, 3.7, 12.5]) {
+    assert.ok(at(cycles) >= entry - 1e-9,
+      `cycle ${cycles} must land in the tail, not back in the entry (got ${at(cycles)})`);
+    assert.ok(at(cycles) < 1);
+  }
+  // ► **AT THE SEAM ITSELF THE CLOCK IS A FLOAT** *(2026-09-24)*: 26 frames is
+  //   866.66... ms, and `1000 + d - 1000` comes back a hair short of `d`, so
+  //   the instant of the wrap reads as the body's end — which IS the seam, on
+  //   a loop. (At 27 frames, 900 ms, it happened to be exact.) Just past it is
+  //   the continuation's first pose, and that is the claim.
+  const seam = at(1);
+  assert.ok(Math.abs(seam - entry) < 1e-9 || Math.abs(seam - 1) < 1e-9, `the seam of the second pass, got ${seam}`);
+  assert.ok(Math.abs(at(1 + 1e-6) - entry) < 1e-5, "the second pass starts exactly at the continuation");
+});
+
+test("THE BODY A WINNER CYCLES IS 17 OF THE BUILD'S FRAMES, 1409-1425, and 1426 is never drawn", () => {
+  // ► **ADDED 2026-09-24 AFTER AN ADVERSARIAL VERIFIER MEASURED 18.** 1426 is
+  //   `GoToLabel("celebrate1a"); Play`: AVM1 runs it before the frame renders,
+  //   so each tick that enters 1426 shows 1409 and the next shows 1410. The
+  //   cycle is 1409-1425 — seventeen frames, 566.7 ms — and 1426's art (which
+  //   is 1409's, placement for placement) is never on screen for a tick of its
+  //   own. Drawn as 18, the winner held 1409's pose for two frames every cycle.
+  if (!REAL_PACK) {
+    assert.equal(REAL_PACK, null, "no extraction on this machine");
+    return;
+  }
+  const winner = { id: "w", teamId: "red", alive: true };
+  const { animation } = animationFor(REAL_PACK, { family: "celebrate", label: CELEBRATION_LABEL });
+  const body = REAL_PACK.animations.celebrate1a;
+  const frameOf = (limb) => {
+    const index = body.limbs.indexOf(limb);
+    return index < 0 ? null : body.firstFrame + index;
+  };
+  const shown = [];
+  for (let now = 1000; now <= 1000 + 4000; now += 0.5) {
+    const { at } = idleFrameFor(winner, { now, winnerTeamId: "red", celebratingSince: 1000 });
+    const frame = frameOf(animation.limbs[poseIndexAt(animation.poses.length, at)]);
+    if (shown.length === 0 || shown.at(-1)[1] !== frame) shown.push([now - 1000, frame]);
+  }
+  assert.equal(shown.some(([, frame]) => frame === 1426), false, "1426 is never drawn");
+  const starts = shown.filter(([, frame]) => frame === 1409).map(([ms]) => ms);
+  assert.ok(starts.length >= 5, `the body loops: ${starts.join(", ")}`);
+  assert.ok(Math.abs(starts[0] - 300) <= 0.5, `the body begins after the 9-frame flourish, at ${starts[0]} ms`);
+  for (let index = 1; index < starts.length; index += 1) {
+    assert.ok(Math.abs(starts[index] - starts[index - 1] - 1700 / 3) <= 0.5,
+      `cycle ${index}: ${starts[index] - starts[index - 1]} ms, where 17 of the build's frames are 566.7`);
+  }
+  // Every frame of the cycle, in order, once — 1425 hands straight to 1409.
+  const cycle = shown.filter(([ms]) => ms >= starts[1] && ms < starts[2]).map(([, frame]) => frame);
+  assert.deepEqual(cycle, Array.from({ length: 17 }, (_, index) => 1409 + index));
+});
+
+test("WITHOUT A START TIME IT LOOPS THE WHOLE RUN, so no existing caller changed behaviour", () => {
+  // `idleFrameFor` is stateless by design and the start is the CALLER's to
+  // supply. Omitting it keeps the pre-2026-09-18 answer exactly, which is what
+  // makes the fix additive rather than a silent change to every reader.
+  const winner = { id: "w", teamId: "red", alive: true };
+  const duration = idleFrameFor(winner, { now: 0, winnerTeamId: "red" }).timeline.durationMs;
+  const free = idleFrameFor(winner, { now: duration * 1.25, winnerTeamId: "red" });
+  assert.ok(Math.abs(free.at - 0.25) < 1e-9, "a free-running clock still wraps at the whole run");
+  assert.equal(free.label, CELEBRATION_LABEL);
+});

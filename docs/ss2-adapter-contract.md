@@ -52,7 +52,9 @@ is a thin compatibility façade over it.
 | Module | Owns |
 | --- | --- |
 | `src/team/rule-set.js` | the injection contract, and the gate on claiming runtime verification |
-| `src/team/placeholder-rules.js` | the only formulas in the tree — all placeholder |
+| `src/team/placeholder-rules.js` | the placeholder formulas — invented, and declared so |
+| `src/team/ss2-rules.js` | SS2's own map-derived arithmetic (`ss2TeamRules`), the largest file in `src/team/` |
+| `src/team/ss2-weapon-table.js` | 90 weapon rows transcribed from the licensed build: id, type, weight, damage pair, range multiplier |
 | `src/team/rng.js` | the ordered authoritative RNG channel (seeded or tape-backed) |
 | `src/team/resources.js` | the open, clamped, projected per-combatant numeric bag |
 | `src/team/roster.js` | teams, slots, combatant identity, AI fill |
@@ -61,8 +63,16 @@ is a thin compatibility façade over it.
 | `src/team/settlement.js` | once-only campaign settlement behind two gates |
 | `src/team/resolver.js` | turn order, legality, effect application, event sequencing |
 
-The boundary is asset-free and dependency-free: ESM, Node builtins only, no
-game data of any kind.
+The boundary is asset-free and dependency-free: ESM and Node builtins only.
+
+► **CORRECTED 2026-09-07: "no game data of any kind" was TRUE of `src/team/`
+  until `ss2-weapon-table.js` landed on 2026-09-02, and is false now.** That
+  file holds **90** weapon rows read out of the licensed build — its own header
+  calls itself build DATA — so the honest statement is: no ASSETS (no art, no
+  audio, no SWF, nothing that would let someone play without their own licensed
+  copy), and no third-party dependency. It stays true unqualified of
+  `src/adapter/`, which this document asserts separately below. Re-derived
+  2026-09-07: `SS2_WEAPON_IDS.length === 90`.
 
 ## What a rule set must provide
 
@@ -73,7 +83,7 @@ built with `defineTeamRuleSet`.
 | --- | --- | --- |
 | `id` | lowercase token | stable identifier, recorded in the wire state |
 | `contractVersion` | `1` | must equal `TEAM_RULE_SET_CONTRACT_VERSION` |
-| `verification` | `"placeholder"` \| `"runtime-verified"` | see the provenance gate below |
+| `verification` | `"placeholder"` \| `"map-derived"` \| `"runtime-verified"` | see the provenance gate below; **three tiers, not two** — `map-derived` was added 2026-09-01 and this row listed only two until 2026-09-07 |
 | `provenance` | object | `note` always; goldens and a build hash when verified |
 | `actionTypes` | lowercase tokens | the rule set's action vocabulary |
 | `maximumHealth(combatant)` | `number` | derived maximum health at normalisation |
@@ -195,11 +205,23 @@ not cite goldens. `describeTeamRuleSet(rules)` returns the one-line summary
 projection, save record, and diagnostic. A reader can therefore always tell
 measured behaviour from invented behaviour.
 
-**Everything shipped today is placeholder.** `classicStyleRules` and the
-`melee/ranged/spell/rest` vocabulary are invented approximations authored for
-this repository, are not measured against the licensed build, and must never be
-presented as SS2 parity. Promotion replaces them by *adding* a rule set, not by
-editing one.
+~~**Everything shipped today is placeholder.**~~ ► **CORRECTED 2026-09-07,
+and the sentence had been false since 2026-09-01.** `classicStyleRules` and the
+`melee/ranged/spell/rest` vocabulary are still invented approximations authored
+for this repository, are still not measured against the licensed build, and
+must still never be presented as SS2 parity. But they are no longer everything
+shipped: **`src/team/ss2-rules.js` ships `ss2TeamRules`, id
+`ss2-map-derived-tournament`, declaring the MIDDLE tier `map-derived`** — SS2's
+own arithmetic read out of the licensed build's bytecode, pinning the build
+SHA-256 and citing 23 promoted goldens, and still declaring
+`runtimeVerified: false`, which is the honest sentence.
+
+**The tier distinction is the whole point and is easy to flatten:**
+`map-derived` means *read from the bytes and not yet observed running*.
+Re-derived 2026-09-07: `describeTeamRuleSet(ss2TeamRules)` returns
+`{ id: "ss2-map-derived-tournament", verification: "map-derived",
+runtimeVerified: false }`. Promotion still replaces a rule set by *adding* one,
+not by editing one.
 
 ## Ordered authoritative RNG channel
 
@@ -442,9 +464,9 @@ Three named things in `src/adapter/state-bridge.js` carry it:
 
 | Name | What it is |
 | --- | --- |
-| `WriteSource` | a closed set of exactly four values — `canonical-health`, `canonical-status`, `declared-resource`, `clip-facing`. Every write must name one. `fieldWrite` refuses a write that names none, because "a write with no declared source is a write with no evidence that the resolver produced its value." |
-| `ALLOWED_WRITE_FIELDS` | which vanilla fields each source may target, **fixed here and independent of any scenario**: `hitpoints` for canonical health, the six status flags for canonical status, `CANONICAL_RESOURCE_SOURCES` for a declared resource (plus the timed `spell_*` pools, via `isResourceBackedVanillaField`), `gladiator_dir` for the clip facing. A parallel table pins each source to one of the two write targets, so a combat-object source cannot aim at a clip or the reverse. |
-| `assertWriteProvenance(writes, after)` | the check. For each write the source names exactly one place in the post-action projection, and `write.to` must be `===` what is there: `projection.health`, `projection.status.includes(field)`, or `projection.resources[field].value`. Not "close to", not "derivable from" — identical. |
+| `WriteSource` | a closed set of exactly ~~four values — `canonical-health`, `canonical-status`, `declared-resource`, `clip-facing`~~ **six values since 2026-09-23 — `canonical-health`, `canonical-status`, `declared-resource`, `clip-facing`, and the owner's "write both back" pair `canonical-stat` and `declared-battle-resource`**. Every write must name one. `fieldWrite` refuses a write that names none, because "a write with no declared source is a write with no evidence that the resolver produced its value." |
+| `ALLOWED_WRITE_FIELDS` | which vanilla fields each source may target, **fixed here and independent of any scenario**: `hitpoints` for canonical health, the six status flags for canonical status, `CANONICAL_RESOURCE_SOURCES` for a declared resource ~~(plus the timed `spell_*` pools, via `isResourceBackedVanillaField`)~~ — **and nothing else, corrected 2026-09-22: the build keeps the six timed counters on the fighter clip, which a declared resource never writes, so a counter is reported unmapped with a reason naming the clip** — `gladiator_dir` for the clip facing, **the seven base-stat fields `CANONICAL_STAT_SOURCES` maps to (`strength`, `speed`, `attack`, `defence`, `vitality`, `stamina`, `magicka` — the vanilla names) for a canonical stat, and `CANONICAL_BATTLE_RESOURCE_SOURCES` (`crowd_interest` alone) for a declared battle resource** (both added 2026-09-23). A parallel table pins each source to one of the ~~two~~ **three** write targets — the combat object (health, status, resources, **stats**), the fighter clip (facing), and **`_global` (`WriteTarget.GLOBAL`, path `_global`; the battle's pools, and nothing else)** — so no source can aim at another's object. `assertWriteProvenance` checks this shape as well as the value (added 2026-09-22), so a hand-built write gets the same refusal a built one does. |
+| `assertWriteProvenance(writes, after, { battleResources })` | the check. For each write the source names exactly one place in the post-action projection, and `write.to` must be `===` what is there: `projection.health`, `projection.status.includes(field)`, `projection.resources[field].value`, **`projection.stats[stat]` for the canonical stat the field maps from, or — for the one source that names no combatant — the post-action wire's `battleResources[field].value`**, which the caller passes as `battleResources` (a battle-resource write naming a combatant, or checked with no pools to compare against, is refused). Not "close to", not "derivable from" — identical. |
 
 That is what a prose rule could never give. `to: before - effect.amount` reads
 plausibly and passes review; a value computed anywhere in the module has no
@@ -453,13 +475,104 @@ check walks the produced list rather than trusting how it was built, so a write
 pushed straight onto the array without going through `fieldWrite` is caught too.
 `vanillaWritesForResolvedAction` runs it as its own final step before returning.
 
+~~**An in-battle base-stat change is REPORTED, not written (2026-09-22).**~~
+**An in-battle base-stat change is WRITTEN (2026-09-23; the owner decided
+"write both back" on 2026-09-22).**
+`EffectKind.STAT` (SS2's colossus, little fat kid, swift sandals and bloodlust)
+moves a canonical `stats` value mid-battle. ~~None of the four sources above
+carries a stat, and a supplied gladiator's base stats are licensed evidence the
+adapter writes over only for an AI-filled slot at construction (`{ stats: true }`,
+below), so the resolved value reaches combat state and the hash and is reported
+in `unmapped` as `{ combatantId, stat, field, reason }` — the treatment a
+destroyed armour piece outside the write allowlist gets.~~ **It reaches the
+vanilla base-stat field `CANONICAL_STAT_SOURCES` names — `agility` lands on
+`speed`, `defense` on `defence` — through the `canonical-stat` source, onto
+the combat object of whoever the effect targeted (little fat kid writes the
+VICTIM's), with the post-action `stats[stat]` and nothing else; the expiry
+writes the restored value back the same way. A stat no vanilla field carries
+is still reported in `unmapped` as `{ combatantId, stat, field: null, reason }`.**
+Until 2026-09-22 it was neither written nor reported (found by a Codex review),
+and from then until 2026-09-23 it was reported and not written. ~~**Writing it
+back would be a fifth `WriteSource` and a new policy for licensed base-stat
+fields; that is undecided, not overlooked.**~~
+
+**The licensed base stats are still not what moves.** The reason for
+reporting rather than writing was that "a supplied gladiator's base stats are
+licensed evidence", and that stays true of everything the write-back touches:
+
+- the caller's supplied combat object is **copied** at normalisation
+  (`normaliseVanillaCombatant`) and never written — every write produces a new
+  mirror record, so the object the caller holds keeps the licensed numbers;
+- the **fight-start values** the build restores from at expiry are the rule
+  set's `backup_*` resources (`backup_strength`, `backup_speed`,
+  `backup_attack`, `backup_defence`), declared at the opening from the stats
+  the combatant was built with and never moved mid-battle — none of them is in
+  `CANONICAL_RESOURCE_SOURCES`, so no write reaches them either;
+- **only the live mirror changes**, exactly as the build's own
+  `game_defender.strength = round(backup_strength / 2)` (`+0x82df`) changes the
+  persistent combat object in battle. The construction-time rule is unchanged:
+  the adapter still writes base stats over a template only for an AI-filled
+  slot (`{ stats: true }`, below).
+
+`test/ss2-stat-spells.test.js` pins all three for colossus and little fat kid.
+
+**The host's agreement check compares stats after every submission
+(2026-09-23).** `mirrorDifferences`' `includeStats` still defaults to `false`,
+but `createVanillaBattleHost` now passes `true` both at construction (for a
+supplied gladiator, whose stats were read from its own record, so a
+disagreement there means licensed stats were rewritten and is refused) and
+after every submitted action. It was left out while stats were reported rather
+than written — comparing then would have refused every colossus — and keeping
+it out would have hidden exactly the drift Codex found: a stat that moved with
+no write reaching the mirror. Pinned in `test/ss2-adapter-integration.test.js`.
+
+~~**The battle's crowd is REPORTED, not written, the same way (2026-09-22).**~~
+**The battle's crowd is WRITTEN to `_global` (2026-09-23; the same decision).**
+`EffectKind.BATTLE_RESOURCE` moves one of the battle's OWN declared pools — for
+SS2, `crowd_interest`, the build's one `_global` per bout, opened at the sum of
+the fighters' `herolevel` and moved by every completed phase
+(`src/team/ss2-crowd.js`). ~~Every one of the four sources above names a
+combatant and this pool belongs to none, so the resolved value reaches combat
+state and the hash and is reported in `unmapped` as `{ battleResource, field,
+scope: "_global", from, to, reason }`, once per action, by the effect pass or
+the totality pass.~~ **It is written once per action, by the effect pass or the
+totality pass, through the `declared-battle-resource` source: target
+`WriteTarget.GLOBAL`, path `_global`, `combatantId: null`, and `to` `===` the
+post-action wire's `battleResources.crowd_interest.value` — never `before +
+crowd_action` re-added in the adapter, which would skip the resolver's 1..100
+clamp. A killing phase writes nothing, because `death()` deletes `nextphase`
+and the pool does not move. A battle pool the build keeps no global for
+(`CANONICAL_BATTLE_RESOURCE_SOURCES` names only `crowd_interest`) is still
+reported in `unmapped` as `{ battleResource, field, scope: "_global", from, to,
+reason }`.** `vanillaWritesForResolvedAction` reads the pool from the
+wire's `battleResources` before and after (`battleBefore`/`battleAfter`), and
+each write's `from` from the `_global` mirror (`globals`), which
+`createVanillaBattleHost` passes. ~~**Writing it to `_global.crowd_interest`
+would be a fifth `WriteSource`, and a global rather than a per-combatant
+field; that is the owner's decision, undecided rather than overlooked.**~~
+
+**How `_global` fits the pinning table.** It is a third write target beside
+the combat object and the fighter clip, owned by exactly one source, and it has
+its own mirror on the host rather than a combatant's record: `vanillaGlobals()`
+reads it, `applyGlobalWrites` applies to it, `applyVanillaWrites` **refuses** a
+`_global` write so the crowd can never land on a gladiator's object, and
+`assertGlobalMirrorAgrees` compares it with the battle's pools after every
+submission, so a crowd that moved with no write reaching it is drift. No caller
+supplies a `_global`, so the host brings it into step at construction from the
+battle's opening pools (`vanillaGlobalsFrom`) and reports that as
+`diagnostics.globalSyncs` — the build opens `crowd_interest` itself from the
+hero's and villain's levels (`crowd_bar` `+0x011f`-`+0x0158`), which is the
+resolved opening in 1v1 but not in team play, where the resolved battle sums
+every combatant's.
+
 `clip-facing` is the one source with no canonical counterpart — the facing is
 presentation, not combat state — so it is checked against the closed
 `FACING_VALUES` vocabulary instead.
 
 A declared resource may never name a field another source already owns
 (`RESOURCE_RESERVED_FIELDS`: `hitpoints`, `hitpointsmax`, the six status flags,
-and `gladiator_dir`). Without that, the resource branch could forge a health or
+~~and~~ `gladiator_dir`, **and since 2026-09-23 the seven base-stat fields the
+`canonical-stat` source owns**). Without that, the resource branch could forge a health or
 status write with a number canonical health never produced.
 
 The effect list still supplies only the *ordering* and the *reason*. The adapter
@@ -487,8 +600,9 @@ reason it emits only the `loadout` keys a named vanilla field answers; see
 | `src/adapter/clip-registry.js` | `clipByCombatantId`, structurally outside deterministic state |
 | `src/adapter/presentation.js` | resolved events -> ordered presentation commands, and the animation binding tables |
 | `src/adapter/acknowledgement.js` | the animation surface -> once-only campaign settlement |
+| `src/adapter/action-gate.js` | per-action animation tokens: is the SURFACE ready for the next action? |
 | `src/adapter/battle-host.js` | the reference host loop that drives both seams together |
-| `src/adapter/index.js` | barrel; re-exports the seven modules above |
+| `src/adapter/index.js` | barrel; re-exports the eight modules above |
 
 `battle-host.js` is not a fifth responsibility — it is the two seams driven
 as one thing, which is what a real mod would be: read vanilla combat objects,
@@ -554,8 +668,22 @@ fold the clip's facing into the scenario) and reported as `facingSource:
 "combat-object"`. The clip wins when both are present.
 
 **Totality.** Every own key of the source object survives the round trip,
-including the timed `spell_*` fields the map declines to name and any key a
+including ~~the timed `spell_*` fields the map declines to name and~~ any key a
 future build adds. Only the two rules above move anything.
+
+**Clip-resident timed counters (corrected 2026-09-22).** The sentence above
+used to include "the timed `spell_*` fields the map declines to name", meaning
+keys of the persistent object. The map names all six
+(`TIMED_SPELL_COUNTER_FIELDS`) and the build keeps every one on the fighter
+clip — `check_spells` binds the clip to r1 and reads and writes each counter
+there (battle map §"Five more phases"). So they are read from a supplied clip
+onto the clip record and back out through `fighterClip`, and never written. One
+found on the combat object still round-trips untouched, but is reported in
+`misplacedClipFields` (the record's `timedSpellFields` is gone) and is NOT
+lifted onto the clip the way a misplaced facing is: the facing is folded onto
+that record by the 1v1 fixtures and the capture wrapper, nothing folds a
+counter, and on the clip a counter drives `check_spells` and `nextphase` where
+on the persistent object it does nothing.
 
 ### Maximum health: reported, refused, never quietly rewritten
 
@@ -646,27 +774,31 @@ inventing vanilla state rather than mirroring it.
    rewriting a vanilla field. Note that this is a deliberate *departure* from
    the resolver's own default, which is `min: 0`.
 
-#### One host integration lag it reports rather than papers over
+#### Closed: the former host integration lag
 
-`src/team/roster.js` now accepts a shared `team.aiFill`, an array indexed by
-slot, or a fill source carried by each empty-slot marker. The core therefore has
-a place for distinct per-slot resource bags. `battle-host.js` still carries the
-older `aiFillWithResources` projection, however: when it derives fill state from
-supplied vanilla templates, it tries to produce one shared team-level resource
-bag instead of projecting each template into the roster's per-slot form.
+► **CLOSED. This section described a defect that no longer exists, and said
+so for eight days after it was fixed. Re-derived 2026-09-07 against
+`src/team/roster.js` and `src/adapter/battle-host.js`.**
 
-`battle-host.js` reports that as `diagnostics.aiFillResourceGaps` — one entry
-per affected team, naming the team and the reason — and declares **no**
-resources on those auto-projected filled slots rather than guessing which
-template wins. A
-guess would put an invented number inside `combatStateHash`, which is the one
-thing the hash exists to prevent. The consequence is concrete and worth
-knowing: a rule set's write to a resource on such a slot will be refused by the
-resolver. The remedies are to supply real gladiators, matching templates, or an
-explicit per-slot `aiFill` declaration. Closing it properly now means retiring
-the host workaround and projecting each caller-supplied template through the
-roster's existing per-slot surface; it is adapter/host work, not a missing core
-roster capability.
+`src/team/roster.js` builds an AI-filled slot from up to two declarations,
+merged with the one nearest the slot winning: `team.aiFill` as an object
+(every filled slot on the team), `team.aiFill` as an **array** indexed by slot,
+or the empty-slot marker's own fields (`{ fill: "ai", ...combatantFields }`).
+So two filled slots on one team CAN each carry their own canonical resource
+bag, and `battle-host.js` puts each one on its own slot.
+
+`diagnostics.aiFillResourceGaps` **no longer exists**. The host's frozen
+diagnostics object names `aiFilledSlots`, `aiFillMirrorRewrites`,
+`aiFillLoadoutGaps`, `canonicalSyncs`, **`globalSyncs` (added 2026-09-23)**,
+`maximumHealthReports` and
+`startingStatusEffects`; the old key survives only inside comments that
+describe what it used to do, which is how it went on reading as live.
+
+*What the old text got right and is worth keeping:* the reason a guess was
+never acceptable. Choosing which template "wins" would have put an invented
+number inside `combatStateHash`, which is the one thing that hash exists to
+prevent. The fix gave each slot a real source rather than teaching the host to
+guess.
 
 ### The loadout bridge is a placeholder, twice over
 
@@ -790,10 +922,42 @@ that agree on combat state compute the same layout.
 
 `presentResolvedEvents(toTeamWireState(battle), { layout, bindings })` returns
 ordered, JSON-safe presentation commands stamped with the resolver event
-`sequence` they came from: `attach-clip`, `place-clip`, `bind-globals`,
-`clip-goto`, `panel-refresh`, `overlay-goto`, `arena-goto`, and `unmapped`.
+`sequence` they came from: `attach-clip`, `place-clip`, `move-clip`,
+`bind-globals`, `clip-goto`, `panel-refresh`, `overlay-goto`, `arena-goto`, and
+`unmapped`.
+
+**`move-clip` is the movement half of the position work (added 2026-09-11), and
+nothing in this repository emits one yet.** The resolver models no position, so
+the producer is the ranked rule-set change preserved at
+`docs/reference/position-in-the-resolver.patch.md`; the presentation half is
+first because landing the resolver half first made a walking gladiator play
+`Standing`, the idle clip. Three things about it are decisions rather than
+details:
+
+- **it is a separate kind from `place-clip`, and reusing that one is a defect.**
+  `src/render/scene.js` folds `place-clip` by overwriting all seven geometry
+  fields, so a partial `place-clip` carrying only a new `x` sets `y` to
+  `undefined` and the browser shell's `toY(undefined)` is `NaN` — the figure
+  does not move, it vanishes;
+- **it carries `from` and `to` and no distance**, because two endpoints already
+  say how far the step went and a third field that could disagree with them is
+  a second source of truth. It never touches `facing`: vanilla walks backwards
+  without turning round;
+- **geometry is not a label decision, so it is not a binding decision.** An
+  event whose gait the bindings cannot name still emits its `move-clip`,
+  alongside an `unmapped` naming the missing field. The bindings choose which
+  clip plays; where the figure ends up is the resolver's reported fact.
+
+A movement event must NAME the build's own phase in `vanillaLabel` — one of
+`walkleft`, `walkright`, `runleft`, `runright`, `chargeleft`, `chargeright`,
+`jumpleft`, `jumpright`. The direction is derivable from the two endpoints; the
+GAIT is not, and deriving `walkleft` from the sign would put a guessed gait on
+screen every time the action was a charge.
 `createPresentationBinder` wraps it in a cursor so a host drains only new
-commands after each action. The cursor holds a sequence number and nothing else.
+commands after each action. The cursor holds a sequence number and the action
+boundaries it has been told about (`drain(wire, { actionBoundary })`) — no
+combat state. Every command also carries an `actionToken`; see "Still open"
+item 5, which is now a description of what was built rather than a gap.
 
 Two rules matter more than the command vocabulary:
 
@@ -910,16 +1074,42 @@ to settle would leave a decided battle that can never pay its campaign.
 | Claim | Status |
 | --- | --- |
 | the undefined-until-set status flags and clip-resident facing | **runtime-observed** 2026-08-30 (battle map, "Combatant state objects") |
-| the 22 promoted goldens in `test/fixtures/ss2-1v1-golden/` | **runtime-verified** — and they verify the ordered rolls, the mutation order, and the result transition, not any adapter mapping. No golden observes anything the adapter does. |
+| the six timed spell counters living on the fighter clip, not the persistent object | **byte-derived and verifier-checked** 2026-09-22 (battle map, "Five more phases"); **not runtime-observed** — no committed observation or fixture carries a counter, and the capture wrapper's default watch list reads only persistent-object fields |
+| the 23 promoted goldens in `test/fixtures/ss2-1v1-golden/` | **runtime-verified** — and they verify the ordered rolls, the mutation order, and the result transition, not any adapter mapping. No golden observes anything the adapter does. |
 | field names, groups, clip names, depths, positions, panel instances, overlay/arena result labels, the four binding globals | **static map only** for the fingerprinted build |
-| every clip *label* the adapter dispatches | **static map at best**; the ranged `hurtN` adjustment and the death-variant label names are `assumed` |
+| every clip *label* the adapter dispatches | **static map at best**; the death-variant label names are `assumed`. *(This row also named "the ranged `hurtN` adjustment" as assumed until 2026-09-10. It is not: the map gives the rewrite with byte offsets at `docs/integration/ss2-battle-map.md:1471-1472`, and the adapter emitted the wrong label for three years' worth of directions because a `MAP_SILENCE` entry declared the map silent. See that constant's header.)* |
 | the loadout bridge, the spell/heal inventory id sets | **assumption**, placeholder vocabulary only — and no longer on the conversion path. `toCanonicalCombatantSource` emits only the vanilla-backed keys; the inventory id sets survive in `placeholderLoadoutFrom`, which nothing calls unless a caller passes it as `options.loadout`. |
 | multi-slot geometry, ally clip names, ally depths, ally panel widgets | **authored mod surface**; vanilla has no second ally, so no capture can settle it |
 
 `MAP_SILENCE` in `src/adapter/vanilla-fields.js` is the machine-readable
-version of this: seven entries, each naming the subject, the silence, what the
-adapter does instead, and the capture that would settle it. A test asserts
-every entry is complete and uniquely identified.
+version of this: ~~**eight**~~ **seven** entries (2026-09-22: `timed-spell-field-names`
+removed — the map names all six counters, and the entry's capture was aimed at
+the persistent object, which holds none of them), each naming the subject, the silence, what
+the adapter does instead, and the capture that would settle it. A test asserts
+every entry is complete and uniquely identified, and pins the id LIST rather
+than the count.
+
+*(It went six -> seven on 2026-09-10 with `movement-displacement`, and
+**seven -> eight -> nine -> eight** across the following day. The displacement
+entry is the only one to have been added and then removed, and the removal is
+worth more than the entry was. It said the battle map gives all eight movement
+phases' stamina cost with byte offsets and no phase's DISTANCE, which is TRUE of
+the document and was read as true of the game: its `settledBy` sent the next
+reader to the capture archive. **The answer was in the build, two instructions
+from the cost the entry was quoting** — `walkright` `+0x3d78` sets
+`destination = _x + movement_speed * 16`, and seven siblings do the same with
+their own factors. Derived 2026-09-11 in `ss2WalkDisplacement`, held to the build
+by `tools/walk-displacement-derivation.mjs`, and the authored 44 turned out to be
+the `movement_speed` FLOOR case and correct. **A gap in this catalogue is a gap in
+a transcription, never a gap in the build**, and an entry whose `settledBy`
+reaches for a capture should have to say why the bytes cannot answer it first.)*
+
+*(It said seven until 2026-09-10, and the seventh was false —
+`ranged-hurt-label-adjustment` claimed the map gave the phrase "adjusted for
+ranged directions" without giving the adjustment, when the map gives it one
+sentence later with byte offsets. An entry here is a CLAIM ABOUT THE MAP and is
+checkable like any other; the test pins the count, so removing it had to be
+deliberate.)*
 
 ## Canonical-shape gaps this exposes
 
@@ -941,14 +1131,14 @@ that was closed two commits ago.
 
 ### Still open
 
-1. **The host does not yet auto-project distinct fill templates into the
-   roster's per-slot resource surface.** Core `src/team/roster.js` supports
-   shared, indexed, and empty-slot-local fill sources. The older
-   `battle-host.js` workaround still collapses caller-supplied vanilla
-   templates toward one team bag; on disagreement it reports
-   `diagnostics.aiFillResourceGaps` and declares none rather than guessing a
-   number into the state hash. Retire that workaround and pass each template
-   through the existing per-slot form.
+1. ~~**AI-filled slots get one resource bag per team, not per slot.**~~
+   **CLOSED, and this entry was stale.** `team.aiFill` accepts a per-slot
+   array and the empty-slot marker carries its own fields, so each filled slot
+   has its own fill source; `diagnostics.aiFillResourceGaps` is gone from the
+   host. Struck rather than deleted, because `docs/roadmap.md` cited this
+   numbered entry by name — an item removed silently from a list that other
+   documents count is how a stale claim gets re-derived from its own citation.
+   Re-derived 2026-09-07.
 2. **Resources are numbers, so not everything vanilla carries has a home.**
    `normaliseResourceBag` accepts finite scalars only. Numeric pools fit;
    equipment identity does not — the **armour piece ids**, the six numbered
@@ -960,6 +1150,83 @@ that was closed two commits ago.
    vanilla record directly, and a future `remove_armour` rule set, which has to
    know *which* piece was destroyed and not merely that armour fell, will need
    `CANONICAL_RESOURCE_SOURCES` to grow.
+
+   ► **THE INVENTORY HALF OF THAT LINE WAS TESTED ON 2026-09-20 AND HELD.** The
+   first verb that CONSUMES an inventory slot shipped that day — the two bolt
+   spells in `src/team/ss2-rules.js` — and the 2026-09-19 handoff had priced
+   the consumption as requiring `inventory1`-`inventory6` to join
+   `CANONICAL_RESOURCE_SOURCES` ("the moment a verb consumes an item it must go
+   in"). **It must not, and this entry said so before the question was asked.**
+   Two independent reasons, either sufficient:
+
+   - **It re-hashes every adapter-built battle.** That constant IS the supplied
+     path's projected bag and `combatStateHash` covers the projection, so
+     growing it moves the hash for every peer — and the owner's 2026-09-07
+     decision was to pin the shape rather than carry a version id, so an old
+     peer cannot tell "different code" from state divergence.
+   - **`canonicalResourcesFrom` materialises an absent field to 0, and 0 is not
+     the empty marker.** Every adapter-built gladiator would declare six slots
+     holding **item 0** rather than six empty ones. The build's empty marker is
+     **1**; `0` is a real item-table row. This is the demo roster's own hazard,
+     which that file has recorded five times.
+
+   So a slot write is REPORTED as unmapped-with-reason, exactly as a destroyed
+   `gauntlet` already is, and the reason string already points here. **That is
+   the designed behaviour, not a gap the verb exposed.**
+
+   ► **THE FUTURE IS HERE, MEASURED 2026-09-07, and the shortfall is wider than
+   the piece ids.** `CANONICAL_RESOURCE_SOURCES` names **20** resources;
+   `SS2_RESOURCE_NAMES` (`src/team/ss2-rules.js`) names **32**, and **14** of
+   those never arrive through the supplied-gladiator path: the eight armour
+   piece ids plus `character_level`, `equipped_weapon`, `herolevel`,
+   `max_damage`, `min_damage` and `secondary_weapon_enchantment_damage`.
+
+   **What that does and does not block, because the obvious reading is too
+   strong and this repository has already made it once.** It blocks the
+   **supplied-gladiator** path only. An **AI-filled slot** takes its bag from
+   `team.aiFill.resources`, which bypasses `CANONICAL_RESOURCE_SOURCES`
+   entirely — measured 2026-09-07:
+   `createVanillaBattleHost({ rules: ss2TeamRules, teams: [...aiFill.resources
+   from ss2Combatant()] })` constructs and fights a full 27-action battle to
+   elimination with `unmapped: []`. **So the host CAN drive the map-derived
+   rule set today; what it cannot do is drive it with a gladiator a person
+   controls**, which is what a playable adapter-driven battle needs.
+
+   **CLOSED THE SAME DAY, and NOT by widening the canonical list.**
+   `toCanonicalCombatantSource(record, { resources })` is an **opt-in override**
+   on the supplied path, mirroring the `loadout` override beside it, and
+   `battle-host.js` passes `member.resources`. A supplied gladiator declaring
+   the SS2 bag now fights a full battle under `ss2TeamRules` — measured:
+   settles by elimination, 32 resources projected. **A caller that declares
+   nothing is byte-identical to before**, which is the whole point: widening
+   `CANONICAL_RESOURCE_SOURCES` would re-hash every adapter-built battle for
+   every peer, and with the shape pinned rather than versioned an old peer
+   cannot tell "different code" from state divergence. The override makes that
+   cost **opt-in**, paid only by a caller who asks, and a test pins that the
+   hash moves so it can never be paid silently.
+
+   The override admits only names the battle map cites (`citationFor`) and only
+   finite numbers — so it cannot put an unverifiable quantity into a hashed,
+   replayed projection.
+
+   **WHAT IT DOES NOT BUY, and this is where item 2's original prediction
+   finally arrives in practice.** `ss2TeamRules` destroys armour PIECES, and a
+   piece id is outside the adapter's declared-resource **write** allowlist. So
+   the resolved value reaches combat state and the hash, and does **not** reach
+   the vanilla mirror: it is REPORTED as unmapped. The reason string was
+   misleading until 2026-09-07 — it said "no vanilla field carries this
+   resource" for a field the map cites by name — and now distinguishes "not in
+   the write allowlist" from "no such field", because the two need different
+   fixes.
+
+   **That gap is reported, not a blocker, and the reason is measured rather
+   than assumed:** the campaign layer cannot want a destroyed piece, because it
+   carries no resource of any kind. `grep -c resources src/campaign/from-battle.js`
+   is **0**; an outcome projects `combatantId`, `name`, `teamId`, `seatId`,
+   `slotIndex`, `aiFilled`, `survived`, `health`, `maxHealth` and `statuses`.
+   **If a record ever gains a resources block, this becomes a real defect at
+   that moment.** Widening the WRITE allowlist to the piece ids remains a
+   decision this item still owns.
 3. **Facing is read but not carried.** `gladiator_dir` affects the knockback
    sign and the debris direction in the 1v1 candidate. It is a string
    (`"right"` / `"left"`), so the numeric resource bag is not its home either.
@@ -972,37 +1239,81 @@ that was closed two commits ago.
    `staminaleft` cannot appear as keys in a persisted outcome. Today this is
    moot (`from-battle.js` projects no `resources` block at all), but it is the
    constraint any future attempt will hit.
-5. **There is no per-action animation acknowledgement.** This is the one gap in
-   the acknowledgement story, and it is a hazard rather than a shape problem.
+5. **Per-action animation acknowledgement — BUILT 2026-09-07, and the sketch
+   that stood here was wrong about its own mechanism.**
 
-   Every presentation command carries the resolver `sequence` it came from,
-   which orders the commands *relative to each other*. Nothing orders them
-   relative to **time**. `bind-globals` and `clip-goto` carry a sequence and no
-   completion token; `createPresentationBinder`'s cursor advances on drain
-   rather than on anything the surface reports; and the only acknowledgement
-   anywhere in the adapter is the terminal one in `acknowledgement.js`, which
-   fires once per battle.
+   The hazard was real and is stated unchanged: a host that submits action N+1
+   while action N's timeline is still running rebinds `_global.attacker` /
+   `_global.defender` / `game_attacker` / `game_defender` underneath it, and
+   vanilla's mapped functions read those globals rather than parameters
+   captured at dispatch. Nothing sequenced the rebind against the running
+   timeline.
 
-   So a host that submits action N+1 while action N's timeline is still running
-   rebinds `_global.attacker` / `_global.defender` / `game_attacker` /
-   `game_defender` underneath it — and vanilla's mapped functions read those
-   globals rather than parameters captured at dispatch. Nothing sequences the
-   rebind against the running timeline, and nothing here mitigates it.
+   **THE PREMISE CORRECTION, and it would have built the wrong thing.** This
+   entry used to say "the resolver sequence is already unique per action and
+   would serve". It is not: `addEvent` stamps
+   `sequence: battle.events.length + 1`, so `sequence` is unique per EVENT.
+   Measured over 5,708 actions (40 seeds, 1v1 and 3v3, `ss2TeamRules`): 5,488
+   actions emitted one event, 140 emitted two, and 80 emitted four — the
+   killing blow emits the action, the knockout, `team-eliminated` and
+   `battle-result-pending`. A token read off `event.sequence` splits one action
+   into four, and the host then gates on the wrong number. That is a sweep of
+   one rule set, not a law: `assertActionOutcome` requires only that `events`
+   be an array, so a rule set may legally emit none or a dozen, and "a new
+   action begins at every non-elimination event" is therefore not derivable
+   from the event stream either.
 
-   **This is documented, not designed.** What a seam that closed it would have
-   to offer, stated so nobody has to guess: (1) a per-action token on one
-   resolved action's commands — the resolver sequence is already unique per
-   action and would serve, but it has to be *carried* on `bind-globals` and
-   `clip-goto` and *echoed back*, not merely stamped; (2) a reporting call the
-   surface makes when that action's timeline reaches its terminal frame, naming
-   the token and shaped like `reportDeathAnimation` — accepted once, duplicates
-   answered rather than thrown, an unknown token refused; (3) a gate the host
-   consults before submitting the next action, so "the resolver is ready" and
-   "the surface is ready" stay two questions with two answers; and (4) a policy
-   for a surface that never reports, since a timeout is a host decision rather
-   than a presentation one. None of it is implemented, and inventing a mechanism
-   without a capture of the vanilla timeline's own completion signal would put a
-   guess at the centre of the action loop.
+   The identifier that works already existed: `lastResolvedAction(battle).firstEventSequence`.
+   **It is deliberately NOT in `toTeamWireState`, and that is load-bearing** —
+   `combatStateHash` hashes the whole projection, so projecting an action
+   boundary would move every pinned battle hash and desync an old peer from a
+   new one. The boundary is therefore CARRIED IN by the caller and never
+   derived from the wire.
+
+   What is built, against the four parts this entry asked for:
+
+   1. **The token.** Every command bound from an event carries `actionToken`.
+      `presentResolvedEvents(wire, { actionBoundaries })` takes an ascending
+      array of boundaries; `createPresentationBinder(...).drain(wire, { actionBoundary })`
+      takes one per action and is what `battle-host.js` uses. A caller that
+      supplies none gets `actionToken: **null**` on every command — present and
+      null, so a host cannot read a missing field as "no gating needed" — and
+      the module invents nothing. Boundaries must ascend strictly; a repeated
+      or backwards one is refused rather than sorted, because a host that has
+      lost track of its own action order should find out here.
+   2. **The reporting call.** `src/adapter/action-gate.js`:
+      `gate.report(token)` / `host.reportActionAnimation(token)`. Accepted
+      once; a duplicate is answered rather than thrown; an unknown token is
+      refused. An out-of-order report is accepted and FLAGGED rather than
+      refused — a surface finishing a later action first is unmeasured here,
+      not contradicted by resolved state, and this project refuses only what
+      resolved state can contradict.
+   3. **The gate.** `host.readyForNextAction()` answers "is the surface ready?"
+      as a separate question from "has the resolver finished?". It is
+      **advisory by default**, because every headless caller — the goldens, the
+      replay harness, the suite — has no surface to report from and a blocking
+      gate would deadlock them. `createVanillaBattleHost({ awaitAnimations: true })`
+      makes `submit` refuse while a token is unreported, and it refuses
+      **before** `applyAction`, because an applied action cannot be taken back.
+   4. **The never-reports policy is still not implemented, deliberately.** No
+      timer, no deadline, no default timeout lives anywhere in `src/adapter/`.
+      A host that stops waiting says so itself through
+      `abandon(token, reason)` / `host.abandonActionAnimation(token, reason)`,
+      and the reason is MANDATORY so that a gate opened by giving up is
+      distinguishable in the record from one opened by a surface reporting.
+      Nothing has ever captured the vanilla timeline's own completion signal,
+      so any duration chosen here would be the guess this entry warned about.
+
+   **Nothing in the host ever calls `report`.** That is the same rule
+   `acknowledgeResultAnimations` was rewritten to obey: a convenience that
+   supplies the evidence it is checking is not a convenience, and a gate that
+   opens itself is not a gate.
+
+   **What it does NOT prove.** No renderer exists, so this is a seam ahead of
+   its consumer: the tests drive it with a simulated surface, and no capture
+   has observed a vanilla action timeline reaching a terminal frame. The token
+   is a resolver quantity — it names which action a command belongs to, and
+   says nothing about how long that action's animation takes.
 
 ## Networking boundary
 
@@ -1056,11 +1367,84 @@ What is still missing before a playable mod:
   authenticates same-seat reconnect, visible grace timing, and race-safe
   connected-team abandonment without AI takeover;
 - **the runtime-verified rule set** — the seam and its gate exist and nothing
-  measured has been dropped into them yet. `classicStyleRules` is the only rule
-  set anywhere under `src/`, and it is a declared placeholder; the others in the
-  repository exist only inside `test/`, to exercise the seam;
-- **campaign roster and reward integration** — the record layer stores an
-  outcome, but nothing reads a record back into a roster or pays a reward;
+  RUNTIME-VERIFIED has been dropped into them yet. ► **Two errors corrected
+  2026-09-07, both mine.** (a) `classicStyleRules` is a formulas object; the
+  rule set built from it is `placeholderTeamRules`, which is also
+  `battle-host.js`'s default. (b) It is not the only rule set under `src/`:
+  `src/team/ss2-rules.js` exports `ss2TeamRules` / `createSs2TeamRules`, the
+  `map-derived` tier, which is a real second rule set outside `test/`. What is
+  still absent is the TOP tier, and only that;
+- ~~**campaign roster and reward integration**~~ **campaign REWARD integration**
+  — ► **corrected 2026-09-07: the roster half landed on 2026-09-07 and this
+  bullet advertised it as missing anyway.** `rosterFromCampaignRecord`
+  (`src/campaign/to-battle.js`) reads a settled record plus the bout's
+  blueprints back into the next bout's teams, `advanceCircuit`
+  (`src/campaign/circuit.js`) chains bouts with the survivors carried, and
+  `node tools/hotseat.mjs --circuit <n>` is a playable consumer of both. Nothing
+  pays a reward; that half stands, and ~~EP-D04~~ EP-D05 owns it. ► **Corrected
+  2026-09-24: EP-D04 is RARITY ("rarity changes behaviour complexity, not
+  chassis budget"); personal precommitted reward outcomes are EP-D05, pending,
+  in `docs/design/endless-progression-decisions.md`.** And "nothing pays" is
+  now narrower than "nothing exists": the build's own victory purse is
+  implemented, map-derived, in `src/team/ss2-crowd.js` (`ss2VictoryPurse`,
+  `ss2TeamVictoryPurses`, `cefaf83`), and nothing calls it. Struck rather than
+  deleted, because this bulleted list is cited by number elsewhere;
 - **the launcher route** into the Collection's mods folder.
 
 None of these may be substituted for by the adapter.
+
+## Can a six-slot arena be rendered without touching an asset? YES (measured 2026-09-02)
+
+Stages 5 and 6 of the roadmap both say the rendered arena is "not started", and
+nobody had established whether it was even *reachable* asset-free. It is.
+Verified wave, 6 questions / 24 verifiers / 30 of 30 returned.
+
+**The fighters cost nothing.** `hero_battle` is character **1241**, exported by
+`ExportAssets` (file offset `0x3b2688`). The build has **0 `SymbolClass`, 0
+`DoABC`**, and the clip has no `DoInitAction` and no `registerClass` — so there
+is no class binding and no per-symbol instance cap. **Vanilla already attaches
+it four times concurrently** in `_root.arena.gladiators` (root frame 221, block
+base `0x671ad3`): `villain`@300, `hero`@301, `villain_shadow`@299,
+`hero_shadow`@298 — plus a fifth at depth 100000 from `initsystem`. Each
+instance brings all 101 frame labels with it: every attack and defence
+direction, `Death1`-`23`, `Hurt1`-`20`, `rest`, `taunt`, `frozen`/`burning`/
+`poisoned`, `Cast1/2`.
+
+**The depth space is free.** `gladiators` is a `createEmptyMovieClip`, so its
+depths are script-owned; occupied are only 6, 200, 201, 298-301, 40000. **The
+`320…344` band `slot-layout.js` already reserves is empty.** `duplicateMovieClip`
+appears **0 times** in the whole build and no `Enumerate2` iterates
+`gladiators`' children, so adding siblings breaks no iteration.
+
+**Skinning is already parameterised.** `skincharacter`, `initcharacter`,
+`updatecharacter`, `colorhero`, `battlevalues`, `remove_armour`,
+`damagecharacter`, `magic_damage_character`, `attack_chances` and `check_stats`
+contain **zero** `hero`/`villain` literals. Armour attaches into
+`<avatar>.<bodypart>` at per-clip depths, and damage icons at 25000/25005
+*inside the target clip*, so N combatants never collide.
+
+**Space is not the constraint.** The stage is 640×420 but the playfield runs to
+±2160 with active x clamped to ±2100, and `combatCamera`/`combatscale`
+(`sprite:2249` frame 1) pan and zoom about `midwaypoint`. Six fighters fit
+inside the existing background.
+
+### What is genuinely hard-coded to two — and it is CODE, not art
+
+Census over the battle route: 46 sites, **145 clip references, 500 state
+references**. Four matter, and each is replaced by our own code rather than by
+an asset:
+
+| site | offset | what breaks at >2 |
+| --- | --- | --- |
+| `death(whichcharacter, how_died)` | `0x240c85` `+0x1e99` | routes on CLIP IDENTITY (`=== gladiators.villain` → `combatwon`, `=== .hero` → `combatlost`). **An ally dying matches neither and transitions nothing.** |
+| `cast_spell_icon` | `+0x2251` | two identity branches with literal `_x` 60 / 580; an ally casting falls through both and writes to `undefined` |
+| `getfightdistance()` | `0x6e4221` `+0x2a9` | reads `gladiators.hero._x` / `.villain._x` **and `._y`** by literal name to derive `midwaypoint` and `fightdistance` — which the controller selector then uses. **`._y` was omitted here until 2026-09-12**: `fightdistance` is `round(sqrt(xdist^2 + ydist^2))` (`+0x0427`), not the x-separation. See `ss2FightDistance`. |
+| the villain AI | `0x23f83b` `+0x2c9` | unparameterised; assumes one opponent |
+
+**So stages 5 and 6 need no new or altered game asset.** What they need is our
+own code for those four seams — which is what `src/adapter/` exists to be. The
+only place an authored asset is plausibly wanted is the combat panel, and new
+UI is unblocked and shippable.
+
+*(Curiosity worth keeping: frame 221 attaches linkage `overlay_villain`@40001
+and **that linkage does not exist in the build**, so the call yields nothing.)*

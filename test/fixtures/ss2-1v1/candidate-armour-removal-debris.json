@@ -160,14 +160,16 @@
           "selected": "helmet",
           "removed": true,
           "defenceRemoved": 10,
-          "debrisRolls": {
-            "horizontal": {
-              "source": "randomNumber",
-              "value": 10
-            },
-            "vertical": 5,
-            "rotation": 2
-          }
+          "debrisRolls": [
+            {
+              "horizontal": {
+                "source": "randomNumber",
+                "value": 10
+              },
+              "vertical": 5,
+              "rotation": 2
+            }
+          ]
         }
       ],
       "knockback": {

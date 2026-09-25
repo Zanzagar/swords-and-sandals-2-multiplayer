@@ -15,6 +15,7 @@
 import { createHash } from "node:crypto";
 
 import { RollSource, createOrderedRollTape } from "./ordered-rolls.js";
+import { SS2_STAGED_MAX_LENGTH, parseStagedDeclaration } from "./staged-declaration.js";
 import {
   SS2_BUILD_SHA256,
   SS2_PROJECTED_COMBATANT_KEYS,
@@ -99,14 +100,27 @@ const CAPTURE_KEYS = Object.freeze([
  * - `staged`: every combatant field the WRAPPER wrote before the observed
  *   action, and the value that stuck once the game's own construction had
  *   finished. Its absence means the scenario is one the game produced unaided,
- *   which is what all 22 promoted goldens rest on. Its presence does not make
+ *   which is what 22 of the 23 promoted goldens rest on — the exception is
+ *   `golden-armoured-deflection-threshold-cleared`, whose scenario the wrapper
+ *   staged and which therefore carries this key. Its presence does not make
  *   an observation weaker evidence — the game still resolved the action, and
  *   the formulas under measurement operate on whatever inputs they are given —
  *   but it does mean nobody has shown the game's own progression can *reach*
  *   this scenario. A reviewer has to be able to tell the two apart, so the
  *   field is carried into the record and surfaced by the promotion gate.
  */
-const CAPTURE_OPTIONAL_KEYS = Object.freeze(["launchNonce", "overdraw", "staged"]);
+// ► **`traceWindow` JOINS THESE THREE, AND FOR THE SAME REASON THEY ARE
+//   OPTIONAL.** It is present only when the capture used the WIDE recording
+//   window (`phase`), which closes the trace at `nextphase` rather than at
+//   `checkattackroll`'s return. Every record committed before it existed omits
+//   it and stays byte-identical, which matters because an observation's digest
+//   covers its own record and a field on legacy records would rewrite all of
+//   their digests and invalidate the provenance of every golden citing them.
+//
+//   **Its presence is a substantive claim, like `staged`'s**: this record's
+//   trace saw more of the phase than the archive's do, so its line counts are
+//   not comparable with theirs.
+const CAPTURE_OPTIONAL_KEYS = Object.freeze(["launchNonce", "overdraw", "staged", "traceWindow"]);
 
 export const SS2_CAPTURE_ATTESTATION_KEYS = CAPTURE_OPTIONAL_KEYS;
 const SAMPLE_KEYS = Object.freeze(["callSite", "injected", "label", "max", "min", "source", "value"]);
@@ -155,10 +169,8 @@ const SPELL_ANIMATION_LABEL_PATTERN = /^[A-Za-z][A-Za-z0-9_]{0,31}$/;
  * would let a comma or an `=` into a value and make the list ambiguous to
  * split.
  */
-const STAGED_ENTRY_PATTERN =
-  /^(hero|villain)\.([a-z][a-z0-9_]{0,63})=(-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?|true|false)$/;
-/** Roughly 30 entries. A staging list longer than this is a defect, not a scenario. */
-export const SS2_STAGED_MAX_LENGTH = 512;
+/** The staging grammar now lives in `staged-declaration.js`; see that file for why. */
+export { SS2_STAGED_MAX_LENGTH };
 
 export class ObservationError extends Error {
   constructor(message, options = {}) {
@@ -168,6 +180,70 @@ export class ObservationError extends Error {
 }
 
 export class ObservationValidationError extends ObservationError {}
+
+/** A fixture mutation reason that no wrapper hook is mapped to. */
+export class HookAttributionError extends ObservationError {}
+
+/**
+ * The hook `capture-ingest.js` stamps on the `/result` entry it synthesizes.
+ *
+ * `/result` is a pipeline convention rather than a watched game field, so no
+ * `set` line ever carries it; ingest mints the entry from the observed `death`
+ * and `overlay-label` events and labels it with this constant. The literal
+ * lives in `capture-ingest.js` (another track's file, and importing it here
+ * would be a cycle), so the two are pinned by checking this value against the
+ * `/result` rows of the committed observation records — output ingest really
+ * produced — rather than against a second copy of the same literal, which
+ * would move with it and assert nothing.
+ */
+export const SS2_RESULT_BRIDGE_HOOK = "result-bridge";
+
+/**
+ * Wrapper hook attribution per static mutation reason — the physical
+ * (`damagecharacter`) ingress.
+ *
+ * A fixture names each mutation by the STATIC REASON the candidate model
+ * assigns it; a wrapper reports the INGRESS FUNCTION the write happened
+ * inside. This table is the translation between them, and it is what makes
+ * `matchSs2ObservationToFixture` able to compare an attribution instead of
+ * discarding it. The convention is the ingress that owns the assignment, not
+ * the innermost helper: `stat-clamp` is `check_stats`' arithmetic but is
+ * attributed to whichever ingress called it.
+ *
+ * `src/golden/simulate-capture-trace.js` holds a second copy under the names
+ * `HOOK_FOR_STATIC_REASON`/`SPELL_HOOK_FOR_STATIC_REASON`, because that module
+ * imports this one and the reverse import would be a cycle. The copies are
+ * pinned equal by a test, and the reference simulator's own end-to-end
+ * self-check would fail on every fixture if they ever drifted. The canonical
+ * home is here, with the matcher that consumes it.
+ */
+export const SS2_HOOK_FOR_STATIC_REASON = Object.freeze({
+  "physical-damage": "damagecharacter",
+  "magic-damage": "magic-damage-character",
+  "psyche-up": "magic-damage-character",
+  "breastplate-stamina": "damagecharacter",
+  "stat-clamp": "damagecharacter",
+  "weapon-enchantment": "damagecharacter",
+  "remove-armour-piece": "remove-armour",
+  "remove-armour-clamp": "remove-armour",
+  "death-status-clear": "death",
+  "death-taunt-clear": "death"
+});
+
+/**
+ * The same table as seen from the spell ingress.
+ *
+ * Two reasons are shared with the physical path but belong to a different
+ * function there: the breastplate stamina join and `check_stats` are steps 5
+ * and 6 of `magic_damage_character` itself, so a wrapper attributing by call
+ * frame reports `magic-damage-character` for both during a spell action.
+ * `death-*` stays `death`, which really is the shared function.
+ */
+export const SS2_SPELL_HOOK_FOR_STATIC_REASON = Object.freeze({
+  ...SS2_HOOK_FOR_STATIC_REASON,
+  "breastplate-stamina": "magic-damage-character",
+  "stat-clamp": "magic-damage-character"
+});
 
 /**
  * Parse a staging declaration into its ordered entries, or throw naming the
@@ -183,37 +259,17 @@ export class ObservationValidationError extends ObservationError {}
  * fact would mean two records that claim the same thing digest differently, and
  * a reader could not tell "staged nothing" from "forgot to say".
  */
+/**
+ * The observation-side spelling of the staging grammar.
+ *
+ * Kept as a named export because `capture-ingest.js` and this module's own
+ * `assertObservation` both call it, and because the promotion gate's refusal
+ * message names it. The grammar itself moved to `staged-declaration.js` so that
+ * `run-1v1-fixture.js` can validate `provenance.staged` with the SAME parser
+ * without importing this module, which would be a cycle.
+ */
 export function parseSs2StagedDeclaration(text, path = "capture.staged") {
-  const reject = (why) => {
-    throw new ObservationValidationError(
-      `${path} must be a non-empty comma-separated "side.field=value" list in application order, ` +
-      `for example "hero.strength=40,villain.helmet=6" — ${why}. A capture that staged nothing ` +
-      "omits the field entirely; the empty string is not a second spelling of that."
-    );
-  };
-  if (typeof text !== "string") reject(`got ${JSON.stringify(text)}`);
-  if (text.length === 0) reject("it is empty");
-  if (text.length > SS2_STAGED_MAX_LENGTH) {
-    reject(`it is ${text.length} characters, past the ${SS2_STAGED_MAX_LENGTH} cap`);
-  }
-  const entries = [];
-  const seen = new Set();
-  for (const part of text.split(",")) {
-    const match = STAGED_ENTRY_PATTERN.exec(part);
-    if (!match) reject(`the entry ${JSON.stringify(part)} is not side.field=value`);
-    const [, side, field, literal] = match;
-    const key = `${side}.${field}`;
-    if (seen.has(key)) {
-      reject(`${key} is listed twice — each staged field appears once, carrying the value that stuck`);
-    }
-    seen.add(key);
-    entries.push({
-      side,
-      field,
-      value: literal === "true" ? true : literal === "false" ? false : Number(literal)
-    });
-  }
-  return entries;
+  return parseStagedDeclaration(text, path, ObservationValidationError);
 }
 
 function isPlainObject(value) {
@@ -577,6 +633,41 @@ export function validateSs2Observation(record) {
       `${record.capture.method} captures must contain at least one injected sample.`
     );
   }
+  /*
+   * `injected-tape-runtime` is the one method that names a tape, and it means
+   * EVERY recorded roll came off it — "at least one" was too weak for it.
+   *
+   * Three facts close the gap with nothing left over. The wrapper's sole roll
+   * emitter stamps `injected: true` unconditionally. A draw made after the tape
+   * ran out is never emitted at all — it increments `capture.overdraw`, which
+   * ingest refuses non-zero. And `assertNoUncapturableSamples` has already
+   * refused the only source that could honestly be uninjected here, the
+   * RandomNumber opcode. So a sample claiming `injected: false` on this method
+   * claims the wrapper WATCHED a roll it did not force, which is a stronger
+   * kind of evidence than the method can produce, and the field is not compared
+   * anywhere else: `comparableSamples` drops it before matching. All 407
+   * samples across the committed records are injected, so requiring it refuses
+   * nothing real.
+   *
+   * Its sibling `callSite` is deliberately NOT pinned. The wrapper has one roll
+   * emitter and stamps one compile-time constant, so any check on the value
+   * compares a hard-coded constant to a hard-coded constant: it could not fail
+   * on a real capture and would attest nothing about where the roll came from.
+   * The honest statement is that `callSite` — like `label`, `min`, `max` and
+   * `value` on an injected sample — is the pipeline's own input read back, not
+   * an observation, and that belongs in the record's documentation rather than
+   * in a check that looks like verification.
+   */
+  if (
+    record.capture.method === ObservationCaptureMethod.INJECTED_TAPE &&
+    injectedCount !== record.samples.length
+  ) {
+    throw new ObservationValidationError(
+      `${ObservationCaptureMethod.INJECTED_TAPE} captures must have every sample injected; ` +
+      `${record.samples.length - injectedCount} of ${record.samples.length} claim to be rolls the ` +
+      "wrapper observed rather than served, which its single roll emitter cannot produce."
+    );
+  }
   assertSs2MutationTraceShape(record.mutationTrace, "mutationTrace", ObservationValidationError);
   if (record.mutationTrace.length > 500) {
     throw new ObservationValidationError("mutationTrace must contain at most 500 entries.");
@@ -645,6 +736,51 @@ export function projectSs2ObservationForComparison(record) {
   });
 }
 
+/**
+ * Fields two records of the same action MUST be free to differ on: identity and
+ * the capture metadata (`launchNonce` emphatically — two records agreeing on it
+ * are one launch, which the promotion gate refuses separately), plus the digest,
+ * which is a function of everything else.
+ */
+const SS2_PAIRWISE_EXCLUDED_KEYS = Object.freeze(["capture", "observationId", "digest"]);
+
+/**
+ * The surface two observations must agree on when compared TO EACH OTHER.
+ *
+ * WHY THIS DOES NOT REUSE `projectSs2ObservationForComparison`, which is the
+ * whole point of the function existing:
+ *
+ * That projection is shared with `matchSs2ObservationToFixture` — both route
+ * their samples through `comparableSamples`. So an exclusion added there to make
+ * the MATCHER tolerant silently makes the PAIRWISE GATE blind to the same field,
+ * and the gate whose job is to catch two records disagreeing about a field is
+ * switched off by the very edit that stops the field being compared. That is not
+ * hypothetical: with the prescribed `staminaleft` exclusion patched in, an
+ * auditor promoted a golden from two records disagreeing by 99,992 stamina — one
+ * negative, one 10^13 above `staminamax` — with this gate installed and silent.
+ *
+ * So this projection is built by ENUMERATING the record's own keys and dropping
+ * a named few, rather than by listing the channels to keep. It fails closed: a
+ * field added to the schema later is compared by default and has to be
+ * deliberately exempted here to stop being compared. Nothing the matcher does to
+ * its own projection can reach it.
+ *
+ * It is also strictly wider than the matcher's view, which closes a blind spot
+ * the audit named: `callSite` and `injected` survive here, so two records that
+ * disagree about where a roll came from no longer corroborate each other.
+ *
+ * Measured before landing: all 29 cited observation pairs across the 22 promoted
+ * goldens agree under this surface, so it refuses no legitimate promotion.
+ */
+export function projectSs2ObservationForPairwiseComparison(record) {
+  const projected = {};
+  for (const key of Object.keys(record).sort()) {
+    if (SS2_PAIRWISE_EXCLUDED_KEYS.includes(key)) continue;
+    projected[key] = record[key];
+  }
+  return cloneJson(projected);
+}
+
 const MAX_DIFFERENCES = 200;
 
 function pushDifference(differences, difference) {
@@ -697,14 +833,20 @@ function collectDifferences(expected, actual, path, differences) {
   }
 }
 
-/** Compare two validated observations; match means equal comparison projections. */
+/**
+ * Compare two validated observations to EACH OTHER.
+ *
+ * Uses `projectSs2ObservationForPairwiseComparison`, deliberately NOT the
+ * matcher's projection — see that function for why sharing one would let a
+ * matcher-side exclusion switch this gate off.
+ */
 export function ss2ObservationsMatch(left, right) {
   validateSs2Observation(left);
   validateSs2Observation(right);
   const differences = [];
   collectDifferences(
-    projectSs2ObservationForComparison(left),
-    projectSs2ObservationForComparison(right),
+    projectSs2ObservationForPairwiseComparison(left),
+    projectSs2ObservationForPairwiseComparison(right),
     "",
     differences
   );
@@ -750,21 +892,84 @@ function candidateIdFor(fixtureId) {
   return fixtureId.startsWith("golden-") ? `candidate-${fixtureId.slice("golden-".length)}` : fixtureId;
 }
 
-function stripTraceReasons(trace) {
-  return trace.map((entry) => ({
+/**
+ * One mutation projected for matching: ordering, the write itself, and the
+ * hook the write must be attributed to.
+ *
+ * The two sides speak different vocabularies and the key is named `hook`
+ * rather than `reason` to keep that visible in a divergence path. A fixture
+ * entry carries a STATIC reason (`physical-damage`, `stat-clamp`) — the
+ * candidate model's name for the assignment. An observation entry carries the
+ * WRAPPER's attribution: the ingress function the write happened inside,
+ * copied from the raw trace's `set.hook` by `capture-ingest.js`. Translating
+ * the first into the second is what makes them comparable; see
+ * `hookForFixtureMutation`.
+ */
+function projectTraceForMatching(trace, hookAt) {
+  return trace.map((entry, index) => ({
     sequence: entry.sequence,
     path: entry.path,
     before: entry.before,
-    after: entry.after
+    after: entry.after,
+    hook: hookAt(entry, index)
   }));
 }
 
 /**
+ * The hook a wrapper must report for one fixture mutation.
+ *
+ * Which table applies is a property of the STAGED ACTION, not of the derived
+ * calculation, so it is keyed on `scenario.spellId !== undefined` — the same
+ * discriminator `deriveExpectedEventsFromSs2Fixture` above and
+ * `simulate-capture-trace.js` already use, and the same one the fixture schema
+ * enforces by requiring exactly one action identity.
+ *
+ * An unmapped reason THROWS rather than producing a difference. A difference
+ * would report "this observation diverges" when the real fault is a gap in
+ * this table, sending the reader to re-capture evidence that was never wrong.
+ * Nothing in the repository reaches it today: every static reason in every
+ * committed fixture is mapped.
+ */
+function hookForFixtureMutation(fixture, entry, index) {
+  // `/result` is not a game write. It is a pipeline convention that ingest
+  // synthesizes from the observed `death` + `overlay-label` pair, stamping its
+  // own constant. Comparing it therefore proves nothing about instrumentation
+  // — both sides are constants on the honest path — and it is included only so
+  // the projection needs no special case. The evidence on this row is its
+  // payload (`before`/`after`), which is derived from the observed events and
+  // is compared in full.
+  if (entry.path === "/result") return SS2_RESULT_BRIDGE_HOOK;
+  const table = fixture.scenario.spellId !== undefined
+    ? SS2_SPELL_HOOK_FOR_STATIC_REASON
+    : SS2_HOOK_FOR_STATIC_REASON;
+  if (!Object.hasOwn(table, entry.reason)) {
+    throw new HookAttributionError(
+      `${fixture.fixtureId} expected.mutationTrace[${index}] gives reason ${JSON.stringify(entry.reason)}, ` +
+      "which no wrapper hook is mapped to, so no observation could ever be compared against it. " +
+      "Add the reason to SS2_HOOK_FOR_STATIC_REASON (and, if the spell ingress owns the write, to " +
+      "SS2_SPELL_HOOK_FOR_STATIC_REASON) in src/golden/observation.js, naming the AS2 ingress function " +
+      "the assignment lives inside."
+    );
+  }
+  return table[entry.reason];
+}
+
+/**
  * Match one runtime observation against a fixture's runtime-observable
- * projection: scenario, ordered samples, ordered mutations (reasons are
- * annotations, not part of the contract), semantic events, the result event,
- * and the final state. `expected.calculation`/`expected.mutation` stay
- * candidate-derived and are not directly observable.
+ * projection: scenario, ordered samples, ordered mutations (each one's static
+ * reason TRANSLATED into the hook a wrapper must attribute it to), semantic
+ * events, the result event, and the final state. `expected.calculation`/
+ * `expected.mutation` stay candidate-derived and are not directly observable.
+ *
+ * The mutation `reason` used to be stripped from BOTH sides before comparison,
+ * on the grounds that the two vocabularies could not be compared. The cost of
+ * that convenience was a forgery: a record attributing the hitpoint write to
+ * `remove-armour`, or to `unattributed`, or to nothing the wrapper can produce,
+ * matched, promoted, and yielded a golden the committed suite accepted — while
+ * the hook is the record's only statement about WHERE in the game the write
+ * came from, which is exactly the claim a golden rests on. Translating instead
+ * of stripping costs no re-capture: all 23 promoted goldens' cited observations
+ * already carry the hooks their fixtures' reasons map to.
  */
 export function matchSs2ObservationToFixture(fixture, observation) {
   validateSs2OneVsOneFixture(fixture);
@@ -801,8 +1006,11 @@ export function matchSs2ObservationToFixture(fixture, observation) {
   }
 
   collectDifferences(
-    stripTraceReasons(fixture.expected.mutationTrace),
-    stripTraceReasons(observation.mutationTrace),
+    projectTraceForMatching(
+      fixture.expected.mutationTrace,
+      (entry, index) => hookForFixtureMutation(fixture, entry, index)
+    ),
+    projectTraceForMatching(observation.mutationTrace, (entry) => entry.reason),
     "/mutationTrace",
     differences
   );

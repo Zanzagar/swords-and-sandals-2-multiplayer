@@ -127,7 +127,7 @@ function allowsMissingAttestations(options) {
 function readEnd(lines, meta, options) {
   const { lineNumber, entry } = lines[lines.length - 1];
   if (entry.t !== "end") fail(lineNumber, "the last line must be an end line.");
-  const allowed = new Set(["t", "installHashVerifiedAfter", "overdraw", "launchNonce", "staged"]);
+  const allowed = new Set(["t", "installHashVerifiedAfter", "overdraw", "launchNonce", "staged", "traceWindow"]);
   for (const key of Object.keys(entry)) {
     if (!allowed.has(key)) fail(lineNumber, `the end line carries an unexpected field ${key}.`);
   }
@@ -177,6 +177,25 @@ function readEnd(lines, meta, options) {
         "divergence: correct the candidate's roll order from the raw trace."
       );
     }
+  }
+  // ► **WHERE THE RECORDING WINDOW CLOSED, AND IT IS PRESENT ONLY WHEN IT WAS
+  //   NOT THE DEFAULT.** The wrapper's window is normally exactly
+  //   `checkattackroll` — armed on entry, closed on return — which is the
+  //   boundary every archived trace and all 69 observation records were taken
+  //   with. `traceWindow: "phase"` defers the close to `nextphase`, so writes
+  //   the phase makes AFTER the roll are recorded; `psyche_up`'s counter, at
+  //   `+0x6738` and `+0x6761`, is the reason it exists.
+  //
+  //   **A wide trace carries MORE lines by construction and is not comparable
+  //   with an archived one.** Refusing an unknown value here rather than
+  //   ignoring it is what stops a future third mode being read as one of these
+  //   two, and `"action"` is refused OUTRIGHT because the wrapper never emits
+  //   it: a record saying "action" would be a claim where every other record
+  //   makes none, and the two would then disagree about identical runs.
+  if (Object.hasOwn(entry, "traceWindow") && entry.traceWindow !== "phase") {
+    fail(lineNumber,
+      `end.traceWindow must be "phase" when present — the default window emits no field at all, ` +
+      `so every trace taken at the archived boundary stays byte-identical. Got ${JSON.stringify(entry.traceWindow)}.`);
   }
   // Minted inside the player from values the launcher does not supply, so a
   // record carries one identity field the operator did not choose. Validated
@@ -264,16 +283,37 @@ function projectFields(fields, requiredKeys, context, lineNumber) {
  * pre-action dump — the scenario as it stood, however it came to stand that
  * way. `end.staged` is narrower and is about authorship: the fields the WRAPPER
  * itself wrote. A trace can have a full staged dump and no `end.staged` at all,
- * and every trace behind the 22 promoted goldens does.
+ * and every trace behind 22 of the 23 promoted goldens does. The 23rd,
+ * `golden-armoured-deflection-threshold-cleared`, is the exception in both
+ * halves: its wrapper staged the scenario, so its trace carries `end.staged`
+ * and its provenance carries the resulting `staged` string.
  *
  * Options:
  * - `installHashVerifiedAfter` — supply the live post-session hash result when
  *   the trace carries the wrapper's `null` placeholder.
  * - `allowMissingOverdraw` — accept an `injected-tape-runtime` trace whose end
  *   line has no `overdraw`. This exists for exactly one purpose: the archived
- *   raw traces under the ignored `captures/` directory predate the field (113
- *   of 177 carry it; the rest do not), and regenerating divergence reports from
- *   them must not be blocked by evidence they could not have recorded. The live
+ *   raw traces under the ignored `captures/` directory predate the field, and
+ *   regenerating divergence reports from them must not be blocked by evidence
+ *   they could not have recorded. **The ratio is deliberately NOT quoted here.**
+ *   It said "113 of 177" and was stale by 2026-09-01, when the same count read
+ *   153 of 221 — and it moved again by three files DURING the audit that caught
+ *   it, because a capture run was writing to the archive at the time. The
+ *   archive is outside the repo and grows; a number about it is a number that
+ *   rots. Re-derive at the moment you need it:
+ *   count the archive's JSONL files carrying `"overdraw"` against the total —
+ *   `find <archive> -name` with a star-dot-jsonl pattern, piped to grep. Written
+ *   in prose because a glob containing a star-slash inside this comment block
+ *   closes it and breaks the module; that is not hypothetical, it happened while
+ *   writing this note, and the first prose version then dropped the star and
+ *   named a pattern matching nothing. Codex caught that.
+ *   What is stable is a fact about the ARCHIVE, not about this parser: every
+ *   archived trace carries `overdraw` and `launchNonce` together or carries
+ *   neither — 153 both, 68 neither, 0 mismatched at last count. **The parser
+ *   does NOT enforce that pairing**: the two checks are independent, so with
+ *   this hatch enabled a trace missing only one of them still ingests. An
+ *   earlier version of this note claimed the option "waives a coupled pair,
+ *   never a lone field", which described the data and not the code. The live
  *   capture path — `tools/capture-session.mjs` and
  *   `tools/runtime-capture/campaign.mjs` — must never pass it, and does not: a
  *   record ingested under this option carries no `capture.overdraw`, so it
@@ -599,7 +639,10 @@ export function ingestSs2CaptureTrace(rawText, fixture, options = {}) {
       // convenience: absent means the game produced this scenario unaided.
       ...(Object.hasOwn(end, "overdraw") ? { overdraw: end.overdraw } : {}),
       ...(Object.hasOwn(end, "launchNonce") ? { launchNonce: end.launchNonce } : {}),
-      ...(stagedDeclaration ? { staged: stagedDeclaration.text } : {})
+      ...(stagedDeclaration ? { staged: stagedDeclaration.text } : {}),
+      // Same omission rule and the same reason: absent means the trace was taken
+      // at the archived boundary, which is what every committed record means.
+      ...(Object.hasOwn(end, "traceWindow") ? { traceWindow: end.traceWindow } : {})
     },
     target: { fixtureId: fixture.fixtureId },
     scenario,

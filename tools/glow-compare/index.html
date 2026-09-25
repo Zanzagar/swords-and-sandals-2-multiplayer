@@ -1,0 +1,79 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Glow strength — our canvas filter against the Ruffle oracle</title>
+<style>
+  html, body { margin: 0; background: #000; }
+  canvas { display: block; image-rendering: pixelated; }
+</style>
+<!--
+  THE SAME LADDER `tools/swf-probe.mjs` HANDS RUFFLE, DRAWN THROUGH OUR OWN
+  `canvasFilterFor`.
+
+  ► **WHY A PAGE AND NOT AN ASSERTION.** The question is what Chrome's
+    `drop-shadow()` actually paints, which no amount of reading the filter
+    string answers. `test/render-filters.test.js` can pin the STRING; only a
+    render can measure the PIXELS, and the pixels are where the loss is.
+
+  ► **IT MUST BE THE SAME LADDER, THE SAME SOURCE AND THE SAME SCALE**, or the
+    two profiles are not comparable and the difference between them is not the
+    measurement. So: a 24x24 white square in a 100px cell, six cells, glow
+    #00ccff at blurX = blurY = 8 and passes 1 — every number identical to
+    `glowProbe()` in `tools/swf-probe.mjs`, which is the file to change if this
+    one ever needs to change.
+
+  ► **devicePixelRatio IS PINNED TO 1 BY SIZING THE BACKING STORE MYSELF.**
+    A HiDPI backing store would scale the blur with it and the profile would be
+    measured in device pixels while the oracle's is in movie pixels. The Ruffle
+    side has the same hazard and handles it by locating the source squares in
+    the render rather than predicting them.
+-->
+<canvas id="stage" width="600" height="100"></canvas>
+<script type="module">
+import { canvasFilterFor } from "/src/render/filters.js";
+
+const STRENGTHS = [0.5, 1, 2, 4, 10, 16];
+const CELL = 100;
+const BOX = 24;
+const GLOW = { red: 0, green: 204, blue: 255, alpha: 255 };
+
+const canvas = document.getElementById("stage");
+const context = canvas.getContext("2d");
+context.fillStyle = "#000000";
+context.fillRect(0, 0, canvas.width, canvas.height);
+
+const emitted = [];
+function draw() {
+  context.fillStyle = "#000000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  emitted.length = 0;
+  STRENGTHS.forEach((strength, index) => {
+    const { filter } = canvasFilterFor(
+      [{ type: "glow", colour: GLOW, blurX: 8, blurY: 8, strength, passes: 1, inner: false, knockout: false }],
+      { scale: 1 }
+    );
+    emitted.push({ strength, filter });
+    context.save();
+    context.filter = filter || "none";
+    context.fillStyle = "#ffffff";
+    context.fillRect(index * CELL + (CELL - BOX) / 2, (CELL - BOX) / 2, BOX, BOX);
+    context.restore();
+  });
+}
+
+// ► **IT REDRAWS ON A FRAME LOOP, AND THE FRAME IS THE POINT.**
+//   `tools/shot-live.mjs` freezes a page at a FRAME NUMBER by counting
+//   `requestAnimationFrame` callbacks; a page that paints once and stops never
+//   reaches frame 1 and the tool reports "the page may not animate", which is
+//   exactly what it did here. Every frame draws the identical picture, so the
+//   freeze is deterministic rather than merely reachable.
+(function frame() {
+  draw();
+  requestAnimationFrame(frame);
+})();
+
+// Printed where a screenshot cannot capture it but a CDP evaluate can, so the
+// filter strings this render was actually taken with are recoverable from the
+// run rather than reconstructed afterwards.
+window.__glowLadder = { strengths: STRENGTHS, cell: CELL, box: BOX, emitted };
+console.log(JSON.stringify(window.__glowLadder));
+</script>
