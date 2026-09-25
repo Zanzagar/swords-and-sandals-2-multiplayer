@@ -240,7 +240,9 @@ the completed catalog supports at least one current-state form with an
 irreducible simultaneous direct-support basis containing multiple independent
 roots. A fourteenth prerequisite audit then split old RCS-03C3B2B into
 repeated-same-provenance cross-root support and conditional build-provenance
-root equivalence. RCS-03C3B2B1 is the active owner choice under SR-03.
+root equivalence. The owner selected RCS-03C3B2B1-B, requiring at least one
+functional repeated-same-provenance cross-root form. RCS-03C3B2B2 is the
+active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -20310,9 +20312,9 @@ an interim fifty-six-slot register with 26 `SCREEN`, 1 `OWNER-OPEN`, 7
 > B2B cannot reopen either boundary. Replacing one counted row with two adds one
 > potential slot. The amended register has fifty-seven slots: 27 `SCREEN`, 1
 > `OWNER-OPEN`, 7 `PRUNED`, 19 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
-> `EVALUATE`; `Phi_SR = 28`. B2B1 is the sole active card.
+> `EVALUATE`; `Phi_SR = 28`. At that checkpoint B2B1 was the sole active card.
 
-### RCS-03C3B2B1 — repeated same-provenance cross-root support — active owner choice
+### RCS-03C3B2B1 — repeated same-provenance cross-root support — B selected
 
 C3c.31-A requires functional pure-build entries, and C3c.32-B requires every
 counted source position in those entries to depend on contingent post-entry
@@ -20414,6 +20416,147 @@ For both options:
 If B is selected, `RCS-03C3B2B2` becomes the sole active card. If A is
 selected, B2B2 is pruned and `RCS-03C3B3` becomes the sole active card. Any
 answer moves B2B1 to `DIR-SELECTED` and reduces `Phi_SR` by at least one. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-25:** **B, require
+repeated same-provenance cross-root support.** `E^{build-repeat}_v` is
+nonempty. The completed catalog must contain at least one prospectively
+versioned pure-build source form with a reachable functional witness containing
+at least two committed contingent evidence occurrences at one authoritative
+evaluation cut. The occurrences have equal exact `Pi`, distinct roots after
+every selected B2A canonicalization, disjoint complete lineages, separate
+authorization/payment/accounting, and material pure-build candidate use.
+
+This is an existential support floor, not a prevalence rule. Exact forms,
+counts, distribution, and prevalence remain AUTHOR/SPEC. Frozen
+`Bastion#17` may therefore supply a separately authorized and paid Guard at
+`t_1` and another at `t_3`, tied to different defended attacks, with both
+occurrence roots present as same-`Pi` candidate records after the second
+commits. One configured provenance participates through causally distinct
+manifestations, a **partial** local Souls and Simulacra / Achintya Bheda
+Abheda fit until B2B2 decides their build identity.
+
+B grants no power or position use and mints, promotes, coarsens, and exposes no
+root. Shared provenance/equip attribution is metadata rather than occurrence
+payment; reusing one authorization or accounting event does not qualify. Each
+occurrence retains origin, phase, history, outcome, and complete lineage.
+B2B1 moves from `OWNER-OPEN` to `DIR-SELECTED`; already-counted conditional
+B2B2 moves from `SCREEN` to `OWNER-OPEN`. The fifty-seven-slot register now
+contains 26 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 20 `DIR-SELECTED`, 1
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`. The authoritative
+decision record remains unchanged.
+
+### RCS-03C3B2B2 — build-provenance root equivalence/coarsening — active owner choice
+
+Inherit B2B1-B. Let `U^{build-repeat}_v` contain every currently admissible,
+already-committed candidate record admitted through any supported form in
+nonempty `E^{build-repeat}_v` at one authoritative evaluation cut. Let
+`K^{same-Pi}_v` contain every unordered pair of distinct records in `U` whose
+exact signatures are equal, including equal-`Pi` records classified under
+different semantic source forms. B2B1-B guarantees at least one reachable
+pair in `K`. Every member remains a distinct post-B2A causal root with disjoint
+full lineage and separate occurrence authorization/payment/accounting before
+this pure-build projection.
+
+Let `~^{build}_v` be a prospective, versioned equivalence relation over those
+candidate records that **refines exact provenance equality**: distinct records
+may be equivalent only when their `Pi` values are equal. Its class key is fixed
+before the first member commits and must be reflexive, symmetric, and
+transitive; pair-by-pair favorable grouping is invalid. Under whatever class
+identity lifetime RCS-15/SR-11 later authorizes, the first qualifying record
+opens a singleton class and each later equal-key committed candidate joins
+atomically.
+
+Once a class contains several members, the pure-build projection records one
+canonical build identity carrying the deduplicated union of every member's
+complete lineage. Each occurrence still retains its own origin, authorization,
+payment, accounting, phase, semantic content, outcome, and history. Semantic
+source-form identity is not silently part of `Pi`: option B crosses it, while
+option C may use a prospectively disclosed form or other authorable field as a
+finer class key.
+
+This is replacement/equivalence, not an additive build-view root. The
+underlying causal roots remain legible member ancestry but are not also
+independent pure-build identities beside their class. B2B2 does not globally
+merge action roots, split an upstream root, or change any B2A identity. A class
+and its members can never count as independent from one another or from an
+intersecting lineage.
+
+The relation is total and occurrence-stable. A target, actor choice,
+interruption, outcome, Relic, recipe, payoff, claim state, or favorable history
+cannot choose its class after play. Any form or provenance field used by C's
+finer partition must be canonical and exclusive before commitment; overlapping
+labels, partial subcohorts, and nontransitive favorable-pair selection are
+illegal.
+
+| Choice | Build-provenance identity policy | Recommendation, ideal fit, and gameplay tradeoff | Held-fixed example: one exact `Bastion#17` `Pi` spans two Steady-Guard roots `r_S1,r_S2` and two Defiant-Guard-form roots `r_D1,r_D2` |
+| --- | --- | --- | --- |
+| **A — every supported equal-provenance pair remains distinct** | No distinct pair in `K^{same-Pi}_v` is equivalent. Every separately committed candidate remains a singleton pure-build identity after all B2A canonicalization. | A maximizes repeat-source combination space and makes distinct paid manifestations directly legible. Its local ideal fit is **partial**: continuity is visible in shared provenance, but build identity expresses only difference. Repeatable, cheap, or rapidly refreshed sources can become a hidden roots-per-repeat premium and crowd out cross-source play. | The projection is `{[r_S1],[r_S2],[r_D1],[r_D2]}`. All payments and histories remain distinct, but no root may fill a position until B3 permits it. |
+| **B — exact provenance fully determines build identity** | For distinct candidates, `x ~^{build}_v y` exactly when `Pi(x)=Pi(y)`. Every currently admissible record with one exact `Pi` belongs to one canonical build-equivalence class, even across different semantic source forms. | **Recommended.** “One exact configured provenance, one build identity” is teachable and blocks root-per-proc or roots-per-semantic-form farming. One configured identity and its genuinely different paid manifestations coexist at the operative build boundary, a **direct** local Achintya fit; universal equality-by-`Pi` is **aggregate**. Costs are lost same-source independent-root combinations, possible gear/coordination pressure, and path-dependent ancestry: an expired member remains class history and may keep a later partner with intersecting lineage non-independent until the later-authorized class lifetime ends. | The projection is one class `{[r_S1,r_S2,r_D1,r_D2]_{Pi(Bastion#17)}}`, not four member roots plus a new fifth root. Every occurrence history remains visible; the class appears at most once as a build identity. |
+| **C — a disclosed finer partition of equal provenance** | The set of equivalent distinct pairs is a nonempty proper subset of `K^{same-Pi}_v`. At least one reachable equal-`Pi` pair coarsens and at least one reachable equal-`Pi` pair remains in different classes under one stable disclosed equivalence key. | C creates the richest source ontology. Members inside a class have B's **direct** local fit; equal-`Pi` records separated by the finer key have A's **partial** fit; coexistence is **aggregate**. It preserves meaningful semantic subidentities but creates a hidden class-key/source-density taxonomy, compensation pressure, and tooltip/UI burden. The key must never be silently inferred from rarity or chosen after a recipe appears. | A form-keyed partition may project `{[r_S1,r_S2]_{Steady},[r_D1,r_D2]_{Defiant}}` even though all four `Pi` values are equal. Exact finer keys are AUTHOR/SPEC, but their equivalence classes cannot change after play. |
+
+**Recommendation: B, let exact provenance fully determine build identity.** It
+preserves the selected cross-source-weaver purpose: repetition can supply
+several truthful combat manifestations without quietly becoming several build
+sources. It also gives the strongest direct local expression of meaningful
+unity with preserved causal difference. This recommendation has a real cost:
+repeat mastery does not create source diversity, so later partner-source and
+encounter authoring must avoid turning the Relic into a narrow gear or ally
+tax. Append-only class ancestry also creates path dependence: an expired
+member remains historical lineage and can keep a later otherwise-current
+partner with intersecting lineage non-independent until the class's later-
+authorized lifetime ends. RCS-15/SR-11 must define that lifetime, and source
+explanation must make the retained ancestry legible. B3/B4 may later preserve
+manifestation-level interaction through legal child semantics without
+restoring independent root cardinality.
+
+A/B/C are mutually exclusive and exhaustive over the off-diagonal pairs of an
+equivalence relation that refines exact `Pi` equality: no distinct equal-`Pi`
+pair is related, every such pair is related, or the related-pair set is a
+nonempty proper subset of `K^{same-Pi}_v`. Transitivity prevents C from hiding
+arbitrary pairwise exceptions. C is a genuine product policy rather than
+barred prevalence because its finer partition changes authoritative identity
+and the legal future build/counterplay surface. Exact finer keys, form
+identities, catalog counts, distribution, and tuning remain AUTHOR/SPEC.
+
+For every option, the following settlement rules are forced rather than new
+owner choices:
+
+- only already-committed B2B1 candidates with equal exact `Pi` can join one
+  class; different combatants, configuration revisions, configured causal
+  origins, ownership/custody provenance, or component-origin sets never
+  coarsen here merely because definitions, tags, actions, or presentation
+  match;
+- an interrupted or unrealized attempt contributes no member. If an upstream
+  phase already committed an eligible occurrence before interruption, upstream
+  phase semantics decide that fact and B2B2 only classifies it;
+- a late member joins only at its own authoritative commit. It cannot rewrite,
+  revoke, or newly validate an earlier snapshot, settled result, or Relic
+  evaluation. Replay/retry is idempotent and cannot append a duplicate;
+- all members committing at one cut settle through commutative, idempotent set
+  union before the one coherent pre-adjudication evidence read. Callback,
+  packet, or resolver order cannot expose singleton and coarsened identities to
+  coincident evaluations;
+- coarsening never refreshes H age, prolongs S, resurrects expired evidence,
+  or opens readiness. Eligibility remains member-local; expired members
+  remain historical lineage but are absent from the current candidate
+  projection, and a class is currently available only through at least one
+  admissible member; and
+- SR-07's source-configuration contract must say whether an upgrade, reforge,
+  unequip/re-equip, or other source mutation creates a new frozen configuration
+  revision; a changed revision changes `Pi` and is a hard no-coarsen boundary.
+  RCS-15/SR-11 owns class persistence across unchanged configurations and
+  encounter boundaries. This card infers no continuity across either boundary.
+
+B2A remains causal-root authority, A4 remains current-fact support authority,
+B3 remains root/class/child addressability and position-use authority, and B4
+remains child-partition authority. C3C owns same-cut result/tag fan-out;
+C3D-C3F own claims, consumption, and later reuse; RCS-08 owns cross-root/team
+fan-out. B2B2 grants no position occupancy, nesting, fan-out, claim, reuse,
+payoff, UI realization, persistence, release, or implementation authority.
+
+Any answer moves B2B2 from `OWNER-OPEN` to `DIR-SELECTED`, reduces
+`Phi_SR` from 27 to 26, and makes `RCS-03C3B3` the sole active card. The
 authoritative decision record remains unchanged.
 
 ## Session protocol and evidence

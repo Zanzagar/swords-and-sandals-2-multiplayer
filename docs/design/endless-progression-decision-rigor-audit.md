@@ -3230,7 +3230,7 @@ Old B2B is therefore a non-counting parent for support child B2B1 and
 conditional equivalence child B2B2. Replacing one row with two raises the
 register to fifty-seven slots: 27 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 19
 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 28`.
-B2B1 is the sole active card.
+At that checkpoint B2B1 was the sole active card.
 
 For B2B1, `Pi(x)` is the prospective exact build-provenance signature of a
 contingent evidence occurrence offered to a pure-build position. It retains
@@ -3297,6 +3297,76 @@ partition, nesting, fan-out, cross-combatant access, claims, consumption,
 reuse, payoff, UI realization, release, and implementation remain downstream.
 If B1-B is selected, B2B2 follows. If B1-A is selected, B2B2 is pruned and B3
 follows.
+
+The owner selected `RCS-03C3B2B1-B`. `E^{build-repeat}_v` is nonempty: at
+least one prospectively versioned pure-build source form has a reachable
+functional same-`Pi` witness containing separately committed and accounted
+candidate occurrences with distinct post-B2A roots and disjoint full lineages.
+Exact forms, counts, distribution, and prevalence remain AUTHOR/SPEC. This is
+candidate admission only; B1 mints, merges, exposes, and empowers no root.
+
+B1 moved from `OWNER-OPEN` to `DIR-SELECTED`, and conditional B2B2 moved from
+`SCREEN` to `OWNER-OPEN`. The current fifty-seven-slot register contains 26
+`SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 20 `DIR-SELECTED`, 1 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`. B2B2 is the sole active card.
+
+B2B2 passes atomic-card admission after the diff-review correction below. It
+governs one player-material axis: the equivalence relation over currently
+admissible B1 candidates in the pure-build projection. Let
+`K^{same-Pi}_v` contain every distinct candidate pair with equal exact `Pi`,
+including records under different semantic source forms. The three mutually
+exclusive and exhaustive directions are A, relate no distinct pair; B, relate
+every pair in `K`; and C, relate a nonempty proper subset through one
+prospective finer equivalence key with reachable related and still-separated
+equal-`Pi` witnesses. The relation must be reflexive, symmetric, and transitive;
+no target, outcome, Relic, favorable history, or post-hoc subgroup may select
+it.
+
+B is recommended. It establishes one pure-build identity for one exact
+configured provenance while retaining separately paid manifestations and
+their complete histories, a direct local ideal fit and a defense against
+roots-per-repeat farming. A preserves maximum repeat-source combination space
+but expresses shared provenance only partially at the operative identity
+boundary and creates a repeat-cadence premium. C is genuine rather than mere
+prevalence because it imposes two authoritative identity grammars and changes
+future legal build/counterplay surfaces; it also creates source-density
+arbitrage and explanation burden.
+
+The matched `Bastion#17` example holds exact `Pi` fixed across two Steady-Guard
+roots `r_S1,r_S2` and two Defiant-Guard-form roots `r_D1,r_D2`. A projects four
+singleton classes. B projects one four-member exact-`Pi` class across both
+semantic forms. C may project two form-keyed classes while all four records
+retain equal `Pi`. Under every option, B3 still decides whether any root,
+class representative, or child may occupy a position.
+
+The dependency audit found no further product split. Correctness forces
+prospective keys, atomic/idempotent joins at member commitment, commutative
+same-cut union before the coherent evidence read, complete deduplicated member
+lineage, no retroactive change to settled results, no phantom interrupted
+member, no H-age refresh/S extension/resurrection/readiness opening, and a hard
+different-`Pi` boundary. SR-07 owns whether source mutation creates a new
+frozen configuration revision; RCS-15/SR-11 owns class persistence across an
+unchanged revision and encounter boundaries. B2A retains causal-root identity, A4 current-fact support,
+B3/B4 addressability and child partition, C3C-C3F fan-out/claims/reuse, and
+RCS-08 cross-root/team fan-out. B2B2 is replacement/equivalence only and
+creates no additive build-view root, power, position use, payoff, persistence,
+release, or implementation authority.
+
+B's append-only class lineage creates one further disclosed cost: an expired
+member remains historical ancestry and may keep an otherwise-current partner
+with intersecting lineage non-independent until the RCS-15-bounded class
+lifetime ends. This is the anti-laundering consequence of retaining complete
+lineage, not a new claim or expiry rule; the eventual source explanation must
+make it legible.
+
+**Diff-review correction, 2026-09-25:** the first B2B2 draft keyed cohorts and
+the A/B/C partition by B1 source form even though `Pi` deliberately did not
+determine semantic source form. It therefore omitted the material case where
+equal-`Pi` records span forms and falsely called its form-subset trichotomy
+exhaustive. Read-only atomicity review caught the countermodel before commit.
+The corrected card quantifies over all equal-`Pi` candidate pairs and uses the
+discrete/full/proper equivalence-relation trichotomy; do not restore the
+form-subset draft.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

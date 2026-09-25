@@ -140,6 +140,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [repeated same-provenance Relic support selected](2026-09-25-1902--relic-repeated-provenance-support-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | B2B1-B requires at least one repeated same-provenance cross-root pure-build form and leaves build-provenance equivalence/coarsening as the sole active Relic frontier. |
 | [irreducible multi-root state support selected](2026-09-25-1542--relic-multi-root-state-support-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | A4-B requires at least one current-state fact with irreducible simultaneous multi-root support; a fourteenth audit splits old B2B and leaves repeated same-provenance cross-root support as the sole active Relic frontier. |
 | [continuity-root preservation selected](2026-09-25-1424--relic-continuity-root-preservation-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | A3B-A preserves one founder continuity root across every material same-episode revision and leaves irreducible simultaneous multi-root current-state support as the sole active Relic frontier. |
 | [evolving current-state support selected](2026-09-25-0551--relic-evolving-state-support-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | A3A-B requires at least one material revision inside an uninterrupted state episode and leaves continuity-root preservation versus succession as the sole active Relic frontier. |
