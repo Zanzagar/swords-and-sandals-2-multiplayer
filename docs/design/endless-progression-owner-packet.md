@@ -235,8 +235,12 @@ conditional succession boundary RCS-03C3B2A3B. The owner selected
 RCS-03C3B2A3A-B: the completed catalog supports at least one reachable
 material revision inside an uninterrupted current-state continuity episode.
 The owner then selected RCS-03C3B2A3B-A: every such revision preserves the
-episode's founder continuity root. RCS-03C3B2A4 is the active owner choice
-under SR-03.
+episode's founder continuity root. The owner then selected RCS-03C3B2A4-B:
+the completed catalog supports at least one current-state form with an
+irreducible simultaneous direct-support basis containing multiple independent
+roots. A fourteenth prerequisite audit then split old RCS-03C3B2B into
+repeated-same-provenance cross-root support and conditional build-provenance
+root equivalence. RCS-03C3B2B1 is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -19536,7 +19540,8 @@ from `SCREEN` to `DERIVED` reduces `Phi_SR` from 29 to 28.
 > compound-H relation-root promotion),
 > `RCS-03C3B2A3` (current-state root succession through a nonterminating semantic
 > revision), and `RCS-03C3B2A4` (current-state irreducible multi-root support).
-> `RCS-03C3B2B` follows all five. Replacing one screened row with five adds four
+> At that audit checkpoint, the then-counted `RCS-03C3B2B` row followed all
+> five. Replacing one screened row with five added four
 > rows and four potential cards. After A2B-C and derived B1B had reduced
 > `Phi_SR` to 28, this amendment produces fifty-four counted slots and
 > `Phi_SR = 32`.
@@ -20138,12 +20143,12 @@ A creates no additive revision root and grants no addressability, response
 window, H fact, H-age refresh, readiness break/rearm, tag satisfaction, claim,
 reuse, fan-out, payoff, persistence, release, or implementation authority. It
 moves A3B from `OWNER-OPEN` to `DIR-SELECTED` and A4 from `SCREEN` to
-`OWNER-OPEN`. The fifty-six-slot register now contains 27 `SCREEN`, 1
+`OWNER-OPEN`. The then-current fifty-six-slot register contained 27 `SCREEN`, 1
 `OWNER-OPEN`, 7 `PRUNED`, 18 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR` falls from 29 to 28. The authoritative decision record
 remains unchanged.
 
-### RCS-03C3B2A4 — current-state irreducible multi-root causal support — active owner choice
+### RCS-03C3B2A4 — current-state irreducible multi-root causal support — B selected
 
 Selected A3B-A gives every uninterrupted current-state episode one continuing
 identity root. It does not determine whether the material fact beneath that
@@ -20245,8 +20250,170 @@ For both options:
   claims, consumes, reuses, or assigns payoff to evidence, selects persistence
   or serialization, or authorizes implementation.
 
-`RCS-03C3B2B` follows every answer. Any choice moves A4 to `DIR-SELECTED`,
-reduces `Phi_SR` from 28 to 27, and makes B2B the sole active card. The
+At presentation, the then-counted `RCS-03C3B2B` row followed every answer. An
+A4 choice would move A4 to `DIR-SELECTED`, reduce `Phi_SR` from 28 to 27, and,
+before any further prerequisite correction, make B2B the sole active card. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-25:** **B, require
+irreducible simultaneous multi-root support.** `E^{state-mroot}_v` is nonempty.
+The completed catalog must contain at least one prospectively versioned
+canonical current-state source form with a reachable, committed,
+non-preempted, materially functional occurrence whose inclusion-minimal direct
+support basis contains at least two independent roots. Every member is
+presently co-necessary for the same fact, the complete member lineages are
+disjoint, no member is another's ancestor, and no pair shares a nonmultiplying
+authorization or accounting parent.
+
+The qualifying fact still has one continuity identity and occupies one Relic
+position. Distinct roots directly sustain that one present manifestation while
+remaining mechanically distinguishable, a **direct** local Souls and
+Simulacra / Achintya Bheda Abheda fit. The requirement is only existential:
+ordinary root-atomic states remain legal, and exact forms, support widths,
+counts, distribution, prevalence, redundant alternatives, and incidence
+remain AUTHOR/SPEC. `Tempered Formation` may therefore be one current fact
+jointly sustained by independent `Guarding/r_G` and `Heat-readied/r_H`; with
+no alternative basis active, removing either contribution alone ends or
+materially changes the Formation.
+
+B mints no root and exposes no support member. A relation root cannot count
+beside an ancestor; aliases, children, co-presence, time-separated handoff, and
+redundant singleton alternatives cannot counterfeit a multi-root basis. Loss
+of an indispensable member atomically selects another already-valid basis or
+commits the authored revision/termination. Circular reference alone proves
+nothing. B creates no H fact, freshness refresh, readiness or tag event,
+addressability, fan-out, cross-combatant access, claim, consumption, reuse,
+payoff, persistence, serialization, release, or implementation authority.
+
+A4 moves from `OWNER-OPEN` to `DIR-SELECTED`. Before the prerequisite
+correction below, B2B would have moved from `SCREEN` to `OWNER-OPEN`, producing
+an interim fifty-six-slot register with 26 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 19 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 27`. The authoritative decision record remains unchanged.
+
+> **Fourteenth prerequisite correction, 2026-09-25:** screening B2B after
+> A4-B found that pure-build support and combat-produced evidence do not prove
+> that any one exact build provenance ever supplies two otherwise-distinct
+> post-B2A roots. One valid completed world uses only one-shot build sources:
+> a bearer Bastion fact and an allied Ember fact each contribute one root, and
+> A4-B's required composite state exists elsewhere. Another valid world lets
+> one exact configured Bastion origin produce separately accepted Guard and
+> Bash roots outside any already-coarsened source episode. The worlds preserve
+> every prior answer but differ in repeat-source build play. An equivalence
+> policy is vacuous in the first and player-material in the second.
+>
+> Old `RCS-03C3B2B` is therefore a non-counting parent for counted
+> `RCS-03C3B2B1` (repeated same-provenance cross-root support) and conditional
+> `RCS-03C3B2B2` (build-provenance root equivalence/coarsening). Action/build
+> views still never mint roots. B2A2B2 alone owns additive compound-H relation
+> roots, while A4 alone owns multi-root support for one current-state fact;
+> B2B cannot reopen either boundary. Replacing one counted row with two adds one
+> potential slot. The amended register has fifty-seven slots: 27 `SCREEN`, 1
+> `OWNER-OPEN`, 7 `PRUNED`, 19 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
+> `EVALUATE`; `Phi_SR = 28`. B2B1 is the sole active card.
+
+### RCS-03C3B2B1 — repeated same-provenance cross-root support — active owner choice
+
+C3c.31-A requires functional pure-build entries, and C3c.32-B requires every
+counted source position in those entries to depend on contingent post-entry
+combat evidence. Neither rule says that two otherwise-distinct canonical roots
+may carry the same exact build provenance in one admissible comparison.
+
+For a contingent evidence occurrence `x` offered to a pure-build position, let
+`Pi(x)` be its prospective exact build-provenance signature. It retains the
+`sourceCombatantId`, frozen legal configuration revision, every indispensable
+exact configured causal origin, and each origin's configuration-side ownership
+and custody provenance. It excludes the occurrence token and every
+occurrence-specific authorization, payment, and accounting lineage: qualifying
+occurrences must keep those lineages separate even when `Pi` is equal.
+A definition or semantic tag may remain a predicate attribute, but it cannot
+replace exact causal origin for root accounting. The signature does not decide
+whether the origin is later authored as an item instance, payload, Technique,
+component-owned occurrence, multi-component record, or another legal source
+family.
+
+Shared immutable provenance attribution or a repeat-enabling equip entitlement
+inside `Pi` is metadata, not itself a member of either root's causal lineage or
+a nonmultiplying authorization/accounting parent. It cannot authorize or pay
+for an occurrence. If two purported occurrences instead reuse one accepted
+authorization, payment, or accounting event, they fail the witness regardless
+of equal `Pi`.
+
+A **repeated same-provenance cross-root witness** is one reachable,
+non-preempted comparison at an authoritative evaluation cut containing at
+least two committed contingent evidence occurrences `x_1,x_2` such that:
+
+- `Pi(x_1)=Pi(x_2)` while the occurrences remain semantically distinct;
+- after every selected B2A canonicalization, they carry distinct roots with
+  disjoint complete lineages, neither root is an alias or ancestor of the
+  other, and they share no nonmultiplying authorization/accounting parent;
+- the occurrences were separately accepted and accounted rather than being
+  fields, targets, hits, phases, callbacks, packets, action/build views, or
+  children of one already-canonical root; and
+- both remain materially admissible pure-build source candidates with Relic
+  matching, payoff, claims/reuse, and later addressability projected out.
+
+Let `E^{build-repeat}_v` contain exactly the prospectively versioned pure-build
+source forms with at least one such witness. Membership is fixed by source form
+and provenance grammar before combat; a target, Relic, favorable history,
+payoff, claim state, replay, or present recipe completion cannot create it.
+
+B2B1's immediate authoritative consequence is **candidate admission**, not
+position use. After the second occurrence commits, the pure-build source ledger
+either may or may not contain both same-`Pi` roots as simultaneous candidate
+records. That difference is inspectable in the eventual source explanation and
+changes the required content/proof and the exact input offered to B2B2/B3; it
+does not itself authorize either candidate to fill a Relic position. Exact UI
+realization remains downstream.
+
+| Choice | Repeated-provenance support language | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
+| --- | --- | --- | --- |
+| **A — no repeated same-provenance cross-root support** | `E^{build-repeat}_v` is empty. No exact build-provenance signature has two otherwise-independent post-B2A roots simultaneously admissible as pure-build source candidates. Separately rooted pure-build relationships must cross exact provenance signatures. | A gives the clearest source-density rule and prevents one signature from supplying two candidate records through repetition. Its fit is **neutral/protective**: it protects real source distinction but provides no same-provenance continuity across distinct manifestations. If a later relationship requires two independently sourced candidates, they must cross exact provenances. | With frozen `Bastion#17` provenance, Aster separately authorizes and pays for one Guard occurrence at `t_1` and another at `t_3`, each tied to a different defended attack. Both may remain ordinary combat facts with distinct roots, but the post-`t_3` pure-build source ledger cannot admit both as a same-`Pi` candidate pair; exact exclusion/tie-breaking is SPEC if the authored domain permits either alone. |
+| **B — require repeated same-provenance cross-root support** | `E^{build-repeat}_v` is nonempty. At least one prospectively versioned pure-build source form has a reachable functional witness with two otherwise-independent post-B2A roots carrying the same exact provenance signature. Exact forms, counts, distribution, and prevalence remain AUTHOR/SPEC. | **Recommended.** B preserves a real repeat-source design space and makes the next identity question substantive: one configured provenance has several causally distinct candidate manifestations. That relationship is **partial** until B2B2 decides whether the candidates remain distinct or become one build identity. B itself grants no power or position use. Its immediate costs are lineage/provenance explanation and occurrence tracking; root-density or coordination pressure depends on later choices. | On the same `Bastion#17` timeline, both separately paid Guard occurrences remain in the post-`t_3` pure-build source ledger as distinct candidate roots with distinct occurrence-accounting lineages but equal `Pi`. B2B2 later decides remain-distinct versus coarsen for build identity; even a remain-distinct answer grants no position use until B3. |
+
+**Recommendation: B, require at least one repeated same-provenance cross-root
+form.** It preserves the possibility of expressing “one meaningful build
+source through several combat manifestations” without pretending that this
+card already grants a repeat-source build. Its guaranteed result is narrower:
+at least one authored form puts multiple separately paid same-provenance roots
+into the candidate ledger. That is a **partial** local ideal fit grounded in
+direct same-provenance participation, and it makes the later equivalence choice
+substantive. B2B2 and B3 still decide build identity and position use
+respectively.
+
+A/B are mutually exclusive and exhaustive because `E^{build-repeat}_v` is
+empty or nonempty. A universal-versus-mixed support split would change catalog
+saturation rather than this support boundary, so exact breadth remains
+AUTHOR/SPEC. Positive membership needs one complete reachable witness;
+negative membership needs complete analysis of the declared pure-build source
+domain. Configuration or a provenance signature alone remains insufficient
+evidence under C3c.32-B.
+
+For both options:
+
+- different combatants, owners, configuration revisions, or exact causal
+  origins do not share `Pi` merely because their item definition, tag, action,
+  or presentation is equal;
+- one accepted operation's action and build views remain one lineage, and a
+  multi-root current fact remains one A4 fact/position rather than becoming a
+  B2B1 pair;
+- no answer coarsens, promotes, mints, or exposes a root. If B is selected,
+  conditional B2B2 alone decides remain-distinct versus coarsen for
+  build-provenance identity; remaining distinct never authorizes position use,
+  which belongs to B3; if A is selected, B2B2 is pruned;
+- every occurrence keeps its origin, authorization, payment/accounting, phase,
+  semantic content, and full lineage; H freshness and S termination remain
+  unchanged;
+- upgrades, reforges, unequip/re-equip, cross-encounter continuity,
+  persistence, and migration remain outside this fixed-configuration support
+  card; and
+- root/child addressability, child partition, nesting, same-cut or cross-Relic
+  fan-out, cross-combatant access, claims, consumption, reuse, payoff, UI
+  realization, release, and implementation remain downstream.
+
+If B is selected, `RCS-03C3B2B2` becomes the sole active card. If A is
+selected, B2B2 is pruned and `RCS-03C3B3` becomes the sole active card. Any
+answer moves B2B1 to `DIR-SELECTED` and reduces `Phi_SR` by at least one. The
 authoritative decision record remains unchanged.
 
 ## Session protocol and evidence

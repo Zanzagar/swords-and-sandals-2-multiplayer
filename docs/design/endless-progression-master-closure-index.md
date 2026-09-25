@@ -1354,8 +1354,8 @@ worksheet history. They primarily populate `SR-01` through `SR-05` and parts of
 | --- | --- | --- | --- |
 | `SR-01` | Fantasy, purpose, and topology | One vocabulary/relationship map distinguishes Soul, simulacrum/combatant, Bound Soul, Relic root, input/payoff Charms, sources, and results; each has a unique job and no slot duplicates another system's theme or UI role. | `PARTIAL`: standalone root/customizer and cross-source-weaver directions exist; normative map/replay remains. |
 | `SR-02` | Access, ownership, slots, custody, and loss | A state machine covers disabled/eligible/enabled states, one-root/two-Charm occupancy, personal ownership, duplicates, transfer, destruction/loss, retirement, and every illegal transition for Relics and Charms separately. | `PARTIAL`: personal Relic/Charm access, one root, two Charms, and permanent nontransferable Relics are selected; Charm custody/loss remains open. |
-| `SR-03` | Source and input grammar | A total matrix names eligible bearer/ally/source evidence, temporal and basis cells, Charm modifications, participation requirements, and legal/illegal examples; every selected cell has a gameplay use. | `PARTIAL`: extensive grammar directions exist; total authored examples and exclusions do not. |
-| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, and universal continuity-root preservation across those revisions are selected; coherent same-cut evidence acquisition and exact `{D,E,O}` material phase support are derived, while current-state irreducible multi-root support, later root/atom identity, claims/reuse, cause, agency, precedence, and lineage ownership remain open. |
+| `SR-03` | Source and input grammar | A total matrix names eligible bearer/ally/source evidence, temporal and basis cells, Charm modifications, participation requirements, and legal/illegal examples; every selected cell has a gameplay use. | `PARTIAL`: extensive grammar directions and nonempty irreducible multi-root current-state support exist; repeated same-provenance cross-root support, build-root equivalence, and total authored examples/exclusions remain open. |
+| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, universal continuity-root preservation across those revisions, and nonempty irreducible multi-root current-state support are selected; coherent same-cut evidence acquisition and exact `{D,E,O}` material phase support are derived, while later root/atom identity, claims/reuse, cause, agency, precedence, and lineage ownership remain open. |
 | `SR-05` | Relational archetypes and Achintya boundary | Every required archetype maps to an operative player choice or state transition where continuity and distinction are mechanically legible; no mandatory class exists only to satisfy a graph, coverage, or symmetry token. | `PARTIAL`: structural/archetype directions through C170 exist; concrete player-visible proof does not. |
 | `SR-06` | Representative and release catalog | A finite versioned release catalog (or explicit launch minimum plus deferred catalog boundary) supplies source/relationship/payoff definitions, counterexamples, and at least one viable build purpose for every required family. | `OPEN` |
 | `SR-07` | Configuration and evolution horizons | Equip, Charm socketing, reconfiguration, rebinding, learning/evolution, encounter/Circuit locks, preview, and rollback rules name every clean boundary and cannot be shopped through reload or route information. | `OPEN` |
@@ -1875,9 +1875,9 @@ authoritative cut. Preservation creates no additive root and grants no
 downstream access or use.
 
 A3B moves from `OWNER-OPEN` to `DIR-SELECTED`; A4 moves from `SCREEN` to
-`OWNER-OPEN`. The fifty-six-slot register now contains 27 `SCREEN`, 1
+`OWNER-OPEN`. The then-current fifty-six-slot register contained 27 `SCREEN`, 1
 `OWNER-OPEN`, 7 `PRUNED`, 18 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 28`. `RCS-03C3B2A4` is the sole active card.
+`EVALUATE`; `Phi_SR = 28`. `RCS-03C3B2A4` was the sole active card.
 
 The A4 prerequisite screen admits one existential product boundary rather than
 a prevalence subtree. For a current-state fact at one authoritative cut, a
@@ -1892,9 +1892,60 @@ exclude every such basis, or B, require at least one reachable functional
 state form with one. Exact forms, widths, counts, distribution, prevalence,
 and redundant alternatives remain AUTHOR/SPEC under the anti-recursion rule.
 
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2A4-B`, so `E^{state-mroot}_v` is nonempty. The completed catalog
+must contain at least one reachable, committed, non-preempted current-state
+fact occurrence whose inclusion-minimal direct-support basis contains at least
+two independent roots. The fact retains one continuity identity and one Relic
+position; A4 mints and exposes no root. Exact forms, support widths, counts,
+distribution, prevalence, redundant alternatives, and incidence remain
+AUTHOR/SPEC.
+
+Before further prerequisite correction, A4 moved from `OWNER-OPEN` to
+`DIR-SELECTED` and B2B moved from `SCREEN` to `OWNER-OPEN`. The interim
+fifty-six-slot register contained 26 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 19
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`.
+
+**Fourteenth prerequisite correction, 2026-09-25.** B2B still combined two
+independent consequence boundaries. Pure-build entries and contingent combat
+evidence do not prove that any one exact build-provenance signature can produce
+two otherwise-distinct roots after all selected B2A canonicalization. An
+empty-domain world uses only one-shot provenance sources; a nonempty-domain
+world lets one exact configured origin produce separately accepted and
+accounted roots. Only in the second world can a later equivalence policy change
+repeat-source density.
+
+Old `RCS-03C3B2B` is therefore a non-counting parent for support child
+`RCS-03C3B2B1` and conditional equivalence child `RCS-03C3B2B2`. Additive
+build-view roots are already forbidden: aliases and action/build views never
+mint roots. B2A2B2 retains additive compound-H relation-root promotion; A4
+retains multi-root support for one current-state fact. Replacing one counted
+row with two adds one potential slot. The amended fifty-seven-slot register
+contains 27 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 19 `DIR-SELECTED`, 1
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 28`.
+`RCS-03C3B2B1` is the sole active card.
+
+The B2B1 support set is empty or nonempty. A qualifying positive witness has
+two committed contingent evidence occurrences at one evaluation cut with the
+same prospective exact provenance signature—including source combatant,
+frozen configuration revision, every indispensable exact causal origin, and
+each origin's configuration-side ownership/custody provenance—but distinct
+post-B2A roots, disjoint complete lineages, separate occurrence-specific
+authorization/payment/accounting, and material pure-build candidate use.
+Shared immutable provenance attribution/equip entitlement is metadata rather
+than a causal-lineage member or authorization/payment parent; reuse of one
+accepted payment event disqualifies the pair.
+Existing aliases, views, child applications, one paid operation, an A4
+support basis, or configuration alone cannot prove membership. A excludes all
+such witnesses; B requires at least one functional form while exact breadth
+remains AUTHOR/SPEC. Conditional B2B2 alone later decides whether supported
+same-provenance roots remain distinct or coarsen for pure-build identity.
+Candidate-ledger admission is B2B1's immediate authoritative difference;
+position use remains B3 even if B2B2 leaves roots distinct.
+
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has fifty-six
+To make that route genuinely finite, the remaining C3c pass has fifty-seven
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -1935,9 +1986,10 @@ overcompression.
 | `RCS-03C3B2A2B2` | Additive multi-parent relation-root promotion for eligible nonmerged multi-root H order/trajectory forms | `DIR-SELECTED`; B gives every successfully realized qualifying occurrence of every eligible form exactly one fresh additive relation root with complete transitive operand ancestry; the occurrence must retain at least two post-coarsening roots, and no promoted root is independent from an ancestor, intersecting lineage, or shared nonmultiplying authorization/accounting parent |
 | `RCS-03C3B2A3A` | Support for material semantic revision while one current-state continuity episode remains uninterrupted | `DIR-SELECTED`; B requires nonempty `E^{state-rev}_v`: at least one reachable committed revision materially changes player-semantic state while the same episode remains continuously operative; exact forms, counts, distribution, and prevalence remain AUTHOR/SPEC |
 | `RCS-03C3B2A3B` | Current-state root preservation versus succession across an eligible material nonterminating revision | `DIR-SELECTED`; A makes `Q^{state-succ}_v` empty under `SR-03`: every committed eligible revision preserves the episode's founder continuity root while append-only retaining complete indispensable cause lineage at the cut; material manifestations remain distinct, and no revision mints a root or grants downstream use |
-| `RCS-03C3B2A4` | Current-state irreducible multi-root causal-support topology | `OWNER-OPEN`; decide whether `E^{state-mroot}_v` is empty or nonempty under `SR-03`: a qualifying witness has one reachable current fact with an inclusion-minimal simultaneous direct-support basis of at least two roots whose complete lineages are disjoint and share no nonmultiplying authorization/accounting parent; exact forms, widths, counts, distribution, prevalence, and redundant alternatives remain AUTHOR/SPEC, and A4 mints and exposes no root |
-| `RCS-03C3B2B` | Canonical build-provenance source-root identity and equivalence for pure-build entries | `SCREEN`; follows `RCS-03C3B2A1`, `RCS-03C3B2A2A`, applicable `RCS-03C3B2A2B2`, `RCS-03C3B2A3A`/applicable `RCS-03C3B2A3B`, and `RCS-03C3B2A4` under `SR-03`; exact family records follow the selected semantic boundary |
-| `RCS-03C3B3` | Root-occurrence versus semantic-child-application atom addressability topology | `SCREEN`; follows `RCS-03C3B2A1`, `RCS-03C3B2A2A`, applicable `RCS-03C3B2A2B2`, `RCS-03C3B2A3A`/applicable `RCS-03C3B2A3B`, `RCS-03C3B2A4`, and `RCS-03C3B2B` under `SR-03`; every child retains its full root lineage, and intersecting lineage sets or a shared nonmultiplying authorization/accounting parent never become independent sources for one result |
+| `RCS-03C3B2A4` | Current-state irreducible multi-root causal-support topology | `DIR-SELECTED`; B requires nonempty `E^{state-mroot}_v` under `SR-03`: at least one reachable current fact has an inclusion-minimal simultaneous direct-support basis containing multiple independent roots; exact forms, widths, counts, distribution, prevalence, and redundant alternatives remain AUTHOR/SPEC, and A4 mints and exposes no root |
+| `RCS-03C3B2B1` | Support for repeated same-provenance otherwise-distinct post-B2A roots in pure-build evidence | `OWNER-OPEN`; decide whether `E^{build-repeat}_v` is empty or nonempty under `SR-03`: a qualifying witness retains one exact source-combatant/configuration/causal-origin provenance signature across two separately accepted and accounted contingent evidence occurrences with distinct post-B2A roots and material pure-build candidate use; exact forms, counts, distribution, and prevalence remain AUTHOR/SPEC |
+| `RCS-03C3B2B2` | Build-provenance root equivalence/coarsening across supported repeated same-provenance roots | `SCREEN`; conditional on `RCS-03C3B2B1-B` under `SR-03`, otherwise `PRUNED`; coarsening is replacement/equivalence with complete member lineage, never an additive build-view root, and feasible policy breadth is recomputed after B1 |
+| `RCS-03C3B3` | Root-occurrence versus semantic-child-application atom addressability topology | `SCREEN`; follows `RCS-03C3B2A1`, `RCS-03C3B2A2A`, applicable `RCS-03C3B2A2B2`, `RCS-03C3B2A3A`/applicable `RCS-03C3B2A3B`, `RCS-03C3B2A4`, `RCS-03C3B2B1`, and applicable `RCS-03C3B2B2` under `SR-03`; every child retains its full root lineage, and intersecting lineage sets or a shared nonmultiplying authorization/accounting parent never become independent sources for one result |
 | `RCS-03C3B4` | Canonical within-root semantic child-application partition by target/effect/application rather than fields, aliases, packets without authored meaning, or resolver microsteps | `SCREEN`; conditional on `RCS-03C3B3` admitting child atoms; otherwise `PRUNED`, with exact per-family catalogs becoming AUTHOR/SPEC after selection |
 | `RCS-03C3C` | Same-cut canonical-evidence fan-out across distinct result/tag predicates within one active Relic, whether adjudicated in one invocation or multiple coincident invocations | `SCREEN`; follows `RCS-03C3B3` and applicable `RCS-03C3B4` under `SR-03`; batching cannot change legality, and position proofs with intersecting full lineages or one shared nonmultiplying authorization/accounting parent cannot occupy independent positions of the same relationship result |
 | `RCS-03C3D` | Post-invocation Relic-local evidence-claim/consumption trigger and no-result disposition without deleting canonical occurrence truth | `SCREEN`; follows `RCS-03C3C` and C133/C134 under `SR-03`/`SR-04` |
@@ -2036,21 +2088,27 @@ then-current register still had **fifty-six slots**: 28 `SCREEN`, 1
 `OWNER-OPEN`, 7 `PRUNED`, 17 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; then-current `Phi_SR = 29`, and `RCS-03C3B2A3B` was the sole active
 card. `RCS-03C3B2A3B-A` then selected universal continuity-root preservation
-across every eligible revision. The current register still has **fifty-six
-slots**: 27 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 18 `DIR-SELECTED`, 1
-`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current `Phi_SR = 28`, and
-`RCS-03C3B2A4` is the sole active card.
+across every eligible revision. At that checkpoint the register still had
+**fifty-six slots**: 27 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 18
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 28`, and
+`RCS-03C3B2A4` was the sole active card. `RCS-03C3B2A4-B` then selected
+nonempty irreducible multi-root current-state support, producing an interim
+`Phi_SR = 27`. Replacing old B2B with support child `RCS-03C3B2B1` and
+conditional equivalence child `RCS-03C3B2B2` adds one potential row. The
+current fourteenth-amendment register has **fifty-seven slots**: 27 `SCREEN`,
+1 `OWNER-OPEN`, 7 `PRUNED`, 19 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; current `Phi_SR = 28`, and `RCS-03C3B2B1` is the sole active card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most twenty-eight
-owner cards under this thirteen-times-amended charter and will usually have
+owner cards under this fourteen-times-amended charter and will usually have
 fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`, and
-`RCS-04` remain readable parent aliases only; they are not additional counted
-slots.
+`RCS-03C3B2B`, and `RCS-04` remain readable parent aliases only; they are not
+additional counted slots.
 
 `Phi_SR = 0` is necessary but not sufficient for Relic closure: the twelve
 `SR-*` exit tests, proof packet, coherent normative replay, and explicit
@@ -2064,7 +2122,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 56 frozen candidate slots; current `Phi_SR = 28` after `RCS-03C3B2A3B-A` selects universal continuity-root preservation and activates current-state multi-root support | At most 28 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 57 frozen candidate slots; current `Phi_SR = 28` after `RCS-03C3B2A4-B` selects nonempty irreducible multi-root current-state support and the B2B support/equivalence split activates the repeated same-provenance support question | At most 28 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
