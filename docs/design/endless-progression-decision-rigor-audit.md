@@ -3464,6 +3464,66 @@ B3B, B4, C3C-C3F, RCS-08, SR-07, and RCS-15/SR-11 retain those respective
 boundaries. Historical class ancestry alone supplies no current representative
 or child, and a repeated child label cannot bridge a changed `Pi`.
 
+The owner selected `RCS-03C3B3A-B`. `P` is empty and `C` is nonempty: only
+semantic child applications may furnish Relic positions. Parent roots and
+exact-`Pi` classes remain operative lineage/grouping identities but are not
+addressable position atoms. B3B is therefore pruned. Complete lineage,
+prospective A4 basis selection, non-independence, current admissibility, and
+all retained-owner safeguards above remain binding. Before further correction,
+the fifty-eight-slot register had 24 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 22
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`, with
+old B4 active.
+
+The B4 prerequisite audit first appeared to expose singular versus plural
+parent frontiers, but rechecking upstream support proves the singular world
+illegal. Old B4 is now a non-counting parent for B4A, explicit plural-site
+support, and B4B, canonical partition/coarsening. Let `S^{app}_v(e,p)` contain
+the realized primitive semantic application sites beneath current parent `p`
+at invocation cut `e`. Distinct sites need a matched comparison that changes
+or removes one while holding parent identity, the other site, source
+configuration, and unrelated state fixed, thereby changing a truthful
+player-semantic target/effect/application fact. Fields, packets, callbacks,
+storage writes, labels, animation markers, and resolver microsteps fail that
+separator. Let `E^{app-multi}_v` contain reachable `(e,p)` with at least two
+qualifying sites.
+
+B2B1-B supplies two semantically distinct, separately accepted/accounted,
+equal-`Pi` current candidates at one cut. B2B2-B maps both into one exact-`Pi`
+class parent, and B3A-B preserves their player-meaningful manifestations as
+the only possible position-furnishing layer. Removing one while retaining the
+other preserves the class key and changes a truthful application fact.
+Therefore `E^{app-multi}_v` is nonempty. Coarsening both manifestations into
+one final child would be B4B's partition answer, not evidence that the
+primitive site set was singular. B4A closes `DERIVED`; exact additional
+families, widths, counts, distribution, and prevalence remain AUTHOR/SPEC.
+
+B4B gives each site one prospective canonical laminar child-family grammar.
+Its three exhaustive directions are A, semantic leaves only; B, at least one
+reachable functional compound under one nonoverlapping child scale; and C, at
+least one co-addressable compound/descendant pair in an acyclic laminar
+hierarchy. Recommend B: it keeps signature sequences readable without
+restoring root addressability or letting recipes shop the same site at broad
+and precise scales. A maximizes precision and simplicity but risks target/stage
+token fragmentation. C is the richest direct unity/difference expression but
+adds scale ambiguity, candidates, and claims/reuse/fan-out/UI burden. Exact
+breadth remains AUTHOR/SPEC; incomparable crossing blocks are predicate
+queries, not additional canonical atom identities.
+
+Partition keys are versioned, prospective, deterministic, and source-owned.
+Incomplete finite compounds furnish nothing; same-cut completion settles
+before the coherent read; later sites cannot repartition old ones or rewrite
+settled results. Every final child inherits complete parent proof lineage.
+Only C admits ancestor/descendant overlap, and complete shared lineage still
+blocks independent positions. B4B grants no crossing child identity,
+root-level addressability, fan-out, claim, reuse, payoff, UI, persistence,
+release, or implementation.
+
+Replacing one counted B4 row with B4A/B4B creates the sixteenth amendment and
+adds one slot but no potential card. The current fifty-nine-slot register has
+24 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 22 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`. B4B is the sole active card; C3C
+follows any answer.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

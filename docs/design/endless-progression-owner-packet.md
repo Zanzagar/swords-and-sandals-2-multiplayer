@@ -246,7 +246,13 @@ RCS-03C3B2B2-B: exact `Pi` fully determines one canonical pure-build identity
 across every currently admissible equal-`Pi` candidate, including candidates
 classified under different semantic source forms. A fifteenth prerequisite
 audit then split old RCS-03C3B3 into global addressable atom-layer support and
-conditional same-lineage parent/child co-addressability. RCS-03C3B3A is the
+conditional same-lineage parent/child co-addressability. The owner selected
+RCS-03C3B3A-B: only semantic child applications may furnish Relic source
+positions, while their parent roots/classes remain operative lineage and
+grouping identities. A sixteenth prerequisite audit then split old
+RCS-03C3B4 into nontrivial within-parent application-site support and its
+canonical final child-family topology. RCS-03C3B4A is derived positive from
+the already-selected repeated-provenance class witness, and RCS-03C3B4B is the
 active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
@@ -20641,7 +20647,7 @@ record remains unchanged.
 > `PRUNED`, 21 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 > `Phi_SR = 27`. B3A is the sole active card.
 
-### RCS-03C3B3A — global addressable atom-layer support — active owner choice
+### RCS-03C3B3A — global addressable atom-layer support — B selected
 
 This card chooses the semantic layer or layers that the completed Relic source
 catalog must support as directly addressable evidence atoms. An atom is
@@ -20732,14 +20738,190 @@ Every option obeys the following forced safeguards:
 - B3A grants no nested-form catalog, same-cut result/tag fan-out, claim,
   consumption, later reuse, cross-combatant authority, payoff, UI realization,
   persistence, release, or implementation. B3B owns same-lineage dual-level
-  support, B4 child partition, C3C fan-out, C3D-C3F claims/reuse, and RCS-08
-  cross-root/team authority.
+  support, B4 child-family topology, C3C fan-out, C3D-C3F claims/reuse, and
+  RCS-08 cross-root/team authority.
 
-If A is selected, B3B and B4 are pruned and C3C follows. If B is selected,
-B3B is pruned and B4 becomes the sole active card. If C is selected, B3B
-becomes the sole active card and B4 remains screened behind it. Any answer
-moves B3A to `DIR-SELECTED` and reduces `Phi_SR` by at least one. The
-authoritative decision record remains unchanged.
+**Direction answer — selected by Zanzagar on 2026-09-25:** **B, semantic child
+applications only.** `P^{addr}_v` is empty and `C^{addr}_v` is nonempty.
+Every operative Relic source position is furnished by an authored,
+player-meaningful target/effect/application manifestation. Its canonical B2A
+root or B2B2 exact-`Pi` class remains mechanically operative as lineage and
+grouping identity, but cannot itself occupy a position. A source family with
+no canonical meaningful child is unavailable to Relic matching.
+
+This makes concrete manifestation and parent continuity simultaneously
+operative at one position, a **direct** local Souls and Simulacra / Achintya
+Bheda Abheda fit, without maintaining two addressability languages. The real
+costs remain: direct whole-root/class recipes and root-level nesting disappear;
+the child catalog and explanations become more demanding; and application
+families without a meaningful child frontier contribute nothing. B3A does not
+select one proof when several children qualify and does not choose the UI.
+
+Every child inherits its complete applicable proof lineage. A child beneath a
+B2B2-B class inherits the class's complete deduplicated union lineage; an A4
+fact or child inherits continuity lineage plus every member lineage of its one
+prospectively selected authoritative active support basis. Parent/child,
+sibling, class/member, fact/supporter, intersecting-lineage, and shared
+nonmultiplying-authorization proofs remain non-independent for one result.
+B3A mints, splits, merges, succeeds, promotes, or empowers no root and grants
+no fan-out, claim, reuse, payoff, persistence, release, or implementation.
+
+B3A moves from `OWNER-OPEN` to `DIR-SELECTED`; conditional B3B is pruned, and
+the then-registered B4 row would have become `OWNER-OPEN`. Before the
+prerequisite correction below, the fifty-eight-slot register therefore
+contained 24 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 22 `DIR-SELECTED`, 1
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`. The authoritative
+decision record remains unchanged.
+
+> **Sixteenth prerequisite correction, 2026-09-26:** old B4 states a
+> partition policy without first making its nontrivial support premise
+> explicit. That premise is not another owner choice. B2B1-B already requires
+> two semantically distinct, separately accepted and accounted, equal-`Pi`
+> occurrences to remain materially admissible at one evaluation cut. B2B2-B
+> then makes their exact-`Pi` class the one parent representative, while B3A-B
+> preserves their meaningful manifestations as the only possible
+> position-furnishing layer. Therefore at least two primitive semantic
+> application sites exist beneath one current parent. A globally singular
+> child frontier is incompatible with the selected rules; grouping those sites
+> into one final child would be a B4 partition answer, not proof that only one
+> primitive site existed.
+>
+> Old `RCS-03C3B4` is therefore a non-counting parent for
+> `RCS-03C3B4A` (nontrivial within-parent semantic-application support) and
+> conditional `RCS-03C3B4B` (canonical coarsening/partition of plural sites).
+> B4A closes `DERIVED` as nonempty; B4B inherits the actual owner choice.
+> Replacing one counted row with two adds one slot but no potential card. The
+> amended fifty-nine-slot register contains 24 `SCREEN`, 1 `OWNER-OPEN`, 8
+> `PRUNED`, 22 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 25`. B4B is the sole active card.
+
+### RCS-03C3B4A — nontrivial within-parent semantic-application support — derived nonempty
+
+B3A-B makes semantic child applications the only source objects that may
+furnish Relic positions. B4A makes explicit whether the selected upstream
+topology supplies more than one meaningful application site beneath one
+parent before final child atoms are partitioned.
+
+For fixed ruleset/catalog version `v`, actual invocation cut `e`, and one
+currently admissible canonical parent representative `p`, let
+`S^{app}_v(e,p)` contain its **primitive semantic application sites**. A site
+is an actually realized, authored, player-meaningful target/effect/application
+manifestation beneath `p`. Two sites are distinct only when a matched
+held-fixed comparison can change or remove one while preserving `p`'s
+canonical identity key, the other site, source configuration, and unrelated
+state, and thereby changes a truthful player-semantic fact about what was
+done, to whom, or with what effect. Complete ancestry may truthfully lose the
+removed site's lineage; that does not change the parent key. A field, packet,
+callback, storage write, animation marker, repeated
+label, resolver microstep, or mechanically meaningless subdivision is never a
+site. Separate authored target applications, effects, or action stages may be
+sites; mere implementation multiplicity may not.
+
+These are pre-partition semantic sites, not yet final addressable child atoms.
+B4B still decides whether they remain separate children or coarsen into
+authored compound children. B4A chooses no grouping.
+
+Let
+`E^{app-multi}_v = {(e,p) | |S^{app}_v(e,p)| >= 2}` over reachable materially
+functional child-frontier witnesses. B3A-B guarantees at least one functional
+child somewhere. More specifically, B2B1-B supplies two semantically distinct,
+separately accepted/accounted, equal-`Pi` occurrences that are both materially
+admissible at one cut. B2B2-B maps both into one exact-`Pi` class
+representative `p`, and B3A-B requires their player-meaningful manifestations,
+rather than `p`, to furnish any positions. Removing either occurrence while
+retaining the other preserves the class key but changes a truthful application
+fact. Therefore the two manifestations are distinct members of
+`S^{app}_v(e,p)`, so `E^{app-multi}_v` is nonempty.
+
+This is a **derived** support fact, not B4B's partition answer. Coarsening both
+sites into one final child cannot retroactively make them one primitive site;
+it is exactly the compound-child policy B4B must decide. B2A2A-B's functional
+multi-operation episode supplies a compatible second witness, but the
+repeated-provenance class witness alone is sufficient. Exact additional
+families, widths, counts, distribution, and prevalence remain AUTHOR/SPEC.
+
+The derivation mints no root, child, position, result, claim, or use. Both sites
+remain beneath the exact-`Pi` class, inherit its complete union lineage, and
+cannot occupy independent positions of one relationship result. B4A grants no
+final grouping, proof selection, nested catalog, fan-out, claim, reuse, payoff,
+UI, persistence, release, or implementation. It moves directly to `DERIVED`;
+B4B is the sole active card.
+
+### RCS-03C3B4B — canonical semantic-child family topology — active owner choice
+
+For each actual cut `e` and parent `p`, let `F^{child}_v(e,p)` be the canonical
+family of nonempty blocks drawn from `S^{app}_v(e,p)`. Each block is one final
+semantic child atom, and every primitive site is covered. The family must be
+**laminar**: two blocks are disjoint, or one wholly contains the other.
+Incomparable crossing blocks are not alternative atom identities; recipes may
+predicate over canonical children instead. This preserves a truthful ancestry
+tree and prevents one site from acquiring several unrelated canonical selves.
+
+The versioned family grammar is prospective. Site-to-block keys are fixed
+from authored source semantics when each site commits, before Relic matching.
+A finite compound may remain incomplete until all required sites commit, but
+an incomplete block furnishes no compound child. Same-cut completions settle
+atomically before the coherent evidence read. A later site or class member may
+complete a prospectively declared ancestor block but cannot change an old
+assignment or rewrite a settled result.
+
+Let `K^{compound}_v` contain reachable materially functional blocks `B` with
+`|B| >= 2`. Let `K^{nested}_v` contain reachable strict-containment pairs
+`B_1 ⊊ B_2` where both blocks are directly addressable children at
+the same cut. The question is whether the final child family contains only
+semantic leaves, a single nonoverlapping scale with compounds, or at least one
+addressable child hierarchy.
+
+| Choice | Final child-family topology | Recommendation, ideal fit, and gameplay tradeoff | Concrete example |
+| --- | --- | --- | --- |
+| **A — semantic leaves only** | `K^{compound}_v` and `K^{nested}_v` are empty. Every final child is exactly one primitive target/effect/application site. | A is the clearest and most precise rule: what the player sees as one meaningful application site is what a Relic may name. Distinct sites remain legible while one parent lineage governs them, a **direct** local ideal fit. It maximizes recipe precision and counterplay. Costs are candidate and explanation volume, AoE/multi-stage fragmentation, and pressure on C3C/claim rules because every meaningful target or stage remains separately addressable even though siblings cannot fill independent positions of one result. | Twinstrike's `Opening Cut` and `Returning Cut` are separate child atoms beneath one operation root. A Relic may name the return specifically. Ember Arc's two meaningful target applications are separate children, while its internal damage packets never appear. |
+| **B — one nonoverlapping scale with authored compounds** | `K^{compound}_v` is nonempty and `K^{nested}_v` is empty. Final children form one exhaustive partition: at least one reachable functional block groups multiple primitive sites, other blocks may be singletons, and no grouped member is simultaneously addressable as a descendant child at that cut. Exact families, keys, widths, counts, distribution, and prevalence remain AUTHOR/SPEC. | **Recommended.** B lets signature sequences and genuinely unified multi-target/effect acts remain one readable child without restoring the nonaddressable parent root or a second selectable child scale. Several meaningful sites remain distinct content while participating in one operative compound child and one parent lineage, a layered **direct** local ideal fit. It reduces token spam and supports memorable recipe nouns. Costs are lost precision inside grouped blocks, a harder authoring taxonomy, compound-completion timing, and balance/UI pressure if designers group opportunistically. | Twinstrike may prospectively assign opening and return to one finite `Completed Twinstrike` child that exists only after both commit; neither cut is simultaneously exposed as a leaf. Elsewhere, a Defiant Guard site may remain a singleton. An interrupted Twinstrike never produces the compound or retroactively changes an earlier result. |
+| **C — permit a nested addressable child hierarchy** | `K^{nested}_v` is nonempty. At least one reachable parent exposes a compound child and one of its proper descendant blocks as separately addressable atoms at the same cut. The family remains laminar and acyclic; exact hierarchy breadth and prevalence remain AUTHOR/SPEC. Intersecting lineage prevents ancestor and descendant children from independently filling positions of one result. | C offers the richest broad-versus-precise child recipes without restoring parent-root addressability. Unity and difference are both directly selectable inside one manifestation hierarchy, a strong **direct** local ideal fit. Its costs are a second child scale, scale-shopping and explanation ambiguity, more candidates, harder claims/reuse/fan-out semantics, and the risk that the “right” recipe wording rather than combat decisions dominates builds. | After both cuts commit, `Completed Twinstrike` and its `Returning Cut` descendant may each be addressable. A broad recipe can ask for the completed assault and a precise recipe for the return, but they can never occupy two independent positions of one result. C3C-C3F later decide cross-result use and claims. |
+
+**Recommendation: B, one nonoverlapping scale with authored compounds.** A
+pure leaf grammar is transparent but risks turning every target and stage into
+evidence-token noise. C is expressively exciting but recreates broad-versus-
+precise scale shopping inside the child layer immediately after B3A-B avoided
+it at the parent/child boundary. B preserves application-level addressability
+and memorable signature acts while keeping one canonical explanation unit per
+site at a cut.
+
+A/B/C are mutually exclusive and exhaustive under the laminar-family
+invariant: there is no compound block; compound blocks exist but no strict
+containment pair is co-addressable; or at least one such nested pair exists.
+How common each selected topology is remains AUTHOR/SPEC. B or C needs one
+reachable completed compound that can materially furnish a position, not an
+unused catalog declaration; C additionally needs one functional co-addressable
+ancestor/descendant pair.
+
+Every option obeys the following forced safeguards:
+
+- final children remain beneath one upstream parent and inherit its complete
+  applicable proof lineage. A B2B2 class child carries the class's full
+  deduplicated union lineage; an A4 child carries continuity plus the complete
+  authoritative active-basis lineage fixed before matching;
+- siblings, a compound and any historical member manifestation, or any proofs
+  with intersecting lineage or one shared nonmultiplying authorization parent
+  cannot furnish independent positions of one relationship result;
+- a compound groups only already-qualifying realized semantic sites under one
+  parent. Its prospective grammar may reserve finite member roles, but an
+  unrealized or expired site cannot count toward completion or current use;
+  another parent, field, packet, callback, label, animation marker, storage
+  write, or resolver microstep can never become a member;
+- partition keys are versioned, prospective, deterministic, and source-owned.
+  Target fortune, interruption, a Relic, recipe, result, payoff, claim state,
+  or desired match cannot choose or change them;
+- only C admits overlapping ancestor/descendant addressability, and then only
+  in one laminar acyclic family. No option restores parent-root addressability,
+  creates crossing child identities, or grants a second position or result;
+  and
+- B4B grants no same-cut fan-out, claim, consumption, reuse, cross-combatant
+  authority, payoff, UI realization, persistence, release, or implementation.
+  C3C-C3F, RCS-08, SR-07, and RCS-15/SR-11 retain those boundaries.
+
+After any answer, C3C becomes the next active card. An answer moves B4B to
+`DIR-SELECTED` and reduces `Phi_SR` from 25 to 24. The authoritative decision
+record remains unchanged.
 
 ## Session protocol and evidence
 

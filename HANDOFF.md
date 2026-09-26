@@ -1,6 +1,82 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 semantic-child Relic addressability — RCS-03C3B3A-B selected
+
+The owner selected `RCS-03C3B3A-B`: semantic child applications are the only
+objects that may furnish Relic source positions. Canonical B2A causal roots
+and B2B2 exact-`Pi` classes remain mechanically operative lineage/grouping
+identities but cannot themselves occupy positions. Any source family lacking
+an authored, player-meaningful target/effect/application child is unavailable
+to Relic matching. The child rather than the broad root/class is now the
+addressable evidence language.
+
+Every child inherits complete applicable proof lineage. A child under an
+exact-`Pi` class inherits the class's complete deduplicated union lineage, not
+only its visible member's lineage. An A4 fact or child retains continuity
+lineage plus every member lineage of the one authoritative active support
+basis selected prospectively before Relic matching. Parents/children,
+siblings, classes/members, facts/supporters, intersecting lineages, and proofs
+sharing a nonmultiplying authorization/accounting parent cannot furnish
+independent positions of one relationship result. B3A grants no extra root,
+position, result, fan-out, claim, reuse, payoff, persistence, or implementation.
+
+B3B is pruned because no parent layer is addressable. Before further
+correction, old B4 would have become active and the fifty-eight-slot register
+would have contained 24 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 22
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`.
+
+A sixteenth prerequisite audit separated plural-site support from final child
+partition, then found that support already derived positive. B2B1-B requires
+two semantically distinct, separately accepted/accounted, equal-`Pi`
+occurrences to remain materially admissible at one cut. B2B2-B makes their
+exact-`Pi` class the one parent, and B3A-B preserves their meaningful
+manifestations as the only position-furnishing layer. Those are at least two
+primitive semantic sites beneath one parent. Grouping them into one final
+child would be a partition choice, not a singular-site countermodel.
+
+Old B4 is therefore a non-counting parent for derived-positive
+`RCS-03C3B4A`, nontrivial within-parent semantic-application support, and
+`RCS-03C3B4B`, canonical partition/coarsening of plural sites. The amended
+fifty-nine-slot register contains 24 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 22
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`.
+`RCS-03C3B4B` is the sole active card. The authoritative decision record is
+unchanged because a bare option label selects direction but does not complete
+acceptance.
+
+B4B assigns primitive sites to one prospective, exhaustive, laminar child
+family. It asks whether final children are leaves, one nonoverlapping scale
+containing compounds, or a nested addressable hierarchy:
+
+- A: semantic leaves only. Every final child is exactly one primitive
+  target/effect/application site.
+- B: one nonoverlapping scale with authored compounds. At least one reachable
+  child groups multiple sites; other blocks may remain singletons.
+- C: permit a nested addressable child hierarchy. At least one compound and
+  one proper descendant block are both addressable at one cut. Complete shared
+  lineage still blocks them from independently filling one result.
+
+Recommend B. It lets signature sequences and genuinely unified multi-target
+acts remain one readable child without restoring parent-root addressability or
+adding a second selectable child scale. Multiple meaningful sites stay
+distinct content while participating in one compound child and one parent
+lineage, a layered direct local ideal fit. A is the clearest precision
+countercase but risks turning every target/stage into an evidence token. C is
+expressively exciting but recreates broad-versus-precise scale shopping and
+adds candidate, claims/reuse/fan-out, explanation, balance, and UI burden.
+
+Only C may expose a compound and a descendant, and then only in one acyclic
+laminar family; crossing overlaps are not atom identities. Family keys are
+versioned, prospective, deterministic, and source-owned. Interruption, a
+Relic, recipe, result, payoff, or claim cannot change them; incomplete
+compounds furnish nothing and later sites cannot rewrite settled results. C3C
+owns fan-out; C3D-C3F own claims and reuse; RCS-08 owns cross-root/team
+authority. SR-07 and RCS-15/SR-11 retain revision, admissibility, and lifetime
+boundaries.
+
 ## 2026-09-25 exact-provenance build identity — RCS-03C3B2B2-B selected
+
+**Historical frontier:** B3A-B was subsequently selected and the sixteenth
+prerequisite audit above supersedes this section's next-card guidance.
 
 The owner selected `RCS-03C3B2B2-B`: for distinct currently admissible
 pure-build candidates, `x ~^{build}_v y` exactly when `Pi(x)=Pi(y)`. Equal
@@ -9045,9 +9121,11 @@ irreducible multi-root current-state support; a fourteenth amendment split old
 B2B into support and conditional equivalence. The owner then selected B1-B,
 requiring nonempty repeated same-provenance cross-root support, then B2B2-B,
 making exact `Pi` fully determine build identity. A fifteenth audit split old
-B3 into B3A/B3B. Continue at registered Relic slot `RCS-03C3B3A` under
-`SR-03`; conditional `RCS-03C3B3B`, `RCS-03C3B4`–`RCS-03C3F`, expanded
-`RCS-08`, cause, and agency follow separately.
+B3 into B3A/B3B. The owner selected B3A-B, making semantic child applications
+the sole addressable layer and pruning B3B. A sixteenth audit split old B4 into
+B4A/B4B; repeated-provenance class support derives B4A positive. Continue at
+registered Relic slot `RCS-03C3B4B` under `SR-03`; `RCS-03C3C`–`RCS-03C3F`,
+expanded `RCS-08`, cause, and agency follow separately.
 
 R11 begins only
 after R10 completes and first chooses package proximity for R10.7's selected
@@ -9191,7 +9269,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-25 22:49 UTC — exact-provenance Relic build identity selected](docs/handoffs/2026-09-25-2249--relic-exact-provenance-build-identity-selected.md)**
+[2026-09-26 02:39 UTC — semantic-child Relic addressability selected](docs/handoffs/2026-09-26-0239--relic-semantic-child-addressability-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
