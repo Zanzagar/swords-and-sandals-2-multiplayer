@@ -1,5 +1,59 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 authoritative related exposure — RCS-03C3C3D1-B selected
+
+The owner selected `RCS-03C3C3D1-B`. At least one reachable actual evaluation
+under one actually bound lawful complete stance/configuration must select a
+genuine distinct-related pair in its authoritative tuple. The witness may be
+related-only or hybrid. It grants no permission, survivor, result, payoff,
+prevalence, or participant actionability, and a hybrid remains one opportunity
+with one eventual permission bit.
+
+Three bounded read-only audits tested D2's authority inheritance, minimum
+decision subtree, and first-card gameplay value, then cross-challenged their
+domain assumptions. They found a thirtieth prerequisite correction. Let
+`E_v=E^{resolved-exact}_v`, `R_v=R^{resolved-related}_v`,
+`H_v=E_v∩R_v`, and `Q_v=R_v setminus E_v`. Hybrids in `H_v` inherit the
+participant-intrinsic, deterministic exact permission law selected by C2A-A
+and C2D-A; D2 may constrain their placement but cannot add a second vote, draw,
+veto, or precedence rule. Related-only opportunities in `Q_v` still have
+independent authority, coordinate, language, branching, and randomness
+questions.
+
+Old D2 is now a non-counting parent for six rows: D2A participant-
+configurability prevalence over related-only-capable contracts; conditional
+D2B independent coordinate recombination; conditional D2C1 constructive
+language; conditional D2C2 participant-composed context branching; D2D
+stochastic support over complete `Q_v` law projections; and D2E final
+permission topology over all `R_v`. D2A-A prunes D2B/D2C1/D2C2 and activates
+D2D. D2A-B/C activates D2B; every D2B answer activates D2C1; D2C1-A prunes
+D2C2, while D2C1-B/C activates it. D2D then precedes a fresh D2E audit.
+
+D2A is the sole presented card. Let `S^{rel-only-perm}_v` contain contracts
+with a reachable `q∈Q_v`, and let `P^{rel-only-perm-config}_v` contain those
+where two lawful prospectively bound participant settings change the complete
+permission law on one matched `q` while the Relic, facts, selected tuple, and
+pair stay fixed:
+
+- A: `P=∅`; no related-only permission is participant-configurable, and `S`
+  may be empty. Recommend A. Participants already bind a finite routing
+  orientation; the resolver chooses the proof relation from lawful inputs, and
+  the Relic/relationship covenant owns compatibility. This protects artifact
+  identity, team trust, prediction, and UI economy without fixing exact laws or
+  incidence or promising participant control of a matched proof form.
+- B: `S≠∅` and `P=S`; every related-only-capable contract offers at least one
+  configurable matched case. This enables precommitted permission postures but
+  duplicates routing agency and must become irrelevant for hybrids.
+- C: `∅⊊P⊊S`; configurable and intrinsic related-only-capable contracts
+  coexist. This broadens artifact personality but introduces a second authority
+  dialect and premium-class pressure. Hybrid-only contracts cannot supply C's
+  intrinsic comparator.
+
+The correction replaces one D2 row with six. The 94-row register contains 38
+`SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`. The authoritative decision record
+remains unchanged.
+
 ## 2026-09-26 three exact-permission philosophies — RCS-03C3C3C2E3-C selected
 
 The owner selected `RCS-03C3C3C2E3-C`. The completed catalog must contain
@@ -36,9 +90,10 @@ players can understand, plan around, or have treated; this is not a new D1
 membership test. If none can, reopen D1 with A rather than count inert
 incidence.
 
-The eighty-nine-row register now contains 34 `SCREEN`, 1 `OWNER-OPEN`, 13
-`PRUNED`, 37 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 35`. `RCS-03C3C3D1` is the current presented card. The authoritative
+At that checkpoint the eighty-nine-row register contained 34 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 37 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`;
+`Phi_SR = 35`. `RCS-03C3C3D1` was the presented card. The authoritative
 decision record remains unchanged.
 
 D1 asks whether any structurally supported distinct-related pair must actually
@@ -10116,7 +10171,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 15:01 UTC — three exact-permission philosophies selected](docs/handoffs/2026-09-26-1501--relic-three-permission-philosophies-selected.md)**
+[2026-09-26 19:01 UTC — authoritative related exposure selected](docs/handoffs/2026-09-26-1901--relic-authoritative-related-exposure-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

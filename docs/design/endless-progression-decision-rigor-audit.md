@@ -4632,10 +4632,103 @@ injection, explanation burden, and token hybrids. A is the clean countercase:
 related pair witnesses never become authoritative, protecting accounting
 clarity but making the selected related grammar latent.
 
-No row is added. After E3-C and D1's activation, the register has 89 rows: 34
+No row is added. After E3-C and D1's activation, the register at that
+checkpoint had 89 rows: 34
 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 37 `DIR-SELECTED`, 2 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. D1 is the current presented card.
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. D1 was the presented card.
 The authoritative decision record remains unchanged.
+
+The owner selected D1-B. Therefore `R^{resolved-related}_v` is nonempty: at
+least one reachable actual evaluation under one actually bound lawful complete
+stance/configuration selects a genuine distinct-related pair in its
+authoritative tuple. The witness may be related-only or hybrid. This moves D1
+to `DIR-SELECTED` without selecting permission, result, payoff, prevalence, or
+participant actionability. Before amendment, D2 would have opened and the
+89-row register would have contained 33 `SCREEN`, 1 `OWNER-OPEN`, 13
+`PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 34`.
+
+The D2 prerequisite screen used three different named questions rather than
+replicas. One traced authority inheritance between exact, related-only, and
+hybrid opportunities. One sought the smallest decision subtree whose leaves
+change player contracts. One attacked the proposed first card with gameplay
+countermodels. Their cross-challenge agreed that old D2 was not ready as a
+single incidence choice and that copying the exact lane over all related
+opportunities would be wrong.
+
+Write `E_v=E^{resolved-exact}_v`, `R_v=R^{resolved-related}_v`,
+`H_v=E_v∩R_v`, and `Q_v=R_v setminus E_v`. Each hybrid in `H_v` is one
+opportunity with one permission probability and one realized permission bit.
+Exact C2A-A already makes that bit participant-intrinsic, C2D-A makes it
+deterministic after authoritative inputs are fixed, and E1/E2/E3 classify its
+exact projection. A related-form restriction may constrain which exact
+opportunities can also appear in `H_v`; it cannot supply a second grant, veto,
+draw, or precedence rule.
+
+Only the related-only residual `Q_v` retains independent permission questions:
+whether participant settings may carry permission force; whether that force is
+inseparably coupled to routing or independently recombinable; whether its
+language is a closed menu or bounded construction; whether participants may
+compose context branches; and whether the resulting complete law projection
+can remain stochastic after all authoritative inputs and earlier committed
+state are fixed. Each boundary changes legal configurations, decisions,
+prediction, replay, migration, or exploit surfaces independently.
+
+Old D2 therefore becomes a non-counting parent for six rows: D2A participant-
+configurability prevalence across related-only-capable contracts; conditional
+D2B coordinate recombination; conditional D2C1 constructive language;
+conditional D2C2 participant-composed context branching; D2D stochastic
+support over complete `Q_v` law projections; and D2E final permission topology
+over all `R_v`. D2A-A prunes D2B/D2C1/D2C2 and activates D2D. D2A-B/C
+activates D2B; every D2B answer activates D2C1 because coupled control need not
+imply a closed language. D2C1-A prunes D2C2 and activates D2D; D2C1-B/C
+activates D2C2, then D2D. D2D precedes a fresh D2E prerequisite audit.
+
+The domain split is necessary in both directions. D2A through D2D must use
+`Q_v`, or forced-intrinsic deterministic hybrid-only contracts would
+manufacture false mixed prevalence classes. D2E must return to all `R_v`, or a
+catalog with no related-only pair would lose the real choice among all-allow,
+all-deny, and mixed authored hybrid placement. D2E can constrain placement but
+never alter a hybrid's inherited exact bit.
+
+No separate `Q_v≠∅` support card passes admission. D1 deliberately permits a
+hybrid-only witness; positive D2A or D2D branches entail the residual support
+their authority or randomness requires. Bare related-only coverage adds no
+independent player contract. No cross-form-uniformity card has a stable matched
+comparator, no hybrid-composition card survives the one-bit rule, and existing
+G2 already owns coupling when two distinct simultaneous pair opportunities
+have nonconstant marginals.
+
+D2A's denominator is
+`S^{rel-only-perm}_v`, the versioned treatment contracts with at least one
+reachable `q∈Q_v`; it may be empty. Its configurable subset
+`P^{rel-only-perm-config}_v` contains a contract exactly when two lawful
+prospectively bindable participant settings change the complete permission law
+on one matched `q`, holding the version, Relic, facts, selected tuple, and pair
+fixed. A chooses `P=∅`; B requires nonempty `S` and `P=S`; C requires
+`∅⊊P⊊S`. These branches are exhaustive, and a hybrid-only contract lies
+outside the denominator rather than supplying C's intrinsic comparator.
+
+Recommend D2A-A. Participants already bind finite whole-policy routing
+orientations; the resolver, not a guaranteed participant form choice, selects
+the proof relation from lawful inputs. A leaves compatibility with the Relic
+and relationship covenant instead of creating a second approval optimizer. It
+protects artifact identity, team trust, prediction, and UI economy while still
+allowing authored intrinsic response across Relics and contexts. Its fit at
+this authority boundary is neutral/protective; a later permitted distinct pair whose children
+remain many and whose causal unity remains one can still express the project's
+ideal directly. B can support precommitted permission postures, but duplicates
+routing agency and becomes irrelevant on hybrids. C adds a second authority
+dialect and risks making intrinsic contracts feel incomplete. B/C also add
+quarterbacking, grief, migration, and obvious-allow pressure. A's costs are
+less downstream control, possible frustration under refusal, and a heavier
+disclosure obligation.
+
+Replacing one counted D2 row with six adds five rows and five unresolved
+potentials. The corrected register has 94 rows: 38 `SCREEN`, 1 `OWNER-OPEN`,
+13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 39`. D2A is the sole presented card. This is the thirtieth explicit
+prerequisite correction. The authoritative decision record remains unchanged.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

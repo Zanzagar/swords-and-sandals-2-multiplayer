@@ -313,7 +313,12 @@ RCS-03C3C3C2E3-C: responsive, steadfast-allow, and steadfast-deny law families
 must coexist under that viability obligation. A post-answer audit upheld D1's
 empty/nonempty post-routing related-exposure boundary while preventing a
 related-only witness or actionability promise from being smuggled into it.
-RCS-03C3C3D1 is the current owner-facing choice under SR-03.
+The owner selected RCS-03C3C3D1-B, requiring at least one authoritative
+distinct-related route. A thirtieth prerequisite correction separates the
+remaining related-only permission authority, coordinate, language, branching,
+randomness, and final form-wide incidence boundaries while preserving one-bit
+hybrid inheritance. RCS-03C3C3D2A is the current owner-facing choice under
+SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -22730,6 +22735,140 @@ absent another amendment, the register would contain 33 `SCREEN`, 1
 `OWNER-OPEN`, 13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 34`. Any B-admitted hybrid remains one pair with one
 permission bit.
+
+The owner selected **B**. Therefore `R^{resolved-related}_v≠∅`: at least one
+reachable actual evaluation under one actually bound lawful complete stance or
+configuration selects an authoritative tuple containing a genuine distinct-
+related unordered tag pair. This makes related proof structure operative after
+routing, but grants no joint survival, candidate, commitment, result, payoff,
+or participant actionability. The witness may be related-only or hybrid and
+remains subject to the deferred SR-05/SR-06 legibility, viable-purpose, and
+non-token release gates.
+
+D1 moves to `DIR-SELECTED`. Old D2 would ordinarily become `OWNER-OPEN`,
+yielding 89 rows: 33 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 38
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
+The prerequisite correction below replaces that still-bundled open row before
+presentation. The authoritative decision record remains unchanged.
+
+> **Thirtieth prerequisite correction, 2026-09-26:** three bounded read-only
+> audits independently tested permission authority inheritance, minimum
+> subtree size, and the gameplay value of the first related-permission card,
+> then cross-challenged their only domain disagreement. Old D2 is not one
+> prerequisite-ready incidence card. It hides five independently variable
+> prerequisites before form-wide incidence, but its domains cannot simply copy
+> the exact lane.
+>
+> Write `E_v=E^{resolved-exact}_v`,
+> `R_v=R^{resolved-related}_v`, `H_v=E_v∩R_v`, and
+> `Q_v=R_v setminus E_v`. `H_v` contains hybrid exact-and-related
+> opportunities; `Q_v` contains related-only opportunities. Every hybrid is
+> one opportunity with one permission probability and one realized bit. Exact
+> C2A-A therefore makes every hybrid participant-intrinsic, C2D-A makes it
+> deterministic once authoritative inputs are fixed, and E1/E2/E3 classify its
+> exact projection. D2 may constrain hybrid placement but may never add a
+> related grant, veto, draw, or precedence rule.
+>
+> The selected exact rules do not determine `Q_v`. A related-only pair can
+> still carry an intrinsic or prospectively participant-configurable law; a
+> permission force coupled to its routing stance or independently recombinable;
+> a closed authored menu or bounded constructive language; participant-composed
+> context branching or none; and a deterministic law or a fresh nondegenerate
+> draw after all bindings, facts, and earlier committed state are fixed. These
+> change legal configurations, actions, planning, replay, migration, and
+> exploit surfaces independently.
+>
+> Old `RCS-03C3C3D2` therefore becomes a non-counting parent for six registered
+> rows:
+>
+> 1. `RCS-03C3C3D2A` — participant configurability prevalence across
+>    related-only-capable permission contracts;
+> 2. conditional `RCS-03C3C3D2B` — independently recombinable related-
+>    permission-coordinate prevalence;
+> 3. conditional `RCS-03C3C3D2C1` — constructive related-permission-language
+>    prevalence;
+> 4. conditional `RCS-03C3C3D2C2` — participant-composed related context-
+>    branching prevalence;
+> 5. `RCS-03C3C3D2D` — stochastic support across complete bound related-only
+>    permission projections; and
+> 6. `RCS-03C3C3D2E` — final related-form permission topology over all of
+>    `R_v` after the complete-law and stochastic denominator is settled.
+>
+> D2A-A prunes D2B/D2C1/D2C2 and activates D2D. D2A-B/C activates D2B; every
+> D2B answer activates D2C1 because inseparable control does not imply a closed
+> permission language. D2C1-A prunes D2C2 and activates D2D; D2C1-B/C activates
+> D2C2, whose answer then activates D2D. D2D precedes D2E. D2E receives its own
+> fresh prerequisite audit rather than pre-minting incidence descendants.
+>
+> D2A through D2D use the residual `Q_v` domain. Otherwise already-intrinsic,
+> deterministic hybrid-only contracts would manufacture fake mixed classes.
+> D2E must return to all `R_v`: even if `Q_v` is empty, exact law-family support
+> does not determine whether the authored hybrid set is entirely allowed,
+> entirely denied, or mixed. A form-wide D2E restriction constrains which exact
+> opportunities may also be related; it never changes their inherited bit.
+>
+> No separate `Q_v≠∅` card passes admission. D1 deliberately left a related-
+> only witness unrequired; positive D2A or D2D branches openly entail whatever
+> `Q_v` support their new authority or randomness needs. Bare residual coverage
+> adds no independent player contract. No cross-form-uniformity or hybrid-
+> composition card is warranted either: disjoint exact-only and related-only
+> opportunities lack a representation-invariant matched comparator, while
+> hybrids already have one bit. Existing G2 already covers coupling only when
+> two distinct simultaneous pair opportunities have nonconstant marginals.
+>
+> Replacing one counted D2 row with six adds five slots and five unresolved
+> potentials. The register now contains **94 rows: 38 `SCREEN`, 1
+> `OWNER-OPEN`, 13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+> `EVALUATE`; `Phi_SR = 39`**. D2A is the sole presented card.
+
+### RCS-03C3C3D2A — participant configurability of related-only permission — active owner choice
+
+D1-B guarantees some selected distinct-related pair. Hybrids already inherit
+participant-intrinsic exact permission, so D2A classifies only the remaining
+related-only domain `Q_v=R_v setminus E_v`.
+
+Let `S^{rel-only-perm}_v` contain the versioned treatment contracts for which
+some lawful configuration produces a reachable member of `Q_v`. This set may
+be empty. A contract belongs to `P^{rel-only-perm-config}_v` when two lawful
+prospectively bindable participant settings produce different complete
+permission laws on one matched reachable `q∈Q_v`: hold fixed the version,
+Relic, actual evaluation facts, selected authoritative tuple, and unordered
+tag pair while only a setting carrying authored permission-control force
+changes. Merely selecting a different tuple does not qualify.
+
+| Choice | Related-only participant-configurability rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no participant-configurable related-only permission** | `P^{rel-only-perm-config}_v=∅`. `Q_v` may be empty. If related-only opportunities exist, their permission authority is intrinsic; combined with exact C2A-A, every exposed related pair is participant-nonconfigurable. This imports no common cross-form law identity, determinism, or incidence. | **Recommended.** Participants already bind finite whole-policy routing orientations. A preserves the clean division: participants orient routing prospectively; the resolver determines the selected proof relation from lawful inputs; the Relic/relationship covenant determines compatibility. It does not promise that a participant can force one proof form in a matched case. Its fit at this authority boundary is **neutral/protective**, while an eventually allowed `a≠b` pair with one true causal parent can still be a direct local ideal expression. A improves prediction, UI economy, team trust, and artifact identity. Costs are less downstream control, frustration under intrinsic refusal, and a high disclosure burden. | `Chorus` selects one contender through `Twin Vow`'s `Guard Pulse a` and the other through distinct `Riposte Mark b`, with no exact shared child. Holding that same pair and all facts fixed, changing any participant setting cannot change its complete permission law. Another Relic or factual context may still carry a different intrinsic law. |
+| **B — every related-only-capable contract offers a configurable case** | `S^{rel-only-perm}_v≠∅` and `P^{rel-only-perm-config}_v=S^{rel-only-perm}_v`. Every contract with a reachable related-only opportunity has at least one matched `Q_v` pair whose complete law differs under two lawful prospective settings. This does not require every opportunity to differ, and hybrids remain intrinsic. | B lets participant orientation and the Relic jointly govern whether two sibling manifestations may remain together, a **potential direct** configuration-boundary fit. It adds mastery and precommitted risk postures, but duplicates routing agency and creates a difficult asymmetry: the setting must become irrelevant whenever the pair also shares an exact child. Costs include a second approval optimizer, quarterbacking, grief, configuration/migration burden, and obvious-allow dominance pressure. | The same related-only `a/b` tuple remains selected under prospectively bound `Concord` and `Severance`, but the two settings induce different complete permission laws. They may be inseparable clauses of whole routing stances or a separate coordinate; D2B decides that later. |
+| **C — configurable and intrinsic related-only-capable contracts coexist** | `∅⊊P^{rel-only-perm-config}_v⊊S^{rel-only-perm}_v`. At least one related-only-capable contract has a configurable matched witness and at least one other related-only-capable contract has none. Hybrid-only contracts lie outside `S^{rel-only-perm}_v` and cannot supply C's intrinsic comparator. | C supports configurable covenants beside immutable related-only witness Relics. Each local case inherits A or B's fit; coexistence is only **aggregate**. It broadens artifact personality but teaches another authority dialect, complicates comparison and migration, and risks making configurable contracts the premium class while intrinsic ones feel incomplete. | Ashen has the configurable `a/b` witness from B; Severed Bell has a reachable related-only `x/y` pair whose law no participant setting changes. A hybrid-only Stone Witness does not count as C's intrinsic family. |
+
+A/B/C are mutually exclusive and exhaustive. If
+`P^{rel-only-perm-config}_v` is empty—including when
+`S^{rel-only-perm}_v` is empty—A holds. Otherwise that subset is all of its
+nonempty denominator or a nonempty proper subset, producing B or C. Positive
+B/C openly entail related-only support; a separate coverage card would add no
+independent player authority. “Configurable” includes permission force bundled
+inside another participant setting, while representation or UI layout cannot
+erase or manufacture it.
+
+D2A chooses no holder, consent, information, default, binding horizon,
+coordinate independence, policy language, randomness, form-wide incidence,
+survivor, substitute, candidate, claim, payoff, prevalence, release placement,
+or implementation. RCS-02 retains holder/consent/information and RCS-13 retains
+binding/lock timing. A live proc-time `allow both?` prompt remains incompatible
+with cut-atomic automatic invocation. Cosmetic settings, result-aware
+rebinding, live or unbound permission-only delayed commands, and denial-
+triggered retry or rerouting do not qualify. A permission command that is
+lawfully and prospectively bound and satisfies the matched-law test does.
+
+Any answer moves D2A to `DIR-SELECTED`. A prunes D2B/D2C1/D2C2 and makes D2D
+the next presented card; the register would contain 34 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 39 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 35`. B/C makes D2B the next presented card; the register
+would contain 37 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 39 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. A stronger promise that
+every related-only opportunity is configurable is a replacement path, not
+hidden inside B.
 
 ## Session protocol and evidence
 
