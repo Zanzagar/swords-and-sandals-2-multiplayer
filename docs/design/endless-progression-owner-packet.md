@@ -241,7 +241,12 @@ irreducible simultaneous direct-support basis containing multiple independent
 roots. A fourteenth prerequisite audit then split old RCS-03C3B2B into
 repeated-same-provenance cross-root support and conditional build-provenance
 root equivalence. The owner selected RCS-03C3B2B1-B, requiring at least one
-functional repeated-same-provenance cross-root form. RCS-03C3B2B2 is the
+functional repeated-same-provenance cross-root form. The owner then selected
+RCS-03C3B2B2-B: exact `Pi` fully determines one canonical pure-build identity
+across every currently admissible equal-`Pi` candidate, including candidates
+classified under different semantic source forms. A fifteenth prerequisite
+audit then split old RCS-03C3B3 into global addressable atom-layer support and
+conditional same-lineage parent/child co-addressability. RCS-03C3B3A is the
 active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
@@ -20241,6 +20246,12 @@ For both options:
   sustaining an unchanged fact: the same authoritative cut must select another
   already-valid minimal basis or commit the authored material revision or
   termination atomically;
+- when several minimal bases are valid at one cut, exactly one authoritative
+  active basis is selected by a prospective deterministic source-form rule
+  before any Relic match. Its selection cannot depend on the inspecting Relic,
+  recipe, result, payoff, or claim state. Every member of that active basis is
+  operative support until an authoritative atomic basis switch; exact tie
+  ordering remains AUTHOR/SPEC;
 - circular reference alone cannot establish a qualifying A4 basis: every
   witness must be grounded by roots whose operative status is established
   independently of the candidate fact; an already-established continuity or
@@ -20282,8 +20293,10 @@ B mints no root and exposes no support member. A relation root cannot count
 beside an ancestor; aliases, children, co-presence, time-separated handoff, and
 redundant singleton alternatives cannot counterfeit a multi-root basis. Loss
 of an indispensable member atomically selects another already-valid basis or
-commits the authored revision/termination. Circular reference alone proves
-nothing. B creates no H fact, freshness refresh, readiness or tag event,
+commits the authored revision/termination. If several bases are valid, one
+prospectively and deterministically selected active basis settles before Relic
+matching and cannot be shopped by recipe or result. Circular reference alone
+proves nothing. B creates no H fact, freshness refresh, readiness or tag event,
 addressability, fan-out, cross-combatant access, claim, consumption, reuse,
 payoff, persistence, serialization, release, or implementation authority.
 
@@ -20441,12 +20454,13 @@ root. Shared provenance/equip attribution is metadata rather than occurrence
 payment; reusing one authorization or accounting event does not qualify. Each
 occurrence retains origin, phase, history, outcome, and complete lineage.
 B2B1 moves from `OWNER-OPEN` to `DIR-SELECTED`; already-counted conditional
-B2B2 moves from `SCREEN` to `OWNER-OPEN`. The fifty-seven-slot register now
-contains 26 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 20 `DIR-SELECTED`, 1
+B2B2 moves from `SCREEN` to `OWNER-OPEN`. At that checkpoint the fifty-seven-
+slot register contained 26 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 20
+`DIR-SELECTED`, 1
 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`. The authoritative
 decision record remains unchanged.
 
-### RCS-03C3B2B2 — build-provenance root equivalence/coarsening — active owner choice
+### RCS-03C3B2B2 — build-provenance root equivalence/coarsening — B selected
 
 Inherit B2B1-B. Let `U^{build-repeat}_v` contain every currently admissible,
 already-committed candidate record admitted through any supported form in
@@ -20557,6 +20571,174 @@ payoff, UI realization, persistence, release, or implementation authority.
 
 Any answer moves B2B2 from `OWNER-OPEN` to `DIR-SELECTED`, reduces
 `Phi_SR` from 27 to 26, and makes `RCS-03C3B3` the sole active card. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-25:** **B, exact
+provenance fully determines build identity.** For distinct currently
+admissible candidates, `x ~^{build}_v y` exactly when `Pi(x)=Pi(y)`. Every
+candidate carrying one exact `Pi` belongs to one canonical pure-build
+equivalence class even when its semantic source form differs from another
+member's. The class is the root-scale representative in the pure-build
+projection; it is not a fresh additive causal root and its member roots do not
+remain beside it as independent build identities.
+
+The held-fixed `Bastion#17` cohort therefore projects as
+`[r_S1,r_S2,r_D1,r_D2]_{Pi(Bastion#17)}`, not four singleton build identities
+or four member identities plus a fifth root. Every member retains its distinct
+origin, authorization, payment/accounting, phase, semantic content, outcome,
+history, and complete lineage. The class carries the deduplicated union of
+those complete lineages. One configured provenance and its genuinely distinct
+paid manifestations are mechanically united without erasing their causal
+differences, a **direct** local Souls and Simulacra / Achintya Bheda Abheda
+fit; universal equality-by-`Pi` is **aggregate**.
+
+This blocks roots-per-repeat and roots-per-semantic-form farming, but it
+deliberately removes same-source independent-root combinations. Later partner
+source authoring must therefore avoid a narrow gear or ally tax. Append-only
+class ancestry is also path-dependent: an expired member remains historical
+lineage and can keep an otherwise-current partner with intersecting lineage
+non-independent until the RCS-15/SR-11-authorized class lifetime ends.
+
+Class membership is prospective, reflexive, symmetric, and transitive. A late
+member joins atomically only at its own commitment and cannot rewrite an
+earlier snapshot or settled result. Same-cut joins use commutative, idempotent
+set union before the coherent evidence read. Interruption contributes no
+phantom member. Coarsening never refreshes H age, prolongs S, resurrects
+evidence, or opens readiness; current availability still requires at least one
+admissible member. A different `Pi` never coarsens here. SR-07 owns whether a
+source mutation creates a new configuration revision; RCS-15/SR-11 owns class
+lifetime across unchanged configurations and encounter boundaries.
+
+B2B2 grants no position occupancy, child, nesting, fan-out, claim, reuse,
+payoff, UI realization, persistence, release, or implementation authority.
+B2A remains causal-root authority and A4 remains current-fact support
+authority. The answer moves B2B2 from `OWNER-OPEN` to `DIR-SELECTED`, moves the
+then-registered B3 row from `SCREEN` to `OWNER-OPEN`, and reduces `Phi_SR` from
+27 to 26 before the prerequisite correction below. The authoritative decision
+record remains unchanged.
+
+> **Fifteenth prerequisite correction, 2026-09-25:** screening B3 after
+> B2B2-B proved that the old addressability row still compressed two
+> player-material boundaries. Global support for both parent representatives
+> and semantic children does not determine whether any one canonical lineage
+> exposes both levels at the same evaluation cut. In one legal world,
+> `Bastion#17` exposes only its exact-`Pi` class representative while an
+> unrelated Twinstrike source exposes only a semantic child. In another world,
+> the same Bastion lineage exposes both its class representative and a Guard
+> manifestation child. Shared lineage prevents double occupancy in both
+> worlds, but only the second lets one source match either a class-level or a
+> manifestation-level predicate. That changes legal build and counterplay, not
+> merely catalog saturation. B4 owns the partition **among** children and
+> cannot answer parent/child co-addressability.
+>
+> Old `RCS-03C3B3` is therefore a non-counting parent for
+> `RCS-03C3B3A` (global addressable atom-layer support) and conditional
+> `RCS-03C3B3B` (same-lineage dual-level support). B3A-A prunes B3B and B4;
+> B3A-B prunes B3B and activates B4; B3A-C activates B3B, whose answer then
+> activates B4. Replacing one counted row with two adds one potential slot.
+> After B2B2-B had produced fifty-seven slots and `Phi_SR = 26`, the amended
+> register contains fifty-eight slots: 26 `SCREEN`, 1 `OWNER-OPEN`, 7
+> `PRUNED`, 21 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 27`. B3A is the sole active card.
+
+### RCS-03C3B3A — global addressable atom-layer support — active owner choice
+
+This card chooses the semantic layer or layers that the completed Relic source
+catalog must support as directly addressable evidence atoms. An atom is
+**addressable** only when a final effective source-position predicate may name
+that canonical object and, in a reachable materially functional entry, the
+object can furnish that one position. Addressability is not automatic matching
+by every Relic and does not itself authorize a second position, result, claim,
+or use.
+
+A **parent representative** is the one already-canonical root-scale identity
+offered by the applicable upstream projection: an ordinary canonical B2A
+causal root occurrence, or, for pure-build evidence after B2B2-B, the one
+exact-`Pi` class representative replacing its member roots. The class
+representative is not an additive causal root. An A4 current-state fact still
+has one continuity identity and one position; its direct support members do
+not become extra representatives of that fact.
+
+A **semantic child application** is one actually realized, authored,
+player-meaningful target/effect/application manifestation beneath a parent
+representative. It is never a fresh root, a parent alias, a phase or build
+view, a field, packet, storage write, callback, animation marker, or resolver
+microstep. B3A decides only whether the child layer has material support. If it
+does, B4 later owns the canonical within-parent-representative partition and
+exact per-family catalogs, including children beneath a B2B2 class
+representative.
+
+Let `P^{addr}_v` contain the reachable materially functional parent-scale
+addressability witnesses and `C^{addr}_v` the corresponding child-scale
+witnesses. The selected cross-source-weaver purpose and existing functional
+source-position requirements make their union nonempty. The question is which
+nonempty support set the completed catalog must realize.
+
+| Choice | Addressable-layer support | Recommendation, ideal fit, and gameplay tradeoff | Held-fixed example: exact-`Pi` class `beta_B=[r_S1,r_S2,r_D1,r_D2]_{Pi(Bastion#17)}` and unrelated ally Heat lineage `h` |
+| --- | --- | --- | --- |
+| **A — parent representatives only** | `P^{addr}_v` is nonempty and `C^{addr}_v` is empty. Only root-scale representatives may furnish source positions. Semantic applications remain truthful source content but are never separately addressable Relic atoms. B3B and B4 are pruned. | A has the narrowest layer vocabulary and lowest two-scale identity burden; exact atom counts remain authored. Broad operation, state, relation, episode, or build-class identities remain easy to match and may support higher-order root play. Its fit at this boundary is **partial**: unity is directly addressable, while manifestation differences remain semantically preserved and may still be inspected by a parent predicate or explanation but do not receive their own addressable identities. The cost is a coarser candidate/claim/reuse unit and no way for distinct applications to participate as distinct atoms. | `beta_B` may fill the Bastion position once beside unrelated `h`. The qualifying Steady or Defiant Guard application may remain identifiable and predicate-relevant, but it is content/proof of `beta_B`, not the atom furnishing the position. Twinstrike is likewise the atom even if its returning cut is the internal fact that made the parent predicate true. |
+| **B — semantic child applications only** | `P^{addr}_v` is empty and `C^{addr}_v` is nonempty. Every operative Relic source position is furnished at the child-application frontier; parent representatives remain mechanically operative lineage/grouping identities but cannot themselves occupy positions. B3B is pruned and B4 becomes active. Any source family with no later-canonical meaningful child is unavailable to Relic matching. | **Recommended.** The Relic addresses the concrete defense, strike, state manifestation, or relationship application rather than the parent root/class identity. The child remains distinct while its parent/class unity actively governs ancestry and independence at that same position, a **direct** local ideal fit. It enables child-specific matching and explanation without two selectable scales for one fact. Costs are a demanding semantic-child catalog, more candidate/explanation burden, exclusion of sources without a meaningful application frontier, and loss of directly selectable whole-operation/class roots or root-level nesting. Exact proof selection and UI remain downstream. | A later B4-valid Defiant Guard application `c_D1` may fill the Bastion position beside `h`; `beta_B` itself may not. A Twinstrike returning-cut child may pair with independent Heat, while “Twinstrike as a whole” cannot. If several children qualify, this card alone neither selects one uniquely nor promises which one the player sees. |
+| **C — parent and child layers both materially supported** | `P^{addr}_v` and `C^{addr}_v` are both nonempty. The completed catalog has reachable functional parent-scale and child-scale uses. This does **not** yet say that one lineage exposes both: B3B next distinguishes global coexistence without overlap from at least one dual-level lineage. B4 follows after B3B. | C has the widest layer vocabulary, preserving broad root/class relationships and precise application recipes somewhere in the catalog without fixing total atom or build count. Local witnesses inherit A or B's fit; mere catalog coexistence is **aggregate**, not a direct unity/difference realization. It also creates two source languages, taxonomy and UI burden, broad-versus-precise balance pressure, and a conditional overlap question that cannot be hidden in authoring. | One functional entry may address `beta_B`, while another addresses a Twinstrike return child. That proves both layers without making `beta_B` and one of its own Guard children simultaneously addressable. B3B would decide whether any such same-lineage dual-scale case exists. |
+
+**Recommendation: B, semantic child applications only.** It best converts the
+selected in-combat evidence requirement into an application-scale source
+grammar: every atom furnishing a position is a meaningful application, while
+the upstream root or exact-`Pi` class continues to prevent false independence.
+This enables precise explanation; proof selection and actual presentation
+remain downstream. It also avoids C's permanent two-layer taxonomy and the
+same-lineage ambiguity that C could add only through B3B-B. This is not a free
+simplicity win: B4 must define
+a nonempty canonical semantic frontier capable of realizing every already-
+required temporal/basis source cell, and broad whole-root or class recipes
+disappear unless a genuinely distinct semantic application expresses their
+meaning.
+
+A/B/C are mutually exclusive and exhaustive over the two global atom layers:
+only `P^{addr}_v`, only `C^{addr}_v`, or both are nonempty. The empty union is
+infeasible under the selected functional cross-source purpose. That fact alone
+does not prove either singleton branch can realize the already-selected
+functional support grid; a selected branch must discharge that obligation,
+with B depending on B4's complete child catalog. This support-set card does not
+silently treat C as same-lineage layering; the fifteenth correction registers
+that consequence separately. Exact counts, identities, distribution, and
+prevalence within an admitted layer remain AUTHOR/SPEC after the topology
+choices.
+
+Every option obeys the following forced safeguards:
+
+- an atom inherits its complete applicable proof lineage. A pure-build child
+  beneath a B2B2-B class inherits the class's full deduplicated union lineage,
+  not only the member occurrence that supplied its visible manifestation. A
+  current-state fact or child carries its continuity lineage and every member's
+  complete lineage from the one authoritative A4 active support basis already
+  settled at that cut. When several bases are valid, the source's prospective
+  deterministic rule selects that active basis before Relic matching; it
+  cannot vary by Relic, recipe, result, payoff, or claim;
+- a parent and child, sibling children, a class and member, an A4 fact and one
+  of its indispensable supporters, or any proofs with intersecting complete
+  lineages or one shared nonmultiplying authorization/accounting parent cannot
+  occupy independent positions of one relationship result;
+- root-scale support exposes only the canonical representative selected by the
+  upstream projection. It never restores B2B2 member roots beside their class,
+  exposes A4 support members as atoms of the fact, or mints, splits, merges,
+  succeeds, or promotes a root;
+- current addressability still requires a currently admissible source. An
+  expired class member remains ancestry but supplies no live child by history
+  alone, and no representative remains available after its last admissible
+  member solely because historical lineage persists;
+- a changed source-configuration revision and therefore changed `Pi` cannot be
+  bridged by a repeated child label. SR-07 owns revision boundaries and
+  RCS-15/SR-11 owns class lifetime and persistent identity; and
+- B3A grants no nested-form catalog, same-cut result/tag fan-out, claim,
+  consumption, later reuse, cross-combatant authority, payoff, UI realization,
+  persistence, release, or implementation. B3B owns same-lineage dual-level
+  support, B4 child partition, C3C fan-out, C3D-C3F claims/reuse, and RCS-08
+  cross-root/team authority.
+
+If A is selected, B3B and B4 are pruned and C3C follows. If B is selected,
+B3B is pruned and B4 becomes the sole active card. If C is selected, B3B
+becomes the sole active card and B4 remains screened behind it. Any answer
+moves B3A to `DIR-SELECTED` and reduces `Phi_SR` by at least one. The
 authoritative decision record remains unchanged.
 
 ## Session protocol and evidence

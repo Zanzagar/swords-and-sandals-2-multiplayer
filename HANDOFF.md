@@ -1,6 +1,94 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-25 exact-provenance build identity — RCS-03C3B2B2-B selected
+
+The owner selected `RCS-03C3B2B2-B`: for distinct currently admissible
+pure-build candidates, `x ~^{build}_v y` exactly when `Pi(x)=Pi(y)`. Equal
+exact provenance now determines one canonical build-equivalence class even
+across different semantic source forms. The class replaces member roots in the
+pure-build projection, carries their deduplicated complete union lineage, and
+is not a new additive root. Members retain distinct origin,
+authorization/payment/accounting, semantic content, outcome, history, and
+lineage.
+
+The held-fixed `Bastion#17` cohort therefore projects as
+`[r_S1,r_S2,r_D1,r_D2]_{Pi(Bastion#17)}`. One configured provenance and its
+genuinely different paid manifestations are mechanically united without
+erasure, a direct local ideal fit. The selection blocks roots-per-repeat and
+roots-per-semantic-form farming, but removes same-source independent-root
+combinations and can increase partner-source pressure. Expired member ancestry
+also remains in the class until its later-authorized lifetime ends, so lineage
+intersection can remain path-dependent.
+
+Membership is prospective, reflexive, symmetric, and transitive. Late joins
+are atomic and nonretroactive; same-cut joins are commutative/idempotent before
+the coherent evidence read. Coarsening changes no H age, S lifetime,
+resurrection, or readiness. Different `Pi` never coarsens. SR-07 owns source-
+revision boundaries and RCS-15/SR-11 owns class lifetime.
+
+A fifteenth prerequisite audit found that old B3 still hid a material fourth
+topology. A catalog can support parent representatives and semantic children
+without any one lineage exposing both, or can let at least one source match at
+both scales. Shared lineage prevents double occupancy in either world, but the
+second permits legal broad-versus-precise matching for the same source. B4
+owns child partition, not parent/child co-addressability. Old B3 is therefore a
+non-counting parent for B3A, global layer support, and conditional B3B,
+same-lineage dual-level support.
+
+The amended fifty-eight-slot register contains 26 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 21 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 27`. `RCS-03C3B3A` is the sole active card. The authoritative
+decision record remains unchanged because a bare option label selects
+direction but does not complete acceptance.
+
+B3A asks which directly addressable atom layers have reachable functional
+support:
+
+- A: parent representatives only. Roots and exact-`Pi` classes may furnish
+  positions; semantic children may not. This is simplest but keeps a qualifying
+  application inside its parent proof instead of giving it an atom identity.
+  B3B and B4 are pruned.
+- B: semantic child applications only. Concrete target/effect/application
+  manifestations furnish positions; parent roots/classes remain operative
+  lineage identities but are not directly addressable. B3B is pruned and B4
+  follows.
+- C: both layers have functional support somewhere. This does not imply that
+  any same lineage exposes both; conditional B3B asks that next, then B4.
+
+Recommend B. It makes the concrete defense, strike, state manifestation, or
+relationship application the addressable atom rather than the parent
+root/class identity. The child remains distinct while its parent/class unity
+actively governs ancestry and independence at the same position, a direct
+local Achintya Bheda Abheda fit. It enables precise feedback without a second
+addressability language; exact proof selection and UI remain downstream. The
+costs are a
+demanding B4 child catalog, more presentation burden, loss of direct whole-
+root/class recipes and root-level nesting, and no Relic use for a source family
+lacking a meaningful application frontier.
+
+Use the held-fixed examples. Under A, `Bastion#17`'s class may pair once with
+unrelated ally Heat. The qualifying Guard can remain identifiable and material,
+but is proof/content of the class rather than the atom furnishing the position.
+Under B, a later B4-valid Defiant Guard child may pair with Heat while the class
+itself cannot; Twinstrike may expose its returning cut rather than “Twinstrike
+as a whole.” Under C, Bastion may be parent-addressable while an unrelated
+Twinstrike child is addressable, proving both layers without same-lineage
+overlap.
+
+Every atom retains complete proof lineage. A build-class child inherits the
+class's full union lineage, not only the member behind its visible
+manifestation. An A4 fact or child retains its continuity lineage plus every
+member lineage of one authoritative active support basis selected
+prospectively before Relic matching and never by recipe/result. Parent/child,
+siblings, class/member, fact/supporter, intersecting lineages, and shared
+nonmultiplying authorization parents cannot furnish independent positions of
+one result. B3A creates no root and grants no fan-out, claims/reuse, payoff,
+persistence, release, or implementation authority.
+
 ## 2026-09-25 repeated same-provenance support — RCS-03C3B2B1-B selected
+
+**Historical frontier:** B2B2-B was subsequently selected and the fifteenth
+prerequisite audit above supersedes this section's next-card guidance.
 
 The owner selected `RCS-03C3B2B1-B`: `E^{build-repeat}_v` is nonempty. The
 completed catalog must contain at least one prospectively versioned pure-build
@@ -22,15 +110,16 @@ Frozen `Bastion#17` may therefore supply a separately paid Guard at `t_1` and
 another at `t_3`, tied to different defended attacks, with both present as
 same-`Pi` candidate roots after the second commits. This is candidate admission
 only: B1 mints, promotes, coarsens, exposes, and empowers no root. It is a
-partial local Souls and Simulacra / Achintya Bheda Abheda fit until the active
-B2B2 card decides build identity.
+partial local Souls and Simulacra / Achintya Bheda Abheda fit; at that
+checkpoint B2B2 still had to decide build identity.
 
-B1 moves from `OWNER-OPEN` to `DIR-SELECTED`; conditional B2B2 moves from
-`SCREEN` to `OWNER-OPEN`. The current fifty-seven-slot register contains 26
-`SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 20 `DIR-SELECTED`, 1 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`. `RCS-03C3B2B2` is the sole active
-card. The authoritative decision record remains unchanged because a bare
-option label selects direction but does not complete its acceptance protocol.
+B1 moved from `OWNER-OPEN` to `DIR-SELECTED`; conditional B2B2 moved from
+`SCREEN` to `OWNER-OPEN`. At that checkpoint the fifty-seven-slot register
+contained 26 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 20 `DIR-SELECTED`, 1
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`.
+`RCS-03C3B2B2` was the sole active card. The authoritative decision record
+remains unchanged because a bare option label selects direction but does not
+complete its acceptance protocol.
 
 B2B2 asks which prospective equivalence relation governs supported equal-`Pi`
 roots, including roots classified under different semantic source forms. Let
@@ -1469,7 +1558,11 @@ owner then selected `RCS-03C3B2A4-B`, requiring nonempty irreducible multi-root
 current-state support. **Fourteenth prerequisite correction:** old B2B is a
 non-counting parent for repeated same-provenance cross-root support and
 conditional build-provenance equivalence. The owner subsequently selected
-`RCS-03C3B2B1-B`; the sole active card is now `RCS-03C3B2B2`. Do not revive
+`RCS-03C3B2B1-B` and then `RCS-03C3B2B2-B`, making exact `Pi` fully determine
+pure-build identity. **Fifteenth prerequisite correction:** old B3 is a non-
+counting parent for global atom-layer support B3A and conditional same-lineage
+parent/child co-addressability B3B. The sole active card is now
+`RCS-03C3B3A`. Do not revive
 C171 as an owner question.
 Exact Relic tuple and evidence-projection atomicity are derived, not choices.
 
@@ -1525,7 +1618,7 @@ merge the PR.
 The active finite scope controller is
 `docs/design/endless-progression-master-closure-index.md`. It fixes twenty
 whole-system closure gates, twelve Soul Relic/Charm exit gates, an explicit
-card-admission/reopening rule, and a fourteen-times-amended frozen fifty-seven-slot
+card-admission/reopening rule, and a fifteen-times-amended frozen fifty-eight-slot
 remaining Relic register. Two Relic slots are already routed to specification/
 evaluation; `RCS-03A-C`, `RCS-03B1-A`, and `RCS-03C1-A` are direction-selected;
 `RCS-03C2A-A` selects automatic invocation and `RCS-03C3A-A` selects finite
@@ -1547,7 +1640,9 @@ The owner selected nonempty revision support at A3A-B and universal
 continuity-root preservation at A3B-A, then selected nonempty irreducible
 multi-root current-state support at A4-B. A fourteenth amendment split old B2B
 into support and conditional equivalence; the owner then selected nonempty
-repeated same-provenance support at B1-B. Current `Phi_SR = 27`.
+repeated same-provenance support at B1-B and exact-`Pi`-universal build identity
+at B2B2-B. A fifteenth amendment then split old B3 into global atom-layer support
+and conditional same-lineage overlap. Current `Phi_SR = 27`.
 Each ordinary future
 Relic round must reduce it and may not mint an automatic descendant. The
 original twenty-slot/`Phi_SR = 18` count first became twenty-five/23 when the
@@ -1580,6 +1675,8 @@ conditional succession children produces fifty-six slots and restores it to
 Selecting A4-B reduces it to 27; replacing old B2B with support and conditional
 equivalence children produces fifty-seven slots and restores it to 28;
 selecting B1-B reduces it to 27 and activates B2B2.
+Selecting B2B2-B reduces it to 26; replacing old B3 with B3A and conditional
+B3B produces fifty-eight slots and restores `Phi_SR` to 27.
 Adding another genuinely missed product slot requires an owner-visible charter
 amendment with the new bound.
 
@@ -1593,7 +1690,8 @@ evidence passes the index's reopening test.
 
 The owner selected `RCS-03C3B2A1-A`, `RCS-03C3B2A2A-B`,
 `RCS-03C3B2A2B1-B`, `RCS-03C3B2A2B2-B`, `RCS-03C3B2A3A-B`, and
-`RCS-03C3B2A3B-A`, then `RCS-03C3B2A4-B` and `RCS-03C3B2B1-B`. One
+`RCS-03C3B2A3B-A`, then `RCS-03C3B2A4-B`, `RCS-03C3B2B1-B`, and
+`RCS-03C3B2B2-B`. One
 accepted operation first has one primitive lineage;
 every qualifying prospectively authored finite source episode then coarsens
 all realized member lineages into one canonical episode root; and the catalog
@@ -1610,13 +1708,14 @@ irreducible simultaneous direct-support basis containing multiple independent
 roots while retaining one continuity identity and one Relic position. The
 catalog must also admit two separately accepted and accounted,
 otherwise-distinct post-B2A roots with the same exact configured provenance as
-simultaneous pure-build candidates. The sole active Relic boundary is now
-`RCS-03C3B2B2` under `SR-03`: whether those supported same-provenance cohorts
-remain discrete, universally coarsen by exact `Pi` even across semantic forms,
-or follow a prospectively finer nontrivial equivalence key. Recommend B,
-exact-`Pi` equivalence, while B3 retains position use.
-Root/class position use,
-child partitioning, fan-out,
+simultaneous pure-build candidates; all currently admissible candidates with
+that exact `Pi` then form one canonical pure-build class even across semantic
+source forms. The sole active Relic boundary is now `RCS-03C3B3A` under
+`SR-03`: whether directly addressable source atoms support parent
+representatives only, semantic child applications only, or both layers
+globally. Recommend B, child applications only. Conditional B3B now owns
+same-lineage dual-level support.
+Child partitioning, fan-out,
 claims/reuse, exact horizons, actor information, and configuration locks remain
 separate.
 The authoritative decision record is unchanged; implementation remains blocked.
@@ -8944,8 +9043,10 @@ support, then selected A3B-A, preserving the founder continuity root through
 every eligible revision. The owner then selected A4-B, requiring nonempty
 irreducible multi-root current-state support; a fourteenth amendment split old
 B2B into support and conditional equivalence. The owner then selected B1-B,
-requiring nonempty repeated same-provenance cross-root support. Continue at
-registered Relic slot `RCS-03C3B2B2` under `SR-03`; `RCS-03C3B3`–`RCS-03C3F`, expanded
+requiring nonempty repeated same-provenance cross-root support, then B2B2-B,
+making exact `Pi` fully determine build identity. A fifteenth audit split old
+B3 into B3A/B3B. Continue at registered Relic slot `RCS-03C3B3A` under
+`SR-03`; conditional `RCS-03C3B3B`, `RCS-03C3B4`–`RCS-03C3F`, expanded
 `RCS-08`, cause, and agency follow separately.
 
 R11 begins only
@@ -9090,7 +9191,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-25 19:02 UTC — repeated same-provenance Relic support selected](docs/handoffs/2026-09-25-1902--relic-repeated-provenance-support-selected.md)**
+[2026-09-25 22:49 UTC — exact-provenance Relic build identity selected](docs/handoffs/2026-09-25-2249--relic-exact-provenance-build-identity-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
