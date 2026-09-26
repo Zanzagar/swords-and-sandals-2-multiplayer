@@ -471,8 +471,9 @@ test("the shell draws the swap with the ring, kept on the stage with it, clicks 
   assert.match(button, /context\.scale\(button\.scale, button\.scale\);\s*context\.translate\(-button\.centre\.x, -button\.centre\.y\);/,
     "the ops are drawn with the disc's centre, not the clip's corner, on the button");
   // One route to the engine still: the click names the slot, and actFromRing re-asks whose turn it is —
-  // through the confirm gate since S7 (`pressRing`), ~~`actFromRing` directly~~.
-  assert.match(shell, /pressRing\(ringActionFor\(ringView\.model, slot\)\)/);
+  // through the confirm gate since S7, ~~`actFromRing` directly~~, and since S9 by the key's own command
+  // (`ringClickCommand`), ~~`pressRing(ringActionFor(ringView.model, slot))`~~.
+  assert.match(shell, /runRingCommand\(ringClickCommand\(ringView\.model, slot, \{ confirm: ringConfirm \}\)\)/);
   assert.equal((shell.match(/host\.submit\(/g) ?? []).length, 3);
 });
 

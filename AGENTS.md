@@ -208,8 +208,11 @@ and the path is unreachable from Linux anyway.
   line above read as though any session directory sufficed.)
 - A working tree with `assets/` but no probe session: **1 skipped**, the
   raw-trace archive existence check. EXPECTED, not a defect.
-- **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS ~~9~~ ~~10~~ 11 —
-  measured 2026-09-23 with the fight pop-ups** (10 at b51ad05; 9 on 2026-09-15,
+- **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS ~~9~~ ~~10~~ ~~11~~ 16 —
+  measured 2026-09-25 by the gauges slice's implementer in scratch copies with no `assets/`: 15 at
+  808f6da (the four real-pack tests in `test/render-action-buttons.test.js`, 1f4759c, were never
+  counted here) and 16 with the in-frame gauges (56d1b36); the camera and wiring slices add no gated
+  test. Not re-measured at 3bc2238.** (11 was measured 2026-09-23 with the fight pop-ups:) (10 at b51ad05; 9 on 2026-09-15,
   where this line used to say 1 and mean the tree above). Besides the archive
   check, 8 are gated on the extracted TEXT pack, 1, since 2690559, on the
   extracted PROPS pack (the boulder test), and 1 on the ICONS and TEXT packs

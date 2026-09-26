@@ -1,12 +1,14 @@
 /**
- * THE RING'S MODEL — slices S2, S4, S5 and S6 of `docs/design/battle-ui.md`
+ * THE RING'S MODEL — slices S2, S4, S5, S6 and S9 of `docs/design/battle-ui.md`
  * ("The in-battle actions: DECIDED"): on a person's turn, which foe is
  * selected, which of the build's four stances the ring shows, which verb sits
  * in which of the eight slots, where each walk and rank change the engine
  * offers stands (S4), which spell or potion each place of the items row holds
  * and whom it is aimed at (S5), whether the weapon swap is on the ring and
- * which weapon it offers (S6), what the engine offers that the ring does not
- * show, and the exact action a click, a digit, a letter or an arrow key sends.
+ * which weapon it offers (S6), which buttons the team rules GREY and why (S9),
+ * what the engine offers that the ring does not show, and the exact action a
+ * click, a digit, a letter or an arrow key sends — never one a greyed button
+ * shows.
  *
  * Pure. It reads what it is handed — the fighters, the engine's offer and the
  * engine's own menu for the selected foe — and decides only how to ARRANGE
@@ -14,7 +16,7 @@
  */
 
 import { SS2_OPTION_SLOTS, SS2_OVERLAY_SLOTS, SS2_STRIP, SS2_SWAP_SLOT, actionButtonVerbFor } from "../../src/render/action-buttons.js";
-import { ss2FightDistance, ss2SameLane } from "../../src/team/ss2-rules.js";
+import { SS2_UNAVAILABLE_REASONS, ss2FightDistance, ss2SameLane } from "../../src/team/ss2-rules.js";
 
 /**
  * ► **THE FOUR MOVES AND THEIR ARROW KEYS (slice S4; the owner's Q5 and
@@ -126,6 +128,48 @@ export const RING_ITEM_WORDS = Object.freeze({
 });
 
 /**
+ * ► **WHY A BUTTON IS GREYED, OR HIDDEN (slice S9; the owner's Q6 and Q8).**
+ *   The engine's menu carries, for every button of the ring it does not
+ *   offer, ONE reason code and that code's flag (`SS2_UNAVAILABLE_REASONS`):
+ *   `hide` where the build itself hides the button (the stance, the level, an
+ *   empty slot, a forced phase), `grey` where the team rules forbid it (another
+ *   rank, a foe in reach, a body in the line, the duel, no rank that way) or
+ *   the engine has no verb for it. A GREY one is drawn where it stands,
+ *   dimmed, says why in the engine's own words, and can never act; a HIDE one
+ *   is not drawn at all.
+ *
+ *   **Jump and charge stay HIDDEN whatever the engine flags them** — the
+ *   owner's Q8 ("Jump and charge stay hidden and get their own design pass").
+ *   The engine flags them `not-built`, a grey code, and on the long warrior
+ *   frames they are three of the eight slots on every turn.
+ */
+export const RING_HIDDEN_VERBS = Object.freeze(["jumpleft", "jumpright", "chargeleft", "chargeright"]);
+
+/**
+ * The reason a menu entry is GREYED — `{code, words}`, the engine's code and
+ * its own words for it — or null when the entry is on offer or hidden.
+ */
+export function ringGreyReasonOf(entry) {
+  if (!entry || entry.available !== false || entry.display !== "grey") return null;
+  if (RING_HIDDEN_VERBS.includes(entry.verb)) return null;
+  const known = Object.hasOwn(SS2_UNAVAILABLE_REASONS, entry.reason) ? SS2_UNAVAILABLE_REASONS[entry.reason] : null;
+  return Object.freeze({ code: entry.reason, words: known?.says ?? SS2_UNAVAILABLE_REASONS["not-offered"].says });
+}
+
+/**
+ * What a greyed button WOULD send, for its words only — never sent: the verb's
+ * action type, whom it would be aimed at, the actor, and a potion's item.
+ */
+function withheldOf(entry, actorId) {
+  return Object.freeze({
+    type: entry.type ?? null,
+    targetId: entry.targetId ?? null,
+    actorId,
+    ...(entry.type === "drink-potion" && Number.isInteger(entry.itemId) ? { itemId: entry.itemId } : {})
+  });
+}
+
+/**
  * WHO FIRST (the owner's Q4): a foe is always selected. The previous selection
  * is kept while it is still a living foe; otherwise the nearest foe in the
  * actor's own rank; otherwise the nearest foe.
@@ -184,13 +228,18 @@ function stageOrder(foes) {
  *     to the selected foe (the build's controller selector, overlay frame 4,
  *     in `ss2UnavailableActions`); null when there is no menu to ask;
  *   - `slots` — eight, in KEY order (`RING_KEY_ORDER`), each `{key, slot,
- *     verb, action}`; `verb`/`action` null unless the offer holds it;
+ *     verb, action, reason, withheld}`; `action` null unless the offer holds
+ *     it; `verb` null unless it acts or is GREYED (S9: `reason` `{code,
+ *     words}`, `ringGreyReasonOf`, and `withheld` what it would send, for its
+ *     words only); `reason`/`withheld` null otherwise;
  *   - `moves` (S4) — every walk and rank change the offer holds, in
  *     `RING_MOVES` order, each `{move, key, verb, place, slot, action}`:
  *     `place` is `slot` (a walk the stance wires, `slot` naming it and
  *     `action` the slot's own), `beside` (a walk it does not), `above-head`
  *     or `below-feet`; empty when there is no ring (no stance). A move the
- *     offer does not hold is not here;
+ *     offer does not hold is here only when GREYED (S9: `action` null, with
+ *     `reason` and `withheld` — a walk its slot greys, or a rank change the
+ *     engine's rank entry greys); every move carries `reason`/`withheld`;
  *   - `swap` (S6) — `{key: "9", slot: "swap_inventory", verb: "swap_weapons",
  *     usingBow, words, action}` when there is a ring and the offer holds the
  *     swap; else null, and there is no button: the engine withholds it with no
@@ -204,7 +253,8 @@ function stageOrder(foes) {
  *     when empty), `words` the build's name for it; `verb` (`item`) and
  *     `action` null unless the offer holds the item's action — aimed at the
  *     SELECTED foe for a spell that strikes a foe, at the actor otherwise, as
- *     the engine's menu aims it;
+ *     the engine's menu aims it; S9: a held item the engine withholds for a
+ *     grey code keeps `verb` `item`, with `reason` and `withheld`;
  *   - `offRing` — `{action}` for every offered action at the selected foe or
  *     at no foe that no slot, move, the swap or the items row holds, in the
  *     offer's order;
@@ -231,24 +281,34 @@ export function ringModelFor({ actorId, combatants, legal, previous = null, menu
     }
   }
 
-  // The engine's own ring for the selected foe: a slot holds its verb only
-  // when the OFFER holds its action (S2; hidden-vs-greyed is S9) — the same
-  // test the menu's own `available` makes — and what it sends is the offered
-  // option itself, so a slot can never send what the engine did not offer.
+  // The engine's own ring for the selected foe: a slot ACTS only when the
+  // OFFER holds its action (S2) — the same test the menu's own `available`
+  // makes — and what it sends is the offered option itself, so a slot can
+  // never send what the engine did not offer. One the engine withholds for a
+  // GREY reason keeps its verb, sends nothing, and says why (S9); one it
+  // withholds for a HIDE reason is empty (`ringGreyReasonOf`).
   const bySlot = new Map();
+  const greyBySlot = new Map();
   for (const entry of menu?.ring ?? []) {
     if (entry.group !== "controller") continue;
     const option = offer.find((candidate) => candidate.type === entry.type && candidate.targetId === entry.targetId
       && (candidate.itemId ?? null) === null);
     if (option) bySlot.set(entry.slot, { verb: entry.verb, option });
+    else {
+      const reason = ringGreyReasonOf(entry);
+      if (reason) greyBySlot.set(entry.slot, { verb: entry.verb, reason, withheld: withheldOf(entry, actorId) });
+    }
   }
   const slots = RING_KEY_ORDER.map((slot, index) => {
     const held = bySlot.get(slot) ?? null;
+    const grey = held ? null : greyBySlot.get(slot) ?? null;
     return Object.freeze({
       key: String(index + 1),
       slot,
-      verb: held ? held.verb : null,
-      action: held ? Object.freeze({ ...held.option, actorId }) : null
+      verb: held ? held.verb : grey ? grey.verb : null,
+      action: held ? Object.freeze({ ...held.option, actorId }) : null,
+      reason: grey ? grey.reason : null,
+      withheld: grey ? grey.withheld : null
     });
   });
 
@@ -257,12 +317,30 @@ export function ringModelFor({ actorId, combatants, legal, previous = null, menu
   // slot, and is the same action as that slot's; one the stance does not wire
   // stands beside its side's walk slot. A move the engine withholds is not
   // here at all, so nothing can press it.
+  // S9: a move the engine withholds for a GREY reason is here too, sending
+  // nothing and saying why — a walk its slot greys (the arrow is that
+  // button's), or a rank change the engine's rank entry greys, at its place.
   const moved = new Set();
   const moves = menu
     ? RING_MOVES.flatMap((move) => {
       const option = offer.find((candidate) => candidate.type === move.move && candidate.targetId === actorId
         && (candidate.itemId ?? null) === null);
-      if (!option) return [];
+      if (!option) {
+        const greySlot = slots.find((slot) => slot.reason && slot.withheld?.type === move.move);
+        const rankEntry = greySlot ? null : (menu.ring ?? []).find((entry) => entry.group === "rank" && entry.type === move.move);
+        const reason = greySlot ? greySlot.reason : ringGreyReasonOf(rankEntry);
+        if (!reason) return [];
+        return [Object.freeze({
+          move: move.move,
+          key: move.key,
+          verb: greySlot ? greySlot.verb : actionButtonVerbFor(move.move),
+          place: greySlot ? "slot" : move.place,
+          slot: greySlot ? greySlot.slot : null,
+          action: null,
+          reason,
+          withheld: greySlot ? greySlot.withheld : withheldOf(rankEntry, actorId)
+        })];
+      }
       moved.add(option);
       const inSlot = slots.find((slot) => slot.action?.type === move.move);
       return [Object.freeze({
@@ -271,7 +349,9 @@ export function ringModelFor({ actorId, combatants, legal, previous = null, menu
         verb: inSlot ? inSlot.verb : actionButtonVerbFor(move.move),
         place: inSlot ? "slot" : move.place,
         slot: inSlot ? inSlot.slot : null,
-        action: inSlot ? inSlot.action : Object.freeze({ ...option, actorId })
+        action: inSlot ? inSlot.action : Object.freeze({ ...option, actorId }),
+        reason: null,
+        withheld: null
       })];
     })
     : [];
@@ -317,14 +397,18 @@ export function ringModelFor({ actorId, combatants, legal, previous = null, menu
         && (candidate.itemId == null || candidate.itemId === itemId)) ?? null
       : null;
     if (option) itemOptions.add(option);
+    // S9: an item the engine withholds for a GREY reason keeps its place.
+    const reason = option || itemId === null ? null : ringGreyReasonOf(entry);
     return Object.freeze({
       key: RING_ITEM_KEYS[index],
       slot,
       inventory,
       itemId,
-      verb: option ? "item" : null,
+      verb: option || reason ? "item" : null,
       words: itemId !== null ? (RING_ITEM_WORDS[itemId] ?? null) : null,
-      action: option ? Object.freeze({ ...option, actorId }) : null
+      action: option ? Object.freeze({ ...option, actorId }) : null,
+      reason,
+      withheld: reason ? withheldOf(entry, actorId) : null
     });
   });
 
@@ -398,25 +482,83 @@ export function ringSameAction(left, right) {
  *   (null for a listed one); `slot` the name its drawn button carries
  *   (`ringSlotAt` returns it); `verb` and `words` what the strip labels it
  *   with. What a hover previews and what "confirm every move" may hold.
+ *
+ * ► **`{greyed: true}` (S9) puts every GREYED button in its place too** —
+ *   `action` null, `reason` `{code, words}` (`ringGreyReasonOf`) and
+ *   `withheld` (what it would send, for its words only). The strip lists them
+ *   so; nothing that sends or previews asks for them.
  */
-export function ringEntries(model) {
+export function ringEntries(model, { greyed = false } = {}) {
   if (!model) return Object.freeze([]);
   const out = [];
+  const grey = (place, key, slot, verb, words, from) => (greyed && from.reason && !from.action
+    ? out.push({ place, key, slot, verb, words, action: null, reason: from.reason, withheld: from.withheld ?? null })
+    : 0);
   for (const slot of model.slots ?? []) {
     if (slot.action) out.push({ place: "slot", key: slot.key, slot: slot.slot, verb: slot.verb, words: null, action: slot.action });
+    else grey("slot", slot.key, slot.slot, slot.verb, null, slot);
   }
   for (const move of model.moves ?? []) {
-    if (move.place !== "slot") out.push({ place: "move", key: move.key, slot: move.move, verb: move.verb, words: null, action: move.action });
+    if (move.place === "slot") continue;
+    if (move.action) out.push({ place: "move", key: move.key, slot: move.move, verb: move.verb, words: null, action: move.action });
+    else grey("move", move.key, move.move, move.verb, null, move);
   }
   const swap = model.swap ?? null;
   if (swap) out.push({ place: "swap", key: swap.key, slot: swap.slot, verb: swap.verb, words: swap.words, action: swap.action });
   for (const item of model.items ?? []) {
     if (item.action) out.push({ place: "item", key: item.key, slot: item.slot, verb: item.verb, words: item.words, action: item.action });
+    // An item with no name in the build's table (10-29) is called by its id.
+    else grey("item", item.key, item.slot, item.verb, item.words ?? `Item #${item.itemId}`, item);
   }
   for (const entry of model.offRing ?? []) {
     out.push({ place: "off", key: null, slot: null, verb: null, words: null, action: entry.action });
   }
   return Object.freeze(out.map((entry) => Object.freeze(entry)));
+}
+
+/**
+ * THE GREYED BUTTON (S9) named by its key (`"3"`, `"E"`, `"ArrowDown"`), its
+ * slot (`"optionC"`, `"inventory_button1"`) or its move (`"rank-front"`) — its
+ * `ringEntries(model, {greyed: true})` entry — or null when that button acts,
+ * is hidden or does not exist. A walk greyed in its slot answers to the slot's
+ * digit and name and to its arrow and move name alike.
+ */
+export function ringGreyFor(model, slotOrKey) {
+  if (slotOrKey === null || slotOrKey === undefined || slotOrKey === "") return null;
+  const entries = ringEntries(model, { greyed: true }).filter((entry) => entry.reason);
+  const direct = entries.find((entry) => entry.key === slotOrKey || entry.slot === slotOrKey);
+  if (direct) return direct;
+  // A greyed walk in its slot: its arrow and its move's name are the slot's.
+  const move = model?.moves?.find((candidate) => candidate.place === "slot" && candidate.reason
+    && (candidate.key === slotOrKey || candidate.move === slotOrKey));
+  return move ? entries.find((entry) => entry.slot === move.slot) ?? null : null;
+}
+
+/**
+ * ► **WHAT A CLICK ON A DRAWN BUTTON DOES (S9), named as `ringSlotAt` names
+ *   it** — a slot (`"optionC"`), the swap, an items place, a move
+ *   (`"rank-front"`) — or by its key: an acting one presses
+ *   (`ringPressCommand`: acts, or chooses with "confirm every move" on); a
+ *   GREYED one is `{kind: "ignore", why: "greyed", entry}` — nothing is sent,
+ *   whatever the setting, and `entry` (`ringGreyFor`) is there for the shell to
+ *   say why; anything else, null. A digit or a letter takes this same road
+ *   (`ringKeyCommand`).
+ */
+export function ringClickCommand(model, slotOrKey, { confirm = false } = {}) {
+  const press = ringPressCommand(ringActionFor(model, slotOrKey), { confirm });
+  if (press) return press;
+  const entry = ringGreyFor(model, slotOrKey);
+  return entry ? Object.freeze({ kind: "ignore", why: "greyed", entry }) : null;
+}
+
+/**
+ * WHAT THE POINTER ON A DRAWN BUTTON SHOWS (S7, S9) — the button named as
+ * `ringSlotAt` names it: its own action when it acts (`ringActionFor`, which a
+ * preview previews), its greyed entry when it is greyed (`ringGreyFor`, whose
+ * reason is said), else null.
+ */
+export function ringShownFor(model, slotOrKey) {
+  return ringActionFor(model, slotOrKey) ?? ringGreyFor(model, slotOrKey);
 }
 
 /** The first entry on screen that sends `action` (`ringSameAction`), or null. */
@@ -482,15 +624,19 @@ export function ringKeyCommand(model, {
     }
     return null;
   }
+  // S9: a key on a GREYED button presses nothing, whatever the setting; it
+  // is still the ring's, so the shell can say why (`{kind: "ignore", why:
+  // "greyed", entry}`, the button's `ringGreyFor` entry) — the road a click
+  // takes (`ringClickCommand`).
   if (/^[1-8]$/.test(key ?? "") || key === RING_SWAP_KEY) {
     if (repeat) return null;
-    return ringPressCommand(ringActionFor(model, key), { confirm });
+    return ringClickCommand(model, key, { confirm });
   }
   // The items row (S5): a letter, whichever case Shift or Caps Lock gives it.
   const letter = typeof key === "string" && key.length === 1 ? key.toUpperCase() : null;
   if (letter !== null && RING_ITEM_KEYS.includes(letter)) {
     if (repeat) return null;
-    return ringPressCommand(ringActionFor(model, letter), { confirm });
+    return ringClickCommand(model, letter, { confirm });
   }
   const move = RING_MOVES.find((candidate) => candidate.key === key);
   if (move) {
@@ -499,7 +645,7 @@ export function ringKeyCommand(model, {
     const action = ringActionFor(model, move.key);
     return action
       ? ringPressCommand(action, { confirm })
-      : Object.freeze({ kind: "ignore", why: "not-offered", move: move.move });
+      : ringClickCommand(model, move.key, { confirm }) ?? Object.freeze({ kind: "ignore", why: "not-offered", move: move.move });
   }
   // S7: with "confirm every move" on, Enter from the stage sends the choice
   // (on a button it presses that button, as the browser does), and Esc takes

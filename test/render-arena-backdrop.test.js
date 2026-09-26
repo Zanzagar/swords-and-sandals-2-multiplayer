@@ -60,7 +60,9 @@ import {
   SS2_UI_BAR_READOUTS,
   SS2_UI_BAR_UNPLACED,
   uiBarReadoutsFor,
-  hasUiBarReadouts
+  hasUiBarReadouts,
+  closeUpZoomFor,
+  SS2_CLOSE_UP
 } from "../src/render/arena-backdrop.js";
 import { SS2_ARENA } from "../src/team/ss2-rules.js";
 import { propOpsFor } from "../src/render/props.js";
@@ -210,6 +212,46 @@ test("EVERY rank stands on the FLOOR, below the foot of the painted wall, in all
       }
     }
   }
+});
+
+test("EVERY rank stands on the FLOOR at every zoom the camera can REACH, the survivors' close-up included", () => {
+  // ► **THE TEST ABOVE STOPS AT 80, THE BUILD'S TIGHTEST BAND, AND THE CAMERA
+  //   DOES NOT.** Since 2026-09-24 the survivors' close-up takes a team bout
+  //   to 100 (`SS2_CLOSE_UP.zoomCap`), and nothing checked the wall there: a
+  //   back-ranker small enough that his crown did not bind was framed at zoom
+  //   97, 17.39px INSIDE arena 5's wall (found by the HUD's camera study).
+  //
+  // So: for each rank, on each framing, every zoom from the establishing shot
+  // to the highest the close-up will take that rank to — a fighter too small
+  // for his crown to bind (`_yscale` 50) — with his feet 5px below the foot of
+  // every arena's wall, measured the painter's way as above. And the highest
+  // is pinned by hand, so the close-up cannot pass the check by never
+  // closing in: on the team framing the back rank (y 6) clears arena 5's wall
+  // by 5px to zoom 82 (6.16px) and not at 83 (4.59px); every other case
+  // reaches the owner's cap of 100.
+  const crowd = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.prop === "crowd");
+  const reach = [];
+  for (const teamWeight of [0, 1]) {
+    for (let rank = 0; rank < SS2_ARENA.rankCount; rank += 1) {
+      const y = SS2_ARENA.frontY - rank * SS2_ARENA.rankStride;
+      const highest = closeUpZoomFor([{ x: 0, y, yscale: 50 }], { teamWeights: [teamWeight] });
+      reach.push([teamWeight, y, highest]);
+      for (let zoomscale = SS2_CAMERA.zoomStart; zoomscale <= highest; zoomscale += 1) {
+        const camera = { zoomscale, teamWeight, gladiatorsX: 0, crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale) };
+        for (const wall of SS2_ARENA_WALL_BASE) {
+          const floorLine = layerPlacementFor(crowd, camera).y + wall.crowdY;
+          const feet = arenaToStage(camera, { x: 0, y, lift: 0 }).y;
+          assert.ok(feet - floorLine >= SS2_CLOSE_UP.wallMargin,
+            `framing ${teamWeight ? "team" : "pair"} at zoom ${zoomscale}, arena ${wall.arena}: rank ${rank} (y ${y}) ` +
+            `${(feet - floorLine).toFixed(2)}px below the wall's foot`);
+        }
+      }
+    }
+  }
+  assert.deepEqual(reach, [[0, 200, 100], [0, 103, 100], [0, 6, 100], [1, 200, 100], [1, 103, 100], [1, 6, 82]]);
+  const at83 = { zoomscale: 83, teamWeight: 1, crowdY: SS2_CAMERA.crowdBaseY + 83 };
+  const arena5 = SS2_ARENA_WALL_BASE.find((wall) => wall.arena === 5);
+  near(arenaToStage(at83, { y: 6 }).y - (layerPlacementFor(crowd, at83).y + arena5.crowdY), 4.59, "arena 5 at 83");
 });
 
 test("each arena's wall foot is its measured bitmap ROW, carried through the pack's own tile placements", () => {

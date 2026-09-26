@@ -250,7 +250,18 @@ const FITTED_HALF_WIDTH_FIGURES = 105 / 150;
 /** The fitted view's vertical bound, in figure heights: 250 of the old 150. Authored. */
 const FITTED_HEIGHT_FIGURES = 250 / 150;
 
-export function viewportFor({ width, height, actors = [], frontY, minExtent = 250 }) {
+export function viewportFor({ width, height, actors = [], frontY, minExtent = 250, reserveBottom = 0 }) {
+  // ► **A RESERVED BAND AT THE CANVAS'S FOOT (D3, 2026-09-24): the in-frame
+  //   team HUD's.** The fitted view is laid out in the canvas ABOVE it — every
+  //   vertical term below reads `floor` where it read `height` — so the
+  //   fighters' ink stays above the band by the same arithmetic that kept it on
+  //   the canvas: the front rank's feet stand 0.62 of the way from the horizon
+  //   to `floor`, the horizon at most 0.58 of `floor`, and the scale at most
+  //   `floor / 371`, which leaves 0.16 of `floor` under the feet for a plate
+  //   and a shadow that need at most 0.137 of it (a colossus's shadow; the
+  //   plate's 10px font floor adds 4.2px, so any `floor` over ~42px). A
+  //   reserve of 0, absent, or not a positive number is today's view to the bit.
+  const floor = Number.isFinite(reserveBottom) && reserveBottom > 0 ? Math.max(1, height - reserveBottom) : height;
   let extent = minExtent;
   let rearY = frontY;
   for (const actor of actors) {
@@ -268,15 +279,21 @@ export function viewportFor({ width, height, actors = [], frontY, minExtent = 25
   const halfWidth = extent + SS2_FIGURE_HEIGHT * FITTED_HALF_WIDTH_FIGURES;
   const depthUnits = frontY - rearY;
   const MIN_HORIZON_FRACTION = 0.18;
-  const depthScaleCap = (height * (1 - MIN_HORIZON_FRACTION)) * 0.62 / (depthUnits * 1.7 + 30);
-  const scale = Math.min(width / (halfWidth * 2), height / (SS2_FIGURE_HEIGHT * FITTED_HEIGHT_FIGURES), depthScaleCap);
+  const depthScaleCap = (floor * (1 - MIN_HORIZON_FRACTION)) * 0.62 / (depthUnits * 1.7 + 30);
+  const scale = Math.min(width / (halfWidth * 2), floor / (SS2_FIGURE_HEIGHT * FITTED_HEIGHT_FIGURES), depthScaleCap);
   const depthSpan = depthUnits * scale * 1.7;
   const FLOOR_MARGIN = scale * 30;
   const horizon = Math.max(
-    height * MIN_HORIZON_FRACTION,
-    Math.min(height * 0.58, height - (FLOOR_MARGIN + depthSpan) / 0.62)
+    floor * MIN_HORIZON_FRACTION,
+    Math.min(floor * 0.58, floor - (FLOOR_MARGIN + depthSpan) / 0.62)
   );
-  return { scale, horizon, extent, depthUnits };
+  // `ground` is where the front rank's feet stand — the expression the shell's
+  // `toY` closure (`tools/arena/main.js`, `viewport()`) has always written as
+  // `horizon + (height - horizon) * 0.62`. A shell drawing over a reserve must
+  // stand its fighters here: `toY: (y, lift) => ground - (frontY - y) * scale
+  // * 1.7 - lift * scale`.
+  const ground = horizon + (floor - horizon) * 0.62;
+  return { scale, horizon, extent, depthUnits, floor, ground };
 }
 
 /**

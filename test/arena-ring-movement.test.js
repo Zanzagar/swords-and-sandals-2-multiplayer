@@ -24,7 +24,7 @@ import { ss2BattleValues, ss2Combatant, ss2TeamRules } from "../src/team/ss2-rul
 import { demoItemsFrom, demoSide } from "../tools/arena/roster.js";
 import { SS2_BUTTON_WIRING, SS2_OVERLAY_SLOTS, actionButtonPackFrom } from "../src/render/action-buttons.js";
 import { cameraFor, cameraStep, stageClipRectFor, stageFitFor, stageProjectorFor } from "../src/render/arena-backdrop.js";
-import { ringActionFor, ringFocusKind, ringKeyCommand, ringModelFor } from "../tools/arena/ring.js";
+import { ringActionFor, ringClickCommand, ringFocusKind, ringKeyCommand, ringModelFor } from "../tools/arena/ring.js";
 import { fighterBoxFor, ringButtonsAt, ringButtonsInside, ringMoveButtonsAt, ringPlacementFor, ringSlotAt } from "../tools/arena/ring-layout.js";
 import { ringButtonArt } from "../tools/arena/ring-art.js";
 
@@ -52,27 +52,43 @@ function modelOf(host, previous = null) {
 }
 /** An action as one line, `type -> target`. */
 const line = (action) => `${action.type}${action.itemId != null ? `#${action.itemId}` : ""} -> ${action.targetId}`;
-/** A model's moves as `move key place slot` lines. */
-const moveLines = (model) => model.moves.map((move) => `${move.move} ${move.key} ${move.place} ${move.slot ?? "-"}`);
+/**
+ * A model's moves as `move key place slot` lines, then `acts` or — S9 — `grey:<code>` for a move the
+ * engine withholds for a team rule, which is on the ring greyed; ~~no fifth word~~ before S9, when every
+ * move on the ring acted.
+ */
+const moveLines = (model) => model.moves.map((move) => `${move.move} ${move.key} ${move.place} ${move.slot ?? "-"} ${move.action ? "acts" : `grey:${move.reason?.code}`}`);
 
 /* ------------------------------------------------------------------ */
 /* 1. Which moves are on the ring, and where                           */
 /* ------------------------------------------------------------------ */
 
-test("the 3v3 opening: both walks in the build's own slots, the rank change BACK above the head, and none of them listed", () => {
+test("the 3v3 opening: both walks in the build's own slots, the rank change BACK above the head, the step forward GREYED below the feet (S9), and none of them listed", () => {
   const model = modelOf(demoHost({ perSide: 3, seed: 3 }));
   // red-1 is offered walk-left, walk-right, a taunt at blue-1, rank-back, wincrowd and rest (S2's own
   // reading of this turn). `longrange_warrior` facing right wires walkleft at optionB and walkright at
   // optionE (SS2_BUTTON_WIRING), so those two stay in their slots; the rank verb has no build slot.
+  // S9: red-1 is in the front rank, so the engine withholds the step forward for `no-rank` — a team
+  // rule, so it stands greyed below the feet; ~~three moves, the step forward nowhere~~ before S9.
   assert.deepEqual(moveLines(model), [
-    "walk-left ArrowLeft slot optionB",
-    "walk-right ArrowRight slot optionE",
-    "rank-back ArrowUp above-head -"
+    "walk-left ArrowLeft slot optionB acts",
+    "walk-right ArrowRight slot optionE acts",
+    "rank-back ArrowUp above-head - acts",
+    "rank-front ArrowDown below-feet - grey:no-rank"
   ]);
   assert.deepEqual(model.moves[2].action, { type: "rank-back", targetId: "red-1", actorId: "red-1" });
   assert.equal(model.moves[0].action, model.slots.find((slot) => slot.slot === "optionB").action, "one action, not a copy");
   assert.deepEqual(model.offRing.map((entry) => line(entry.action)), ["rest -> red-1"]);
 });
+
+/** Plays the rule set's own AI for `turns` submissions. */
+function played(host, turns) {
+  for (let taken = 0; taken < turns; taken += 1) {
+    const due = host.currentCombatantId();
+    host.submit({ ...host.suggestAction(due), actorId: due });
+  }
+  return host;
+}
 
 /** Plays the rule set's own AI until turn `turnNumber` is due to `actorId`, or fails. */
 function advanceTo(host, turnNumber, actorId) {
@@ -101,20 +117,34 @@ test("A WALK THE STANCE DOES NOT WIRE — toward a foe inside reach — stands B
   assert.ok(!model.offRing.some((entry) => entry.action.type === "walk-right"), "on the ring, so not listed");
 });
 
-test("a stance that wires a walk the engine WITHHOLDS shows it nowhere: not in its slot, not beside, not listed", () => {
+test("a stance that wires a walk the engine WITHHOLDS for a team rule GREYS it in its slot (S9): it sends nothing, stands nowhere else and is not listed; one withheld for a HIDE reason is nowhere", () => {
   // The same turn: the stance wires walkleft at optionB, and the engine withholds it (the retreat is
-  // to the right). Neither rank arrow is withheld here, so both stand, and nothing is listed: ~~the swap
-  // is only listed~~ — S6 put the swap on the ring's ninth button (`model.swap`).
+  // to the right) for `in-reach`, a team rule. ~~It shows it nowhere~~ before S9: the slot was empty.
+  // Neither rank arrow is withheld here, so both stand, and nothing is listed: ~~the swap is only
+  // listed~~ — S6 put the swap on the ring's ninth button (`model.swap`).
   const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 2 }), 20, "blue-2"), "red-3");
-  assert.equal(model.slots.find((slot) => slot.slot === "optionB").verb, null);
-  assert.deepEqual(model.moves.map((move) => `${move.move} ${move.place}`),
-    ["walk-right beside", "rank-back above-head", "rank-front below-feet"]);
+  const walkSlot = model.slots.find((slot) => slot.slot === "optionB");
+  assert.equal(walkSlot.verb, "walkleft");
+  assert.equal(walkSlot.action, null, "greyed: it sends nothing");
+  assert.equal(walkSlot.reason.code, "in-reach");
+  assert.deepEqual(moveLines(model), [
+    "walk-left ArrowLeft slot optionB grey:in-reach",
+    "walk-right ArrowRight beside - acts",
+    "rank-back ArrowUp above-head - acts",
+    "rank-front ArrowDown below-feet - acts"
+  ]);
   assert.deepEqual(model.offRing.map((entry) => line(entry.action)), []);
   // ~~`model.swap.action` is blue-2's swap~~ — **RE-PINNED 2026-09-24 (night2/engine2 swap-ammo)**: blue-2
   // spent his five arrows and the forced swap put the bow away, so he holds the sword with `ammo_left` 0,
   // and the build hides its swap button on `!(ammo_left > 0)` (overlay frame 1 body 0x2378d2
   // +0x0e0a-+0x0e9d). The engine no longer offers it, so the ring has no ninth button here.
   assert.equal(model.swap, null);
+  // A HIDE: 2v2 plain seed 1, 24 AI submissions in — red-2 out of arrows with the bow drawn, the build's
+  // forced swap (`no-ammo`, a hide, on every button). No move is on the ring, greyed or not, and no slot.
+  const forced = modelOf(played(demoHost({ perSide: 2, seed: 1 }), 24), "blue-1");
+  assert.equal(forced.actorId, "red-2");
+  assert.deepEqual(forced.moves, []);
+  assert.ok(forced.slots.every((slot) => slot.verb === null && slot.reason === null), "every slot hidden");
 });
 
 test("with no ring — the engine has no menu to ask — no move is placed, and every offered move is listed", () => {
@@ -157,8 +187,13 @@ test("the arrow keys move from the stage or a strip button: one press, one move;
     assert.deepEqual(ringKeyCommand(model, { key: "ArrowUp", focus }), self("rank-back"), focus);
     assert.deepEqual(ringKeyCommand(model, { key: "ArrowDown", focus }), self("rank-front"), focus);
   }
-  // Withheld: the key is the ring's (the page must not scroll under the fight), and nothing is sent.
-  assert.deepEqual(ringKeyCommand(model, { key: "ArrowLeft", focus: "stage" }), { kind: "ignore", why: "not-offered", move: "walk-left" });
+  // Withheld: the key is the ring's (the page must not scroll under the fight), and nothing is sent. S9:
+  // withheld for a team rule, the arrow names the greyed button, so the shell can say why; ~~`not-offered`
+  // for every withheld move~~, which is now only the answer for a HIDDEN one (the forced swap below).
+  const left = ringKeyCommand(model, { key: "ArrowLeft", focus: "stage" });
+  assert.deepEqual([left.kind, left.why, left.entry.slot, left.entry.reason.code], ["ignore", "greyed", "optionB", "in-reach"]);
+  const forced = modelOf(played(demoHost({ perSide: 2, seed: 1 }), 24), "blue-1");
+  assert.deepEqual(ringKeyCommand(forced, { key: "ArrowLeft", focus: "stage" }), { kind: "ignore", why: "not-offered", move: "walk-left" });
   assert.deepEqual(ringKeyCommand(model, { key: "ArrowUp", focus: "stage", repeat: true }), { kind: "ignore", why: "repeat", move: "rank-back" },
     "holding an arrow moves once");
   // A field that types, a slider or a radio keeps its arrows; a modified arrow is the browser's.
@@ -252,20 +287,29 @@ test("a rank arrow that would leave the canvas stays on it, whatever the fighter
   assert.deepEqual(buttons.map((button) => round(button.y)), [28.8, 371.2]);
 });
 
-test("a click on a move's button hits that move, and sends it; a hover names it", () => {
+test("a click on a move's button hits that move, and sends it; a hover names it — and a GREYED one (S9) is hit, named and sends nothing", () => {
   const host = advanceTo(demoHost({ perSide: 3, seed: 2 }), 20, "blue-2");
   const model = modelOf(host, "red-3");
   const buttons = [
     ...ringButtonsAt(model, { centerX: 300, centerY: 200, unit: 1.2 }),
     ...ringMoveButtonsAt(model, { centerX: 300, centerY: 200, unit: 1.2, head: 190, feet: 330 })
   ];
+  let greyed = 0;
   for (const move of model.moves) {
-    const button = buttons.find((candidate) => candidate.slot === move.move);
+    // A move in its slot is that slot's button (S9 put the greyed walk-left there); ~~every move by its own name~~.
+    const name = move.place === "slot" ? move.slot : move.move;
+    const button = buttons.find((candidate) => candidate.slot === name);
     assert.ok(button, `${move.move} is drawn`);
     const hit = ringSlotAt(buttons, button.x, button.y);
-    assert.equal(hit, move.move);
+    assert.equal(hit, name);
     assert.deepEqual(ringActionFor(model, hit), move.action);
+    if (!move.action) {
+      assert.deepEqual(button.reason, move.reason, `${move.move}: drawn greyed, with its reason`);
+      assert.equal(ringClickCommand(model, hit).why, "greyed");
+      greyed += 1;
+    }
   }
+  assert.equal(greyed, 1, "the withheld walk-left");
 });
 
 test("CODEX PASS 2: a ring that would leave the stage is moved back onto it WHOLE — every button by the same amount, so nothing overlaps that did not before", () => {
@@ -350,8 +394,8 @@ function arenaButtons(host, model) {
   return { buttons, stage, camera };
 }
 
-test("ACCEPTANCE, over whole bouts with every foe selected in turn, under the arena's own camera: every walk and rank change the engine offers is drawn once, inside the stage, and sent by its click and its arrow; none it withholds is drawn, clicked or keyed; no two buttons overlap", (t) => {
-  const tally = { turns: 0, selections: 0, offered: 0, withheld: 0, teamCamera: 0 };
+test("ACCEPTANCE, over whole bouts with every foe selected in turn, under the arena's own camera: every walk and rank change the engine offers is drawn once, inside the stage, and sent by its click and its arrow; none it withholds is sent — one withheld for a team rule is drawn once, greyed, with the engine's reason (S9), any other is not drawn at all; no two buttons overlap", (t) => {
+  const tally = { turns: 0, selections: 0, offered: 0, withheld: 0, greyed: 0, hidden: 0, teamCamera: 0 };
   const placed = new Map();
   for (const perSide of [1, 2, 3]) {
     for (const kit of ["", "tricks"]) {
@@ -389,14 +433,35 @@ test("ACCEPTANCE, over whole bouts with every foe selected in turn, under the ar
                 placed.set(`${type} ${move.place}`, (placed.get(`${type} ${move.place}`) ?? 0) + 1);
               } else {
                 tally.withheld += 1;
-                assert.equal(drawn.length, 0, `${where}: withheld ${type} is drawn`);
+                assert.equal(drawn.length, 0, `${where}: withheld ${type} is drawn to act`);
                 assert.equal(ringActionFor(model, type), null, `${where}: withheld ${type} can be sent`);
-                assert.deepEqual(keyed, { kind: "ignore", why: "not-offered", move: type }, `${where}: ${ARROW[type]} on a withheld move`);
+                // S9: the ENGINE's reason decides whether it is drawn at all — its rank entry, or the
+                // walk's slot on this stance — ~~never drawn, and its arrow always "not-offered"~~ before S9.
+                const menu = host.unavailableActions(actorId, foeId);
+                const why = menu.ring.find((entry) => (entry.group === "rank" || entry.group === "controller") && entry.type === type && !entry.available);
+                const walkVerb = { "walk-left": "walkleft", "walk-right": "walkright" }[type] ?? null;
+                const greyedButtons = buttons.filter((button) => button.reason && (button.slot === type || (walkVerb !== null && button.verb === walkVerb)));
+                if (why?.display === "grey") {
+                  tally.greyed += 1;
+                  assert.equal(greyedButtons.length, 1, `${where}: ${type} greyed (${why.reason}) is drawn ${greyedButtons.length} times`);
+                  assert.equal(greyedButtons[0].reason.code, why.reason, `${where}: ${type} carries the engine's reason`);
+                  assert.equal(ringSlotAt(buttons, greyedButtons[0].x, greyedButtons[0].y), greyedButtons[0].slot, `${where}: ${type} is under the pointer`);
+                  assert.deepEqual([keyed?.kind, keyed?.why, keyed?.entry?.reason?.code], ["ignore", "greyed", why.reason], `${where}: ${ARROW[type]} on a greyed move`);
+                } else {
+                  tally.hidden += 1;
+                  assert.equal(greyedButtons.length, 0, `${where}: ${type} withheld for ${why?.reason ?? "no entry"} is drawn`);
+                  assert.deepEqual(keyed, { kind: "ignore", why: "not-offered", move: type }, `${where}: ${ARROW[type]} on a withheld move`);
+                }
               }
             }
+            // To rounding (`EPS`, as the edge slice's own acceptance): since S9 a GREYED swing stands in the
+            // slot beside which a walk the stance does not wire stands, and where the edge slice holds that
+            // walk the rest of the ring moves on by the least that clears it — exactly tangent (3v3 tricks
+            // seed 3 turn 78, red-1's optionE and walk-right, 5.3e-14 px short in floating point);
+            // ~~`>= a.r + b.r`~~ held only while that path was never reached.
             for (const a of buttons) {
               for (const b of buttons) {
-                if (a !== b) assert.ok(Math.hypot(a.x - b.x, a.y - b.y) >= a.r + b.r, `${where}: ${a.slot} overlaps ${b.slot}`);
+                if (a !== b) assert.ok(Math.hypot(a.x - b.x, a.y - b.y) >= a.r + b.r - EPS, `${where}: ${a.slot} overlaps ${b.slot}`);
               }
             }
             tally.selections += 1;
@@ -412,7 +477,7 @@ test("ACCEPTANCE, over whole bouts with every foe selected in turn, under the ar
   for (const needed of ["walk-left slot", "walk-right slot", "walk-left beside", "walk-right beside", "rank-back above-head", "rank-front below-feet"]) {
     assert.ok((placed.get(needed) ?? 0) > 0, `${needed} never happened: ${JSON.stringify([...placed])}`);
   }
-  assert.ok(tally.withheld > 0 && tally.offered > tally.selections && tally.teamCamera > 0, JSON.stringify(tally));
+  assert.ok(tally.withheld > 0 && tally.greyed > 0 && tally.hidden > 0 && tally.offered > tally.selections && tally.teamCamera > 0, JSON.stringify(tally));
   t.diagnostic(JSON.stringify({ ...tally, placed: Object.fromEntries([...placed].sort()) }));
 });
 
@@ -513,8 +578,11 @@ test("the shell draws the moves with the ring, off the acting fighter's DRAWN he
   assert.match(stage, /ringOrigins\.actor = \{ x: origin\.x, y: origin\.y, head: box\.y0, below: nameY \+ namePx \* 0\.5 \};/);
   const paint = functionBody("paintRing");
   assert.match(paint, /ringMoveButtonsAt\(ringView\.model, \{[^}]*centerX: placement\.x,[^}]*centerY: placement\.y,[^}]*unit: placement\.unit,[^}]*layout: ringButtonPack\?\.layout \?\? null,[^}]*head: ringOrigins\.actor\.head,[^}]*feet: ringOrigins\.actor\.below,[^}]*bounds: \{ top: stage\.y, bottom: stage\.y \+ stage\.height \}/);
-  // CODEX PASS 2: the whole ring, moves included, kept on the visible stage — the rectangle the frame is clipped to.
-  assert.match(paint, /const stage = stageClipRectFor\(fit\);/);
+  // CODEX PASS 2: the whole ring, moves included, kept on the visible stage — ~~the rectangle the frame is
+  // clipped to (`stageClipRectFor(fit)`)~~ RE-PINNED FOR D4 of the in-frame team HUD (2026-09-25): the stage
+  // left visible above the build's UI bar, where the bar is drawn (`ringBoundsFor`,
+  // `test/arena-combat-hud.test.js`) — the whole clipped stage let the rank-front arrow sit under the bar.
+  assert.match(paint, /const stage = ringBoundsFor\(fit, \{ barred: arenaScreenAvailable\(\) \}\);/);
   assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\(/, "the eight first, all kept on the stage");
   // ring2 "edge": with the fighter's drawn centre, so a walk the move would carry across him stays on his side.
   assert.match(paint, /\.\.\.ringMoveButtonsAt\([\s\S]*?\}\)\s*\], stage, \{ fighterX: placement\.x \}\);/);
@@ -552,11 +620,14 @@ test("the strip lists every move on the ring once, with its arrow key: a walk in
   const strip = functionBody("renderRingStrip");
   assert.match(strip, /model\.moves\.filter\(\(move\) => move\.place !== ""\)/, "moves no slot holds, after the eight");
   assert.match(strip, /model\.moves\.find\(\(move\) => move\.slot === slot\.slot\)\?\.key/, "a walk in its slot takes its arrow too");
-  assert.match(strip, /slotRow\.replaceChildren\([\s\S]*?\.\.\.unslotted\.map\(\(move\) => actionButton\(move\.action, \{ verb: move\.verb, keys: \[move\.key\] \}\)\)\)/,
+  // S9: a greyed move is listed in its place too (`greyButton`, pinned in `test/arena-ring-reasons.test.js`);
+  // ~~`unslotted.map((move) => actionButton(move.action, ...))`~~ listed only the moves that act.
+  assert.match(strip, /slotRow\.replaceChildren\([\s\S]*?\.\.\.unslotted\.map\(\(move\) => move\.action\s*\? actionButton\(move\.action, \{ verb: move\.verb, keys: \[move\.key\] \}\)/,
     "each move no slot holds is a strip button with its arrow, in the ring row");
   assert.match(strip, /hint\.textContent = RING_KEY_GLYPHS\[key\] \?\? key;/, "an arrow is written as the arrow");
   assert.match(strip, /button\.setAttribute\("", keys\.join\(""\)\);/);
   assert.ok(rawShell.includes('button.setAttribute("aria-keyshortcuts", keys.join(" "));'), "every key the button answers to, for a screen reader");
-  assert.ok(rawShell.includes("`${filled.length + unslotted.length} on the ring"), "a turn's announcement counts the moves on the ring");
+  // S9: counting only the moves that ACT, as `unslotted` now holds the greyed ones too; ~~`filled.length + unslotted.length`~~.
+  assert.ok(rawShell.includes("`${filled.length + unslotted.filter((move) => move.action).length} on the ring"), "a turn's announcement counts the moves on the ring");
   assert.ok(rawShell.includes('model.moves.filter((move) => move.place !== "slot")'));
 });

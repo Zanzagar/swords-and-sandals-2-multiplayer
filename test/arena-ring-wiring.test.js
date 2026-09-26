@@ -68,9 +68,10 @@ test("a click, a key and a strip button all act through actFromRing, which re-as
   assert.match(act, /if \(!current\.ready\) return;/, "nothing is sent while the arena is still drawing");
   assert.equal((code.match(/host\.submit\(/g) ?? []).length, 3, "the raw buttons, the AI seat, and the ring — no fourth route");
   assert.match(code, /ringSlotAt\(ringButtons, point\.x, point\.y\)/);
-  // S7: a click presses through the confirm gate (`pressRing` -> `runRingCommand` -> `actFromRing` on
-  // an "act"), ~~`actFromRing` directly~~; `test/arena-ring-preview.test.js` pins the gate.
-  assert.match(code, /pressRing\(ringActionFor\(ringView\.model, slot\)\)/);
+  // S7: a click presses through the confirm gate (`runRingCommand` -> `actFromRing` on an "act"),
+  // ~~`actFromRing` directly~~; `test/arena-ring-preview.test.js` pins the gate. S9: the click's command is
+  // `ringClickCommand`'s — the key's road, which greys a greyed button — ~~`pressRing(ringActionFor(...))`~~.
+  assert.match(code, /runRingCommand\(ringClickCommand\(ringView\.model, slot, \{ confirm: ringConfirm \}\)\)/);
   assert.match(code, /foeAt\(fighterBoxes, point\.x, point\.y, ringView\.model\.foeIds\)/);
   assert.match(code, /const command = ringKeyCommand\(ringView\.model, \{/);
   assert.match(code, /if \(command\.kind === ""\) actFromRing\(command\.action\);/);
@@ -98,4 +99,17 @@ test("every name the shell imports is exported by the module it names — the ri
       assert.ok(name in module, `${source} exports ${name}`);
     }
   }
+});
+
+test("a rebuilt ring clears the stage's hit-test set, so a click before the next paint hits no button of the OLD ring", () => {
+  // Found by the follow-up run's write-nothing verifier (2026-09-24, wf_4a7d3b65-6c7): `ringButtons` is set
+  // only in `paintRing`, but Tab (`selectRingFoe` -> `renderControls`) replaces `ringView.model` at once — so
+  // a click between a target change and the next paint hit-tested the PREVIOUS frame's discs against the NEW
+  // model, and a click on a disc greyed in the new model could send its action. Mutation that breaks this
+  // test: delete `ringButtons = [];` from `renderControls`.
+  const controls = functionBody("renderControls");
+  const reset = controls.indexOf("ringView = null;");
+  assert.ok(reset >= 0, "renderControls resets the ring view");
+  assert.match(controls.slice(reset, reset + 200), /^ringView = null;\s*ringButtons = \[\];/,
+    "the hit-test set is cleared together with the ring view");
 });

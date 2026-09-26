@@ -28,9 +28,16 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-24 04:53 — the stranded work is merged, and the night is running](docs/handoffs/2026-09-24-0453--the-stranded-work-is-merged-and-the-night-is-running.md)**
-(a MID-SESSION checkpoint of session `b64d8f55`, written while the overnight
-run wf_b7145bd6-967 builds in four worktrees). Start there. *(It supersedes
+[2026-09-25 23:40 — the HUD is in the frame](docs/handoffs/2026-09-25-2340--the-hud-is-in-the-frame.md)**
+(session `5bb96879`). Start there. *(It supersedes
+[2026-09-24 14:50 — the team HUD is built, and the gate waits](docs/handoffs/2026-09-24-1450--the-team-hud-is-built-and-the-gate-waits.md),
+**whose item 1 (the gate) is on harness main but NOT adopted by SS2 — two new Codex findings must land
+first — and whose item 2 (ring3) is not started.**)* *(That one supersedes
+[2026-09-24 11:48 — the night merged, and the HUD is decided](docs/handoffs/2026-09-24-1148--the-night-merged-and-the-hud-is-decided.md),
+**whose in-flight items 1-2 are MERGED, item 3 (the gate) is BUILT BUT NOT
+ADOPTED, and item 4 (ring3) is not started.**)* *(That one supersedes
+[2026-09-24 04:53 — the stranded work is merged, and the night is running](docs/handoffs/2026-09-24-0453--the-stranded-work-is-merged-and-the-night-is-running.md),
+**whose overnight run is ALL MERGED.**)* *(That one supersedes
 [2026-09-23 21:19 — the arena draws what the engine does](docs/handoffs/2026-09-23-2119--the-arena-draws-what-the-engine-does.md),
 **whose session `c62c201f` ran on after it, then ran out of context with five
 implementers finished-unmerged and no handoff — all five are now merged
@@ -3396,7 +3403,8 @@ has been started:)*
 [2026-09-10 12:12 — everything is pushed, and the Workflow gate is gone](docs/handoffs/2026-09-10-1212--everything-is-pushed-and-the-workflow-gate-is-gone.md).**
 Start there — it is SHORT, and it carries only what changed. **Nothing is
 unpushed for the first time in three sessions.** No code changed; the one thing
-that binds you is that `Workflow` is no longer in `permissions.ask`, so a
+that binds you is that `Workflow` is no longer in `permissions.ask` *(re-added
+by the owner 2026-09-24 — see the corrected block on the `Workflow` gate below)*, so a
 fan-out wave starts with no dialog and **you must say what it will spawn before
 launching it.** Its ranked list is unchanged and points at the brief below,
 which is still the work.
@@ -3428,7 +3436,15 @@ forbids the one behaviour all five designs were built around.
   number in the living head, where it can be corrected.** As of 2026-09-09,
   eight commits are unpushed and the tree is clean at `79cc325`.
 
-► **THE `Workflow` PERMISSION GATE IS GONE — owner's decision, 2026-09-09.**
+► **CORRECTED 2026-09-24: `Workflow` IS BACK IN `permissions.ask` — the owner
+  re-added it in chat ("fulfill the requests that you could not auto accept from
+  the agent on the remote machine and need my word for"), on a peer session's
+  request: it is ADR 0001's owner-approves-each-wave layer, carried by every
+  other repository that adopted the set. The dialog is IN ADDITION to what the
+  paragraph below says still binds — the hard cap, one wave at a time, and the
+  spawn count stated in the transcript first — none of which is withdrawn.
+  `.claude/settings.json`'s `_ss2_workflow` records both decisions.**
+  ~~**THE `Workflow` PERMISSION GATE IS GONE — owner's decision, 2026-09-09.**~~
   `.claude/settings.json` no longer lists `Workflow` in `permissions.ask`, so a
   fan-out wave now starts with no confirmation dialog. **The reasoning, because
   it changes what you must do rather than only what you may do: the dialog

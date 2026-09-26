@@ -222,8 +222,9 @@ export const PACKS = Object.freeze([
     after: [],
     reader: "tools/arena",
     arena: true,
-    unlocks: "the faces (eyes and mouth) and the damage, spell and BLOCK pop-up art",
-    without: "a blank face and plain-number pop-ups"
+    unlocks: "the faces (eyes and mouth), the damage, spell and BLOCK pop-up art, the action buttons, " +
+      "the fight's own health, energy and armour gauges, and its crowd bar",
+    without: "a blank face, plain-number pop-ups, and authored action buttons, gauges and crowd bar"
   },
   {
     name: "text",

@@ -437,7 +437,8 @@ test("over whole bouts, with every foe selected in turn: each slot holds what th
             const rowItems = [...new Map(model.items.filter((item) => item.action).map((item) => [identity(item.action), item.action])).values()];
             const shown = [
               ...model.slots.filter((slot) => slot.action).map((slot) => slot.action),
-              ...model.moves.filter((move) => move.place !== "slot").map((move) => move.action),
+              // S9: a greyed move sends nothing; only the ones that act are the offer's.
+              ...model.moves.filter((move) => move.place !== "slot" && move.action).map((move) => move.action),
               ...(model.swap ? [model.swap.action] : []),
               ...rowItems,
               ...model.offRing.map((entry) => entry.action)

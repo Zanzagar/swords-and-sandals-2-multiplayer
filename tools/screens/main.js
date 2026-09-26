@@ -1268,15 +1268,24 @@ function paintOne(ctx, operation, tally) {
   //   cutter's matrix is composed in the SAME space as the shape's and not
   //   inside it. Setting it afterwards clips a glow by a mask already moved
   //   by the glow's own placement — a plausible picture, and the wrong one.
-  if (operation.clip && typeof operation.clip.d === "string") {
+  //
+  // ► **ONLY THE TRANSFORM IS PUT BACK AFTER `clip()`, NEVER THE DRAWING
+  //   STATE.** ~~`save()`, transform, `clip()`, `restore()`, and count it~~
+  //   until 2026-09-24: the clipping region IS drawing state, `restore()`
+  //   popped it before the fill, every masked operation was painted UNCLIPPED
+  //   and "clips applied" counted clips that applied to nothing (found by the
+  //   arena's in-frame HUD, wave 1; D7). The clip now lives in the `save()`
+  //   above and ends at the `restore()` below, and it is COUNTED below, only
+  //   once something was painted under it. `test/arena-layer-clip.test.js`.
+  const clipped = Boolean(operation.clip && typeof operation.clip.d === "string");
+  if (clipped) {
     const c = Array.isArray(operation.clip.matrix) && operation.clip.matrix.length === 6
       ? operation.clip.matrix
       : [1, 0, 0, 1, 0, 0];
-    ctx.save();
+    const layerSpace = ctx.getTransform();
     ctx.transform(c[0], c[1], c[2], c[3], c[4] / TWIPS_PER_PIXEL, c[5] / TWIPS_PER_PIXEL);
     ctx.clip(path2dFor(operation.clip.d), "evenodd");
-    ctx.restore();
-    tally.clipsApplied += 1;
+    ctx.setTransform(layerSpace);
   }
   ctx.transform(
     matrix[0], matrix[1], matrix[2], matrix[3],
@@ -1352,8 +1361,10 @@ function paintOne(ctx, operation, tally) {
 
   ctx.globalAlpha = 1;
   ctx.restore();
-  if (painted) tally.painted += 1;
-  else {
+  if (painted) {
+    tally.painted += 1;
+    if (clipped) tally.clipsApplied += 1;
+  } else {
     tally.drewNothing += 1;
     tally.reasons[reason] += 1;
   }

@@ -30,7 +30,11 @@ import {
   SS2_CAMERA,
   SS2_CLOSE_UP,
   SS2_TEAM_FRAMING,
-  arenaToStage
+  SS2_ARENA_SCREEN_LAYERS,
+  SS2_ARENA_WALL_BASE,
+  arenaToStage,
+  layerPlacementFor,
+  namePlateDepthAt
 } from "../src/render/arena-backdrop.js";
 import { ADVANCE_UNITS } from "../src/render/timeline.js";
 
@@ -140,7 +144,11 @@ test("ONE WINNER IS FRAMED ALONE, AND THE CLOSE-UP TAKES HIM TO THE OWNER'S CAP 
   assert.equal(groundLineAt(camera), 366.75);
   const plate = arenaToStage(camera, { x: -380, y: 200, lift: -SS2_CLOSE_UP.namePlateDrop }).y;
   assert.equal(plate, 388.75, "the name plate's baseline, 22 units under the feet");
-  assert.ok(plate + 0.3 * 15 <= SS2_CLOSE_UP.visible.bottom, `the plate's descent reaches ${plate + 4.5}`);
+  // ~~`plate + 0.3 * 15`~~: the glyph alone. The plate's ink reaches its
+  // outline too — 6.3px under the baseline at 15px (`namePlateDepthAt`).
+  const ink = groundLineAt(camera) + namePlateDepthAt(1);
+  assert.ok(ink <= SS2_CLOSE_UP.visible.bottom, `the plate's ink reaches ${ink}`);
+  assert.ok(Math.abs(ink - 395.05) < 1e-9, `395.05, 2.95px above the bar's plate: ${ink}`);
 });
 
 test("a winner in the BACK rank is held below the cap by his own crown", () => {
@@ -812,4 +820,64 @@ test("A LONE FLANK WALKING FURTHER OUT: the zoom drawn holds him from both sides
   }
   assert.ok(engagements <= 1, `the hold engaged ${engagements} times`);
   assert.equal(state.closeUp, true);
+});
+
+/* ---------------------------------------------------------------- */
+/* The close-up keeps every framed rank on the floor                  */
+/* ---------------------------------------------------------------- */
+
+/** How far each framed fighter's feet stand below the foot of each arena's painted wall, at this camera. */
+function wallClearances(camera, framed) {
+  const crowd = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.prop === "crowd");
+  const out = [];
+  for (const actor of framed) {
+    const depths = [actor.y ?? 200, actor.yMin, actor.yMax].filter(Number.isFinite);
+    for (const wall of SS2_ARENA_WALL_BASE) {
+      // The painter's own route to the wall: the crowd layer's placement, which
+      // follows the camera's `crowdY`, plus that arena's measured foot.
+      const foot = layerPlacementFor(crowd, camera).y + wall.crowdY;
+      for (const y of depths) {
+        out.push({ id: actor.id, arena: wall.arena, y, clearance: arenaToStage(camera, { x: actor.x, y }).y - foot });
+      }
+    }
+  }
+  return out;
+}
+
+test("THE SURVIVORS' CLOSE-UP KEEPS EVERY FRAMED RANK ON THE FLOOR: a small back-ranker no longer stands in arena 5's wall", () => {
+  // The defect, found by the HUD's camera study (2026-09-24) and re-measured
+  // here before the fix: a 2v2 down one, three framed on the team framing, the
+  // back-ranker (y 6) shrunk to `_yscale` 50 by little fat kid (item 33, the
+  // `crowd` kit's). His crown no longer binds, so the close-up took the camera
+  // to 97 — and at 97 the back rank's feet stood 17.39px INSIDE arena 5's wall.
+  // `SS2_CLOSE_UP.zoomCap` is 100 and the old sweep stopped at the build's 80.
+  //
+  // Worked by hand: on the team framing the back rank (y 6, drawn at 103)
+  // stands at 293.48 + 0.4 ceil z - 0.97 z; arena 5's wall foot is at
+  // 166.75 - 200 + ceil z + 191.83. At least 5px between them holds to z 82
+  // (6.16px) and fails at 83 (4.59px).
+  const roster = [
+    { id: "a0", x: -40, y: 200, yscale: 86, side: "A", teamId: "A", alive: true },
+    { id: "a1", x: -60, y: 6, yscale: 50, side: "A", teamId: "A", alive: true },
+    { id: "b0", x: 40, y: 200, yscale: 86, side: "B", teamId: "B", alive: false, drawing: false },
+    { id: "b1", x: 60, y: 200, yscale: 86, side: "B", teamId: "B", alive: true }
+  ];
+  let state = null;
+  let peak = 0;
+  for (let frame = 0; frame < 400; frame += 1) {
+    state = stepFramedCamera(state, roster);
+    peak = Math.max(peak, state.camera.zoomscale);
+    for (const { id, arena, y, clearance } of wallClearances(state.camera, state.framed)) {
+      assert.ok(clearance >= SS2_CLOSE_UP.wallMargin,
+        `frame ${frame} at zoom ${state.camera.zoomscale}: ${id} (y ${y}) stands ${clearance.toFixed(2)}px below arena ${arena}'s wall foot`);
+    }
+  }
+  assert.equal(state.closeUp, true, "the close-up still drives");
+  assert.equal(state.camera.teamWeight, 1);
+  assert.equal(state.camera.zoomscale, 82, "as close as the back rank allows");
+  assert.equal(peak, 82);
+  assert.equal(closeUpZoomFor(state.framed, { teamWeights: [1] }), 82);
+  // In the FRONT rank the same three close in past it: only the back rank binds.
+  const front = state.framed.map((actor) => ({ ...actor, y: 200 }));
+  assert.ok(closeUpZoomFor(front, { teamWeights: [1] }) > 82);
 });

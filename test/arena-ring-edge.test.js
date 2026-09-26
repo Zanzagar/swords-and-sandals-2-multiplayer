@@ -229,20 +229,25 @@ test("THE ARENA'S OWN CASE: 2v2 tricks seed 3, red-2 drawn 19.16 px from the sta
   assert.deepEqual(ringActionFor(model, ringSlotAt(buttons, walk.x, walk.y)), { type: "walk-left", targetId: "red-2", actorId: "red-2" });
 });
 
-test("CODEX PASS 1: the walk held flush with the edge keeps its key label on the stage — under it, slid onto the stage, clear of every button", () => {
+test("CODEX PASS 1: the walk held flush with the edge keeps its key label on the stage — ~~under it~~ over it (S9), slid onto the stage, clear of every button", () => {
   // The same turn. Held at x 13.82 (its radius), optionB's label on the ring's outer side would end at
   // 13.82 - 13.82 - 3 = -3: wholly off the stage, "2 Walk" and all (Codex, pass 1; before this slice it
-  // ended at 11.07, its digit already cut). Nothing is drawn under it — optionG and the swap are 57 px
-  // lower — so it goes there: y 221.61 + 13.82 + 3 + 4.5 = 242.94, centred, slid right until its left
-  // end is on the stage's (x 15 for a label 30 px wide, about what "2 Walk" measures at 9 px).
+  // ended at 11.07, its digit already cut). ~~Nothing is drawn under it — optionG and the swap are 57 px
+  // lower — so it goes there: y 221.61 + 13.82 + 3 + 4.5 = 242.94~~ — S9 draws the taunt red-2 may not
+  // throw at blue-1 (another rank, `other-rank`) GREYED in optionC, 30.24 px under it, and a label under
+  // the walk would cross it. So it goes over it: y 221.61 - 13.82 - 3 - 4.5 = 200.29, centred, slid
+  // right until its left end is on the stage's (x 15 for a label 30 px wide, about what "2 Walk"
+  // measures at 9 px).
   const host = played(demoHost({ perSide: 2, seed: 3, kit: "tricks" }), 18);
   const model = modelOf(host, "blue-1");
   const { buttons, stage } = arenaButtons(host, model);
   const walk = buttons.find((button) => button.slot === "optionB");
   const { px, gap } = ringLabelSizeFor(walk.r);
   assert.deepEqual([px, gap], [9, 3]);
+  const taunt = buttons.find((button) => button.slot === "optionC");
+  assert.deepEqual([taunt.verb, taunt.reason?.code, round(taunt.y - walk.y)], ["taunt", "other-rank", 30.24], "S9: the greyed taunt under it");
   const label = ringLabelAt(walk, buttons, { width: 30, height: px, gap }, { stage });
-  assert.deepEqual([label.align, round(label.x), round(label.y)], ["center", 15, 242.94]);
+  assert.deepEqual([label.align, round(label.x), round(label.y)], ["center", 15, 200.29]);
   const box = { x0: label.x - 15, x1: label.x + 15, y0: label.y - px / 2, y1: label.y + px / 2 };
   assert.ok(box.x0 >= stage.x && box.x1 <= stage.x + stage.width && box.y0 >= stage.y && box.y1 <= stage.y + stage.height, JSON.stringify(box));
   for (const other of buttons) {
@@ -334,9 +339,11 @@ test("ACCEPTANCE, over whole bouts with every foe selected in turn, under the ar
             // walk this slice holds at the edge keeps its label on the stage (Codex, pass 1); none
             // crosses a button; no two overlap. (A label with no free place on the stage keeps its
             // old one, past the edge, as before this slice: a column within a label's width of the
-            // edge but not moved, e.g. 3v3 tricks seed 1 turn 104, red-2's optionE.)
+            // edge but not moved, e.g. 3v3 tricks seed 1 turn 104, red-2's optionE.) S9: a GREYED button
+            // carries no label either, as `paintRing` draws none for it — ~~every button but a move~~ —
+            // but it is drawn, so no label may cross it.
             const labelled = [];
-            for (const button of buttons.filter((candidate) => !candidate.move)) {
+            for (const button of buttons.filter((candidate) => !candidate.move && !candidate.reason)) {
               const { px, gap } = ringLabelSizeFor(button.r);
               const size = { width: button.verb === "item" ? px * 0.6 : px * 0.55 * 7, height: px, gap };
               const box = ringLabelBoxOf(ringLabelAt(button, buttons, size, { stage, taken: labelled }), size);

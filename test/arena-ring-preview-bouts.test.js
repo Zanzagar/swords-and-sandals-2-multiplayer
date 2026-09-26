@@ -18,12 +18,12 @@ import test from "node:test";
 
 import { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
 import { rngJournal } from "../src/team/resolver.js";
-import { ss2BattleValues, ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
+import { SS2_UNAVAILABLE_REASONS, ss2BattleValues, ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
 import { demoItemsFrom, demoSide } from "../tools/arena/roster.js";
 import { seatControllersFrom, seatTurnFor, withSeatControllers } from "../tools/arena/seats.js";
-import { ringActionFor, ringConfirmCommand, ringEntries, ringKeyCommand, ringModelFor, ringPendingFor, ringPendingKept, ringPressCommand } from "../tools/arena/ring.js";
+import { ringActionFor, ringConfirmCommand, ringEntries, ringKeyCommand, ringModelFor, ringPendingFor, ringPendingKept, ringPressCommand, ringShownFor } from "../tools/arena/ring.js";
 import { ringButtonsAt, ringButtonsInside, ringItemButtonsAt, ringMoveButtonsAt, ringSlotAt, ringSwapButtonAt } from "../tools/arena/ring-layout.js";
-import { ringOddsFor, ringPreviewFor } from "../tools/arena/ring-preview.js";
+import { ringOddsFor, ringPreviewFor, ringShownText } from "../tools/arena/ring-preview.js";
 
 const deps = { ss2Combatant, ss2BattleValues };
 
@@ -82,7 +82,7 @@ function statedIn(text) {
 }
 
 test("ACCEPTANCE: every hover shows host.previewAction for the button under the pointer, and the odds are the offer's rolls at the selected foe", (t) => {
-  const tally = { bouts: 0, turns: 0, selections: 0, hovered: 0, listed: 0, withChance: 0, certain: 0, wasted: 0, oddsLines: 0, odds: 0 };
+  const tally = { bouts: 0, turns: 0, selections: 0, hovered: 0, greyedHovered: 0, listed: 0, withChance: 0, certain: 0, wasted: 0, oddsLines: 0, odds: 0 };
   for (const perSide of [1, 3]) {
     for (const kit of ["", "tricks", "blasts", "crowd"]) {
       for (const seed of [1, 2]) {
@@ -123,6 +123,15 @@ test("ACCEPTANCE: every hover shows host.previewAction for the button under the 
             for (const button of buttons) {
               const slot = ringSlotAt(buttons, button.x, button.y);
               assert.equal(slot, button.slot, "the pointer on a button's centre is on that button");
+              // S9: a GREYED button is drawn too, and the pointer on it shows why — the engine's own words
+              // for its reason — and no preview: it sends nothing. ~~Every drawn button previews~~ before S9.
+              if (button.reason) {
+                assert.equal(ringActionFor(model, slot), null, `${slot}: greyed, it sends nothing`);
+                const text = ringShownText(ringShownFor(model, slot), () => "a preview", { nameOf });
+                assert.ok(text.endsWith(` — not now: ${SS2_UNAVAILABLE_REASONS[button.reason.code].says}`), `${slot}: ${text}`);
+                tally.greyedHovered += 1;
+                continue;
+              }
               check(ringActionFor(model, slot), slot);
               tally.hovered += 1;
             }
@@ -158,7 +167,7 @@ test("ACCEPTANCE: every hover shows host.previewAction for the button under the 
     }
   }
   assert.equal(tally.bouts, 16);
-  assert.ok(tally.withChance > 0 && tally.certain > 0 && tally.wasted > 0 && tally.odds > 0, JSON.stringify(tally));
+  assert.ok(tally.withChance > 0 && tally.certain > 0 && tally.wasted > 0 && tally.odds > 0 && tally.greyedHovered > 0, JSON.stringify(tally));
   t.diagnostic(JSON.stringify(tally));
 });
 
@@ -171,9 +180,11 @@ test("ACCEPTANCE: every hover shows host.previewAction for the button under the 
  * the COMMAND the press made (never sent here).
  */
 function pressWithConfirm(model, { click = false } = {}) {
-  const attack = model.slots.find((slot) => /attack|snipe|bombard|bash/.test(slot.verb ?? ""));
+  // S9: a greyed slot or move shows its verb and sends nothing, so the policy takes only what ACTS;
+  // ~~any slot showing the verb~~ was the same thing before S9.
+  const attack = model.slots.find((slot) => slot.action && /attack|snipe|bombard|bash/.test(slot.verb ?? ""));
   const spell = model.items.find((item) => item.action?.type.startsWith("cast-") && item.action.targetId === model.selectedId);
-  const toward = model.moves.find((move) => move.move === (model.stance?.facing === "left" ? "walk-left" : "walk-right"));
+  const toward = model.moves.find((move) => move.action && move.move === (model.stance?.facing === "left" ? "walk-left" : "walk-right"));
   const any = model.slots.find((slot) => slot.action);
   const [via, pick] = attack ? ["key", attack] : spell ? ["letter", spell] : toward ? ["arrow", toward] : any ? ["key", any] : ["list", null];
   if (!pick) return { via, command: ringPressCommand(model.offRing[0]?.action ?? null, { confirm: true }) };
