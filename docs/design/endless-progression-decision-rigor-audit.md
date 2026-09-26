@@ -4150,6 +4150,141 @@ burden, and the risk that overlap seeking becomes the obvious premium route.
 A stronger rule requiring every Relic or every stance to expose exact reuse is
 a replacement path, not part of B.
 
+The owner selected `RCS-03C3C3C1-B`. Thus
+`E^{resolved-exact}_v` is nonempty: at least one reachable actual evaluation
+and lawful complete bound routing stance selects one authoritative tuple whose
+ledgers reuse the same canonical final child across an unordered pair of
+distinct receipt tags. This makes exact reuse operative routing space while
+granting no joint-survival permission or downstream result. C1 moves to
+`DIR-SELECTED`.
+
+A bounded read-only named-claim audit then attacked the planned direct C2
+empty/universal/selective card. Its initial repair separated participant
+configurability, stochastic support, and permission incidence, but a focused
+countermodel challenge broke that repair as still overcompressed. Four
+independent analysis paragraphs exposed five prerequisite boundaries before
+incidence could be asked.
+
+First, two prospectively bindable participant settings can produce different
+permission laws for the same exact selected pair. Whether any, every, or only
+some exact-exposure-capable versioned contracts support that material control
+is not holder, consent, disclosure, or lock timing. Repository precedent at
+RCS-03C2A and B3A likewise decides whether a semantic control exists before
+RCS-02 assigns actors/information and RCS-13 assigns binding horizons.
+
+Second, participant permission force can be inseparably carried by an existing
+whole routing stance or exposed as an independently recombinable permission
+coordinate. In the coupled case, a player cannot combine Chorus routing with
+Severance permission; in the independent case, routing may remain fixed while
+Concord versus Severance changes the law. Splitting a coupled value across two
+UI controls with only one-to-one legal pairings changes no topology. The
+representation-invariant separator is whether permission may vary while the
+complete routing orientation remains fixed.
+
+Third, a finite authored menu of whole permission orientations and a bounded
+constructive permission language expose materially different legal actions and
+solver, identity, migration, UI, and exploit surfaces. This remains true when
+the permission component is coupled one-to-one with a whole routing stance.
+Fourth, participant-authored context branching is a separate conditional
+choice beyond constructive support, just as it was for routing.
+
+Fifth, a complete bound permission law can remain stochastic after every
+nonrandom semantic input and prospective setting is fixed. If its allow
+probability on the same resolved exact opportunity is strictly between zero
+and one, no deterministic pre-draw set-membership bit exists. B4A-A made the
+ledger selector deterministic only. Calling random permission “selective”
+would erase player-visible planning and replay consequences.
+
+The twenty-fifth prerequisite correction therefore makes old C2 a
+non-counting parent for six registered rows: C2A participant permission-
+configurability prevalence; conditional C2B independently recombinable
+permission-coordinate prevalence; conditional C2C1 constructive permission-
+language prevalence; conditional C2C2 participant-composed context branching;
+C2D stochastic support across canonical complete bound permission laws; and
+C2E exact-form permission incidence after the law denominator is settled.
+
+Their order is load-bearing. C2A-A prunes C2B/C2C1/C2C2 and activates C2D;
+C2A-B/C activates C2B. Every C2B answer then activates C2C1 because coupled
+versus independent control does not decide how the permission component was
+legally authored. C2C1-A prunes C2C2 and activates C2D; C2C1-B/C activates
+C2C2, whose answer then activates C2D. C2D precedes C2E, and C2E precedes D1.
+C2E requires its own post-C2D prerequisite audit because stochastic support
+and certainty cannot reuse the deterministic empty/universal/nonempty-proper
+wording without proof.
+
+For one canonical complete bound permission law `w` and one reachable exposed
+exact opportunity `o`, `pi_w(o)` denotes allow probability after all nonrandom
+inputs and prospective settings are fixed. Stochastic capability means some
+reachable `o` has `0 < pi_w(o) < 1`. A law may draw once inside automatic
+cut-atomic treatment; callback, reload, reconnect, or replay cannot redraw it.
+The same hybrid exact-and-related pair receives one `pi_w(o)` and one realized
+permission bit. Permission denial cannot cause tuple retry or ledger
+substitution, and a false bit still says only “not both”; E/F or H/I owns the
+result disposition.
+
+The first six-row draft failed its strict read-only adversarial diff review in
+two places and was corrected before commit. First, it claimed that C2B-A could
+prune permission-language rows because B3B1-A makes routing stances closed.
+That inference was invalid. A participant can construct a permission policy,
+pair each resulting policy one-to-one with a different indivisible authored
+routing stance, and never receive a permission coordinate that varies while
+routing stays fixed. The routing language remains closed, C2B still answers
+coupled-only, yet the permission language is genuinely constructive and may
+contain participant-authored branches. C2C1 must therefore classify all
+participant-configurable permission forces after C2B, not only independent
+coordinates.
+
+Second, `pi_w(o)` describes one pair marginal and cannot settle joint draws
+across several distinct simultaneous pair opportunities. With three tags,
+two pair bits can each be 50/50 while either sharing one coin or drawing
+independently; their marginals match but their feasible survivor sets differ.
+Old G is therefore a non-counting parent for G1 three-plus contender support
+and conditional G2 joint stochastic permission-draw coupling. G2 receives a
+card only if G1 is positive and the already-settled exact/related laws provide
+at least two nonconstant pair marginals in one reachable evaluation; otherwise
+it prunes or derives. A hybrid exact-and-related pair remains one pair and one
+draw. H follows applicable G2.
+
+After the ordinary C1-B transition, the unsplit eighty-one-row register would
+contain 34 `SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`, 32 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. Replacing the one open
+C2 row with six registered children adds five rows and five unresolved
+potentials. Replacing old G with G1/G2 adds one further row and potential. The
+corrected register therefore has **eighty-seven rows**: 40
+`SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`, 32 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 41`. C2A is the sole active card.
+
+C2A is now prerequisite-ready. Let `S^{exact-perm}_v` be the nonempty set of
+supported versioned Relic treatment contracts with at least one reachable
+exposed exact pair. Let `P^{exact-perm-config}_v` contain a contract when two
+lawful prospectively bindable participant settings give different complete
+permission laws on a matched exact pair while version, Relic, actual
+evaluation facts, selected tuple, and unordered tag pair stay fixed. A setting
+that also serves as a routing stance counts only when it carries authored
+permission-control force and the same exact pair remains operative; merely
+routing to a different tuple does not count.
+
+C2A-A makes that subset empty, so permission is intrinsic across every
+contract. C2A-B makes it all of `S^{exact-perm}_v`, requiring every contract
+to offer material prospective participant permission control. C2A-C makes it
+a nonempty proper subset, producing intrinsic and configurable contract
+classes. These are exhaustive empty/all/proper cases. None decides whether a
+complete law is deterministic, whether permission is eventually allowed, or
+who binds the setting.
+
+Recommend C2A-A. Whole routing stances already give players material control
+over whether exact reuse becomes the authoritative route. Making the later
+permission covenant intrinsic preserves distinct Relic/relationship identity,
+avoids a second approval layer and generic “allow doubles” optimization, and
+keeps team preview comprehensible. This card is neutral/protective rather than
+a new ideal realization; when later incidence permits the pair, the one-deed/
+two-relationship state can still be a direct local fit. A costs downstream
+agency and can make an exposed-but-denied route frustrating, so the intrinsic
+law must be disclosed causally and authored as meaningful rather than
+arbitrary. B supplies additional participant/Relic co-determination but makes
+the control dialect mandatory; C adds two contract dialects and a likely
+premium-configurability hierarchy.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

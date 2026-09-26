@@ -1,5 +1,61 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 authoritative exact-overlap route — RCS-03C3C3C1-B selected
+
+The owner selected `RCS-03C3C3C1-B`: at least one reachable actual evaluation
+and lawful complete bound routing stance selects an authoritative exact-overlap
+pair. The same canonical final child is therefore operative in two distinct
+receipt-tag ledgers somewhere in the completed catalog. This is exposure only;
+it grants no joint-survival permission, candidate, commitment, claim,
+consumption, payoff, or retry.
+
+A bounded read-only named-claim audit and a focused challenge to its first
+repair found that old C2's empty/universal/selective card was not
+prerequisite-ready. It hid participant-configurability prevalence, whether
+permission is inseparable from the existing routing stance or independently
+recombinable, closed versus constructive permission language, conditional
+participant-authored branching, and deterministic versus stochastic complete
+permission laws. RCS-02 may later choose holder/consent/information and RCS-13
+may choose binding/lock timing, but neither can silently choose these local
+legal control topologies.
+
+Old C2 is now a non-counting parent for C2A participant configurability,
+conditional C2B coordinate independence, conditional C2C1 constructive
+language, conditional C2C2 context branching, C2D stochastic support, and C2E
+exact permission incidence. A complete bound permission law has one allow
+probability for one exposed pair; a hybrid exact-and-related pair never gets
+two form votes or draws. Live proc-time permission prompts remain invalid,
+draws cannot repeat on callback/reload/reconnect/replay, and denial cannot
+retry or reroute the selector.
+
+Strict read-only diff review then broke the first dependency draft: a
+constructive permission component may remain paired one-to-one with a closed
+routing stance, so coupled permission cannot prune the language/branching
+questions. The same review exposed joint stochastic coupling across several
+distinct simultaneous pair opportunities. Old G is now a non-counting parent
+for G1 three-plus support and conditional G2 cross-pair draw coupling; one
+hybrid pair remains one draw.
+
+The amended eighty-seven-slot register contains 40 `SCREEN`, 1 `OWNER-OPEN`, 10
+`PRUNED`, 32 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 41`. `RCS-03C3C3C2A` is the sole active card. The authoritative
+decision record remains unchanged.
+
+C2A asks whether a prospectively bound participant setting may change the
+permission law for the same held-fixed exact selected pair:
+
+- A: no contract permits that; permission is intrinsic to the authored
+  Relic/relationship. Recommend A because routing stances already give players
+  meaningful control over whether exact overlap is exposed, while a second
+  approval layer risks generic “allow doubles” optimization and UI burden.
+- B: every exact-exposure-capable contract supplies material participant
+  permission control. C2B later decides whether it is coupled or independent.
+- C: intrinsic and participant-configurable contract classes coexist.
+
+C2A does not decide randomness or whether any exact pair is ultimately
+permitted. Under A, the permission law may still vary by Relic, relationship,
+or factual context and may still be stochastic until C2D is answered.
+
 ## 2026-09-26 deterministic Relic routing — RCS-03C3C3B4A-A selected
 
 The owner selected `RCS-03C3C3B4A-A`: every canonical complete bound routing-
@@ -9761,7 +9817,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 06:02 UTC — deterministic Relic routing selected](docs/handoffs/2026-09-26-0602--relic-deterministic-routing-selected.md)**
+[2026-09-26 06:23 UTC — authoritative exact-overlap route selected](docs/handoffs/2026-09-26-0623--relic-exact-route-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
