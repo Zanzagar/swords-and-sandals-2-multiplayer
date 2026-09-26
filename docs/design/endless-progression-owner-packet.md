@@ -317,8 +317,11 @@ The owner selected RCS-03C3C3D1-B, requiring at least one authoritative
 distinct-related route. A thirtieth prerequisite correction separates the
 remaining related-only permission authority, coordinate, language, branching,
 randomness, and final form-wide incidence boundaries while preserving one-bit
-hybrid inheritance. RCS-03C3C3D2A is the current owner-facing choice under
-SR-03.
+hybrid inheritance. The owner then selected RCS-03C3C3D2A-A: no participant
+setting changes permission on a matched related-only opportunity, so D2B,
+D2C1, and D2C2 prune. A three-angle prerequisite audit upheld D2D as one
+empty-aware residual stochastic-support card. RCS-03C3C3D2D is the current
+owner-facing choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -22817,11 +22820,11 @@ presentation. The authoritative decision record remains unchanged.
 > two distinct simultaneous pair opportunities have nonconstant marginals.
 >
 > Replacing one counted D2 row with six adds five slots and five unresolved
-> potentials. The register now contains **94 rows: 38 `SCREEN`, 1
+> potentials. At that checkpoint the register contained **94 rows: 38 `SCREEN`, 1
 > `OWNER-OPEN`, 13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
-> `EVALUATE`; `Phi_SR = 39`**. D2A is the sole presented card.
+> `EVALUATE`; `Phi_SR = 39`**. D2A was the sole presented card.
 
-### RCS-03C3C3D2A — participant configurability of related-only permission — active owner choice
+### RCS-03C3C3D2A — participant configurability of related-only permission — direction selected
 
 D1-B guarantees some selected distinct-related pair. Hybrids already inherit
 participant-intrinsic exact permission, so D2A classifies only the remaining
@@ -22869,6 +22872,132 @@ would contain 37 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 39 `DIR-SELECTED`, 2
 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. A stronger promise that
 every related-only opportunity is configurable is a replacement path, not
 hidden inside B.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **A, no
+participant-configurable related-only permission.**
+`P^{rel-only-perm-config}_v=∅`. There is no matched reachable `q∈Q_v` and pair
+of lawful prospectively bindable participant settings that change its complete
+permission law while the versioned Relic/relationship contract, actual
+evaluation facts, selected authoritative tuple, and unordered pair remain
+fixed. `Q_v` may be empty. Different Relics,
+relationships, and factual contexts may still carry different intrinsic laws,
+and this answer does not select determinism or incidence.
+
+Participants retain their selected ability to bind a finite whole-policy
+routing orientation; the resolver determines the proof relation from lawful
+inputs. D2A-A does not promise participant control over one matched form. It
+keeps related-only compatibility covenantal rather than adding a second
+approval optimizer. This is neutral/protective of the ideal at this boundary:
+an eventually permitted pair can still express distinct manifestations and one
+true causal unity directly. The costs are less downstream control, possible
+frustration under intrinsic refusal, and a heavier disclosure obligation.
+
+D2A moves to `DIR-SELECTED`; D2B, D2C1, and D2C2 move to `PRUNED`; D2D becomes
+the sole `OWNER-OPEN` row. The 94-row register now contains 34 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 39 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 35`. The authoritative decision record remains
+unchanged.
+
+The D2D prerequisite screen used three bounded read-only questions: the
+smallest representation-invariant stochastic topology, whether intrinsic
+chance could create fun rather than noise, and the exact timing/replay and
+downstream authority boundary. Two recommendation cross-challenges then
+attacked the only disagreement. The audits agreed that D2D is one
+prerequisite-ready card and needs no additional row.
+
+### RCS-03C3C3D2D — stochastic support across intrinsic related-only permission laws — active owner choice
+
+Let `W^{Q-perm-law}_v` contain each canonical complete intrinsic permission-
+law projection whose reachable related-only domain
+`O^Q_w={q∈Q_v : q is reachable under w}` is nonempty. If `Q_v=∅`, then
+`W^{Q-perm-law}_v=∅`. One canonical law contributes one projection; factual
+contexts, object instances, generated identifiers, callbacks, helper
+functions, eager versus delayed calculation, reload copies, and separate
+allow/deny handlers cannot multiply it.
+
+For `w∈W^{Q-perm-law}_v` and `q∈O^Q_w`, hold fixed the version and canonical
+contract/law, Relic and relationship identities, every prospective binding,
+any genuinely law-defining committed variant, selected authoritative tuple,
+unordered pair and proof relation, complete factual evaluation context, and
+every earlier committed authoritative state regardless of random origin. Let
+`pi^Q_w(q)` be the allow probability immediately before the earliest semantic
+realization that commits this permission bit. Pre-sampling that same bit into a
+cache one callback earlier does not turn it into prior state; a genuinely
+earlier persistent acquisition or transformation variant does.
+
+Define
+`G^{Q-perm-stoch}_v={w∈W^{Q-perm-law}_v : some q∈O^Q_w has
+0<pi^Q_w(q)<1}`.
+
+| Choice | Related-only stochastic-support rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — deterministic-only related-only laws** | `G^{Q-perm-stoch}_v=∅`; `W^{Q-perm-law}_v` and `Q_v` may be empty. Every extant complete related-only law projection returns a certain zero or one on every reachable fixed opportunity, although one law may return different certain bits in different factual contexts. | A is the safest coherent rule and the mandatory fallback if guarded C cannot be authored. It gives all exact, hybrid, and related-only treatment one deterministic covenant vocabulary, protecting coordination, replay trust, causal explanation, and policy comparison. Its ideal fit is **neutral/protective**: certainty helps players read the distinct children and their shared cause, but is not itself the unity-in-difference. Costs are less oracular suspense, easier solving, and pressure on contextual laws to supply all the texture. | **Stone Choir:** Twin Vow's distinct `Guard Pulse a` and `Riposte Mark b` share one nonmultiplying parent and no exact child. The intrinsic law certainly allows while visible Vow Integrity remains intact and certainly denies after it breaks. Repeating the same fixed opportunity never changes the bit. |
+| **B — every extant related-only law is stochastic-capable** | `W^{Q-perm-law}_v≠∅` and `G^{Q-perm-stoch}_v=W^{Q-perm-law}_v`. Every complete related-only projection has at least one reachable fixed opportunity with a nondegenerate permission draw. This does not require every opportunity under the law to roll. | B makes numinous uncertainty part of every related-only covenant and prevents the entire lane from becoming a solved lookup. But variance becomes a universal tax: no fully reliable related-only family exists, correct team play can still receive a false bit, and trust, explanation, simulation, and balance burdens apply everywhere. Randomness is only a **partial/expressive** ideal fit; a coin does not explain unity or distinction. | **Dreamglass catalog:** every complete related-only law has some visible Unsettled Resonance region—for illustration, one fixed `a/b` opportunity resolves 70/30—although authored endpoint contexts may still be certain. A catalog containing one wholly deterministic related-only law would violate B. |
+| **C — deterministic-only and stochastic-capable related-only laws coexist** | `∅⊊G^{Q-perm-stoch}_v⊊W^{Q-perm-law}_v`. At least one complete related-only projection is deterministic throughout its reachable `Q_v` domain and at least one distinct complete projection has a reachable nondegenerate draw. C therefore entails at least two related-only projections. Hybrid laws are outside this denominator and cannot supply C's deterministic comparator. | **Conditionally recommended.** C preserves reliable Witness covenants while permitting distinct Oracle covenants, making variance an optional catalog/build identity rather than B's universal tax. Its coexistence fit is **aggregate**; any direct local ideal expression comes from the distinct children and their real shared parent, not from randomness. The costs are two prediction dialects, exact/hybrid-versus-related-only asymmetry, variance-insurance routing pressure, team grief, and a premium-gamble balance trap. C carries the hard deferred validation obligation below and reopens with A if it fails. | **Stone Choir** supplies A's deterministic family. **Veiled Chorus** has one intrinsic, visible nondegenerate related-only region and one committed draw. Choosing the Oracle, managing exposure, and hedging a possible denial may support a risk policy; D2D does not require direct odds control or decide its payoff. |
+
+A/B/C are mutually exclusive and exhaustive. If `G` is empty, A holds,
+including `W=∅`. Otherwise `W` is nonempty and `G` is either all of `W` or a
+nonempty proper subset, producing B or C. A singleton deterministic law yields
+A; a singleton stochastic-capable law yields B; C requires at least two laws.
+One law random in one context and certain in another is one stochastic-capable
+law, not C. One law mapping different fixed contexts deterministically to zero
+and one remains deterministic.
+
+This classification follows semantic behavior, not implementation shape. A
+seeded generator may realize the one declared draw; an opaque deterministic
+hash of fixed authoritative inputs remains deterministic. Earlier random
+acquisition, transformation, or persisted variant selection is fixed state and
+cannot be averaged into a permission draw. Each `q` receives one committed
+realization. Duplicate callbacks, serialization, reload, reconnect, replay,
+denial, or routing fallback may not redraw it, retry the selector, or substitute
+another ledger. Exact-and-related hybrids remain intrinsic and deterministic
+under C2A-A/C2D-A and receive no related draw.
+
+D2A-A forbids a matched-case permission setting, direct odds slider, or any
+participant command whose sole semantic force is to change permission odds. A
+reroll is separately barred by the one-commit replay invariant. D2D does not
+select seed authority; any later seed rule may not create an outcome-shopping
+or redraw channel that defeats intrinsic one-commit semantics. This does not
+forbid one immutable intrinsic law from responding to different independently
+meaningful factual contexts; whether any stochastic law does so is not required
+here and remains part of D2E's fresh audit. Choosing a different Relic changes
+the contract rather than reconfiguring one held-fixed law.
+
+**C's deferred hard validation obligation:** in the applicable release scope,
+the required deterministic-only and stochastic-capable related-only families
+must each furnish a reachable, mechanically legible, viable, non-token build or
+policy purpose. The stochastic identity must be causally operative and
+materially change at least one truthful disclosed legal build or play policy;
+neither required family may be everywhere weakly dominated within the actual
+lawful build/route policy space. Plan-relevant risk must be understandable
+before the relevant irreversible choice and attributable afterward. An
+epsilon-probability showcase, outcome-equivalent coin, opaque gotcha,
+voluntary handicap, or raw-power package whose stochastic identity never
+changes a preferred policy does not qualify. Existing SR-05/SR-06/SR-09,
+RCS-02/SR-10, SR-12, and RCS-17/RCS-18 author and evaluate those requirements;
+D2D adds no new row and chooses no threshold. If either required family or
+their coexistence fails this obligation during later authoring and evaluation,
+reopen D2D with A as the bounded replacement rather than shipping token chance.
+
+D2D chooses no exact odds, randomizing context, actor, action-responsive
+condition, entropy source, seed visibility, pair-pair coupling, disclosure
+surface, form-wide incidence, survivor, substitute, compensation, payoff,
+rarity, release placement, or implementation. D2E receives its already-required
+fresh prerequisite audit; G2 alone owns correlation across two distinct
+simultaneous nonconstant pair marginals; E/F own a false bit's result and
+selection authority; RCS-15/RCS-16 own persistence, migration, idempotence, and
+fault repair.
+
+Any answer moves D2D to `DIR-SELECTED` and sends D2E through its fresh audit.
+Before any D2E amendment, B/C would leave 33 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 40 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 34`. A also immediately prunes G2 because exact, hybrid, and
+related-only pair-permission marginals would all be deterministic, leaving 32
+`SCREEN`, 1 `OWNER-OPEN`, 17 `PRUNED`, 40 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 33`. B/C do not activate G2: they establish
+neither a three-plus contender state nor two simultaneous nonconstant
+marginals. A stronger requirement that every related-only opportunity roll is
+a replacement path, not hidden inside B.
 
 ## Session protocol and evidence
 

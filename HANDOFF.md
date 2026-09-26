@@ -1,5 +1,62 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 intrinsic related-only permission — RCS-03C3C3D2A-A selected
+
+The owner selected `RCS-03C3C3D2A-A`. There is no matched reachable related-
+only opportunity and pair of lawful prospective participant settings that
+change its complete permission law while the versioned Relic/relationship
+contract, facts, authoritative tuple, and pair remain fixed. `Q_v` may be
+empty. Different contracts and factual contexts may still carry different
+intrinsic laws; this selects no determinism or incidence.
+
+D2A moves to `DIR-SELECTED`; D2B, D2C1, and D2C2 prune. Three bounded read-only
+audits tested D2D's mathematical topology, gameplay value, and integration
+boundary; two recommendation cross-challenges attacked their only disagreement.
+They upheld D2D as one empty-aware card with no hidden row.
+
+Let `W^{Q-perm-law}_v` contain canonical complete intrinsic permission-law
+projections with nonempty reachable related-only domains. It may be empty. Hold
+all prospective bindings, facts, selected tuple/pair/relation, genuine law-
+defining variants, and earlier committed authoritative state fixed. Let
+`G^{Q-perm-stoch}_v⊆W^{Q-perm-law}_v` contain projections with some reachable
+fixed opportunity whose allow probability remains strictly between zero and
+one immediately before the earliest semantic realization committing the bit.
+
+D2D is the sole presented card:
+
+- A: `G=∅`; all extant related-only law projections are deterministic, and
+  `W`/`Q_v` may be empty. This is the safest coherent option and C's mandatory
+  fallback. It gives all pair treatment one deterministic covenant vocabulary.
+- B: `W≠∅` and `G=W`; every extant related-only projection is stochastic-
+  capable somewhere, though not every opportunity rolls. This universalizes
+  variance and is not recommended.
+- C: `∅⊊G⊊W`; deterministic-only and stochastic-capable related-only
+  projections coexist. **Recommend C conditionally.** It supports reliable
+  Witness and optional Oracle Relics rather than making chance universal.
+  Hybrids cannot supply C's deterministic comparator and remain deterministic.
+
+C carries a hard deferred validation obligation. Both required families must
+have reachable, mechanically legible, viable, non-token build or policy
+purposes; the stochastic identity must materially change a truthful legal
+policy; neither family may be everywhere weakly dominated; and risk must be
+understandable before the relevant irreversible choice and attributable
+afterward. Existing SR-05/SR-06/SR-09, RCS-02/SR-10, SR-12, and RCS-17/RCS-18
+own those authoring and evaluation tests. If either required family or their
+coexistence fails that obligation, reopen D2D with A rather than shipping token
+chance.
+
+One related-only opportunity receives one committed realization. Callback
+duplication, reload, reconnect, replay, denial, or routing fallback cannot
+redraw it. D2D chooses no odds, direct odds control, factual response, actor,
+entropy source, disclosure surface, incidence, result, payoff, rarity, or
+implementation. Randomness itself is not the direct *Achintya Bheda Abheda*
+fit; the distinct children and real shared cause are. C's coexistence is an
+aggregate catalog identity.
+
+The 94-row register now contains 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 39
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+The authoritative decision record remains unchanged.
+
 ## 2026-09-26 authoritative related exposure — RCS-03C3C3D1-B selected
 
 The owner selected `RCS-03C3C3D1-B`. At least one reachable actual evaluation
@@ -29,7 +86,8 @@ permission topology over all `R_v`. D2A-A prunes D2B/D2C1/D2C2 and activates
 D2D. D2A-B/C activates D2B; every D2B answer activates D2C1; D2C1-A prunes
 D2C2, while D2C1-B/C activates it. D2D then precedes a fresh D2E audit.
 
-D2A is the sole presented card. Let `S^{rel-only-perm}_v` contain contracts
+At that checkpoint D2A was the sole presented card. Let
+`S^{rel-only-perm}_v` contain contracts
 with a reachable `q∈Q_v`, and let `P^{rel-only-perm-config}_v` contain those
 where two lawful prospectively bound participant settings change the complete
 permission law on one matched `q` while the Relic, facts, selected tuple, and
@@ -49,7 +107,8 @@ pair stay fixed:
   dialect and premium-class pressure. Hybrid-only contracts cannot supply C's
   intrinsic comparator.
 
-The correction replaces one D2 row with six. The 94-row register contains 38
+The correction replaced one D2 row with six. At that checkpoint the 94-row
+register contained 38
 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`. The authoritative decision record
 remains unchanged.
@@ -10171,7 +10230,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 19:01 UTC — authoritative related exposure selected](docs/handoffs/2026-09-26-1901--relic-authoritative-related-exposure-selected.md)**
+[2026-09-26 19:19 UTC — intrinsic related-only permission selected](docs/handoffs/2026-09-26-1919--relic-intrinsic-related-permission-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

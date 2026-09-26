@@ -2790,7 +2790,31 @@ marginals. Replacing one D2 row with six adds five slots and potentials.
 
 The corrected register has ninety-four slots: 38 `SCREEN`, 1 `OWNER-OPEN`, 13
 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 39`. D2A is the current presented card.
+`Phi_SR = 39`. D2A was the presented card.
+
+The owner selected `RCS-03C3C3D2A-A`. No matched reachable related-only
+opportunity and pair of lawful prospective participant settings change the
+complete permission law while its contract, facts, tuple, and pair remain
+fixed. `Q_v` may still be empty, and different contracts or factual contexts
+may carry different intrinsic laws. D2A moves to `DIR-SELECTED`; D2B, D2C1,
+and D2C2 prune; D2D opens.
+
+Three bounded read-only prerequisite audits and two recommendation cross-
+challenges upheld D2D as one empty-aware stochastic-support card over canonical
+complete `Q_v` law projections. No row is added. Its exhaustive cases are no
+stochastic projection, every extant projection stochastic-capable, or
+deterministic-only and stochastic-capable projections coexisting. Probability
+is measured after all prospective bindings, facts, and earlier committed state
+are fixed but before the earliest semantic realization that commits this
+permission bit. One law random in one context and certain elsewhere remains one
+stochastic-capable law; code/refactor shape cannot multiply laws.
+
+The register remains ninety-four slots: 34 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 39 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 35`. D2D is the current presented card. A would immediately prune G2
+because every exact, hybrid, and related-only marginal would then be
+deterministic. B/C leave G2 conditional and send D2E through its required fresh
+audit without proving G2's three-plus or two-nonconstant-marginal prerequisites.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -2862,11 +2886,11 @@ overcompression.
 | `RCS-03C3C3C2E2` | Matched player/counterplay-causal factual-response support among responsive exact-permission laws | `DIR-SELECTED`; B requires at least one qualifying lawful independently revisable decision and complete causal closure to change the certain bit under the same law and eventual exact pair/proof; exact actor, trigger, prevalence, disclosure, and success rate remain unsettled |
 | `RCS-03C3C3C2E3` | Constant-law polarity among context-invariant intrinsic exact-permission laws | `DIR-SELECTED`; C requires responsive, steadfast-allow, and distinct steadfast-deny complete law families (`R+D+A`), with domain-relative gate-local polarity and the documented non-token non-dominated refusal obligation or reopening to B |
 | `RCS-03C3C3D1` | Post-routing authoritative distinct-related-form exposure support among resolved pair opportunities | `DIR-SELECTED`; B requires nonempty `R^{resolved-related}_v`, so at least one reachable actually bound route selects a genuine distinct-related pair; its witness may be related-only or hybrid, grants no joint survival, and a hybrid receives no second permission bit |
-| `RCS-03C3C3D2A` | Material participant permission-configurability prevalence across related-only-capable versioned Relic treatment contracts | `OWNER-OPEN`; classify participant-configurable permission as empty, universal, or nonempty proper only over contracts with reachable `Q_v=R_v setminus E_v`; hybrid-only contracts are excluded because exact C2A-A already makes their single inherited bit participant-intrinsic |
-| `RCS-03C3C3D2B` | Independently recombinable participant related-permission-coordinate prevalence among related-only permission-configurable contracts | `SCREEN`; conditional on D2A-B/C; distinguish permission force inseparably coupled to whole routing settings from an independently recombinable coordinate without manufacturing a second hybrid vote |
-| `RCS-03C3C3D2C1` | Constructive participant related-permission-language prevalence across all participant-configurable related-only permission forces | `SCREEN`; follows every D2B answer when D2A-B/C; a coupled permission force may still use either a closed authored menu or bounded constructive language |
-| `RCS-03C3C3D2C2` | Participant-composed related context-branching prevalence among constructive-capable related-only permission forces | `SCREEN`; conditional on D2C1-B/C and otherwise `PRUNED`; classify participant-authored context branching only within the residual `Q_v` projection |
-| `RCS-03C3C3D2D` | Stochastic support across complete bound related-only permission-law projections after applicable configuration and language rows | `SCREEN`; follows D2A-A or the applicable D2B/D2C1/D2C2 route and measures only complete `Q_v` law projections; inherited hybrid bits remain deterministic under exact C2D-A |
+| `RCS-03C3C3D2A` | Material participant permission-configurability prevalence across related-only-capable versioned Relic treatment contracts | `DIR-SELECTED`; A makes participant-configurable related-only permission empty, so every extant `Q_v=R_v setminus E_v` permission law is intrinsic while `Q_v` itself may remain empty; hybrid permission was already intrinsic |
+| `RCS-03C3C3D2B` | Independently recombinable participant related-permission-coordinate prevalence among related-only permission-configurable contracts | `PRUNED`; D2A-A admits no participant-configurable related-only permission force and therefore no independently recombinable coordinate |
+| `RCS-03C3C3D2C1` | Constructive participant related-permission-language prevalence across all participant-configurable related-only permission forces | `PRUNED`; D2A-A leaves no participant related-permission language, coupled or independent, to classify |
+| `RCS-03C3C3D2C2` | Participant-composed related context-branching prevalence among constructive-capable related-only permission forces | `PRUNED`; D2A-A leaves no participant-constructed related-permission force and therefore no participant-composed context branching |
+| `RCS-03C3C3D2D` | Stochastic support across complete bound related-only permission-law projections after applicable configuration and language rows | `OWNER-OPEN`; classify stochastic-capable support as empty, universal among extant projections, or nonempty proper over canonical complete `Q_v` law projections after fixing all prior authoritative state; `Q_v` may be empty, while inherited hybrid bits remain deterministic under exact C2D-A |
 | `RCS-03C3C3D2E` | Final distinct-related-form permission topology over all exposed related opportunities | `SCREEN`; follows D2D and a fresh prerequisite audit; returns to all `R_v` to classify authored related incidence, while any restriction on hybrid placement leaves each hybrid's inherited exact permission bit unchanged |
 | `RCS-03C3C3E` | Result disposition and survivor cardinality when two individually satisfied overlapping tags receive a false joint-survival permission bit | `SCREEN`; follows applicable C2E1-C2E3/D2 permission restrictions and their stochastic topology; prunes only if no selected overlap reaches treatment or every applicable exposed pair is permitted with probability one; a realized false bit enters this route once without redraw or rerouting |
 | `RCS-03C3C3F` | Authority selecting the survivor or legal substitute for a denied pair | `SCREEN`; conditional on C3C3E admitting a positive nonunique result; otherwise `PRUNED` or `DERIVED`; exact priority keys remain later only after authority is settled |
@@ -3122,15 +3146,22 @@ and replaces old D2 with six rows: participant configurability, coordinate
 recombination, constructive language, participant-composed branching, and
 stochastic support over the related-only residual `Q_v`, followed by final
 form-wide incidence over all `R_v`. It adds five rows and five unresolved
-potentials. The current register has **ninety-four slots**: 38 `SCREEN`, 1
+potentials. The register at that checkpoint had **ninety-four slots**: 38 `SCREEN`, 1
 `OWNER-OPEN`, 13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 39`. D2A is the current presented card.
+`EVALUATE`; `Phi_SR = 39`. D2A was the presented card.
+`RCS-03C3C3D2A-A` then makes every extant related-only permission law
+participant-intrinsic while allowing `Q_v` itself to remain empty. D2B, D2C1,
+and D2C2 prune. A three-question prerequisite audit and two recommendation
+cross-challenges uphold D2D as one empty-aware law-level stochastic-support
+card; no row is added. The current register has **ninety-four slots**: 34
+`SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 39 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. D2D is the current presented card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-nine owner cards under this thirty-times-corrected charter and will
+thirty-five owner cards under this thirty-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3153,7 +3184,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 94 frozen candidate slots; current `Phi_SR = 39` after `RCS-03C3C3D1-B` requires authoritative related exposure and the thirtieth correction separates six related-permission boundaries | At most 39 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 94 frozen candidate slots; current `Phi_SR = 35` after `RCS-03C3C3D2A-A` makes related-only permission participant-intrinsic, prunes three control-language rows, and opens D2D | At most 35 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
