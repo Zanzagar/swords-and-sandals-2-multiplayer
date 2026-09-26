@@ -1,14 +1,78 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 causal exact-permission response — RCS-03C3C3C2E2-B selected
+
+The owner selected `RCS-03C3C3C2E2-B`: at least one responsive complete
+intrinsic exact-permission law has a qualifying lawful decision intervention
+whose complete causal closure changes the certain bit while the same law and
+eventual selected exact pair/proof remain fixed. This is existential. It does
+not require every responsive law, identify the controlling side, guarantee
+upstream success, or choose exact disclosure. RCS-02/SR-10 must later make the
+operative factor understandable before the correct actor's first irreversible
+divergence and attributable afterward.
+
+Two distinct bounded read-only audits attacked E3's topology and gameplay
+purpose, then cross-challenged their initially different recommendations. For
+nonempty context-invariant `K_v`, let `K^+_v` contain complete laws that return
+one throughout their own nonempty reachable domains. `K^+_v` is empty, all of
+`K_v`, or nonempty proper: steadfast refusal only, steadfast compatibility
+only, or both. Singleton domains are nonvacuous but promise no breadth;
+unreachable branches and representation/variant splitting cannot manufacture
+polarity.
+
+Polarity is local to this exact-permission gate. Always-allow means only that
+the exact pair passes this coordinate; always-deny means only “not both” and
+enters later denied-pair treatment. Neither chooses final co-survival, survivor,
+substitute, alternate proof, reroute, benefit, or payoff. E1-C's responsive
+class already makes global bit incidence mixed under every E3 answer.
+
+The audits converged on conditional C as the recommendation. Responsive denial
+cannot replace steadfast denial because a responsive law must allow somewhere;
+constant denial instead removes allowance throughout its own reachable domain
+and can support context-robust refusal. Participant or opponent steering is one
+possible realization, not a universally selected property. But C cannot be
+satisfied by a dominated symmetry token. Each required polarity family must
+support a reachable, mechanically legible, non-token legal build or policy
+purpose in the applicable release scope. It must remain viable and not
+everywhere weakly dominated under the later power/compatibility envelope.
+Constant refusal must be instrumentally useful or an explicit play-shaping
+commitment or
+exploitable liability in a package with commensurate value. Exact mechanics
+remain C3C3E/F and RCS-05/08 work; SR-05/06 and RCS-17/18 validate them. If no
+deny family passes, reopen E3 with B as the bounded replacement.
+
+The eighty-nine-row register now contains 35 `SCREEN`, 1 `OWNER-OPEN`, 13
+`PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. `RCS-03C3C3C2E3` is the current presented card. D1 remains
+independently ready but queued. The authoritative decision record remains
+unchanged.
+
+E3 asks which context-invariant law polarities the completed catalog requires:
+
+- A: steadfast refusal only (`R+D`). Every constant law always denies in its
+  own domain. This supports invariant severance but supplies no reliable
+  compatibility class and puts every steadfast law under trap/value pressure.
+- B: steadfast compatibility only (`R+A`). Every constant law always allows in
+  its own domain. This is the safest two-dialect catalog—responsive covenants
+  carry conditional refusal, while Stone Witness-style laws reliably pass this
+  gate—but excludes invariant refusal builds and risks an obvious premium.
+- C: both steadfast polarities (`R+D+A`). Recommend C with the hard viability
+  obligation above. Stone Witness always allows, Severed Bell always denies,
+  and Ashen responds to `Guard` versus `Burst`. This adds a distinct invariant
+  covenant at the cost of a third prediction dialect, ally-grief/reduced-
+  counterplay risk, and trap-versus-overcompensation pressure.
+
+Any answer makes D1 the next presented card and reduces `Phi_SR` to 35.
+
 ## 2026-09-26 responsive and steadfast exact-permission laws — RCS-03C3C3C2E1-C selected
 
 The owner selected `RCS-03C3C3C2E1-C`: complete responsive intrinsic exact-
 permission laws coexist with complete context-invariant laws. At least one law
 returns both certain bits across its reachable domain, while at least one
 distinct law always denies or always allows throughout its domain. This selects
-no exact law identity, player-causal lever, or constant polarity. E2 and E3 are
-both applicable; E2 is presented first. D1 remains independently ready but
-queued.
+no exact law identity, player-causal lever, or constant polarity. At that
+checkpoint E2 and E3 were both applicable; E2 was presented first. D1 remained
+independently ready but queued.
 
 Two distinct bounded read-only post-answer audits attacked E2's completeness
 and gameplay meaning, then cross-challenged their repairs. The empty/nonempty
@@ -40,10 +104,11 @@ if E2-B is chosen, those later rules must make the operative factor
 understandable before the correct actor's first irreversible divergence and
 attributable afterward.
 
-The eighty-nine-row register now contains 36 `SCREEN`, 1 `OWNER-OPEN`, 13
+At that checkpoint the eighty-nine-row register contained 36 `SCREEN`, 1 `OWNER-OPEN`, 13
 `PRUNED`, 35 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 37`. `RCS-03C3C3C2E2` is the current presented card. E3 and D1
-remain ready but queued. The authoritative decision record remains unchanged.
+`Phi_SR = 37`. `RCS-03C3C3C2E2` was the presented card. E3 and D1 were ready
+but queued. The newer section records E2-B and the E3 frontier. The
+authoritative decision record remains unchanged.
 
 E2 asks whether any responsive law contains a real causal play-or-counterplay
 lever while the intrinsic law and eventual exact pair remain fixed:
@@ -9997,7 +10062,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 07:37 UTC — responsive and steadfast permission laws coexist](docs/handoffs/2026-09-26-0737--relic-responsive-law-coexistence-selected.md)**
+[2026-09-26 07:55 UTC — causal exact-permission response selected](docs/handoffs/2026-09-26-0755--relic-causal-permission-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

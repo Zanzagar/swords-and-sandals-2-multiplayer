@@ -2654,8 +2654,51 @@ qualify. This semantic repair adds no row.
 
 After E1-C and E2's activation, the register has eighty-nine slots: 36
 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 35 `DIR-SELECTED`, 2 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. E2 is the current presented card; E3
-and D1 remain prerequisite-ready but queued.
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. At that checkpoint E2 was the
+presented card; E3 and D1 remained prerequisite-ready but queued.
+
+**Post-answer screen and twenty-ninth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3C2E2-B`: at least one responsive intrinsic law
+has a qualifying matched decision intervention and complete causal closure
+that changes its certain bit while the same law and eventual selected exact
+pair/proof remain fixed. E2 moves to `DIR-SELECTED`. E3 becomes the presented
+sibling; D1 remains ready but queued.
+
+Two distinct bounded read-only audits, then mutual cross-challenge, upheld
+E3's three-way complete-law polarity partition. For nonempty constant-law class
+`K_v`, let `K^+_v` contain laws returning one throughout their own nonempty
+reachable authoritative domains. `K^+_v` is empty, all of `K_v`, or nonempty
+proper, yielding steadfast-refusal only, steadfast-compatibility only, or both.
+Singleton domains are nonvacuous but grant no breadth; dormant branches and
+representation/variant splitting cannot manufacture polarity.
+
+The classification is gate-local. Always-allow guarantees only passage through
+the exact permission coordinate; always-deny guarantees only “not both” and
+entry into later denied-pair treatment. Neither selects a final result, payoff,
+survivor, substitute, retry, reroute, or alternate proof. E1-C's responsive
+class already makes global exact-bit incidence mixed under every E3 answer.
+
+The audits initially disagreed between B's safe two-dialect catalog and C's
+three covenant philosophies. Cross-challenge proved steadfast refusal is not
+redundant with responsive denial: a responsive law must allow somewhere,
+whereas a constant-deny law removes allowance throughout its own reachable
+domain and can therefore support context-robust refusal. Participant or
+opponent steering is one possible realization, not a universally selected
+property. Conditional C is therefore the recommendation, with a hard existing-
+gate obligation rather than a new row. Each required constant-
+polarity family must support a reachable, mechanically legible, non-token legal
+build or policy purpose in its applicable release scope and remain viable and
+not everywhere weakly dominated under the later power/compatibility envelope.
+Certain refusal must be instrumentally useful or a play-shaping commitment or
+exploitable liability within a package receiving commensurate value. E3 chooses
+no concrete result or value mechanism. C3C3E/F and RCS-05/08 own those choices;
+SR-05/06 and RCS-17/18 validate purpose, fun, and non-domination. If no deny
+family passes, reopen E3 with B as the bounded replacement. No row is added.
+
+After E2-B and E3's activation, the register has eighty-nine slots: 35
+`SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. E3 is the current presented card; D1
+remains prerequisite-ready but queued.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -2724,8 +2767,8 @@ overcompression.
 | `RCS-03C3C3C2C2` | Participant-composed context-branching prevalence among constructive-capable permission forces | `PRUNED`; C2A-A leaves no participant-constructed permission force and therefore no participant-composed permission branching |
 | `RCS-03C3C3C2D` | Stochastic support across canonical complete bound permission laws after applicable configuration and language rows | `DIR-SELECTED`; A makes every complete intrinsic law deterministic on every reachable fixed exact opportunity while permitting certain context response; no permission draw, retry, or reroute remains |
 | `RCS-03C3C3C2E1` | Responsive-law prevalence across complete deterministic intrinsic exact-permission laws | `DIR-SELECTED`; C requires responsive laws and context-invariant laws to coexist, without selecting actionability or constant polarity |
-| `RCS-03C3C3C2E2` | Matched player/counterplay-causal factual-response support among responsive exact-permission laws | `OWNER-OPEN`; classify the qualifying responsive-law subset as empty or nonempty using two lawful non-oracular policies that differ at exactly one independently revisable material decision, hold one causal background and all non-descendant inputs fixed, preserve the same law/identities/stance/eventual exact pair/proof, carry the decision's complete delayed/reactive/stochastic factual closure, and produce opposite certain bits; forced moves, unrelated random traces, distribution-neutral hidden crossovers, and permission-only toggles do not qualify; exact triggers and saturation remain AUTHOR/SPEC/TUNE |
-| `RCS-03C3C3C2E3` | Constant-law polarity among context-invariant intrinsic exact-permission laws | `SCREEN`; conditional on E1-A/C; classify the always-allow subset of the nonempty constant-law class as empty, universal, or nonempty proper, yielding always-deny only, always-allow only, or coexistence |
+| `RCS-03C3C3C2E2` | Matched player/counterplay-causal factual-response support among responsive exact-permission laws | `DIR-SELECTED`; B requires at least one qualifying lawful independently revisable decision and complete causal closure to change the certain bit under the same law and eventual exact pair/proof; exact actor, trigger, prevalence, disclosure, and success rate remain unsettled |
+| `RCS-03C3C3C2E3` | Constant-law polarity among context-invariant intrinsic exact-permission laws | `OWNER-OPEN`; classify the always-allow subset of nonempty `K_v` as empty, all, or nonempty proper, yielding steadfast-refusal only, steadfast-compatibility only, or coexistence; polarity is relative to each law's own nonempty reachable domain and governs only the exact permission coordinate; every required family remains subject to SR-05/SR-06 viability, and coexistence requires a non-token non-dominated refusal purpose or later reopening to B |
 | `RCS-03C3C3D1` | Post-routing authoritative distinct-related-form exposure support among resolved pair opportunities | `SCREEN`; independently prerequisite-ready after C1-B because exposure precedes permission, but queued behind the current exact-permission traversal; choose empty or nonempty `R^{resolved-related}_v` without granting joint survival |
 | `RCS-03C3C3D2` | Distinct-related-form restriction of the same resolved-pair joint-survival permission set | `SCREEN`; conditional on D1-B and its own fresh authority/randomness prerequisite screen; intentionally queued behind exact-first traversal but not logically dependent on C2E, and one exact-and-related pair retains one permission bit |
 | `RCS-03C3C3E` | Result disposition and survivor cardinality when two individually satisfied overlapping tags receive a false joint-survival permission bit | `SCREEN`; follows applicable C2E1-C2E3/D2 permission restrictions and their stochastic topology; prunes only if no selected overlap reaches treatment or every applicable exposed pair is permitted with probability one; a realized false bit enters this route once without redraw or rerouting |
@@ -2955,16 +2998,24 @@ E1 was the presented card and D1 remained ready but queued.
 invariant intrinsic laws. The twenty-eighth correction preserves E2's binary
 support boundary but repairs its witness from one action to one independently
 revisable lawful decision and its full causal closure. No row is added. The
-current register has **eighty-nine slots**: 36 `SCREEN`, 1 `OWNER-OPEN`, 13
+register at that checkpoint had **eighty-nine slots**: 36 `SCREEN`, 1 `OWNER-OPEN`, 13
 `PRUNED`, 35 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 37`. E2 is the current presented card; E3 and D1 are ready but
+`Phi_SR = 37`. E2 was the presented card; E3 and D1 were ready but
 queued.
+`RCS-03C3C3C2E2-B` then requires at least one qualifying causal
+play/counterplay witness. The twenty-ninth correction upholds E3's three stable-
+polarity branches, makes their gate-local meaning explicit, and attaches the
+existing non-token viability obligation to any required polarity family. No
+row is added. The current register has **eighty-nine slots**: 35 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 36`. E3 is the current presented card and D1 remains
+ready but queued.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-seven owner cards under this twenty-eight-times-corrected charter and will
+thirty-six owner cards under this twenty-nine-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -2986,7 +3037,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 89 frozen candidate slots; current `Phi_SR = 37` after `RCS-03C3C3C2E1-C` requires responsive and context-invariant law families and the twenty-eighth correction repairs the matched causal witness | At most 37 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 89 frozen candidate slots; current `Phi_SR = 36` after `RCS-03C3C3C2E2-B` requires a qualifying causal response witness and the twenty-ninth correction makes E3's gate-local polarity/viability boundary explicit | At most 36 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

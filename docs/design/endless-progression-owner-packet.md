@@ -304,9 +304,12 @@ conditional constant-law polarity. The owner selected RCS-03C3C3C2E1-C:
 responsive and context-invariant law families coexist. A twenty-eighth post-
 answer audit repaired the conditional actionability witness around one
 independently revisable lawful decision and its complete causal closure rather
-than one immediate action or an arbitrary whole-policy contrast.
-RCS-03C3C3C2E2 is the current owner-facing choice under SR-03; E3 and D1
-remain prerequisite-ready but queued.
+than one immediate action or an arbitrary whole-policy contrast. The owner
+selected RCS-03C3C3C2E2-B, requiring at least one qualifying causal play-or-
+counterplay witness. A twenty-ninth post-answer audit upheld E3's three stable-
+polarity branches while making their domain-relative, gate-local meaning and
+non-token viability obligations explicit. RCS-03C3C3C2E3 is the current owner-
+facing choice under SR-03; D1 remains independently ready but queued.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -22482,11 +22485,11 @@ first and E3 queued. D1 remains independently ready but queued.
 >
 > After E1-C and E2's activation, the eighty-nine-row register contains **36
 > `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 35 `DIR-SELECTED`, 2 `DERIVED`, 1
-> `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`**. E2 is the current presented card;
-> E3 and D1 remain ready but queued. The authoritative decision record remains
-> unchanged.
+> `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`**. At that checkpoint E2 was the
+> presented card; E3 and D1 were ready but queued. The authoritative decision
+> record remains unchanged.
 
-### RCS-03C3C3C2E2 — matched player/counterplay-causal exact-permission response — active owner choice
+### RCS-03C3C3C2E2 — matched player/counterplay-causal exact-permission response — direction selected
 
 E1-C guarantees at least one responsive law, but not that any legal player
 decision can cause or contest its change. Let `M^{exact-causal}_v` contain the
@@ -22516,6 +22519,111 @@ remains independently ready but queued. Deterministic factual response creates
 no stochastic permission marginal and cannot activate G2. Exact identities,
 facts, actors, information, triggers, horizons, success rates, distribution,
 payoff, and implementation remain unsettled.
+
+The owner selected **B**. Therefore `M^{exact-causal}_v≠∅`: at least one
+responsive complete intrinsic exact-permission law has one qualifying lawful
+decision intervention whose complete causal closure supplies a playable change
+in the certain bit while the same law and eventual exact pair/proof remain
+fixed. This is an existential support promise. It does not require every
+responsive law or opportunity to qualify, identify the controlling side,
+guarantee action success, or choose exact disclosure. E2 moves to
+`DIR-SELECTED`; the RCS-02/SR-10 legibility compatibility obligation remains,
+E3 becomes the presented sibling, and D1 remains independently ready but
+queued.
+
+> **Post-answer screen and twenty-ninth prerequisite correction,
+> 2026-09-26:** two distinct bounded read-only audits attacked E3 from
+> different directions. The incidence audit tested whether constant-law
+> polarity hid domain, hybrid, or downstream-result choices. The gameplay
+> audit tested whether an always-deny class could be a meaningful build identity
+> rather than a dominated symmetry token. Their first recommendations
+> disagreed—B for the safe two-dialect catalog versus C for three steadfast and
+> responsive philosophies—but mutual cross-challenge converged on conditional
+> C and preserved one three-way owner card.
+>
+> For nonempty context-invariant `K_v`, define
+> `K^+_v={w∈K_v : b_w(o)=1 for every o∈O_w}` and
+> `K^-_v=K_v setminus K^+_v`. Every `O_w` is nonempty. Because a member of
+> `K_v` cannot take both binary values, each complete law belongs to exactly one
+> polarity class. Thus `K^+_v` is empty, all of `K_v`, or nonempty proper; no
+> fourth branch exists. “Always” is relative to that law's own reachable
+> authoritative domain. A singleton domain is nonvacuous but proves no breadth;
+> dormant or unreachable branches cannot change polarity, and code/variant
+> splitting cannot manufacture a class.
+>
+> Polarity is gate-local. An always-allow law guarantees only passage through
+> the exact joint-survival permission coordinate; it does not guarantee
+> candidatehood, commitment, final co-survival, receipt count, or payoff. An
+> always-deny law guarantees only a false bit—“not both”—and entry into later
+> denied-pair treatment; it selects no survivor, substitute, benefit, reroute,
+> retry, or alternate proof. A hybrid exact-and-related opportunity still
+> occurs once and may remain subject to the later related-form restriction.
+> E1-C's responsive class already makes global exact-bit incidence mixed under
+> every E3 branch, so no global incidence card returns.
+>
+> Responsive denial cannot replace steadfast denial: every responsive law
+> allows somewhere in its reachable domain, whereas a constant-deny covenant
+> removes allowance throughout its own reachable domain. A participant,
+> counterplayer, or exogenous condition might reach a responsive allow context;
+> E2 selects none of those universally. The constant invariant can nevertheless
+> support a genuinely different context-robust precommitted build.
+> But formal class incidence alone is insufficient. Under C, each admitted
+> constant-polarity family must support at least one reachable, mechanically
+> legible, non-token legal build or policy purpose in the applicable release
+> catalog. Its polarity must be causally operative in material play and the
+> family must remain viable and not everywhere weakly dominated under the later
+> power/compatibility envelope. For always-deny, certain refusal must be used
+> instrumentally or function as an explicit play-shaping commitment or
+> exploitable liability within a package receiving commensurate value. Mere
+> coverage, an unreachable showcase, an unplannable forced branch, voluntary
+> self-handicap, or compensation that never changes a preferred build/action
+> does not qualify.
+>
+> This obligation excludes a trap but selects no exact law, rarity, actor,
+> trigger, survivor, substitute, compensation form or magnitude, payoff,
+> threshold, count, distribution, or launch placement. C3C3E/F and RCS-05/08
+> own the concrete result/value choices; SR-05/06 and RCS-17/18 validate
+> legibility, viable purpose, fun, and non-domination. SC-09's high-ceiling
+> Legendary direction does not make every E3 law Legendary or require every
+> deny family to be peak-power. If no always-deny family passes those gates,
+> E3 must reopen with B as the bounded replacement rather than shipping a token
+> C witness. No row is added.
+>
+> After E2-B and E3's activation, the eighty-nine-row register contains **35
+> `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1
+> `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**. E3 is the current presented card;
+> D1 remains prerequisite-ready but queued. The authoritative decision record
+> remains unchanged.
+
+### RCS-03C3C3C2E3 — context-invariant exact-permission law polarity — active owner choice
+
+E1-C guarantees that `K_v` is nonempty. E3 decides which steadfast polarity
+classes the completed catalog must contain. It classifies complete canonical
+laws, not isolated opportunities, whole Relics, or final rewards.
+
+| Choice | Context-invariant polarity support | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — steadfast refusal only** | `K^+_v=∅`. Every context-invariant law returns zero for every opportunity in its own reachable domain. Together with the required responsive class, complete-law support is `R+D`. | A makes reliable non-co-survival the sole steadfast philosophy. It can support precommitted severance or anti-manipulation identities, but supplies no guaranteed exact-gate compatibility class. Its fit at this gate is **neutral/protective**: it preserves real distinction and refuses automatic double entitlement, while unity must be expressed by responsive laws elsewhere. Costs are severe trap pressure, possible ally suppression, and dependence on later denied-pair/value design for every constant law. | `Severed Bell` always returns false for its selected exact pair. That means only “not both”; C3C3E/F still decides whether one result, a substitute, or another legal disposition follows. |
+| **B — steadfast compatibility only** | `K^+_v=K_v`. Every context-invariant law returns one for every opportunity in its own reachable domain. Together with the required responsive class, support is `R+A`. | B is the safest two-dialect catalog: actionable responsive covenants provide conditional refusal, while steadfast laws provide reliable exact-gate compatibility. An always-allow witness can be a **direct** ideal fit when one deed remains one and two distinct relationship receipts may pass this gate together. It minimizes trap and teaching burden. Costs are proof-compression and obvious-premium pressure, and it permanently excludes an invariant refusal/anti-manipulation covenant. | `Stone Witness` always passes the shared-Heat exact pair through this permission coordinate. Later candidacy, commitment, related-form restriction, multi-contender treatment, and payoff remain unsettled. |
+| **C — both steadfast polarities coexist** | `∅⊊K^+_v⊊K_v`. At least one context-invariant law always allows and at least one distinct law always denies. With the required responsive class, support is `R+D+A`. | **Recommended, with the hard viability obligation above.** C yields three readable covenant philosophies: steadfast compatibility, steadfast refusal, and actionable response. A constant-deny law adds a genuinely distinct invariant plan because no reachable context can make that law allow; opponent steering is only one possible realization. Individual allow/deny cases inherit A/B's local fit; catalog coexistence is only **aggregate**, not a direct theological analogue. Costs are a third prediction dialect, ally-grief and reduced-counterplay risks, trap versus overcompensation pressure, and the authoring/evaluation burden of proving a non-dominated refusal purpose. | `Stone Witness` always allows; `Severed Bell` always denies; responsive `Ashen` lets `Guard` versus `Burst` preserve or spend the Ember Seal and change its bit. Severed Bell qualifies only if its certain refusal materially supports a viable build or policy, not merely because the matrix needed a deny row. |
+
+A/B/C are mutually exclusive and exhaustive because the subset `K^+_v` of
+nonempty `K_v` is empty, all of `K_v`, or a nonempty proper subset. C derives
+at least two context-invariant laws and, with E1-C, at least three complete laws
+total; it does not require both polarities within every Relic, relationship, or
+committed variant. Every branch inherits SR-05/SR-06's non-token viable-purpose
+test; C must satisfy it for both polarity classes. Exact law identities, domain
+breadth, counts, distribution, prevalence, and release placement remain
+AUTHOR/SPEC under those gates.
+
+No E3 answer changes global exact-bit incidence: the responsive class already
+contains both values. No answer prunes denied-pair treatment, because responsive
+laws deny somewhere, or eliminates allowed opportunities, because responsive
+laws allow somewhere. Any answer moves E3 to `DIR-SELECTED` and makes D1 the
+next presented card. The register would then contain 34 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 37 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 35`. E3 selects no survivor, payoff, implementation, or
+stochastic permission behavior.
 
 ## Session protocol and evidence
 

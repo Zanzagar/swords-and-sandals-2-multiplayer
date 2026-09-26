@@ -4509,9 +4509,72 @@ irrelevant or exploit-dominant realizations.
 
 No new row is required. After E1-C and E2's activation, the register has 89
 rows: 36 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 35 `DIR-SELECTED`, 2
-`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. E2 is the current
-presented card; E3 and D1 remain ready but queued. The authoritative decision
-record remains unchanged.
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. At that checkpoint E2
+was the presented card; E3 and D1 remained ready but queued. The authoritative
+decision record remains unchanged.
+
+The owner selected E2-B. Therefore `M^{exact-causal}_v` is nonempty: at least
+one responsive complete intrinsic exact-permission law has a qualifying matched
+decision intervention under the repaired causal test. This selects no actor,
+exact fact, trigger, disclosure surface, success rate, or prevalence. E2 moves
+to `DIR-SELECTED`; E3 becomes the presented sibling and D1 remains queued.
+
+The E3 post-answer screen again used two different named questions rather than
+replicated briefs. One derived the complete-law polarity partition and attacked
+domain/hybrid/downstream-result leakage. The other asked whether stable denial
+could furnish fun buildcraft instead of a dominated burden. The topology audit
+returned three exhaustive branches but initially recommended always-allow only;
+the gameplay audit initially recommended coexistence with a viability
+condition. Cross-challenge broke the claimed redundancy of constant denial and
+the unqualified C recommendation at the same time.
+
+For nonempty `K_v`, let
+`K^+_v={w∈K_v : {b_w(o):o∈O_w}={1}}` and
+`K^-_v=K_v setminus K^+_v`. Each law's domain is nonempty, and a law in `K_v`
+cannot take both binary values. Therefore `K^+_v` is empty, all of `K_v`, or
+nonempty proper, producing `R+D`, `R+A`, or `R+D+A` support alongside E1-C's
+responsive class. A singleton law domain is nonvacuous but proves no breadth;
+dormant/unreachable branches, aliases, representation changes, and post-hoc
+variant splits cannot alter polarity.
+
+The bit is local to the exact-permission coordinate. One means compatible to
+pass this gate, not guaranteed final co-survival or value. Zero means only “not
+both” and enters C3C3E/F; it grants no survivor, substitute, reroute, alternate
+proof, or benefit. A hybrid exact-related opportunity occurs once and may
+remain constrained by the later related-form restriction. Because every
+responsive law supplies both bits somewhere, all three E3 branches already
+have globally mixed incidence.
+
+Responsive denial is not a substitute for steadfast denial. A responsive law
+necessarily has a reachable allow context; a constant-deny covenant instead
+removes allowance throughout its own reachable domain and can support a
+different context-robust precommitted plan. Participant or opponent steering is
+one possible realization, not a universally selected property. But if all joint
+receipts are positive and denial merely discards one while an otherwise
+identical always-allow package preserves both, the deny family is weakly
+dominated everywhere and strictly worse somewhere. That token countermodel
+satisfies bare C and fails SR-05/SR-06.
+
+Recommend conditional C. Each required constant-polarity family must furnish a
+reachable, mechanically legible, non-token legal build or policy purpose in the
+applicable release scope, with its polarity causally operative in material play
+and its package not everywhere weakly dominated under the later selected
+power/compatibility envelope. Constant refusal must be instrumentally useful or
+an explicit play-shaping commitment or exploitable liability paired with
+commensurate package value. Symmetry, lore, unreachable showcase, an
+unplannable forced branch, voluntary self-handicap, or compensation that never
+changes a preferred build/action is insufficient. This obligation constrains
+later design without selecting survivor, compensation, payoff, magnitude,
+rarity, threshold, count, or placement. C3C3E/F and RCS-05/08 own concrete
+mechanisms; SR-05/06 and RCS-17/18 validate them. If no deny family passes,
+reopen E3 with B as the bounded replacement. SC-09 does not make every E3 law
+Legendary or peak-power.
+
+No separate compensation row is warranted and no row is added. After E2-B and
+E3's activation, the register has 89 rows: 35 `SCREEN`, 1 `OWNER-OPEN`, 13
+`PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. E3 is the current presented card; D1 remains ready but queued.
+The authoritative decision record remains unchanged.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
