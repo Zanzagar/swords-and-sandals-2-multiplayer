@@ -140,6 +140,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [intrinsic exact-overlap permission selected](2026-09-26-0646--relic-intrinsic-permission-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | C2A-A makes exact permission intrinsic and prunes three participant-control rows; a twenty-sixth audit fixes prior-state conditioning and exposes D1 as ready-but-queued, leaving C2D as the presented Relic card. |
 | [authoritative exact-overlap route selected](2026-09-26-0623--relic-exact-route-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | C1-B requires exact overlap to survive routing somewhere; a twenty-fifth audit separates permission configuration, language, randomness, incidence, and later cross-pair coupling, leaving C2A as the sole active Relic frontier. |
 | [deterministic Relic routing selected](2026-09-26-0602--relic-deterministic-routing-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | B4A-A makes every complete bound routing stance deterministic; a twenty-fourth audit separates post-routing overlap exposure from permission and leaves exact-form exposure at C1 as the sole active Relic frontier. |
 | [closed whole-policy Relic routing selected](2026-09-26-0539--relic-whole-stance-routing-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | B3B1-A gives every routing contract only authored whole-policy stances; a twenty-third audit fixes complete bound stance laws as B4A's stochastic-support denominator and leaves B4A as the sole active Relic frontier. |

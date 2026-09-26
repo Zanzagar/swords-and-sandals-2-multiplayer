@@ -291,7 +291,13 @@ permission. The owner selected RCS-03C3C3C1-B, requiring at least one
 authoritative exact-overlap route. A twenty-fifth prerequisite audit separated
 participant permission configurability, coordinate independence, legal policy
 language, stochastic support, exact-form incidence, and later cross-pair draw
-coupling. RCS-03C3C3C2A is the active owner choice under SR-03.
+coupling. The owner selected RCS-03C3C3C2A-A, making exact-overlap permission
+intrinsic to every applicable Relic/relationship contract and pruning the
+participant permission-coordinate and language rows. A twenty-sixth
+prerequisite audit corrected the traversal graph: distinct-related exposure is
+already independently decidable from the selected tuple, although the one-card
+protocol queues it while RCS-03C3C3C2D is the current owner-facing choice under
+SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -22049,7 +22055,8 @@ unchanged.
 > binding and lock horizons, but neither may silently choose these local legal
 > control topologies.
 >
-> Fifth, after every nonrandom input and participant setting is fixed, a
+> Fifth, after every prospective setting, actual fact, and earlier committed
+> authoritative state is fixed regardless of random origin, a
 > permission law can still allow with probability strictly between zero and
 > one. Such a law has no pre-draw membership bit in a deterministic set
 > `P^{intra}_v`; calling it merely “selective” erases variance, replay, and
@@ -22074,14 +22081,19 @@ unchanged.
 > Every C2B answer then activates C2C1, which classifies the permission-control
 > language across **all** participant-configurable permission forces, coupled
 > or independent. C2C1-A prunes C2C2 and activates C2D; C2C1-B/C activates
-> C2C2, whose answer then activates C2D. C2D precedes C2E; C2E then activates
-> D1. C2E must receive its own prerequisite audit after C2D because
+> C2C2, whose answer then activates C2D. C2D precedes C2E. D1 is independently
+> prerequisite-ready after C1-B because exposure is upstream of permission,
+> but the one-card protocol may queue it behind the exact-permission lane. D2
+> is conditional on D1-B and its own fresh permission-law screen; exact-first
+> traversal is an ordering choice, not a premise that removes D1/D2 options.
+> C2E must receive its own prerequisite audit after C2D because
 > deterministic membership and stochastic support/certainty are not the same
 > trichotomy.
 >
 > For a canonical complete bound permission law `w` and reachable exposed
 > exact opportunity `o`, let `pi_w(o)` be its allow probability after every
-> nonrandom semantic input and prospective setting is fixed. Stochastic
+> prospective setting, actual fact, and earlier committed authoritative state
+> is fixed, immediately before the designated permission realization. Stochastic
 > capability means some reachable `o` has `0 < pi_w(o) < 1`. A stochastic law
 > draws once inside the automatic cut-atomic treatment; callback, reload,
 > reconnect, or replay cannot redraw it. A hybrid exact-and-related pair has
@@ -22117,9 +22129,11 @@ unchanged.
 > with G1/G2 adds one further slot and potential card. The amended register
 > therefore contains **eighty-seven slots**: 40 `SCREEN`, 1
 > `OWNER-OPEN`, 10 `PRUNED`, 32 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
-> `EVALUATE`; `Phi_SR = 41`. C2A is the sole active card.
+> `EVALUATE`; `Phi_SR = 41`. C2A is the sole presented card; D1 is already an
+> independently prerequisite-ready row but remains queued by the one-card
+> protocol.
 
-### RCS-03C3C3C2A — participant configurability of exact-overlap permission — active owner choice
+### RCS-03C3C3C2A — participant configurability of exact-overlap permission — direction selected
 
 C1-B guarantees that an exact selected pair reaches treatment somewhere. C2A
 asks whether a prospectively bound participant-semantic setting may materially
@@ -22165,6 +22179,109 @@ path, not hidden inside C.
 
 Any answer moves C2A to `DIR-SELECTED`. A prunes C2B/C2C1/C2C2 and activates
 C2D. B/C activates C2B for its own prerequisite screen. The authoritative
+decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **A, permission is
+intrinsic to every contract.** `P^{exact-perm-config}_v` is empty. Once the
+versioned Relic/relationship contract, actual evaluation facts, selected
+authoritative tuple, and unordered exact tag pair are held fixed, no
+participant-semantic setting changes the pair's complete joint-survival
+permission law. Different Relics, relationships, and factual contexts may
+still carry different intrinsic laws.
+
+This preserves participant agency over which proof route becomes authoritative
+without adding a second generic approval optimizer after routing. The Relic and
+relationship retain a covenantal nature the participant encounters rather than
+rewrites. That is neutral/protective at this boundary: it does not itself grant
+the one-deed/two-relationship result, but it keeps any later grant attributable
+to the relationship instead of a universal “allow doubles” setting. The cost is
+less downstream control and a greater disclosure burden when an exposed pair
+is intrinsically denied.
+
+C2A moves to `DIR-SELECTED`; C2B, C2C1, and C2C2 move to `PRUNED`. C2D becomes
+the current owner-facing card. This answer chooses no deterministic-versus-
+stochastic rule, exact permission incidence, distinct-related exposure,
+survivor, candidate, commitment, payoff, or implementation. The authoritative
+decision record remains unchanged.
+
+> **Twenty-sixth prerequisite correction, 2026-09-26:** a bounded read-only
+> challenge upheld the C2A-A pruning but broke two ordering assumptions before
+> they could become new doctrine.
+>
+> First, D1's distinct-related exposure is a property of the already-selected
+> authoritative tuple before any permission law acts. One catalog can expose
+> only the required exact pair while another, identical in every C2A/C2D fact,
+> also selects a distinct-related pair. C2D or C2E cannot collapse that
+> empty/nonempty distinction. D1 is therefore independently prerequisite-ready
+> after C1-B. It remains `SCREEN` and intentionally queued while C2D is the one
+> presented `OWNER-OPEN` card. If D1-B is later selected, D2 requires its own
+> fresh permission-law screen; placing it after the exact lane normalizes the
+> shared one-bit rule once but is traversal order, not logical dependence.
+>
+> Second, `pi_w(o)` must condition on all earlier committed authoritative state,
+> even when that state originated randomly. Otherwise a persisted acquisition
+> coin that selected an always-allow or always-deny intrinsic variant could be
+> averaged into a fake 50% permission draw. C2D therefore measures immediately
+> before one designated permission realization, after all prospective bindings,
+> actual facts, selected tuple/pair, and earlier committed state are fixed.
+> Contract-level mixtures, hidden information, and context-to-context changes
+> between deterministic zeroes and ones do not establish stochastic permission.
+>
+> No new row is needed. After the ordinary C2A-A transition, the eighty-seven-
+> row register contains 36 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 33
+> `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`.
+> C2D is the current presented card, while D1 is ready but queued.
+
+### RCS-03C3C3C2D — stochastic support across intrinsic exact-permission laws — active owner choice
+
+C2D asks whether an intrinsic complete exact-overlap permission law may require
+a genuine allow/deny draw after everything that can already authoritatively
+determine the opportunity is fixed. It does not ask whether exact overlap is
+usually allowed, which contexts receive which odds, or whether several pair
+draws share randomness.
+
+Let `W^{exact-perm-law}_v` be the nonempty set of reachable canonical complete
+bound exact-permission laws after all prospective bindings and every earlier
+committed authoritative state—regardless of random origin—are fixed. For
+`w` in that set and a reachable exact opportunity `o`, hold fixed the version,
+contract and Relic, relationship identities and unordered tag pair, selected
+authoritative tuple, complete factual context, and prior committed state. Let
+`pi_w(o)` be the allow probability immediately before the one designated
+permission realization. Define `G^{exact-perm-stoch}_v` as the laws for which
+some reachable `o` has `0 < pi_w(o) < 1`.
+
+| Choice | Intrinsic stochastic-support rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — deterministic intrinsic laws only** | `G^{exact-perm-stoch}_v` is empty. For every law and reachable fixed exact opportunity, `pi_w(o)` is either zero or one. A law may still respond differently to different factual contexts. | **Recommended.** Routing already gives meaningful control over whether exact reuse becomes operative. A makes the later covenant legible and attributable to the Relic/relationship instead of adding chance as a third arbiter. It protects team planning, replay trust, causal explanation, and eventual player-policy comparison while leaving combat and acquisition RNG untouched. The marginal *Achintya Bheda Abheda* fit is protective: one deed and two relationships may coexist under a rule that preserves both their continuity and distinct conditions. Costs are less numinous suspense, easier solving, and pressure on authors to make contextual allow/deny laws interesting rather than obvious. | Ashen always permits the shared-Heat pair when both covenant marks remain intact and always denies it otherwise. Changing the facts may change the bit; replaying the identical fixed opportunity never does. |
+| **B — every intrinsic law is stochastic-capable** | `G^{exact-perm-stoch}_v = W^{exact-perm-law}_v`. Every complete intrinsic law has at least one reachable fixed exact opportunity with a nondegenerate permission draw. This does not require every opportunity to roll. | B makes uncertainty part of every exact-capable Relic covenant. It can make Relics feel fateful or numinous and prevent every edge from becoming a solved lookup. But chance is only a **partial** ideal fit: it produces one manifestation without itself explaining the unity or distinction. Every relevant build must bear some permission variance, correct team plans can lose dual survival without a new mistake, and odds disclosure, simulation, and trust burdens become universal. | With the shared-Heat tuple and every prior fact fixed, Ashen permits both tags 70% of the time and denies joint survival 30%, committing one result for replay. Every intrinsic law must contain some such reachable case, though other cases may remain certain. |
+| **C — deterministic-only and stochastic-capable laws coexist** | `G^{exact-perm-stoch}_v` is a nonempty proper subset of `W^{exact-perm-law}_v`. At least one complete intrinsic law is deterministic across its entire reachable exact domain and at least one distinct law has a reachable nondegenerate draw. | C supports steadfast witness Relics beside oracular Relics, making variance a catalog/build identity rather than a universal tax. Its coexistence fit is only **aggregate** unless each stochastic law earns a legible relationship fantasy. It also introduces two prediction dialects and a balance trap in which the stochastic class is either a novice trap or needs enough upside to become the premium gamble. | Stone Witness applies a deterministic contextual law everywhere, while Ashen Oracle has a fixed shared-Heat opportunity that resolves 70/30. C does not require both law classes within every Relic. |
+
+A/B/C are mutually exclusive and exhaustive because
+`G^{exact-perm-stoch}_v` is empty, all of nonempty
+`W^{exact-perm-law}_v`, or a nonempty proper subset. A law that is random on
+one context and deterministic elsewhere is stochastic-capable, not evidence of
+cross-law coexistence. A law that deterministically changes between zero and
+one as fixed context changes remains deterministic. Exact opportunities or
+odds are AUTHOR/SPEC/TUNE unless a later prerequisite audit proves another
+player-material topology.
+
+This classification follows semantic behavior, not code shape. A seeded PRNG
+may realize the one declared permission draw; an opaque deterministic hash of
+the fixed authoritative input is still deterministic. Earlier random
+acquisition, transformation, or persisted variant selection is already-fixed
+state here and cannot be averaged into `pi_w(o)`. Duplicate callbacks, reload,
+reconnect, replay, or denial may not redraw, retry the selector, or substitute
+another ledger. An exact-and-related hybrid pair has one `o`, one probability,
+and one realized permission bit. Conditional G2 owns joint coupling only if
+several distinct simultaneous pair opportunities later exist.
+
+C2D chooses no exact permission incidence, randomizing context, probability,
+entropy source, disclosure rule, survivor, candidate, commitment, payoff, or
+implementation. C2E receives its already-required fresh prerequisite audit;
+that audit must also decide whether constant versus context-responsive chance
+is another owner-facing topology or AUTHOR/SPEC/TUNE work. D1 remains
+independently ready but queued under the one-card protocol. Any answer moves
+C2D to `DIR-SELECTED` and sends C2E through that audit. The authoritative
 decision record remains unchanged.
 
 ## Session protocol and evidence

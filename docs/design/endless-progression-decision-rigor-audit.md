@@ -4189,7 +4189,8 @@ Fourth, participant-authored context branching is a separate conditional
 choice beyond constructive support, just as it was for routing.
 
 Fifth, a complete bound permission law can remain stochastic after every
-nonrandom semantic input and prospective setting is fixed. If its allow
+prospective setting, actual fact, and earlier committed authoritative state is
+fixed regardless of random origin. If its allow
 probability on the same resolved exact opportunity is strictly between zero
 and one, no deterministic pre-draw set-membership bit exists. B4A-A made the
 ledger selector deterministic only. Calling random permission “selective”
@@ -4207,15 +4208,21 @@ Their order is load-bearing. C2A-A prunes C2B/C2C1/C2C2 and activates C2D;
 C2A-B/C activates C2B. Every C2B answer then activates C2C1 because coupled
 versus independent control does not decide how the permission component was
 legally authored. C2C1-A prunes C2C2 and activates C2D; C2C1-B/C activates
-C2C2, whose answer then activates C2D. C2D precedes C2E, and C2E precedes D1.
-C2E requires its own post-C2D prerequisite audit because stochastic support
-and certainty cannot reuse the deterministic empty/universal/nonempty-proper
+C2C2, whose answer then activates C2D. C2D precedes C2E. D1 is independently
+prerequisite-ready after C1-B because selected-tuple exposure exists before
+permission; exact-first traversal may queue it but C2E is not its logical
+premise. D2 is conditional on D1-B and its own permission-law screen, not on
+C2E, although the one-card traversal may normalize the exact form first. C2E
+requires its own post-C2D prerequisite audit because stochastic support and
+certainty cannot reuse the deterministic empty/universal/nonempty-proper
 wording without proof.
 
 For one canonical complete bound permission law `w` and one reachable exposed
-exact opportunity `o`, `pi_w(o)` denotes allow probability after all nonrandom
-inputs and prospective settings are fixed. Stochastic capability means some
-reachable `o` has `0 < pi_w(o) < 1`. A law may draw once inside automatic
+exact opportunity `o`, `pi_w(o)` denotes allow probability after all
+prospective settings, actual facts, and earlier committed authoritative state
+are fixed, regardless of whether that state originated randomly. It is
+measured immediately before the designated permission realization. Stochastic
+capability means some reachable `o` has `0 < pi_w(o) < 1`. A law may draw once inside automatic
 cut-atomic treatment; callback, reload, reconnect, or replay cannot redraw it.
 The same hybrid exact-and-related pair receives one `pi_w(o)` and one realized
 permission bit. Permission denial cannot cause tuple retry or ledger
@@ -4252,7 +4259,9 @@ C2 row with six registered children adds five rows and five unresolved
 potentials. Replacing old G with G1/G2 adds one further row and potential. The
 corrected register therefore has **eighty-seven rows**: 40
 `SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`, 32 `DIR-SELECTED`, 2 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 41`. C2A is the sole active card.
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 41`. C2A is the sole presented card; D1 is
+already independently prerequisite-ready but queued under the one-card
+protocol.
 
 C2A is now prerequisite-ready. Let `S^{exact-perm}_v` be the nonempty set of
 supported versioned Relic treatment contracts with at least one reachable
@@ -4284,6 +4293,74 @@ law must be disclosed causally and authored as meaningful rather than
 arbitrary. B supplies additional participant/Relic co-determination but makes
 the control dialect mandatory; C adds two contract dialects and a likely
 premium-configurability hierarchy.
+
+The owner selected C2A-A. Permission configurability is empty across the
+applicable exact-exposure-capable contracts, so C2B/C2C1/C2C2 genuinely prune:
+there is no participant permission coordinate, permission-construction
+language, or participant-authored permission branch left to classify. This
+does not prune later cross-pair draw coupling at G2, which concerns the joint
+realization of several system-owned pair marginals rather than participant
+control over one pair.
+
+A bounded post-answer challenge returned **PARTIALLY BROKEN** against the first
+planned frontier statement. It upheld the three prunings but supplied two
+countermodels that change the current map.
+
+First, C2D was not the only prerequisite-ready row. Catalog X may expose the
+required exact-only pair while routing around every distinct-related witness;
+catalog Y may preserve every C2A/C2D fact and additionally select one
+distinct-related pair. D1 distinguishes X from Y using only the authoritative
+tuple, before permission. Neither stochastic support nor exact permission
+incidence can erase that difference. D1 is therefore ready after C1-B and is
+only **queued**, not dependent on C2E. The one-card protocol still presents
+C2D alone. D2 likewise need not logically wait for C2E: exact-only and related-
+only pairs may be disjoint, and hybrid restrictions commute. If universal
+exact permission and empty related permission later conflict, the hybrid
+intersection is empty rather than one form vetoing or preceding the other.
+D2 remains conditional on D1-B and its own fresh permission-law screen.
+
+Second, fixing only “nonrandom inputs” lets an earlier random source be
+averaged into a false permission draw. Suppose acquisition flips and persists
+a hidden coin selecting an always-allow or always-deny intrinsic variant.
+Conditioning on the committed variant gives two deterministic laws; averaging
+over it gives `pi=.5`. C2D must therefore fix all earlier committed
+authoritative state, regardless of random origin, before measuring probability
+immediately before the one designated permission realization. Hidden
+information, contract/catalog mixtures, deterministic hashes, and different
+zero/one answers across factual contexts do not establish stochastic
+permission.
+
+Let `W^{exact-perm-law}_v` be the nonempty set of canonical complete bound
+exact-permission laws after those bindings and prior-state conditions are
+fixed, and let
+
+`G^{exact-perm-stoch}_v={w in W^{exact-perm-law}_v : exists reachable o,
+0 < pi_w(o) < 1}`.
+
+C2D-A makes this subset empty; every law is deterministic across its reachable
+exact domain, although it may be context-responsive. C2D-B makes it equal the
+whole law set; every law has at least one reachable nondegenerate permission
+draw, though not every opportunity rolls. C2D-C makes it nonempty proper,
+requiring globally deterministic-only and stochastic-capable laws to coexist.
+These law-level cases are exhaustive. Whether constant chance and matched
+context-responsive chance create another player-material topology is expressly
+reserved for C2E's prerequisite audit rather than silently classified as
+AUTHOR/SPEC/TUNE now.
+
+Recommend C2D-A. The participant already influences exact exposure through the
+selected whole routing stance; an intrinsic deterministic covenant makes the
+next result attributable to the Relic/relationship instead of a third chance
+arbiter. It protects team planning, replay trust, causal explanation, and later
+policy comparison without removing combat or acquisition randomness. Its cost
+is less oracular suspense and easier solving, so authored context response must
+carry the texture chance would otherwise supply. B universalizes permission
+variance; C permits steadfast witness laws beside oracular laws but introduces
+two prediction dialects and a premium-gamble balance risk.
+
+No new row is required. Applying C2A-A produces 87 rows: 36 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 33 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 37`. C2D is the current presented card and D1 is ready
+but queued. The authoritative decision record remains unchanged.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

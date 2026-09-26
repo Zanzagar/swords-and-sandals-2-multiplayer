@@ -1,5 +1,60 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 intrinsic exact-overlap permission — RCS-03C3C3C2A-A selected
+
+The owner selected `RCS-03C3C3C2A-A`: no participant-semantic setting may
+change the complete joint-survival permission law for a matched held-fixed
+exact selected pair. Permission is intrinsic to each applicable versioned
+Relic/relationship contract, although different Relics, relationships, and
+factual contexts may carry different laws. This selects no deterministic-
+versus-stochastic rule and grants no actual joint survival.
+
+C2B independent-coordinate prevalence, C2C1 constructive permission language,
+and C2C2 participant-composed permission branching are therefore pruned. The
+participant still has meaningful routing agency over whether exact reuse is
+exposed, but receives no second generic “allow doubles” control after routing.
+
+A bounded read-only post-answer audit upheld those prunings and broke two
+dependency assumptions. First, D1 distinct-related exposure is already
+decidable from the selected tuple before permission acts. It is independently
+prerequisite-ready after C1-B and only queued behind the exact-permission lane;
+C2E is not its premise. Conditional D2 likewise needs D1-B and its own fresh
+permission-law screen, not C2E, although exact-first traversal normalizes the
+shared one-bit vocabulary once.
+
+Second, C2D must fix every earlier committed authoritative state even when that
+state originated randomly. A persisted acquisition coin choosing always-allow
+or always-deny variants is not a 50% permission draw. `pi_w(o)` is measured
+immediately before one designated permission realization after prospective
+bindings, facts, tuple/pair, and prior committed state are fixed. Context-
+responsive zero/one laws remain deterministic; catalog mixtures and hidden
+information do not establish stochastic permission.
+
+No row was added. The eighty-seven-slot register now contains 36 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 33 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 37`. C2D is the current presented card and D1 is
+prerequisite-ready but queued. The authoritative decision record remains
+unchanged.
+
+C2D asks whether canonical complete intrinsic exact-permission laws may retain
+a genuine allow/deny draw on a fixed opportunity:
+
+- A: every law is deterministic across its reachable exact domain, while still
+  permitted to respond deterministically to different factual contexts.
+  Recommend A for relationship identity, causal explanation, team planning,
+  replay trust, and eventual player-policy comparison; combat and acquisition
+  RNG remain untouched.
+- B: every intrinsic law is stochastic-capable on at least one reachable fixed
+  exact opportunity, though not every opportunity must roll.
+- C: globally deterministic-only and stochastic-capable intrinsic laws coexist
+  in the catalog.
+
+One hybrid exact-and-related pair still receives one probability, one draw at
+most, and one permission bit. Duplicate callbacks, reload, reconnect, replay,
+or denial cannot redraw or reroute it. C2E receives a fresh prerequisite audit
+after C2D, including whether constant versus context-responsive chance hides
+another owner-facing topology.
+
 ## 2026-09-26 authoritative exact-overlap route — RCS-03C3C3C1-B selected
 
 The owner selected `RCS-03C3C3C1-B`: at least one reachable actual evaluation
@@ -38,8 +93,9 @@ hybrid pair remains one draw.
 
 The amended eighty-seven-slot register contains 40 `SCREEN`, 1 `OWNER-OPEN`, 10
 `PRUNED`, 32 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 41`. `RCS-03C3C3C2A` is the sole active card. The authoritative
-decision record remains unchanged.
+`Phi_SR = 41`. `RCS-03C3C3C2A` was the sole presented card; the later
+post-answer audit proved D1 was also prerequisite-ready but queued. The
+authoritative decision record remains unchanged.
 
 C2A asks whether a prospectively bound participant setting may change the
 permission law for the same held-fixed exact selected pair:
@@ -9817,7 +9873,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 06:23 UTC — authoritative exact-overlap route selected](docs/handoffs/2026-09-26-0623--relic-exact-route-selected.md)**
+[2026-09-26 06:46 UTC — intrinsic exact-overlap permission selected](docs/handoffs/2026-09-26-0646--relic-intrinsic-permission-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

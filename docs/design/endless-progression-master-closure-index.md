@@ -2522,9 +2522,12 @@ configuration answer grants a live proc-time prompt: invocation remains
 cut-atomic and automatic. `RCS-02` retains holder, consent, and information
 promises, while `RCS-13` retains binding, reconfiguration, evolution, and lock
 horizons. A canonical complete bound permission law `w` has one allow
-probability `pi_w(o)` for each reachable exposed fixed exact opportunity `o`;
-it is stochastic-capable exactly when some such opportunity has
-`0 < pi_w(o) < 1`. Seed secrecy or implementation shape cannot alter that
+probability `pi_w(o)` for each reachable exposed fixed exact opportunity `o`
+after every prospective binding and all earlier committed authoritative state,
+regardless of random origin, are fixed. It is stochastic-capable exactly when
+some such opportunity has `0 < pi_w(o) < 1` immediately before the designated
+permission realization. Seed secrecy, implementation shape, catalog mixtures,
+or averaging over earlier committed random state cannot alter that
 classification. An exact-and-related hybrid opportunity still has one
 probability and one permission bit, never two form votes or draws. Permission
 denial cannot retry the selector or route to another ledger.
@@ -2535,9 +2538,40 @@ register would have eighty-six slots and `Phi_SR = 40`. Replacing old counted G
 with G1/G2 adds one further slot and potential card. The corrected register has
 eighty-seven slots: 40 `SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`, 32
 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 41`.
-`RCS-03C3C3C2A` is the sole active card. Its answer must precede every later
-permission-language, randomness, incidence, and distinct-related exposure
-question.
+`RCS-03C3C3C2A` is the sole presented card. Its answer must precede every later
+permission-language, permission-randomness, and exact-incidence question.
+Distinct-related exposure at D1 is independently prerequisite-ready from the
+selected tuple but remains queued under the one-card protocol.
+
+**Post-answer screen and twenty-sixth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3C2A-A`: no participant-semantic setting changes
+the complete permission law for a matched held-fixed exact selected pair.
+Permission is intrinsic to every applicable versioned Relic/relationship
+contract. C2B, C2C1, and C2C2 therefore prune; C2D becomes the current
+owner-facing card.
+
+A bounded read-only challenge upheld those pruning consequences but broke the
+old statement that C2E logically precedes D1. Distinct-related exposure is
+already a property of the authoritative selected tuple before permission acts.
+D1 is therefore ready independently after C1-B and remains a `SCREEN` row
+queued while C2D is the single presented `OWNER-OPEN` card. If D1-B is later
+selected, D2 still receives its own fresh permission-law screen. Traversing the
+exact lane first lets both forms share one normalized one-bit vocabulary, but
+neither C2E nor D2 removes the other's legal options; a conflicting hybrid
+restriction instead makes the resolved hybrid intersection empty.
+
+The same challenge repaired C2D's conditioning boundary. Its canonical law set
+fixes all prospective bindings and every earlier committed authoritative
+state—even state that originated randomly—before measuring `pi_w(o)`
+immediately before one designated permission realization. A persisted
+acquisition coin selecting an always-allow or always-deny variant is not a 50%
+permission draw, and a deterministic context-responsive law may map different
+fixed opportunities to zero and one without becoming stochastic.
+
+No counted row is added. The register now has eighty-seven slots: 36 `SCREEN`,
+1 `OWNER-OPEN`, 13 `PRUNED`, 33 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 37`. C2D is the current presented card; D1 is
+prerequisite-ready but queued.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -2600,14 +2634,14 @@ overcompression.
 | `RCS-03C3C3B4A` | Stochastic support across canonical complete bound whole-stance routing laws: deterministic-only, universally stochastic-capable, or coexistence | `DIR-SELECTED`; A makes every canonical complete bound stance law deterministic on every reachable fixed nonrandom selector input; B2 relational responsiveness remains legal, while exact routing-law authoring, disclosure, acquisition, lock, migration, realization, replay, evaluation, and retry stay routed to their existing owners |
 | `RCS-03C3C3B4B` | Product-factorized versus correlated joint tuple draws when stochastic singleton selection exists | `PRUNED`; B4A-A admits no stochastic routing law and therefore no joint-draw coupling question |
 | `RCS-03C3C3C1` | Post-routing authoritative exact-form exposure support among resolved pair opportunities | `DIR-SELECTED`; B requires nonempty `E^{resolved-exact}_v`, so at least one reachable bound routing stance selects an authoritative exact-overlap pair without granting joint survival |
-| `RCS-03C3C3C2A` | Material participant permission-configurability prevalence across exact-exposure-capable versioned Relic treatment contracts | `OWNER-OPEN`; classify participant-configurable support as empty, universal, or nonempty proper; prospectively bound settings differ materially only when their complete permission laws differ on a matched held-fixed exact pair, and the permission force may be bundled into a routing stance |
-| `RCS-03C3C3C2B` | Independently recombinable participant permission-coordinate prevalence among permission-configurable contracts | `SCREEN`; conditional on C2A-B/C; classify empty, universal, or nonempty proper independent support; independence means permission can vary while routing orientation stays fixed, whereas a whole routing stance may carry an inseparable permission force without supplying this coordinate |
-| `RCS-03C3C3C2C1` | Constructive participant permission-language prevalence across all participant-configurable permission forces | `SCREEN`; follows every C2B answer after C2A-B/C, including coupled-only C2B-A; classify closed indivisible authored settings, bounded typed construction throughout, or coexistence without deciding conditional branching |
-| `RCS-03C3C3C2C2` | Participant-composed context-branching prevalence among constructive-capable permission forces | `SCREEN`; conditional on C2C1-B/C; classify empty, universal, or nonempty proper branching support; otherwise pruned, and no participant configuration creates a live proc-time prompt |
-| `RCS-03C3C3C2D` | Stochastic support across canonical complete bound permission laws after applicable configuration and language rows | `SCREEN`; follows the applicable C2A-C2C2 route; classify deterministic-only, universally stochastic-capable, or coexistence, where stochastic-capable means some reachable exposed fixed exact opportunity has `0 < pi_w(o) < 1`; a hybrid exact-and-related pair has one probability and denial cannot retry or reroute |
+| `RCS-03C3C3C2A` | Material participant permission-configurability prevalence across exact-exposure-capable versioned Relic treatment contracts | `DIR-SELECTED`; A makes participant permission-configurability empty, so every applicable contract's exact-overlap permission law is intrinsic while Relic, relationship, and factual-context variation remains legal |
+| `RCS-03C3C3C2B` | Independently recombinable participant permission-coordinate prevalence among permission-configurable contracts | `PRUNED`; C2A-A admits no participant-configurable permission force and therefore no independently recombinable permission coordinate |
+| `RCS-03C3C3C2C1` | Constructive participant permission-language prevalence across all participant-configurable permission forces | `PRUNED`; C2A-A leaves no participant permission language, coupled or independent, to classify |
+| `RCS-03C3C3C2C2` | Participant-composed context-branching prevalence among constructive-capable permission forces | `PRUNED`; C2A-A leaves no participant-constructed permission force and therefore no participant-composed permission branching |
+| `RCS-03C3C3C2D` | Stochastic support across canonical complete bound permission laws after applicable configuration and language rows | `OWNER-OPEN`; classify deterministic-only, universally stochastic-capable, or coexistence after all prospective bindings and earlier committed authoritative state are fixed, where stochastic-capable means some reachable fixed exact opportunity has `0 < pi_w(o) < 1` immediately before one designated permission realization; a hybrid exact-and-related pair has one probability and denial cannot retry or reroute |
 | `RCS-03C3C3C2E` | Exact-form permission incidence after permission-law stochastic topology is settled | `SCREEN`; follows C2D and requires a fresh prerequisite audit before options are written, especially if stochastic laws exist; remains one resolved-pair joint-survival permission bit |
-| `RCS-03C3C3D1` | Post-routing authoritative distinct-related-form exposure support among resolved pair opportunities | `SCREEN`; follows C2E; choose empty or nonempty `R^{resolved-related}_v` without granting joint survival |
-| `RCS-03C3C3D2` | Distinct-related-form restriction of the same resolved-pair joint-survival permission set | `SCREEN`; conditional on D1-B and a fresh authority/randomness prerequisite screen; classify exposed related opportunities as permission-empty, universal, or nonempty proper; one exact-and-related pair retains one permission bit |
+| `RCS-03C3C3D1` | Post-routing authoritative distinct-related-form exposure support among resolved pair opportunities | `SCREEN`; independently prerequisite-ready after C1-B because exposure precedes permission, but queued behind the current exact-permission traversal; choose empty or nonempty `R^{resolved-related}_v` without granting joint survival |
+| `RCS-03C3C3D2` | Distinct-related-form restriction of the same resolved-pair joint-survival permission set | `SCREEN`; conditional on D1-B and its own fresh authority/randomness prerequisite screen; intentionally queued behind exact-first traversal but not logically dependent on C2E, and one exact-and-related pair retains one permission bit |
 | `RCS-03C3C3E` | Result disposition and survivor cardinality when two individually satisfied overlapping tags receive a false joint-survival permission bit | `SCREEN`; follows applicable C2E/D2 permission restrictions and their stochastic topology; prunes only if no selected overlap reaches treatment or every applicable exposed pair is permitted with probability one; a realized false bit enters this route once without redraw or rerouting |
 | `RCS-03C3C3F` | Authority selecting the survivor or legal substitute for a denied pair | `SCREEN`; conditional on C3C3E admitting a positive nonunique result; otherwise `PRUNED` or `DERIVED`; exact priority keys remain later only after authority is settled |
 | `RCS-03C3C3G1` | Support for at least three simultaneously individually ledger-satisfied receipt tags before within-evaluation treatment | `SCREEN`; follows the pair route; choose empty or nonempty support without treating engine callbacks or alternate ledger assignments as additional contenders |
@@ -2814,13 +2848,21 @@ and conditional joint stochastic permission-draw coupling G2. Replacing one
 counted G row with those two adds one slot and one potential card. The corrected
 register has **eighty-seven slots**: 40 `SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`,
 32 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
-`Phi_SR = 41`, and `RCS-03C3C3C2A` is the sole active card.
+`Phi_SR = 41`, and `RCS-03C3C3C2A` is the sole presented card; the
+twenty-sixth correction later proves D1 was independently ready but queued.
+`RCS-03C3C3C2A-A` then selects intrinsic permission for every applicable
+contract, moves C2A to `DIR-SELECTED`, prunes C2B/C2C1/C2C2, and activates
+C2D. The same correction fixes earlier committed state before C2D's probability
+measurement and removes the false C2E-to-D1 dependency without adding a row.
+The current register has **eighty-seven slots**: 36 `SCREEN`, 1 `OWNER-OPEN`,
+13 `PRUNED`, 33 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`. C2D is the current presented card and D1 is ready but queued.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-forty-one owner cards under this twenty-five-times-corrected charter and will
+thirty-seven owner cards under this twenty-six-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -2842,7 +2884,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 87 frozen candidate slots; current `Phi_SR = 41` after `RCS-03C3C3C1-B` selects nonempty authoritative exact exposure and the adversarially corrected twenty-fifth amendment separates participant permission topology, permission stochasticity/incidence, and conditional multi-pair draw coupling | At most 41 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 87 frozen candidate slots; current `Phi_SR = 37` after `RCS-03C3C3C2A-A` makes permission intrinsic, prunes three participant-control rows, and the twenty-sixth correction fixes stochastic conditioning plus the independent D1 frontier | At most 37 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
