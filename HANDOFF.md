@@ -3386,8 +3386,9 @@ exploit.
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
   ~~`Bash(git push *)` stays in `ask`, so ask before every push regardless.~~
   ► **NO LONGER TRUE (owner, 2026-09-12): it is in `permissions.allow` and a
-    push does not prompt.** `main`, `master` and every force form stay DENIED,
-    which is where the safety actually lived.
+    push does not prompt.** ~~`main`, `master` and~~ every force form stays
+    DENIED, which is where the safety actually lived. *(Corrected 2026-09-26:
+    the owner dropped the main/master push denies; see AGENTS.md.)*
 
   ► **AND THE REWRITE STILL LEFT A DECAYING CLAUSE IN, WHICH IS THE WHOLE
     LESSON REPEATING ITSELF INSIDE THE PARAGRAPH ABOUT IT.** The version that

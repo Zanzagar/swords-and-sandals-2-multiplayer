@@ -78,9 +78,13 @@ there never reaches the next reader.
   because the fixtures derive from a licensed game and what left this machine
   was treated as the owner's call; the owner removed it in chat and at the
   approval screen. **What still binds is the part that carried the safety:
-  `main` and `master` are DENIED outright, as are `--force`, `-f` and
-  `--force-with-lease`, and deny beats everything — no allow entry reaches
-  them.** `Bash(git push *)` is now in `permissions.allow`; the two
+  ~~`main` and `master` are DENIED outright, as are~~ `--force`, `-f` and
+  `--force-with-lease` are DENIED, and so is deleting `main`/`master`; deny
+  beats everything — no allow entry reaches them.** **Pushing `main` is no
+  longer denied (the owner, 2026-09-26: "drop SS2's block on pushing main"):
+  SS2 is at the harness floor, where agents push `main` and merge their own
+  PRs; fast-forward `main` after a merge. GitHub branch protection on `main`
+  also blocks force-pushes and deletion.** `Bash(git push *)` is now in `permissions.allow`; the two
   `git push --delete` forms stay in `ask`, and `.claude/settings.json` records
   the one thing to watch there.
 
