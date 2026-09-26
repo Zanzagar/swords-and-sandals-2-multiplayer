@@ -1,5 +1,63 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 deterministic intrinsic exact permission — RCS-03C3C3C2D-A selected
+
+The owner selected `RCS-03C3C3C2D-A`: every canonical complete intrinsic
+exact-permission law returns a certain zero-or-one bit for every reachable
+fixed opportunity. The same opportunity never changes through a permission
+draw. Laws may still respond deterministically across reachable contexts;
+combat RNG, acquisition randomness, and earlier committed random state remain
+outside this answer.
+
+The fresh C2E prerequisite audit ran two distinct read-only questions and then
+cross-challenged their first repairs. A single global empty/universal/mixed
+incidence card remained overcompressed. Catalogs can share mixed incidence
+while differing on whether any complete law is responsive, whether a response
+is caused by a legal player action, and whether stable always-allow or always-
+deny law builds exist.
+
+Old C2E is now a non-counting parent for three rows. E1 classifies complete
+laws whose reachable deterministic image is `{0,1}` as absent, universal, or
+coexisting with context-invariant laws. Conditional E2 asks whether any
+responsive law has a matched player-causal factual witness while law, Relic/
+relationship identities, stance, prior state, and selected exact pair remain
+fixed, as do all independent inputs outside one legal action's complete factual
+delta. Inseparable consequences belong to that delta, and changing its field
+representation cannot change classification. Conditional E3 classifies
+context-invariant laws as always-deny only, always-allow only, or both. E1/E3
+project to the seven nonempty class-support combinations; E2 is orthogonal
+where responsive laws exist, yielding eleven terminal paths. Global exact
+incidence is therefore derived rather than a fourth vote.
+
+E1-A prunes E2 and activates E3. E1-B activates E2 and prunes E3. E1-C makes
+E2/E3 independent siblings and queues E2 first. Deterministic response is not
+stochastic coupling and does not activate G2. A player action changing a factual
+input to the same intrinsic law does not violate C2A-A.
+
+The amended eighty-nine-slot register contains 37 `SCREEN`, 1 `OWNER-OPEN`, 13
+`PRUNED`, 34 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 38`. `RCS-03C3C3C2E1` is the current presented card. D1 remains
+independently prerequisite-ready but queued. The authoritative decision record
+remains unchanged.
+
+E1 asks whether deterministic intrinsic permission laws are steadfast,
+responsive, or both:
+
+- A: every law is context-invariant and therefore always denies or always
+  allows throughout its reachable exact domain. E2 prunes; E3 decides polarity
+  class support.
+- B: every law is responsive, with at least one certain-allow and one certain-
+  deny reachable context. E2 opens; E3 prunes. This does not yet guarantee
+  player actionability.
+- C: responsive and context-invariant laws coexist. Recommend C for conditional
+  covenants beside steadfast witness builds. A responsive law can directly
+  express unity-with-difference; catalog coexistence itself is aggregate. The
+  costs are two prediction dialects and constant-class premium/trap risks.
+
+Different canonical law identities or unreachable branches cannot manufacture
+responsiveness. Exact identities, triggers, counts, distribution, information,
+binding horizon, outcome, payoff, and implementation remain unsettled.
+
 ## 2026-09-26 intrinsic exact-overlap permission — RCS-03C3C3C2A-A selected
 
 The owner selected `RCS-03C3C3C2A-A`: no participant-semantic setting may
@@ -30,11 +88,11 @@ bindings, facts, tuple/pair, and prior committed state are fixed. Context-
 responsive zero/one laws remain deterministic; catalog mixtures and hidden
 information do not establish stochastic permission.
 
-No row was added. The eighty-seven-slot register now contains 36 `SCREEN`, 1
+No row was added at that checkpoint. The eighty-seven-slot register contained 36 `SCREEN`, 1
 `OWNER-OPEN`, 13 `PRUNED`, 33 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 37`. C2D is the current presented card and D1 is
-prerequisite-ready but queued. The authoritative decision record remains
-unchanged.
+`EVALUATE`; `Phi_SR = 37`. C2D was the presented card and D1 was
+prerequisite-ready but queued. The newer section records C2D-A and the C2E
+amendment. The authoritative decision record remains unchanged.
 
 C2D asks whether canonical complete intrinsic exact-permission laws may retain
 a genuine allow/deny draw on a fixed opportunity:
@@ -9873,7 +9931,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 06:46 UTC — intrinsic exact-overlap permission selected](docs/handoffs/2026-09-26-0646--relic-intrinsic-permission-selected.md)**
+[2026-09-26 07:09 UTC — deterministic intrinsic exact permission selected](docs/handoffs/2026-09-26-0709--relic-deterministic-permission-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

@@ -4359,8 +4359,96 @@ two prediction dialects and a premium-gamble balance risk.
 
 No new row is required. Applying C2A-A produces 87 rows: 36 `SCREEN`, 1
 `OWNER-OPEN`, 13 `PRUNED`, 33 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 37`. C2D is the current presented card and D1 is ready
-but queued. The authoritative decision record remains unchanged.
+`EVALUATE`; `Phi_SR = 37`. At that checkpoint, C2D was the presented card and
+D1 was ready but queued. The authoritative decision record remains unchanged.
+
+The owner selected C2D-A. Every complete intrinsic exact-permission law is
+deterministic on every reachable fixed opportunity: its `pi_w(o)` is zero or
+one after bindings, facts, and prior committed state are fixed. Context-to-
+context response remains legal, but permission itself makes no fresh draw.
+
+The required C2E prerequisite audit used two read-only questions rather than
+replicated briefs: one attacked the incidence denominator and the other asked
+which differences change legal player policies under the master admission
+test. Their first repairs disagreed. The incidence audit initially proposed a
+broad constant-versus-responsive prevalence split; the gameplay audit initially
+proposed only binary player-causal support. Cross-challenge broke both:
+
+- a broad response class can vary only with immutable structure and furnish no
+  player action; but
+- binary actionable support cannot distinguish an otherwise identical catalog
+  that adds an always-allow Stone Witness law, which alone supplies a guaranteed
+  exact-compatibility build. The master admission test expressly admits a
+  required or excluded content family when it changes viable play.
+
+The smallest repair needs three counted rows and no separate global-incidence
+card. For each conditioned `w`, let nonempty `O_w` contain only reachable
+authoritative resolved-exact opportunities governed by that canonical semantic
+law. Under C2D-A define `b_w(o)=pi_w(o)` in `{0,1}`. Dormant or unreachable
+branches, alternate unselected ledgers, aliases, callback copies, and replay do
+not enter `O_w`; a hybrid exact-related pair enters once. Relationship identity
+is part of the semantic law key, so moving identity dispatch between one switch
+and several functions cannot change classification.
+
+Let
+
+`R^{exact-resp}_v={w : {b_w(o) : o in O_w}={0,1}}`
+
+and let `K_v=W^{exact-perm-law}_v setminus R^{exact-resp}_v`. Every law in
+`K_v` is context-invariant and, because its domain is nonempty, either always
+denies or always allows. E1 classifies `R` as empty, all, or nonempty proper.
+This decides whether the product contains only steadfast permission identities,
+only responsive covenants, or both. It changes viable reliable versus
+condition-dependent build families even before exact content placement is
+authored.
+
+If `R` is nonempty, E2 asks whether any responsive law has a matched
+player-causal witness. Such a witness holds the canonical law, versioned Relic
+and relationship identities, bound stance, prior committed state, selected
+exact pair and proof structure, and every independently variable permission
+input outside one legal upstream participant or counterplay action's complete
+authoritative factual delta fixed. That action, including all inseparable
+consequences, must flip the bit. Splitting the same delta across stored fields,
+or combining those fields, cannot change classification. Variation only by
+tag/relationship identity, selected tuple, an unalterable flag, or an earlier
+randomly chosen persistent variant is not that witness. E2 is binary
+empty/nonempty: one witness creates the new legal action type; universal
+saturation is AUTHOR/SPEC unless a distinct nonactionable-responsive build
+purpose later earns reopening.
+
+If `K` is nonempty, E3 classifies its always-allow subset as empty, all, or
+nonempty proper. These are always-deny only, always-allow only, or both stable
+polarity classes. The E1/E3 class-support projections enumerate exactly the
+seven nonempty combinations `D`, `A`, `D+A`, `R`, `R+D`, `R+A`, and
+`R+D+A`, where `R` is responsive, `D` always-deny, and `A` always-allow.
+E2's binary result is orthogonal wherever `R` is nonempty, so the three rows
+have eleven terminal decision paths rather than seven. Global exact permission
+incidence follows mechanically: deny-only is empty, allow-only is universal,
+and every other combination is mixed. Asking incidence again would duplicate
+rather than advance the frontier.
+
+E1-A prunes E2 and activates E3. E1-B activates E2 and prunes E3. E1-C makes
+E2 and E3 independent siblings; present E2 first because it changes a direct
+player/counterplay action. A factual action under E2 does not violate C2A-A:
+the participant changes an input to the same intrinsic law, not the law through
+a permission setting. Deterministic response also supplies no nonconstant
+stochastic marginal and cannot activate G2.
+
+Recommend E1-C. It guarantees at least one lived responsive covenant and at
+least one context-invariant build family. A responsive law can directly embody
+*Achintya Bheda Abheda*: the same deed participates in two distinct
+relationships in one real context and remains distinct without joint survival
+in another. Catalog coexistence itself is only aggregate. The tradeoff is two
+prediction dialects plus premium/trap risks around whichever constant-polarity
+class or classes E3 later admits; E2/E3 and later balance/evaluation must keep
+the admitted families meaningful.
+
+Replacing counted C2E with E1/E2/E3 adds two rows and two potential cards.
+After C2D-A selects one former open row and E1 opens, the corrected register has
+89 rows: 37 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 34 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. E1 is the current
+presented card and D1 remains independently ready but queued. The authoritative
+decision record remains unchanged.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

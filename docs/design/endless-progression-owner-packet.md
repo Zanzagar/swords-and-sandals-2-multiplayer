@@ -296,8 +296,12 @@ intrinsic to every applicable Relic/relationship contract and pruning the
 participant permission-coordinate and language rows. A twenty-sixth
 prerequisite audit corrected the traversal graph: distinct-related exposure is
 already independently decidable from the selected tuple, although the one-card
-protocol queues it while RCS-03C3C3C2D is the current owner-facing choice under
-SR-03.
+protocol queues it behind the exact lane. The owner selected
+RCS-03C3C3C2D-A, making every intrinsic exact-permission law deterministic on
+each fixed opportunity. A twenty-seventh prerequisite audit then split old C2E
+into responsive-law prevalence, conditional player-actionable response, and
+conditional constant-law polarity. RCS-03C3C3C2E1 is the current owner-facing
+choice under SR-03; D1 remains independently ready but queued.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -22230,9 +22234,9 @@ decision record remains unchanged.
 > No new row is needed. After the ordinary C2A-A transition, the eighty-seven-
 > row register contains 36 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 33
 > `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`.
-> C2D is the current presented card, while D1 is ready but queued.
+> At that checkpoint C2D was the presented card, while D1 was ready but queued.
 
-### RCS-03C3C3C2D — stochastic support across intrinsic exact-permission laws — active owner choice
+### RCS-03C3C3C2D — stochastic support across intrinsic exact-permission laws — direction selected
 
 C2D asks whether an intrinsic complete exact-overlap permission law may require
 a genuine allow/deny draw after everything that can already authoritatively
@@ -22283,6 +22287,121 @@ is another owner-facing topology or AUTHOR/SPEC/TUNE work. D1 remains
 independently ready but queued under the one-card protocol. Any answer moves
 C2D to `DIR-SELECTED` and sends C2E through that audit. The authoritative
 decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **A, deterministic
+intrinsic laws only.** `G^{exact-perm-stoch}_v` is empty. For every canonical
+complete intrinsic exact-permission law and every reachable fixed opportunity,
+`pi_w(o)` is either zero or one. Replaying the same authoritative opportunity
+cannot change the permission bit through chance. A law may still return
+different certain bits in different reachable contexts.
+
+The permission result therefore remains attributable to the authored
+Relic/relationship covenant rather than a third chance arbiter. This protects
+causal explanation, team planning, replay trust, and later player-policy
+comparison while leaving combat RNG, acquisition randomness, and earlier
+committed random state untouched. The cost is less oracular suspense and easier
+solving, so deterministic response and stable law identities must provide the
+gameplay texture.
+
+C2D moves to `DIR-SELECTED`. It selects no exact permission incidence,
+responsive-law prevalence, player-actionable condition, constant-law polarity,
+survivor, candidate, commitment, payoff, or implementation. The authoritative
+decision record remains unchanged.
+
+> **Twenty-seventh prerequisite correction, 2026-09-26:** two bounded
+> read-only audits, cross-challenged against each other's countermodels, found
+> that old C2E's one global empty/universal/mixed card remained
+> overcompressed even after C2D-A removed stochastic laws.
+>
+> For each `w` in nonempty `W^{exact-perm-law}_v`, let `O_w` be its nonempty
+> domain of reachable authoritative resolved-exact opportunities after all
+> bindings and earlier committed state are fixed, and let
+> `b_w(o)=pi_w(o)` in `{0,1}`. Dormant branches, unreachable contexts,
+> unselected ledgers, aliases, callbacks, and replay copies are excluded. A
+> hybrid exact-related pair occurs once. The canonical semantic law key fixes
+> the versioned Relic/relationship contract; refactoring one switch into many
+> functions cannot change classification.
+>
+> Let `R^{exact-resp}_v` contain laws whose reachable image is `{0,1}`. These
+> are responsive laws: they certainly allow some reachable exact opportunities
+> and certainly deny others. Let `K_v=W^{exact-perm-law}_v setminus
+> R^{exact-resp}_v`; every member of `K_v` is context-invariant and therefore
+> either always-deny or always-allow. A catalog containing only responsive laws
+> and an otherwise identical catalog that adds an always-allow Stone Witness
+> agree on global mixed incidence but expose different legal builds: only the
+> latter offers guaranteed exact compatibility. Stable law-family support
+> therefore cannot be hidden in AUTHOR work.
+>
+> Responsiveness also does not prove actionability. A law may vary only with an
+> immutable or externally fixed fact. A matched player-causal witness must keep
+> version/law, Relic and relationship identities, bound stance, prior committed
+> state, selected exact pair and proof structure, and every independently
+> variable permission input outside one legal upstream player or counterplay
+> action's complete authoritative factual delta fixed. That action, including
+> all of its inseparable consequences, must flip the deterministic bit.
+> Splitting that same delta across several stored fields—or combining those
+> fields into one—cannot change the witness classification. Changing the law,
+> tag identities, selected tuple, or a committed random-origin variant is not a
+> witness, and invocation still has no live permission prompt.
+>
+> Old `RCS-03C3C3C2E` therefore becomes a non-counting parent for three rows:
+>
+> 1. `RCS-03C3C3C2E1` — responsive-law prevalence across complete intrinsic
+>    exact-permission laws;
+> 2. conditional `RCS-03C3C3C2E2` — matched player-causal factual-response
+>    support among responsive laws; and
+> 3. conditional `RCS-03C3C3C2E3` — always-deny versus always-allow polarity
+>    among context-invariant laws.
+>
+> E1-A prunes E2 and activates E3. E1-B activates E2 and prunes E3. E1-C makes
+> E2 and E3 independent siblings; queue E2 first because it changes a direct
+> player/counterplay action, then E3. E2 is an empty/nonempty support boundary;
+> requiring actionability on every responsive law is a stronger authoring
+> minimum unless a distinct nonactionable-responsive build purpose later earns
+> reopening. E3 classifies the always-allow subset of nonempty `K_v` as empty,
+> all, or nonempty proper. The E1/E3 class-support projections enumerate the
+> seven possible nonempty combinations of responsive, always-deny, and always-
+> allow law classes. E2 is orthogonal wherever the responsive class is
+> nonempty, producing eleven terminal decision paths across the three rows.
+> Overall exact permission incidence is then derived, not a fourth owner card.
+>
+> Replacing one counted C2E row with three adds two slots and two potential
+> cards. After recording C2D-A and opening E1, the amended register has
+> **eighty-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 34
+> `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+> E1 is the current presented card; D1 remains prerequisite-ready but queued.
+
+### RCS-03C3C3C2E1 — responsive intrinsic exact-permission law prevalence — active owner choice
+
+C2D-A makes every fixed opportunity certain, but it does not decide whether a
+complete law gives the same bit everywhere in its reachable exact domain. E1
+asks whether the completed catalog must support responsive laws, context-
+invariant laws, or both. “Responsive” here means only that one law takes both
+certain values somewhere; E2 later decides whether a player can deliberately
+cause any such change.
+
+| Choice | Responsive-law prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every law is context-invariant** | `R^{exact-resp}_v` is empty, so `K_v=W^{exact-perm-law}_v`. Each complete law either always permits or always denies every reachable exact opportunity in its domain. E2 prunes and E3 decides which constant polarity classes exist. | A gives every Relic/relationship covenant a steadfast compatibility identity. It is easiest to explain, compare, and plan around, and supports reliable build selection. Its fit is **neutral/protective**: any always-allow law may realize one-deed/two-relationship unity, but no law expresses both unity and distinction through changing circumstances. Costs are less in-battle covenant play and strong pressure for always-allow laws to become obvious premiums unless always-deny laws receive another real purpose. | Ashen's complete law returns the same bit in every reachable exact context. Stone Witness may have the opposite constant bit, but E1 does not decide that; E3 does. |
+| **B — every law is responsive** | `R^{exact-resp}_v=W^{exact-perm-law}_v`. Every complete law certainly allows at least one reachable exact opportunity and certainly denies at least one other. No context-invariant exact-permission build exists. E2 opens and E3 prunes. | B makes conditional covenant behavior universal. Every exact-capable law carries both union and refusal somewhere in its domain, which can give each relationship a direct unity-with-difference expression when authored legibly. It prevents a permanent guaranteed-compatibility or guaranteed-conflict build. Costs are universal prediction burden, loss of iconic steadfast Relics, and the possibility that “responsive” is merely descriptive rather than player-actionable until E2 is answered. | Ashen, Stone Witness, and every other law each have at least one certain-allow and one certain-deny reachable context. E1 does not yet promise that players can intentionally move between them. |
+| **C — responsive and context-invariant laws coexist** | `R^{exact-resp}_v` is a nonempty proper subset of `W^{exact-perm-law}_v`. At least one complete law takes both bits across its domain and at least one distinct law is always-deny or always-allow. E2 and E3 both remain applicable. | **Recommended.** C preserves lived conditional covenants beside steadfast witness Relics, supporting both context-solving and reliable build identities. A responsive law can directly express *Achintya Bheda Abheda*: one unchanged deed participates in two distinct relationships under some real conditions and not others. The catalog coexistence itself is only aggregate. Costs are two prediction dialects, more explanation and balance work, and premium/trap risks around the constant classes that E3 must later constrain. | Ashen certainly permits the shared-Heat pair in one reachable context and denies it in another, while Stone Witness applies one constant bit throughout its domain. E2 later asks whether Ashen's change is player-causal; E3 later decides Stone Witness's polarity class. |
+
+A/B/C are mutually exclusive and exhaustive because
+`R^{exact-resp}_v` is empty, all of nonempty
+`W^{exact-perm-law}_v`, or a nonempty proper subset. One unreachable deny branch
+does not make an always-allow law responsive, and differing outputs from two
+canonical law identities do not make either law responsive. Deterministic
+response supplies no nonconstant stochastic marginal and cannot by itself
+activate G2.
+
+E1 chooses no exact law identity, trigger, count, distribution, actionability,
+constant polarity, information promise, binding horizon, survivor, candidate,
+commitment, payoff, or implementation. A stronger guarantee that every Relic
+definition contains both responsive and context-invariant contracts is a
+replacement path, not hidden inside C. Any answer moves E1 to
+`DIR-SELECTED`. A prunes E2 and activates E3; B activates E2 and prunes E3; C
+activates both independent siblings, with E2 presented first. D1 remains ready
+but queued. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 
