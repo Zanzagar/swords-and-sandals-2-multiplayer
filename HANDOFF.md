@@ -28,9 +28,11 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-24 14:50 — the team HUD is built, and the gate waits](docs/handoffs/2026-09-24-1450--the-team-hud-is-built-and-the-gate-waits.md)**
-(the END of session `e75af16c`, which continued `b64d8f55`). Start there.
-*(It supersedes
+[2026-09-25 23:40 — the HUD is in the frame](docs/handoffs/2026-09-25-2340--the-hud-is-in-the-frame.md)**
+(session `5bb96879`). Start there. *(It supersedes
+[2026-09-24 14:50 — the team HUD is built, and the gate waits](docs/handoffs/2026-09-24-1450--the-team-hud-is-built-and-the-gate-waits.md),
+**whose item 1 (the gate) is on harness main but NOT adopted by SS2 — two new Codex findings must land
+first — and whose item 2 (ring3) is not started.**)* *(That one supersedes
 [2026-09-24 11:48 — the night merged, and the HUD is decided](docs/handoffs/2026-09-24-1148--the-night-merged-and-the-hud-is-decided.md),
 **whose in-flight items 1-2 are MERGED, item 3 (the gate) is BUILT BUT NOT
 ADOPTED, and item 4 (ring3) is not started.**)* *(That one supersedes
