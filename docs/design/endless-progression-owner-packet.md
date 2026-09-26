@@ -263,8 +263,12 @@ survival or commitment. The owner then selected RCS-03C3C2-C, requiring both
 exact-child and distinct-related overlap-form support. An eighteenth
 prerequisite audit split the still-bundled within-evaluation treatment row
 into nine finite ledger, permission, denied-pair, and over-cap arbitration
-boundaries. RCS-03C3C3A, alternate-ledger multiplicity support, is the active
-owner choice under SR-03.
+boundaries. The owner selected RCS-03C3C3A-B, requiring at least one reachable
+alternate-ledger state. A nineteenth prerequisite audit then split old
+conditional RCS-03C3C3B into four rows: authoritative ledger-domain topology,
+conditional factorized-versus-joint selection, conditional selection
+authority, and conditional stochastic-selection support. RCS-03C3C3B1,
+ledger-domain topology, is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -21247,7 +21251,7 @@ decision record remains unchanged.
 > this amendment records their distinct consequence boundaries without
 > prematurely choosing their options.
 
-### RCS-03C3C3A — within-tag alternate-ledger support — active owner choice
+### RCS-03C3C3A — within-tag alternate-ledger support — direction selected
 
 C2-C says both overlap forms exist somewhere, but it does not say whether one
 receipt tag can be proved in more than one genuinely different way at the
@@ -21287,6 +21291,109 @@ forbidden under both options. Selecting B moves C3C3A to `DIR-SELECTED`, makes
 C3C3B `OWNER-OPEN`, and reduces `Phi_SR` from 36 to 35. Selecting A additionally
 prunes C3C3B, makes C3C3C active, and reduces `Phi_SR` from 36 to 34. The
 authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, require at
+least one alternate-ledger state.** `A^{intra-ledger}_v` is nonempty. The
+completed catalog must contain at least one reachable fixed `(e,h,j)` for
+which `Lambda_v(e,h,j)` contains at least two canonical valid ledgers that
+differ in a final child assignment. This is a support promise only: aliases
+still canonicalize, and the answer creates no chooser, prompt, permission,
+candidate, claim, consumption, commitment, or payoff.
+
+One continuing receipt relationship can therefore admit genuinely distinct
+proof embodiments at one state. That is a **partial** unity-with-difference
+fit at this boundary: the relationship identity continues and the proof
+plurality is real, but no embodiment is yet operative. It opens proof-routing,
+redundancy, and scarce-resource-preservation play while carrying proof-choice
+opacity and solver burden forward. In the running witness, P is valid through
+`L_h={Guard g, Heat h}` and `L_v={Guard g, Vow v}`, while Q uses
+`{Return t, Heat h}`. The first P ledger overlaps Q and the second does not.
+
+C3C3A moves to `DIR-SELECTED` and old C3C3B would become `OWNER-OPEN`.
+Before the prerequisite correction below, the seventy-three-slot register
+would contain 34 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 26 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. The authoritative
+decision record remains unchanged.
+
+> **Nineteenth prerequisite correction, 2026-09-26:** three bounded read-only
+> named-claim audits broke old conditional `RCS-03C3C3B` as one
+> prerequisite-ready resolver card. It hid four independently variable
+> player-material boundaries: what ledger-domain object remains authoritative;
+> whether singleton selection is stable per tag or may optimize jointly across
+> the ledger product; whether a system rule or prospectively bound participant
+> policy supplies that selection; and whether fixed visible inputs determine
+> one result or admit random selection. A live proc-time prompt and a resolver
+> that selects after consulting permission, payoff, claims, or the favorable
+> outcome remain invalid under already-selected cut-atomic automatic
+> invocation and C3C3A-B's explicit safeguards.
+>
+> Old `RCS-03C3C3B` is now a non-counting parent for four registered rows:
+>
+> 1. `RCS-03C3C3B1` — authoritative ledger-domain topology: one selected
+>    ledger tuple, complete-product robustness, or prospectively declared
+>    coexistence of those modes;
+> 2. `RCS-03C3C3B2` — conditional tag-local versus joint-product selection;
+> 3. `RCS-03C3C3B3` — conditional system versus participant-precommitted
+>    selection authority, or coexistence; and
+> 4. `RCS-03C3C3B4` — conditional deterministic versus materially random
+>    selection support, or coexistence.
+>
+> B1-B prunes B2-B4 because complete-product robustness selects no tuple.
+> B1-A or B1-C activates B2; B3 follows B2 and B4 follows B3 before form
+> permission at C3C3C-C3C3D. Participant authority in B3 can only be a total
+> prospective standing policy with a deterministic default/fallback; exact
+> decision-holder, consent, communication, and information remain RCS-02,
+> while binding, lock, rebind, and migration timing remain RCS-13. If B4 later
+> admits randomness, seed, replay, reload, and disclosure duties route to
+> RCS-02 and RCS-16-RCS-18.
+>
+> A retained complete product uses universal robustness: joint survival is
+> available only when every authoritative ledger tuple reaches the same
+> permitted conclusion. An existential “use whichever tuple passes” rule is
+> favorable-witness selection after consulting permission and is therefore
+> not a no-selection topology. A filter that leaves a nonempty proper subset
+> of structurally valid tuples is likewise not silently included; it would
+> need an explicit replacement branch because it creates a third authoritative
+> object and an additional aggregation boundary.
+>
+> Replacing one counted B row with four adds three slots and three potential
+> cards. The nineteenth-amendment register therefore contains **seventy-six
+> slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 26 `DIR-SELECTED`, 2
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. B1 is the sole active
+> card. Later rows receive their own prerequisite audit before presentation;
+> this amendment records distinct consequence boundaries without selecting
+> them.
+
+### RCS-03C3C3B1 — authoritative alternate-ledger domain — active owner choice
+
+C3C3A-B makes at least one receipt tag structurally valid through several
+canonical ledgers. For one fixed evaluation, let `J` be the set of individually
+satisfied contender tags and let
+`X=product_{j in J} Lambda_v(e,h,j)` be their complete joint ledger product.
+B1 asks what authoritative object crosses from structural validity into
+overlap classification and permission. It does not yet decide who chooses,
+whether selection is tag-local, or whether it is random.
+
+| Choice | Authoritative-domain rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — one authoritative ledger tuple** | Every reachable multiplicity-positive evaluation resolves `X` to exactly one authoritative tuple before exact/related classification, permission, claims, or outcomes are consulted. The later B2-B4 rows decide its scope, authority, and determinism. | **Recommended.** It turns alternate proofs into usable routing space while preserving one causal receipt account that players and tools can explain. The receipt's unity and its genuinely different proof embodiments remain real, but only one embodiment carries this evaluation, so the ideal fit is **partial** rather than direct. The cost is that priority becomes consequential: a poor or opaque selector can discard a valid route, and the later rows must make that selector predictable and fair. | P has `L_h` and `L_v`; Q has `L_q`. The resolver settles either `(L_h,L_q)` or `(L_v,L_q)` before treatment. Heat-first exposes the exact overlap; Vow-first exposes the independent tuple. Nothing may switch after seeing which result is permitted. |
+| **B — complete-product robustness** | No tuple is selected. Every tuple in `X` remains authoritative, and a joint result can survive only when every tuple passes the later permission rule. One denied tuple vetoes joint survival; an existential favorable witness is forbidden. | This is the strongest consistency countercase. All proof embodiments remain jointly relevant, giving a **direct structural** unity-with-difference fit, and no hidden priority chooses one reality. It also turns extra proofs into possible liabilities: the independent Vow route cannot rescue P and Q from an overlapping Heat route, so C3C3A-B's exciting multiplicity becomes conservative robustness rather than player routing. It is easy to state but can feel punitive and make adding a proof worsen a build. | Both `(L_h,L_q)` and `(L_v,L_q)` remain authoritative. If later rules deny the first and permit the second, the pair is denied because the authoritative product is not unanimously permitted. |
+| **C — selected and robust modes coexist** | Selection-positive and complete-product-robust cases are both nonempty. Each case's mode is prospectively declared and disclosed before evaluation and cannot depend on observed permission, payoff, claim, or outcome. B2-B4 govern only selection-positive cases. | C offers the broadest artifact personalities: an “Attuned” relationship may route through one embodiment while a “Witness” relationship must answer for every embodiment. The local cases inherit A/B's fit; their coexistence is only **aggregate**. The costs are two proof-truth dialects, a larger teaching/UI burden, balance premiums between modes, and a risk that players cannot predict why extra proof helps one Relic but hurts another. | An Attuned P resolves one of `L_h/L_v`; a separately disclosed Witness P retains both. The same visible multiplicity therefore has different treatment semantics only because the case's mode was fixed beforehand, never because one result looked better. |
+
+A/B/C are mutually exclusive and exhaustive over the admitted topology: every
+multiplicity-positive case uses singleton selection, every such case uses
+complete-product robustness, or both kinds of case exist. A prospectively
+filtered multi-tuple proper subset is a replacement path, not a hidden fourth
+meaning of C. If that play pattern is desired, reject these choices and add its
+filter authority plus aggregation consequences explicitly.
+
+B1 grants no live prompt, priority rule, participant authority, random draw,
+joint-survival permission, candidate, claim, consumption, commitment, or
+payoff. Exact keys and case distribution remain AUTHOR/SPEC after topology and
+authority are settled. Under A or C, B2 becomes the next card. Under B, B2-B4
+are pruned and C3C3C becomes active. Any answer moves B1 to `DIR-SELECTED` and
+reduces `Phi_SR` by at least one. The authoritative decision record remains
+unchanged.
 
 ## Session protocol and evidence
 

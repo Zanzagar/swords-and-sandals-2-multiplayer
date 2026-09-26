@@ -1,5 +1,54 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 alternate Relic ledgers — RCS-03C3C3A-B selected
+
+The owner selected `RCS-03C3C3A-B`: the completed catalog must contain at
+least one reachable fixed receipt-tag state with two canonical valid
+position-to-final-child proof ledgers. Aliases and alternate representations
+still canonicalize. The answer creates structural proof plurality only—no
+chooser, prompt, permission, candidate, claim, consumption, commitment, or
+payoff. In the running witness, P is valid through either
+`{Guard g, Heat h}` or `{Guard g, Vow v}`, while Q uses
+`{Return t, Heat h}`; one P/Q tuple overlaps and the other does not.
+
+Three bounded read-only named-claim audits then broke old conditional
+`RCS-03C3C3B` as one card. It hid authoritative ledger-domain topology,
+tag-local versus joint-product selection, system versus participant-
+precommitted selection authority, and deterministic versus random selection.
+Old B is now a non-counting parent for B1-B4. Live proc-time prompts and
+permission/payoff/outcome-favored selection remain invalid. Complete-product
+authority means universal robustness; an existential passing witness is
+selection after inspecting permission, not genuine no-selection. A retained
+proper subset is an explicit replacement path rather than a hidden meaning of
+coexistence.
+
+The seventy-six-slot register now contains 37 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 26 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 38`. `RCS-03C3C3B1` is the sole active card. The authoritative
+decision record remains unchanged because a bare option label selects
+direction but does not complete acceptance.
+
+B1 asks what authoritative object crosses from valid proof plurality into
+overlap classification and permission:
+
+- A: every multiplicity-positive evaluation selects exactly one joint ledger
+  tuple before treatment. Recommend A for legible proof-routing; later rows
+  separately decide tag-local versus joint scope, authority, and randomness.
+- B: no tuple is selected; the complete joint product remains authoritative,
+  and joint survival requires every tuple to pass. This is the strongest
+  consistency countercase but turns an extra proof into a possible liability.
+- C: selected and robust cases both exist, with each case's mode fixed and
+  disclosed prospectively. This permits broader Relic personalities but
+  teaches two proof-truth dialects.
+
+The operative relationship is one receipt identity and its several truthful
+proof embodiments. A preserves both structurally but makes only one embodiment
+operative at this evaluation, a partial Achintya Bheda Abheda fit. B keeps all
+embodiments jointly operative, a direct structural fit with more punitive
+gameplay. C inherits the local fits, while their catalog coexistence is only
+aggregate. Under A/C, B2 follows; under B, B2-B4 prune and exact-form
+permission at C3C3C follows.
+
 ## 2026-09-26 both within-evaluation overlap forms — RCS-03C3C2-C selected
 
 The owner selected `RCS-03C3C2-C`: the completed catalog must support both
@@ -9302,8 +9351,11 @@ support/overlap/form/treatment. The owner selected C1-B, requiring nonempty
 within-evaluation overlap support, then C2-C, requiring both exact-child and
 distinct-related support. An eighteenth audit replaced the still-bundled C3
 with nine ledger, form-permission, denied-pair, and over-cap arbitration rows.
-Continue at registered Relic slot `RCS-03C3C3A` under `SR-03`;
-C3C3B-C3C3I, C4-C7, the distinct claim/reuse rows `RCS-03C3D`-
+The owner then selected C3C3A-B, requiring nonempty alternate-ledger support,
+and a nineteenth audit split old conditional C3C3B into topology, selection-
+scope, selection-authority, and stochastic-selection rows. Continue at
+registered Relic slot `RCS-03C3C3B1` under `SR-03`; B2-B4, C3C3C-C3C3I,
+C4-C7, the distinct claim/reuse rows `RCS-03C3D`-
 `RCS-03C3F`, expanded `RCS-08`, cause, and agency follow separately.
 
 R11 begins only
@@ -9448,7 +9500,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 04:15 UTC — both within-evaluation Relic overlap forms selected](docs/handoffs/2026-09-26-0415--relic-both-overlap-forms-selected.md)**
+[2026-09-26 04:36 UTC — alternate Relic ledgers selected](docs/handoffs/2026-09-26-0436--relic-alternate-ledgers-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

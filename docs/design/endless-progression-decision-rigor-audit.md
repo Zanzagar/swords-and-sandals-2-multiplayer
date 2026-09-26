@@ -3697,6 +3697,67 @@ outcome-favored. Automatic cut-atomic invocation means B creates no live proc
 prompt by itself. A remains the clear, fully legal simplicity countercase and
 does not undo C2-C's two forms across distinct unique-ledger witnesses.
 
+The owner selected `RCS-03C3C3A-B`. Therefore at least one reachable fixed
+tag/state has two or more canonical valid position-to-child ledgers. The
+support answer creates no selector or permission. Before further correction,
+C3C3A moved to `DIR-SELECTED`, old C3C3B became `OWNER-OPEN`, and the
+seventy-three-slot potential fell from 36 to 35.
+
+Three bounded read-only named-claim audits then attacked old C3C3B's
+atomicity, gameplay meaning, and option-space completeness. All three found it
+overcompressed. Their shared countermodel used P ledgers
+`L_h={Guard g, Heat h}` and `L_v={Guard g, Vow v}` with Q ledger
+`L_q={Return t, Heat h}`. The joint product contains one exact-overlap tuple
+and one independent tuple. Four questions can change the result without
+answering one another:
+
+1. Does one tuple become authoritative, does the complete product remain
+   authoritative under universal robustness, or do prospectively declared
+   cases of both types coexist?
+2. In selection-positive cases, is P's chosen ledger stable when Q changes,
+   or may a joint-product resolver change P solely because Q or Q's
+   alternatives are present?
+3. Is selection always system-authored, always governed by a prospectively
+   bound participant policy, or are both disclosed case classes supported?
+4. Once state and any bound policy are fixed, is selection deterministic,
+   random, or split between deterministic and random case classes?
+
+The first gameplay audit also tested global outcome maximization and rejected
+it: it must inspect downstream permission or payoff, making the choice circular
+and outcome-favored. A second apparent no-selection alternative—permit if any
+ledger tuple passes—likewise chooses a favorable witness after permission.
+Genuine complete-product authority is therefore universal: one denied tuple
+vetoes joint survival. A live proof-choice prompt is independently invalid
+under cut-atomic automatic invocation. One ledger never creates one contender;
+alternate ledgers remain proofs for one canonical receipt tag.
+
+**Audit reconciliation:** one atomicity report expressed existential versus
+universal aggregation as a possible fourth axis. The option-space report broke
+that framing: existential permission is selection by a passing witness, not a
+stable no-selection semantic, and violates the already-recorded ban on
+outcome-favored assignment. Universal robustness is the only coherent
+complete-product branch. Conversely, the option-space report identified
+randomness as a real omitted axis because it changes legal outputs,
+replayability, prediction, and reload incentives even when all visible inputs
+are fixed. The durable split therefore uses topology, selection scope,
+selection authority, and stochastic support. A retained nonempty proper subset
+is not silently classified as coexistence; it is an explicit replacement path
+because it would add a third authoritative object and its own aggregation
+consequence.
+
+Old C3C3B is now a non-counting parent for C3C3B1-B4. B1-B prunes B2-B4;
+B1-A/C activates them in order before C3C3C. RCS-02 retains exact actor,
+consent, communication, and information promises; RCS-13 retains policy
+binding and reconfiguration horizon; stochastic realization, if later
+selected, routes seed/replay/fault obligations to RCS-02 and RCS-16-RCS-18.
+Replacing one counted row with four produces seventy-six slots: 37 `SCREEN`,
+1 `OWNER-OPEN`, 8 `PRUNED`, 26 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 38`. C3C3B1 is the sole active card. Recommend its
+singleton-selection option: it preserves one legible causal account and makes
+alternate proof embodiments usable routing space. Complete-product robustness
+is the strongest consistency countercase but makes extra proofs liabilities;
+coexistence carries two proof-truth dialects.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or
