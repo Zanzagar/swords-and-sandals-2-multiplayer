@@ -928,6 +928,15 @@ the main session decided D1–D7 on a read-only wave's measurements (session `5b
   only screen-reader form of the readings.
 - **D6 — the gauges do not drain before the blow lands**: a fighter's readings hold their
   pre-step values until that step's first pop-up on him starts, or the step settles.
+- **D8 — the crowd bar is the build's own, in the frame too** (the owner, 2026-09-25: "use actual in
+  game crowd bar asset?"). `combat_panel`'s `crowd_bar` (sprite 725 over its background 723, and the
+  `crowd_text` field 750) at the build's own place — the top right of the stage, panel-local
+  x 482..640, y -260..-237, i.e. stage y ~28..51 — at scale 1 in every bout size, driven as the build
+  drives it: `_xscale = Math.round(crowd_interest)` and `crowd_text = "crowd: " +
+  crowd_interest_array[Math.ceil(crowd_interest / 10)]` (clip-actions on `crowd_bar`, blocks
+  0x225e5d load / 0x226086 enterFrame), hidden as the build hides it (`crowdHeardFor`). The side
+  panel's DOM meter becomes visually hidden, as the readings did (D5). Above 100 (an opening level
+  sum) the bar stays full and the mood the top one, as the DOM meter already does (authored).
 - **D7 — masks really clip.** `paintLayerOperation` set its clip inside its own save/restore, so
   every masked op was drawn UNCLIPPED (the night sky's moon since `df49dc3`, now the gauges'
   liquid); fixed there and in the screens page, whose `clipsApplied` tally had counted clips that
