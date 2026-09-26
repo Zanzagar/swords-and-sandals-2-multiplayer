@@ -3967,6 +3967,73 @@ C3C3B3B1 is the sole active card. The amendment chooses neither construction
 support nor context branching and leaves actor, information, timing, defaults,
 randomness, treatment, and outcome on their existing routes.
 
+The owner selected `RCS-03C3C3B3B1-A`. Every routing-capable versioned Relic
+contract therefore exposes only a finite authored menu of indivisible
+whole-policy routing stances. A participant binds a stance whole and cannot
+compose, reorder, parameterize, or condition its clauses. Exact stance menus
+and complete authored laws remain AUTHOR/SPEC. B3B1 moves to `DIR-SELECTED`,
+B3B2 is `PRUNED`, and B4A becomes the next row.
+
+Three bounded read-only named-claim audits then tested B4A's atomicity,
+gameplay recommendation, and edge routing. They agreed that its earlier
+“random-only” and “none, universal, or coexistence” wording failed to name a
+denominator. Two audits favored the complete bound stance law because it is the
+legal control unit fixed by B3B1-A; one favored each fixed evaluation case
+because the original audit used “case classes.” A fourth read-only
+adjudication applied the register's admission and anti-recursion rules and
+selected the stance-law denominator.
+
+A whole contract is too coarse: one Relic may expose deterministic Dissonance
+and stochastic Refraction, a material player choice hidden by a contract-level
+flag. A fixed evaluation is too fine: once stochastic support exists, requiring
+empty, full, or proper random incidence across every exact input is
+per-opportunity saturation and exact authoring prevalence. The player-semantic
+unit is instead one canonical versioned complete bound stance law after all
+immutable composition. Whether that law ever admits a non-point tuple
+distribution is stable under UI changes, generated IDs, code factoring, and
+deterministic PRNG implementation.
+
+Formally, let `W^{route-law}_v` be the nonempty set of canonical complete bound
+stance laws. For `w` in that set and reachable multiplicity-positive canonical
+selector input `X`, `kappa_w(X)` is its normalized tuple distribution after all
+nonrandom semantic inputs and the stance are fixed but before a designated
+selection draw is realized. `G^{route-stoch}_v` contains exactly those `w` for
+which some reachable `X` gives at least two complete tuples positive
+probability. B4A-A makes this subset empty; B makes it all of `W`; C makes it
+nonempty proper. B means every stance law is stochastic-capable somewhere, not
+that every invocation rolls. C guarantees deterministic-only and
+stochastic-capable laws somewhere in the catalog but not both inside every
+Relic.
+
+Recommend B4A-A. B2-B already supplies relational input responsiveness, while
+B3A-B and B3B1-A make a participant's whole authored stance materially
+operative. Deterministic selection protects that direct Relic-grammar and
+participant-orientation relationship, makes team choreography and causal
+explanation trustworthy, and does not make the law static. Randomness can
+supply suspense or an oracular fantasy, but it adds no stronger
+*Achintya Bheda Abheda* fit automatically; several possible manifestations with
+one realized output are at most partial. Universal stochastic capability makes
+every stance bear variance. Coexistence adds reliable and fateful prediction
+dialects plus a premium-gamble or novice-trap balance risk.
+
+Hidden or hard-to-predict deterministic state does not count as randomness. A
+seeded implementation may realize a declared stochastic kernel; an earlier
+random stance assignment that is already persisted is upstream acquisition or
+configuration under RCS-09/RCS-13.
+Each evaluation still commits one complete tuple, cannot redraw on callback,
+reload, reconnect, or replay, and cannot reject or retry after downstream
+permission, survivor, claim, payoff, or outcome. Exact randomizing inputs are
+AUTHOR/SPEC, probabilities are TUNE, and disclosure, stance lock, migration,
+atomic realization, replay/retry, exploit, simulation, RL, and human acceptance
+remain routed to RCS-02, RCS-09, RCS-13, RCS-15-RCS-18, and EP-A02/SC-12.
+
+No row is added by this twenty-third correction. The seventy-nine-row register
+now has 35 `SCREEN`, 1 `OWNER-OPEN`, 9 `PRUNED`, 30 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. B4A is the sole active
+card. If B4A admits randomness, B4B must first prove a reachable law with at
+least two nonconstant tag marginals; one random component beside constants
+cannot furnish a nontrivial correlation choice.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

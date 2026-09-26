@@ -1,5 +1,61 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 closed whole-policy Relic routing — RCS-03C3C3B3B1-A selected
+
+The owner selected `RCS-03C3C3B3B1-A`: every routing-capable versioned Relic
+contract exposes only a finite authored menu of indivisible whole-policy
+routing stances. Participants bind a stance whole; they cannot extract,
+reorder, parameterize, or condition its clauses. Exact stance menus and
+complete laws remain AUTHOR/SPEC. B3B2 participant-composed context branching
+is pruned.
+
+Three bounded read-only audits and one read-only adjudication repaired B4A's
+ambiguous stochastic-support denominator. It now classifies **canonical
+complete bound stance laws**, not whole contracts and not each fixed evaluation
+case. A stance law is stochastic-capable when some reachable held-fixed
+multiplicity-positive selector input gives at least two complete tuple outputs
+positive probability before its designated draw. Exact randomizing inputs are
+AUTHOR/SPEC and exact odds are TUNE.
+
+The seventy-nine-slot register now contains 35 `SCREEN`, 1 `OWNER-OPEN`, 9
+`PRUNED`, 30 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. `RCS-03C3C3B4A` is the sole active card. The authoritative
+decision record remains unchanged.
+
+B4A asks whether complete bound routing-stance laws may be stochastic:
+
+- A: every stance law is deterministic on every reachable fixed input.
+  Recommend A: B2 already supplies relational responsiveness, while
+  deterministic resolution protects player orientation, causal explanation,
+  team choreography, and replay trust.
+- B: every stance law is stochastic-capable on at least one reachable input.
+  This does not mean every invocation rolls, but no stance law is globally
+  deterministic.
+- C: deterministic-only and stochastic-capable stance laws coexist. This
+  permits, but does not require, both within one Relic.
+
+For `X={(L_v,L_q),(L_h,L_q)}`, A lets Dissonance always choose Vow and Chorus
+always choose Heat. B requires each stance to have some reachable nondegenerate
+draw, such as inverse 80/20 preferences. C can keep Dissonance reliable while a
+distinct Refraction stance draws 70/30. Randomness is not a stronger
+*Achintya Bheda Abheda* fit by itself: A is neutral/protective of the already
+direct Relic-grammar/participant-orientation relation; stochastic possibility
+is partial, and catalog coexistence is merely aggregate unless authored into a
+legible individual relationship.
+
+Seed secrecy and code shape do not define stochasticity. A seeded PRNG may
+realize one declared draw; an opaque deterministic hash is still deterministic,
+and an earlier random stance assignment is upstream acquisition/configuration
+under RCS-09/RCS-13. One
+evaluation commits one tuple, never redraws on callback/reload/reconnect/replay,
+and never retries after downstream permission or outcome. Disclosure, lock,
+migration, persistence, replay/retry, simulation, RL, and human acceptance
+remain routed to RCS-02, RCS-09, RCS-13, RCS-15-RCS-18, and EP-A02/SC-12.
+
+If A is selected, B4B prunes and C3C3C opens. If B/C is selected, B4B receives
+a fresh prerequisite screen: a stochastic law with only one nonconstant tag
+component supplies no nontrivial factorization-versus-correlation question.
+
 ## 2026-09-26 universal participant-configurable Relic routing — RCS-03C3C3B3A-B selected
 
 The owner selected `RCS-03C3C3B3A-B`: every routing-capable versioned Relic
@@ -9655,7 +9711,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 05:18 UTC — universal participant-configurable Relic routing selected](docs/handoffs/2026-09-26-0518--relic-universal-routing-configuration-selected.md)**
+[2026-09-26 05:39 UTC — closed whole-policy Relic routing selected](docs/handoffs/2026-09-26-0539--relic-whole-stance-routing-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

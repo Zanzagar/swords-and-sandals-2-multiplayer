@@ -279,7 +279,12 @@ policy-language boundary. The owner selected RCS-03C3C3B3A-B: every
 routing-capable versioned Relic contract is materially participant-
 configurable. A twenty-second prerequisite audit then separated constructive
 routing-language prevalence from conditional context-branching support.
-RCS-03C3C3B3B1 is the active owner choice under SR-03.
+The owner selected RCS-03C3C3B3B1-A: every routing-capable contract exposes
+only a finite versioned menu of indivisible authored whole-policy routing
+stances. B3B2 is therefore pruned. A twenty-third prerequisite audit clarified
+that stochastic support is classified over complete bound stance laws rather
+than whole contracts or individual evaluation cases. RCS-03C3C3B4A is the
+active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -21729,7 +21734,7 @@ remains unchanged.
 > construction support, context branching, actor, timing, randomness,
 > treatment, or outcome.
 
-### RCS-03C3C3B3B1 — constructive routing-language prevalence — active owner choice
+### RCS-03C3C3B3B1 — constructive routing-language prevalence — direction selected
 
 Let `K^{route-build}_v` be the subset of `S^{ledger-route}_v` whose legal
 participant controls can create at least one routing setting by separately
@@ -21775,6 +21780,113 @@ selected; the routed later rows retain the other boundaries. Any answer moves
 B3B1 to `DIR-SELECTED` and reduces `Phi_SR` by at least one. A prunes B3B2 and
 makes B4A active; B or C makes B3B2 active. The authoritative decision record
 remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **A, closed
+whole-policy routing stances only.** `K^{route-build}_v` is empty. Every
+routing-capable versioned Relic contract offers a finite authored menu of
+indivisible stances. A participant may bind one of those stances as a whole but
+may not extract, reorder, parameterize, or condition its semantic clauses.
+Exact stance count, identity, predicates, priorities, and total completion
+semantics remain AUTHOR/SPEC.
+
+In the running P/Q witness, Ashen's **Dissonance** and **Chorus** remain
+different material participant orientations. Dissonance's complete authored
+law selects the Vow tuple and Chorus's complete authored law selects the Heat
+tuple on the illustrated product. The participant cannot turn either one into
+a generic priority program. One enduring Relic grammar and one distinct whole
+orientation therefore continue to determine the automatic route together, a
+**direct** unity-with-difference fit at the configuration boundary. The cost is
+less fine-grained policy authorship and a lower ceiling for players who enjoy
+building solvers.
+
+B3B1 moves to `DIR-SELECTED` and B3B2 moves to `PRUNED`. B4A would ordinarily
+become `OWNER-OPEN`; the prerequisite clarification below defines its
+denominator before presentation. The authoritative decision record remains
+unchanged.
+
+> **Twenty-third prerequisite correction, 2026-09-26:** three bounded
+> read-only named-claim audits and one read-only adjudication found that B4A's
+> earlier “random-only” and “none, universal, or coexistence” shorthand did not
+> name what was being counted. A whole Relic contract is too coarse because one
+> contract may expose both a deterministic stance and a stochastic stance. An
+> individual evaluation case is too fine because per-input saturation would
+> turn exact authored trigger incidence into another owner vote. B3B1-A has now
+> supplied the representation-invariant player-semantic unit: the complete
+> canonical bound whole-stance law.
+>
+> Let `W^{route-law}_v` be the nonempty set of canonical versioned complete
+> selector laws induced by lawful whole-stance bindings after immutable Relic
+> composition. For `w` in that set and a reachable multiplicity-positive
+> canonical selector input `X`, let `kappa_w(X)` be the normalized law over
+> complete ledger tuples after all nonrandom semantic inputs and the bound
+> stance are fixed but before a designated selection draw is realized. Define
+> `G^{route-stoch}_v` as the subset of laws for which at least one reachable
+> `X` gives two or more distinct complete tuples positive probability.
+>
+> This definition follows normative tuple behavior, not code shape. A seeded
+> deterministic PRNG can realize a stochastic law; an opaque deterministic
+> hash is not stochastic merely because a player cannot predict it. Randomly
+> assigning a stance earlier and then persisting that deterministic stance is
+> upstream acquisition/configuration state under RCS-09/RCS-13, not B4A
+> selection randomness.
+> Cosmetic aliases, generated IDs, completion-module factoring, zero-probability
+> branches, and internal random branches returning the same tuple cannot change
+> membership.
+>
+> The case-level question does not receive another owner row. Exact inputs that
+> randomize are AUTHOR/SPEC, exact probabilities are TUNE, and materiality,
+> comprehension, fairness, reload pressure, and exploit behavior are tested at
+> RCS-17/RCS-18. RCS-02 retains odds/support/forecast disclosure; RCS-09 retains
+> acquisition; RCS-13 retains stance locking around actionable information;
+> RCS-15 retains version and
+> migration identity; RCS-16 retains atomic realization and fault repair; and
+> EP-A02/SC-12 retains the shared combat-RNG, replay, and retry architecture.
+>
+> No new row is added. After B3B1-A, B3B2's pruning, and B4A's activation, the
+> seventy-nine-slot register contains **35 `SCREEN`, 1 `OWNER-OPEN`, 9
+> `PRUNED`, 30 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 36`**. B4A is the sole active card.
+
+### RCS-03C3C3B4A — stochastic support across complete bound routing laws — active owner choice
+
+B4A asks whether the participant can bind a routing stance whose complete law
+remains genuinely stochastic at some reachable fixed upstream input. A law is
+**deterministic-only** when `kappa_w(X)` is a point mass for every reachable
+multiplicity-positive `X`. It is **stochastic-capable** when at least one such
+input has two or more possible complete tuple outputs with positive
+probability. Stochastic-capable does not mean that every invocation rolls:
+forced products and authored deterministic regions may still resolve to one
+tuple.
+
+| Choice | Stochastic-support rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — deterministic whole-stance laws only** | `G^{route-stoch}_v` is empty. Once the complete nonrandom selector input and bound stance are fixed, every supported law returns one tuple with probability one on every reachable input. | **Recommended.** B2-B already makes routing relationally responsive, and B3A-B/B3B1-A already let a participant orient every Relic meaningfully. Determinism does not make those laws static; it makes their causal response learnable, previewable, and attributable to the Relic-plus-stance relation. B4A's own ideal fit is **neutral/protective**: the direct fit already exists in that relation, and A protects it from an extra chance arbiter. It also gives the strongest replay trust and team choreography. The cost is easier exact solving and fewer suspenseful or “oracular” Relic identities. | With `X={(L_v,L_q),(L_h,L_q)}`, Dissonance always selects the Vow tuple and Chorus always selects the shared-Heat tuple. If Q changes, B2-B may still make either stance choose differently; holding the complete input fixed never changes its answer. |
+| **B — every whole-stance law is stochastic-capable** | `G^{route-stoch}_v=W^{route-law}_v`. Every lawful complete bound stance law has at least one reachable fixed input on which two or more tuples have positive probability. This does not require every input or invocation to randomize. | B makes uncertainty part of every Relic orientation. It can create suspense, prevent a permanent tie convention from deciding every ambiguous route, and make one continuing stance admit several possible manifestations. But that is only a **partial** ideal fit: one manifestation becomes operative, and chance is not automatically meaningful Relic agency. Every build must bear variance; stance promises become probabilistic, correct team plans can lose a receipt without a new mistake, and public forecast or hidden draws each carry serious search or trust costs. | Dissonance might have some reachable product where it chooses Vow 80% and Heat 20%, while Chorus has some product with the inverse weighting. Both remain different authored laws, but neither is globally reliable across its entire reachable domain. |
+| **C — deterministic-only and stochastic-capable laws coexist** | `G^{route-stoch}_v` is a nonempty proper subset of `W^{route-law}_v`. At least one complete bound stance law is deterministic on every reachable input, and at least one distinct law has a reachable nondegenerate draw. Same-Relic coexistence is permitted but not required. | C supports reliable covenant stances beside uncanny or fateful ones, making variance an opt-in build/catalog distinction when the authored placement permits it. Its coexistence fit is merely **aggregate** unless an individual stochastic law earns a legible relationship fantasy. It also teaches two prediction dialects and creates a balance trap: a stochastic stance may be an inferior novice trap, or require enough upside to become the premium gamble. | Dissonance may always choose Vow, while a distinct **Refraction** stance draws Vow 70% and Heat 30% on the same fixed product. C guarantees both law classes somewhere, not that every Relic offers this toggle. |
+
+A/B/C are mutually exclusive and exhaustive because
+`G^{route-stoch}_v` is empty, all of nonempty `W^{route-law}_v`, or a nonempty
+proper subset. B versus C materially decides whether any bindable stance law
+guarantees deterministic routing over its entire reachable domain. Exact
+Relic/stance placement, randomizing input regions, odds, and distributions do
+not become owner answers through this card.
+
+Under every option, one canonical evaluation still commits exactly one
+complete tuple. A stochastic branch may not use wall clock, controller identity,
+reload count, presentation order, a race, or private unexplained state as
+entropy; duplicate callbacks, reload, reconnect, and replay may not redraw it;
+and no rejection sampling, retry, or switch may follow downstream permission,
+survivor, claim, payoff, or combat outcome. Those are correctness and later
+RNG/persistence obligations, not additional B4A choices.
+
+A stronger promise that every Relic offer both a deterministic and a
+stochastic stance is a valid replacement path, but C does not silently provide
+it. A live random-or-deterministic choice at the proc would instead contradict
+selected cut-atomic automatic invocation. Any answer moves B4A to
+`DIR-SELECTED`. A prunes B4B and activates C3C3C; B/C send B4B through a fresh
+prerequisite screen, because one stochastic tuple law need not have two
+nonconstant tag marginals and therefore may provide no nontrivial correlation
+question. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

@@ -2353,6 +2353,40 @@ card. Recommend closed whole-policy routing stances: they preserve universal
 meaningful orientation without turning every Relic into a generic policy
 editor.
 
+**Post-answer screen and twenty-third prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3B3B1-A`: every routing-capable contract exposes
+only a finite versioned menu of indivisible authored whole-policy routing
+stances. Participants bind a stance whole and cannot compose, reorder,
+parameterize, or condition its clauses. B3B2 is therefore pruned.
+
+Three bounded named-claim audits and one adjudication found that B4A's earlier
+“random-only” and “none, universal, or coexistence” shorthand left its
+denominator ambiguous. Whole contracts are too coarse because one contract can
+offer deterministic and stochastic stances. Individual fixed evaluations are
+too fine because their empty/full/proper prevalence is exact authoring
+incidence, not automatically another player-material product choice. The
+smallest representation-invariant domain is the canonical complete bound
+whole-stance law supplied by B3B1-A.
+
+Let `W^{route-law}_v` be those versioned complete laws, and let
+`G^{route-stoch}_v` contain a law when at least one reachable held-fixed
+multiplicity-positive input gives two or more complete tuples positive
+probability before its designated random realization. B4A classifies that
+subset as empty, whole, or nonempty proper. An opaque deterministic mapping is
+not randomness merely because players cannot predict it, while a seeded PRNG
+may implement one normative stochastic draw. Earlier random stance assignment
+is upstream acquisition/configuration under RCS-09/RCS-13, not B4A.
+
+No row is added. The current seventy-nine-slot register contains 35 `SCREEN`,
+1 `OWNER-OPEN`, 9 `PRUNED`, 30 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 36`. `RCS-03C3C3B4A` is the sole active card. Recommend
+deterministic-only whole-stance laws: selected joint responsiveness already
+creates relational variation, while deterministic resolution preserves
+stance ownership, explanation, team choreography, and replay trust. Stochastic
+support adds no stronger ideal fit by itself. If randomness is admitted, B4B
+receives another prerequisite screen because one random tuple component does
+not create a nontrivial factorization-versus-correlation question.
+
 ### 7.3 Frozen remaining Relic slot register
 
 To make that route genuinely finite, the remaining C3c pass has seventy-nine
@@ -2409,10 +2443,10 @@ overcompression.
 | `RCS-03C3C3B1` | Authoritative ledger-domain topology when one or more tags have alternate valid ledgers: one selected joint tuple, complete-product robustness, or prospectively declared coexistence | `DIR-SELECTED`; A makes every multiplicity-positive evaluation return exactly one complete authoritative tuple before downstream permission/results; canonical upstream structural relations remain lawful selector inputs |
 | `RCS-03C3C3B2` | Cross-tag contextual responsiveness of singleton selection: whether another contender or ledger domain can change one tag's held-fixed selected ledger or marginal draw law | `DIR-SELECTED`; B requires at least one reachable matched sensitivity witness; exact triggers/prevalence remain AUTHOR/SPEC, and permission/outcome inputs remain forbidden |
 | `RCS-03C3C3B3A` | Material participant-configurability prevalence across routing-capable versioned Relic selector contracts: empty, universal, or nonempty proper | `DIR-SELECTED`; B requires every routing-capable contract to have at least two prospectively bindable participant routing stances/settings with materially different completed laws on some held-fixed reachable product |
-| `RCS-03C3C3B3B1` | Constructive participant routing-language prevalence: closed whole-policy stances only, bounded construction on every contract, or coexistence | `OWNER-OPEN`; classify legal participant composition rather than UI/compiled representation; recommend closed whole-policy routing stances to preserve Relic identity and legibility |
-| `RCS-03C3C3B3B2` | Participant-composed context-branching prevalence among constructive-capable routing contracts | `SCREEN`; conditional on B3B1-B/C, otherwise `PRUNED`; distinguish uniform composition/order/parameterization from participant-built input-dependent branching before exact predicates/caps are AUTHOR/SPEC |
-| `RCS-03C3C3B4A` | Stochastic singleton-selection support after state and any bound routing policy are fixed: none, universal, or coexistence | `SCREEN`; follows the complete applicable B3A/B3B1/B3B2 route; exact RNG, replay, reload, and disclosure duties route to RCS-02 and RCS-16-RCS-18 |
-| `RCS-03C3C3B4B` | Product-factorized versus correlated joint tuple draws when stochastic singleton selection exists | `SCREEN`; conditional on B4A admitting randomness; otherwise `PRUNED`; context-stable marginals at B2 do not settle joint coupling |
+| `RCS-03C3C3B3B1` | Constructive participant routing-language prevalence: closed whole-policy stances only, bounded construction on every contract, or coexistence | `DIR-SELECTED`; A makes every routing-capable contract expose only a finite versioned menu of indivisible authored whole-policy routing stances |
+| `RCS-03C3C3B3B2` | Participant-composed context-branching prevalence among constructive-capable routing contracts | `PRUNED`; B3B1-A admits no participant construction and therefore no participant-composed context branching |
+| `RCS-03C3C3B4A` | Stochastic support across canonical complete bound whole-stance routing laws: deterministic-only, universally stochastic-capable, or coexistence | `OWNER-OPEN`; a law is stochastic-capable iff some reachable held-fixed multiplicity-positive input has at least two positive-probability tuple outputs; recommend deterministic-only; exact trigger incidence/odds are AUTHOR/SPEC/TUNE, while disclosure, acquisition, lock, migration, realization, replay, evaluation, and retry route to RCS-02/RCS-09/RCS-13/RCS-15-RCS-18 and EP-A02/SC-12 |
+| `RCS-03C3C3B4B` | Product-factorized versus correlated joint tuple draws when stochastic singleton selection exists | `SCREEN`; conditional on B4A admitting randomness and a prerequisite screen finding at least two nonconstant tag marginals; otherwise `PRUNED` or `DERIVED`; context-stable marginals at B2 do not settle joint coupling |
 | `RCS-03C3C3C` | Exact-form restriction of the one within-evaluation joint-survival permission set | `SCREEN`; follows the complete applicable B1-B4A/B4B authoritative-ledger route; classify exact opportunities as permission-empty, universal, or nonempty proper without creating a separate form vote |
 | `RCS-03C3C3D` | Distinct-related-form restriction of the same within-evaluation joint-survival permission set | `SCREEN`; follows C3C3C; classify related opportunities as permission-empty, universal, or nonempty proper; one exact-and-related tuple retains one permission bit |
 | `RCS-03C3C3E` | Result disposition and survivor cardinality when two individually satisfied overlapping tags are denied joint survival | `SCREEN`; follows C3C3C-C3C3D; prunes if every supported overlap is jointly permitted; must distinguish mutual cancellation, retention/substitution, and any admitted coexistence without exceeding the selected result contract |
@@ -2587,16 +2621,22 @@ slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 28 `DIR-SELECTED`, 2
 configurability, ordinarily reducing the potential to 37. The twenty-second
 prerequisite amendment normalizes fixed completion into each total composite
 law and replaces old B3B with constructive-language B3B1 and conditional
-context-branching B3B2, adding one slot and potential card. The current
-register has **seventy-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`,
-29 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
-`Phi_SR = 38`, and `RCS-03C3C3B3B1` is the sole active card.
+context-branching B3B2, adding one slot and potential card. That register had
+**seventy-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 29
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+`RCS-03C3C3B3B1-A` then selected finite authored whole-policy stances, pruned
+B3B2, and activated B4A. The twenty-third prerequisite correction classifies
+B4A over complete bound stance laws rather than contracts or individual
+evaluation cases and adds no row. The current register has **seventy-nine
+slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 9 `PRUNED`, 30 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current `Phi_SR = 36`, and
+`RCS-03C3C3B4A` is the sole active card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-eight owner cards under this twenty-two-times-amended charter and will
+thirty-six owner cards under this twenty-three-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -2617,7 +2657,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 79 frozen candidate slots; current `Phi_SR = 38` after `RCS-03C3C3B3A-B` requires universal material configurability and the twenty-second amendment separates constructive-language prevalence from conditional context branching | At most 38 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 79 frozen candidate slots; current `Phi_SR = 36` after `RCS-03C3C3B3B1-A` selects authored whole-policy stances, prunes context branching, and the twenty-third correction makes complete bound stance laws the stochastic-support denominator | At most 36 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
