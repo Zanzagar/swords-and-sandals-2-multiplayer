@@ -61,7 +61,14 @@ pulled the same way (D8).
 1. **Owner playtest feedback** on the in-frame HUD (links were given in chat: `?teams=1|2|3`,
    `&play=red` / `&spectate=1`, `&items=tricks|buffs|blasts|crowd|doom`, `?red=…&blue=…` champions;
    serve with `node tools/arena-server.mjs --host 0.0.0.0` — Windows cannot reach WSL loopback here).
-2. **The gate: two NEW Codex findings on harness main** (review of 988476b as merged, neutral):
+2. ~~**The gate: two NEW Codex findings on harness main**~~ **DONE 2026-09-26: both fixed in
+   claude-harness PR #7 (merged 1d9f92f on the owner's go, with a verifier-found hole closed), and
+   SS2 ADOPTED THE GATE (6a6afe7 + eac0352): `core.hooksPath .githooks` is set in the main checkout
+   (a clone must set it once), CI's grill-gate check passed on the adoption pushes, and GitHub's
+   squash merge now uses the PR's title and description. EVERY COMMIT NEEDS A `Decided:` OR
+   `Fix:`/`Docs:`/`Chore:`/`Test:` TRAILER. The crowd bar (D8) also landed (2aa4eab).
+   `github/main` still sits at a89704c — moving it is the owner's call (SS2 denies an agent's push
+   to main).** The original item, for the record: (review of 988476b as merged, neutral):
    [high] `adopt.sh` (~138-140) truncates fixed temp paths (`.gitattributes.adopt-tmp`,
    `AGENTS.md.adopt-tmp`, the manifest's temp) without checking — overwrites a pre-existing file and
    follows a symlink; [medium] `githooks/check-trailers` inherits `trailer.<name>.key` aliases, so
