@@ -2695,10 +2695,51 @@ no concrete result or value mechanism. C3C3E/F and RCS-05/08 own those choices;
 SR-05/06 and RCS-17/18 validate purpose, fun, and non-domination. If no deny
 family passes, reopen E3 with B as the bounded replacement. No row is added.
 
-After E2-B and E3's activation, the register has eighty-nine slots: 35
+After E2-B and E3's activation, the register at that checkpoint had eighty-nine
+slots: 35
 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. E3 is the current presented card; D1
-remains prerequisite-ready but queued.
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. E3 was the presented card; D1
+remained prerequisite-ready but queued.
+
+The owner then selected `RCS-03C3C3C2E3-C`. Responsive, context-invariant
+always-allow, and distinct context-invariant always-deny exact-permission law
+families must coexist (`R+D+A`). Each remains subject to SR-05/SR-06's
+legible, viable, non-token purpose gates; the steadfast-deny family also
+retains E3's explicit non-domination/reopen-to-B obligation. E3 selects no
+exact law, payoff, result, rarity, prevalence, or launch placement and moves to
+`DIR-SELECTED`.
+
+**Post-answer D1 prerequisite screen, 2026-09-26.** Two bounded read-only
+audits and cross-challenge upheld one binary post-routing distinct-related-
+exposure card. Reuse the existing resolved-pair domain. Let
+`R^{resolved-related}_v` contain its pairs whose selected authoritative ledgers
+use two distinct final children with intersecting complete lineages or one
+shared nonmultiplying authorization/accounting parent. The set is empty or
+nonempty; selector authority and deterministic complete-stance routing are
+already settled, and contextual response adds no third state.
+
+C2-C's pre-selector related support need not survive authoritative selection.
+Under D1-A every structurally valid related ledger pair remains counterfactual
+to authoritative co-selection, although either constituent ledger may be
+selected with an independent counterpart. D1-B instead requires at least one
+reachable actual selected-tuple witness. A hybrid member of
+`E^{resolved-exact}_v∩R^{resolved-related}_v` is not a third state: it is one
+pair and later receives one permission bit. Requiring a related-only witness
+would silently strengthen C2-C and is not part of B.
+
+Cross-challenge also rejected a proposed D1-time strategic-distinctness or
+dominance test. B promises exposure only. Its selected children and qualifying
+relation must be genuine and mechanically legible; the containing authored
+package must later satisfy SR-05/SR-06's operative-choice or state-transition,
+viable-purpose, and non-token release tests. At that later closure the related
+fact must matter to something players can understand, plan around, or have
+treated. That deferred validation neither requires a related-only route nor
+selects permission, control, result, benefit, or payoff. If no authored witness
+passes, reopen D1 with A. No row is added.
+
+After E3-C and D1's activation, the register has eighty-nine slots: 34
+`SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 37 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. D1 is the current presented card.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -2768,8 +2809,8 @@ overcompression.
 | `RCS-03C3C3C2D` | Stochastic support across canonical complete bound permission laws after applicable configuration and language rows | `DIR-SELECTED`; A makes every complete intrinsic law deterministic on every reachable fixed exact opportunity while permitting certain context response; no permission draw, retry, or reroute remains |
 | `RCS-03C3C3C2E1` | Responsive-law prevalence across complete deterministic intrinsic exact-permission laws | `DIR-SELECTED`; C requires responsive laws and context-invariant laws to coexist, without selecting actionability or constant polarity |
 | `RCS-03C3C3C2E2` | Matched player/counterplay-causal factual-response support among responsive exact-permission laws | `DIR-SELECTED`; B requires at least one qualifying lawful independently revisable decision and complete causal closure to change the certain bit under the same law and eventual exact pair/proof; exact actor, trigger, prevalence, disclosure, and success rate remain unsettled |
-| `RCS-03C3C3C2E3` | Constant-law polarity among context-invariant intrinsic exact-permission laws | `OWNER-OPEN`; classify the always-allow subset of nonempty `K_v` as empty, all, or nonempty proper, yielding steadfast-refusal only, steadfast-compatibility only, or coexistence; polarity is relative to each law's own nonempty reachable domain and governs only the exact permission coordinate; every required family remains subject to SR-05/SR-06 viability, and coexistence requires a non-token non-dominated refusal purpose or later reopening to B |
-| `RCS-03C3C3D1` | Post-routing authoritative distinct-related-form exposure support among resolved pair opportunities | `SCREEN`; independently prerequisite-ready after C1-B because exposure precedes permission, but queued behind the current exact-permission traversal; choose empty or nonempty `R^{resolved-related}_v` without granting joint survival |
+| `RCS-03C3C3C2E3` | Constant-law polarity among context-invariant intrinsic exact-permission laws | `DIR-SELECTED`; C requires responsive, steadfast-allow, and distinct steadfast-deny complete law families (`R+D+A`), with domain-relative gate-local polarity and the documented non-token non-dominated refusal obligation or reopening to B |
+| `RCS-03C3C3D1` | Post-routing authoritative distinct-related-form exposure support among resolved pair opportunities | `OWNER-OPEN`; choose empty or nonempty `R^{resolved-related}_v` over actual selected tuples without granting joint survival; under B a hybrid exact-related pair qualifies once and receives no second permission bit, while SR-05/SR-06 later reject inert release tokens without forcing a related-only witness |
 | `RCS-03C3C3D2` | Distinct-related-form restriction of the same resolved-pair joint-survival permission set | `SCREEN`; conditional on D1-B and its own fresh authority/randomness prerequisite screen; intentionally queued behind exact-first traversal but not logically dependent on C2E, and one exact-and-related pair retains one permission bit |
 | `RCS-03C3C3E` | Result disposition and survivor cardinality when two individually satisfied overlapping tags receive a false joint-survival permission bit | `SCREEN`; follows applicable C2E1-C2E3/D2 permission restrictions and their stochastic topology; prunes only if no selected overlap reaches treatment or every applicable exposed pair is permitted with probability one; a realized false bit enters this route once without redraw or rerouting |
 | `RCS-03C3C3F` | Authority selecting the survivor or legal substitute for a denied pair | `SCREEN`; conditional on C3C3E admitting a positive nonunique result; otherwise `PRUNED` or `DERIVED`; exact priority keys remain later only after authority is settled |
@@ -2950,9 +2991,9 @@ context-branching B3B2, adding one slot and potential card. That register had
 `RCS-03C3C3B3B1-A` then selected finite authored whole-policy stances, pruned
 B3B2, and activated B4A. The twenty-third prerequisite correction classifies
 B4A over complete bound stance laws rather than contracts or individual
-evaluation cases and adds no row. The current register has **seventy-nine
+evaluation cases and adds no row. At that checkpoint the register had **seventy-nine
 slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 9 `PRUNED`, 30 `DIR-SELECTED`, 2
-`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current `Phi_SR = 36`, and
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`, and
 `RCS-03C3C3B4A` is the sole active card.
 `RCS-03C3C3B4A-A` then selected deterministic complete bound routing-stance
 laws and pruned B4B, which would ordinarily reduce the potential to 34. The
@@ -3006,16 +3047,25 @@ queued.
 play/counterplay witness. The twenty-ninth correction upholds E3's three stable-
 polarity branches, makes their gate-local meaning explicit, and attaches the
 existing non-token viability obligation to any required polarity family. No
-row is added. The current register has **eighty-nine slots**: 35 `SCREEN`, 1
+row is added. The register at that checkpoint had **eighty-nine slots**: 35 `SCREEN`, 1
 `OWNER-OPEN`, 13 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 36`. E3 is the current presented card and D1 remains
-ready but queued.
+`EVALUATE`; `Phi_SR = 36`. E3 was the presented card and D1 remained ready
+but queued.
+`RCS-03C3C3C2E3-C` then requires responsive, steadfast-allow, and steadfast-
+deny exact-permission law families to coexist under the selected viability
+obligation. The post-answer D1 screen preserves its empty/nonempty
+authoritative distinct-related-exposure boundary, permits one hybrid witness
+without a second permission vote, and defers non-token package validation to
+the existing gates. No row is added. The current register has **eighty-nine
+slots**: 34 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 37 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. D1 is the current
+presented card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-six owner cards under this twenty-nine-times-corrected charter and will
+thirty-five owner cards under this twenty-nine-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3037,7 +3087,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 89 frozen candidate slots; current `Phi_SR = 36` after `RCS-03C3C3C2E2-B` requires a qualifying causal response witness and the twenty-ninth correction makes E3's gate-local polarity/viability boundary explicit | At most 36 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 89 frozen candidate slots; current `Phi_SR = 35` after `RCS-03C3C3C2E3-C` requires all three responsive/steadfast law philosophies and the D1 screen preserves one gate-local related-exposure decision | At most 35 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

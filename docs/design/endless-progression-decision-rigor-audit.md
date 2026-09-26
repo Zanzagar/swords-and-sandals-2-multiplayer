@@ -4573,7 +4573,68 @@ Legendary or peak-power.
 No separate compensation row is warranted and no row is added. After E2-B and
 E3's activation, the register has 89 rows: 35 `SCREEN`, 1 `OWNER-OPEN`, 13
 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 36`. E3 is the current presented card; D1 remains ready but queued.
+`Phi_SR = 36`. At that checkpoint E3 was the presented card; D1 remained ready
+but queued.
+The authoritative decision record remains unchanged.
+
+The owner selected E3-C. Thus `∅⊊K^+_v⊊K_v`: at least one complete
+context-invariant exact-permission law always allows throughout its own
+nonempty reachable domain and at least one distinct complete law always
+denies, alongside E1-C's responsive family. The hard viability obligation is
+retained. This moves E3 to `DIR-SELECTED`, activates D1, and selects no exact
+law identity, result, payoff, rarity, prevalence, or release placement.
+
+The D1 post-answer screen again used two different named questions. The
+topology audit tested whether post-routing distinct-related exposure hid
+authority, randomness, prevalence, or a hybrid state. The gameplay audit
+tested whether nonempty related exposure could produce legible buildcraft
+rather than decorative lineage. Both preserved one empty/nonempty card and
+recommended nonempty exposure.
+
+Reuse the resolved-pair opportunity domain: one reachable actual evaluation,
+one actually bound lawful complete stance/configuration, its deterministic
+selected authoritative tuple, and one unordered pair of distinct contender
+tags. Let `R^{resolved-related}_v` contain exactly those opportunities whose
+selected ledgers use two distinct final children with intersecting complete
+lineages or one shared nonmultiplying authorization/accounting parent. D1-A
+makes this set empty; D1-B makes it nonempty. Selector authority, stance
+binding, and fixed-input determinism are already settled, while contextual
+response changes inputs rather than adding a random/exogenous third state.
+
+C2-C guarantees related support only among valid pre-selector ledger pairs.
+It is consistent with D1-A for every such pair to remain counterfactual to
+authoritative co-selection while constituent ledgers appear with independent
+counterparts. A selected pair may also belong to both
+`E^{resolved-exact}_v` and `R^{resolved-related}_v`; that hybrid is one
+opportunity with one eventual permission bit, not a fourth branch or two form
+votes. Requiring `R^{resolved-related}_v setminus E^{resolved-exact}_v` to be
+nonempty would be an unselected stronger replacement.
+
+Cross-challenge caught an initially overstrong gameplay condition. Requiring
+the related form to be strategically distinct from, or non-dominated by, exact
+exposure at D1 could silently force a related-only witness or preselect a later
+permission/result/value mechanism. The repaired boundary keeps B as exposure
+only. Its two selected children and their lineage/accounting relation must be
+genuine and mechanically legible; the containing authored package must later
+pass SR-05/SR-06's operative-choice or state-transition, viable-purpose, and
+non-token release tests. At that later closure the related fact must matter to
+something players can understand, plan around, or have treated. A hybrid may
+pass once; no matched stance toggle, actor, control, permission, benefit, or
+payoff is selected. If no authored witness passes those existing gates, reopen
+D1 with A rather than count inert incidence.
+
+Recommend D1-B. It makes the already-selected related-proof grammar operative
+after routing rather than permanently counterfactual. Two distinct proof
+children and one retained causal/accounting unity coexist at the same selected
+boundary, a potential direct ideal fit, while D2 still owns joint-survival
+permission. Risks are one-payment compression, broad-lineage hubs, selector
+injection, explanation burden, and token hybrids. A is the clean countercase:
+related pair witnesses never become authoritative, protecting accounting
+clarity but making the selected related grammar latent.
+
+No row is added. After E3-C and D1's activation, the register has 89 rows: 34
+`SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 37 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. D1 is the current presented card.
 The authoritative decision record remains unchanged.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling

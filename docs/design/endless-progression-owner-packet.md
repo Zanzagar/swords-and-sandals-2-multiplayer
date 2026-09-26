@@ -308,8 +308,12 @@ than one immediate action or an arbitrary whole-policy contrast. The owner
 selected RCS-03C3C3C2E2-B, requiring at least one qualifying causal play-or-
 counterplay witness. A twenty-ninth post-answer audit upheld E3's three stable-
 polarity branches while making their domain-relative, gate-local meaning and
-non-token viability obligations explicit. RCS-03C3C3C2E3 is the current owner-
-facing choice under SR-03; D1 remains independently ready but queued.
+non-token viability obligations explicit. The owner selected
+RCS-03C3C3C2E3-C: responsive, steadfast-allow, and steadfast-deny law families
+must coexist under that viability obligation. A post-answer audit upheld D1's
+empty/nonempty post-routing related-exposure boundary while preventing a
+related-only witness or actionability promise from being smuggled into it.
+RCS-03C3C3D1 is the current owner-facing choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -22589,13 +22593,14 @@ queued.
 > E3 must reopen with B as the bounded replacement rather than shipping a token
 > C witness. No row is added.
 >
-> After E2-B and E3's activation, the eighty-nine-row register contains **35
+> After E2-B and E3's activation, the eighty-nine-row register at that
+> checkpoint contained **35
 > `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1
-> `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**. E3 is the current presented card;
-> D1 remains prerequisite-ready but queued. The authoritative decision record
+> `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**. E3 was the presented card;
+> D1 remained prerequisite-ready but queued. The authoritative decision record
 > remains unchanged.
 
-### RCS-03C3C3C2E3 — context-invariant exact-permission law polarity — active owner choice
+### RCS-03C3C3C2E3 — context-invariant exact-permission law polarity — direction selected
 
 E1-C guarantees that `K_v` is nonempty. E3 decides which steadfast polarity
 classes the completed catalog must contain. It classifies complete canonical
@@ -22624,6 +22629,107 @@ next presented card. The register would then contain 34 `SCREEN`, 1
 `OWNER-OPEN`, 13 `PRUNED`, 37 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 35`. E3 selects no survivor, payoff, implementation, or
 stochastic permission behavior.
+
+The owner selected **C**. Therefore `∅⊊K^+_v⊊K_v`: the completed catalog must
+contain at least one context-invariant exact-permission law that always allows
+throughout its own nonempty reachable domain and at least one distinct law that
+always denies throughout its domain. Together with E1-C, complete-law support
+is `R+D+A`. This is catalog-level coexistence, not a requirement that every
+Relic, relationship, committed variant, or release slice contain all three
+philosophies.
+
+The hard viability obligation is part of the selected direction. Every
+required polarity family must eventually pass SR-05/SR-06's mechanically
+legible, non-token viable-purpose gates. In particular, steadfast refusal must
+be instrumentally useful or a play-shaping commitment or exploitable liability
+inside a package receiving commensurate value; a dominated symmetry witness
+does not satisfy C. Concrete permission laws, final disposition, compensation,
+payoff, rarity, prevalence, and launch placement remain downstream. If later
+authoring and evaluation cannot produce a qualifying steadfast-deny family,
+E3 must be reopened with B as the bounded replacement rather than silently
+weakening C.
+
+E3 moves to `DIR-SELECTED` and D1 becomes the presented card. The eighty-nine-
+row register now contains 34 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 37
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+The authoritative decision record remains unchanged.
+
+> **Post-answer D1 prerequisite screen, 2026-09-26:** two bounded read-only
+> audits independently tested whether post-routing distinct-related exposure
+> remained one owner decision. The topology audit re-derived the domain and
+> attacked hidden authority, randomness, prevalence, and hybrid branches. The
+> gameplay audit tested whether an exposed related form could add buildcraft
+> rather than decorative lineage. Both returned the same binary topology and
+> recommended nonempty exposure.
+>
+> For version `v`, retain the existing resolved-pair domain: one reachable
+> actual evaluation, one actually bound lawful complete stance/configuration,
+> its one deterministic selected authoritative tuple, and one unordered pair
+> of distinct contender tags in that tuple. `R^{resolved-related}_v` contains
+> exactly those pairs whose selected ledgers use two distinct final children
+> with intersecting complete lineages or one shared nonmultiplying
+> authorization/accounting parent. Therefore it is empty or nonempty. Selector
+> authority and determinism are already settled; contextual response does not
+> create a third state.
+>
+> Pre-selector C2-C related support does not imply D1-B. Every structurally
+> valid distinct-related ledger pair may remain counterfactual to authoritative
+> co-selection even though either constituent ledger can be selected with an
+> independent counterpart. Conversely, multiple related edges, aliases,
+> self-lineage, callback splits, or generated IDs do not multiply a pair or
+> establish support.
+>
+> A hybrid opportunity in
+> `E^{resolved-exact}_v∩R^{resolved-related}_v` is not a third branch. It is one
+> pair, counted once, and later receives one permission bit. D1-B may be
+> witnessed by a related-only or hybrid pair; requiring
+> `R^{resolved-related}_v setminus E^{resolved-exact}_v` to be nonempty would
+> be a stronger replacement, not hidden inside B. D1 selects no matched stance
+> toggle, actor, actionability, permission, survivor, retry, payoff, or separate
+> form vote.
+>
+> Cross-challenge narrowed an initially overstrong gameplay guard. D1-B itself
+> promises exposure only. The selected children and qualifying lineage or
+> accounting relation must be genuine and mechanically legible, while the
+> containing authored package must later pass SR-05/SR-06's operative-choice or
+> state-transition, viable-purpose, and non-token release gates. At that later
+> closure, the genuine related fact must matter to something players can
+> understand, plan around, or have treated. This deferred validation does not
+> require a related-only route, a separate downstream benefit, or dominance
+> over exact routes. If no authored witness can pass those existing gates,
+> reopen D1 with A rather than count inert incidence. No new row is warranted.
+
+### RCS-03C3C3D1 — authoritative distinct-related exposure after routing — active owner choice
+
+C2-C requires functional distinct-related overlap among valid pre-selector
+ledger pairs, but B1-A sends only one selected tuple downstream. D1 asks
+whether at least one distinct-related pair must remain operative after a lawful
+bound stance selects that authoritative tuple. It grants no permission for both
+tags to survive together.
+
+| Choice | Post-routing distinct-related exposure | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no authoritative distinct-related route** | `R^{resolved-related}_v=∅`. Across every reachable actual evaluation and actually bound lawful complete stance/configuration, no unordered tag pair in the selected tuple uses distinct final children with intersecting complete lineage or a shared nonmultiplying authorization/accounting parent. C2-C's structural related support remains, but every such pair is counterfactual to authoritative co-selection. | A gives the clearest lineage/accounting firewall at the exposure boundary and prevents shared-cause sibling proofs from reaching fan-out treatment. Its ideal fit is **neutral/protective**: it protects real proof distinction but leaves their causal unity in latent structure rather than one operative relationship. Costs are making the already-required related grammar permanently counterfactual, dead authored breadth, and selector-injection pressure without related-form treatment payoff. A does not guarantee that avoidance is deliberate or player-configurable. | `Twin Vow` supplies structurally valid related children `Guard Pulse a` and `Riposte Mark b`, while P also has independent ledger `L_v`. Whenever that related candidate pair is available, the selected tuple instead uses a non-related alternative such as `(L_v,L_q)`; `a` or `b` may appear with other counterparts, but never together as an authoritative related pair. The required exact shared-Heat route still exists separately. |
+| **B — require an authoritative distinct-related route** | `R^{resolved-related}_v≠∅`. At least one reachable actual evaluation under one actually bound lawful complete stance/configuration selects a tuple containing an unordered tag pair whose selected ledgers use two distinct qualifying related final children. The witness may be related-only or hybrid; exact identities, counts, coverage, and prevalence remain AUTHOR/SPEC. | **Recommended, under the existing SR-05/SR-06 gates.** B makes the selected distinct-related grammar playable exposure instead of permanently counterfactual. Two distinct manifestations and one retained causal/accounting unity coexist at the same selected proof boundary, a **potential direct** *Achintya Bheda Abheda* fit; D2 must still decide whether both may survive. Costs are one-payment compression, broad-lineage hubs, selector injection, explanation burden, and a token-hybrid risk. B guarantees exposure, not that a participant can cause, choose, prevent, or exploit it. | One bound `Chorus` stance selects P through `Twin Vow`'s `Guard Pulse a` and Q through its distinct `Riposte Mark b`; `a≠b` retain one nonmultiplying operation lineage/payment. Both ledgers are authoritative, but D2 later decides their pair's one permission bit and E/F later handles any denial. |
+
+A/B are mutually exclusive and exhaustive because
+`R^{resolved-related}_v` is empty or nonempty. B requires one reachable actual
+selected-tuple witness; an unselected alternate, unreachable showcase, alias,
+self-lineage, field/callback split, or decorative label does not qualify. A
+does not undo C2-C's structural related-support direction; it fixes that
+support as counterfactual to authoritative co-selection.
+
+D1 selects no permission-law authority, randomness, joint survival,
+provisional candidate, commitment, survivor, substitute, claim, consumption,
+payoff, retry, prevalence, release placement, or implementation. A moves D1 to
+`DIR-SELECTED`, prunes D2, and makes E the next presented card; the register
+would contain 32 `SCREEN`, 1 `OWNER-OPEN`, 14 `PRUNED`, 38 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 33`. B moves D1 to
+`DIR-SELECTED` and sends D2 through its mandated fresh prerequisite screen;
+absent another amendment, the register would contain 33 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 34`. Any B-admitted hybrid remains one pair with one
+permission bit.
 
 ## Session protocol and evidence
 

@@ -1,5 +1,59 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 three exact-permission philosophies — RCS-03C3C3C2E3-C selected
+
+The owner selected `RCS-03C3C3C2E3-C`. The completed catalog must contain
+responsive, context-invariant always-allow, and distinct context-invariant
+always-deny exact-permission law families (`R+D+A`). The hard viability
+obligation remains part of C: steadfast refusal cannot be a dominated symmetry
+token, and failure to author a qualifying family later reopens E3 with B as the
+bounded replacement. No exact law, result, payoff, rarity, prevalence, or
+launch placement is selected.
+
+Two bounded read-only audits attacked D1 from different directions, then
+cross-challenged the only disputed guard. `R^{resolved-related}_v` classifies
+resolved pair opportunities whose selected authoritative ledgers use two
+distinct final children with intersecting complete lineage or one shared
+nonmultiplying authorization/accounting parent. It is empty or nonempty;
+authority, deterministic routing, prevalence, and hybrid handling do not create
+another D1 state.
+
+C2-C's pre-selector distinct-related support may remain counterfactual to
+authoritative co-selection. A hybrid pair in
+`E^{resolved-exact}_v∩R^{resolved-related}_v` instead qualifies once and later
+receives one permission bit. D1-B does not require a related-only witness,
+matched stance toggle, participant actionability, separate form vote, survivor,
+benefit, or payoff.
+
+Cross-challenge rejected an overstrong D1-time requirement that related
+exposure be strategically distinct from or non-dominated by exact exposure.
+That would risk silently forcing a related-only route or downstream mechanic.
+The safe boundary is exposure now and existing-gate validation later: the two
+selected children and their qualifying relation must be genuine and legible,
+and the containing package must pass SR-05/SR-06's operative, viable, non-token
+release tests. At that later closure the related fact must matter to something
+players can understand, plan around, or have treated; this is not a new D1
+membership test. If none can, reopen D1 with A rather than count inert
+incidence.
+
+The eighty-nine-row register now contains 34 `SCREEN`, 1 `OWNER-OPEN`, 13
+`PRUNED`, 37 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 35`. `RCS-03C3C3D1` is the current presented card. The authoritative
+decision record remains unchanged.
+
+D1 asks whether any structurally supported distinct-related pair must actually
+survive routing into the selected authoritative tuple:
+
+- A: `R^{resolved-related}_v=∅`. Every related pair remains counterfactual to
+  authoritative co-selection. This protects accounting clarity but makes the
+  required related grammar permanently latent. D2 prunes and E follows.
+- B: `R^{resolved-related}_v≠∅`. Recommend B under the existing SR-05/SR-06
+  gates. At least one actual bound route selects a genuine related pair. This
+  makes distinct manifestations of one causal/accounting unity operative at
+  exposure, without granting joint survival. Costs are one-payment compression,
+  broad-lineage hubs, selector injection, explanation burden, and token-hybrid
+  risk. D2 receives its required fresh prerequisite screen.
+
 ## 2026-09-26 causal exact-permission response — RCS-03C3C3C2E2-B selected
 
 The owner selected `RCS-03C3C3C2E2-B`: at least one responsive complete
@@ -36,16 +90,16 @@ support a reachable, mechanically legible, non-token legal build or policy
 purpose in the applicable release scope. It must remain viable and not
 everywhere weakly dominated under the later power/compatibility envelope.
 Constant refusal must be instrumentally useful or an explicit play-shaping
-commitment or
-exploitable liability in a package with commensurate value. Exact mechanics
-remain C3C3E/F and RCS-05/08 work; SR-05/06 and RCS-17/18 validate them. If no
-deny family passes, reopen E3 with B as the bounded replacement.
+commitment or exploitable liability in a package with commensurate value.
+Exact mechanics remain C3C3E/F and RCS-05/08 work; SR-05/06 and RCS-17/18
+validate them. If no deny family passes, reopen E3 with B as the bounded
+replacement.
 
-The eighty-nine-row register now contains 35 `SCREEN`, 1 `OWNER-OPEN`, 13
-`PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 36`. `RCS-03C3C3C2E3` is the current presented card. D1 remains
-independently ready but queued. The authoritative decision record remains
-unchanged.
+At that checkpoint the eighty-nine-row register contained 35 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 36`. `RCS-03C3C3C2E3` was the presented card. D1 remained
+independently ready but queued. The newer section records E3-C and the D1
+frontier. The authoritative decision record remains unchanged.
 
 E3 asks which context-invariant law polarities the completed catalog requires:
 
@@ -10062,7 +10116,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 07:55 UTC — causal exact-permission response selected](docs/handoffs/2026-09-26-0755--relic-causal-permission-selected.md)**
+[2026-09-26 15:01 UTC — three exact-permission philosophies selected](docs/handoffs/2026-09-26-1501--relic-three-permission-philosophies-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
