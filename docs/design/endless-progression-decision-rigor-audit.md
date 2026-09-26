@@ -3636,6 +3636,67 @@ the resolver's favored assignment. C2 grants no treatment, proof priority,
 claim, later reuse, cross-opportunity authority, payoff, persistence, release,
 or implementation.
 
+The owner selected `RCS-03C3C2-C`. Both exact-child and distinct-related
+support sets are nonempty; their witnesses may occupy different fixed
+evaluations or one hybrid tuple. This moves C2 to `DIR-SELECTED` without
+granting either form joint survival. Before further correction, old C3 would
+have become `OWNER-OPEN` in the sixty-five-slot register, with 27 `SCREEN`, 1
+`OWNER-OPEN`, 8 `PRUNED`, 25 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 28`.
+
+Four bounded read-only named-claim audits then attacked whether old C3 was one
+prerequisite-ready decision. They produced three load-bearing countermodels.
+First, P may have ledgers `{Guard g, Heat h}` and `{Guard g, Feint k}` while Q
+has `{Return t, Heat h}`; a resolver can create or remove overlap without
+changing the game state. Second, exact and distinct-related opportunities can
+receive materially different joint-survival rules: exact-only permission
+supports readable common-child hubs, while related-only permission supports
+different manifestations of one lineage/payment. Third, three or more
+individually valid tags may exist before treatment even though C3c.46-A caps
+the final output at two. A generic “arbitration” label also hid whether a
+denied pair cancels both or retains one, who selects that singleton, how many
+survive a three-plus state, and who selects their identities. C133/C134 begin
+after this boundary and cannot answer any of those questions.
+
+The smallest durable correction replaces old C3 with nine counted children:
+alternate-ledger support; conditional ledger authority; separate exact and
+related restrictions of one joint-survival permission set; denied-pair
+disposition; conditional denied-pair selection authority; three-plus contender
+support; conditional bounded output cardinality; and conditional three-plus
+selection authority. The permission set is one subset of resolved
+opportunities. Exact and related are overlapping factual predicates, not
+separate votes, so a hybrid opportunity has one permission bit. A follow-up
+countermodel audit first reported that a seventh hybrid-composition row was
+needed, then explicitly reversed that finding after the one-permission-set
+invariant exposed its assumed “exact grant versus related veto” as invented
+state. Under a selective/selective answer, the identity of permitted tuples is
+AUTHOR/SPEC; recursively voting on the hybrid subset would violate the master
+index's anti-recursion rule.
+
+Replacing one counted row with nine produces the eighteenth-amendment
+seventy-three-slot register: 35 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 25
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`.
+`RCS-03C3C3A` is the sole active card. Its answer can prune only its
+conditional ledger-authority child; every later row remains counted until its
+own prerequisites derive a disposition.
+
+**Agent correction:** the first internal C3C3A draft called ledgers with the
+same exact/related signature “treatment-equivalent.” A named-claim audit broke
+that assertion before owner presentation. P may use `Heat h` or rare `Vow v`,
+Q may contain both, and a later selective exact-form map may permit sharing
+`v` while denying `h`; both ledger pairs are exact-only but yield different
+results. The corrected card therefore asks exact canonical ledger
+multiplicity, not merely signature variability. For fixed `(e,h,j)`,
+`Lambda_v(e,h,j)` contains every canonical position-to-final-child assignment
+satisfying upstream rules before selection, treatment, claim, or outcome.
+C3C3A-A makes every such nonempty set a singleton. C3C3A-B requires at least one
+reachable set of size two or more and sends all multiplicity authority to
+C3C3B. Recommend B for richer proof-routing and redundancy, provided C3C3B is
+prospective, disclosed, total over simultaneous multiplicity, and never
+outcome-favored. Automatic cut-atomic invocation means B creates no live proc
+prompt by itself. A remains the clear, fully legal simplicity countercase and
+does not undo C2-C's two forms across distinct unique-ledger witnesses.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

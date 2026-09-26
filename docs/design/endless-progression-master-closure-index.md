@@ -2182,9 +2182,44 @@ Each local witness may be a direct ideal fit; catalog coexistence is aggregate.
 The cost is carrying both hub dominance and one-payment compression risks plus
 the highest disclosure, authoring, solver, and teaching burden.
 
+**Post-answer screen and eighteenth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C2-C`: both exact-child and distinct-related
+within-evaluation overlap support sets are nonempty. The witnesses may be
+different opportunities or one opportunity carrying both factual relations.
+C2 grants no joint survival, proof selector, candidate, or commitment.
+
+Read-only named-claim audits then broke old `RCS-03C3C3` as one card. The row
+hid alternate-ledger support and resolution; independently selectable exact
+and related joint-survival topology; denied-pair output disposition and
+selection authority; and support, output cardinality, and selection authority
+for three-plus pre-treatment contenders under the already-selected exact-two
+final ceiling. C133/C134 apply only after this fan-out boundary and settle none
+of it.
+
+Old C3 becomes a non-counting parent for nine rows: C3C3A alternate-ledger
+support; conditional C3C3B authoritative ledger resolution; C3C3C exact-form
+and C3C3D related-form permission topology; C3C3E denied-pair disposition;
+conditional C3C3F denied-pair selection authority; C3C3G support for at least
+three contenders; conditional C3C3H output cardinality; and conditional C3C3I
+selection authority. C3C3C/C3C3D constrain one shared opportunity-level
+permission set, so a hybrid exact-and-related opportunity has one permission
+bit rather than hidden form-level grant/veto votes. Selective identities remain
+AUTHOR/SPEC; no recursive hybrid-subset card is admitted.
+
+Replacing one counted C3 row with nine adds eight slots and potential cards.
+The amended register has seventy-three slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 25 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. `RCS-03C3C3A` is the sole active card. It asks whether every
+individually satisfied tag has one canonical typed ledger at a fixed state or
+whether at least one reachable tag/state has two genuinely different
+position-to-child assignments. Recommend nonempty alternate-ledger support
+for richer proof-routing buildcraft, conditional on the next card imposing a
+prospective, disclosed, total resolver and never outcome-favored post-hoc
+selection.
+
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has sixty-five
+To make that route genuinely finite, the remaining C3c pass has seventy-three
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -2233,13 +2268,21 @@ overcompression.
 | `RCS-03C3B4A` | Support for a nontrivial within-parent semantic-application frontier before final child partition | `DERIVED`; B2B1-B's two semantically distinct equal-`Pi` current candidates become sites beneath one B2B2-B class, and B3A-B preserves their manifestations as the only addressable layer; exact additional breadth remains AUTHOR/SPEC |
 | `RCS-03C3B4B` | Canonical final family topology for multiple qualifying semantic application sites beneath one parent representative | `DIR-SELECTED`; B requires one exhaustive nonoverlapping final-child partition with nonempty reachable functional compound support and no co-addressable compound/descendant pair; exact families, widths, counts, distribution, and prevalence remain AUTHOR/SPEC |
 | `RCS-03C3C1` | Support for one fixed evaluation containing distinct receipt tags that are individually ledger-satisfied before fan-out treatment and whose typed proof ledgers overlap by exact final child, complete lineage, or shared nonmultiplying authorization/accounting; this is not C133/C134 provisional completion | `DIR-SELECTED`; B requires nonempty functional overlap support under `SR-03` without granting joint survival or commitment |
-| `RCS-03C3C2` | Form support among C1-positive within-evaluation overlaps: exact same final child, distinct related proofs, or both | `OWNER-OPEN`; choose exact-only, distinct-related-only, or both; recommend both play grammars while C3 retains all fan-out treatment and exact identities/distribution remain AUTHOR/SPEC |
-| `RCS-03C3C3` | Simultaneous within-evaluation fan-out treatment over supported cross-receipt proof-overlap opportunities | `SCREEN`; follows applicable `RCS-03C3C2`; choose no overlap jointly commits, every otherwise-valid overlap jointly commits, or reachable permitted/denied opportunities coexist; same-result duplication remains forbidden |
+| `RCS-03C3C2` | Form support among C1-positive within-evaluation overlaps: exact same final child, distinct related proofs, or both | `DIR-SELECTED`; C requires nonempty exact and distinct-related support, possibly in one hybrid opportunity or different evaluations, without granting joint survival |
+| `RCS-03C3C3A` | Support for multiple canonical position-keyed typed ledgers for one individually satisfied tag at one fixed evaluation state | `OWNER-OPEN`; choose unique-ledger-only or require at least one reachable alternate-ledger witness; recommend nonempty support for proof-routing buildcraft, with all authority deferred to C3C3B |
+| `RCS-03C3C3B` | Authoritative proof-ledger resolution when one or both tags have multiple otherwise-valid ledgers, including total treatment of their joint ledger product before outcome inspection | `SCREEN`; conditional on `RCS-03C3C3A-B`; otherwise `PRUNED`; must expose every factual exact/related membership and cannot choose a favorable assignment after seeing a result |
+| `RCS-03C3C3C` | Exact-form restriction of the one within-evaluation joint-survival permission set | `SCREEN`; follows the authoritative ledger rule; classify exact opportunities as permission-empty, universal, or nonempty proper without creating a separate form vote |
+| `RCS-03C3C3D` | Distinct-related-form restriction of the same within-evaluation joint-survival permission set | `SCREEN`; follows C3C3C; classify related opportunities as permission-empty, universal, or nonempty proper; one exact-and-related tuple retains one permission bit |
+| `RCS-03C3C3E` | Result disposition and survivor cardinality when two individually satisfied overlapping tags are denied joint survival | `SCREEN`; follows C3C3C-C3C3D; prunes if every supported overlap is jointly permitted; must distinguish mutual cancellation, retention/substitution, and any admitted coexistence without exceeding the selected result contract |
+| `RCS-03C3C3F` | Authority selecting the survivor or legal substitute for a denied pair | `SCREEN`; conditional on C3C3E admitting a positive nonunique result; otherwise `PRUNED` or `DERIVED`; exact priority keys remain later only after authority is settled |
+| `RCS-03C3C3G` | Support for at least three simultaneously individually ledger-satisfied receipt tags before within-evaluation treatment | `SCREEN`; follows the pair route; choose empty or nonempty support without treating engine callbacks or alternate ledger assignments as additional contenders |
+| `RCS-03C3C3H` | Output-cardinality topology for a three-plus contender state under the exact-two final receipt ceiling | `SCREEN`; conditional on `RCS-03C3C3G` positive; otherwise `PRUNED`; options must be relative to actually feasible survivor subsets so an impossible pair is never a fake branch |
+| `RCS-03C3C3I` | Authority selecting receipt identities from a three-plus contender state when several legal bounded outputs remain | `SCREEN`; conditional on a positive nonunique C3C3H result; otherwise `PRUNED` or `DERIVED`; ordering, priority, participant choice, and any merge/substitution consequence cannot be hidden in implementation |
 | `RCS-03C3C4` | Support for multiple semantically distinct automatic evaluation opportunities of one active Relic at one semantic cut | `SCREEN`; follows the settled C1-C3 route; an engine splitting one opportunity into callbacks is never support, and exact opportunity taxonomy remains AUTHOR/SPEC |
 | `RCS-03C3C5` | Cross-opportunity proof-overlap support when distinct same-cut evaluations coexist | `SCREEN`; conditional on `RCS-03C3C4-B`; otherwise `PRUNED`; uses the same exact-child/lineage/accounting non-independence test before any post-invocation claim |
 | `RCS-03C3C6` | Form support among C5-positive cross-opportunity overlaps: exact same final child, distinct related proofs, or both | `SCREEN`; conditional on positive `RCS-03C3C5` support; otherwise `PRUNED`; exact identities and distribution remain AUTHOR/SPEC |
 | `RCS-03C3C7` | Cross-opportunity same-cut fan-out treatment over supported overlaps | `SCREEN`; follows applicable `RCS-03C3C6`; choose empty, universal, or nonempty proper permission while technical batching of one semantic opportunity remains invariant |
-| `RCS-03C3D` | Post-invocation Relic-local evidence-claim/consumption trigger and no-result disposition without deleting canonical occurrence truth | `SCREEN`; follows the settled `RCS-03C3C1`–`RCS-03C3C7` route and C133/C134 under `SR-03`/`SR-04` |
+| `RCS-03C3D` | Post-invocation Relic-local evidence-claim/consumption trigger and no-result disposition without deleting canonical occurrence truth | `SCREEN`; follows the settled `RCS-03C3C1`–`RCS-03C3C7` route, including C3C3A-C3C3I, and C133/C134 under `SR-03`/`SR-04` |
 | `RCS-03C3E` | Later same-tag reuse of otherwise-admissible evidence after a C135-valid break/renew/rearm | `SCREEN`; follows `RCS-03C3D` and may close `DERIVED` if the selected claim topology leaves no branch |
 | `RCS-03C3F` | Later-cut different-tag evidence reuse within the same active Relic | `SCREEN`; follows `RCS-03C3D`/`RCS-03C3E` and may close `DERIVED` if the selected claim topology leaves no branch |
 | `RCS-03D` | Transformation-cause eligibility: which authored events may propose a persistent transition | `SCREEN`; follows `RCS-03A`–`RCS-03C3F` under `SR-04` |
@@ -2372,20 +2415,26 @@ six slots and six potential cards. The pre-C1 seventeenth-amendment register
 had **sixty-five slots**: 29 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 23
 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`.
 `RCS-03C3C1-B` then selected nonempty functional within-evaluation overlap
-support. The current register has **sixty-five slots**: 28 `SCREEN`, 1
-`OWNER-OPEN`, 8 `PRUNED`, 24 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; current `Phi_SR = 29`, and `RCS-03C3C2` is the sole active card.
+support, reducing `Phi_SR` to 29. `RCS-03C3C2-C` then selected nonempty exact
+and distinct-related overlap-form support, which would ordinarily reduce the
+potential to 28. The eighteenth prerequisite amendment replaces old C3 with
+nine ledger, form-permission, denied-pair, and over-cap arbitration rows,
+adding eight counted slots and eight potential cards. The current register has
+**seventy-three slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 25
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
+`Phi_SR = 36`, and `RCS-03C3C3A` is the sole active card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
-outside owner choice. Therefore the remaining Relic pass has at most twenty-nine
-owner cards under this seventeen-times-amended charter and will usually have
-fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
+outside owner choice. Therefore the remaining Relic pass has at most
+thirty-six owner cards under this eighteen-times-amended charter and will
+usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
 `RCS-03C3B2B`, `RCS-03C3B3`, `RCS-03C3B4`, `RCS-03C3C`, and `RCS-04`
-remain readable parent aliases only; they are not additional counted slots.
+remain readable parent aliases only; `RCS-03C3C3` is now also a non-counting
+parent alias. They are not additional counted slots.
 
 `Phi_SR = 0` is necessary but not sufficient for Relic closure: the twelve
 `SR-*` exit tests, proof packet, coherent normative replay, and explicit
@@ -2399,7 +2448,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 65 frozen candidate slots; current `Phi_SR = 29` after `RCS-03C3C1-B` requires nonempty within-evaluation cross-receipt overlap support and activates overlap-form choice C2 | At most 29 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 73 frozen candidate slots; current `Phi_SR = 36` after `RCS-03C3C2-C` requires both within-evaluation overlap forms and the eighteenth amendment exposes nine treatment sub-boundaries | At most 36 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

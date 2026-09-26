@@ -1,6 +1,59 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 both within-evaluation overlap forms — RCS-03C3C2-C selected
+
+The owner selected `RCS-03C3C2-C`: the completed catalog must support both
+exact-child and distinct-related cross-receipt overlap inside one fixed Relic
+evaluation. Exact support repeats one final child occurrence across two valid
+typed ledgers. Distinct-related support uses different final children whose
+complete lineages intersect or whose nonmultiplying authorization/accounting
+parent is shared. The witnesses may occur in different evaluations or in one
+hybrid tuple. This is still pre-treatment support; it creates no provisional
+candidate, joint survival, or commitment.
+
+A prerequisite audit then broke old `RCS-03C3C3` as one card. It hid
+alternate-ledger multiplicity and selection, form-specific permission,
+denied-pair result disposition and authority, and three-plus contender
+cardinality and authority under the exact-two final receipt ceiling. Old C3 is
+now a non-counting parent for nine finite rows, C3C3A-C3C3I. Exact and related
+treatment rows constrain one shared opportunity-level permission set, so a
+hybrid opportunity has one permission bit; there is no invented exact-vote
+versus related-vote composition rule.
+
+The seventy-three-slot register now contains 35 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 25 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. `RCS-03C3C3A` is the sole active card. The authoritative
+decision record remains unchanged because a bare option label selects
+direction but does not complete acceptance.
+
+C3C3A asks whether a receipt tag may have two genuinely different valid proof
+ledgers at the same fixed evaluation state:
+
+- A: every individually satisfied tag has exactly one canonical position-to-
+  child ledger at that state. C2-C's two overlap forms still exist through
+  separate unique-ledger witnesses.
+- B: at least one reachable tag/state has two valid ledgers differing in a
+  final child assignment. The next card decides the prospective total
+  resolution rule; B grants no live prompt or favorable post-hoc choice.
+
+Recommend B for richer buildcraft, conditional on a strong disclosed resolver.
+For example, P may be valid through `{Guard g, Heat h}` or
+`{Guard g, Vow v}`, while Q uses `{Return t, Heat h}`. The first P ledger
+overlaps Q and the second does not. This can eventually create meaningful
+proof routing or resource preservation, but automatic cut-atomic invocation
+means the support answer alone cannot add a new proc-time prompt. A is the
+clean simplicity countercase.
+
+One internal draft incorrectly treated ledgers with the same exact/related
+signature as fully treatment-equivalent. A read-only audit broke that claim:
+a later selective permission map can distinguish the actual proof identities.
+The recorded card therefore measures exact canonical ledger multiplicity,
+not only signature variability.
+
 ## 2026-09-26 within-evaluation Relic overlap support — RCS-03C3C1-B selected
+
+**Historical frontier:** C2-C was subsequently selected and the eighteenth
+prerequisite amendment above supersedes this section's next-card guidance.
 
 The owner selected `RCS-03C3C1-B`: the completed catalog must contain at least
 one reachable fixed evaluation where two distinct canonical receipt tags are
@@ -9246,9 +9299,12 @@ selected B4B-B, one nonoverlapping child scale with nonempty authored compound
 support. A seventeenth audit split old C3C into C1-C7 across within-evaluation
 overlap support/form/treatment and distinct same-cut opportunity
 support/overlap/form/treatment. The owner selected C1-B, requiring nonempty
-within-evaluation overlap support. Continue at registered Relic slot
-`RCS-03C3C2` under `SR-03`; C3-C7, C3D-C3F, expanded `RCS-08`, cause, and agency follow
-separately.
+within-evaluation overlap support, then C2-C, requiring both exact-child and
+distinct-related support. An eighteenth audit replaced the still-bundled C3
+with nine ledger, form-permission, denied-pair, and over-cap arbitration rows.
+Continue at registered Relic slot `RCS-03C3C3A` under `SR-03`;
+C3C3B-C3C3I, C4-C7, the distinct claim/reuse rows `RCS-03C3D`-
+`RCS-03C3F`, expanded `RCS-08`, cause, and agency follow separately.
 
 R11 begins only
 after R10 completes and first chooses package proximity for R10.7's selected
@@ -9392,7 +9448,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 03:40 UTC — within-evaluation Relic overlap support selected](docs/handoffs/2026-09-26-0340--relic-within-evaluation-overlap-support-selected.md)**
+[2026-09-26 04:15 UTC — both within-evaluation Relic overlap forms selected](docs/handoffs/2026-09-26-0415--relic-both-overlap-forms-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

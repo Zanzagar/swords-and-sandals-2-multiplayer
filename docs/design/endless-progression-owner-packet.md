@@ -259,7 +259,12 @@ RCS-03C3C into within-evaluation overlap support and form, conditional fan-out
 treatment, and distinct same-cut evaluation-opportunity support, overlap,
 overlap form, and treatment. The owner selected RCS-03C3C1-B, requiring
 nonempty functional within-evaluation overlap support without granting joint
-survival or commitment. RCS-03C3C2 is the active owner choice under SR-03.
+survival or commitment. The owner then selected RCS-03C3C2-C, requiring both
+exact-child and distinct-related overlap-form support. An eighteenth
+prerequisite audit split the still-bundled within-evaluation treatment row
+into nine finite ledger, permission, denied-pair, and over-cap arbitration
+boundaries. RCS-03C3C3A, alternate-ledger multiplicity support, is the active
+owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -21115,7 +21120,7 @@ C1 moves from `OWNER-OPEN` to `DIR-SELECTED`; C2 moves from `SCREEN` to
 `OWNER-OPEN`, 8 `PRUNED`, 24 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 29`. The authoritative decision record remains unchanged.
 
-### RCS-03C3C2 — within-evaluation proof-overlap form support — active owner choice
+### RCS-03C3C2 — within-evaluation proof-overlap form support — C selected
 
 C1-B requires at least one functional overlap, but exact reuse of one child and
 overlap through distinct related children remain mechanically different. C2
@@ -21170,6 +21175,117 @@ reuse; RCS-08 retains cross-root/team authority.
 Any answer moves C2 to `DIR-SELECTED`, makes C3 active, and reduces `Phi_SR`
 from 29 to 28. The resulting register contains 27 `SCREEN`, 1 `OWNER-OPEN`, 8
 `PRUNED`, 25 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **C, support both
+exact-child and distinct-related overlap forms.** Both
+`E^{intra-exact}_v` and `R^{intra-related}_v` are nonempty. The completed
+catalog must contain at least one reachable valid exact-child witness and at
+least one reachable valid distinct-related witness. They may be different
+fixed evaluations or one tuple that contains an exact shared child plus a
+separate pair of distinct lineage/accounting-related children.
+
+This preserves readable keystone sharing and choreographed distinct
+manifestations of one causal family. Each local witness may be a **direct**
+unity-with-difference expression; merely carrying both grammars somewhere in
+the catalog remains **aggregate**. The selected richness also carries both
+failure modes forward: ubiquitous exact children can become dominant hubs,
+while related children can disguise one paid operation as several independent
+contributions. C2 does not let either form produce two receipts, choose a
+ledger, create a candidate, or commit a result. Exact identities, counts, and
+distribution remain AUTHOR/SPEC except where a later treatment rule makes a
+general consequence boundary owner-material.
+
+C2 moves to `DIR-SELECTED` and old C3 would ordinarily become `OWNER-OPEN`.
+Before the prerequisite correction below, the sixty-five-slot register would
+contain 27 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 25 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 28`. The authoritative
+decision record remains unchanged.
+
+> **Eighteenth prerequisite correction, 2026-09-26:** bounded read-only
+> named-claim audits broke old C3 as one prerequisite-ready treatment card.
+> Its empty/universal/selective trichotomy hid which of several valid ledgers
+> becomes authoritative, whether exact and related opportunities receive the
+> same permission topology, what happens to a denied two-tag pair, and how an
+> arbitrary pre-treatment contender set obeys C3c.46-A's exact final maximum
+> of two. C133/C134 begin only after survivors become provisionally complete
+> and therefore settle none of those input-resolution choices.
+>
+> Old `RCS-03C3C3` is now a non-counting parent for nine registered rows:
+>
+> 1. `RCS-03C3C3A` — support for multiple valid ledgers for one tag at one
+>    fixed evaluation state;
+> 2. `RCS-03C3C3B` — conditional authoritative ledger-resolution rule;
+> 3. `RCS-03C3C3C` — exact-form joint-survival permission topology;
+> 4. `RCS-03C3C3D` — distinct-related-form joint-survival permission topology;
+> 5. `RCS-03C3C3E` — denied two-tag result disposition and survivor
+>    cardinality;
+> 6. `RCS-03C3C3F` — conditional denied-pair survivor-selection authority;
+> 7. `RCS-03C3C3G` — support for at least three simultaneous pre-treatment
+>    contenders in one evaluation;
+> 8. `RCS-03C3C3H` — conditional three-plus output cardinality under the
+>    exact-two final ceiling; and
+> 9. `RCS-03C3C3I` — conditional three-plus survivor-selection authority.
+>
+> C3C3A-A prunes C3C3B; C3C3A-B activates it. C3C3C and C3C3D follow the
+> authoritative ledger rule. They classify restrictions of **one** opportunity-level joint-
+> survival set `P^{intra}_v`, not two latent form votes: a tuple in both exact
+> and related sets has one permission bit. Consequently no hidden OR/AND
+> hybrid-composition choice exists. Incompatible universal-versus-empty form
+> answers instead derive that the effective form intersection is empty;
+> selective tuple identities remain AUTHOR/SPEC under the anti-recursion rule.
+> C3C3E-C3C3F apply only where a supported pair is denied joint survival.
+> C3C3G determines whether C3C3H-C3C3I activate; their cardinality options
+> must be stated relative to actually feasible survivor subsets so a nonexistent
+> legal pair cannot become a fake “retain two” option.
+>
+> Replacing one counted C3 row with nine adds eight slots and eight potential
+> cards. The eighteenth-amendment register therefore contains **seventy-three
+> slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 25 `DIR-SELECTED`, 2
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. C3C3A is the sole active
+> card. Later rows receive their own prerequisite audit before presentation;
+> this amendment records their distinct consequence boundaries without
+> prematurely choosing their options.
+
+### RCS-03C3C3A — within-tag alternate-ledger support — active owner choice
+
+C2-C says both overlap forms exist somewhere, but it does not say whether one
+receipt tag can be proved in more than one genuinely different way at the
+same fixed evaluation state. C3C3A chooses whether that local proof multiplicity
+is part of the completed catalog before any resolver is allowed to select an
+assignment.
+
+For fixed version `v`, invocation cut `e`, operative context `h`, and receipt
+tag `j`, let `Lambda_v(e,h,j)` contain every **canonical position-keyed typed
+ledger** that satisfies only the already-selected type, phase, freshness,
+role, source, and lineage rules. This set is measured before proof selection,
+fan-out treatment, claim/consumption, or outcome inspection. Two ledgers are
+distinct only when at least one authored position is assigned a different
+final child occurrence. Alternate serialization, aliases, fields, callbacks,
+or two names for the same position-to-child assignment canonicalize together.
+
+Let `A^{intra-ledger}_v` contain reachable `(e,h,j)` states for which
+`|Lambda_v(e,h,j)| >= 2`.
+
+| Choice | Alternate-ledger support rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — one valid ledger per satisfied tag** | `A^{intra-ledger}_v` is empty. At every reachable fixed evaluation state, each individually ledger-satisfied tag has exactly one canonical valid position-to-child assignment. Different tags and different evaluations may still realize either C2 overlap form. | A is the strongest clarity countercase. Players never lose a dual result because an unseen resolver chose a different proof embodiment, and authors cannot turn ledger ambiguity into post-hoc outcome shopping. Its fit is **neutral/protective**: it preserves truthful causal distinction but creates no new unity-with-difference relation. The price is rejecting redundant or expressive recipes whenever two current proofs could honestly fill the same position, and it removes advanced proof-routing buildcraft. | P can use only `{Guard g, Heat h}` at this state; an otherwise qualifying `Vow v` must belong to a different tag/state or be made ineligible for P. A separate evaluation may still provide C2-C's distinct-related witness. |
+| **B — require at least one alternate-ledger state** | `A^{intra-ledger}_v` is nonempty. At least one reachable fixed tag/state has two canonical valid ledgers that differ in a final child assignment. The later C3C3B rule must resolve arbitrary multiplicity, including alternatives on both tags and their joint ledger product; B itself grants no chooser. | **Recommended for fun and buildcraft, conditionally on a strong C3C3B resolver.** B lets one continuing relationship identity admit genuinely different proof embodiments at one state and can later support disclosed routing, redundancy, or preservation of a scarce proof. That is a **partial** fit here and only a potential direct fit once authority makes the distinction operative. Costs are solver complexity, proof-choice opacity, outcome shopping, and claim/reuse ambiguity. Automatic cut-atomic invocation forbids treating B as an unselected live proc prompt; any later agency must be prospective and compatible with that rule. | P has `L_h={Guard g, Heat h}` and `L_v={Guard g, Vow v}` while Q has `{Return t, Heat h}`; `h` and `v` are distinct independent children. The first P ledger overlaps Q and the second does not. B requires both ledgers to be structurally valid but does not choose which one governs. |
+
+A/B are mutually exclusive and exhaustive because the reachable canonical
+alternate-ledger set is empty or nonempty. A does not undo C2-C: exact support
+may use one uniquely proved pair and related support another. B needs only one
+functional multiplicity witness; exact identities, total count, prevalence,
+and whether one or both tags have alternatives remain AUTHOR/SPEC. The next
+card must nevertheless define a total rule for every reachable multiplicity,
+not only the minimum witness.
+
+C3C3A grants no proof-selection priority, participant prompt, joint survival,
+candidate, commitment, claim, consumption, later reuse, payoff, persistence,
+release, or implementation. Outcome-favored post-hoc assignment remains
+forbidden under both options. Selecting B moves C3C3A to `DIR-SELECTED`, makes
+C3C3B `OWNER-OPEN`, and reduces `Phi_SR` from 36 to 35. Selecting A additionally
+prunes C3C3B, makes C3C3C active, and reduces `Phi_SR` from 36 to 34. The
 authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
