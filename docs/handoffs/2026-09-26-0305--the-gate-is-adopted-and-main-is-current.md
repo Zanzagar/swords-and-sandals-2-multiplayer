@@ -45,9 +45,33 @@ main-push block is dropped, so `main` is kept equal to `arena` by the agent.
   `node tools/arena-server.mjs --host 0.0.0.0` (Windows cannot reach WSL loopback here), then
   `http://<hostname -I>:8123/tools/arena/index.html?teams=3&spectate=1`.
 
+## Owner-reported defects from playtesting (2026-09-26) — start here
+
+The owner, verbatim: *"in some cases (larger character models) a character in a different lane behind
+another cant advance. it just walks in place when attempting to proceed. also some ai is bad when 2 are
+in same lane one behind other or 2v1 where 2 are in separate lanes, the ai on the team of 2 never makes a
+concerted effort to corner the single gladiator oftentimes it just dances or waits for the 1v1 to finish
+instead of taking decisive maneuvers"*
+
+1. **Walk in place (a movement/blocking defect, Fix-class).** A LARGER fighter in a DIFFERENT lane,
+   behind another, cannot advance: the walk animation plays but he does not move. Hypothesis to break,
+   not a finding: the advance's blocking check measures bodies by drawn size/width across lanes
+   (it should only block within a lane, per the soft-lanes decision), or the walk is offered but the
+   engine's resolved distance is 0. **First get a repro**: a seed + roster (`items=buffs` for colossus
+   sizes; the `crowd` kit's little fat kid for small ones) + a screenshot, then a failing test on the
+   engine's move resolution; check whether the ring offers a walk the engine then resolves to nothing
+   (that would also be a UI lie).
+2. **AI does not press an advantage (a tactics design question — grill before building).** Two cases:
+   (a) two teammates in the SAME lane, one behind the other; (b) a 2v1 with the two in SEPARATE lanes.
+   The pair "dances or waits for the 1v1 to finish" instead of cornering the lone foe (changing lanes to
+   reach him, flanking, both engaging). The AI is the rule set's (`src/team/`); the tactics change is a
+   design decision — run a grilling round (lane changes via walk/jump/charge are already tied to the
+   soft-lanes direction, battle-ui.md decision 10) and record it before any slice; then measure it with
+   seeded bouts (time-to-kill in 2v1, share of turns spent idle/dancing).
+
 ## Next, ranked
 
-1. **Owner playtest feedback** on the in-frame HUD and crowd bar. Open owner call: the crowd bar sits
+1. **More owner playtest feedback** on the in-frame HUD and crowd bar (the defects above come first). Open owner call: the crowd bar sits
    where the build puts it (top right) and in team bouts damage pop-ups pass under it ~2-4% of frames,
    a close-up crown <1% (1v1: none) — keep, move it, or paint pop-ups over the HUD?
 2. **The ring3 track** (unchanged: R1 spell row clear of the bow's words, R2 the reach preview, C1 the
