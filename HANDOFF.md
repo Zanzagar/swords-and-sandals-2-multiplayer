@@ -1,5 +1,49 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 one authoritative Relic ledger tuple — RCS-03C3C3B1-A selected
+
+The owner selected `RCS-03C3C3B1-A`: every reachable evaluation with several
+valid joint ledger tuples applies one total resolver and returns exactly one
+complete authoritative tuple before downstream permission or results. It may
+not return none, retain a proper subset, emit a partial tuple, or retry after a
+later conclusion. B1 decides no scope, actor, or randomness rule.
+
+Three bounded read-only named-claim audits found and repaired two hidden
+defects. First, the worksheet's phrase “before exact/related classification”
+was too strong and did not appear in the owner-facing replay. A selector may
+inspect canonical upstream proof structure and its factual
+exact/related/independent relations; only its returned tuple enters C3C3C/D,
+and downstream permission, survivor treatment, claims/reuse, completion,
+payoff, and combat outcomes remain forbidden inputs. Second, context-stable
+per-tag marginals do not rule out correlated tuple draws. B2 is narrowed to
+cross-tag contextual responsiveness, while old B4 becomes a non-counting
+parent for stochastic-support B4A and conditional stochastic-coupling B4B.
+
+The seventy-seven-slot register now contains 37 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 27 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 38`. `RCS-03C3C3B2` is the sole active card. The authoritative
+decision record remains unchanged.
+
+B2 asks whether another contender can change one tag's chosen proof route
+while that tag's complete local input stays fixed:
+
+- A: no. Every tag's selected ledger or marginal draw law is context-stable
+  when other contenders or their alternatives change. This is clearest and
+  blocks selector injection, but locally sensible priorities can form a
+  globally wasteful tuple.
+- B: require at least one reachable matched witness where only Q or Q's ledger
+  domain changes and P's selected ledger or marginal law changes. Recommend B
+  for relational buildcraft and a direct evaluation-boundary ideal fit,
+  conditional on tuple preview, causal explanation, stable fallback, and
+  selector-injection testing.
+
+For example, P can use `Guard + Heat` or `Guard + Vow`, and Q uses
+`Return + Heat`. Under A, P's Heat-first route remains Heat when Q appears.
+Under B, a prospectively fixed Covenant rule may route P through Vow beside Q.
+It may see the shared-Heat structural fact but cannot ask whether sharing will
+be permitted or which result would be favorable. Either answer leaves system
+versus participant-precommitted authority to B3.
+
 ## 2026-09-26 alternate Relic ledgers — RCS-03C3C3A-B selected
 
 The owner selected `RCS-03C3C3A-B`: the completed catalog must contain at
@@ -9353,9 +9397,12 @@ distinct-related support. An eighteenth audit replaced the still-bundled C3
 with nine ledger, form-permission, denied-pair, and over-cap arbitration rows.
 The owner then selected C3C3A-B, requiring nonempty alternate-ledger support,
 and a nineteenth audit split old conditional C3C3B into topology, selection-
-scope, selection-authority, and stochastic-selection rows. Continue at
-registered Relic slot `RCS-03C3C3B1` under `SR-03`; B2-B4, C3C3C-C3C3I,
-C4-C7, the distinct claim/reuse rows `RCS-03C3D`-
+scope, selection-authority, and stochastic-selection rows. The owner selected
+B1-A, one authoritative tuple everywhere. A twentieth audit narrowed B2 to
+cross-tag contextual responsiveness and split old B4 into stochastic support
+and conditional stochastic coupling. Continue at registered Relic slot
+`RCS-03C3C3B2` under `SR-03`; B3, B4A-B4B, C3C3C-C3C3I, C4-C7, the distinct
+claim/reuse rows `RCS-03C3D`-
 `RCS-03C3F`, expanded `RCS-08`, cause, and agency follow separately.
 
 R11 begins only
@@ -9500,7 +9547,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 04:36 UTC — alternate Relic ledgers selected](docs/handoffs/2026-09-26-0436--relic-alternate-ledgers-selected.md)**
+[2026-09-26 04:49 UTC — one authoritative Relic ledger tuple selected](docs/handoffs/2026-09-26-0449--relic-single-ledger-tuple-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

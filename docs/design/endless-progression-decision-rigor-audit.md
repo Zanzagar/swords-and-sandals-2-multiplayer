@@ -3758,6 +3758,71 @@ alternate proof embodiments usable routing space. Complete-product robustness
 is the strongest consistency countercase but makes extra proofs liabilities;
 coexistence carries two proof-truth dialects.
 
+The owner selected `RCS-03C3C3B1-A`. Every multiplicity-positive evaluation
+must therefore apply one total selector and return exactly one complete
+authoritative ledger tuple. No selector may return none, a proper subset, or a
+partial tuple, and it cannot retry after a downstream permission or result.
+Arbitrary simultaneous multiplicity remains in scope. B1 moves to
+`DIR-SELECTED`; before further correction B2 would open in the seventy-six-row
+register, with 36 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 27 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`.
+
+**Agent correction:** the B1 worksheet said the tuple was selected “before
+exact/related classification,” while the owner-facing replay said before
+overlap permission or outcomes. The worksheet wording was too strong. Exact
+child equality, lineage intersection, shared accounting-parent facts, and the
+resulting structural signatures are deterministic properties of the canonical
+upstream ledger product. A selector receiving the product can derive them, so
+pretending they are unavailable is unenforceable and would make the registered
+joint-routing branch strategically inert. The corrected boundary permits a
+prospectively fixed selector to inspect upstream canonical proof structure,
+including exact/related/independent relations. Only its returned tuple enters
+C3C3C/D permission. Permission results, survivor treatment, claims/reuse,
+completion, payoff, and combat outcomes remain forbidden selector inputs.
+
+Three bounded read-only named-claim audits then attacked B2's atomicity,
+ordering, and gameplay recommendation. They found two distinct countermodels.
+First, the selected supports need not coincide: one evaluation can provide
+C1/C2's unique-ledger overlap witnesses while an unrelated single-contender
+state provides C3C3A's alternate ledgers. A joint-positive B2 answer would be
+vacuous unless it itself requires a reachable held-fixed sensitivity witness.
+The repair does not need another support row: B2-A makes responsive support
+empty, while B2-B requires one witness in which P's complete local input stays
+fixed, only Q or Q's ledger domain changes, and P's selected ledger or marginal
+law changes.
+
+Second, contextual stability and stochastic factorization are not equivalent.
+Let P and Q each have ledgers `0/1`. A shared coin that emits only `(p0,q0)`
+or `(p1,q1)` leaves both marginals 50/50 and can leave them invariant when the
+other tag changes, yet it excludes the two off-diagonal tuples admitted by
+independent tag-local draws. Those mechanisms expose different overlaps and
+results. B2 is therefore narrowed to **cross-tag contextual responsiveness**;
+old B4 is split into B4A stochastic support and conditional B4B product-
+factorized versus correlated tuple draws.
+
+The gameplay audit also broke the earlier categorical recommendation for
+tag-local selection. Tag-local routing is the strongest clarity and anti-grief
+countercase, but it can exhibit priority poisoning: P locally prefers Heat and
+collides with Q even though its Vow proof could form a coherent tuple. A joint
+selector can instead use a prospectively fixed, total Covenant rule to route P
+through Vow when Q carries Heat, without consulting whether exact overlap is
+later permitted or which result pays better. This enables team choreography
+and makes several distinct relationships co-determine one atomic tuple—a
+plausible **direct** ideal fit. It also creates selector-injection, nonlocal
+surprise, teammate externalities, and Cartesian explanation burden. For this
+project's stated fun and thematic goals, B is therefore recommended only with
+later tuple preview, causal explanation, stable fallback, and adversarial
+selector-injection testing; A remains the conservative fallback.
+
+B2's empty/nonempty support options are exhaustive. The positive branch may
+still behave locally on other inputs, and exact triggers/prevalence remain
+AUTHOR/SPEC. Two explicitly named catalog grammars would be an owner-requested
+replacement, not a silently supplied C option. B2 chooses neither actor nor
+randomness. B3 remains next under either answer. Replacing one counted B4 row
+with two produces seventy-seven slots: 37 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 27 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 38`. C3C3B2 is the sole active card.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or
