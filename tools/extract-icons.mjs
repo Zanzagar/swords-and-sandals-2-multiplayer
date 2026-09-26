@@ -631,6 +631,54 @@ export const GAUGE_PANEL = Object.freeze({
   expectedNamesSetBy: "sprite 2249 frame 1 body 0x6e4221 +0x0c4a / +0x0c6b: combat_panel.herotext|villaintext = _root.game.hero|villain.character_name"
 });
 
+/**
+ * THE CROWD BAR, AS ITS OWN SECTION — added 2026-09-25 (D8 of the in-frame
+ * HUD; the owner: "use actual in game crowd bar asset?"). `combat_panel`'s
+ * frame 1 holds it too, at its top right: `crowd_bar_bg` (sprite 723, one
+ * frame holding shape 722) at depth 3, `crowd_bar` (725, holding 724) at
+ * depth 5, and the label field 750 (bound to `crowd_text`) at depth 63.
+ *
+ * ► **A SECTION OF ITS OWN, NOT THE GAUGES'**, for the reason the gauges and
+ *   the buttons have theirs: the gauges' invoice — four entries, six own
+ *   glows, ten placements, the placements' four filters — is pinned against
+ *   the oracle, and two more sprites and a glowing label would move it by
+ *   amounts nobody measured. And the crowd is a different drive (one battle
+ *   value, not a fighter's reading) with its own visibility, so a renderer
+ *   can refuse one and still draw the other. The gauges section leaves these
+ *   three placements to this one: its `notTaken` names only what NEITHER
+ *   takes.
+ *
+ * ► **ITS DRIVE IS DERIVED, AND CHECKED AGAINST THIS EXPECTATION BY NAME**
+ *   (`deriveCrowdDrive`, off `crowd_bar`'s own load and enterFrame handlers):
+ *   a mismatch is a problem naming the key, and the pack carries what the
+ *   bytes say. The panel's place on the stage is the gauges section's
+ *   derived attach — one `attachMovie` places the whole of 751.
+ */
+export const CROWD_BAR = Object.freeze({
+  character: 751,
+  linkage: "combat_panel",
+  background: Object.freeze({ instance: "crowd_bar_bg", character: 723 }),
+  bar: Object.freeze({ instance: "crowd_bar", character: 725 }),
+  text: Object.freeze({ variable: "crowd_text", character: 750 }),
+  /**
+   * Read off the oracle's action dump (`crowd_bar` clip-action 0, `load`,
+   * body 0x225e5d: the opening `+0x0158`, the test `+0x017b`, the moods
+   * `+0x01c7`..`+0x01ea`, the hides `+0x01fd`/`+0x020b`/`+0x021f`;
+   * clip-action 1, `enterFrame`, body 0x226086: the guard `+0x00f2`, the
+   * label `+0x0232`, the scale `+0x0258`).
+   */
+  expectedDrive: Object.freeze({
+    source: "_global.crowd_interest",
+    opening: "_root.game.hero.herolevel + _root.game.villain.herolevel",
+    shownWhile: Object.freeze({ side: "hero", field: "herolevel", comparison: ">", than: 1 }),
+    hides: Object.freeze(["this._visible = false", "_parent.crowd_text = \"\"", "_parent.crowd_bar_bg._visible = false"]),
+    scale: Object.freeze({ target: "this", property: "_xscale", rounding: "round" }),
+    label: Object.freeze({ target: "_parent", variable: "crowd_text", prefix: "crowd: ", array: "crowd_interest_array", rounding: "ceil", divisor: 10 }),
+    moods: Object.freeze(["", "bored to tears", "bored silly", "restless", "indifferent", "interested", "entertained", "enthusiastic",
+      "wildly entertained", "Tranfixed", "Fanatical"])
+  })
+});
+
 /* ------------------------------------------------------------------ */
 /* CLI                                                                 */
 /* ------------------------------------------------------------------ */
@@ -2467,8 +2515,11 @@ function evaluateActions(instructions) {
         stack.push({ kind: "var", name: literalOf(pop()) });
         break;
       case "GetMember": {
-        const name = literalOf(pop());
-        stack.push({ kind: "member", object: pop(), name });
+        // A COMPUTED member (`list[Math.ceil(n / 10)]`, the crowd bar's label)
+        // keeps its computation as `key`; a literal name is unchanged.
+        const named = pop();
+        const name = literalOf(named);
+        stack.push({ kind: "member", object: pop(), name, ...(named?.kind === "literal" ? {} : { key: named }) });
         break;
       }
       case "SetMember": {
@@ -2517,6 +2568,21 @@ function evaluateActions(instructions) {
         stack.push({ kind: "object", props });
         break;
       }
+      case "NewObject": {
+        // `new <name>(args)`: the name, the count, then the arguments FIRST
+        // ARGUMENT FIRST — the compiler pushes them last-first, so the
+        // crowd bar's `new Array("", "bored to tears", …)` pushes "" last.
+        const name = literalOf(pop());
+        const count = countOf(pop());
+        const args = [];
+        for (let index = 0; index < count; index += 1) args.push(pop());
+        stack.push({ kind: "new", name, args });
+        break;
+      }
+      case "RandomNumber":
+        // `random(max)`: the bound in, one integer below it out.
+        stack.push({ kind: "random", max: pop() });
+        break;
       case "StoreRegister":
         registers.set(instruction.operand?.register, stack.length > 0 ? stack[stack.length - 1] : { kind: "unknown" });
         break;
@@ -3051,9 +3117,11 @@ export function deriveGaugeProvenance(analysis, { attach, names }) {
  * Pure over `resolveTimeline`'s entries: `fieldOf(id)` is `{variable, align}`
  * for an edit text or null; `bannerSpanOf(entry)` is the banner's x span in
  * px. Matrices are `roundMatrix`'s (translations in TWIPS); filters are
- * carried as the entry has them, bevel and all.
+ * carried as the entry has them, bevel and all. `takenElsewhere` holds the
+ * depths another section takes — the crowd bar's (`summariseCrowdBar`) — so
+ * `notTaken` names only what NEITHER takes.
  */
-export function summariseGaugePanel(frameOne, { declared, fieldOf, bannerSpanOf }) {
+export function summariseGaugePanel(frameOne, { declared, fieldOf, bannerSpanOf, takenElsewhere = new Set() }) {
   const placements = [];
   const notTaken = [];
   const problems = [];
@@ -3084,6 +3152,7 @@ export function summariseGaugePanel(frameOne, { declared, fieldOf, bannerSpanOf 
         depth: entry.depth, character: entry.characterId, matrix, ...withFilters(entry) });
       continue;
     }
+    if (takenElsewhere.has(entry.depth)) continue;
     notTaken.push({ depth: entry.depth, character: entry.characterId, name: entry.name ?? null });
   }
   for (const gauge of declared.gauges) {
@@ -3178,6 +3247,20 @@ const round3 = (value) => {
   return Object.is(rounded, -0) ? 0 : rounded;
 };
 
+/** `fieldOf(id)`: an edit text's `{variable, align}`, or null — how the panel's fields are known. */
+function editTextFieldOf(buffer, characters) {
+  return (id) => {
+    const character = characters.get(id);
+    if (!character || character.tagCode !== TAG.DEFINE_EDIT_TEXT) return null;
+    try {
+      const field = parseEditText(buffer, character.bodyStart, character.bodyEnd);
+      return { variable: field.variable, align: field.align };
+    } catch {
+      return null;
+    }
+  };
+}
+
 /**
  * THE GAUGES SECTION — see `GAUGE_PANEL` for why it is a section. Every
  * problem is kept on the section AND pushed to the pack's `failures` with a
@@ -3205,20 +3288,13 @@ function extractGauges({ buffer, characters, names, analysis, actionsFor, events
   // The provenance lines are READ below, with the attach (`deriveGaugeProvenance`); null until then.
   section.panel = { character: declared.character, linkage: declared.linkage, attachedBy: null, namesSetBy: null };
 
-  // THE PLACEMENTS, named from the bytes.
+  // THE PLACEMENTS, named from the bytes — leaving the crowd bar's three to its own section.
   const frameOne = resolveTimeline(buffer, panel, { frames: [1] }).frames[0] ?? [];
-  const fieldOf = (id) => {
-    const character = characters.get(id);
-    if (!character || character.tagCode !== TAG.DEFINE_EDIT_TEXT) return null;
-    try {
-      const field = parseEditText(buffer, character.bodyStart, character.bodyEnd);
-      return { variable: field.variable, align: field.align };
-    } catch {
-      return null;
-    }
-  };
+  const fieldOf = editTextFieldOf(buffer, characters);
+  const crowdDepths = new Set(summariseCrowdBar(frameOne, { declared: CROWD_BAR, fieldOf }).placements.map((row) => row.depth));
   const summary = summariseGaugePanel(frameOne, {
-    declared, fieldOf, bannerSpanOf: (entry) => spriteSpanOf(buffer, characters, entry.characterId, entry.matrix ?? IDENTITY_MATRIX)
+    declared, fieldOf, bannerSpanOf: (entry) => spriteSpanOf(buffer, characters, entry.characterId, entry.matrix ?? IDENTITY_MATRIX),
+    takenElsewhere: crowdDepths
   });
   section.placements = summary.placements;
   section.notTaken = summary.notTaken;
@@ -3341,6 +3417,421 @@ function extractGauges({ buffer, characters, names, analysis, actionsFor, events
   section.placementEffects = placementEffectsOf(section.placements);
   section.clipsAcrossSpriteBoundary = [...Object.values(section.clips), ...Object.values(section.nested)]
     .reduce((total, entry) => total + entry.clipsAcrossSpriteBoundary, 0);
+  return section;
+}
+
+/* ------------------------------------------------------------------ */
+/* The crowd bar (D8, 2026-09-25)                                      */
+/* ------------------------------------------------------------------ */
+
+/** `onClipEvent(load)`: bit 0 of a SWF 6+ clip-event mask. */
+const CLIP_EVENT_LOAD = 0x1;
+
+/**
+ * THE CROWD BAR'S PLACEMENTS ON THE PANEL'S FRAME 1, NAMED: the bar and its
+ * background by their instance names, the label by the variable its
+ * `DefineEditText` is bound to — each exactly once, as the character the
+ * build uses, or a problem naming it. Pure over `resolveTimeline`'s entries,
+ * as `summariseGaugePanel` is; matrices are `roundMatrix`'s, filters as the
+ * entry has them (the label's glow).
+ */
+export function summariseCrowdBar(frameOne, { declared, fieldOf }) {
+  const placements = [];
+  const problems = [];
+  const withFilters = (entry) => (Array.isArray(entry.filters) && entry.filters.length > 0 ? { filters: entry.filters } : {});
+  const parts = [["background", declared.background], ["bar", declared.bar]];
+  for (const entry of [...(frameOne ?? [])].sort((left, right) => left.depth - right.depth)) {
+    const matrix = roundMatrix(entry.matrix ?? IDENTITY_MATRIX);
+    const part = parts.find(([, want]) => entry.name === want.instance);
+    if (part) {
+      const [kind, want] = part;
+      if (entry.characterId !== want.character) problems.push(`${want.instance} is character ${entry.characterId}, expected ${want.character}`);
+      placements.push({ kind, instance: want.instance, depth: entry.depth, character: entry.characterId, matrix, ...withFilters(entry) });
+      continue;
+    }
+    const field = fieldOf(entry.characterId);
+    if (field?.variable === declared.text.variable) {
+      if (entry.characterId !== declared.text.character) {
+        problems.push(`the ${declared.text.variable} field is character ${entry.characterId}, expected ${declared.text.character}`);
+      }
+      placements.push({ kind: "label", variable: field.variable, align: field.align ?? null, depth: entry.depth, character: entry.characterId,
+        matrix, ...withFilters(entry) });
+    }
+  }
+  for (const [kind, want] of parts) {
+    const count = placements.filter((row) => row.kind === kind).length;
+    if (count !== 1) problems.push(`${want.instance} is placed ${count} times in ${declared.linkage} frame 1, expected once`);
+  }
+  const labels = placements.filter((row) => row.kind === "label").length;
+  if (labels !== 1) problems.push(`${labels} fields bound to ${declared.text.variable} in ${declared.linkage} frame 1, expected one`);
+  return { placements, problems };
+}
+
+/** What a write can move on screen: a clip's own display properties. */
+const DISPLAY_PROPERTIES = new Set(["_x", "_y", "_xscale", "_yscale", "_width", "_height", "_visible", "_alpha", "_rotation"]);
+/** And the methods that change what a clip shows. */
+const DISPLAY_METHODS = new Set(["gotoAndStop", "gotoAndPlay", "play", "stop", "nextFrame", "prevFrame", "removeMovieClip",
+  "attachMovie", "duplicateMovieClip", "swapDepths", "setMask", "createEmptyMovieClip", "createTextField", "loadMovie", "unloadMovie"]);
+
+const OPERATORS = Object.freeze({ Add2: "+", Subtract: "-", Multiply: "*", Divide: "/" });
+
+/** An expression as the source reads, for a line a human checks — or null where this reader cannot print it. */
+function expressionText(expression) {
+  if (expression?.kind === "literal") {
+    return typeof expression.value === "string" ? JSON.stringify(expression.value) : String(expression.value);
+  }
+  if (expression?.kind === "binary" && OPERATORS[expression.op]) {
+    const left = expressionText(expression.left);
+    const right = expressionText(expression.right);
+    return left === null || right === null ? null : `${left} ${OPERATORS[expression.op]} ${right}`;
+  }
+  return pathOf(expression);
+}
+
+/**
+ * `if (<!…>(_root.game.<side>.<field> <cmp> <n>))` — the crowd bar's level
+ * test, with whether its jump is taken when the comparison HOLDS (an even
+ * number of `Not`s) — or null.
+ */
+function levelTestOf(statement) {
+  if (statement?.kind !== "if") return null;
+  let condition = statement.condition;
+  let negations = 0;
+  while (condition?.kind === "not") { negations += 1; condition = condition.operand; }
+  const field = condition?.kind === "binary" ? gameFieldOf(condition.left) : null;
+  if (!field || !COMPARISONS[condition.op] || !isNumberLiteral(condition.right)) return null;
+  return { side: field.side, field: field.field, comparison: COMPARISONS[condition.op], than: condition.right.value, jumpsWhenTrue: negations % 2 === 0 };
+}
+
+/** `<target>.<property> = Math.<r>(<source>)`: the bar's scale. */
+function crowdScaleOf(statement) {
+  if (statement?.kind !== "set" || !DISPLAY_PROPERTIES.has(statement.name)) return null;
+  const call = mathCallOf(statement.value);
+  const source = call ? pathOf(call.argument) : null;
+  const target = pathOf(statement.object);
+  if (!source || !target) return null;
+  return { target, property: statement.name, rounding: call.rounding, source };
+}
+
+/** `<target>.<variable> = "<prefix>" + <array>[Math.<r>(<source> / <n>)]`: the label. */
+function crowdLabelOf(statement) {
+  if (statement?.kind !== "set") return null;
+  const sum = statement.value;
+  if (sum?.kind !== "binary" || sum.op !== "Add2" || typeof literalOf(sum.left) !== "string") return null;
+  const element = sum.right;
+  if (element?.kind !== "member" || element.object?.kind !== "var" || typeof element.object.name !== "string" || !element.key) return null;
+  const call = mathCallOf(element.key);
+  const quotient = call?.argument;
+  if (quotient?.kind !== "binary" || quotient.op !== "Divide" || !isNumberLiteral(quotient.right)) return null;
+  const source = pathOf(quotient.left);
+  const target = pathOf(statement.object);
+  if (!source || !target) return null;
+  return { target, variable: statement.name, prefix: literalOf(sum.left), array: element.object.name, rounding: call.rounding,
+    divisor: quotient.right.value, source };
+}
+
+/** `<array> = new Array("<mood>", …)`: the moods, index 0 first. */
+function crowdMoodsOf(statement) {
+  if (statement?.kind !== "setVariable" || typeof statement.name !== "string") return null;
+  const made = statement.value;
+  if (made?.kind !== "new" || made.name !== "Array" || !made.args.every((arg) => typeof literalOf(arg) === "string")) return null;
+  return { array: statement.name, moods: made.args.map(literalOf) };
+}
+
+/** `<target>.<name> = <literal>` as a line, for what the level test hides. */
+function literalWriteOf(statement) {
+  if (statement?.kind !== "set" || statement.value?.kind !== "literal") return null;
+  const target = pathOf(statement.object);
+  return target ? `${target}.${statement.name} = ${expressionText(statement.value)}` : null;
+}
+
+/**
+ * A statement of a crowd handler that is not part of the bar's drive: a
+ * problem when it could change what is drawn — an opcode this reader does not
+ * model, a write it cannot name, a write to a display property or to a name
+ * the drive reads or writes (`drawnNames`) — and otherwise a line in
+ * `notDrawn` (the build's crowd SOUNDS share these handlers). A call that
+ * changes what a clip shows is judged apart, from every call the evaluator
+ * collected (`deriveCrowdDrive`), wherever its value goes.
+ */
+function crowdStatementVerdict(statement, drawnNames) {
+  if (statement.kind === "unread") return { problem: describeStatement(statement) };
+  if (statement.kind === "set" || statement.kind === "setVariable") {
+    if (typeof statement.name !== "string") return { problem: "a write this reader cannot name" };
+    if (DISPLAY_PROPERTIES.has(statement.name) || drawnNames.has(statement.name)) return { problem: describeStatement(statement) };
+  }
+  return { notDrawn: describeStatement(statement) };
+}
+
+/**
+ * THE CROWD BAR'S DRIVE, READ OFF ITS OWN TWO `onClipEvent` HANDLERS — the
+ * ones on `crowd_bar` in the panel's frame 1:
+ *
+ * - **load** (clip-action 0): the OPENING (`_global.crowd_interest = …`), the
+ *   LEVEL TEST (`if (hero.herolevel > 1)`), its shown arm building the MOODS
+ *   (`crowd_interest_array = new Array(…)`), and its hidden arm — what the
+ *   build HIDES (`this._visible = false`, the label emptied, the background
+ *   hidden), each a line;
+ * - **enterFrame** (clip-action 1): the same level test as a GUARD over the
+ *   whole handler, then the LABEL (`_parent.crowd_text = "crowd: " +
+ *   crowd_interest_array[Math.ceil(crowd_interest / 10)]`) and the SCALE
+ *   (`this._xscale = Math.round(crowd_interest)`), each on every path under
+ *   the guard (`skippedBy`).
+ *
+ * The build's crowd SOUNDS share both handlers — the ambience started on
+ * load, its volume every frame, the two 1-in-1000 gates — and draw nothing:
+ * each is a `notDrawn` row naming it. A statement that could change what is
+ * drawn and is none of the above is a PROBLEM naming it
+ * (`crowdStatementVerdict`), as is a piece missing, a piece twice, a label
+ * and a scale reading different sources, or a test the guard does not share.
+ * `drive` is null while a piece is missing; the constants are what the bytes
+ * say, never corrected — the caller checks them against `CROWD_BAR`.
+ *
+ * @param {object} analysis  `analyseSwfBuffer(buffer).analysis`
+ * @param {{character: number, instance: string}} options  the panel (751) and the bar's instance
+ */
+export function deriveCrowdDrive(analysis, { character, instance }) {
+  const problems = [];
+  const notDrawn = [];
+  const pattern = new RegExp(`^sprite:${character}/frame:1/instance:${instance}/clip-action:(\\d+)`);
+  const blocks = (analysis?.actionBlocks ?? []).filter((block) => pattern.test(block.context));
+  const loads = blocks.filter((block) => ((block.eventFlags ?? 0) & CLIP_EVENT_LOAD) !== 0);
+  const frames = blocks.filter((block) => ((block.eventFlags ?? 0) & CLIP_EVENT_ENTER_FRAME) !== 0);
+  for (const block of blocks) {
+    const flags = block.eventFlags ?? 0;
+    if (!(flags === CLIP_EVENT_LOAD || flags === CLIP_EVENT_ENTER_FRAME)) {
+      problems.push(`a clip-action on ${instance} at 0x${block.offset.toString(16)} on events ${flags}; this reader reads one load and one enterFrame handler`);
+    }
+  }
+  if (loads.length !== 1) problems.push(`${loads.length} load handlers on ${instance} in sprite ${character} frame 1, expected one`);
+  if (frames.length !== 1) problems.push(`${frames.length} enterFrame handlers on ${instance} in sprite ${character} frame 1, expected one`);
+  if (problems.length > 0) return { drive: null, handlers: null, notDrawn, problems };
+
+  const [load, frame] = [loads[0], frames[0]];
+  const onLoad = evaluateActions(load.instructions);
+  const onFrame = evaluateActions(frame.instructions);
+  const at = (block, statement) => relativeTo(block.offset, statement.offset);
+  const handlers = {
+    load: { block: `0x${load.offset.toString(16)}`, eventFlags: load.eventFlags, opening: null, test: null, moods: null, hides: [] },
+    enterFrame: { block: `0x${frame.offset.toString(16)}`, eventFlags: frame.eventFlags, guard: null, label: null, scale: null }
+  };
+  const used = new Set();
+
+  // THE LABEL AND THE SCALE, under the enterFrame guard.
+  const frameList = onFrame.statements;
+  const guard = levelTestOf(frameList[0]);
+  if (!guard || guard.jumpsWhenTrue || frameList[0].target !== onFrame.tail) {
+    problems.push("the enterFrame handler does not open with a level test that skips all of it: the label and the bar would be written while hidden");
+  } else {
+    used.add(frameList[0]);
+    handlers.enterFrame.guard = at(frame, frameList[0]);
+  }
+  const guarded = guard && used.has(frameList[0]) ? frameList.slice(1) : frameList;
+  const labels = guarded.filter((statement) => crowdLabelOf(statement));
+  const scales = guarded.filter((statement) => crowdScaleOf(statement));
+  if (labels.length !== 1) problems.push(`${labels.length} label writes (<clip>.<field> = "<prefix>" + <array>[Math.<r>(<crowd> / n)]) on enterFrame, expected one`);
+  if (scales.length !== 1) problems.push(`${scales.length} scale writes (<clip>.<property> = Math.<r>(<crowd>)) on enterFrame, expected one`);
+  const label = labels.length === 1 ? crowdLabelOf(labels[0]) : null;
+  const scale = scales.length === 1 ? crowdScaleOf(scales[0]) : null;
+  for (const [statement, name] of [[labels[0], "label"], [scales[0], "scale"]]) {
+    if (!statement || (name === "label" ? !label : !scale)) continue;
+    used.add(statement);
+    handlers.enterFrame[name] = at(frame, statement);
+    const skipped = skippedBy(guarded, guarded.indexOf(statement), onFrame.tail);
+    if (skipped) problems.push(`the ${name} at ${at(frame, statement)} does not run on every path under the guard: ${skipped}`);
+  }
+  if (label && scale && label.source !== scale.source) problems.push(`the label reads ${label.source}, the bar ${scale.source}`);
+  const source = scale?.source ?? label?.source ?? null;
+
+  // THE OPENING, THE LEVEL TEST, THE MOODS AND WHAT IS HIDDEN, on load.
+  const loadList = onLoad.statements;
+  const openings = source ? loadList.filter((statement) => statement.kind === "set" && `${pathOf(statement.object)}.${statement.name}` === source) : [];
+  if (openings.length !== 1) problems.push(`${openings.length} writes of ${source ?? "the crowd"} on load, expected one (the opening)`);
+  const opening = openings.length === 1 ? expressionText(openings[0].value) : null;
+  // ► **WHAT THE LOAD DOES MUST RUN** (Codex review of the crowd slice, pass
+  //   2): a jump at the load's start to its end left every piece below in
+  //   place and certified. Each is searched for a way round it (`skippedBy`):
+  //   the opening and the test over the whole handler, the moods over the arm
+  //   that shows the bar, each hide over the arm that hides it.
+  const runs = (list, statement, what, where) => {
+    const skipped = skippedBy(list, list.indexOf(statement), onLoad.tail);
+    if (skipped) problems.push(`${what} at ${at(load, statement)} ${where}: ${skipped}`);
+  };
+  if (openings.length === 1) {
+    if (opening === null) problems.push(`the opening at ${at(load, openings[0])} is an expression this reader cannot print`);
+    used.add(openings[0]);
+    handlers.load.opening = at(load, openings[0]);
+    runs(loadList, openings[0], "the opening", "does not run on every path of the load handler");
+  }
+  const tests = loadList.filter((statement) => levelTestOf(statement));
+  let shownWhile = null;
+  let moods = null;
+  const hides = [];
+  if (tests.length !== 1) {
+    problems.push(`${tests.length} level tests on load, expected one`);
+  } else {
+    const test = levelTestOf(tests[0]);
+    const index = loadList.indexOf(tests[0]);
+    const landing = tests[0].target === onLoad.tail ? loadList.length : loadList.findIndex((statement) => statement.start === tests[0].target);
+    const skip = loadList[landing - 1];
+    // The build's own shape: `if` / one arm / a jump to the end / the other arm to the end.
+    if (landing <= index || skip?.kind !== "jump" || skip.target !== onLoad.tail) {
+      problems.push("the load's level test is not shaped if / arm / jump to the end / arm");
+    } else {
+      used.add(tests[0]).add(skip);
+      handlers.load.test = at(load, tests[0]);
+      runs(loadList, tests[0], "the level test", "does not run on every path of the load handler");
+      const fallArm = loadList.slice(index + 1, landing - 1);
+      const jumpedArm = loadList.slice(landing);
+      // Each arm as its own list for the search: the fall arm with the jump that ends it, the jumped arm to the end.
+      const searched = (arm) => (arm === fallArm ? loadList.slice(index + 1, landing) : jumpedArm);
+      // The HIDDEN arm is the one that hides the bar; the other shows it.
+      const hidesBar = (arm) => arm.some((statement) => statement.kind === "set" && statement.name === "_visible" &&
+        statement.value?.kind === "literal" && statement.value.value === false);
+      const hiddenArm = hidesBar(jumpedArm) ? jumpedArm : fallArm;
+      const shownArm = hiddenArm === jumpedArm ? fallArm : jumpedArm;
+      if (hidesBar(fallArm) === hidesBar(jumpedArm)) {
+        problems.push(`${hidesBar(fallArm) ? "both arms" : "neither arm"} of the load's level test hide the bar`);
+      } else if ((shownArm === jumpedArm) !== test.jumpsWhenTrue) {
+        // Shown when the comparison HOLDS: the shown arm is the jumped one exactly when the jump is taken on it.
+        problems.push(`the bar is shown while ${test.side}.${test.field} ${test.comparison} ${test.than} is FALSE; this reader reads a test it is shown under`);
+      } else {
+        shownWhile = { side: test.side, field: test.field, comparison: test.comparison, than: test.than };
+      }
+      // The moods are built whenever the bar is shown: ahead of the test, or in its shown arm.
+      const made = [...loadList.slice(0, index), ...shownArm].filter((statement) => crowdMoodsOf(statement));
+      if (made.length !== 1) problems.push(`${made.length} mood arrays (new Array(…)) built when shown, expected one`);
+      else {
+        moods = crowdMoodsOf(made[0]);
+        used.add(made[0]);
+        handlers.load.moods = at(load, made[0]);
+        const ahead = loadList.indexOf(made[0]) < index;
+        runs(ahead ? loadList : searched(shownArm), made[0], "the moods", ahead ? "do not run on every path of the load handler"
+          : "do not run on every path while the bar is shown");
+      }
+      for (const statement of hiddenArm) {
+        const line = literalWriteOf(statement);
+        const hiding = line !== null && ((statement.name === "_visible" && statement.value.value === false) ||
+          (label && statement.name === label.variable && statement.value.value === ""));
+        if (!hiding) continue;
+        used.add(statement);
+        hides.push(line);
+        handlers.load.hides.push(at(load, statement));
+        runs(searched(hiddenArm), statement, `the hide ${line}`, "does not run on every path while the bar is hidden");
+      }
+      if (hides.length === 0) problems.push("nothing is hidden when the level test fails");
+    }
+  }
+  if (guard && shownWhile && (guard.side !== shownWhile.side || guard.field !== shownWhile.field ||
+    guard.comparison !== shownWhile.comparison || guard.than !== shownWhile.than)) {
+    problems.push(`the enterFrame guard tests ${guard.side}.${guard.field} ${guard.comparison} ${guard.than}; ` +
+      `the load shows the bar while ${shownWhile.side}.${shownWhile.field} ${shownWhile.comparison} ${shownWhile.than}`);
+  }
+  if (label && moods && label.array !== moods.array) problems.push(`the label reads ${label.array}, the moods are ${moods.array}`);
+
+  // EVERYTHING ELSE IS ACCOUNTED FOR: a sound, named, or a problem.
+  const drawnNames = new Set([label?.variable, label?.array, moods?.array, source?.split(".").at(-1)].filter(Boolean));
+  for (const [name, block, evaluated] of [["load", load, onLoad], ["enterFrame", frame, onFrame]]) {
+    for (const statement of evaluated.statements) {
+      if (used.has(statement)) continue;
+      const verdict = crowdStatementVerdict(statement, drawnNames);
+      if (verdict.problem) problems.push(`${verdict.problem} at ${at(block, statement)} on ${name} is not part of the crowd bar's drive`);
+      else notDrawn.push({ handler: name, at: at(block, statement), what: verdict.notDrawn });
+    }
+    // ► **EVERY CALL, WHEREVER ITS VALUE GOES** (Codex review of the crowd
+    //   slice, pass 1): `ignored = _parent.removeMovieClip()` is a write to a
+    //   variable nobody draws, and the call inside it removes the panel. So a
+    //   call that changes what a clip shows is a problem whether its value is
+    //   discarded, assigned, passed on or left on the stack — judged off the
+    //   evaluator's own list of the calls it ran (`evaluateActions`).
+    for (const call of evaluated.calls) {
+      if (DISPLAY_METHODS.has(call.method)) {
+        problems.push(`a call to ${call.method} at ${at(block, call)} on ${name} is not part of the crowd bar's drive`);
+      }
+    }
+  }
+
+  const whole = source && opening !== null && shownWhile && moods && hides.length > 0 && scale && label;
+  const drive = whole ? {
+    source,
+    opening,
+    shownWhile,
+    hides,
+    scale: { target: scale.target, property: scale.property, rounding: scale.rounding },
+    label: { target: label.target, variable: label.variable, prefix: label.prefix, array: label.array, rounding: label.rounding, divisor: label.divisor },
+    moods: moods.moods
+  } : null;
+  return { drive, handlers, notDrawn, problems };
+}
+
+/**
+ * THE CROWD SECTION — see `CROWD_BAR` for why it is a section. Every problem
+ * is kept on the section AND pushed to the pack's `failures` with a
+ * `crowd: ` prefix, as the gauges' are. `attach` is the gauges section's
+ * derived attach: one `attachMovie` places all of 751, so the bar's place on
+ * the stage (`origin`) is the panel's.
+ */
+function extractCrowd({ buffer, characters, names, analysis, actionsFor, eventsFor, take, sink, attach }) {
+  const declared = CROWD_BAR;
+  const section = {
+    panel: null, origin: null, placements: [], drive: null, handlers: null, notDrawn: [], problems: [],
+    clips: {}, placementEffects: placementEffectsOf([]), clipsAcrossSpriteBoundary: 0, effects: null
+  };
+  const fail = (character, message) => {
+    section.problems.push(message);
+    sink.failures.push({ character, message: `crowd: ${message}` });
+  };
+  const panel = characters.get(declared.character);
+  if (!panel || panel.kind !== "sprite" || names.get(declared.character) !== declared.linkage) {
+    fail(declared.character, `expected export ${declared.linkage}, build calls character ${declared.character} ` +
+      `${names.get(declared.character) ?? "nothing"}`);
+    return section;
+  }
+  section.panel = { character: declared.character, linkage: declared.linkage };
+
+  // THE PLACEMENTS, named from the bytes.
+  const frameOne = resolveTimeline(buffer, panel, { frames: [1] }).frames[0] ?? [];
+  const summary = summariseCrowdBar(frameOne, { declared, fieldOf: editTextFieldOf(buffer, characters) });
+  section.placements = summary.placements;
+  for (const problem of summary.problems) fail(declared.character, problem);
+
+  // THE PANEL'S PLACE: the gauges section's attach, or a problem saying there is none.
+  if (attach && !attach.problem && attach.origin) section.origin = { ...attach.origin };
+  else fail(declared.character, `the panel's attach was not read (${attach?.problem ?? "no attach"}), so the crowd bar has no place on the stage`);
+
+  // THE DRIVE, read off crowd_bar's own handlers and checked against what it is expected to be.
+  const derived = deriveCrowdDrive(analysis, { character: declared.character, instance: declared.bar.instance });
+  section.drive = derived.drive;
+  section.handlers = derived.handlers;
+  section.notDrawn = derived.notDrawn;
+  for (const problem of derived.problems) fail(declared.character, problem);
+  if (derived.drive) {
+    for (const [key, expected] of Object.entries(declared.expectedDrive)) {
+      if (JSON.stringify(derived.drive[key]) !== JSON.stringify(expected)) {
+        fail(declared.character, `the crowd's ${key} is ${JSON.stringify(derived.drive[key])}, expected ${JSON.stringify(expected)}`);
+      }
+    }
+  }
+
+  // THE ART: the background's and the bar's own sprites, shapes only.
+  const own = { ...sink, clipIds: new Set(), clipNames: new Map() };
+  for (const part of [declared.background, declared.bar]) {
+    const taken = take(part.character, names.get(part.character) ?? `character ${part.character}`, own);
+    if (!taken) continue;
+    section.clips[part.character] = {
+      character: part.character,
+      linkage: names.get(part.character) ?? null,
+      reachedAs: `${declared.linkage}.${part.instance}`,
+      timeline: actionsFor(part.character),
+      clipEvents: eventsFor(part.character),
+      ...taken
+    };
+  }
+  if (own.clipIds.size > 0) {
+    fail(declared.character, `the crowd bar's sprites hold child clips (${[...own.clipIds].join(", ")}); this section carries shapes only`);
+  }
+  section.placementEffects = placementEffectsOf(section.placements);
+  section.clipsAcrossSpriteBoundary = Object.values(section.clips).reduce((total, entry) => total + entry.clipsAcrossSpriteBoundary, 0);
   return section;
 }
 
@@ -3549,6 +4040,10 @@ export function extractIcons(buffer) {
     roster: new Set([...Object.values(clips), ...Object.values(nested)].map((entry) => entry.character))
   });
 
+  /* --- the crowd bar, on the same panel ----------------------------- */
+  // After the gauges, whose derived attach places the whole panel.
+  const crowd = extractCrowd({ buffer, characters, names, analysis, actionsFor, eventsFor, take, sink, attach: gauges.attach });
+
   /* --- the expression script -------------------------------------- */
   const driver = characters.get(EXPRESSION_DRIVER.character);
   let expressionScript = null;
@@ -3645,7 +4140,8 @@ export function extractIcons(buffer) {
     approximations: sink.approximations,
     clipsAcrossSpriteBoundary,
     buttons,
-    gauges
+    gauges,
+    crowd
   };
   // AFTER the worklist, because it needs every child's entry to exist. This
   // turns "the filters inside an undescended child are counted elsewhere" from
@@ -3662,6 +4158,10 @@ export function extractIcons(buffer) {
   const gaugeEntries = iconEntries(gauges);
   crossReferenceChildEffects(result, gaugeEntries, [...iconEntries(result), ...gaugeEntries]);
   gauges.effects = tallyIconEffects(gauges);
+  // And the crowd bar's.
+  const crowdEntries = iconEntries(crowd);
+  crossReferenceChildEffects(result, crowdEntries, [...iconEntries(result), ...crowdEntries]);
+  crowd.effects = tallyIconEffects(crowd);
   return result;
 }
 
@@ -3822,6 +4322,7 @@ export function buildManifest(result, { file, sha256 }) {
      * roster's totals above do not count them.
      */
     gauges: gaugesManifest(result.gauges, clipRow),
+    crowd: crowdManifest(result.crowd, clipRow),
     failures: result.failures
   };
 }
@@ -3879,6 +4380,25 @@ function gaugesManifest(gauges, clipRow) {
     placementEffects: gauges.placementEffects,
     effects: gauges.effects,
     clipsAcrossSpriteBoundary: gauges.clipsAcrossSpriteBoundary
+  };
+}
+
+/** The manifest's `crowd` block: where the bar goes, what drives it, what shares its handlers, and the invoice. */
+function crowdManifest(crowd, clipRow) {
+  if (!crowd) return null;
+  return {
+    panel: crowd.panel,
+    origin: crowd.origin,
+    placements: crowd.placements.map((row) => [row.depth, row.kind, row.character, row.instance ?? row.variable ?? null,
+      (row.filters ?? []).map((filter) => filter.type).join("+") || null]),
+    drive: crowd.drive,
+    handlers: crowd.handlers,
+    notDrawn: crowd.notDrawn.map((row) => `${row.handler} ${row.at} ${row.what}`),
+    problems: crowd.problems,
+    clips: Object.fromEntries(Object.entries(crowd.clips).map(([key, clip]) => [key, { ...clipRow(clip), linkage: clip.linkage }])),
+    placementEffects: crowd.placementEffects,
+    effects: crowd.effects,
+    clipsAcrossSpriteBoundary: crowd.clipsAcrossSpriteBoundary
   };
 }
 
@@ -4031,6 +4551,22 @@ function main(argv) {
     for (const problem of gauges.problems) lines.push(`    PROBLEM: ${problem}`);
   }
 
+  // ► **THE CROWD BAR, PRINTED APART** — its place, its drive and the sounds
+  //   that share its handlers, for a human checking the renderer's table.
+  const crowd = result.crowd;
+  if (crowd) {
+    lines.push("  crowd bar (its own section; NOT in the totals above)");
+    for (const row of crowd.placements) {
+      lines.push(`    d${String(row.depth).padEnd(3)} ${row.kind.padEnd(10)} char ${row.character} ${row.instance ?? row.variable}`);
+    }
+    const drive = crowd.drive;
+    lines.push(`    drive: ${drive ? `${drive.scale.target}.${drive.scale.property} = ${drive.scale.rounding}(${drive.source}); ` +
+      `${drive.label.target}.${drive.label.variable} = "${drive.label.prefix}" + ${drive.label.array}[${drive.label.rounding}(${drive.source} / ${drive.label.divisor})] ` +
+      `(${drive.moods.length} moods); shown while ${drive.shownWhile.side}.${drive.shownWhile.field} ${drive.shownWhile.comparison} ${drive.shownWhile.than}` : "NOT READ"}`);
+    lines.push(`    sharing its handlers, drawing nothing: ${crowd.notDrawn.length} statements (the crowd's sounds)`);
+    for (const problem of crowd.problems) lines.push(`    PROBLEM: ${problem}`);
+  }
+
   if (options.report) {
     process.stdout.write(`icons (measured, nothing written)\n${lines.join("\n")}\n`);
     for (const failure of result.failures.slice(0, 25)) {
@@ -4054,7 +4590,8 @@ function main(argv) {
     shapes: result.shapes,
     texts: result.texts,
     buttons: result.buttons,
-    gauges: result.gauges
+    gauges: result.gauges,
+    crowd: result.crowd
   }, null, 1);
   // Never a zero-byte file: an empty asset a renderer draws as nothing is the
   // exact failure mode this tool's manifest exists to make impossible.

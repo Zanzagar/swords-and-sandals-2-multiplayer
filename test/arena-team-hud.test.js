@@ -16,8 +16,9 @@ import { SS2_FACING_LEFT, SS2_STATUS_FLAGS, createSs2TeamRules, ss2Combatant, ss
 import { SS2_CLOSE_UP } from "../src/render/arena-backdrop.js";
 import { seatControllersFrom } from "../tools/arena/seats.js";
 import {
-  NAME_PLATE_OUTLINE, conditionsFor, crowdMeterFor, namePlateFor, namePlateLayout, teamHudFor, teamStyleFor, turnOrderFor
+  CROWD_MOODS, NAME_PLATE_OUTLINE, conditionsFor, crowdMeterFor, namePlateFor, namePlateLayout, teamHudFor, teamStyleFor, turnOrderFor
 } from "../tools/arena/team-hud.js";
+import { SS2_CROWD_MOODS, crowdBarDriveFor } from "../src/render/crowd-bar.js";
 
 /* ------------------------------------------------------------------ */
 /* H1: the team colours                                                */
@@ -159,6 +160,17 @@ test("H2: an opening above 100 (six high-level fighters) keeps the top mood and 
   assert.equal(meter.value, 124, "the number is the engine's, unclamped");
   assert.equal(meter.mood, "Fanatical");
   assert.equal(meter.percent, 100);
+});
+
+test("D8: ONE TABLE OF MOODS — the side panel's meter and the crowd bar in the frame say the same words for every crowd", () => {
+  // Two hand-cited copies of the build's eleven moods could drift apart silently; the meter's IS the renderer's,
+  // which the extractor re-derives from the bytes (`test/extract-icons.test.js`, "THE CROWD'S DRIVE, FROM THE BYTES").
+  assert.equal(CROWD_MOODS, SS2_CROWD_MOODS);
+  for (const crowd of [-15, 0, 0.4, 1, 10, 11, 50, 54.6, 99, 100, 100.3, 101, 124, 250]) {
+    const meter = crowdMeterFor(crowd);
+    const bar = crowdBarDriveFor(crowd);
+    assert.deepEqual([meter.mood, meter.text, meter.percent], [bar.mood, bar.text, bar.xscale], `${crowd}`);
+  }
 });
 
 test("H2: no crowd — a rule set with none, or a bout where every fighter is level 1, whose crowd the build hides — is no meter", () => {

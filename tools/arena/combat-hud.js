@@ -31,6 +31,11 @@
  * - **D6, the timing**: a fighter's gauges hold their pre-step readings until
  *   the step's first pop-up on him starts, or until the step settles when no
  *   pop-up concerns him (`gaugeHoldFor`, `heldHudFor`).
+ * - **D8, the crowd bar**: the build's own `crowd_bar` at the stage's top
+ *   right, from the pack or authored (`crowdBarArtFor`), showing the crowd as
+ *   it is HEARD — each step's value from the moment its drawing ends
+ *   (`crowdBarReadingFor`) — with its ops kept (`createCrowdBarOps`) and its
+ *   own line (`crowdBarProvenanceFor`).
  *
  * Pure: no canvas, no DOM, no clock of its own, no battle. It reads the HUD
  * model (`teamHudFor`, `tools/arena/team-hud.js`) and never writes anything.
@@ -47,6 +52,8 @@ import {
   combatPanelOpsFor,
   combatPanelPackFrom
 } from "../../src/render/combat-panel.js";
+import { crowdBarFallbackOpsFor, crowdBarInvoiceFor, crowdBarOpsFor, crowdBarPackFrom } from "../../src/render/crowd-bar.js";
+import { crowdInterestAt } from "../../src/render/crowd-sound.js";
 
 /* ------------------------------------------------------------------ */
 /* Which art, and why                                                  */
@@ -192,11 +199,16 @@ export function combatHudProvenanceFor({ art, invoice = null, open = true }) {
  *   panel at the build's own place under the build's own camera (D3).
  * - `clusters`: `{ cluster, reading }` — each cluster with its fighter's row.
  *
+ * - `crowd`: the crowd bar's reading this frame (`crowdBarReadingFor`), or
+ *   null — handed through, the same whatever the bout's size: the bar is the
+ *   build's at scale 1 in every bout (D8).
+ *
  * @param {object} input
  * @param {object} input.hud   `teamHudFor`'s model — as the gauges show it (`heldHudFor`)
  * @param {object|null} input.pack  `combatPanelPackFrom(...)`, or null
+ * @param {{value: number|null, shown: boolean}|null} [input.crowd]  `crowdBarReadingFor`'s, or null
  */
-export function combatHudFrameFor({ hud, pack = null }) {
+export function combatHudFrameFor({ hud, pack = null, crowd = null }) {
   const teams = hud?.teams ?? [];
   const layout = combatPanelLayoutFor({
     sides: teams.map((team) => ({ teamId: team.teamId, ids: (team.rows ?? []).map((one) => one.id) })),
@@ -206,7 +218,8 @@ export function combatHudFrameFor({ hud, pack = null }) {
   return Object.freeze({
     layout,
     cameraHudTop: layout.mode === "team" && Number.isFinite(layout.hudTop) ? layout.hudTop : null,
-    clusters: Object.freeze(layout.clusters.map((cluster) => Object.freeze({ cluster, reading: rows.get(cluster.id) ?? null })))
+    clusters: Object.freeze(layout.clusters.map((cluster) => Object.freeze({ cluster, reading: rows.get(cluster.id) ?? null }))),
+    crowd: crowd ?? null
   });
 }
 
@@ -499,4 +512,145 @@ export function heldHudFor(hud, hold, { now, pendingTokens = [] } = {}) {
       }))
     })))
   });
+}
+
+/* ------------------------------------------------------------------ */
+/* D8: the crowd bar                                                   */
+/* ------------------------------------------------------------------ */
+
+/** Why the authored crowd bar is drawn, by case — as `FALLBACK_WHY` is for the gauges. */
+const CROWD_FALLBACK_WHY = Object.freeze({
+  none: Object.freeze({
+    log: `crowd bar: no icons pack — the authored crowd bar is drawn, at the build's place with the build's drive (${EXTRACT_ALL} for the build's own).`,
+    warn: false,
+    because: `there is no extracted icons pack (${EXTRACT_ALL} for the build's own)`
+  }),
+  stale: Object.freeze({
+    log: `crowd bar: your icons pack was extracted before its crowd section — the authored crowd bar is drawn: run ${EXTRACT_ALL} for the build's own.`,
+    warn: true,
+    because: `your icons pack predates its crowd section: run ${EXTRACT_ALL}`
+  }),
+  refused: Object.freeze({
+    log: "crowd bar: your icons pack's crowd section is not the build this page draws (the extraction recorded a problem, " +
+      `or its art is not whole) — the authored crowd bar is drawn. Re-extract with ${EXTRACT_ALL}.`,
+    warn: true,
+    because: `your icons pack's crowd section was refused (a problem its extraction recorded, or art that is not whole): re-extract with ${EXTRACT_ALL}`
+  }),
+  unused: Object.freeze({
+    log: "crowd bar: the icons pack was not used this bout (late, or its fetch failed — the asset gate's line says which) — the authored crowd bar is drawn.",
+    warn: true,
+    because: "the icons pack was not used this bout (late, or its fetch failed; reload to use it)"
+  })
+});
+
+/**
+ * WHICH CROWD BAR IS DRAWN (D8), from what the asset gate handed `useIconPack`
+ * — the cases of `combatHudArtFor`, for the pack's `crowd` section:
+ * `"build"` (`crowdBarPackFrom` accepted it), `"none"` (a 404), `"stale"` (a
+ * pack from before the section), `"refused"`, `"unused"` (never handed over).
+ * Every case but the first draws the authored bar, and `log` says why.
+ *
+ * @param {object|null|undefined} icons  `assets/icons/icons.json`, null for a 404, undefined when never applied
+ * @returns {{pack: object|null, state: string, log: {message: string, warn: boolean}}}
+ */
+export function crowdBarArtFor(icons) {
+  const pack = icons ? crowdBarPackFrom(icons) : null;
+  if (pack) {
+    return Object.freeze({
+      pack,
+      state: "build",
+      log: Object.freeze({ message: "crowd bar: the build's own crowd_bar from your install — the bar, its background and \"crowd: <mood>\" in the frame.", warn: false })
+    });
+  }
+  const state = icons === undefined ? "unused" : icons === null || typeof icons !== "object" ? "none"
+    : icons.crowd === undefined || icons.crowd === null ? "stale" : "refused";
+  const why = CROWD_FALLBACK_WHY[state];
+  return Object.freeze({ pack: null, state, log: Object.freeze({ message: why.log, warn: why.warn }) });
+}
+
+/**
+ * THE CROWD THE BAR SHOWS AT `now` (D8): the battle's crowd as it is HEARD —
+ * `crowdInterestAt` over the presenter the arena's sounds already keep, which
+ * holds the opening and then each step's `ss2CrowdInterestOf(host.battle)`
+ * (the number the side panel's meter reads off the wire) from the moment that
+ * step's DRAWING ENDS (`stepEndsAtMs`) — shown while the crowd is heard
+ * (`crowdHeardFor`).
+ *
+ * ► **NOT D6's HOLD, AND NOT THE WIRE'S VALUE AT ONCE.** The build moves its
+ *   crowd in `nextphase`, as the phase COMPLETES — after the blow and its
+ *   pop-up have been drawn — and its bar reads `crowd_interest` every frame.
+ *   The wire holds the post-action crowd at submit, while the swing is still
+ *   to be drawn, so read at once the bar would move before the blow; and D6's
+ *   release, the step's first pop-up, is still before the phase ends. The
+ *   step's drawing ending is the build's moment, and the crowd's VOLUME moves
+ *   then too (`crowdGainFor` over the same presenter): the bar and the roar
+ *   move together.
+ *
+ * @param {{presenter: object, now: number, heard: boolean}} input  `createCrowdPresenter`'s history, the arena's clock, `crowdHeardFor`'s answer
+ * @returns {{value: number|null, shown: boolean}}
+ */
+export function crowdBarReadingFor({ presenter, now, heard }) {
+  const value = crowdInterestAt(presenter, now);
+  const known = typeof value === "number" && Number.isFinite(value);
+  return Object.freeze({ value: known ? value : null, shown: known && heard === true });
+}
+
+/**
+ * THE CROWD BAR'S OPS, KEPT: `crowdBarOpsFor` with the build's pack,
+ * `crowdBarFallbackOpsFor` without — built once and handed back unchanged
+ * while the art, the text pack, the stage scale and the reading are the same.
+ *
+ * @returns {(input: {art: object, textPack: object|null, reading: object|null, stageScale: number}) => object[]}
+ */
+export function createCrowdBarOps() {
+  let kept = null;
+  return ({ art, textPack = null, reading, stageScale = 1 }) => {
+    const pack = art?.pack ?? null;
+    const key = JSON.stringify([stageScale, reading?.value ?? null, reading?.shown === true]);
+    if (kept && kept.key === key && kept.pack === pack && kept.textPack === textPack) return kept.ops;
+    const ops = (pack ? crowdBarOpsFor(pack, textPack, reading, { stageScale }) : null) ?? crowdBarFallbackOpsFor(reading);
+    kept = { key, pack, textPack, ops };
+    return ops;
+  };
+}
+
+/** `crowdBarInvoiceFor` for the art drawn — null for the authored bar, which carries no art of the build's to fall short of. */
+export function crowdBarInvoiceOf(art, textPack, reading) {
+  return art?.pack ? crowdBarInvoiceFor(art.pack, textPack, reading) : null;
+}
+
+/** What is authored either way: the range past the build's, one crowd for both sides, and when it moves. */
+const CROWD_AUTHORED_EITHER_WAY =
+  "It shows the battle's one crowd, and moves when the action has been drawn, as the build's moves when a phase completes " +
+  "(its roar with it). Authored: above 100 (an opening every fighter's level summed) the bar is drawn full with the top " +
+  "mood, where the build's would overrun and read \"undefined\"; below 0 it is drawn empty; and it is shown while ANY " +
+  "fighter is above level 1, where the build asks its one hero.";
+
+/**
+ * THE CROWD BAR'S LINE IN "WHAT YOU ARE LOOKING AT" — `[subject, body]`,
+ * derived from what is drawn: the build's own bar with the invoice's counts,
+ * the authored bar and why, or hidden this bout as the build hides it.
+ *
+ * @param {{art: object, invoice: object|null, open: boolean, heard: boolean}} input  `crowdBarArtFor`'s art,
+ *   `crowdBarInvoiceOf`'s counts, whether the asset gate has opened, and whether the crowd is heard
+ */
+export function crowdBarProvenanceFor({ art, invoice = null, open = true, heard = true }) {
+  const subject = "The crowd bar in the frame";
+  if (!open) return [subject, "is not drawn yet: the stage waits for your extracted packs to settle."];
+  if (!heard) {
+    return [subject, "is hidden this bout, as the build hides its crowd bar when its hero is level 1: no fighter is above level 1, " +
+      "so the crowd is neither seen nor heard."];
+  }
+  if (art?.pack) {
+    const paged = Number.isFinite(invoice?.wordsInPageFont) && invoice.wordsInPageFont > 0;
+    return [subject,
+      "is the build's own crowd_bar from your install's icons, at the build's place at the stage's top right and at its " +
+      "own size in every bout: the bar over its background, scaled as the build scales it (_xscale = round(crowd)), and " +
+      "\"crowd: <mood>\" from the build's own ten moods. " + CROWD_AUTHORED_EITHER_WAY +
+      (paged ? " Not the build's: its label in the page font, where the text pack has no glyphs for it." : "")];
+  }
+  const because = CROWD_FALLBACK_WHY[art?.state]?.because ?? CROWD_FALLBACK_WHY.none.because;
+  return [subject,
+    "is an authored stand-in — a track, a fill and the label in the page font — at the build's place with the build's " +
+    `drive, because ${because}. ` + CROWD_AUTHORED_EITHER_WAY];
 }

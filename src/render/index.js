@@ -104,6 +104,10 @@
  *   by the main session 2026-09-24: the slice's implementer was killed by a
  *   reboot before its final suite run, which is where the barrel test that
  *   caught the omission lives.)*
+ * - `crowd-bar.js` is the build's own CROWD BAR (`combat_panel`'s `crowd_bar`
+ *   over `crowd_bar_bg`, and its `crowd_text` label) at the stage's top right,
+ *   driven as the build drives it (`_xscale = round(crowd)`, the label from the
+ *   build's moods), with an authored fallback for a fresh clone (D8, 2026-09-25).
  */
 
 export * from "./scene.js";
@@ -136,3 +140,4 @@ export * from "./popups.js";
 export * from "./action-buttons.js";
 export * from "./pack-ops.js";
 export * from "./combat-panel.js";
+export * from "./crowd-bar.js";

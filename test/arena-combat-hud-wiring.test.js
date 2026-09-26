@@ -70,7 +70,9 @@ test("D2 + D3: the frame is worked out BEFORE the camera steps — from the wire
   assert.match(render, /const view = viewport\(now\);/);
   const now = functionBody("combatHudNow");
   assert.match(now, /const shown = heldHudFor\(teamHudFor\(\{ wire: host\.wire\(\), seats \}\), hudHold, \{ now, pendingTokens \}\);/);
-  assert.match(now, /return combatHudFrameFor\(\{ hud: shown, pack: gaugeArt\.pack \}\);/, "laid out with the art it is drawn with");
+  // ► RE-PINNED FOR D8 (2026-09-25): ~~`return combatHudFrameFor({ hud: shown, pack: gaugeArt.pack });`~~ — the frame
+  //   carries the crowd bar's reading too (pinned in full by "D8 FRAME" below).
+  assert.match(now, /return combatHudFrameFor\(\{\s*hud: shown,\s*pack: gaugeArt\.pack,/, "laid out with the art it is drawn with");
   assert.match(now, /catch \(error\) \{\s*hudFailed\(/, "a layout that throws is said, not silent");
   assert.match(functionBody("stepCamera"),
     /stepFramedCamera\(cameraFrame, placedActors\(now\), \{ result: host\?\.battle\?\.result \?\? null, hudTop: hudFrame\?\.cameraHudTop \?\? null \}\)/,
@@ -121,10 +123,9 @@ test("D2: each cluster is painted IN STAGE SPACE under the stage fit, in its ops
     "the stage fit, like paintArenaLayer: every op is in stage px");
   assert.match(paint, /const ops = combatHudOps\(\{ art: gaugeArt, textPack, cluster, reading, stageScale: fit\.scale \}\);/,
     "the pack's ops or the fallback's, glows built at the stage fit's scale");
-  assert.match(paint, /paintGroupRuns\(run, \{ translationDivisor: TWIPS_PER_PIXEL, filtersScaled: true \}, paintLayerOperation\);/,
-    "paths as the pop-ups' are: twips translations, the clip in force (D7), each glow composited");
-  assert.match(paint, /if \(op\.kind === ""\) \{\s*run\.push\(op\);\s*continue;\s*\}\s*flush\(\);\s*paintHudWord\(op\);/,
-    "a word between two runs keeps its place in the paint order");
+  // ► RE-PINNED FOR D8 (2026-09-25): ~~`paintGroupRuns(run, …)` and the run/word loop, here in paintCombatHud~~ —
+  //   the loop is `paintHudOps` now, shared with the crowd bar, and pinned there ("ONE PAINTER FOR THE HUD'S OPS").
+  assert.match(paint, /const ops = combatHudOps\([^;]*\);\s*paintHudOps\(ops\);/, "each cluster's ops, through the one painter");
   assert.ok(raw.includes('if (op.kind === "path") {'));
   assert.match(paint, /catch \(error\) \{\s*failed \+= 1;\s*hudFailed\(/, "a cluster that cannot be drawn is counted and said in the log, and the rest are still drawn");
   assert.match(paint, /finally \{\s*context\.restore\(\);/);
@@ -217,4 +218,80 @@ test("D5: the side panel's three readings are no longer SEEN — each is a visua
   // Names, tags, chips, "N of M standing", the crowd meter and the strip stay (pinned in test/arena-team-hud-wiring.test.js).
   assert.doesNotMatch(page, /\n\s*\.reading[ .]/, "and no style for a visible reading");
   assert.match(page, /\.visually-hidden \{[^}]*position: absolute;[^}]*clip: rect\(0 0 0 0\);/);
+});
+
+/* ------------------------------------------------------------------ */
+/* D8: the crowd bar (2026-09-25)                                      */
+/* ------------------------------------------------------------------ */
+
+test("D8 LOAD: the icons pack's crowd bar is read where the pack is used and said in the log, and a pack the gate skipped is said too", () => {
+  const icons = functionBody("useIconPack");
+  assert.match(icons, /crowdArt = crowdBarArtFor\(data\);\s*log\(crowdArt\.log\.message, \{ warn: crowdArt\.log\.warn \}\);/,
+    "the renderer's reader, and the case it found, in the log panel");
+  assert.match(code, /let crowdArt = crowdBarArtFor\(undefined\);/, "until the gate hands the pack over: not used");
+  assert.ok(raw.includes('if (crowdArt.state === "unused") log(crowdArt.log.message, { warn: crowdArt.log.warn });'));
+  const open = functionBody("openArena");
+  assert.ok(open.indexOf("useArenaPacks(verdict);") < open.indexOf('if (crowdArt.state === "") log(crowdArt.log.message, { warn: crowdArt.log.warn });'),
+    "a late or failed icons pack never reaches useIconPack: the crowd bar's line is said at the open instead");
+});
+
+test("D8 FRAME: the crowd bar's reading is this frame's — the crowd as HEARD at the frame's `now` (each step's value from when its drawing ends), shown while the crowd is heard", () => {
+  const now = functionBody("combatHudNow");
+  assert.match(now, /return combatHudFrameFor\(\{\s*hud: shown,\s*pack: gaugeArt\.pack,\s*crowd: crowdBarReadingFor\(\{ presenter: crowdPresenter, now, heard: crowdHeard \}\)\s*\}\);/,
+    "the presenter the arena's sounds keep (its values: ss2CrowdInterestOf(host.battle), queued at stepEndsAtMs), and crowdHeardFor's answer");
+  // The presenter is fed at every step, whoever plays it, before any draw of that step.
+  const note = functionBody("noteArenaSoundStep");
+  assert.match(note, /crowdPresenter = queueCrowdInterest\(crowdPresenter, ss2CrowdInterestOf\(host\.battle\), endsAt\);/);
+  assert.ok(functionBody("beginStep").includes("noteArenaSoundStep(step, started);"));
+});
+
+test("D8 PAINT: the crowd bar is painted in the SAME LAYER as the gauges — stage space under the stage fit, after the clusters, its ops kept — and a bar that cannot be drawn is said, not silent", () => {
+  const paint = functionBody("paintCombatHud");
+  const clusters = at(paint, "for (const { cluster, reading } of frame?.clusters ?? []) {", "paintCombatHud");
+  const crowd = at(paint, "const ops = crowdBarOps({ art: crowdArt, textPack, reading: frame?.crowd ?? null, stageScale: fit.scale });", "paintCombatHud");
+  assert.ok(clusters < crowd, "after the clusters, in the same call: the same layer, over the fighters and under the ring");
+  const tail = paint.slice(crowd - 400);
+  assert.match(tail, /context\.save\(\);\s*try \{\s*context\.translate\(fit\.offsetX, fit\.offsetY\);\s*context\.scale\(fit\.scale, fit\.scale\);\s*const ops = crowdBarOps\(/,
+    "in stage px under the stage fit, as every cluster");
+  assert.match(paint.slice(crowd), /paintHudOps\(ops\);/);
+  assert.match(paint.slice(crowd), /catch \(error\) \{\s*hudFailed\("", error\);\s*\} finally \{\s*context\.restore\(\);/);
+  assert.ok(raw.includes('hudFailed("the crowd bar could not be drawn", error);'));
+  assert.match(code, /const crowdBarOps = createCrowdBarOps\(\);/);
+  // Both paint through ONE painter: a run of paths through the group compositor, a word where it falls.
+  assert.equal((paint.match(/paintHudOps\(ops\);/g) ?? []).length, 2, "the clusters' ops and the crowd bar's");
+  // The frame's HUD as a value carries the crowd bar too.
+  for (const field of ["crowd: {", "art: crowdArt.state", "shown: frame?.crowd?.shown === true", "value: frame?.crowd?.value ?? null", "drawn: crowdDrawn"]) {
+    assert.ok(paint.includes(field), `window.__combatHud carries ${field}`);
+  }
+});
+
+test("ONE PAINTER FOR THE HUD'S OPS: a run of paths through the group compositor with twips translations and the clip in force, a page-font word between runs keeping its place", () => {
+  // ► MOVED HERE FOR D8 (2026-09-25) from the test "D2: each cluster is painted IN STAGE SPACE…": the loop was
+  //   paintCombatHud's own ~~`paintGroupRuns(run, …)` and `if (op.kind === "path") { run.push(op); continue; }`~~
+  //   and is now `paintHudOps`, which the clusters and the crowd bar share.
+  const ops = functionBody("paintHudOps");
+  assert.match(ops, /paintGroupRuns\(run, \{ translationDivisor: TWIPS_PER_PIXEL, filtersScaled: true \}, paintLayerOperation\);/,
+    "paths as the pop-ups' are: twips translations, the clip in force (D7), each glow composited");
+  assert.match(ops, /if \(op\.kind === ""\) \{\s*run\.push\(op\);\s*continue;\s*\}\s*flush\(\);\s*paintHudWord\(op\);/,
+    "a word between two runs keeps its place in the paint order");
+  assert.match(ops, /\}\s*flush\(\);\s*\}$/, "and the last run is painted");
+});
+
+test("D8 PROVENANCE: \"What you are looking at\" carries the crowd bar's line, after the gauges', derived from the art drawn, its invoice and whether the crowd is heard", () => {
+  const provenance = functionBody("renderProvenance");
+  const gauges = at(provenance, "combatHudProvenanceFor({ art: gaugeArt, invoice: hudInvoice, open: assetGateOpen }),", "renderProvenance");
+  const crowd = at(provenance, "crowdBarProvenanceFor({ art: crowdArt, invoice: crowdInvoice, open: assetGateOpen, heard: crowdHeard }),", "renderProvenance");
+  assert.ok(gauges < crowd);
+  assert.match(provenance, /const crowdInvoice = assetGateOpen\s*\? crowdBarInvoiceOf\(crowdArt, textPack, crowdBarReadingFor\(\{ presenter: crowdPresenter, now: arenaNow\(\), heard: crowdHeard \}\)\)\s*: null;/);
+});
+
+test("D8 + D5: the side panel's crowd meter is no longer SEEN — a visually hidden meter with its value and mood in words, the screen-reader form of the bar in the frame", () => {
+  const crowd = lift("renderCrowdMeter");
+  assert.match(crowd, /el\("crowd"\)\.hidden = !crowd\.shown;\s*if \(!crowd\.shown\) return;/, "no meter while the build would hide the bar");
+  assert.match(crowd, /bar\.setAttribute\("aria-valuenow", String\(crowd\.percent\)\);/);
+  assert.match(crowd, /bar\.setAttribute\("aria-valuetext", `\$\{crowd\.text\} \(\$\{crowd\.value\}\)`\);/, "\"crowd: entertained (55)\": the build's own words, and the number");
+  assert.doesNotMatch(crowd, /style\.|textContent|dataset/, "no bar, no line, no number on screen");
+  assert.match(page, /<section class="crowd visually-hidden" id="crowd" aria-label="The crowd" hidden>\s*<div id="crowd-bar" role="meter" aria-label="Crowd" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><\/div>\s*<\/section>/);
+  assert.doesNotMatch(page, /id="crowd-(fill|boo|cheer|text|value)"/, "~~the fill, the two lines, the label and the number~~");
+  assert.doesNotMatch(page, /\n\s*\.crowd-(line|bar)[ .{[]/, "and no style for a visible meter");
 });

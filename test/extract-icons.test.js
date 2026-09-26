@@ -33,17 +33,20 @@ import fs from "node:fs";
 
 import {
   BUTTON_OVERLAY,
+  CROWD_BAR,
   ExtractIconsError,
   GAUGE_PANEL,
   FACE_CLIPS,
   ICON_CLIPS,
   NESTED_MEANINGS,
   ORACLE_SHA256,
+  actionStatementsOf,
   bindExpressions,
   boundFieldOf,
   buildManifest,
   deriveButtonHandlers,
   deriveClipEvents,
+  deriveCrowdDrive,
   deriveExpressionCalls,
   deriveGaugeAttach,
   deriveGaugeDrive,
@@ -60,12 +63,13 @@ import {
   readRect,
   roundColour,
   roundMatrix,
+  summariseCrowdBar,
   summariseGaugePanel,
   summariseOverlayLayout,
   tallyIconEffects,
   toPlacement
 } from "../tools/extract-icons.mjs";
-import { IDENTITY_MATRIX } from "../tools/swf-display-list.mjs";
+import { IDENTITY_MATRIX, indexCharacters, resolveTimeline } from "../tools/swf-display-list.mjs";
 // The READER of the buttons section, imported for the same reason
 // `test/extract-props.test.js` imports the props renderer: the only way to show
 // the extractor's output is drawable is to hand it to the renderer.
@@ -73,6 +77,8 @@ import { actionButtonOpsFor, actionButtonPackFrom } from "../src/render/action-b
 // And the gauges' reader, whose hand-cited drive and placements are checked
 // against what the extraction derives from the bytes.
 import { SS2_COMBAT_PANEL, SS2_GAUGE_DRIVE } from "../src/render/combat-panel.js";
+// And the crowd bar's, likewise (D8).
+import { SS2_CROWD_BAR, SS2_CROWD_BAR_DRIVE, SS2_CROWD_MOODS } from "../src/render/crowd-bar.js";
 
 /** Two `{x, y}` points equal to 0.001 px. */
 function near2(actual, expected) {
@@ -1908,6 +1914,308 @@ test("A BUILD WITHOUT THE PANEL: the gauges section says so BY NAME, stays empty
 });
 
 /* ------------------------------------------------------------------ */
+/* 7e. THE CROWD BAR: its drive, read off the bytes (D8, 2026-09-25)   */
+/* ------------------------------------------------------------------ */
+
+const literal = (value) => ({ kind: "literal", value });
+
+test("THE STATEMENT READER MODELS new, random() AND A COMPUTED MEMBER — the three shapes the crowd bar's handlers are written in", () => {
+  // Each as the build compiles it (crowd_bar clip-action 0 +0x01c7..+0x01ea; clip-action 1 +0x0159..+0x016a
+  // and +0x01fa..+0x0232): `new` pops its name, its count, then its arguments FIRST-ARGUMENT-FIRST (pushed
+  // last-first); `random` pops its bound; a member whose name is computed keeps the computation.
+  const statements = actionStatementsOf(assembleBlock("synthetic", 0, [
+    push(constant("list"), constant("b"), constant("a"), constant(""), integer(3), constant("Array")), bare("NewObject"), bare("SetVariable"),
+    push(constant("chance"), integer(1), integer(1000)), bare("RandomNumber"), bare("Add2"), bare("SetVariable"),
+    push(constant("_parent")), bare("GetVariable"), push(constant("label"), constant("x: "), constant("list")), bare("GetVariable"),
+    push(constant("_global")), bare("GetVariable"), push(constant("n")), bare("GetMember"), push(integer(10)), bare("Divide"),
+    push(integer(1), constant("Math")), bare("GetVariable"), push(constant("ceil")), bare("CallMethod"), bare("GetMember"), bare("Add2"),
+    bare("SetMember"),
+    bare("End")
+  ]).instructions);
+  assert.deepEqual(statements.map((statement) => [statement.kind, statement.name]), [["setVariable", "list"], ["setVariable", "chance"], ["set", "label"]],
+    "three statements, none unread");
+  assert.deepEqual(statements[0].value, { kind: "new", name: "Array", args: [literal(""), literal("a"), literal("b")] }, "index 0 is the one pushed last");
+  assert.deepEqual(statements[1].value, { kind: "binary", op: "Add2", left: literal(1), right: { kind: "random", max: literal(1000) } });
+  const element = statements[2].value.right;
+  assert.deepEqual([element.kind, element.name, element.object], ["member", null, { kind: "var", name: "list" }]);
+  assert.deepEqual([element.key.kind, element.key.method, element.key.args[0].op], ["call", "ceil", "Divide"], "list[Math.ceil(_global.n / 10)]");
+  // A literal member name is unchanged: no `key` rides along with it.
+  assert.equal(Object.hasOwn(statements[2].value.right.key.args[0].left, "key"), false);
+});
+
+/** The build's ten moods and its empty index 0, as `crowd_bar` clip-action 0 builds them (+0x01c7). */
+const BUILD_MOODS = ["", "bored to tears", "bored silly", "restless", "indifferent", "interested", "entertained", "enthusiastic",
+  "wildly entertained", "Tranfixed", "Fanatical"];
+/** `_global.crowd_interest`, as the build reads it. */
+const crowdRead = () => [push(constant("_global")), bare("GetVariable"), push(constant("crowd_interest")), bare("GetMember")];
+const branch = (name, mark) => ({ name, operand: { delta: 0, target: -1 }, mark });
+const marked = (step, mark) => (Array.isArray(step) ? [{ ...step[0], mark }, ...step.slice(1)] : { ...step, mark });
+/** `_root.<clip>.<method>(<args>)` as a discarded call. */
+const soundCall = (clip, method, args) => [push(...[...args].reverse(), integer(args.length), constant("_root")), bare("GetVariable"),
+  push(constant(clip)), bare("GetMember"), push(constant(method)), bare("CallMethod"), bare("Pop")];
+/** `if (<chance> = 1 + random(1000)) == 1000) _root.<clip>.start()` under `if (crowd <cmp> <n>)`: one of the two sound gates. */
+const soundGate = (comparison, than, chance, clip, from, to) => [
+  marked(crowdRead(), from), push(integer(than)), bare(comparison), bare("Not"), branch("If", `${from}:out`),
+  push(constant(chance), integer(1), integer(1000)), bare("RandomNumber"), bare("Add2"), bare("SetVariable"),
+  push(constant(chance)), bare("GetVariable"), push(integer(1000)), bare("Equals2"), bare("Not"), branch("If", `${from}:in`),
+  push(double(0), constant("_root")), bare("GetVariable"), push(constant(clip)), bare("GetMember"), push(constant("start")), bare("CallMethod"), bare("Pop")
+].map((step) => ({ step, to }));
+
+/**
+ * `crowd_bar`'s two `onClipEvent` handlers as the build compiles them, statement
+ * for statement (the oracle's dump: clip-action 0, `load`, body 0x225e5d;
+ * clip-action 1, `enterFrame`, body 0x226086). `edit` may rewrite either step
+ * list before it is assembled; the branches are patched after, by mark.
+ */
+function crowdBlocks({ moods = BUILD_MOODS, level = 1, guard = 1, divisor = 10, prefix = "crowd: ", edit = null } = {}) {
+  const load = [
+    push(constant("_global")), bare("GetVariable"), push(constant("crowd_interest")), gameRead("hero", "herolevel"),
+    gameRead("villain", "herolevel"), bare("Add2"), { name: "SetMember", mark: "opening" },
+    gameRead("hero", "herolevel"), push(integer(level)), bare("Greater"), bare("Not"), branch("If", "test"),
+    soundCall("crowd_noise", "start", [integer(0), integer(99999)]),
+    soundCall("crowd_noise", "setVolume", [integer(0)]),
+    marked(push(constant("crowd_interest_array"), ...[...moods].reverse().map(constant), integer(moods.length), constant("Array")), "moodsFrom"), bare("NewObject"),
+    { name: "SetVariable", mark: "moods" },
+    branch("Jump", "skip"),
+    marked(push(constant("this")), "hidden"), bare("GetVariable"), push(constant("_visible"), bool(false)), { name: "SetMember", mark: "hideBar" },
+    push(constant("_parent")), bare("GetVariable"), push(constant("crowd_text"), constant("")), { name: "SetMember", mark: "emptyText" },
+    marked(push(constant("_parent")), "hideBackgroundFrom"), bare("GetVariable"), push(constant("crowd_bar_bg")), bare("GetMember"), push(constant("_visible"), bool(false)),
+    { name: "SetMember", mark: "hideBackground" },
+    marked(bare("End"), "end")
+  ];
+  const cheer = soundGate("Greater", 70, "rockyouchance", "rockyou", "cheer", "boo");
+  const boo = soundGate("Less2", 20, "crowd_boo_chance", "crowd_boo", "boo", "label");
+  const frame = [
+    gameRead("hero", "herolevel"), push(integer(guard)), bare("Greater"), bare("Not"), branch("If", "guard"),
+    crowdRead(), push(integer(2)), bare("Divide"), mathRound(), push(integer(4)), bare("Add2"),
+    push(integer(1), constant("_root")), bare("GetVariable"), push(constant("crowd_noise")), bare("GetMember"), push(constant("setVolume")),
+    bare("CallMethod"), bare("Pop"),
+    cheer.map((entry) => entry.step), boo.map((entry) => entry.step),
+    marked(push(constant("_parent")), "labelFrom"), bare("GetVariable"), push(constant("crowd_text"), constant(prefix), constant("crowd_interest_array")),
+    bare("GetVariable"), crowdRead(), push(integer(divisor)), bare("Divide"), push(integer(1), constant("Math")), bare("GetVariable"),
+    push(constant("ceil")), bare("CallMethod"), bare("GetMember"), bare("Add2"), { name: "SetMember", mark: "label" },
+    push(constant("this")), bare("GetVariable"), push(constant("_xscale")), crowdRead(), mathRound(), { name: "SetMember", mark: "scale" },
+    marked(bare("End"), "end")
+  ];
+  const steps = { load, frame };
+  if (edit) edit(steps);
+  const loadBlock = assembleBlock("sprite:751/frame:1/instance:crowd_bar/clip-action:0", 0x20000, steps.load);
+  const frameBlock = assembleBlock("sprite:751/frame:1/instance:crowd_bar/clip-action:1", 0x30000, steps.frame);
+  loadBlock.eventFlags = 1;
+  frameBlock.eventFlags = 2;
+  const find = (block, mark) => block.instructions.find((instruction) => instruction.mark === mark);
+  const patch = (block, mark, to) => { const found = find(block, mark); if (found) found.operand.target = find(block, to)?.offset ?? -1; };
+  patch(loadBlock, "test", "hidden");
+  patch(loadBlock, "skip", "end");
+  patch(frameBlock, "guard", "end");
+  for (const [from, to] of [["cheer", "boo"], ["boo", "labelFrom"]]) {
+    patch(frameBlock, `${from}:out`, to);
+    patch(frameBlock, `${from}:in`, to);
+  }
+  return {
+    blocks: [loadBlock, frameBlock], load: loadBlock, frame: frameBlock,
+    at: (block, mark) => relative(block, find(block, mark))
+  };
+}
+
+test("THE CROWD BAR'S DRIVE IS READ OFF ITS OWN TWO HANDLERS: the opening, the level test, the moods, what it hides, the label and the _xscale", () => {
+  const built = crowdBlocks();
+  const derived = deriveCrowdDrive({ actionBlocks: built.blocks }, { character: 751, instance: "crowd_bar" });
+  assert.deepEqual(derived.problems, []);
+  assert.deepEqual(derived.drive, {
+    source: "_global.crowd_interest",
+    opening: "_root.game.hero.herolevel + _root.game.villain.herolevel",
+    shownWhile: { side: "hero", field: "herolevel", comparison: ">", than: 1 },
+    hides: ["this._visible = false", "_parent.crowd_text = \"\"", "_parent.crowd_bar_bg._visible = false"],
+    scale: { target: "this", property: "_xscale", rounding: "round" },
+    label: { target: "_parent", variable: "crowd_text", prefix: "crowd: ", array: "crowd_interest_array", rounding: "ceil", divisor: 10 },
+    moods: BUILD_MOODS
+  });
+  assert.deepEqual(derived.handlers, {
+    load: { block: "0x20000", eventFlags: 1, opening: built.at(built.load, "opening"), test: built.at(built.load, "test"),
+      moods: built.at(built.load, "moods"),
+      hides: [built.at(built.load, "hideBar"), built.at(built.load, "emptyText"), built.at(built.load, "hideBackground")] },
+    enterFrame: { block: "0x30000", eventFlags: 2, guard: built.at(built.frame, "guard"), label: built.at(built.frame, "label"),
+      scale: built.at(built.frame, "scale") }
+  });
+  // The sounds share the handlers and draw nothing: each is NAMED, never silently skipped — the two
+  // on load, and the volume and the two 1-in-1000 gates every frame.
+  assert.deepEqual(derived.notDrawn.map((row) => row.handler), ["load", "load", ...Array(9).fill("enterFrame")]);
+  assert.deepEqual(derived.notDrawn.filter((row) => /a call to start/.test(row.what)).length, 3, "the ambience, the cheer and the boo");
+  assert.ok(derived.notDrawn.every((row) => /^\+0x[0-9a-f]{4}$/.test(row.at)));
+});
+
+test("A CROWD HANDLER THIS READER CANNOT FOLLOW IS A PROBLEM BY NAME — a stray drawn write, no guard, a skipped label, a lost arm, a third handler", () => {
+  const read = (built) => deriveCrowdDrive({ actionBlocks: built.blocks }, { character: 751, instance: "crowd_bar" });
+  const problemsOf = (options) => read(crowdBlocks(options)).problems;
+  const insertBefore = (list, mark, steps) => {
+    const index = list.findIndex((step) => (Array.isArray(step) ? step[0]?.mark === mark : step.mark === mark));
+    assert.ok(index >= 0, `mark ${mark}`);
+    list.splice(index, 0, ...steps);
+  };
+  // A write that moves what is drawn and is not the drive: named, with its offset.
+  const stray = problemsOf({ edit: (steps) => insertBefore(steps.frame, "labelFrom",
+    [push(constant("this")), bare("GetVariable"), push(constant("_alpha"), integer(50)), bare("SetMember")]) });
+  assert.ok(stray.some((problem) => /a write to this\._alpha at \+0x[0-9a-f]{4} on enterFrame is not part of the crowd bar's drive/.test(problem)), JSON.stringify(stray));
+  // A second write to the crowd itself: the bar would not show the engine's crowd.
+  const rewritten = problemsOf({ edit: (steps) => insertBefore(steps.frame, "labelFrom",
+    [push(constant("_global")), bare("GetVariable"), push(constant("crowd_interest"), integer(5)), bare("SetMember")]) });
+  assert.ok(rewritten.some((problem) => /a write to _global\.crowd_interest .* on enterFrame/.test(problem)), JSON.stringify(rewritten));
+  // An opcode this reader does not model: never guessed across.
+  const unread = problemsOf({ edit: (steps) => insertBefore(steps.frame, "labelFrom", [bare("Trace")]) });
+  assert.ok(unread.some((problem) => /an opcode this reader does not model \(Trace\)/.test(problem)), JSON.stringify(unread));
+  // No guard: the label would be written every frame while the bar is hidden.
+  const unguarded = problemsOf({ edit: (steps) => { steps.frame.splice(0, 5); } });
+  assert.ok(unguarded.some((problem) => /does not open with a level test/.test(problem)), JSON.stringify(unguarded));
+  // A guard that tests another level than the load hides by.
+  assert.ok(problemsOf({ guard: 2 }).some((problem) => /the enterFrame guard tests hero\.herolevel > 2; the load shows the bar while hero\.herolevel > 1/.test(problem)));
+  // A branch that can skip the label.
+  const dodging = crowdBlocks({ edit: (steps) => insertBefore(steps.frame, "labelFrom",
+    [gameRead("hero", "herolevel"), push(integer(5)), bare("Greater"), branch("If", "dodge")]) });
+  const dodge = dodging.frame.instructions.find((instruction) => instruction.mark === "dodge");
+  dodge.operand.target = dodging.frame.instructions[dodging.frame.instructions.findIndex((instruction) => instruction.mark === "label") + 1].offset;
+  const skipped = read(dodging).problems;
+  assert.ok(skipped.some((problem) => /the label at \+0x[0-9a-f]{4} does not run on every path under the guard: the list's end/.test(problem)), JSON.stringify(skipped));
+  // The skip jump gone: the shown arm runs on into the hiding one.
+  const fallThrough = problemsOf({ edit: (steps) => { steps.load = steps.load.filter((step) => step.mark !== "skip"); } });
+  assert.ok(fallThrough.some((problem) => /not shaped if \/ arm \/ jump to the end \/ arm/.test(problem)), JSON.stringify(fallThrough));
+  // No mood array: no drive, and the reason.
+  const moodless = read(crowdBlocks({ edit: (steps) => {
+    steps.load = steps.load.filter((step) => !(step.name === "NewObject" || step.mark === "moods" ||
+      (step.name === "Push" && step.operand?.[0]?.value === "crowd_interest_array")));
+  } }));
+  assert.equal(moodless.drive, null);
+  assert.ok(moodless.problems.some((problem) => /0 mood arrays/.test(problem)), JSON.stringify(moodless.problems));
+  // The label reads another array than the one built.
+  const other = problemsOf({ edit: (steps) => {
+    const at = steps.frame.findIndex((step) => step.name === "Push" && step.operand?.[2]?.value === "crowd_interest_array");
+    steps.frame[at] = push(constant("crowd_text"), constant("crowd: "), constant("another_array"));
+  } });
+  assert.ok(other.some((problem) => /the label reads another_array, the moods are crowd_interest_array/.test(problem)), JSON.stringify(other));
+  // A third handler, on another event: not silently ignored.
+  const third = crowdBlocks();
+  third.blocks.push({ ...assembleBlock("sprite:751/frame:1/instance:crowd_bar/clip-action:2", 0x40000, [bare("End")]), eventFlags: 4 });
+  assert.ok(read(third).problems.some((problem) => /on events 4/.test(problem)));
+  // A guard that jumps somewhere other than the end (here: onto the label, skipping only the sounds).
+  const short = crowdBlocks();
+  const guardOf = short.frame.instructions.find((instruction) => instruction.mark === "guard");
+  guardOf.operand.target = short.frame.instructions.find((instruction) => instruction.mark === "labelFrom").offset;
+  assert.ok(read(short).problems.some((problem) => /does not open with a level test that skips all of it/.test(problem)));
+  // The load's test the other way round (one `Not` fewer): the bar would be built while the hero is level 1.
+  const inverted = problemsOf({ edit: (steps) => {
+    const at = steps.load.findIndex((step) => step.mark === "test");
+    steps.load.splice(at - 1, 1);
+  } });
+  assert.ok(inverted.some((problem) => /the bar is shown while hero\.herolevel > 1 is FALSE/.test(problem)), JSON.stringify(inverted));
+  // A write in the hidden arm that hides nothing is not a hide: a display write, and a problem.
+  const extra = problemsOf({ edit: (steps) => insertBefore(steps.load, "end",
+    [push(constant("this")), bare("GetVariable"), push(constant("_alpha"), integer(50)), bare("SetMember")]) });
+  assert.ok(extra.some((problem) => /a write to this\._alpha at \+0x[0-9a-f]{4} on load is not part of the crowd bar's drive/.test(problem)), JSON.stringify(extra));
+  // CODEX PASS 1 (the crowd slice): a call that changes what a clip shows is a problem however its value is
+  // used — assigned, passed as an argument, or left on the stack — not only as a statement of its own.
+  const removal = [push(integer(0), constant("_parent")), bare("GetVariable"), push(constant("removeMovieClip")), bare("CallMethod")];
+  const assigned = problemsOf({ edit: (steps) => insertBefore(steps.frame, "labelFrom", [push(constant("ignored")), removal, bare("SetVariable")]) });
+  assert.ok(assigned.some((problem) => /a call to removeMovieClip at \+0x[0-9a-f]{4} on enterFrame is not part of the crowd bar's drive/.test(problem)),
+    JSON.stringify(assigned));
+  const nested = problemsOf({ edit: (steps) => insertBefore(steps.frame, "labelFrom", [
+    push(integer(2), integer(1), constant("this")), bare("GetVariable"), push(constant("gotoAndStop")), bare("CallMethod"),
+    push(integer(1), constant("_root")), bare("GetVariable"), push(constant("crowd_noise")), bare("GetMember"), push(constant("setVolume")),
+    bare("CallMethod"), bare("Pop")]) });
+  assert.ok(nested.some((problem) => /a call to gotoAndStop at \+0x[0-9a-f]{4} on enterFrame/.test(problem)), JSON.stringify(nested));
+  const dangling = problemsOf({ edit: (steps) => insertBefore(steps.load, "end", removal) });
+  assert.ok(dangling.some((problem) => /a call to removeMovieClip at \+0x[0-9a-f]{4} on load/.test(problem)), JSON.stringify(dangling));
+  // CODEX PASS 2 (the crowd slice): what the load does must RUN. A jump at its start straight to its end skips
+  // the opening and the test; a jump over the moods leaves the bar shown with no moods; a branch over a hide
+  // leaves the background up while the bar is hidden. Each is a problem naming the piece and the way round it.
+  const jumpTo = (block, from, to) => {
+    const at = block.instructions.find((instruction) => instruction.mark === from);
+    at.operand.target = block.instructions.find((instruction) => instruction.mark === to).offset;
+  };
+  const bypassed = crowdBlocks({ edit: (steps) => { steps.load.unshift(branch("Jump", "bypass")); } });
+  jumpTo(bypassed.load, "bypass", "end");
+  const bypass = read(bypassed).problems;
+  assert.ok(bypass.some((problem) => /the opening at \+0x[0-9a-f]{4} does not run on every path of the load handler: the list's end/.test(problem)), JSON.stringify(bypass));
+  assert.ok(bypass.some((problem) => /the level test at \+0x[0-9a-f]{4} does not run on every path of the load handler/.test(problem)), JSON.stringify(bypass));
+  const moodSkip = crowdBlocks({ edit: (steps) => insertBefore(steps.load, "moodsFrom", [branch("Jump", "hop")]) });
+  jumpTo(moodSkip.load, "hop", "skip");
+  const unbuilt = read(moodSkip).problems;
+  assert.ok(unbuilt.some((problem) => /the moods at \+0x[0-9a-f]{4} do not run on every path while the bar is shown/.test(problem)), JSON.stringify(unbuilt));
+  const hideSkip = crowdBlocks({ edit: (steps) => insertBefore(steps.load, "hideBackgroundFrom",
+    [push(constant("whim")), bare("GetVariable"), push(integer(1)), bare("Equals2"), branch("If", "dodgeHide")]) });
+  jumpTo(hideSkip.load, "dodgeHide", "end");
+  const shown = read(hideSkip).problems;
+  assert.ok(shown.some((problem) => /the hide _parent\.crowd_bar_bg\._visible = false at \+0x[0-9a-f]{4} does not run on every path while the bar is hidden/.test(problem)),
+    JSON.stringify(shown));
+  // And none of these is a drive the section would carry as the build's… except that each still names what it read.
+  assert.deepEqual(read(crowdBlocks()).problems, [], "the build's own shape is clean");
+});
+
+test("THE CROWD BAR'S PLACEMENTS ARE NAMED FROM THE BYTES — the bar and its background by instance, the label by its field's variable — and the gauges leave them to it", () => {
+  const frameOne = [
+    entryAt(3, 723, { name: "crowd_bar_bg", tx: 9661, ty: -5144 }),
+    entryAt(5, 725, { name: "crowd_bar", tx: 9657, ty: -5132 }),
+    entryAt(9, 733, { name: "villain_potion", tx: 10700, ty: 933 }),
+    entryAt(63, 750, { tx: 9669, ty: -5175, filters: [{ type: "glow" }] }),
+    entryAt(64, 999, { name: "something_else" })
+  ];
+  const fields = { 750: { variable: "crowd_text", align: "center" } };
+  const fieldOf = (id) => fields[id] ?? null;
+  const crowd = summariseCrowdBar(frameOne, { declared: CROWD_BAR, fieldOf });
+  assert.deepEqual(crowd.problems, []);
+  assert.deepEqual(crowd.placements.map((row) => [row.depth, row.kind, row.character, row.instance ?? row.variable, row.matrix]), [
+    [3, "background", 723, "crowd_bar_bg", [1, 0, 0, 1, 9661, -5144]],
+    [5, "bar", 725, "crowd_bar", [1, 0, 0, 1, 9657, -5132]],
+    [63, "label", 750, "crowd_text", [1, 0, 0, 1, 9669, -5175]]
+  ]);
+  const label = crowd.placements.find((row) => row.kind === "label");
+  assert.deepEqual([label.align, label.filters], ["center", [{ type: "glow" }]], "the label's glow, carried as data on the placement that has it");
+  // THE GAUGES LEAVE THEM TO IT: what neither section takes is still named, and only that.
+  const gauges = summariseGaugePanel(frameOne, { declared: GAUGE_PANEL, fieldOf, bannerSpanOf: () => null,
+    takenElsewhere: new Set(crowd.placements.map((row) => row.depth)) });
+  assert.deepEqual(gauges.notTaken.map((row) => [row.depth, row.character, row.name]), [[64, 999, "something_else"]]);
+  // Each part exactly once, as the character the build uses — or a problem by name.
+  const doubled = summariseCrowdBar([...frameOne, entryAt(70, 725, { name: "crowd_bar" })], { declared: CROWD_BAR, fieldOf });
+  assert.ok(doubled.problems.some((problem) => /crowd_bar is placed 2 times/.test(problem)), JSON.stringify(doubled.problems));
+  const swapped = summariseCrowdBar(frameOne.map((entry) => (entry.depth === 3 ? entryAt(3, 724, { name: "crowd_bar_bg" }) : entry)),
+    { declared: CROWD_BAR, fieldOf });
+  assert.ok(swapped.problems.some((problem) => /crowd_bar_bg is character 724, expected 723/.test(problem)), JSON.stringify(swapped.problems));
+  const unlabelled = summariseCrowdBar(frameOne.filter((entry) => entry.depth !== 63), { declared: CROWD_BAR, fieldOf });
+  assert.ok(unlabelled.problems.some((problem) => /0 fields bound to crowd_text/.test(problem)), JSON.stringify(unlabelled.problems));
+});
+
+test("the crowd bar's declaration names its three parts and the drive it EXPECTS — checked by the extraction, never written", () => {
+  assert.deepEqual([CROWD_BAR.character, CROWD_BAR.linkage], [751, "combat_panel"]);
+  assert.deepEqual([CROWD_BAR.background, CROWD_BAR.bar, CROWD_BAR.text],
+    [{ instance: "crowd_bar_bg", character: 723 }, { instance: "crowd_bar", character: 725 }, { variable: "crowd_text", character: 750 }]);
+  // Read off the oracle's dump (crowd_bar clip-actions 0 and 1) — and re-derived from the bytes by the gated tests below.
+  assert.deepEqual(CROWD_BAR.expectedDrive, {
+    source: "_global.crowd_interest",
+    opening: "_root.game.hero.herolevel + _root.game.villain.herolevel",
+    shownWhile: { side: "hero", field: "herolevel", comparison: ">", than: 1 },
+    hides: ["this._visible = false", "_parent.crowd_text = \"\"", "_parent.crowd_bar_bg._visible = false"],
+    scale: { target: "this", property: "_xscale", rounding: "round" },
+    label: { target: "_parent", variable: "crowd_text", prefix: "crowd: ", array: "crowd_interest_array", rounding: "ceil", divisor: 10 },
+    moods: BUILD_MOODS
+  });
+  assert.equal(ICON_CLIPS.some((clip) => [723, 725].includes(clip.character)), false,
+    "the crowd's sprites are NOT roster clips: adding them there would move the roster's measured totals");
+});
+
+test("A BUILD WITHOUT THE PANEL: the crowd section says so BY NAME, stays empty, and the manifest still has its block", () => {
+  const result = extractIcons(buttonBuild());
+  const crowd = result.crowd;
+  assert.ok(crowd, "the section is always written");
+  assert.ok(crowd.problems.some((problem) => /combat_panel/.test(problem)));
+  assert.ok(result.failures.some((row) => row.character === 751 && row.message === `crowd: ${crowd.problems[0]}`),
+    "in the pack's failures under the section's own name");
+  assert.deepEqual([Object.keys(crowd.clips), crowd.placements, crowd.drive, crowd.origin], [[], [], null, null]);
+  assert.equal(crowd.effects.ownFilters, 0, "a counted zero, not an absent invoice");
+  const manifest = buildManifest(result, { file: "x.swf", sha256: "0" });
+  assert.deepEqual(manifest.crowd.problems, crowd.problems);
+  assert.equal(tallyIconEffects(result).undescendedClipPlacements, 0, "the roster's invoice never sees the crowd");
+});
+
+/* ------------------------------------------------------------------ */
 /* 8. Against the real build                                           */
 /* ------------------------------------------------------------------ */
 
@@ -2410,8 +2718,11 @@ test("THE GAUGES SECTION, FROM THE BUILD: six gauges, two bevelled banners, two 
       assert.deepEqual(name.filters.map((filter) => [filter.type, filter.strength]), [["glow", 10]]);
       assert.equal(name.align, name.side === "hero" ? "left" : "right");
     }
-    assert.deepEqual(gauges.notTaken.map((row) => [row.depth, row.character, row.name]),
-      [[3, 723, "crowd_bar_bg"], [5, 725, "crowd_bar"], [63, 750, null]]);
+    // ► RE-PINNED FOR D8 (2026-09-25): ~~[[3, 723, "crowd_bar_bg"], [5, 725, "crowd_bar"], [63, 750, null]]~~ —
+    //   the crowd bar was 751's only placements this section did not take, named here so it was "said to be
+    //   there rather than silently absent". The crowd section takes them now (`CROWD_BAR`), and the test
+    //   "THE CROWD'S DRIVE, FROM THE BYTES" holds every one of 751's placements to exactly one section.
+    assert.deepEqual(gauges.notTaken.map((row) => [row.depth, row.character, row.name]), []);
   });
 
 test("EACH GAUGE SPRITE KEEPS ITS LIQUID WHOLE: one blood_health, at its REST matrix, under its own cutter, the liquid its own entry",
@@ -2598,4 +2909,127 @@ test("THE MANIFEST CARRIES THE GAUGES AS THEIR OWN BLOCK, and the roster's total
     assert.equal(manifest.gauges.placements.length, 10);
     assert.equal(manifest.effects.ownFilters + manifest.effects.inheritedFilters, 176, "the roster's own, unmoved");
     assert.equal(manifest.effects.undescendedClipPlacements, 190);
+  });
+
+/* ------------------------------------------------------------------ */
+/* 11. THE CROWD SECTION, against the real build (D8, 2026-09-25)       */
+/* ------------------------------------------------------------------ */
+
+test("THE CROWD SECTION, FROM THE BUILD: the bar, its background and its label by depth, name and matrix, their sprites whole, and the panel's own place",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    const result = oracleExtraction();
+    const crowd = result.crowd;
+    assert.deepEqual(crowd.problems, []);
+    assert.deepEqual(result.failures, [], "and nothing about it failed");
+    // Measured with resolveTimeline on 751 frame 1 (read-only, 2026-09-25): depths 3, 5 and 63.
+    assert.deepEqual(crowd.placements.map((row) => [row.depth, row.kind, row.character, row.instance ?? row.variable, row.matrix]), [
+      [3, "background", 723, "crowd_bar_bg", [1, 0, 0, 1, 9661, -5144]],
+      [5, "bar", 725, "crowd_bar", [1, 0, 0, 1, 9657, -5132]],
+      [63, "label", 750, "crowd_text", [1, 0, 0, 1, 9669, -5175]]
+    ]);
+    const label = crowd.placements.find((row) => row.kind === "label");
+    assert.equal(label.align, "center");
+    assert.deepEqual(label.filters.map((filter) => [filter.type, filter.blurX, filter.strength, filter.colour]),
+      [["glow", 2, 10, { red: 0, green: 0, blue: 0, alpha: 255 }]], "the label's black glow");
+    // Each sprite is ONE frame holding its one shape at identity: the bar's registration point is its own
+    // left edge (shape 724 starts at x 0), which is what `_xscale` scales about.
+    assert.deepEqual(Object.keys(crowd.clips).map(Number), [723, 725]);
+    for (const [sprite, shape] of [[723, 722], [725, 724]]) {
+      assert.equal(crowd.clips[sprite].declaredFrames, 1);
+      assert.deepEqual(crowd.clips[sprite].frames[0].map((placement) => [placement.kind, placement.character, placement.matrix]),
+        [["shape", shape, [1, 0, 0, 1, 0, 0]]]);
+      assert.ok(result.shapes[shape]?.paths.length > 0, `shape ${shape} is in the one shape table`);
+    }
+    assert.equal(result.shapes[724].bounds.xMin, 0, "the bar's left edge is its registration point");
+    assert.ok(result.texts[750], "the label's field was read");
+    assert.deepEqual(crowd.origin, { x: -0.05, y: 288.75 }, "the panel's own place — the gauges section's derived attach");
+    assert.deepEqual(crowd.origin, result.gauges.attach.origin);
+    // Its own invoice: the label's one glow on the panel's placement, nothing inside the two sprites.
+    assert.deepEqual({ ...crowd.placementEffects, use: undefined }, { filters: 1, byType: { glow: 1 }, use: undefined });
+    assert.equal(crowd.effects.ownFilters, 0);
+    assert.equal(crowd.clipsAcrossSpriteBoundary, 0);
+  });
+
+test("THE CROWD'S DRIVE, FROM THE BYTES: crowd_bar's own two handlers, the build's constants, every sound named — and the gauges leave 751 to it",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    const result = oracleExtraction();
+    const crowd = result.crowd;
+    assert.deepEqual(crowd.drive, { ...CROWD_BAR.expectedDrive, shownWhile: { ...CROWD_BAR.expectedDrive.shownWhile },
+      hides: [...CROWD_BAR.expectedDrive.hides], scale: { ...CROWD_BAR.expectedDrive.scale }, label: { ...CROWD_BAR.expectedDrive.label },
+      moods: [...CROWD_BAR.expectedDrive.moods] });
+    // Read by hand off the oracle's dump (`crowd_bar` clip-action 0 body 0x225e5d, clip-action 1 body 0x226086).
+    assert.deepEqual(crowd.handlers, {
+      load: { block: "0x225e5d", eventFlags: 1, opening: "+0x0158", test: "+0x017b", moods: "+0x01ea", hides: ["+0x01fd", "+0x020b", "+0x021f"] },
+      enterFrame: { block: "0x226086", eventFlags: 2, guard: "+0x00f2", label: "+0x0232", scale: "+0x0258" }
+    });
+    assert.deepEqual(crowd.notDrawn.map((row) => `${row.handler} ${row.at} ${row.what}`), [
+      "load +0x01a5 a call to start", "load +0x01c6 a call to setVolume",
+      "enterFrame +0x013d a call to setVolume", "enterFrame +0x0154 a branch", "enterFrame +0x016a a write to the variable rockyouchance",
+      "enterFrame +0x017b a branch", "enterFrame +0x019b a call to start", "enterFrame +0x01b2 a branch",
+      "enterFrame +0x01c8 a write to the variable crowd_boo_chance", "enterFrame +0x01d9 a branch", "enterFrame +0x01f9 a call to start"
+    ], "the ambience, its volume and the cheer and boo gates: sounds, each named");
+    // EVERY placement on 751's frame 1 is taken by exactly one section, and the gauges' `notTaken` is empty.
+    // ~~[[3, 723, "crowd_bar_bg"], [5, 725, "crowd_bar"], [63, 750, null]]~~ was the gauges' notTaken until
+    // this section took them (D8, 2026-09-25).
+    assert.deepEqual(result.gauges.notTaken, []);
+    const buffer = fs.readFileSync(ORACLE);
+    const { characters } = indexCharacters(buffer);
+    const depths = resolveTimeline(buffer, characters.get(751), { frames: [1] }).frames[0].map((entry) => entry.depth).sort((a, b) => a - b);
+    const taken = [...result.gauges.placements, ...crowd.placements].map((row) => row.depth).sort((a, b) => a - b);
+    assert.deepEqual(taken, depths, "each of 751's placements, once");
+    // The roster's measured totals do not move.
+    const manifest = buildManifest(result, { file: "x.swf", sha256: ORACLE_SHA256 });
+    assert.equal(manifest.effects.ownFilters + manifest.effects.inheritedFilters, 176);
+    assert.equal(manifest.effects.undescendedClipPlacements, 190);
+    assert.deepEqual(manifest.crowd.drive, crowd.drive, "and the manifest carries the crowd as its own block");
+    assert.deepEqual(manifest.crowd.placements, [[3, "background", 723, "crowd_bar_bg", null], [5, "bar", 725, "crowd_bar", null],
+      [63, "label", 750, "crowd_text", "glow"]]);
+    // THE RENDERER'S HAND-CITED COPY AGREES — two independent paths to one answer.
+    for (const key of Object.keys(SS2_CROWD_BAR_DRIVE)) assert.deepEqual(crowd.drive[key], JSON.parse(JSON.stringify(SS2_CROWD_BAR_DRIVE[key])), key);
+    assert.deepEqual(crowd.drive.moods, [...SS2_CROWD_MOODS]);
+    near2(SS2_CROWD_BAR.origin, crowd.origin);
+    for (const part of [SS2_CROWD_BAR.background, SS2_CROWD_BAR.bar, SS2_CROWD_BAR.label]) {
+      const row = crowd.placements.find((one) => one.kind === part.kind);
+      assert.deepEqual([row.depth, row.character, [...row.matrix]], [part.depth, part.character, [...part.matrix]], part.kind);
+    }
+  });
+
+test("A ONE-BYTE CHANGE TO THE CROWD'S HANDLERS MOVES ITS DRIVE AND IS A PROBLEM BY NAME — in an in-memory copy of the build",
+  { skip: haveOracle ? false : "no installed build on this machine" }, () => {
+    const original = fs.readFileSync(ORACLE);
+    const { handlers } = oracleExtraction().crowd;
+    const frameBody = Number(handlers.enterFrame.block);
+    const loadBody = Number(handlers.load.block);
+    const offset = (body, relativeOffset) => body + Number.parseInt(relativeOffset.slice(1), 16);
+    /** Where an int32 Push operand (type 7, then the value) sits in [from, to), found by its bytes, exactly once. */
+    const integerAt = (from, to, value) => {
+      const found = [];
+      for (let index = from; index < to; index += 1) if (original[index] === 7 && original.readInt32LE(index + 1) === value) found.push(index + 1);
+      assert.equal(found.length, 1, `one int32 ${value} in 0x${from.toString(16)}..0x${to.toString(16)}`);
+      return found[0];
+    };
+    const stringAt = (from, to, text) => {
+      const needle = Buffer.from(`${text}\0`, "latin1");
+      const found = [];
+      for (let index = from; index < to; index += 1) if (original.subarray(index, index + needle.length).equals(needle)) found.push(index);
+      assert.equal(found.length, 1, `one "${text}" in 0x${from.toString(16)}..0x${to.toString(16)}`);
+      return found[0];
+    };
+    const mutant = (edit) => { const copy = Buffer.from(original); edit(copy); return extractIcons(copy).crowd; };
+    // The label's divisor, 10 -> 11: the label reads what the bytes say, and the section names the key.
+    const divided = mutant((copy) => copy.writeInt32LE(11, integerAt(offset(frameBody, handlers.enterFrame.guard), offset(frameBody, handlers.enterFrame.label), 10)));
+    assert.equal(divided.drive.label.divisor, 11);
+    assert.ok(divided.problems.some((problem) => /the crowd's label is .*"divisor":11.*, expected .*"divisor":10/.test(problem)), JSON.stringify(divided.problems));
+    // The top mood's spelling, in the load's constant pool.
+    const renamed = mutant((copy) => { copy[stringAt(loadBody, offset(loadBody, handlers.load.moods), "Fanatical") + 8] = "m".charCodeAt(0); });
+    assert.equal(renamed.drive.moods[10], "Fanaticam");
+    assert.ok(renamed.problems.some((problem) => /the crowd's moods is/.test(problem)), JSON.stringify(renamed.problems));
+    // The property the bar scales, `_xscale` -> `_yscale`, in the enterFrame's pool.
+    const turned = mutant((copy) => { copy[stringAt(frameBody, offset(frameBody, handlers.enterFrame.guard), "_xscale") + 1] = "y".charCodeAt(0); });
+    assert.equal(turned.drive.scale.property, "_yscale");
+    assert.ok(turned.problems.some((problem) => /the crowd's scale is/.test(problem)), JSON.stringify(turned.problems));
+    // The enterFrame guard's level, 1 -> 2: no longer the test the load hides by.
+    const guarded = mutant((copy) => copy.writeInt32LE(2, integerAt(frameBody, offset(frameBody, handlers.enterFrame.guard), 1)));
+    assert.ok(guarded.problems.some((problem) => /the enterFrame guard tests hero\.herolevel > 2/.test(problem)), JSON.stringify(guarded.problems));
+    assert.equal(original.equals(fs.readFileSync(ORACLE)), true, "the build itself is untouched");
   });

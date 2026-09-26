@@ -3,7 +3,9 @@
  * arena's own host, seated as `tools/arena/main.js` seats them, with the whole
  * pipeline the shell runs for the gauges — `teamHudFor`, the step's hold
  * (`gaugeHoldFor`, `heldHudFor`), the frame (`combatHudFrameFor`) and every
- * cluster's ops (`createCombatHudOps`) — read after EVERY action.
+ * cluster's ops (`createCombatHudOps`) — and for the crowd bar (D8: the
+ * crowd presenter queued at each step's drawing end, `crowdBarReadingFor`,
+ * `createCrowdBarOps`) — read after EVERY action.
  *
  * The HUD is presentation only: reading it all after every action leaves a
  * spectated bout's state-hash sequence exactly what it is without it (the
@@ -15,6 +17,9 @@ import test from "node:test";
 import { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } from "../src/adapter/index.js";
 import { ss2BattleValues, ss2Combatant, ss2TeamRules } from "../src/team/ss2-rules.js";
 import { popupsForEvents } from "../src/render/popups.js";
+import { createCrowdPresenter, crowdHeardFor, queueCrowdInterest } from "../src/render/crowd-sound.js";
+import { ss2CrowdInterestOf } from "../src/team/ss2-crowd.js";
+import { resourceValue } from "../src/team/resources.js";
 import { demoItemsFrom, demoSide } from "../tools/arena/roster.js";
 import { seatControllersFrom, withSeatControllers } from "../tools/arena/seats.js";
 import { teamHudFor } from "../tools/arena/team-hud.js";
@@ -22,6 +27,9 @@ import {
   combatHudArtFor,
   combatHudFrameFor,
   createCombatHudOps,
+  createCrowdBarOps,
+  crowdBarArtFor,
+  crowdBarReadingFor,
   gaugeHoldFor,
   heldHudFor
 } from "../tools/arena/combat-hud.js";
@@ -52,6 +60,14 @@ function playWithHud({ perSide, seed, kit }, onStep = () => {}) {
   const { host, seats } = seatedHost({ perSide, seed, kit });
   const art = combatHudArtFor(null);
   const opsFor = createCombatHudOps();
+  // D8, as `main.js` keeps it: the opening levels decide whether the crowd is heard (`crowdHeard`), and the
+  // presenter holds the opening and then each step's crowd from the moment its drawing ends
+  // (`noteArenaSoundStep`) — here each step's drawing ends at 1000 x (its number) + 500 on the test's clock.
+  const heard = crowdHeardFor(host.battle.teams.flatMap((team) => team.combatants.map((one) => resourceValue(one, "herolevel", Number.NaN))));
+  const crowdArt = crowdBarArtFor(null);
+  const crowdOpsFor = createCrowdBarOps();
+  let presenter = createCrowdPresenter(ss2CrowdInterestOf(host.battle));
+  let stepNumber = 0;
   const hashes = [host.hash()];
   let before = teamHudFor({ wire: host.wire(), seats });
   while (!host.battle.result) {
@@ -64,12 +80,19 @@ function playWithHud({ perSide, seed, kit }, onStep = () => {}) {
     const drawing = heldHudFor(after, hold, { now: 999, pendingTokens: step.actionTokens });
     const landed = heldHudFor(after, hold, { now: 1000, pendingTokens: step.actionTokens });
     const settled = heldHudFor(after, hold, { now: 999, pendingTokens: [] });
+    stepNumber += 1;
+    const endsAt = stepNumber * 1000 + 500;
+    presenter = queueCrowdInterest(presenter, ss2CrowdInterestOf(host.battle), endsAt);
+    const crowd = { drawing: crowdBarReadingFor({ presenter, now: endsAt - 1, heard }), drawn: crowdBarReadingFor({ presenter, now: endsAt, heard }) };
     for (const shown of [drawing, landed, settled]) {
-      for (const { cluster, reading } of combatHudFrameFor({ hud: shown, pack: art.pack }).clusters) {
+      const frame = combatHudFrameFor({ hud: shown, pack: art.pack, crowd: crowd.drawing });
+      for (const { cluster, reading } of frame.clusters) {
         opsFor({ art, textPack: null, cluster, reading, stageScale: 1 });
       }
+      crowdOpsFor({ art: crowdArt, textPack: null, reading: frame.crowd, stageScale: 1 });
     }
-    onStep({ before, after, drawing, landed, settled, popups, hold });
+    crowdOpsFor({ art: crowdArt, textPack: null, reading: crowd.drawn, stageScale: 1 });
+    onStep({ before, after, drawing, landed, settled, popups, hold, crowd, heard });
     before = after;
     hashes.push(host.hash());
   }
@@ -126,4 +149,25 @@ test("D3 OVER REAL BOUTS: the camera is handed the band's top in a team bout and
     });
     assert.ok(checked > 5, `${perSide}v${perSide}: ${checked} steps`);
   }
+});
+
+test("D8 OVER REAL STEPS: while a step is drawn the crowd bar shows the crowd the step found; once its drawing ends, the side panel's — the wire's own number", () => {
+  let steps = 0;
+  let moved = 0;
+  const heardIn = [];
+  for (const [perSide, kit, seed] of [[3, "tricks", 2], [2, "", 5], [1, "tricks", 4], [2, "crowd", 3]]) {
+    let found = null;
+    playWithHud({ perSide, kit, seed }, ({ before, after, crowd, heard }) => {
+      steps += 1;
+      found ??= heard;
+      // The side panel's meter reads the wire (`teamHudFor` -> `crowdMeterFor(ss2CrowdInterestOf(wire))`).
+      assert.equal(crowd.drawing.value, before.crowd.value, "the swing still being drawn: the crowd the step found");
+      assert.equal(crowd.drawn.value, after.crowd.value, "the action drawn: the side panel's number, the wire's");
+      assert.equal(crowd.drawn.shown, heard && Number.isFinite(after.crowd.value), "shown while the crowd is heard");
+      if (crowd.drawn.value !== crowd.drawing.value) moved += 1;
+    });
+    heardIn.push(found);
+  }
+  assert.ok(steps > 50 && moved > 20, `the sweep is not empty (${steps} steps, the crowd moved on ${moved})`);
+  assert.ok(heardIn.includes(true), `at least one of the bouts has a crowd heard: ${heardIn}`);
 });

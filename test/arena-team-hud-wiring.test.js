@@ -101,10 +101,13 @@ test("H2: the side panel is the model's — the crowd meter, then a panel per si
   assert.match(reading, /hudNode\("span", `visually-hidden reading-\$\{kind\}`\)/);
   const crowd = rawBody("renderCrowdMeter");
   assert.match(crowd, /el\("crowd"\)\.hidden = !crowd\.shown;\s*if \(!crowd\.shown\) return;/);
-  assert.match(crowd, /\.textContent = crowd\.text;/);
-  assert.match(crowd, /\.style\.width = `\$\{crowd\.percent\}%`;/);
-  assert.match(crowd, /\.style\.left = `\$\{crowd\.booBelow\}%`;/);
-  assert.match(crowd, /\.style\.left = `\$\{crowd\.cheerAbove\}%`;/);
+  // ► RE-PINNED FOR D8 of the in-frame HUD (2026-09-25): ~~`.textContent = crowd.text`, the fill's
+  //   `.style.width = `${crowd.percent}%`` and the boo and cheer lines' `.style.left`~~ — the crowd is the
+  //   build's own crowd bar in the frame now, and the side panel keeps it only as a visually hidden meter,
+  //   its value and the build's words in `aria-valuetext` (`test/arena-combat-hud-wiring.test.js` pins the
+  //   whole of it).
+  assert.match(crowd, /bar\.setAttribute\("aria-valuetext", `\$\{crowd\.text\} \(\$\{crowd\.value\}\)`\);/);
+  assert.match(crowd, /bar\.setAttribute\("aria-valuenow", String\(crowd\.percent\)\);/);
   // No raw status token reaches the page: the list used to print `status.join(", ")`.
   assert.equal((code.match(/status\.join\(/g) ?? []).length, 0);
 });
@@ -119,7 +122,9 @@ test("H2: the crowd meter is at the top of the side panel, the team panels under
   assert.ok(at('id="crowd"') < at('id="roster"'));
   assert.ok(at('id="roster"') < at('id="turn-heading"'));
   assert.ok(at('id="roster"') < at("What you are looking at"));
-  assert.match(page, /<section class="crowd" id="crowd"[^>]*\bhidden>/, "no meter until the model says there is a crowd");
+  // ► RE-PINNED FOR D8 (2026-09-25): ~~`<section class="crowd" id="crowd"…hidden>`~~ — the section is visually
+  //   hidden now as well (the crowd bar is in the frame), and still `hidden` until the model says there is a crowd.
+  assert.match(page, /<section class="crowd visually-hidden" id="crowd"[^>]*\bhidden>/, "no meter until the model says there is a crowd");
   assert.match(page, /id="crowd-bar" role="meter"/);
 });
 

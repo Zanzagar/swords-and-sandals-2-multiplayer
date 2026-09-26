@@ -11,6 +11,7 @@
  * asks the engine nothing.
  */
 
+import { SS2_CROWD_MOODS } from "../../src/render/crowd-bar.js";
 import { SS2_CROWD_SOUND } from "../../src/render/crowd-sound.js";
 import { SPLAT_WORDS, STATUS_BONUS_FRAMES } from "../../src/render/popups.js";
 import { ss2CrowdInterestOf } from "../../src/team/ss2-crowd.js";
@@ -126,13 +127,16 @@ export function namePlateLayout({ px }) {
  * (`all-actions.txt`, sha256 77cb545c…). "Tranfixed" is the build's spelling.
  *
  * ► **NOT FROM THE TEXT PACK OR THE BATTLE MAP**, where the brief looked for
- *   them: neither records them. The icons pack does (`combat_panel`'s
- *   `clipEvents[].touches`), but as a SORTED set, which has lost the order.
+ *   them: neither records them. ~~The icons pack does (`combat_panel`'s
+ *   `clipEvents[].touches`), but as a SORTED set, which has lost the order.~~
+ *   Since D8 (2026-09-25) the icons pack carries them IN ORDER, read off the
+ *   bytes (`crowd.drive.moods`, `tools/extract-icons.mjs`).
+ *
+ * ► **ONE TABLE, THE CROWD BAR'S** (D8): this is `SS2_CROWD_MOODS` of
+ *   `src/render/crowd-bar.js`, which draws the same words in the frame — two
+ *   hand-cited copies could drift apart with nothing to say so.
  */
-export const CROWD_MOODS = Object.freeze([
-  "", "bored to tears", "bored silly", "restless", "indifferent", "interested",
-  "entertained", "enthusiastic", "wildly entertained", "Tranfixed", "Fanatical"
-]);
+export const CROWD_MOODS = SS2_CROWD_MOODS;
 
 /**
  * THE CROWD METER (H2; the owner's Q11): one shared meter, the build's label

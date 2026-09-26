@@ -207,6 +207,11 @@ import {
   combatHudInvoiceFor,
   combatHudProvenanceFor,
   createCombatHudOps,
+  createCrowdBarOps,
+  crowdBarArtFor,
+  crowdBarInvoiceOf,
+  crowdBarProvenanceFor,
+  crowdBarReadingFor,
   fittedViewFor,
   gaugeHoldFor,
   heldHudFor,
@@ -874,13 +879,18 @@ let popups = [];
  *   before the camera steps (`combatHudNow`), read by the camera, the fitted
  *   view and the painter.
  * - `combatHudOps` — each cluster's ops, kept while nothing they read changes.
+ * - `crowdArt`, `crowdBarOps` — D8, the build's own crowd bar at the stage's
+ *   top right, in the same layer: which art (`crowdBarArtFor`) and its kept
+ *   ops. Its reading is the frame's (`hudFrame.crowd`, `crowdBarReadingFor`).
  * - `hudFailures` — the causes of a HUD that could not be drawn, said once each.
  */
 let gaugeArt = combatHudArtFor(undefined);
+let crowdArt = crowdBarArtFor(undefined);
 let hudAtStep = teamHudFor({ wire: host.wire(), seats });
 let hudHold = null;
 let hudFrame = null;
 const combatHudOps = createCombatHudOps();
+const crowdBarOps = createCrowdBarOps();
 const hudFailures = new Set();
 
 /**
@@ -2580,6 +2590,10 @@ function useIconPack(data) {
   // says which case it is — no pack, a stale one, or one it refused.
   gaugeArt = combatHudArtFor(data);
   log(gaugeArt.log.message, { warn: gaugeArt.log.warn });
+  // THE CROWD BAR IN THE FRAME (D8): the build's own when the pack has a
+  // `crowd` section the renderer accepts; otherwise the authored one, and why.
+  crowdArt = crowdBarArtFor(data);
+  log(crowdArt.log.message, { warn: crowdArt.log.warn });
 }
 
 assetGate.track("bitmaps", fetch("/assets/bitmaps/manifest.json")
@@ -4994,12 +5008,20 @@ function renderStage(view, fit, now) {
  * THIS FRAME'S HUD: the wire's HUD model with the step's hold applied (D6: a
  * gauge drains when the blow's pop-up starts), laid out with the art it is
  * drawn with (`combatHudFrameFor`) — or null, said in the log, when it cannot
- * be laid out, and then the camera frames as if there were no HUD.
+ * be laid out, and then the camera frames as if there were no HUD. With it,
+ * the crowd bar's reading (D8): the crowd as HEARD at `now` — each step's
+ * value from the moment its drawing ends, the moment the build's `nextphase`
+ * moves it and the crowd's roar follows (`crowdBarReadingFor`) — shown while
+ * the crowd is heard (`crowdHeard`).
  */
 function combatHudNow(now) {
   try {
     const shown = heldHudFor(teamHudFor({ wire: host.wire(), seats }), hudHold, { now, pendingTokens });
-    return combatHudFrameFor({ hud: shown, pack: gaugeArt.pack });
+    return combatHudFrameFor({
+      hud: shown,
+      pack: gaugeArt.pack,
+      crowd: crowdBarReadingFor({ presenter: crowdPresenter, now, heard: crowdHeard })
+    });
   } catch (error) {
     hudFailed("the gauges could not be laid out", error);
     return null;
@@ -5043,20 +5065,7 @@ function paintCombatHud(fit) {
       context.translate(fit.offsetX, fit.offsetY);
       context.scale(fit.scale, fit.scale);
       const ops = combatHudOps({ art: gaugeArt, textPack, cluster, reading, stageScale: fit.scale });
-      let run = [];
-      const flush = () => {
-        if (run.length > 0) paintGroupRuns(run, { translationDivisor: TWIPS_PER_PIXEL, filtersScaled: true }, paintLayerOperation);
-        run = [];
-      };
-      for (const op of ops) {
-        if (op.kind === "path") {
-          run.push(op);
-          continue;
-        }
-        flush();
-        paintHudWord(op);
-      }
-      flush();
+      paintHudOps(ops);
       drawn += 1;
     } catch (error) {
       failed += 1;
@@ -5064,6 +5073,24 @@ function paintCombatHud(fit) {
     } finally {
       context.restore();
     }
+  }
+  // ► **THE CROWD BAR (D8), IN THE SAME LAYER**: `combat_panel`'s own
+  //   `crowd_bar` at the stage's top right, at scale 1 in every bout, driven by
+  //   the frame's crowd — or nothing while the crowd is not heard, as the build
+  //   hides it. Its own try: a bar that cannot be drawn costs the bar, never
+  //   the gauges or the frame.
+  let crowdDrawn = 0;
+  context.save();
+  try {
+    context.translate(fit.offsetX, fit.offsetY);
+    context.scale(fit.scale, fit.scale);
+    const ops = crowdBarOps({ art: crowdArt, textPack, reading: frame?.crowd ?? null, stageScale: fit.scale });
+    paintHudOps(ops);
+    crowdDrawn = ops.length > 0 ? 1 : 0;
+  } catch (error) {
+    hudFailed("the crowd bar could not be drawn", error);
+  } finally {
+    context.restore();
   }
   context.globalAlpha = 1;
   window.__combatHud = {
@@ -5073,8 +5100,37 @@ function paintCombatHud(fit) {
     cameraHudTop: frame?.cameraHudTop ?? null,
     clusters: frame?.clusters.length ?? 0,
     drawn,
-    failed
+    failed,
+    crowd: {
+      art: crowdArt.state,
+      shown: frame?.crowd?.shown === true,
+      value: frame?.crowd?.value ?? null,
+      drawn: crowdDrawn
+    }
   };
+}
+
+/**
+ * ONE PAINTER FOR THE HUD'S OPS — a cluster's or the crowd bar's, in their
+ * own order: a run of paths through the group compositor (twips
+ * translations, a mask in force — D7 — and every glow composited), a
+ * page-font word where it falls between runs, so it keeps its depth.
+ */
+function paintHudOps(ops) {
+  let run = [];
+  const flush = () => {
+    if (run.length > 0) paintGroupRuns(run, { translationDivisor: TWIPS_PER_PIXEL, filtersScaled: true }, paintLayerOperation);
+    run = [];
+  };
+  for (const op of ops) {
+    if (op.kind === "path") {
+      run.push(op);
+      continue;
+    }
+    flush();
+    paintHudWord(op);
+  }
+  flush();
 }
 
 /**
@@ -5930,19 +5986,19 @@ function hudNode(tag, className, text = null) {
   return node;
 }
 
-/** The crowd meter at the top of the side panel: the build's label, the number, the bar and its boo and cheer lines. */
+/**
+ * The crowd meter at the top of the side panel — since D8 (2026-09-25) a
+ * VISUALLY HIDDEN meter, as D5 made the readings: the build's own crowd bar is
+ * in the frame now (`paintCombatHud`), and this is its screen-reader form, the
+ * build's label and the number in words. ~~The label, the number, the bar and
+ * its boo and cheer lines, seen.~~
+ */
 function renderCrowdMeter(crowd) {
   el("crowd").hidden = !crowd.shown;
   if (!crowd.shown) return;
-  el("crowd-text").textContent = crowd.text;
-  el("crowd-value").textContent = String(crowd.value);
   const bar = el("crowd-bar");
   bar.setAttribute("aria-valuenow", String(crowd.percent));
-  bar.setAttribute("aria-valuetext", `${crowd.value}: ${crowd.mood}`);
-  bar.dataset.band = crowd.band ?? "";
-  el("crowd-fill").style.width = `${crowd.percent}%`;
-  el("crowd-boo").style.left = `${crowd.booBelow}%`;
-  el("crowd-cheer").style.left = `${crowd.cheerAbove}%`;
+  bar.setAttribute("aria-valuetext", `${crowd.text} (${crowd.value})`);
 }
 
 /** One side's panel: its colour, its name and how many still stand, and a row per fighter. */
@@ -6836,6 +6892,10 @@ function renderProvenance() {
   // build's own art and its invoice over the clusters on the stage, or the
   // authored fallback and why (`combatHudProvenanceFor`).
   const hudInvoice = assetGateOpen ? combatHudInvoiceFor(gaugeArt, textPack, combatHudNow(arenaNow())) : null;
+  // And the crowd bar's (D8), over the crowd as it is heard now.
+  const crowdInvoice = assetGateOpen
+    ? crowdBarInvoiceOf(crowdArt, textPack, crowdBarReadingFor({ presenter: crowdPresenter, now: arenaNow(), heard: crowdHeard }))
+    : null;
   const figureLine = ["The figures", assetGateOpen
     ? figureProvenance({ hasExtractedArt: hasExtractedArt(figurePack), wardrobePieces })
     : "are not drawn yet: the stage waits for your extracted packs to settle."];
@@ -6849,6 +6909,7 @@ function renderProvenance() {
       "rule set's unhashed observer, because the event log does not carry it."],
     ringProvenance(),
     combatHudProvenanceFor({ art: gaugeArt, invoice: hudInvoice, open: assetGateOpen }),
+    crowdBarProvenanceFor({ art: crowdArt, invoice: crowdInvoice, open: assetGateOpen, heard: crowdHeard }),
     ["Slot 0 of each side", "reuses the battle map's own instance names, depths and positions. Everything past it is authored mod surface no capture can settle."]
   ];
   if (championsBySlot.size > 0) {
@@ -6997,6 +7058,7 @@ function openArena(now) {
   // A late or failed icons pack never reaches `useIconPack`: say what the
   // gauges are drawn with instead, beside the gate's own line about the pack.
   if (gaugeArt.state === "unused") log(gaugeArt.log.message, { warn: gaugeArt.log.warn });
+  if (crowdArt.state === "unused") log(crowdArt.log.message, { warn: crowdArt.log.warn });
   for (const line of assetGateReport(verdict)) log(line.message, { warn: line.warn });
   boutStartedAt = now;
   renderProvenance();

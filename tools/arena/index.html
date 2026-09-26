@@ -136,18 +136,11 @@
     overflow-y: auto;
   }
   h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-dim); margin: 0 0 6px; }
-  /* H2: the crowd meter, at the top of the side panel — the build's own label
-     ("crowd: <mood>"), the number, and the bar with the lines under 20 and over
-     70 where the build's boos and cheers can start. */
-  .crowd { display: flex; flex-direction: column; gap: 4px; }
+  /* D8 (2026-09-25): the crowd is the build's own crowd bar IN THE FRAME now;
+     at the top of the side panel it is only a visually hidden meter for a
+     screen reader (.visually-hidden), ~~the build's label, the number, and the
+     bar with the lines under 20 and over 70 (H2)~~. */
   .crowd[hidden] { display: none; }
-  .crowd-line { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 600; }
-  .crowd-line output { color: var(--ink-dim); font-weight: 400; font-variant-numeric: tabular-nums; }
-  .crowd-bar { position: relative; height: 8px; border-radius: 4px; background: #000; }
-  .crowd-bar > i { display: block; height: 100%; border-radius: 4px; background: var(--warn); }
-  .crowd-bar[data-band="boo"] > i { background: #8a7f73; }
-  .crowd-bar[data-band="cheer"] > i { background: #f2c14e; }
-  .crowd-bar > b { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--ink-dim); }
   /* H2: the two team panels, red then blue. Each carries its side's colour
      (--team, set from tools/arena/team-hud.js) on its top edge, its heading,
      each row's left edge and each name — and that colour is the side's only
@@ -253,9 +246,8 @@
       <div class="visually-hidden" id="ring-live" aria-live="polite"></div>
     </div>
     <aside>
-      <section class="crowd" id="crowd" aria-label="The crowd" hidden>
-        <div class="crowd-line"><span id="crowd-text"></span><output id="crowd-value" aria-hidden="true"></output></div>
-        <div class="crowd-bar" id="crowd-bar" role="meter" aria-label="Crowd" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="crowd-fill"></i><b id="crowd-boo" title="Below this the crowd may boo"></b><b id="crowd-cheer" title="Above this the crowd may cheer"></b></div>
+      <section class="crowd visually-hidden" id="crowd" aria-label="The crowd" hidden>
+        <div id="crowd-bar" role="meter" aria-label="Crowd" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
       </section>
       <section>
         <h2>Teams</h2>
