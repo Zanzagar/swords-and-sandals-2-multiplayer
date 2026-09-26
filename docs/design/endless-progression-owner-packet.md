@@ -271,8 +271,12 @@ authority, and conditional stochastic-selection support. The owner selected
 RCS-03C3C3B1-A: every multiplicity-positive evaluation resolves to exactly one
 authoritative ledger tuple. A twentieth prerequisite audit narrowed B2 to
 cross-tag contextual responsiveness and split old B4 into stochastic support
-and conditional stochastic-coupling topology. RCS-03C3C3B2 is the active owner
-choice under SR-03.
+and conditional stochastic-coupling topology. The owner selected
+RCS-03C3C3B2-B, requiring at least one held-fixed cross-tag routing witness. A
+twenty-first prerequisite audit then repaired selection authority into
+material participant-configurability prevalence and a separate conditional
+policy-language boundary. RCS-03C3C3B3A is the active owner choice under
+SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -21344,12 +21348,13 @@ decision record remains unchanged.
 >
 > B1-B prunes B2-B4 because complete-product robustness selects no tuple.
 > B1-A or B1-C activates B2; B3 follows B2 and B4 follows B3 before form
-> permission at C3C3C-C3C3D. Participant authority in B3 can only be a total
-> prospective standing policy with a deterministic default/fallback; exact
-> decision-holder, consent, communication, and information remain RCS-02,
-> while binding, lock, rebind, and migration timing remain RCS-13. If B4 later
-> admits randomness, seed, replay, reload, and disclosure duties route to
-> RCS-02 and RCS-16-RCS-18.
+> permission at C3C3C-C3C3D. Any participant-configurable selector in B3 must
+> use a prospectively bound routing coordinate inside one total composite
+> selection law; exact decision-holder, consent, communication, and
+> information remain RCS-02, while binding, lock, rebind, and migration timing
+> remain RCS-13. Whether the completed law may be stochastic remains B4; if it
+> does, seed, replay, reload, and disclosure duties route to RCS-02 and
+> RCS-16-RCS-18.
 >
 > A retained complete product uses universal robustness: joint survival is
 > available only when every authoritative ledger tuple reaches the same
@@ -21463,8 +21468,8 @@ remains unchanged.
 >    draw support when B4A admits randomness.
 >
 > B2 still precedes B3 because input scope does not choose the actor. B3
-> precedes B4A because a participant-authored policy and a system rule may
-> expose different lawful stochastic surfaces. B4A-A prunes B4B; a
+> precedes B4A because a participant-configured policy and a system-fixed rule
+> may expose different lawful stochastic surfaces. B4A-A prunes B4B; a
 > randomness-positive B4A answer activates it. B2's tag-local option constrains
 > marginal contextual stability only; it cannot silently decide B4B.
 >
@@ -21475,7 +21480,7 @@ remains unchanged.
 > `Phi_SR = 38`. B2 is the sole active card. The audit changes no selected
 > topology and supplies no answer to B2-B4B.
 
-### RCS-03C3C3B2 — cross-tag contextual responsiveness — active owner choice
+### RCS-03C3C3B2 — cross-tag contextual responsiveness — direction selected
 
 B1-A requires one authoritative tuple, but it does not say whether each tag's
 component is chosen independently of the other contenders. For a fixed tag
@@ -21509,6 +21514,129 @@ permission, survivor choice, candidate, claim, commitment, or payoff. Every
 selector remains total and automatic. Any answer moves B2 to `DIR-SELECTED`,
 makes B3 active, and reduces `Phi_SR` from 38 to 37. The authoritative decision
 record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, require
+joint-responsive singleton selection.** `R^{ledger-joint}_v` is nonempty. The
+completed catalog must contain at least one reachable matched comparison in
+which P's complete tag-local input remains fixed, only Q, Q's identity, or Q's
+canonical ledger domain changes, and P's selected ledger—or its marginal draw
+law if randomness is later admitted—changes. This is an existential support
+promise, not a universal prevalence rule; exact triggers, affected tags, and
+catalog distribution remain AUTHOR/SPEC.
+
+In the running witness, P can use `L_h={Guard g, Heat h}` or
+`L_v={Guard g, Vow v}`, while Q uses `L_q={Return t, Heat h}`. A prospectively
+fixed Covenant resolver may choose P's Heat proof while P is alone and its Vow
+proof when Q's Heat proof is present. It may use that canonical shared-Heat
+structural fact, but it may not inspect whether the resulting overlap will be
+permitted, which contender would survive denial, what could be claimed or
+reused, or which combat outcome would pay better. It cannot retry after any of
+those conclusions.
+
+The operative relationship is several distinct receipt relationships jointly
+shaping one atomic proof tuple without losing their tag identities. That is a
+plausible **direct** unity-with-difference fit at this evaluation boundary and
+opens prospective team choreography and scarce-proof preservation. The costs
+remain nonlocal surprise, Cartesian explanation burden, teammate
+externalities, and selector injection; later UI and acceptance work must show
+the tuple and its cause and test whether a cheap extra contender can reroute a
+strong existing receipt. B2 chooses no participant control, live prompt,
+randomness, correlation, permission, or payoff.
+
+B2 moves to `DIR-SELECTED`; before the prerequisite correction below, B3 would
+become `OWNER-OPEN` and the seventy-seven-slot register would contain 36
+`SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 28 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. The authoritative decision record
+remains unchanged.
+
+> **Twenty-first prerequisite correction, 2026-09-26:** three bounded
+> read-only named-claim audits broke old B3's literal “system-only,
+> participant-precommitted-only, or coexistence” trichotomy. A participant may
+> bind a routing mode that materially changes the selected tuple while an
+> immutable system rule still composes several inputs, breaks ties, or
+> completes the total law. That layered case is neither exclusive system
+> authorship nor exclusive participant authorship, and every executable
+> policy language is ultimately system-authored. The material question is
+> whether a dedicated participant-semantic routing coordinate can change the
+> selector law, not who writes or executes its code.
+>
+> The audits also exposed a separate player-material boundary. Choosing from a
+> tiny Relic-specific menu and constructing a conditional priority program can
+> both be “precommitted participant policy,” yet they produce radically
+> different comprehension, artifact identity, optimization, migration, and
+> exploit surfaces. One audit proposed routing that vocabulary to RCS-02; that
+> is rejected here because RCS-02 currently owns holder, consent,
+> communication, and information, and burying the legal control language there
+> would recreate the overcompression this register exists to prevent.
+>
+> Old `RCS-03C3C3B3` is therefore a non-counting parent for two rows:
+>
+> 1. `RCS-03C3C3B3A` — material participant-configurability prevalence across
+>    routing-capable versioned Relic selector contracts; and
+> 2. `RCS-03C3C3B3B` — conditional participant policy-language and completion
+>    topology when B3A admits participant configurability.
+>
+> B3A-A prunes B3B and activates B4A. B3A-B/C activates B3B, which must settle
+> the legal control vocabulary before B4A asks whether the resulting complete
+> selection law may be random. Exact holder, collective consent, conflict
+> composition, and available information remain RCS-02. Initial binding,
+> default/rebind legality, and lock horizon remain RCS-13; version identity and
+> migration remain RCS-15; corrupt or stale-state repair remains RCS-16. A
+> normal system composer or canonical tie-break does not erase material
+> participant configurability. A sole automatic default, merely equipping the
+> Relic, or choosing an upstream combat action does not create it.
+>
+> B1 still requires the complete composite selector to be total and return one
+> tuple. Replace the earlier premature phrase “deterministic
+> default/fallback” with a **prospectively fixed total completion law**: B4A,
+> not B3, decides whether fixed state and policy may induce a stochastic draw
+> law. No B3 branch permits a live proc-time prompt, veto, `none`, partial
+> tuple, retry, or permission/payoff/outcome-aware switch.
+>
+> Replacing one counted B3 row with B3A-B3B adds one slot and one potential
+> card. After B2-B's ordinary reduction, the twenty-first-amendment register
+> contains **seventy-eight slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`,
+> 28 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 38`. B3A is the sole active card. The amendment changes no selected
+> direction and supplies no answer to B3A-B4B.
+
+### RCS-03C3C3B3A — material participant-configurability prevalence — active owner choice
+
+Let `S^{ledger-route}_v` be the nonempty set of supported versioned Relic
+selector contracts that have at least one reachable multiplicity-positive
+ledger product. C3C3A-B and B1-A make this domain nonempty. Define
+`P^{ledger-config}_v` as the subset for which two lawful, prospectively
+bindable participant routing settings differ materially: on at least one
+reachable comparison holding the complete upstream ledger product and every
+nonpolicy selector input fixed, changing only that bound setting changes the
+selected tuple or, if B4A later admits randomness, its draw law.
+
+The participant coordinate must remain operative when automatic selection
+runs. The system may still execute the selector, compose several lawful
+coordinates, apply an immutable canonical tie-break, and ensure totality.
+Those mechanics do not erase participant leverage when the held-fixed output
+law actually changes.
+
+| Choice | Participant-configurability rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every routing contract is system-fixed** | `P^{ledger-config}_v` is empty. No routing-capable Relic definition/version exposes a dedicated participant setting that can materially change its selector law. Players may still choose builds, actions, and which Relic to equip, but once the upstream ledger product exists the Relic's intrinsic contract alone routes it. | This is the strongest clarity, anti-quarterbacking, and artifact-identity countercase. B2-B's distinct receipt relationships still jointly determine one tuple, so the selected direct relational fit remains intact; A is **neutral/protective** at this separate authority boundary. Its cost is reduced ownership of proof routing: players solve around a Relic's fixed temperament rather than orienting it themselves, and a disliked intrinsic priority can make an otherwise exciting artifact feel rigid. | Ashen Covenant always applies intrinsic **Dissonance**: minimize shared structural proof, then use its canonical completion rule. Beside Q's Heat ledger it routes P through Vow. The player can equip or reject Ashen, but cannot make the same version prefer the shared-Heat tuple. |
+| **B — every routing contract is participant-configurable** | `P^{ledger-config}_v=S^{ledger-route}_v`. Every routing-capable Relic definition/version offers at least two lawful prospectively bindable settings whose selector laws differ on some reachable held-fixed ledger product. This does not mean participants write code or exclusively resolve ties. | **Recommended, conditional on B3B later choosing a tiny Relic-specific closed control vocabulary.** An enduring intrinsic Relic grammar and a participant's distinct attunement then co-determine one automatic route without collapsing into either pure player fiat or a generic solver—a **direct** unity-with-difference fit at the configuration-to-evaluation boundary. It gives players legible ownership and build expression. Costs are configuration fatigue, loadout quarterbacking, deliberately team-hostile settings, stale choices after migration, and loss of Relic identity if later controls become programmable. If B3B admits broad compositional policy authoring, the recommendation flips to A. | Ashen offers **Dissonance** (minimize shared structural proof) and **Chorus** (maximize it), each with one total completion rule. With the same P/Q product, Dissonance routes P through Vow while Chorus routes P through Heat. The chosen attunement is bound before evaluation; no prompt appears when the proc occurs. |
+| **C — system-fixed and participant-configurable contracts coexist** | `P^{ledger-config}_v` is a nonempty proper subset of `S^{ledger-route}_v`. At least one routing-capable definition/version is materially configurable and at least one is system-fixed; that class is a versioned contract property and cannot change opportunistically per evaluation. | C supports immutable “oracle” Relics beside attunable “covenant” Relics. Each local case inherits A/B's fit, but catalog coexistence is only **aggregate**. It can make control itself part of artifact personality, yet it teaches two interaction dialects, complicates comparison and migration, and risks making configurable Relics feel like the premium class while fixed ones feel incomplete. Exact class visibility remains RCS-02. | Ashen's contract exposes Dissonance/Chorus, while Stone Witness's contract always follows one immutable least-overlap law. Their class identity is version-fixed rather than switching only when one route would be favorable; when and how players learn that identity remains undecided. |
+
+A/B/C are mutually exclusive and exhaustive because the nonempty contract
+domain's materially configurable subset is empty, whole, or nonempty proper.
+A deterministic or stochastic system completion step can exist under any
+branch; it does not create a fourth authority class. A cosmetic setting whose
+tuple law never differs, accepting a sole default, changing upstream evidence,
+or reacting at proc time is not a B/C witness.
+
+B3A chooses no exact player, team-vote rule, consent model, communication
+channel, information set, binding horizon, default behavior, policy grammar,
+randomness, permission, survivor, claim, payoff, or combat outcome. RCS-02,
+B3B, RCS-13, B4A/B4B, and the later treatment rows retain those boundaries.
+Any answer moves B3A to `DIR-SELECTED` and reduces `Phi_SR` by at least one. A
+prunes B3B and makes B4A active; B or C makes B3B active. The authoritative
+decision record remains unchanged.
 
 ## Session protocol and evidence
 

@@ -3823,6 +3823,80 @@ with two produces seventy-seven slots: 37 `SCREEN`, 1 `OWNER-OPEN`, 8
 `PRUNED`, 27 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 38`. C3C3B2 is the sole active card.
 
+The owner selected `RCS-03C3C3B2-B`. Joint-responsive support is therefore
+nonempty: at least one reachable matched comparison holds P's complete local
+input fixed, changes only Q, Q's identity, or Q's canonical ledger domain, and
+changes P's selected ledger or marginal draw law. Exact triggers and
+prevalence remain AUTHOR/SPEC. In the running `L_h/L_v/L_q` witness, a fixed
+Covenant rule can route P through Vow only when Q's Heat proof is present. It
+may inspect that upstream structural relation but cannot consult downstream
+permission, survivors, claims, payoff, or combat outcome. B2 moves to
+`DIR-SELECTED`; before further correction B3 would open and the
+seventy-seven-row potential would fall from 38 to 37.
+
+Three bounded read-only named-claim audits then attacked B3's authority
+trichotomy, edge-case closure, and gameplay meaning. All three broke the
+literal “system-only, participant-precommitted-only, or coexistence” wording.
+A participant can bind “avoid shared Heat” while an immutable system composer
+resolves conflict and ties. Both semantics materially affect the tuple in the
+same contract, so the case is neither exclusive system authority nor exclusive
+participant authority, nor coexistence between separate pure classes. Every
+executable policy language is system-authored in another sense, making
+“participant-authored-only” doubly misleading.
+
+The repaired atomic incidence is **material participant configurability**.
+Let `S^{ledger-route}_v` contain the supported versioned Relic selector
+contracts with some reachable multiplicity-positive ledger product. Let
+`P^{ledger-config}_v` contain a contract only if two lawful prospectively
+bindable participant settings, compared on one reachable held-fixed upstream
+product and identical nonpolicy inputs, produce different tuple laws. Empty,
+whole, and nonempty-proper `P^{ledger-config}_v` are exhaustive. A system
+composer, canonical tie-break, or total completion does not erase a material
+participant coordinate; merely equipping a Relic, choosing upstream evidence,
+or accepting a sole default does not create one. This follows the same
+material-coordinate discipline used for invocation authority without deciding
+the exact holder, consent, information, or bind horizon.
+
+Two audits also found that “prospectively bound policy” hides a separate legal
+control-language choice: a tiny Relic-specific menu and a participant-built
+conditional priority language both satisfy that phrase while producing
+different comprehension, artifact identity, optimization, migration, and
+exploit surfaces. The third audit proposed routing this to RCS-02. The durable
+reconciliation keeps RCS-02's holder/consent/communication/information scope
+intact and registers a conditional B3B policy-language/completion row instead;
+otherwise a player-material action vocabulary would be buried inside a later
+one-line surface contract.
+
+Old B3 is now a non-counting parent for B3A material-configurability prevalence
+and conditional B3B policy-language/completion topology. B3A-A prunes B3B and
+activates B4A; B3A-B/C activates B3B before B4A. RCS-13 retains initial
+binding, default/rebind legality, and lock timing; RCS-15 retains version and
+migration identity; RCS-16 retains stale or corrupt-state repair. The earlier
+“deterministic default/fallback” wording is withdrawn because it silently
+answered B4A. B1 requires a prospectively fixed **total completion law**;
+B4A later decides whether that law may draw randomly after state and policy are
+fixed.
+
+The gameplay recommendation is now explicitly conditional. Recommend B3A-B,
+universal participant configurability, only if B3B later chooses a small
+Relic-specific closed attunement vocabulary. Then the Relic's enduring grammar
+and the participant's distinct orientation jointly determine one automatic
+route without turning the artifact into a generic solver. For example, Ashen
+may offer `Dissonance` (minimize shared structural proof) and `Chorus`
+(maximize it), each with canonical total completion. On the same P/Q product,
+the former selects Vow and the latter Heat. If B3B admits broad compositional
+policy authoring, recommend system-fixed B3A-A instead. B3A-C is the strongest
+countercase but teaches fixed and configurable interaction dialects and risks
+making the latter feel premium.
+
+Replacing one counted B3 row with B3A-B3B adds one slot and one potential card.
+After B2-B's ordinary reduction, the twenty-first-amendment register has
+seventy-eight slots: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 28
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+C3C3B3A is the sole active card. The amendment chooses neither prevalence nor
+policy language, actor, timing, default behavior, randomness, treatment, or
+outcome.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

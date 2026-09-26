@@ -1,5 +1,59 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 joint-responsive Relic routing — RCS-03C3C3B2-B selected
+
+The owner selected `RCS-03C3C3B2-B`: the completed catalog must contain at
+least one reachable matched comparison where P's complete local selector input
+stays fixed, only Q or Q's canonical ledger domain changes, and P's selected
+ledger—or its marginal draw law if randomness is later admitted—changes. The
+selector may inspect canonical upstream structural relations, but never
+downstream permission, survivor treatment, claims, payoff, or combat outcome.
+B2 decides no participant control or randomness rule.
+
+Three bounded read-only named-claim audits broke old B3's exclusive
+system-versus-participant wording. A participant setting may materially change
+the tuple while an immutable system rule still composes inputs, completes the
+law, and breaks ties. The real incidence is material participant
+configurability, not code authorship. The audits also proved that a tiny named
+attunement menu and a constructive conditional policy language are distinct
+gameplay choices. Old B3 is therefore a non-counting parent for B3A
+configurability prevalence and conditional B3B policy-language/completion
+topology. The earlier “deterministic default/fallback” phrase is withdrawn;
+B1 requires a prospectively fixed total completion law, while B4A still owns
+stochastic support.
+
+The seventy-eight-slot register now contains 37 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 28 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 38`. `RCS-03C3C3B3A` is the sole active card. The authoritative
+decision record remains unchanged.
+
+B3A classifies routing-capable versioned Relic selector contracts by whether
+two prospectively bindable participant settings can change the tuple law on a
+held-fixed upstream ledger product:
+
+- A: none are configurable; every such contract has intrinsic system-fixed
+  routing.
+- B: every such contract is materially participant-configurable. Recommend B
+  only if B3B later keeps the control vocabulary tiny, closed, and
+  Relic-specific.
+- C: fixed and configurable versioned contract classes coexist; RCS-02 later
+  decides when and how players learn the class.
+
+For example, system-fixed Ashen always uses **Dissonance**, minimizing shared
+proof structure and routing P through Vow beside Q's Heat proof. Under B,
+Ashen instead offers prebound **Dissonance** and **Chorus** attunements; Chorus
+maximizes shared structure and routes the identical product through Heat. The
+Relic's enduring grammar and the participant's distinct orientation then
+co-determine one automatic route, a direct configuration-boundary
+unity-with-difference fit. If later policy controls become broadly
+programmable, A becomes the safer recommendation because the Relic risks
+collapsing into a generic solver.
+
+B3A chooses no exact holder, team-vote or consent rule, information set,
+binding horizon, default behavior, policy grammar, randomness, permission, or
+result. RCS-02, B3B, RCS-13, B4A/B4B, and the later treatment rows retain those
+boundaries.
+
 ## 2026-09-26 one authoritative Relic ledger tuple — RCS-03C3C3B1-A selected
 
 The owner selected `RCS-03C3C3B1-A`: every reachable evaluation with several
@@ -9547,7 +9601,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 04:49 UTC — one authoritative Relic ledger tuple selected](docs/handoffs/2026-09-26-0449--relic-single-ledger-tuple-selected.md)**
+[2026-09-26 05:01 UTC — joint-responsive Relic routing selected](docs/handoffs/2026-09-26-0501--relic-joint-responsive-routing-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
