@@ -1354,8 +1354,8 @@ worksheet history. They primarily populate `SR-01` through `SR-05` and parts of
 | --- | --- | --- | --- |
 | `SR-01` | Fantasy, purpose, and topology | One vocabulary/relationship map distinguishes Soul, simulacrum/combatant, Bound Soul, Relic root, input/payoff Charms, sources, and results; each has a unique job and no slot duplicates another system's theme or UI role. | `PARTIAL`: standalone root/customizer and cross-source-weaver directions exist; normative map/replay remains. |
 | `SR-02` | Access, ownership, slots, custody, and loss | A state machine covers disabled/eligible/enabled states, one-root/two-Charm occupancy, personal ownership, duplicates, transfer, destruction/loss, retirement, and every illegal transition for Relics and Charms separately. | `PARTIAL`: personal Relic/Charm access, one root, two Charms, and permanent nontransferable Relics are selected; Charm custody/loss remains open. |
-| `SR-03` | Source and input grammar | A total matrix names eligible bearer/ally/source evidence, temporal and basis cells, Charm modifications, participation requirements, and legal/illegal examples; every selected cell has a gameplay use. | `PARTIAL`: extensive grammar directions, nonempty irreducible multi-root current-state support, repeated same-provenance cross-root support, exact-`Pi`-universal build identity, semantic-child-only addressability, and one nonoverlapping final child scale with authored compounds exist; nontrivial within-parent site support is derived, while within-evaluation and cross-opportunity overlap/fan-out plus total authored examples/exclusions remain open. |
-| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, universal continuity-root preservation across those revisions, nonempty irreducible multi-root current-state support, semantic-child-only addressability, and one nonoverlapping final child scale with authored compounds are selected; coherent same-cut evidence acquisition, exact `{D,E,O}` material phase support, and nontrivial within-parent application-site support are derived, while within-evaluation and cross-opportunity overlap/fan-out, claims/reuse, cause, agency, precedence, and lineage ownership remain open. |
+| `SR-03` | Source and input grammar | A total matrix names eligible bearer/ally/source evidence, temporal and basis cells, Charm modifications, participation requirements, and legal/illegal examples; every selected cell has a gameplay use. | `PARTIAL`: extensive grammar directions, nonempty irreducible multi-root current-state support, repeated same-provenance cross-root support, exact-`Pi`-universal build identity, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, and nonempty within-evaluation cross-receipt overlap support exist; nontrivial within-parent site support is derived, while overlap form/treatment, cross-opportunity behavior, and total authored examples/exclusions remain open. |
+| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, universal continuity-root preservation across those revisions, nonempty irreducible multi-root current-state support, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, and nonempty within-evaluation cross-receipt overlap support are selected; coherent same-cut evidence acquisition, exact `{D,E,O}` material phase support, and nontrivial within-parent application-site support are derived, while overlap form/treatment, cross-opportunity behavior, claims/reuse, cause, agency, precedence, and lineage ownership remain open. |
 | `SR-05` | Relational archetypes and Achintya boundary | Every required archetype maps to an operative player choice or state transition where continuity and distinction are mechanically legible; no mandatory class exists only to satisfy a graph, coverage, or symmetry token. | `PARTIAL`: structural/archetype directions through C170 exist; concrete player-visible proof does not. |
 | `SR-06` | Representative and release catalog | A finite versioned release catalog (or explicit launch minimum plus deferred catalog boundary) supplies source/relationship/payoff definitions, counterexamples, and at least one viable build purpose for every required family. | `OPEN` |
 | `SR-07` | Configuration and evolution horizons | Equip, Charm socketing, reconfiguration, rebinding, learning/evolution, encounter/Circuit locks, preview, and rollback rules name every clean boundary and cannot be shopped through reload or route information. | `OPEN` |
@@ -2142,7 +2142,8 @@ prunes C5-C7. C3D follows the settled seven-row route.
 Replacing one counted C3C row with seven adds six slots and six potential
 cards. The amended sixty-five-slot register contains 29 `SCREEN`, 1
 `OWNER-OPEN`, 8 `PRUNED`, 23 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 30`. `RCS-03C3C1` is the sole active card.
+`EVALUATE`; `Phi_SR = 30`. At that checkpoint `RCS-03C3C1` was the sole active
+card.
 
 C1 asks whether any one fixed evaluation has two distinct receipt tags that
 are each individually ledger-satisfied before fan-out treatment under typed
@@ -2156,6 +2157,30 @@ tags to survive treatment. Recommend B: it
 preserves the bounded possibility that one deed participates in two distinct
 relationships, but the later fan-out card must confront hub-evidence
 compression because the two-receipt cap does not bound proof reuse.
+
+**Post-answer screen, 2026-09-26.** The owner selected `RCS-03C3C1-B`.
+`O^{intra-overlap}_v` is nonempty: at least one reachable fixed evaluation has
+two distinct canonical receipt tags that are individually ledger-satisfied
+before treatment through overlapping valid typed ledgers. The overlap uses an
+exact shared final child, distinct final children with intersecting complete
+lineage, or distinct final children sharing one nonmultiplying authorization/
+accounting parent. This creates no C133/C134 candidate, joint survival, or
+commitment.
+
+C1 moves to `DIR-SELECTED`, C2 moves to `OWNER-OPEN`, and `Phi_SR` falls from
+30 to 29. The register remains sixty-five slots: 28 `SCREEN`, 1 `OWNER-OPEN`,
+8 `PRUNED`, 24 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`.
+
+C2 separates two functional overlap forms. Exact support repeats one identical
+final child occurrence across the ledgers. Distinct-related support uses two
+different final children whose complete lineages intersect or whose
+nonmultiplying authorization/accounting parent is shared. C1-B makes their
+union nonempty, so C2 chooses exact-only, distinct-related-only, or support for
+both. Recommend both: it preserves legible common-proof hubs and choreographed
+distinct manifestations of one causal family without deciding C3 treatment.
+Each local witness may be a direct ideal fit; catalog coexistence is aggregate.
+The cost is carrying both hub dominance and one-payment compression risks plus
+the highest disclosure, authoring, solver, and teaching burden.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -2207,8 +2232,8 @@ overcompression.
 | `RCS-03C3B3B` | Same-lineage parent/child co-addressability after both atom layers have global support | `PRUNED`; `RCS-03C3B3A-B` admits no addressable parent layer |
 | `RCS-03C3B4A` | Support for a nontrivial within-parent semantic-application frontier before final child partition | `DERIVED`; B2B1-B's two semantically distinct equal-`Pi` current candidates become sites beneath one B2B2-B class, and B3A-B preserves their manifestations as the only addressable layer; exact additional breadth remains AUTHOR/SPEC |
 | `RCS-03C3B4B` | Canonical final family topology for multiple qualifying semantic application sites beneath one parent representative | `DIR-SELECTED`; B requires one exhaustive nonoverlapping final-child partition with nonempty reachable functional compound support and no co-addressable compound/descendant pair; exact families, widths, counts, distribution, and prevalence remain AUTHOR/SPEC |
-| `RCS-03C3C1` | Support for one fixed evaluation containing distinct receipt tags that are individually ledger-satisfied before fan-out treatment and whose typed proof ledgers overlap by exact final child, complete lineage, or shared nonmultiplying authorization/accounting; this is not C133/C134 provisional completion | `OWNER-OPEN`; choose no reachable cross-receipt overlap versus nonempty functional overlap support under `SR-03`; recommend nonempty support for bounded relational hub play, without yet granting simultaneous fan-out |
-| `RCS-03C3C2` | Form support among C1-positive within-evaluation overlaps: exact same final child, distinct related proofs, or both | `SCREEN`; conditional on `RCS-03C3C1-B`; otherwise `PRUNED`; exact identities and distribution remain AUTHOR/SPEC |
+| `RCS-03C3C1` | Support for one fixed evaluation containing distinct receipt tags that are individually ledger-satisfied before fan-out treatment and whose typed proof ledgers overlap by exact final child, complete lineage, or shared nonmultiplying authorization/accounting; this is not C133/C134 provisional completion | `DIR-SELECTED`; B requires nonempty functional overlap support under `SR-03` without granting joint survival or commitment |
+| `RCS-03C3C2` | Form support among C1-positive within-evaluation overlaps: exact same final child, distinct related proofs, or both | `OWNER-OPEN`; choose exact-only, distinct-related-only, or both; recommend both play grammars while C3 retains all fan-out treatment and exact identities/distribution remain AUTHOR/SPEC |
 | `RCS-03C3C3` | Simultaneous within-evaluation fan-out treatment over supported cross-receipt proof-overlap opportunities | `SCREEN`; follows applicable `RCS-03C3C2`; choose no overlap jointly commits, every otherwise-valid overlap jointly commits, or reachable permitted/denied opportunities coexist; same-result duplication remains forbidden |
 | `RCS-03C3C4` | Support for multiple semantically distinct automatic evaluation opportunities of one active Relic at one semantic cut | `SCREEN`; follows the settled C1-C3 route; an engine splitting one opportunity into callbacks is never support, and exact opportunity taxonomy remains AUTHOR/SPEC |
 | `RCS-03C3C5` | Cross-opportunity proof-overlap support when distinct same-cut evaluations coexist | `SCREEN`; conditional on `RCS-03C3C4-B`; otherwise `PRUNED`; uses the same exact-child/lineage/accounting non-independence test before any post-invocation claim |
@@ -2343,15 +2368,18 @@ repeated-provenance class witness. The sixteenth-amendment checkpoint had
 `RCS-03C3B4B-B` then selected one nonoverlapping final child scale with
 nonempty authored compound support, reducing the potential to 24. Replacing
 old C3C with seven independently variable support/form/treatment/scope rows adds
-six slots and six potential cards. The current seventeenth-amendment register
-has **sixty-five slots**: 29 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 23
-`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
-`Phi_SR = 30`, and `RCS-03C3C1` is the sole active card.
+six slots and six potential cards. The pre-C1 seventeenth-amendment register
+had **sixty-five slots**: 29 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 23
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`.
+`RCS-03C3C1-B` then selected nonempty functional within-evaluation overlap
+support. The current register has **sixty-five slots**: 28 `SCREEN`, 1
+`OWNER-OPEN`, 8 `PRUNED`, 24 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; current `Phi_SR = 29`, and `RCS-03C3C2` is the sole active card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
-outside owner choice. Therefore the remaining Relic pass has at most thirty
+outside owner choice. Therefore the remaining Relic pass has at most twenty-nine
 owner cards under this seventeen-times-amended charter and will usually have
 fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
@@ -2371,7 +2399,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 65 frozen candidate slots; current `Phi_SR = 30` after `RCS-03C3B4B-B` selects one nonoverlapping final child scale and the seventeenth amendment exposes support/form/treatment/scope boundaries inside old C3C | At most 30 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 65 frozen candidate slots; current `Phi_SR = 29` after `RCS-03C3C1-B` requires nonempty within-evaluation cross-receipt overlap support and activates overlap-form choice C2 | At most 29 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

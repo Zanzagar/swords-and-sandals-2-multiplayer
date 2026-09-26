@@ -1,6 +1,58 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 within-evaluation Relic overlap support — RCS-03C3C1-B selected
+
+The owner selected `RCS-03C3C1-B`: the completed catalog must contain at least
+one reachable fixed evaluation where two distinct canonical receipt tags are
+individually ledger-satisfied before fan-out treatment and their valid typed
+proof ledgers overlap. The overlap may reuse the same final B4B child or use
+distinct final children with intersecting complete lineage/shared
+nonmultiplying authorization or accounting.
+
+This is a structural pre-treatment promise, not C133/C134 provisional
+completion. It creates no receipt candidate, joint survival, or commitment.
+Alternate contexts, cuts, Souls, Relic realizations, Charms, or outcome-favored
+ledger assignments cannot construct the witness. Every ledger remains
+internally independent. Hub-proof dominance, one-payment compression,
+disclosure, solver, and non-dominance remain explicit downstream burdens.
+
+C1 moves to `DIR-SELECTED`; C2 moves to `OWNER-OPEN`. The sixty-five-slot
+register now contains 28 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 24
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 29`.
+`RCS-03C3C2` is the sole active card. The authoritative decision record remains
+unchanged because a bare option label selects direction but does not complete
+acceptance.
+
+C2 asks which forms of functional overlap the catalog supports. Exact form
+repeats one identical final child occurrence across both ledgers. Distinct-
+related form uses different final children whose complete lineages intersect
+or whose nonmultiplying authorization/accounting parent is shared:
+
+- A: exact-child support is nonempty; distinct-related support is empty.
+- B: exact-child support is empty; distinct-related support is nonempty.
+- C: both support sets are nonempty; witnesses may occur together or in
+  different fixed evaluations.
+
+Recommend C. Exact overlap supports readable keystone sharing: one `Heat h`
+helps `Guard + h` and `Return + h`. Distinct-related overlap supports
+choreography: different final singleton manifestations of one operation help
+different relationships while retaining one causal/payment family. Each local
+witness can directly express unity with difference; supporting both somewhere
+in the catalog is aggregate rather than a stronger metaphysical claim. C has
+the richest buildcraft but also combines hub dominance, sibling/payment
+compression, and the largest UI, teaching, authoring, and solver burden.
+
+A completed B4B compound is one final child. Reusing it is exact overlap; its
+hidden members cannot counterfeit distinct-related support. “Related” requires
+two genuinely distinct final occurrences; aliases, member sites, fields,
+packets, and callbacks do not qualify. C2 decides support only. C3 still
+decides whether supported overlaps let both tags survive treatment, while
+C3D-C3F retain claims and reuse and RCS-08 retains cross-root/team authority.
+
 ## 2026-09-26 authored-compound Relic child topology — RCS-03C3B4B-B selected
+
+**Historical frontier:** C1-B was subsequently selected; the current C2
+guidance above supersedes this section's next-card guidance.
 
 The owner selected `RCS-03C3B4B-B`: final semantic children use one
 nonoverlapping scale with authored compounds. `K^{compound}_v` is nonempty and
@@ -9193,8 +9245,9 @@ B4A/B4B; repeated-provenance class support derives B4A positive. The owner
 selected B4B-B, one nonoverlapping child scale with nonempty authored compound
 support. A seventeenth audit split old C3C into C1-C7 across within-evaluation
 overlap support/form/treatment and distinct same-cut opportunity
-support/overlap/form/treatment. Continue at registered Relic slot `RCS-03C3C1`
-under `SR-03`; C2-C7, C3D-C3F, expanded `RCS-08`, cause, and agency follow
+support/overlap/form/treatment. The owner selected C1-B, requiring nonempty
+within-evaluation overlap support. Continue at registered Relic slot
+`RCS-03C3C2` under `SR-03`; C3-C7, C3D-C3F, expanded `RCS-08`, cause, and agency follow
 separately.
 
 R11 begins only
@@ -9339,7 +9392,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 03:18 UTC — authored-compound Relic child topology selected](docs/handoffs/2026-09-26-0318--relic-authored-compound-topology-selected.md)**
+[2026-09-26 03:40 UTC — within-evaluation Relic overlap support selected](docs/handoffs/2026-09-26-0340--relic-within-evaluation-overlap-support-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

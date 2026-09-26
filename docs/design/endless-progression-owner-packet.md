@@ -257,8 +257,9 @@ RCS-03C3B4B-B: final children use one nonoverlapping scale with at least one
 reachable authored compound. A seventeenth prerequisite audit then split old
 RCS-03C3C into within-evaluation overlap support and form, conditional fan-out
 treatment, and distinct same-cut evaluation-opportunity support, overlap,
-overlap form, and treatment. RCS-03C3C1 is the active owner choice under
-SR-03.
+overlap form, and treatment. The owner selected RCS-03C3C1-B, requiring
+nonempty functional within-evaluation overlap support without granting joint
+survival or commitment. RCS-03C3C2 is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -21001,10 +21002,10 @@ The authoritative decision record remains unchanged.
 > routes settle. Replacing one counted C3C row with seven adds six slots and
 > six potential cards. The seventeenth-amendment register contains sixty-five
 > slots: 29 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 23 `DIR-SELECTED`, 2
-> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`. C1 is the sole active
-> card.
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`. At that checkpoint C1
+> was the sole active card.
 
-### RCS-03C3C1 — within-evaluation cross-receipt proof-overlap support — active owner choice
+### RCS-03C3C1 — within-evaluation cross-receipt proof-overlap support — B selected
 
 This card asks only whether the completed catalog must contain a functional
 one-evaluation situation in which two distinct aligned receipt tags are each
@@ -21083,6 +21084,93 @@ Selecting B moves C1 to `DIR-SELECTED`, makes C2 active, and reduces
 `Phi_SR` from 30 to 29. Selecting A additionally prunes C2-C3, makes C4 active,
 and reduces `Phi_SR` from 30 to 27. The authoritative decision record remains
 unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, require at
+least one functional overlap opportunity.** `O^{intra-overlap}_v` is nonempty.
+The completed catalog must contain at least one reachable fixed evaluation in
+which two distinct canonical receipt tags are individually ledger-satisfied
+before fan-out treatment and their valid typed ledgers overlap through either
+one exact shared final child or two distinct proofs with intersecting complete
+lineage/shared nonmultiplying authorization or accounting.
+
+The witness is structural and pre-treatment. It makes neither tag a C133/C134
+provisionally complete candidate, does not let both tags survive together, and
+commits no result. It cannot be assembled across contexts, cuts, Souls, Relic
+realizations, Charms, or alternate proof assignments chosen after seeing a
+desired outcome. Every ledger remains internally independent. The final
+exact-versus-related support language remains C2, and joint treatment remains
+C3.
+
+The `Heat h` example is now required in kind, not necessarily by identity:
+some reachable fixed evaluation must contain an overlapping pair analogous to
+`P = Defiant Guard g + h` and `Q = Returning Cut t + h`, or a pair using
+distinct but lineage/accounting-related proofs. The same deed may therefore
+stand in two distinct relational readings while remaining one deed, a
+potential **direct** local Achintya Bheda Abheda fit. Hub-proof dominance,
+one-payment compression, disclosure, solver, and non-dominance remain real
+burdens rather than assumed-away costs.
+
+C1 moves from `OWNER-OPEN` to `DIR-SELECTED`; C2 moves from `SCREEN` to
+`OWNER-OPEN`. The sixty-five-slot register now contains 28 `SCREEN`, 1
+`OWNER-OPEN`, 8 `PRUNED`, 24 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 29`. The authoritative decision record remains unchanged.
+
+### RCS-03C3C2 — within-evaluation proof-overlap form support — active owner choice
+
+C1-B requires at least one functional overlap, but exact reuse of one child and
+overlap through distinct related children remain mechanically different. C2
+chooses which of those two overlap languages the completed catalog must
+functionally support. It does **not** decide whether either form lets both tags
+survive fan-out treatment.
+
+For each tuple in `O^{intra-overlap}_v`, define two support sets:
+
+- `E^{intra-exact}_v` contains the tuple when the exact same final B4B child
+  occurrence appears in both typed ledgers; and
+- `R^{intra-related}_v` contains the tuple when one final child from each
+  ledger is a **distinct** occurrence and the pair's complete lineages
+  intersect or it shares one nonmultiplying authorization/accounting parent.
+
+The distinctness condition is load-bearing. A child does not prove related
+support merely because its lineage intersects itself. Labels, aliases,
+primitive member sites, fields, packets, and callbacks do not multiply final
+child identity. One overlap opportunity may belong to both sets if it contains
+an exact shared child and a separate distinct-related pair. C1-B proves
+`E^{intra-exact}_v union R^{intra-related}_v` is nonempty, so the fourth
+empty/empty support state is unavailable.
+
+| Choice | Required within-evaluation overlap-form support | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — exact-child overlap only** | `E^{intra-exact}_v` is nonempty and `R^{intra-related}_v` is empty. At least one reachable valid pair repeats one identical final child, while no valid ledger pair anywhere in the completed catalog overlaps through distinct lineage/accounting-related children. | A is the clearest player grammar: “this one proof counts in both readings.” Each functional witness is a potential **direct** ideal fit—one child, two distinct relationships. It also concentrates power in obvious hub children, however, and globally forbids choreographed sibling/class-member relationships even when their common causal payment remains truthful. | In one evaluation, P uses `{Defiant Guard g, Heat h}` and Q uses `{Returning Cut t, the same Heat h}`. The exact occurrence `h` is shared; every distinct cross-ledger proof pair remains lineage/accounting-independent. |
+| **B — distinct-related overlap only** | `E^{intra-exact}_v` is empty and `R^{intra-related}_v` is nonempty. No final child occurrence may appear in both ledgers, but at least one reachable valid pair uses distinct children whose complete lineages intersect or whose authorization/accounting parent is shared and nonmultiplying. | B emphasizes choreography: distinct manifestations remain distinct while visibly participating in one causal/payment unity, also a potential **direct** local ideal fit. It avoids literal common-child hubs but has the greatest risk of opaque “one paid button became two proofs” compression unless lineage is disclosed extremely well. It also forbids the most legible same-Heat pattern. | One authored `Twin Vow` operation yields distinct final singleton children `Guard Pulse a` and `Riposte Mark b`, both retaining one operation lineage/payment. P uses `a + Heat`; Q uses `b + Feint`. No proof occurrence repeats, but `a` and `b` make the ledgers overlap through their shared causal/accounting family. |
+| **C — support both exact and distinct-related forms** | Both `E^{intra-exact}_v` and `R^{intra-related}_v` are nonempty. Reachable functional witnesses for both forms must exist; they may occur in one overlap opportunity or in different fixed evaluations. Exact identities, counts, distribution, and prevalence remain AUTHOR/SPEC. | **Recommended.** C preserves two locally coherent play grammars: readable keystone/hub sharing and choreographed distinct manifestations of one causal family. Each local witness can directly express unity-with-difference; their catalog coexistence is only **aggregate**, not a stronger metaphysical rating. C has the richest buildcraft and avoids globally banning either natural form before C3 decides treatment, but it carries both hub dominance and sibling/payment-compression risks plus the highest authoring, UI, solver, and teaching burden. | The completed catalog contains a same-`Heat h` witness of A's kind and a distinct `Guard Pulse a`/`Riposte Mark b` shared-lineage witness of B's kind. C does not require both forms in one recipe or permit either pair to resolve jointly. |
+
+A/B/C are mutually exclusive and exhaustive because C1-B makes the union of
+the two support sets nonempty: exact support alone, distinct-related support
+alone, or both. A and B's empty-set clauses quantify **every** reachable valid
+candidate-ledger pair, not only the resolver's preferred assignment. A dormant
+definition, alias, unreachable recipe, or two alternate contexts cannot prove
+support. An owner-written replacement may propose a genuinely different form
+contract.
+
+A completed B4B compound is one final child. Reusing that compound in both
+ledgers is exact overlap; its hidden member sites cannot counterfeit distinct-
+related support. Conversely, two related final children retain distinct
+identities—their shared lineage/accounting marks overlap rather than aliasing
+or duplicate result identity. Every ledger still obeys its own within-receipt
+independence rules.
+
+C2 grants no joint survival, provisional candidate, commitment, proof priority,
+claim, consumption, later reuse, cross-opportunity use, cross-combatant or
+cross-Relic authority, payoff, UI realization, persistence, release, or
+implementation. C3 alone decides treatment over the supported forms. C4-C7
+retain distinct same-cut opportunity behavior; C3D-C3F retain claims and later
+reuse; RCS-08 retains cross-root/team authority.
+
+Any answer moves C2 to `DIR-SELECTED`, makes C3 active, and reduces `Phi_SR`
+from 29 to 28. The resulting register contains 27 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 25 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`. The
+authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

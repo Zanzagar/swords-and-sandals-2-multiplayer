@@ -3593,9 +3593,48 @@ labels cannot construct a witness. Claims remain post-invocation at C3D; later
 reuse remains C3E-C3F; cross-root/team authority remains RCS-08.
 
 Replacing one counted C3C row with seven adds six slots and six potential
-cards. The current sixty-five-slot register has 29 `SCREEN`, 1 `OWNER-OPEN`, 8
+cards. The pre-C1 sixty-five-slot register had 29 `SCREEN`, 1 `OWNER-OPEN`, 8
 `PRUNED`, 23 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 30`. C1 is the sole active card.
+`Phi_SR = 30`. C1 was the sole active card at that checkpoint.
+
+The owner selected `RCS-03C3C1-B`. Functional within-evaluation overlap support
+is nonempty, but this remains a pre-treatment structural promise. It creates no
+C133/C134 candidate, joint survival, or commitment and does not choose exact
+reuse versus distinct related proofs. C1 moves to `DIR-SELECTED`, C2 becomes
+`OWNER-OPEN`, and the sixty-five-slot register now has 28 `SCREEN`, 1
+`OWNER-OPEN`, 8 `PRUNED`, 24 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 29`.
+
+Two bounded read-only audits tested whether C2 is one prerequisite-ready card.
+The first re-derived the exhaustive support partition. Let
+`E^{intra-exact}_v` be C1-positive tuples where the same final child occurrence
+appears in both ledgers. Let `R^{intra-related}_v` be C1-positive tuples with
+two **distinct** cross-ledger child occurrences whose complete lineages
+intersect or that share one nonmultiplying authorization/accounting parent.
+Distinctness prevents a child from proving related support through self-
+lineage. C1-B makes their union nonempty, leaving exactly three support states:
+E-only, R-only, or both. One tuple may witness both; both-form support does not
+require both forms in the same opportunity.
+
+The second audit stress-tested the recommendation. Exact-only yields the most
+legible hub grammar but globally bans truthful sibling/class-member overlap.
+Related-only preserves choreographed distinct manifestations of one causal or
+payment family but bans the clearest shared-Heat pattern and risks opaque one-
+payment compression. Both retains both local grammars without authorizing
+either to produce two receipts; C3 remains the sole treatment decision. It is
+therefore recommended, with the explicit caveat that catalog coexistence is
+aggregate rather than a stronger ideal realization. Each reachable local
+witness may be a direct unity-with-difference expression.
+
+The exact witness is `P = Guard g + Heat h` and
+`Q = Return t + the same Heat h`. The distinct-related witness uses two final
+singleton children `a != b` of one authored operation, one in each ledger,
+while both retain the operation lineage/payment. A completed B4B compound is
+one final child: using it twice is exact overlap, and its hidden members cannot
+manufacture related support. Empty-set clauses quantify all valid ledgers, not
+the resolver's favored assignment. C2 grants no treatment, proof priority,
+claim, later reuse, cross-opportunity authority, payoff, persistence, release,
+or implementation.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
