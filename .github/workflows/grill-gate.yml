@@ -17,6 +17,11 @@
 # its edits to .githooks/ take effect once it has merged. THIS FILE is the
 # limit: on pull_request GitHub runs the pull request's own copy of it, so an
 # edit here is judged by itself. Review every change to .github/workflows/.
+# The owner accepted that limit (2026-09-24) instead of pull_request_target or
+# a required-workflow ruleset: a change to the gate's own files, this one
+# included, lands in a pull request that touches nothing else and merges only
+# on the owner's go. claude-harness docs/git-hygiene.md rule 14, "Changes to
+# the gate itself".
 name: grill-gate
 
 on:

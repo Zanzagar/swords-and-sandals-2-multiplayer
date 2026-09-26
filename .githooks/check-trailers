@@ -1,6 +1,9 @@
 #!/bin/sh
 # check-trailers: the grilling gate's ONE checker (claude-harness docs/git-hygiene.md, rule 14).
-# The commit-msg hook and CI both run this file, so they cannot disagree.
+# The commit-msg hook and CI both run this file: one rule, one parse. CI reads
+# the commit git made; the hook reads the message BEFORE git cleans it up, and
+# works out what git will make of it. Where it cannot tell (THE HOOK'S LIMITS,
+# below) the two can disagree, and CI, which checks every commit, decides.
 #
 # POSIX sh + git + awk only: it runs in WSL/Linux, in Git for Windows' bash
 # (which has no node) and on GitHub Actions.
@@ -19,13 +22,44 @@
 #                                          GitHub slug, de-duplicated like one page
 #
 # THE RULE. A commit message ends with a trailer block (the last paragraph, as
-# `git interpret-trailers --parse` reads it) containing either
+# `git interpret-trailers --parse` reads it with no configuration) containing either
 #   Decided: <repo-relative-path>#<anchor>   the path exists in what is committed and the
 #                                            anchor is an <a id="..."> or a heading's
 #                                            GitHub slug in that file, or
 #   Fix: | Docs: | Chore: | Test: <why>      non-empty.
 # Every gate trailer present must be valid. Keys match case-insensitively, as
 # git's own trailer keys do.
+#
+# THE HOOK'S LIMITS. Git does not tell the commit-msg hook how it will clean the
+# message up. The hook knows commit.cleanup, the comment string in force, and
+# whether an editor runs (git sets GIT_EDITOR=: for it when none does); it does
+# not know the command line. So:
+#   - a --cleanup=<mode> given there overrides what the hook goes by, either way:
+#     with --cleanup=verbatim and an editor it drops comment lines git keeps (and
+#     may ACCEPT what CI refuses); with --cleanup=strip and -F it keeps comment
+#     lines git drops (and may REFUSE what CI accepts);
+#   - a scissors line typed into the message is cut at as for -v, which it
+#     cannot see; git cuts there only for -v, or for commit.cleanup=scissors
+#     with an editor. Otherwise, when git KEEPS comment lines (whitespace,
+#     verbatim), CI stops reading at a # scissors line and reads past any
+#     other; when git STRIPS them (an editor without -v, commit.cleanup=
+#     strip), git drops the scissors line itself and CI reads what follows.
+#     Either way the hook, having cut, may ACCEPT what CI refuses;
+#   - with no commit.cleanup and no editor (-m or -F without -e), it drops the
+#     comment lines that END the message, as git's template must be dropped if
+#     a writer's own environment sets GIT_EDITOR=: while an editor runs (git
+#     commit -e): git keeps them, and when the comment string is not # CI reads
+#     them as text (it may ACCEPT); and in that editor case it keeps any other
+#     comment line git strips (it may REFUSE);
+#   - with core.commentChar=auto, git picks another character than # when a
+#     line of the message it starts from (-m, -F, --amend) begins with #, and
+#     the hook takes # (either way).
+#   - the hook reads the message bytes as written; CI reads `git show
+#     --format=%B`, re-encoded to UTF-8, so with a non-UTF-8
+#     i18n.commitEncoding a non-ASCII Decided path or anchor can go either way.
+# A comment line kept or dropped wrongly changes the verdict only inside the
+# final paragraph: a # line before an indented continuation line, or any line
+# not beginning with #. CI, which reads each commit as git made it, decides.
 #
 # Exit status: 0 accepted, 1 refused, 2 usage or environment error.
 
@@ -40,9 +74,20 @@ GATE_KEYS='decided fix docs chore test'
 
 # stdin: a commit message. stdout: "key<TAB>value" for each trailer in its
 # final trailer block, key lower-cased, value trimmed. Git's own parser decides
-# what the trailer block is, so this agrees with `git log --format=%(trailers)`.
+# what the trailer block is, so this agrees with `git log --format=%(trailers)`
+# in a clone with no configuration. It parses with NO configuration but the
+# separator: git renames a key by any trailer.<name>.key alias it can read (so
+# an inherited one could make a gate key of another trailer, or hide one), and
+# reads core.commentChar, so the hook and a clean CI could disagree. So: not in
+# a repository, no system or global file (GIT_CONFIG_GLOBAL from git 2.32; HOME
+# and XDG_CONFIG_HOME for an older git, which ignores it), and no `git -c` or
+# GIT_CONFIG_COUNT from whatever ran this.
 trailers() {
-  git -c trailer.separators=: interpret-trailers --parse |
+  (
+    unset GIT_CONFIG_PARAMETERS GIT_CONFIG_COUNT
+    GIT_DIR=/dev/null GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null HOME=/dev/null XDG_CONFIG_HOME=/dev/null \
+      git -c trailer.separators=: interpret-trailers --parse
+  ) |
     awk '{
       i = index($0, ":"); if (i == 0) next
       k = tolower(substr($0, 1, i - 1)); v = substr($0, i + 1)
@@ -584,9 +629,40 @@ case "${1:-}" in
     clean=$TMPD/message
     # A merge commit (git merge, or git commit concluding one) is exempt.
     [ -f "$(git rev-parse --git-path MERGE_HEAD)" ] && exit 0
-    # What git will commit: cut at the scissors line (git commit -v), drop comments.
-    awk '/^. -+ >8 -+$/ { exit } { print }' "$2" | git stripspace --strip-comments > "$clean" ||
-      die "git stripspace failed"
+    # What git will commit. The hook sees the message before git cleans it up,
+    # so it does what git will do, as far as it can tell (see THE HOOK'S LIMITS).
+    # 1. Cut at the scissors line (git commit -v), always: -v is not visible
+    #    here, and git writes that line even when GIT_EDITOR=: (set by a writer,
+    #    with git commit -v -e). Git cuts only at its own line, exactly, which
+    #    begins with the comment string in force: `git stripspace
+    #    --comment-lines` writes it as git does.
+    cc=$(printf 'x\n' | git stripspace --comment-lines) || die "git stripspace failed"
+    cc=${cc%' x'}
+    CUT="$cc ------------------------ >8 ------------------------" awk '$0 == ENVIRON["CUT"] { exit } { print }' "$2" > "$TMPD/cut" ||
+      die "cannot read $2"
+    # 2. Clean up as git will. Its mode is commit.cleanup, else its default:
+    #    strip (comment lines dropped) when an editor runs, whitespace when none
+    #    does (-m, -F), and git sets GIT_EDITOR=: for this hook when none does.
+    case $(git config commit.cleanup 2>/dev/null) in
+      strip) mode=strip ;;
+      verbatim) mode=verbatim ;;
+      whitespace | scissors) mode=whitespace ;;   # scissors: the cut is step 1
+      *) if [ "${GIT_EDITOR-}" = : ]; then mode=unsure; else mode=strip; fi ;;
+    esac
+    case $mode in
+      strip) git stripspace --strip-comments < "$TMPD/cut" ;;
+      verbatim) cat "$TMPD/cut" ;;
+      whitespace) git stripspace < "$TMPD/cut" ;;
+      unsure)
+        # Whitespace, but not a run of comment lines at the END: a writer whose
+        # own environment has GIT_EDITOR=: runs an editor path (git commit -e)
+        # that looks like none, and git's template, which git then strips, is
+        # that run.
+        git stripspace < "$TMPD/cut" | CC=$cc awk '{ l[++n] = $0 } END {
+          while (n > 0 && (l[n] == "" || index(l[n], ENVIRON["CC"]) == 1)) n--
+          for (i = 1; i <= n; i++) print l[i]
+        }' ;;
+    esac > "$clean" || die "git stripspace failed"
     is_git_revert "$clean" && exit 0
     check_message "$clean" ":" "the index" "this commit message" || exit 1
     exit 0

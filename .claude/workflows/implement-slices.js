@@ -14,6 +14,11 @@ export const meta = {
 //   base: string,           // the commit every worktree starts from
 //   night: string,          // scratch root, ABSOLUTE and symlink-free: reports, cumulative diffs, verifier scratch (agents get private subdirs)
 //   mainTree: string,       // the project's main tree, ABSOLUTE and symlink-free: READ-ONLY to every agent
+//                           //   Neither, nor any worktree, may have a ".." component: the script refuses one.
+//                           //   Paths are compared as STRINGS, so an alias (a symlink, /proc/self/root) of
+//                           //   night, mainTree or a worktree is not seen here. That risk is mitigated by an
+//                           //   in-prompt realpath self-check, not enforced by the script; a preflight agent is
+//                           //   the fallback if an alias ever causes harm — the owner's decision, 2026-09-24.
 //   codex: string,          // pinned Codex review command, run as: <codex> <worktree> <outfile> "<focus>"
 //   suite: string,          // the full test command, run from the worktree
 //   suiteExpect: string,    // what a green run looks like there, e.g. 'expect 0 fail and 1 skipped (the archive check)'
@@ -77,10 +82,16 @@ const KEY = /^[A-Za-z0-9][A-Za-z0-9_-]*$/
 const keyRule = 'must be one path component: letters, digits, "-" and "_", starting with a letter or digit'
 const fold = (k) => String(k).toLowerCase()
 // A POSIX path with ".", ".." and repeated "/" resolved, so "/wt/./a" and
-// "/wt/a" compare equal. Every check here compares STRINGS: the sandbox has no
-// filesystem, so an alias through a symlink (or /proc/self/root) of the
-// scratch root, the main tree or a worktree cannot be seen. Give every path as
-// its real, symlink-free path; nothing here can verify that you did.
+// "/wt/a" compare equal. (A ".." in night, mainTree or a worktree is refused
+// below, so in practice only "." and repeated "/" are left to resolve.) Every
+// check here compares STRINGS: the sandbox has no filesystem, so an alias
+// through a symlink (or /proc/self/root) of the scratch root, the main tree or
+// a worktree cannot be seen. Give every path as
+// its real, symlink-free path; nothing here can verify that you did. The alias
+// risk is mitigated by an in-prompt realpath self-check (pathSelfCheck below:
+// every agent given a private path resolves it and the protected trees FIRST),
+// not enforced by the script; a preflight agent is the fallback if an alias
+// ever causes harm — the owner's decision, 2026-09-24.
 function normal(path) {
   const out = []
   for (const part of path.split('/')) {
@@ -97,9 +108,16 @@ function normal(path) {
 // document with a space in it, is quoted instead.)
 const SHELL_SAFE = /^[A-Za-z0-9._/@+,:=-]+$/
 const unsafe = 'has a character a shell would reinterpret; use letters, digits and . _ / @ + , : = - only'
+// Nor a ".." component: normal() reads it lexically, but agents get the path as
+// given, so `mkdir -p /repo/new/../../night/x` creates /repo/new inside the main
+// tree before it walks out (Codex pass 2 on the realpath self-check, reproduced
+// on disk), and after a symlink ".." leads where no string check can follow.
+const updir = (p) => p.split('/').includes('..')
+const hasUpdir = 'has a ".." component: mkdir -p would create what comes before it, and after a symlink it leads where these checks cannot see; give the path without one'
 for (const k of ['night', 'mainTree']) {
   if (!A[k].startsWith('/')) refused.push(`args.${k} "${A[k]}" must be an absolute path`)
   else if (!SHELL_SAFE.test(A[k])) refused.push(`args.${k} "${A[k]}" ${unsafe}`)
+  else if (updir(A[k])) refused.push(`args.${k} "${A[k]}" ${hasUpdir}`)
 }
 if (!/^[A-Za-z0-9]/.test(A.base) || !SHELL_SAFE.test(A.base)) refused.push(`args.base "${A.base}" must start with a letter or digit and ${unsafe}: give a commit id or a plain ref name`)
 const mainTree = normal(A.mainTree)
@@ -121,6 +139,7 @@ for (const t of A.tracks) {
     refused.push(`${t.key}: worktree "${t.worktree}" must be an absolute path`)
   } else {
     if (!SHELL_SAFE.test(t.worktree)) refused.push(`${t.key}: worktree "${t.worktree}" ${unsafe}`)
+    if (updir(t.worktree)) refused.push(`${t.key}: worktree "${t.worktree}" ${hasUpdir}`)
     // Compared ignoring case, like every path here: NTFS and APFS would merge them.
     const w = fold(normal(t.worktree))
     if (w === fold(mainTree)) refused.push(`${t.key}: worktree ${t.worktree} is the main tree, which is read-only to every agent`)
@@ -160,12 +179,14 @@ const scratchOf = (t, s) => `${A.night}/${t.key}/${s.key}`
 const reportOf = (t, s, i) => `${A.night}/${t.key}/${pad(i)}-${s.key}.report.md`
 const diffOf = (t, s, i) => `${A.night}/${t.key}/${pad(i)}-${s.key}.cumulative.diff`
 const verifierScratchOf = (t, j) => `${A.night}/verify/${t.key}-${j + 1}`
+// Everything an implementer writes outside its worktree; its prompt's path self-check names the same list.
+const slicePaths = (t, s, i) => [scratchOf(t, s), reportOf(t, s, i), diffOf(t, s, i)]
 const privatePaths = []
 for (const t of A.tracks) {
   if (!t || !t.key || !Array.isArray(t.slices)) continue
   t.slices.forEach((s, i) => {
     if (!s || !s.key) return
-    for (const path of [scratchOf(t, s), reportOf(t, s, i), diffOf(t, s, i)]) privatePaths.push({ path, owner: `${t.key}:${s.key}` })
+    for (const path of slicePaths(t, s, i)) privatePaths.push({ path, owner: `${t.key}:${s.key}` })
   })
   if (Array.isArray(t.verifiers)) t.verifiers.forEach((_, j) => privatePaths.push({ path: verifierScratchOf(t, j), owner: `${t.key}:verify${j + 1}` }))
 }
@@ -256,6 +277,33 @@ const VERDICT = {
 }
 
 const lines = (xs) => (xs && xs.length ? xs.map((x) => `- ${x}`).join('\n') + '\n' : '')
+
+// THE PATH SELF-CHECK. The checks above compare STRINGS, so a symlink or
+// /proc/self/root alias of args.night, the main tree or a worktree can still
+// put an agent's scratch inside a protected tree, and this sandbox cannot see
+// it. The owner ACCEPTED that risk on 2026-09-24 rather than spend a realpath
+// preflight agent on every run: it is mitigated by this in-prompt realpath
+// self-check, not enforced by the script; a preflight agent is the fallback if
+// an alias ever causes harm. Every agent given a private path runs it FIRST.
+// `-m` because the paths do not exist yet: plain GNU realpath fails on a
+// missing parent (measured 2026-09-24), and the check runs before any mkdir.
+// Without a working `-m` the agent stops: resolving the nearest existing
+// parent and appending the rest missed "<root>/missing/../alias" (Codex pass
+// 1 on this change, reproduced on disk; a ".." is now refused above) and
+// still misses a dangling symlink into a protected tree, which `-m` follows
+// (measured 2026-09-24). So no by-hand fallback is offered. `find -type l`
+// lists a symlink already inside the agent's own paths (a reused scratch: Codex
+// pass 3 on this change, reproduced on disk), which resolving the directory
+// itself cannot see; it prints nothing for a path that does not exist yet.
+// Not covered, and within the risk the owner accepted: a hard link, a mount.
+function pathSelfCheck(own, stop) {
+  const trees = [A.mainTree, ...A.tracks.map((t) => t.worktree)]
+  return `PATH SELF-CHECK: your FIRST step, before you write anything anywhere (mkdir included). The script that wrote this brief compared every path as a STRING, so a symlink or /proc/self/root alias can still put a path of yours inside a tree you must not write in, and only you can see that. Run all three:
+  realpath -m ${own.join(' ')}
+  realpath -m ${trees.join(' ')}
+  find ${own.join(' ')} -type l 2>/dev/null
+The first resolves the paths this brief makes yours; the second, the main tree and every worktree of this run, none of which you may use as scratch; the third lists any symlink already INSIDE your paths (a reused scratch directory), which the first cannot see. If a path of yours resolves to or inside one of those trees, or a tree resolves inside a path of yours (compare ignoring letter case), STOP before writing anything and return ${stop}. If two of those TREES resolve to the same path or one inside another (a worktree that is really the main tree, or another track's worktree), STOP the same way: the script's string checks cannot see that either. If find prints anything, STOP the same way: a write through that link could land anywhere. If realpath -m is missing or fails, STOP the same way: resolving by hand misses what it follows, such as a dangling symlink.`
+}
 const maxPasses = Number.isInteger(A.maxCodexPasses) && A.maxCodexPasses > 0 ? A.maxCodexPasses : 4
 
 function decisionBlock(s) {
@@ -273,6 +321,8 @@ function implPrompt(t, s, i) {
   const scratch = scratchOf(t, s)
   const checks = (t.checks || A.checks || []).map((c) => c.split('{scratch}').join(scratch))
   return `You are an IMPLEMENTER on ${A.project}: slice "${s.key}" (${i + 1} of ${n}) of the track "${t.key}". The main session merges and commits; you build, test and get Codex to approve.
+
+${pathSelfCheck(slicePaths(t, s, i), 'status "blocked", with every resolved path under wrongPremises')}
 
 WORKTREE: ${t.worktree} — cd there for EVERY command. Branch ${t.branch}, based on commit ${A.base}.
 ${i === 0
@@ -302,7 +352,11 @@ ${checks.length ? `3. Then:\n${lines(checks)}` : '3. (No extra checks for this t
 }
 
 function verifyPrompt(t, claim, j) {
-  return `You are an ADVERSARIAL VERIFIER on ${A.project}. You WRITE NOTHING except in your own scratch directory ${verifierScratchOf(t, j)}/ (mkdir -p it). No git state changes of any kind, no edits in any worktree or in the main tree.
+  return `You are an ADVERSARIAL VERIFIER on ${A.project}.
+
+${pathSelfCheck([verifierScratchOf(t, j)], 'verdict UNVERIFIABLE, with every resolved path as the evidence')}
+
+You WRITE NOTHING except in your own scratch directory ${verifierScratchOf(t, j)}/ (mkdir -p it). No git state changes of any kind, no edits in any worktree or in the main tree.
 
 TARGET: the uncommitted work in ${t.worktree} (branch ${t.branch}, base ${A.base}). The implementers' reports are ${A.night}/${t.key}/*.report.md and their per-slice cumulative diffs sit beside them — treat every number and claim in them as a hypothesis. To compare with the base, export it read-only: \`git -C ${A.mainTree} archive ${A.base} | tar -x -C <your scratch>/base\`.
 
