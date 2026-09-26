@@ -3879,7 +3879,7 @@ fixed.
 
 The gameplay recommendation is now explicitly conditional. Recommend B3A-B,
 universal participant configurability, only if B3B later chooses a small
-Relic-specific closed attunement vocabulary. Then the Relic's enduring grammar
+Relic-specific closed routing-stance vocabulary. Then the Relic's enduring grammar
 and the participant's distinct orientation jointly determine one automatic
 route without turning the artifact into a generic solver. For example, Ashen
 may offer `Dissonance` (minimize shared structural proof) and `Chorus`
@@ -3896,6 +3896,76 @@ seventy-eight slots: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 28
 C3C3B3A is the sole active card. The amendment chooses neither prevalence nor
 policy language, actor, timing, default behavior, randomness, treatment, or
 outcome.
+
+The owner selected `RCS-03C3C3B3A-B`. Every routing-capable versioned Relic
+selector contract must therefore offer at least two lawful prospectively
+bindable participant routing settings whose completed laws differ on some
+reachable held-fixed upstream ledger product. The settings need not differ on
+every input, and a system composer or canonical tie rule may remain inside the
+complete contract law. B3A moves to `DIR-SELECTED`; before further correction
+old B3B would open and the seventy-eight-row register would contain 36
+`SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 29 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`.
+
+**Agent nomenclature correction:** the B3A presentation used “attunement” for
+Dissonance/Chorus. RCS-03A-C already reserves remembered boundary attunement
+for a persistent Relic-owned transformation coordinate. The participant
+configuration here is a **routing stance** or covenant orientation. No
+coupling between those two coordinates was selected. This is a terminology
+repair, not a changed owner answer.
+
+Three bounded read-only named-claim audits then attacked B3B's atomicity,
+gameplay, and edge closure. They agreed that selecting an indivisible authored
+stance and constructing a policy from separate primitives are different legal
+player actions. They disagreed on whether a participant preference completed
+by an intrinsic Relic rule creates another owner axis. A fourth read-only
+adjudication resolved that disagreement through representation invariance.
+
+For any fixed participant preference `P_c` and immutable completion rule `C_s`,
+their composition `F_{s,c}(X)=C_s(X,P_c(X))` is already one total versioned
+selection law. Writing `C_s` as the final lexicographic clause of the stance
+changes no legal configuration action, selected tuple or marginal law,
+preview, replay, or failure behavior. Conversely, any total law can be factored
+through a singleton recommendation and trivial completion. “Total policy”
+versus “intrinsic residual completion” therefore fails the register's
+observable independent-boundary test. Every lawful setting plus immutable
+contract semantics must denote one total composite law over arbitrary reachable
+nonempty ledger products; exact tie/completion clauses are AUTHOR/SPEC. B4A
+still owns deterministic versus stochastic support.
+
+One further language boundary is observable and cannot be authored silently.
+A participant who can uniformly reorder `[prefer Vow, prefer Heat]` cannot
+express “if Q carries Return, prefer Vow; otherwise prefer Heat” without a new
+input-dependent predicate-and-branch action. Context branching changes legal
+agency, information needs, shadowing and fallthrough exploits, selector
+injection, preview, migration, and the optimization surface even when both
+languages compile to total functions.
+
+Old B3B is therefore a non-counting parent for B3B1 constructive-language
+prevalence and conditional B3B2 participant-composed context-branching
+prevalence. B3B1-A prunes B3B2 and activates B4A; B3B1-B/C activates B3B2,
+whose answer then activates B4A. Exact stance identities, primitives,
+predicates, caps, and presets remain AUTHOR/SPEC. Unrestricted scripts,
+arbitrary lookup tables, and a guaranteed universal cross-Relic language are
+replacement paths, not hidden constructive settings.
+
+The B3B1 recommendation is A: a finite versioned menu of indivisible
+Relic-owned routing stances for every contract. In the P/Q example, selecting
+Dissonance whole produces the Vow tuple and selecting Chorus whole produces the
+Heat tuple; the participant cannot extract and reorder their subclauses. This
+preserves B3A-B's direct Relic-grammar/participant-orientation relation while
+remaining previewable and migration-stable. Universal builders add search,
+configuration fatigue, quarterbacking, policy-sharing metas, selector
+injection, shadowed rules, and generic-solver identity. Coexistence adds two
+control dialects and a likely premium programmable class.
+
+Replacing one counted B3B row with B3B1-B3B2 adds one slot and one potential
+card. After B3A-B's ordinary reduction, the twenty-second-amendment register
+has seventy-nine slots: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 29
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+C3C3B3B1 is the sole active card. The amendment chooses neither construction
+support nor context branching and leaves actor, information, timing, defaults,
+randomness, treatment, and outcome on their existing routes.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

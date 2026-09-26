@@ -2317,9 +2317,45 @@ card. Recommend universal participant configurability only if B3B later keeps
 the vocabulary small, closed, and Relic-specific; otherwise system-fixed
 routing is the safer recommendation.
 
+**Post-answer screen and twenty-second prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3B3A-B`: every routing-capable versioned Relic
+selector contract must have at least two lawful prospectively bindable
+participant routing settings whose completed laws differ on some reachable
+held-fixed ledger product. This does not grant code authorship, exclusive
+tie-breaking, live invocation, or downstream-aware selection.
+
+The initial presentation's word “attunement” was overloaded. RCS-03A-C already
+uses remembered boundary attunement for a persistent Relic-owned transformation
+coordinate. Dissonance/Chorus are **routing stances**, independent of that
+coordinate unless a later explicit replacement couples them.
+
+Three bounded named-claim audits and one adjudication then tested old B3B. A
+separate intrinsic completion module is not a representation-invariant product
+choice: a fixed preference plus fixed completion composes to the same total
+law as a whole policy containing the completion clause. Every lawful setting
+plus immutable contract semantics must denote one total composite selection
+law; exact completion clauses remain AUTHOR/SPEC and B4A retains stochastic
+support.
+
+Two observable control-language axes do remain. Selecting one indivisible
+authored stance differs from separately composing routing primitives. Among
+constructive languages, uniform ordering/parameterization differs from
+participant-built context branching. Old B3B therefore becomes a non-counting
+parent for B3B1 constructive-language prevalence and conditional B3B2
+context-branching prevalence. B3B1-A prunes B3B2 and activates B4A; B3B1-B/C
+activates B3B2 before B4A.
+
+After B3A-B's ordinary reduction, replacing one counted B3B row with two adds
+one slot and potential card. The amended register has seventy-nine slots: 37
+`SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 29 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. `RCS-03C3C3B3B1` is the sole active
+card. Recommend closed whole-policy routing stances: they preserve universal
+meaningful orientation without turning every Relic into a generic policy
+editor.
+
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has seventy-eight
+To make that route genuinely finite, the remaining C3c pass has seventy-nine
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -2372,9 +2408,10 @@ overcompression.
 | `RCS-03C3C3A` | Support for multiple canonical position-keyed typed ledgers for one individually satisfied tag at one fixed evaluation state | `DIR-SELECTED`; B requires at least one reachable alternate-ledger witness under `SR-03`; aliases canonicalize and no authority or treatment is granted |
 | `RCS-03C3C3B1` | Authoritative ledger-domain topology when one or more tags have alternate valid ledgers: one selected joint tuple, complete-product robustness, or prospectively declared coexistence | `DIR-SELECTED`; A makes every multiplicity-positive evaluation return exactly one complete authoritative tuple before downstream permission/results; canonical upstream structural relations remain lawful selector inputs |
 | `RCS-03C3C3B2` | Cross-tag contextual responsiveness of singleton selection: whether another contender or ledger domain can change one tag's held-fixed selected ledger or marginal draw law | `DIR-SELECTED`; B requires at least one reachable matched sensitivity witness; exact triggers/prevalence remain AUTHOR/SPEC, and permission/outcome inputs remain forbidden |
-| `RCS-03C3C3B3A` | Material participant-configurability prevalence across routing-capable versioned Relic selector contracts: empty, universal, or nonempty proper | `OWNER-OPEN`; a contract is configurable only when changing one prospectively bindable participant routing setting changes its tuple law on a reachable held-fixed upstream product; recommend universal only with a tightly bounded Relic-specific control vocabulary |
-| `RCS-03C3C3B3B` | Participant routing-policy language and completion topology when material configurability exists | `SCREEN`; conditional on B3A-B/C, otherwise `PRUNED`; distinguish closed named modes from materially broader constructive control before exact vocabulary is AUTHOR/SPEC; RCS-02 owns holder/consent/information and RCS-13 owns binding/reconfiguration timing |
-| `RCS-03C3C3B4A` | Stochastic singleton-selection support after state and any bound routing policy are fixed: none, universal, or coexistence | `SCREEN`; follows the complete applicable B3A/B3B route; exact RNG, replay, reload, and disclosure duties route to RCS-02 and RCS-16-RCS-18 |
+| `RCS-03C3C3B3A` | Material participant-configurability prevalence across routing-capable versioned Relic selector contracts: empty, universal, or nonempty proper | `DIR-SELECTED`; B requires every routing-capable contract to have at least two prospectively bindable participant routing stances/settings with materially different completed laws on some held-fixed reachable product |
+| `RCS-03C3C3B3B1` | Constructive participant routing-language prevalence: closed whole-policy stances only, bounded construction on every contract, or coexistence | `OWNER-OPEN`; classify legal participant composition rather than UI/compiled representation; recommend closed whole-policy routing stances to preserve Relic identity and legibility |
+| `RCS-03C3C3B3B2` | Participant-composed context-branching prevalence among constructive-capable routing contracts | `SCREEN`; conditional on B3B1-B/C, otherwise `PRUNED`; distinguish uniform composition/order/parameterization from participant-built input-dependent branching before exact predicates/caps are AUTHOR/SPEC |
+| `RCS-03C3C3B4A` | Stochastic singleton-selection support after state and any bound routing policy are fixed: none, universal, or coexistence | `SCREEN`; follows the complete applicable B3A/B3B1/B3B2 route; exact RNG, replay, reload, and disclosure duties route to RCS-02 and RCS-16-RCS-18 |
 | `RCS-03C3C3B4B` | Product-factorized versus correlated joint tuple draws when stochastic singleton selection exists | `SCREEN`; conditional on B4A admitting randomness; otherwise `PRUNED`; context-stable marginals at B2 do not settle joint coupling |
 | `RCS-03C3C3C` | Exact-form restriction of the one within-evaluation joint-survival permission set | `SCREEN`; follows the complete applicable B1-B4A/B4B authoritative-ledger route; classify exact opportunities as permission-empty, universal, or nonempty proper without creating a separate form vote |
 | `RCS-03C3C3D` | Distinct-related-form restriction of the same within-evaluation joint-survival permission set | `SCREEN`; follows C3C3C; classify related opportunities as permission-empty, universal, or nonempty proper; one exact-and-related tuple retains one permission bit |
@@ -2543,21 +2580,28 @@ adding one slot and potential card. That register had **seventy-seven slots**:
 nonempty held-fixed cross-tag responsiveness, ordinarily reducing the
 potential to 37. The twenty-first prerequisite amendment replaces old B3 with
 participant-configurability-prevalence B3A and conditional policy-language
-B3B, adding one slot and potential card. The current register has
-**seventy-eight slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 28
-`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
-`Phi_SR = 38`, and `RCS-03C3C3B3A` is the sole active card.
+B3B, adding one slot and potential card. That register had **seventy-eight
+slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 28 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+`RCS-03C3C3B3A-B` then selected universal material participant
+configurability, ordinarily reducing the potential to 37. The twenty-second
+prerequisite amendment normalizes fixed completion into each total composite
+law and replaces old B3B with constructive-language B3B1 and conditional
+context-branching B3B2, adding one slot and potential card. The current
+register has **seventy-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`,
+29 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
+`Phi_SR = 38`, and `RCS-03C3C3B3B1` is the sole active card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-eight owner cards under this twenty-one-times-amended charter and will
+thirty-eight owner cards under this twenty-two-times-amended charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
 `RCS-03C3B2B`, `RCS-03C3B3`, `RCS-03C3B4`, `RCS-03C3C`, `RCS-03C3C3B`,
-`RCS-03C3C3B3`, `RCS-03C3C3B4`, and `RCS-04`
+`RCS-03C3C3B3`, `RCS-03C3C3B3B`, `RCS-03C3C3B4`, and `RCS-04`
 remain readable parent aliases only; `RCS-03C3C3` is now also a non-counting
 parent alias. They are not additional counted slots.
 
@@ -2573,7 +2617,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 78 frozen candidate slots; current `Phi_SR = 38` after `RCS-03C3C3B2-B` requires joint-responsive routing and the twenty-first amendment separates participant-configurability prevalence from policy-language design | At most 38 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 79 frozen candidate slots; current `Phi_SR = 38` after `RCS-03C3C3B3A-B` requires universal material configurability and the twenty-second amendment separates constructive-language prevalence from conditional context branching | At most 38 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

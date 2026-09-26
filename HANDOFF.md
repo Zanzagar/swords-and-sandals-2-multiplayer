@@ -1,5 +1,59 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 universal participant-configurable Relic routing — RCS-03C3C3B3A-B selected
+
+The owner selected `RCS-03C3C3B3A-B`: every routing-capable versioned Relic
+selector contract must expose at least two lawful prospectively bindable
+participant routing settings whose completed selector laws differ on some
+reachable held-fixed upstream ledger product. The settings need not differ on
+every product, and the participant neither invokes the selector live nor gains
+exclusive control over system composition or ties.
+
+**Terminology correction:** the prior card called Dissonance/Chorus
+“attunements,” but RCS-03A-C already uses remembered boundary attunement for a
+different persistent Relic transformation coordinate. These participant
+settings are **routing stances** or covenant orientations. The two coordinates
+remain independent unless a later explicit replacement couples them.
+
+Three bounded read-only named-claim audits and one adjudication then repaired
+old B3B. An immutable residual tie/completion rule is not a separate owner
+topology: it can be inlined into the same required total versioned selector law
+without changing player action or behavior. But selecting one whole authored
+stance, constructing a uniform priority policy, and constructing
+input-dependent branches expose genuinely different legal controls. Old B3B
+is now a non-counting parent for B3B1 constructive-language prevalence and
+conditional B3B2 context-branching prevalence.
+
+The seventy-nine-slot register now contains 37 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 29 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 38`. `RCS-03C3C3B3B1` is the sole active card. The authoritative
+decision record remains unchanged.
+
+B3B1 asks whether participants select whole authored routing stances or can
+construct policies from separately exposed primitives:
+
+- A: no contract has a builder; every contract offers only a finite versioned
+  menu of indivisible whole-policy stances. Recommend A for legibility and
+  Relic identity.
+- B: every routing contract supports bounded typed construction; named presets
+  may also exist. Conditional context branching remains B3B2.
+- C: closed-only and constructive contract classes coexist as versioned
+  properties.
+
+For example, A lets a participant choose Ashen's Dissonance or Chorus whole.
+B can instead expose an editable order such as `minimize shared proof >
+preserve freshest proof > prefer Vow`. A preserves the direct relationship
+between an enduring Relic grammar and a distinct participant orientation;
+universal builders risk configuration fatigue, quarterbacking, selector
+injection, solved shared policies, fragile migration, and generic-solver
+identity. C adds two control dialects and a likely premium programmable class.
+
+B3B1 chooses no exact menu size, primitive, cap, predicate, holder,
+information set, bind/rebind horizon, default, randomness, permission, or
+result. Under A, B3B2 prunes and B4A opens. Under B/C, B3B2 opens. Unrestricted
+scripts or a guaranteed universal cross-Relic language require an explicit
+replacement branch.
+
 ## 2026-09-26 joint-responsive Relic routing — RCS-03C3C3B2-B selected
 
 The owner selected `RCS-03C3C3B2-B`: the completed catalog must contain at
@@ -15,7 +69,7 @@ system-versus-participant wording. A participant setting may materially change
 the tuple while an immutable system rule still composes inputs, completes the
 law, and breaks ties. The real incidence is material participant
 configurability, not code authorship. The audits also proved that a tiny named
-attunement menu and a constructive conditional policy language are distinct
+routing-stance menu and a constructive conditional policy language are distinct
 gameplay choices. Old B3 is therefore a non-counting parent for B3A
 configurability prevalence and conditional B3B policy-language/completion
 topology. The earlier “deterministic default/fallback” phrase is withdrawn;
@@ -41,7 +95,7 @@ held-fixed upstream ledger product:
 
 For example, system-fixed Ashen always uses **Dissonance**, minimizing shared
 proof structure and routing P through Vow beside Q's Heat proof. Under B,
-Ashen instead offers prebound **Dissonance** and **Chorus** attunements; Chorus
+Ashen instead offers prebound **Dissonance** and **Chorus** routing stances; Chorus
 maximizes shared structure and routes the identical product through Heat. The
 Relic's enduring grammar and the participant's distinct orientation then
 co-determine one automatic route, a direct configuration-boundary
@@ -9601,7 +9655,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 05:01 UTC — joint-responsive Relic routing selected](docs/handoffs/2026-09-26-0501--relic-joint-responsive-routing-selected.md)**
+[2026-09-26 05:18 UTC — universal participant-configurable Relic routing selected](docs/handoffs/2026-09-26-0518--relic-universal-routing-configuration-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

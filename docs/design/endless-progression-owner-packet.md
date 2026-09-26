@@ -275,8 +275,11 @@ and conditional stochastic-coupling topology. The owner selected
 RCS-03C3C3B2-B, requiring at least one held-fixed cross-tag routing witness. A
 twenty-first prerequisite audit then repaired selection authority into
 material participant-configurability prevalence and a separate conditional
-policy-language boundary. RCS-03C3C3B3A is the active owner choice under
-SR-03.
+policy-language boundary. The owner selected RCS-03C3C3B3A-B: every
+routing-capable versioned Relic contract is materially participant-
+configurable. A twenty-second prerequisite audit then separated constructive
+routing-language prevalence from conditional context-branching support.
+RCS-03C3C3B3B1 is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -21600,7 +21603,7 @@ remains unchanged.
 > `Phi_SR = 38`. B3A is the sole active card. The amendment changes no selected
 > direction and supplies no answer to B3A-B4B.
 
-### RCS-03C3C3B3A — material participant-configurability prevalence — active owner choice
+### RCS-03C3C3B3A — material participant-configurability prevalence — direction selected
 
 Let `S^{ledger-route}_v` be the nonempty set of supported versioned Relic
 selector contracts that have at least one reachable multiplicity-positive
@@ -21620,8 +21623,8 @@ law actually changes.
 | Choice | Participant-configurability rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
 | --- | --- | --- | --- |
 | **A — every routing contract is system-fixed** | `P^{ledger-config}_v` is empty. No routing-capable Relic definition/version exposes a dedicated participant setting that can materially change its selector law. Players may still choose builds, actions, and which Relic to equip, but once the upstream ledger product exists the Relic's intrinsic contract alone routes it. | This is the strongest clarity, anti-quarterbacking, and artifact-identity countercase. B2-B's distinct receipt relationships still jointly determine one tuple, so the selected direct relational fit remains intact; A is **neutral/protective** at this separate authority boundary. Its cost is reduced ownership of proof routing: players solve around a Relic's fixed temperament rather than orienting it themselves, and a disliked intrinsic priority can make an otherwise exciting artifact feel rigid. | Ashen Covenant always applies intrinsic **Dissonance**: minimize shared structural proof, then use its canonical completion rule. Beside Q's Heat ledger it routes P through Vow. The player can equip or reject Ashen, but cannot make the same version prefer the shared-Heat tuple. |
-| **B — every routing contract is participant-configurable** | `P^{ledger-config}_v=S^{ledger-route}_v`. Every routing-capable Relic definition/version offers at least two lawful prospectively bindable settings whose selector laws differ on some reachable held-fixed ledger product. This does not mean participants write code or exclusively resolve ties. | **Recommended, conditional on B3B later choosing a tiny Relic-specific closed control vocabulary.** An enduring intrinsic Relic grammar and a participant's distinct attunement then co-determine one automatic route without collapsing into either pure player fiat or a generic solver—a **direct** unity-with-difference fit at the configuration-to-evaluation boundary. It gives players legible ownership and build expression. Costs are configuration fatigue, loadout quarterbacking, deliberately team-hostile settings, stale choices after migration, and loss of Relic identity if later controls become programmable. If B3B admits broad compositional policy authoring, the recommendation flips to A. | Ashen offers **Dissonance** (minimize shared structural proof) and **Chorus** (maximize it), each with one total completion rule. With the same P/Q product, Dissonance routes P through Vow while Chorus routes P through Heat. The chosen attunement is bound before evaluation; no prompt appears when the proc occurs. |
-| **C — system-fixed and participant-configurable contracts coexist** | `P^{ledger-config}_v` is a nonempty proper subset of `S^{ledger-route}_v`. At least one routing-capable definition/version is materially configurable and at least one is system-fixed; that class is a versioned contract property and cannot change opportunistically per evaluation. | C supports immutable “oracle” Relics beside attunable “covenant” Relics. Each local case inherits A/B's fit, but catalog coexistence is only **aggregate**. It can make control itself part of artifact personality, yet it teaches two interaction dialects, complicates comparison and migration, and risks making configurable Relics feel like the premium class while fixed ones feel incomplete. Exact class visibility remains RCS-02. | Ashen's contract exposes Dissonance/Chorus, while Stone Witness's contract always follows one immutable least-overlap law. Their class identity is version-fixed rather than switching only when one route would be favorable; when and how players learn that identity remains undecided. |
+| **B — every routing contract is participant-configurable** | `P^{ledger-config}_v=S^{ledger-route}_v`. Every routing-capable Relic definition/version offers at least two lawful prospectively bindable settings whose selector laws differ on some reachable held-fixed ledger product. This does not mean participants write code or exclusively resolve ties. | **Recommended, conditional on B3B later choosing a tiny Relic-specific closed control vocabulary.** An enduring intrinsic Relic grammar and a participant's distinct routing stance then co-determine one automatic route without collapsing into either pure player fiat or a generic solver—a **direct** unity-with-difference fit at the configuration-to-evaluation boundary. It gives players legible ownership and build expression. Costs are configuration fatigue, loadout quarterbacking, deliberately team-hostile settings, stale choices after migration, and loss of Relic identity if later controls become programmable. If B3B admits broad compositional policy authoring, the recommendation flips to A. | Ashen offers **Dissonance** (minimize shared structural proof) and **Chorus** (maximize it), each with one total completion rule. With the same P/Q product, Dissonance routes P through Vow while Chorus routes P through Heat. The chosen routing stance is already bound when automatic selection runs; no prompt appears at the proc. |
+| **C — system-fixed and participant-configurable contracts coexist** | `P^{ledger-config}_v` is a nonempty proper subset of `S^{ledger-route}_v`. At least one routing-capable definition/version is materially configurable and at least one is system-fixed; that class is a versioned contract property and cannot change opportunistically per evaluation. | C supports immutable “oracle” Relics beside routing-configurable “covenant” Relics. Each local case inherits A/B's fit, but catalog coexistence is only **aggregate**. It can make control itself part of artifact personality, yet it teaches two interaction dialects, complicates comparison and migration, and risks making configurable Relics feel like the premium class while fixed ones feel incomplete. Exact class visibility remains RCS-02. | Ashen's contract exposes Dissonance/Chorus, while Stone Witness's contract always follows one immutable least-overlap law. Their class identity is version-fixed rather than switching only when one route would be favorable; when and how players learn that identity remains undecided. |
 
 A/B/C are mutually exclusive and exhaustive because the nonempty contract
 domain's materially configurable subset is empty, whole, or nonempty proper.
@@ -21637,6 +21640,141 @@ B3B, RCS-13, B4A/B4B, and the later treatment rows retain those boundaries.
 Any answer moves B3A to `DIR-SELECTED` and reduces `Phi_SR` by at least one. A
 prunes B3B and makes B4A active; B or C makes B3B active. The authoritative
 decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, every
+routing-capable contract is materially participant-configurable.**
+`P^{ledger-config}_v=S^{ledger-route}_v`. Every supported versioned Relic
+selector contract that can encounter ledger multiplicity must expose at least
+two lawful prospectively bindable participant routing settings whose completed
+selector laws differ on some reachable held-fixed upstream ledger product.
+The settings need not differ on every product, and the participant need not
+write code, exclusively resolve ties, or invoke the selector live.
+
+In the running P/Q witness, Ashen may offer the whole-policy routing stances
+**Dissonance** and **Chorus**. With the same upstream product, Dissonance routes
+P through Vow to minimize shared proof structure, while Chorus routes P through
+Heat to maximize it. The chosen stance is already operative when automatic
+selection runs; exact holder, information, and bind/lock horizon remain later
+questions.
+
+One enduring Relic grammar and one materially distinct participant orientation
+therefore jointly induce one automatic tuple without either becoming the
+other. That is a **direct** unity-with-difference fit at the
+configuration-to-evaluation boundary. The costs are universal configuration
+burden, quarterbacking, deliberately team-hostile orientations, stale settings
+after migration, and pressure to turn every Relic into a generic policy
+console. The next language card must keep this agency bounded enough to
+preserve artifact identity.
+
+**Agent correction — routing stance, not attunement.** The first B3A
+presentation called Dissonance/Chorus “attunements.” That term already denotes
+RCS-03A-C's persistent remembered evaluation-boundary coordinate. B3A selects
+a participant-bound **routing stance** (or covenant orientation) inside the
+singleton ledger resolver. It is independent of remembered boundary
+attunement unless a future explicit replacement couples them. This correction
+changes no option or owner answer; it prevents two distinct Relic coordinates
+from silently sharing one name.
+
+B3A moves to `DIR-SELECTED` and old B3B would become `OWNER-OPEN`. Before the
+prerequisite correction below, the seventy-eight-slot register would contain
+36 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 29 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. The authoritative decision record
+remains unchanged.
+
+> **Twenty-second prerequisite correction, 2026-09-26:** three bounded
+> read-only named-claim audits and one read-only adjudication tested old B3B's
+> control language, totality, and edge cases. The original “policy-language
+> and completion topology” label still combined one real player-action
+> boundary with a non-invariant implementation decomposition.
+>
+> Residual completion is not an independent owner axis. If a participant
+> preference yields a tied set and an immutable Relic rule resolves it, their
+> composition is the same total versioned selection law that results from
+> writing the tie rule as the stance's final clause. Conversely, any total law
+> can be factored through a trivial completion step without changing a legal
+> action, selected tuple or marginal law, preview, replay, or failure behavior.
+> Every lawful participant setting plus its immutable versioned Relic semantics
+> must therefore denote one total composite law over every reachable nonempty
+> ledger product. Exact intrinsic tie/completion clauses are AUTHOR/SPEC; B4A
+> still decides whether the resulting law may be stochastic.
+>
+> One independently variable language boundary does survive. Selecting one
+> indivisible authored routing stance is not the same legal action as
+> separately composing or ordering routing primitives. And a uniform ordered
+> construction cannot reproduce participant-authored context branching such
+> as “if Q carries Return, prefer Vow; otherwise prefer Heat” without adding a
+> new predicate-and-branch action. That changes optimization, UI, information,
+> selector-injection, testing, and migration surfaces.
+>
+> Old `RCS-03C3C3B3B` is therefore a non-counting parent for two rows:
+>
+> 1. `RCS-03C3C3B3B1` — constructive routing-language prevalence across the
+>    universally configurable contract domain; and
+> 2. `RCS-03C3C3B3B2` — conditional participant-composed context-branching
+>    prevalence among constructive-capable contracts.
+>
+> B3B1-A prunes B3B2 and activates B4A. B3B1-B/C activates B3B2; every B3B2
+> answer then activates B4A. Exact stance identities, primitives, predicates,
+> caps, and presets remain AUTHOR/SPEC after topology. RCS-02 retains holder,
+> collective composition, communication, and information; RCS-13 retains
+> initial/default binding and reconfiguration timing; RCS-15 retains version
+> and migration identity; RCS-16 retains stale/corrupt repair; RCS-17/RCS-18
+> retain comprehension, fun, exploit, simulation, RL, and playtest acceptance.
+>
+> Replacing one counted B3B row with B3B1-B3B2 adds one slot and one potential
+> card. After B3A-B's ordinary reduction, the twenty-second-amendment register
+> contains **seventy-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`,
+> 29 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 38`. B3B1 is the sole active card. The amendment selects no
+> construction support, context branching, actor, timing, randomness,
+> treatment, or outcome.
+
+### RCS-03C3C3B3B1 — constructive routing-language prevalence — active owner choice
+
+Let `K^{route-build}_v` be the subset of `S^{ledger-route}_v` whose legal
+participant controls can create at least one routing setting by separately
+combining, ordering, or parameterizing exposed semantic routing primitives,
+rather than selecting one indivisible author-enumerated whole-policy stance.
+B3A-B already makes every contract in `S^{ledger-route}_v` materially
+configurable; B3B1 asks whether any or all of those contracts expose a builder.
+
+A complex stance with intrinsic conditions remains closed when the participant
+can only select it whole. A contract remains constructive when it also offers
+named presets. Several people selecting indivisible stances do not make the
+language constructive merely because a later RCS-02 composer combines their
+inputs. Every resulting setting plus immutable contract semantics must still
+denote one total automatic selection law over arbitrary reachable ledger
+products.
+
+| Choice | Constructive-language rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — closed whole-policy routing stances only** | `K^{route-build}_v` is empty. Every routing-capable contract offers a finite versioned menu of indivisible authored stances. Participants select one stance as a whole and cannot edit its predicates, objectives, ordering, parameters, or completion clauses. Exact menu sizes and stance identities remain AUTHOR/SPEC. | **Recommended.** It fulfills the condition under which universal B3A-B configurability was recommended: players orient every Relic meaningfully without turning every artifact into a policy editor. One enduring Relic grammar and one distinct whole stance jointly determine the route, preserving the **direct** configuration-boundary ideal fit. It is the most legible, previewable, replayable, and migration-stable option. Its cost is bounded mastery and less room for players who enjoy programming exact routing behavior. | Ashen offers indivisible **Dissonance** and **Chorus**. Dissonance's full law selects the Vow tuple; Chorus's full law selects the Heat tuple. A participant cannot extract “avoid shared Heat,” reorder it beneath “preserve freshness,” or attach a new condition. |
+| **B — every routing contract supports bounded construction** | `K^{route-build}_v=S^{ledger-route}_v`. Every routing-capable contract lets a participant build at least one setting from a bounded typed set of routing primitives. Whole-policy presets may also exist, but no contract is closed-only. B3B2 later decides whether participant-composed context branching is supported. | B maximizes expressive agency and can make routing itself a deep buildcraft layer. But universal builders multiply the search surface, configuration fatigue, quarterbacking, policy-sharing metas, selector injection, shadowed priorities, migration fragility, and solver/UI cost. A generic optimizer can absorb the Relic's authored voice, so greater agency does **not** improve the ideal fit automatically; the relation may become player-dominant rather than mutually constitutive. | Every routing Relic exposes a bounded builder. Ashen might let the participant order `[minimize shared proof] > [preserve freshest proof] > [prefer Vow]`; on the P/Q product, that compiled setting chooses Vow. Named Dissonance can remain as a preset, but participants may edit beyond it. |
+| **C — closed-only and constructive contracts coexist** | `K^{route-build}_v` is a nonempty proper subset of `S^{ledger-route}_v`. At least one contract supports bounded construction and at least one remains whole-stance-only; the class is a versioned contract property. B3B2 governs the constructive subset. | C can make “Loom” Relics unusually programmable while protecting simpler artifact temperaments. Local cases inherit A/B's fit; catalog coexistence is only **aggregate**. It creates two control, preview, testing, and migration dialects and risks making constructive Relics the premium/expert class rather than a genuine sidegrade. Exact class visibility remains RCS-02. | Ashen remains Dissonance/Chorus-only, while Dreamglass lets a participant assemble an ordered routing vow from bounded primitives. Their language class cannot switch opportunistically per evaluation; when and how players learn it remains undecided. |
+
+A/B/C are mutually exclusive and exhaustive because the constructive-capable
+subset of the nonempty routing-contract domain is empty, whole, or nonempty
+proper. The classification follows legal participant composition, not UI
+widgets or compiled implementation: flattening a builder's possible outputs
+into generated IDs does not turn it into A, and a richly conditional authored
+stance does not turn it into B.
+
+Unrestricted scripts, arbitrary per-state lookup tables, or a Turing-complete
+policy surface are not hidden inside “bounded construction.” Nor does this
+card guarantee one universal cross-Relic language. Either desire is an explicit
+replacement path because it changes termination, security, canonicalization,
+migration, UI, and artifact-identity obligations. A live tuple choice after
+the proc is not a replacement path; it contradicts selected cut-atomic
+automatic invocation.
+
+B3B1 chooses no exact mode count, primitive, order cap, parameter range,
+predicate, branching support, holder, conflict rule, information set,
+bind/rebind horizon, default, randomness, permission, survivor, claim, payoff,
+or outcome. B3B2 owns participant-composed context branching if B/C is
+selected; the routed later rows retain the other boundaries. Any answer moves
+B3B1 to `DIR-SELECTED` and reduces `Phi_SR` by at least one. A prunes B3B2 and
+makes B4A active; B or C makes B3B2 active. The authoritative decision record
+remains unchanged.
 
 ## Session protocol and evidence
 

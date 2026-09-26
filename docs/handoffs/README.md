@@ -140,6 +140,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [universal participant-configurable Relic routing selected](2026-09-26-0518--relic-universal-routing-configuration-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | B3A-B makes every routing contract materially participant-configurable; a twenty-second audit separates constructive-language prevalence from context branching and leaves B3B1 as the sole active Relic frontier. |
 | [joint-responsive Relic routing selected](2026-09-26-0501--relic-joint-responsive-routing-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | B2-B requires a held-fixed cross-tag routing witness; a twenty-first audit separates material participant-configurability prevalence from policy-language design and leaves B3A as the sole active Relic frontier. |
 | [one authoritative Relic ledger tuple selected](2026-09-26-0449--relic-single-ledger-tuple-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | B1-A selects exactly one authoritative tuple; a twentieth audit separates cross-tag contextual response from stochastic coupling and leaves B2 as the sole active Relic frontier. |
 | [alternate Relic ledgers selected](2026-09-26-0436--relic-alternate-ledgers-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | C3C3A-B requires at least one alternate-ledger state; a nineteenth audit splits the resolver into four rows and leaves authoritative ledger-domain topology at C3C3B1 as the sole active Relic frontier. |
