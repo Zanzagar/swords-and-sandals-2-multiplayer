@@ -1,6 +1,72 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 authored-compound Relic child topology — RCS-03C3B4B-B selected
+
+The owner selected `RCS-03C3B4B-B`: final semantic children use one
+nonoverlapping scale with authored compounds. `K^{compound}_v` is nonempty and
+`K^{nested}_v` is empty. At least one reachable functional final child groups
+multiple primitive semantic application sites; other blocks may remain
+singletons. A grouped member site is not simultaneously an addressable
+descendant. An incomplete compound furnishes nothing.
+
+`Completed Twinstrike` may therefore become one child only after its
+prospectively declared opening and return both commit. The member cuts remain
+truthful distinct content but are not separate Relic atoms at that cut. Keys
+are versioned, prospective, deterministic, and source-owned. Every child
+inherits complete parent lineage. B4B grants no fan-out, claims, reuse, payoff,
+persistence, release, or implementation. The authoritative decision record is
+unchanged because a bare option label selects direction but does not complete
+acceptance.
+
+A seventeenth prerequisite audit then found old C3C overcompressed. The
+selected two-receipt result topology and exact-two ceiling leave source/event
+reuse open, and B4B-B does not force one child to qualify for two tags. Exact
+reuse of one child also differs from placing two distinct sibling/class-member
+proofs with intersecting lineage or shared nonmultiplying accounting in two
+receipt ledgers. Finally, sharing inside one evaluation and across two
+semantically distinct same-cut automatic opportunities can differ. Engine
+callbacks cannot manufacture distinct opportunities, but authored
+opportunities are not implementation aliases.
+
+Old C3C is now a non-counting parent for seven rows: C1 within-evaluation overlap
+support; C2 conditional exact/related overlap-form support; C3 conditional
+within-evaluation fan-out treatment; C4 distinct same-cut evaluation-
+opportunity support; C5 conditional cross-opportunity overlap support; C6
+conditional exact/related cross-opportunity overlap-form support; and C7
+conditional cross-opportunity fan-out treatment. C1-A prunes C2-C3. C4-A
+prunes C5-C7. C3D follows the settled route.
+
+The amended register has 65 slots: 29 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`,
+23 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`.
+`RCS-03C3C1` is the sole active card.
+
+C1 asks whether any fixed one-evaluation state supports two distinct receipt
+tags that are individually ledger-satisfied before fan-out treatment and whose
+valid final-child proof ledgers overlap. This is a structural input
+classification, not C133/C134 provisional completion, and creates no candidate
+or commitment. Overlap means the exact same child occurs in both, distinct
+proofs have intersecting complete lineages, or they share one nonmultiplying
+authorization/accounting parent.
+
+- A: the functional overlap set is empty. Every dual candidate uses fully
+  cross-receipt-independent proof accounting.
+- B: the set is nonempty. At least one reachable pair of distinct tags is
+  individually ledger-satisfied through overlapping ledgers; C2-C3 still
+  decide the overlap form and whether both may survive treatment.
+
+Recommend B. It preserves the bounded possibility that one deed participates
+in two genuinely distinct relationships, a potential direct Achintya Bheda
+Abheda fit. The exact-two ceiling limits outputs, not evidence compression, so
+later cards must still confront hub-evidence dominance. Example: one current
+`Heat h` may make `P = Defiant Guard g + h` and
+`Q = Returning Cut t + h` individually ledger-satisfied before treatment. B
+requires some exact or related-proof analogue; it does not yet authorize both
+tags to survive treatment or `{P,Q}` to commit.
+
 ## 2026-09-26 semantic-child Relic addressability — RCS-03C3B3A-B selected
+
+**Historical frontier:** B4B-B was subsequently selected and the seventeenth
+prerequisite audit above supersedes this section's next-card guidance.
 
 The owner selected `RCS-03C3B3A-B`: semantic child applications are the only
 objects that may furnish Relic source positions. Canonical B2A causal roots
@@ -9123,9 +9189,13 @@ requiring nonempty repeated same-provenance cross-root support, then B2B2-B,
 making exact `Pi` fully determine build identity. A fifteenth audit split old
 B3 into B3A/B3B. The owner selected B3A-B, making semantic child applications
 the sole addressable layer and pruning B3B. A sixteenth audit split old B4 into
-B4A/B4B; repeated-provenance class support derives B4A positive. Continue at
-registered Relic slot `RCS-03C3B4B` under `SR-03`; `RCS-03C3C`–`RCS-03C3F`,
-expanded `RCS-08`, cause, and agency follow separately.
+B4A/B4B; repeated-provenance class support derives B4A positive. The owner
+selected B4B-B, one nonoverlapping child scale with nonempty authored compound
+support. A seventeenth audit split old C3C into C1-C7 across within-evaluation
+overlap support/form/treatment and distinct same-cut opportunity
+support/overlap/form/treatment. Continue at registered Relic slot `RCS-03C3C1`
+under `SR-03`; C2-C7, C3D-C3F, expanded `RCS-08`, cause, and agency follow
+separately.
 
 R11 begins only
 after R10 completes and first chooses package proximity for R10.7's selected
@@ -9269,7 +9339,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 02:39 UTC — semantic-child Relic addressability selected](docs/handoffs/2026-09-26-0239--relic-semantic-child-addressability-selected.md)**
+[2026-09-26 03:18 UTC — authored-compound Relic child topology selected](docs/handoffs/2026-09-26-0318--relic-authored-compound-topology-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

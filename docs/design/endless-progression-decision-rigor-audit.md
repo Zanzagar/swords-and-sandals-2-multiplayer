@@ -3519,10 +3519,83 @@ root-level addressability, fan-out, claim, reuse, payoff, UI, persistence,
 release, or implementation.
 
 Replacing one counted B4 row with B4A/B4B creates the sixteenth amendment and
-adds one slot but no potential card. The current fifty-nine-slot register has
+adds one slot but no potential card. At that checkpoint the fifty-nine-slot register had
 24 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 22 `DIR-SELECTED`, 2 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`. B4B is the sole active card; C3C
-follows any answer.
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`. B4B was the sole active card; C3C
+would follow any answer.
+
+The owner selected `RCS-03C3B4B-B`. Final child families now use one
+nonoverlapping scale: `K^{compound}_v` is nonempty and `K^{nested}_v` is empty.
+At least one reachable functional child groups multiple primitive semantic
+sites, while other blocks may remain singletons. Grouped member sites are not
+simultaneously addressable descendants. Incomplete compounds furnish nothing;
+keys remain prospective, deterministic, versioned, and source-owned; every
+child retains complete parent lineage. Before further correction, B4B's move
+to `DIR-SELECTED` and old C3C's activation would have produced 23 `SCREEN`, 1
+`OWNER-OPEN`, 8 `PRUNED`, 23 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 24`.
+
+Two read-only named-claim audits independently returned `PARTIALLY BROKEN` on
+the proposition that old C3C was one prerequisite-ready decision. First,
+C3c.45-C/C3c.46-A require a reachable two-receipt result and exact maximum two
+but leave event/source reuse open; B4B-B does not force one child to qualify
+for two receipt tags. Thus shared-eligibility support and fan-out treatment
+were compressed. Second, exact-child reuse and related-proof reuse are
+independent. Distinct children can sit in different receipt ledgers without
+the same proof appearing twice while their complete lineages intersect or they
+share one nonmultiplying authorization/accounting parent. An exact-proof-only
+policy can therefore be bypassed by siblings, class members, aliases, or two
+outputs of one paid operation. Third, one evaluation's multi-receipt ledger and
+two semantically distinct automatic evaluation opportunities coinciding at one
+cut can apply different sharing rules. Only splitting one semantic opportunity
+into callbacks is a representation-invariant non-choice.
+
+This creates the seventeenth prerequisite amendment. Old C3C is a non-counting
+parent for C1 within-evaluation overlap support; C2 conditional exact,
+related, or both-form support; C3 conditional within-evaluation fan-out
+treatment; C4 support for distinct same-cut evaluation opportunities; C5
+conditional cross-opportunity overlap support; C6 conditional exact, related,
+or both-form support across opportunities; and C7 conditional cross-
+opportunity fan-out treatment. C1-A prunes C2-C3. C4-A prunes C5-C7. C3D
+follows only after both routes settle.
+
+For C1, a typed candidate proof ledger assigns one current final B4B child to
+each authored position while satisfying all H/S, phase, freshness, role,
+source, and lineage rules. A tag is **individually ledger-satisfied before
+fan-out treatment** when its ledger would satisfy every upstream source and
+predicate requirement if evaluated alone. That is a pre-treatment structural
+classification, explicitly not a C133/C134 provisionally complete candidate;
+it creates no candidate or commitment. Two ledgers for distinct canonical tags
+overlap if they reuse the exact same final child occurrence, contain distinct
+proofs with intersecting complete lineages, or share one nonmultiplying
+authorization or accounting parent. `O^{intra-overlap}_v` contains reachable
+fixed-evaluation tuples in which both tags are individually ledger-satisfied
+before treatment and their valid pre-treatment ledgers overlap. Only tags
+surviving C3 treatment can proceed into ordinary final-predicate, provisional-
+completion, and commit semantics.
+
+C1-A makes this set empty and requires every dual candidate to use fully
+cross-receipt-independent proof accounting. C1-B makes it nonempty but does not
+let both tags survive treatment; C2-C3 still decide supported overlap form and
+fan-out treatment. Recommend B. It preserves the bounded possibility that one
+deed participates in two distinct relationships, a potential direct ideal
+fit, while the exact-two output ceiling bounds receipts but not evidence
+compression. The serious counterpressure is hub-child dominance and cheaper
+dual-result construction.
+
+The same `Heat h` may, for example, make `P = Defiant Guard g + h` and
+`Q = Returning Cut t + h` individually ledger-satisfied in one evaluation. A
+forbids the completed catalog from containing such a functional overlap; B
+requires at least one exact or related-proof analogue but does not yet let both
+tags survive treatment or allow `{P,Q}` to commit. Same-result duplication
+stays forbidden. Alternate contexts, cuts, Souls, Relic realizations, or reused
+labels cannot construct a witness. Claims remain post-invocation at C3D; later
+reuse remains C3E-C3F; cross-root/team authority remains RCS-08.
+
+Replacing one counted C3C row with seven adds six slots and six potential
+cards. The current sixty-five-slot register has 29 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 23 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 30`. C1 is the sole active card.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

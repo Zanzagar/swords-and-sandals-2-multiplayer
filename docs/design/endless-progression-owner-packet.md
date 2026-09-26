@@ -252,8 +252,13 @@ positions, while their parent roots/classes remain operative lineage and
 grouping identities. A sixteenth prerequisite audit then split old
 RCS-03C3B4 into nontrivial within-parent application-site support and its
 canonical final child-family topology. RCS-03C3B4A is derived positive from
-the already-selected repeated-provenance class witness, and RCS-03C3B4B is the
-active owner choice under SR-03.
+the already-selected repeated-provenance class witness. The owner selected
+RCS-03C3B4B-B: final children use one nonoverlapping scale with at least one
+reachable authored compound. A seventeenth prerequisite audit then split old
+RCS-03C3C into within-evaluation overlap support and form, conditional fan-out
+treatment, and distinct same-cut evaluation-opportunity support, overlap,
+overlap form, and treatment. RCS-03C3C1 is the active owner choice under
+SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -20793,7 +20798,7 @@ decision record remains unchanged.
 > Replacing one counted row with two adds one slot but no potential card. The
 > amended fifty-nine-slot register contains 24 `SCREEN`, 1 `OWNER-OPEN`, 8
 > `PRUNED`, 22 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-> `Phi_SR = 25`. B4B is the sole active card.
+> `Phi_SR = 25`. At that checkpoint B4B was the sole active card.
 
 ### RCS-03C3B4A — nontrivial within-parent semantic-application support — derived nonempty
 
@@ -20845,9 +20850,9 @@ remain beneath the exact-`Pi` class, inherit its complete union lineage, and
 cannot occupy independent positions of one relationship result. B4A grants no
 final grouping, proof selection, nested catalog, fan-out, claim, reuse, payoff,
 UI, persistence, release, or implementation. It moves directly to `DERIVED`;
-B4B is the sole active card.
+B4B was then the sole active card.
 
-### RCS-03C3B4B — canonical semantic-child family topology — active owner choice
+### RCS-03C3B4B — canonical semantic-child family topology — B selected
 
 For each actual cut `e` and parent `p`, let `F^{child}_v(e,p)` be the canonical
 family of nonempty blocks drawn from `S^{app}_v(e,p)`. Each block is one final
@@ -20922,6 +20927,162 @@ Every option obeys the following forced safeguards:
 After any answer, C3C becomes the next active card. An answer moves B4B to
 `DIR-SELECTED` and reduces `Phi_SR` from 25 to 24. The authoritative decision
 record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, one
+nonoverlapping scale with authored compounds.** `K^{compound}_v` is nonempty
+and `K^{nested}_v` is empty. At every actual cut and parent, the final child
+family is one exhaustive partition of the realized primitive semantic sites.
+At least one reachable materially functional child groups multiple sites;
+other children may remain singletons. No grouped site is simultaneously
+addressable as a descendant child at that cut.
+
+`Completed Twinstrike` may therefore become one final child only after its
+prospectively declared opening and return sites both commit. Until then the
+compound furnishes no position; after completion neither member cut is a
+second addressable child. The sites remain truthful distinct content beneath
+one operative compound and parent lineage, a layered **direct** local Souls
+and Simulacra / Achintya Bheda Abheda fit. The cost is deliberately accepted:
+compound authoring loses member-level Relic precision and requires stable
+taxonomy, completion timing, explanation, and balance discipline.
+
+Partition keys remain versioned, prospective, deterministic, and
+source-owned. A target outcome, interruption, Relic, recipe, result, payoff,
+or claim cannot choose or revise them. Every compound inherits the complete
+applicable parent proof lineage. Historical member manifestations, siblings,
+and proofs with intersecting lineage or one shared nonmultiplying
+authorization/accounting parent remain non-independent within one
+relationship result. This answer creates no parent addressability, nested
+child scale, additional position or result, fan-out, claim, consumption,
+reuse, payoff, persistence, release, or implementation authority.
+
+B4B moves from `OWNER-OPEN` to `DIR-SELECTED` and old C3C would ordinarily
+become active. Before the prerequisite correction below, the fifty-nine-slot
+register would contain 23 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 23
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`.
+The authoritative decision record remains unchanged.
+
+> **Seventeenth prerequisite correction, 2026-09-26:** two independent
+> read-only named-claim audits found old C3C unsafe as one card. C3c.45-C and
+> C3c.46-A require a reachable two-receipt result and cap it at two, but both
+> explicitly leave source/event reuse open. B4B-B supplies one canonical child
+> scale, not a cross-tag overlap witness. C133-A through C135-A likewise leave
+> source identity and reuse unresolved.
+>
+> Old C3C compressed three independently variable boundaries. First, the
+> completed catalog may or may not contain any one-evaluation state in which
+> two distinct receipt tags have individually valid proof ledgers that reuse
+> the same child or otherwise overlap in lineage/accounting. Second, exact
+> reuse of one child and use of two distinct but related proofs are different:
+> `Opening Cut` can prove one receipt and `Returning Cut` another without the
+> exact same child appearing twice, while both still carry one operation
+> lineage/payment. Third, two semantically distinct automatic evaluation
+> opportunities may coincide at one cut; sharing inside one evaluation and
+> sharing across those opportunities can differ. Splitting one semantic
+> opportunity into callbacks is never material, but distinct opportunities
+> are not implementation aliases.
+>
+> Old `RCS-03C3C` is therefore a non-counting parent for seven registered rows:
+>
+> 1. `RCS-03C3C1` — within-evaluation cross-receipt proof-overlap support;
+> 2. `RCS-03C3C2` — conditional support for exact-child overlap,
+>    distinct-related-proof overlap, or both;
+> 3. `RCS-03C3C3` — conditional within-evaluation fan-out treatment over the
+>    supported overlap opportunities;
+> 4. `RCS-03C3C4` — support for multiple semantically distinct evaluation
+>    opportunities of one active Relic at one semantic cut;
+> 5. `RCS-03C3C5` — conditional cross-opportunity proof-overlap support;
+> 6. `RCS-03C3C6` — conditional support for exact-child overlap,
+>    distinct-related-proof overlap, or both across opportunities; and
+> 7. `RCS-03C3C7` — conditional cross-opportunity fan-out treatment.
+>
+> C1 is active first. C1-A prunes C2-C3 and continues at C4; C1-B activates
+> C2, then C3. C4-A prunes C5-C7; C4-B activates C5, then applicable C6-C7.
+> C3D follows only after both the within-evaluation and distinct-opportunity
+> routes settle. Replacing one counted C3C row with seven adds six slots and
+> six potential cards. The seventeenth-amendment register contains sixty-five
+> slots: 29 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 23 `DIR-SELECTED`, 2
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`. C1 is the sole active
+> card.
+
+### RCS-03C3C1 — within-evaluation cross-receipt proof-overlap support — active owner choice
+
+This card asks only whether the completed catalog must contain a functional
+one-evaluation situation in which two distinct aligned receipt tags are each
+individually ledger-satisfied before fan-out treatment by proof ledgers that
+overlap. It does **not** yet say whether both tags survive treatment or whether
+both receipts may commit together from that overlap.
+
+For fixed ruleset/catalog version `v`, one active Relic instance, one actual
+evaluation cut `e`, and one fixed operative context `h`, reuse C3c.44-A's
+aligned player/consumer result identity and C3c.45's canonical receipt tags
+`(h,j)`. A **typed candidate proof ledger** for tag `(h,j)` assigns every
+required relationship position one current final B4B child occurrence while
+satisfying that position's authored H/S type, phase, freshness, role, source,
+and lineage rules. It is evaluated before post-invocation claim or consumption.
+
+A tag is **individually ledger-satisfied before fan-out treatment** when its
+typed ledger would satisfy every upstream source and predicate requirement if
+that tag were evaluated alone. This is a structural input classification for
+C1-C3, not a C133/C134 provisionally complete receipt candidate. It creates no
+candidate and commits no result. Only tags that survive the later C3 fan-out
+treatment proceed into the ordinary final-predicate, provisional-completion,
+and sealed-commit path.
+
+Two individually valid ledgers for distinct tags `j_1 != j_2` have
+**cross-receipt proof overlap** when at least one of these is true:
+
+- the exact same final child occurrence appears in both ledgers;
+- distinct child proofs in the two ledgers have intersecting complete proof
+  lineages; or
+- proofs in the two ledgers share one nonmultiplying authorization or
+  accounting parent.
+
+The broad definition prevents an exact-child exclusivity rule from being
+bypassed through sibling children, class members, aliases, or two outputs of
+one payment. It changes no within-receipt rule: one receipt's own positions
+must still be independent under every selected lineage safeguard.
+
+Let `O^{intra-overlap}_v` contain every reachable tuple
+`(e,h,j_1,j_2,L_1,L_2)` where the same authoritative state makes both distinct
+tags individually ledger-satisfied before fan-out treatment under valid
+ledgers `L_1` and `L_2`, and those ledgers overlap as above. Alternate Souls,
+Relic realizations, Charms, source configurations, contexts, or cuts cannot be
+unioned to create a witness. The ledgers are pre-treatment structural inputs,
+not provisionally complete candidates or whichever assignments an outcome-
+favorable resolver later happens to retain.
+
+| Choice | Within-evaluation overlap-support rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — require fully independent receipt ledgers** | `O^{intra-overlap}_v` is empty. Every valid candidate-ledger pair for distinct tags in one evaluation is cross-receipt independent: no functional pair reuses one child, intersects in complete lineage, or shares nonmultiplying authorization/accounting. | A gives the clearest coordination bill: a dual weave must be built from genuinely separate contributions. It blocks hub-evidence compression and makes the exact-two result ceiling correspond to two independently earned relationships. The cost is expressive and sometimes counterintuitive: one truthful deed cannot participate in two simultaneous relationships even when both predicates name it, so content must avoid those overlaps or supply independent replacements. The marginal rule is **neutral/protective**, not a direct ideal realization. | `P = Defiant Guard + Heat` and `Q = Returning Cut + Feint` can both be ledger-satisfied without C1 overlap because all four proofs are cross-receipt independent. No authored context may make one current `Heat` child independently satisfy a position in both P and Q. |
+| **B — require at least one functional overlap opportunity** | `O^{intra-overlap}_v` is nonempty. The completed catalog contains at least one reachable fixed evaluation in which two distinct receipt tags are each individually ledger-satisfied before fan-out treatment and their valid candidate ledgers reuse an exact child or otherwise overlap in full lineage/accounting. Exact versus related-proof support follows at C2; whether the pair may jointly survive treatment follows at C3. | **Recommended.** B preserves the possibility that one deed can stand in two genuinely distinct relational readings while remaining one deed—the strongest potential **direct** Achintya Bheda Abheda fit at this boundary. It creates interesting hub/keystone buildcraft under the already-selected two-receipt ceiling. But the ceiling limits outputs, not evidence compression: one easy ubiquitous child could make dual results too cheap. B therefore creates real collision, disclosure, solver, and non-dominance obligations even if C3 later denies simultaneous fan-out. | In one fixed evaluation, `P = Defiant Guard g + Heat h` and `Q = Returning Cut t + the same Heat h` are each individually ledger-satisfied before treatment. The exact `h` proof is common while `g` and `t` are independent. B requires some witness of this kind but does not yet permit both tags to survive treatment or `{P,Q}` to commit. |
+
+A/B are mutually exclusive and exhaustive because the reachable functional
+overlap set is empty or nonempty. A is not satisfied by hiding an overlap
+behind receipt priority after both tags were ledger-satisfied; B is not
+satisfied by a dormant tag pair, two alternate contexts, a reused label, or
+incomplete analysis. An owner-written replacement may propose a genuinely
+different support promise.
+
+Every option retains C3c.44-A's distinct truthful receipt identities,
+C3c.46-A's final maximum of two receipts, C133-A/C134-A prompt sealed
+commitment, and C135-A break-before-same-tag-rearm rule. A B4B compound is one
+final proof only after all member sites commit; its hidden members cannot
+manufacture overlap. No candidate refreshes H, prolongs S, resurrects expired
+evidence, or changes its final child assignment.
+
+C1 grants no simultaneous fan-out, proof-selection priority, claim,
+consumption, later reuse, cross-opportunity use, cross-combatant or cross-Relic
+authority, payoff, UI realization, persistence, release, or implementation.
+C2-C3 retain within-evaluation form and permission. C4-C7 retain distinct
+same-cut opportunity behavior. C3D-C3F retain claims and later reuse, and
+RCS-08 retains cross-root/team authority. Engine batching or callback layout
+cannot turn one semantic evaluation opportunity into several; C4 concerns
+only separately authored opportunities.
+
+Selecting B moves C1 to `DIR-SELECTED`, makes C2 active, and reduces
+`Phi_SR` from 30 to 29. Selecting A additionally prunes C2-C3, makes C4 active,
+and reduces `Phi_SR` from 30 to 27. The authoritative decision record remains
+unchanged.
 
 ## Session protocol and evidence
 
