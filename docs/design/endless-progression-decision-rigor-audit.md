@@ -4034,6 +4034,122 @@ card. If B4A admits randomness, B4B must first prove a reachable law with at
 least two nonconstant tag marginals; one random component beside constants
 cannot furnish a nontrivial correlation choice.
 
+The owner selected `RCS-03C3C3B4A-A`. Every canonical complete bound routing-
+stance law is therefore deterministic at every reachable fixed nonrandom
+selector input: `G^{route-stoch}_v` is empty and each `kappa_w(X)` is a point
+mass. This does not make a stance static. Under B2-B, changing another
+contender or its ledger domain may still change the selected tuple; fixing the
+complete input and stance fixes the answer. The rule applies only to ledger
+routing, so it neither prohibits combat RNG nor turns earlier random
+acquisition or already-committed configuration state into routing randomness.
+B4A moves to `DIR-SELECTED` and B4B to `PRUNED`.
+
+Three bounded read-only named-claim audits then tested whether old C3C3C and
+C3C3D were actually permission questions after singleton routing. They were
+not prerequisite-ready. `RCS-03C3C2-C` requires exact-child and
+distinct-related support over **all valid pre-selector candidate-ledger
+pairs**, including assignments the resolver does not prefer. B1-A, however,
+sends only one selected complete tuple downstream. Neither B2-B's contextual
+responsiveness, B3A-B's universal participant configuration, B3B1-A's closed
+stance menus, nor B4A-A's determinism requires any lawful stance ever to select
+either supported overlap form. A structural witness can therefore exist
+without furnishing even one opportunity on which a permission law could act.
+
+The exact-form countermodel is concrete. Let P have
+`L_h={Guard g, Heat h}` and `L_v={Guard g, Vow v}`, and let Q have
+`L_q={Return t, Heat h}`. `(L_h,L_q)` supplies selected
+`RCS-03C3C2-C`'s exact structural support, yet every lawful stance may select
+`(L_v,L_q)` at this input. Required stance differentiation and B2-B
+responsiveness can occur at other reachable inputs. An analogous distinct-
+related witness can also remain unselected while the catalog satisfies
+`RCS-03C3C2-C` elsewhere. Thus “no exact tuple is ever selected” and “an exact
+tuple is selected but denied joint survival” are materially different states:
+only the latter reaches the later denied-pair disposition route. The same
+distinction applies to related form.
+
+The twenty-fourth prerequisite correction defines the missing post-routing
+domain. For version `v`, one **resolved pair opportunity** comes from exactly
+one reachable actual evaluation, one lawful complete bound stance or
+configuration, its deterministic selected complete tuple, and one unordered
+pair of distinct contender tags in that tuple. Pair order, aliases, generated
+IDs, callback splits, serialization, reload, and replay do not multiply the
+opportunity. Alternate unselected ledgers, stance bindings, contexts, cuts,
+Souls, or Relic realizations cannot be unioned to construct one. Several shared
+children between the same two tags remain one opportunity; a selected tuple
+with three distinct tags instead supplies three unordered pair opportunities.
+
+Let `E^{resolved-exact}_v` contain resolved pairs whose selected authoritative
+ledgers reuse one canonical final child. Let `R^{resolved-related}_v` contain
+resolved pairs whose selected ledgers use distinct children with intersecting
+complete lineage or one shared nonmultiplying authorization/accounting parent.
+One pair may belong to both sets when its ledgers contain exact reuse and a
+separate distinct-related connection. Old C and D become non-counting parents
+for four registered rows:
+
+1. `RCS-03C3C3C1` asks whether post-routing authoritative exact-form exposure
+   is empty or nonempty;
+2. conditional `RCS-03C3C3C2` restricts the one joint-survival permission set
+   over exposed exact pairs to empty, universal, or nonempty proper;
+3. `RCS-03C3C3D1` asks whether post-routing authoritative distinct-related
+   exposure is empty or nonempty; and
+4. conditional `RCS-03C3C3D2` restricts that same permission set over exposed
+   related pairs to empty, universal, or nonempty proper.
+
+C1-A prunes C2 and activates D1; C1-B activates C2, whose answer then
+activates D1. D1-A prunes D2, while D1-B activates it. C2 and D2 are
+restrictions of one opportunity-level compatibility set `P^{intra}_v`, never
+independent form grant/veto votes. A hybrid exact-and-related pair has one
+permission bit. If independently stated universal and empty restrictions
+would disagree on a hybrid, the selected resolved hybrid intersection must be
+empty rather than acquiring two votes or a hidden composition rule.
+`P^{intra}_v` membership means only that the pair is compatible to co-survive
+this fan-out gate; it creates no C133/C134 provisional candidate and commits no
+result. Nonmembership means only “not both,” leaving E/F or H/I to decide the
+surviving disposition. Permission denial may never make the deterministic
+selector retry or switch to an unselected ledger.
+
+Before presenting C2 or D2, a fresh prerequisite screen must make the
+permission law's authority explicit: intrinsic, participant-prebound, or
+stochastic permission are not interchangeable implementations of one answer.
+B4A-A closed selector randomness only. A random allow/deny draw or a separate
+participant-bound permission policy cannot hide under “selective,” while a
+live proc-time permission choice remains incompatible with cut-atomic
+automatic invocation. Exact actors, lock timing, and random support require
+their proper owner route if the screen finds that they change legal player
+action or normative outcomes.
+
+The arithmetic exposes why the split does not merely rename rows. Applying
+B4A-A and B4B's pruning to the prior seventy-nine-row register, then opening
+old C, would produce 33 `SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`, 31
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
+Replacing the two counted old C/D rows with four counted C1/C2/D1/D2 rows adds
+two slots and two unresolved potentials. The corrected register therefore has
+**eighty-one rows**: 35 `SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`, 31
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. C1 is
+the sole active card.
+
+C1 now presents one prerequisite-ready binary choice. A makes
+`E^{resolved-exact}_v` empty: `RCS-03C3C2-C`'s exact overlap remains valid
+structural proof space, but every lawful stance routes around it whenever an
+exact pair could become authoritative. This is the strongest hub-control and
+proof-separation countercase, at the cost of making the earlier exact-support
+promise permanently latent; it prunes C2 and activates D1. B makes
+`E^{resolved-exact}_v` nonempty: at least one reachable actual evaluation and
+lawful bound stance selects an authoritative exact-overlap pair. It grants no
+joint survival, exact identity, count, prevalence, or universal stance
+coverage; it activates C2 for the authority screen above.
+
+Recommend C1-B. It turns the already-selected exact-child grammar into
+playable routing texture rather than dormant proof structure and lets one deed
+remain one child while becoming operative in two distinct relationship
+readings, a potential direct *Achintya Bheda Abheda* fit at exposure. In the
+running example, Dissonance may select independent Vow while Chorus selects
+shared Heat; those names and that placement are illustrative, not mandated.
+The costs are hub-proof compression, selector-injection pressure, explanation
+burden, and the risk that overlap seeking becomes the obvious premium route.
+A stronger rule requiring every Relic or every stance to expose exact reuse is
+a replacement path, not part of B.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

@@ -1,5 +1,55 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 deterministic Relic routing — RCS-03C3C3B4A-A selected
+
+The owner selected `RCS-03C3C3B4A-A`: every canonical complete bound routing-
+stance law is deterministic on every reachable fixed nonrandom selector input.
+The same stance may still respond to another contender or ledger-domain change
+under B2-B, but a held-fixed complete input never changes tuple through chance.
+This governs the ledger selector only; combat RNG, acquisition randomness, and
+earlier committed random state remain outside the answer. B4B is pruned.
+
+Three bounded read-only named-claim audits then found that old C3C3C and
+C3C3D conflated two different states: an overlap tuple can exist before routing
+yet never be selected, or it can be selected and then denied joint survival.
+Only the latter reaches the downstream denied-pair disposition route. The
+selected rules admit a concrete countermodel in which exact-overlap and
+independent tuples both exist, every lawful stance selects the independent
+tuple at that input, and required stance differentiation and cross-tag response
+occur elsewhere.
+
+Old C and D are therefore non-counting parents for four rows. C1/D1 ask whether
+any post-routing authoritative exact/distinct-related pair is exposed; C2/D2
+conditionally ask whether exposed pairs may jointly survive. Each opportunity
+is one unordered pair of distinct contender tags in the one selected complete
+tuple of one reachable actual evaluation under one bound stance/configuration.
+Aliases, callback splits, reload/replay, alternate unselected ledgers, and
+multiple shared children between the same tags do not multiply it. A pair that
+is both exact and related has one shared permission bit, never two form votes.
+Permission means only compatibility to co-survive this gate; it creates no
+candidate, commitment, payoff, or retry.
+
+The amended eighty-one-slot register contains 35 `SCREEN`, 1 `OWNER-OPEN`, 10
+`PRUNED`, 31 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. `RCS-03C3C3C1` is the sole active card. The authoritative
+decision record remains unchanged.
+
+C1 asks whether the already-required pre-routing exact-overlap grammar must
+ever become the selector's authoritative route:
+
+- A: `E^{resolved-exact}_v` is empty. Exact tuples exist structurally, but every
+  lawful bound stance routes around them. C2 prunes and D1 follows.
+- B: `E^{resolved-exact}_v` is nonempty. At least one reachable bound stance
+  selects an exact-overlap pair, without yet granting joint survival.
+  Recommend B: it makes exact overlap playable stance texture instead of a
+  permanently latent proof form, while keeping permission as the next separate
+  choice.
+
+Before C2 or D2 is presented, audit whether its permission law is intrinsic,
+participant-prebound, or stochastic. B4A-A settled selector randomness only;
+random allow/deny and participant permission policy cannot be hidden inside
+“selective.” Denial never makes the selector retry or switch ledgers.
+
 ## 2026-09-26 closed whole-policy Relic routing — RCS-03C3C3B3B1-A selected
 
 The owner selected `RCS-03C3C3B3B1-A`: every routing-capable versioned Relic
@@ -9711,7 +9761,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 05:39 UTC — closed whole-policy Relic routing selected](docs/handoffs/2026-09-26-0539--relic-whole-stance-routing-selected.md)**
+[2026-09-26 06:02 UTC — deterministic Relic routing selected](docs/handoffs/2026-09-26-0602--relic-deterministic-routing-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

@@ -283,8 +283,11 @@ The owner selected RCS-03C3C3B3B1-A: every routing-capable contract exposes
 only a finite versioned menu of indivisible authored whole-policy routing
 stances. B3B2 is therefore pruned. A twenty-third prerequisite audit clarified
 that stochastic support is classified over complete bound stance laws rather
-than whole contracts or individual evaluation cases. RCS-03C3C3B4A is the
-active owner choice under SR-03.
+than whole contracts or individual evaluation cases. The owner selected
+RCS-03C3C3B4A-A: every complete bound stance law is deterministic across its
+reachable domain, so B4B is pruned. A twenty-fourth prerequisite audit then
+separated post-routing exact/related exposure from conditional joint-survival
+permission. RCS-03C3C3C1 is the active owner choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -21847,7 +21850,7 @@ unchanged.
 > `PRUNED`, 30 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 > `Phi_SR = 36`**. B4A is the sole active card.
 
-### RCS-03C3C3B4A — stochastic support across complete bound routing laws — active owner choice
+### RCS-03C3C3B4A — stochastic support across complete bound routing laws — direction selected
 
 B4A asks whether the participant can bind a routing stance whose complete law
 remains genuinely stochastic at some reachable fixed upstream input. A law is
@@ -21887,6 +21890,121 @@ selected cut-atomic automatic invocation. Any answer moves B4A to
 prerequisite screen, because one stochastic tuple law need not have two
 nonconstant tag marginals and therefore may provide no nontrivial correlation
 question. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **A,
+deterministic whole-stance laws only.** `G^{route-stoch}_v` is empty. For every
+canonical complete bound routing-stance law and every reachable fixed
+nonrandom selector input, the selected complete ledger tuple is a point mass.
+The same stance may still respond differently when another contender or its
+ledger domain changes under B2-B, but the same complete input and stance never
+produce a different tuple through chance.
+
+This protects the already-selected direct relationship between enduring Relic
+grammar and distinct participant orientation without adding an opaque chance
+arbiter. The marginal B4A fit is **neutral/protective**: deterministic routing
+does not itself instantiate the ideal, but makes the relational response
+learnable, attributable, and replay-stable. It costs the system oracular
+variance and makes exact policy solving easier. This answer governs only the
+ledger selector; it does not prohibit combat RNG, random acquisition, or an
+earlier committed random state elsewhere in the game.
+
+B4A moves to `DIR-SELECTED` and B4B moves to `PRUNED`. Old C3C3C would
+ordinarily become `OWNER-OPEN`; the prerequisite correction below repairs its
+domain before presentation. The authoritative decision record remains
+unchanged.
+
+> **Twenty-fourth prerequisite correction, 2026-09-26:** three bounded
+> read-only named-claim audits found that old C3C3C and C3C3D were not
+> prerequisite-ready permission cards. C2-C guarantees exact-child and
+> distinct-related overlap among **valid pre-selector ledger pairs** and
+> explicitly quantifies ledgers beyond the resolver's preferred assignment.
+> B1-A later makes only one selected complete tuple authoritative. B2-B,
+> B3A-B, B3B1-A, and B4A-A constrain that selector but do not require any
+> lawful stance to choose either overlap-form witness.
+>
+> A complete countermodel preserves every selected rule: P has
+> `L_h={Guard g, Heat h}` exact-overlapping Q's
+> `L_q={Return t, Heat h}` and also independent
+> `L_v={Guard g, Vow v}`; every lawful stance selects `(L_v,L_q)` at this
+> input, while required stance differentiation and cross-tag responsiveness
+> occur elsewhere. Exact structural support exists, but no exact tuple reaches
+> treatment. “No exact tuple is selected” and “an exact tuple is selected but
+> denied joint survival” cannot be one option: only the second enters the later
+> denied-pair disposition route.
+>
+> For version `v`, define one **resolved pair opportunity** from one reachable
+> actual evaluation, one lawful complete bound stance/configuration, its one
+> selected complete tuple, and one unordered pair of distinct contender tags
+> in that tuple. Pair order, aliases, generated IDs, callback splits,
+> serialization, reload, and replay do not multiply opportunities. Alternate
+> unselected ledgers, alternate stance bindings, contexts, cuts, Souls, or
+> Relic realizations cannot be unioned. Several shared children between the
+> same two tags still form one pair opportunity; if three tags later exist,
+> their three unordered pairs remain separate opportunities.
+>
+> Let `E^{resolved-exact}_v` contain resolved pairs whose selected ledgers reuse
+> one canonical final child. Let `R^{resolved-related}_v` contain resolved pairs
+> whose selected ledgers use distinct children with intersecting complete
+> lineage or one shared nonmultiplying authorization/accounting parent. A pair
+> may belong to both. Old C and D are therefore non-counting parents for four
+> registered rows:
+>
+> 1. `RCS-03C3C3C1` — post-routing authoritative exact-form exposure support;
+> 2. `RCS-03C3C3C2` — conditional exact-form joint-survival permission;
+> 3. `RCS-03C3C3D1` — post-routing authoritative distinct-related exposure
+>    support; and
+> 4. `RCS-03C3C3D2` — conditional related-form joint-survival permission.
+>
+> C1-A prunes C2 and activates D1; C1-B activates C2, whose answer then
+> activates D1. D1-A prunes D2; D1-B activates it. C2/D2 remain restrictions
+> of one opportunity-level compatibility set `P^{intra}_v`, never independent
+> form votes. A hybrid exact-and-related pair has one permission bit;
+> incompatible universal-versus-empty answers force the resolved hybrid
+> intersection empty rather than inventing grant/veto composition. A true bit
+> means the pair is compatible to co-survive this fan-out gate, not that either
+> tag is yet a C133/C134 candidate or commits. A false bit means only “not
+> both”; E/F or H/I later decides the surviving result.
+>
+> Before either permission card is presented, its prerequisite screen must
+> make any intrinsic, participant-prebound, or stochastic permission-law
+> authority explicit. B4A-A settled selector randomness only. A separate
+> participant permission policy or random allow/deny draw is not hidden inside
+> “selective”; a live proc-time choice remains incompatible with cut-atomic
+> automatic invocation. No denial may make the selector retry or switch to an
+> unselected ledger.
+>
+> Replacing two counted rows with four adds two slots and potential cards.
+> After B4A-A's ordinary reduction and B4B's pruning, the amended register
+> contains **eighty-one slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`,
+> 31 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 36`. C1 is the sole active card.
+
+### RCS-03C3C3C1 — authoritative exact-overlap exposure after routing — active owner choice
+
+C2-C already requires a valid exact-overlap ledger pair somewhere before
+routing. C1 asks whether at least one exact pair must remain operative after a
+lawful whole stance's deterministic selector chooses the one authoritative
+tuple. It grants no permission for both tags to survive together.
+
+| Choice | Post-routing exact-exposure rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no authoritative exact-overlap route** | `E^{resolved-exact}_v` is empty. Exact-overlap ledger tuples remain structurally supported under C2-C, but every reachable lawful bound stance selects a different tuple whenever exact reuse would otherwise become authoritative. | A is the strongest proof-separation and hub-control countercase. One final child never reaches fan-out treatment as the operative proof for two tags, so exact reuse becomes a routing hazard players learn to avoid rather than a possible dual-weave route. The fit is **neutral/protective**: one deed may be truthfully legible to two relationships in latent proof space, but it never participates in both at the operative treatment boundary. The cost is making the earlier exact-support promise permanently latent and narrowing stance identity around avoidance. | P has exact-overlapping `L_h` and independent `L_v` beside Q's `L_q`, but every lawful stance selects `(L_v,L_q)`. The shared-Heat tuple remains valid counterfactual proof structure and never reaches permission. |
+| **B — require an authoritative exact-overlap route** | `E^{resolved-exact}_v` is nonempty. At least one reachable actual evaluation and lawful complete bound stance selects a tuple in which one unordered tag pair's authoritative ledgers reuse the same final child. Exact identities, counts, stance coverage, and prevalence remain AUTHOR/SPEC. | **Recommended.** It makes the already-selected exact-child grammar playable routing space instead of dead structure and lets a stance deliberately carry one deed into two distinct relationship readings. This is a **potential direct** unity-with-difference fit at exposure: the one child and two real tag identities are jointly operative, although C2 must still decide whether both may survive. It gives stances meaningful scarce-proof/hub texture. Costs are hub-proof compression, selector-injection pressure, explanation burden, and the risk that overlap-seeking becomes the obvious premium route. | On `X={(L_v,L_q),(L_h,L_q)}`, Dissonance may select independent Vow while Chorus selects shared Heat. B requires some reachable witness of that kind, not those names or universal exact exposure. |
+
+A/B are mutually exclusive and exhaustive because
+`E^{resolved-exact}_v` is empty or nonempty. B requires one functional selected
+witness; a dormant exact tuple, unselected alternate ledger, alternate stance
+not actually bound in the witness, callback alias, or post-denial retry does not
+count. A does not erase C2-C's structural exact-support answer; it fixes that
+support as counterfactual to every authoritative route.
+
+C1 selects no exact pair identity, routing priority, joint-survival permission,
+survivor, substitute, claim, consumption, later reuse, payoff, persistence,
+release, or implementation. A stronger guarantee that every Relic or stance
+expose an exact route is a replacement path, not hidden inside B. Any answer
+moves C1 to `DIR-SELECTED`. A prunes C2 and activates D1; B activates C2 for a
+fresh prerequisite screen. The authoritative decision record remains
+unchanged.
 
 ## Session protocol and evidence
 

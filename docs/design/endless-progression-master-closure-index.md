@@ -2387,9 +2387,77 @@ support adds no stronger ideal fit by itself. If randomness is admitted, B4B
 receives another prerequisite screen because one random tuple component does
 not create a nontrivial factorization-versus-correlation question.
 
+**Post-answer screen and twenty-fourth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3B4A-A`: every canonical complete bound routing-
+stance law is deterministic on every reachable fixed nonrandom selector input.
+The same stance can still respond differently when another contender or its
+ledger domain changes under B2-B; holding the complete input and stance fixed
+always returns one complete tuple. This selection governs the Relic ledger
+selector only. It neither prohibits combat RNG, random acquisition, or an
+earlier committed random state elsewhere in the game nor supplies a stronger
+ideal fit by itself. B4A moves to `DIR-SELECTED` and B4B is pruned.
+
+Three bounded named-claim audits then found that old C3C3C and C3C3D were not
+prerequisite-ready permission cards. C2-C guarantees exact-child and distinct-
+related overlap among valid **pre-selector** ledger pairs, while B1-A makes
+only the selected tuple authoritative downstream. None of B2-B, B3A-B,
+B3B1-A, or B4A-A requires a lawful stance to select either overlap-form
+witness. For example, P can have exact-overlapping
+`L_h={Guard g, Heat h}` beside Q's `L_q={Return t, Heat h}` and also an
+independent `L_v={Guard g, Vow v}`. Every lawful stance can select
+`(L_v,L_q)` at this input while satisfying required stance differentiation and
+cross-tag responsiveness elsewhere. Exact structural support then exists, but
+no exact pair reaches treatment. That is materially different from selecting
+an exact pair and denying it joint survival; only the latter enters the denied-
+pair result route.
+
+For version `v`, one resolved pair opportunity comes from one reachable actual
+evaluation, one lawful complete bound stance/configuration, its deterministic
+selected complete tuple, and one unordered pair of distinct contender tags in
+that tuple. Pair order, aliases, generated IDs, callback splits,
+serialization, reload, and replay do not multiply opportunities. Alternate
+unselected ledgers, stance bindings, contexts, cuts, Souls, or Relic
+realizations cannot be unioned. Several shared children between the same pair
+still form one opportunity; three selected contender tags would instead yield
+three unordered pair opportunities. Let `E^{resolved-exact}_v` contain those
+opportunities whose selected ledgers reuse one canonical final child. Let
+`R^{resolved-related}_v` contain those whose selected ledgers use distinct
+children with intersecting complete lineage or one shared nonmultiplying
+authorization/accounting parent. One opportunity may belong to both sets.
+
+Old `RCS-03C3C3C` and `RCS-03C3C3D` therefore become non-counting parents for
+four registered rows: C1 post-routing exact exposure, conditional C2 exact
+permission, D1 post-routing distinct-related exposure, and conditional D2
+related permission.
+C1-A prunes C2 and activates D1; C1-B activates C2, whose answer then activates
+D1. D1-A prunes D2; D1-B activates it. C2 and D2 remain restrictions of one
+opportunity-level compatibility set, never independent form votes. A hybrid
+exact-and-related pair has one permission bit; incompatible universal-versus-
+empty restrictions make the hybrid intersection empty rather than inventing a
+grant/veto composition rule. True means only that the pair is compatible to
+co-survive this fan-out gate, not that either tag is yet a candidate or commits.
+False means only “not both”; E/F or H/I still decides the result. Denial can
+never retry the selector or switch to an unselected ledger.
+
+Before either permission row is presented, its prerequisite screen must expose
+whether the permission law is intrinsic, participant-prebound, or stochastic.
+B4A-A settled selector randomness only; a participant permission policy or
+random allow/deny draw cannot hide inside “selective,” and a live proc-time
+choice remains incompatible with cut-atomic automatic invocation.
+
+Replacing two counted rows with four adds two slots and potential cards. The
+amended register has eighty-one slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 10
+`PRUNED`, 31 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. `RCS-03C3C3C1` is the sole active card. Recommend B, required
+nonempty authoritative exact-overlap exposure: it makes the selected exact-
+child grammar playable routing texture and a potential direct unity-with-
+difference fit, at the cost of proof-hub compression, selector-injection
+pressure, explanation burden, and a possible premium-route trap. B grants no
+joint-survival permission.
+
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has seventy-nine
+To make that route genuinely finite, the remaining C3c pass has eighty-one
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -2445,11 +2513,13 @@ overcompression.
 | `RCS-03C3C3B3A` | Material participant-configurability prevalence across routing-capable versioned Relic selector contracts: empty, universal, or nonempty proper | `DIR-SELECTED`; B requires every routing-capable contract to have at least two prospectively bindable participant routing stances/settings with materially different completed laws on some held-fixed reachable product |
 | `RCS-03C3C3B3B1` | Constructive participant routing-language prevalence: closed whole-policy stances only, bounded construction on every contract, or coexistence | `DIR-SELECTED`; A makes every routing-capable contract expose only a finite versioned menu of indivisible authored whole-policy routing stances |
 | `RCS-03C3C3B3B2` | Participant-composed context-branching prevalence among constructive-capable routing contracts | `PRUNED`; B3B1-A admits no participant construction and therefore no participant-composed context branching |
-| `RCS-03C3C3B4A` | Stochastic support across canonical complete bound whole-stance routing laws: deterministic-only, universally stochastic-capable, or coexistence | `OWNER-OPEN`; a law is stochastic-capable iff some reachable held-fixed multiplicity-positive input has at least two positive-probability tuple outputs; recommend deterministic-only; exact trigger incidence/odds are AUTHOR/SPEC/TUNE, while disclosure, acquisition, lock, migration, realization, replay, evaluation, and retry route to RCS-02/RCS-09/RCS-13/RCS-15-RCS-18 and EP-A02/SC-12 |
-| `RCS-03C3C3B4B` | Product-factorized versus correlated joint tuple draws when stochastic singleton selection exists | `SCREEN`; conditional on B4A admitting randomness and a prerequisite screen finding at least two nonconstant tag marginals; otherwise `PRUNED` or `DERIVED`; context-stable marginals at B2 do not settle joint coupling |
-| `RCS-03C3C3C` | Exact-form restriction of the one within-evaluation joint-survival permission set | `SCREEN`; follows the complete applicable B1-B4A/B4B authoritative-ledger route; classify exact opportunities as permission-empty, universal, or nonempty proper without creating a separate form vote |
-| `RCS-03C3C3D` | Distinct-related-form restriction of the same within-evaluation joint-survival permission set | `SCREEN`; follows C3C3C; classify related opportunities as permission-empty, universal, or nonempty proper; one exact-and-related tuple retains one permission bit |
-| `RCS-03C3C3E` | Result disposition and survivor cardinality when two individually satisfied overlapping tags are denied joint survival | `SCREEN`; follows C3C3C-C3C3D; prunes if every supported overlap is jointly permitted; must distinguish mutual cancellation, retention/substitution, and any admitted coexistence without exceeding the selected result contract |
+| `RCS-03C3C3B4A` | Stochastic support across canonical complete bound whole-stance routing laws: deterministic-only, universally stochastic-capable, or coexistence | `DIR-SELECTED`; A makes every canonical complete bound stance law deterministic on every reachable fixed nonrandom selector input; B2 relational responsiveness remains legal, while exact routing-law authoring, disclosure, acquisition, lock, migration, realization, replay, evaluation, and retry stay routed to their existing owners |
+| `RCS-03C3C3B4B` | Product-factorized versus correlated joint tuple draws when stochastic singleton selection exists | `PRUNED`; B4A-A admits no stochastic routing law and therefore no joint-draw coupling question |
+| `RCS-03C3C3C1` | Post-routing authoritative exact-form exposure support among resolved pair opportunities | `OWNER-OPEN`; choose empty or nonempty `E^{resolved-exact}_v`; recommend B nonempty so exact overlap reaches treatment as playable routing texture, without granting joint survival |
+| `RCS-03C3C3C2` | Exact-form restriction of the one resolved-pair joint-survival permission set | `SCREEN`; conditional on C1-B and a fresh authority/randomness prerequisite screen; classify exposed exact opportunities as permission-empty, universal, or nonempty proper without creating a separate form vote or selector retry |
+| `RCS-03C3C3D1` | Post-routing authoritative distinct-related-form exposure support among resolved pair opportunities | `SCREEN`; follows C1 and applicable C2; choose empty or nonempty `R^{resolved-related}_v` without granting joint survival |
+| `RCS-03C3C3D2` | Distinct-related-form restriction of the same resolved-pair joint-survival permission set | `SCREEN`; conditional on D1-B and a fresh authority/randomness prerequisite screen; classify exposed related opportunities as permission-empty, universal, or nonempty proper; one exact-and-related pair retains one permission bit |
+| `RCS-03C3C3E` | Result disposition and survivor cardinality when two individually satisfied overlapping tags are denied joint survival | `SCREEN`; follows applicable C2/D2 permission restrictions; prunes only if no selected overlap reaches treatment or every exposed form is universally permitted; must distinguish mutual cancellation, retention/substitution, and any admitted coexistence without exceeding the selected result contract |
 | `RCS-03C3C3F` | Authority selecting the survivor or legal substitute for a denied pair | `SCREEN`; conditional on C3C3E admitting a positive nonunique result; otherwise `PRUNED` or `DERIVED`; exact priority keys remain later only after authority is settled |
 | `RCS-03C3C3G` | Support for at least three simultaneously individually ledger-satisfied receipt tags before within-evaluation treatment | `SCREEN`; follows the pair route; choose empty or nonempty support without treating engine callbacks or alternate ledger assignments as additional contenders |
 | `RCS-03C3C3H` | Output-cardinality topology for a three-plus contender state under the exact-two final receipt ceiling | `SCREEN`; conditional on `RCS-03C3C3G` positive; otherwise `PRUNED`; options must be relative to actually feasible survivor subsets so an impossible pair is never a fake branch |
@@ -2631,17 +2701,26 @@ evaluation cases and adds no row. The current register has **seventy-nine
 slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 9 `PRUNED`, 30 `DIR-SELECTED`, 2
 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current `Phi_SR = 36`, and
 `RCS-03C3C3B4A` is the sole active card.
+`RCS-03C3C3B4A-A` then selected deterministic complete bound routing-stance
+laws and pruned B4B, which would ordinarily reduce the potential to 34. The
+twenty-fourth prerequisite correction makes post-routing overlap exposure a
+separate prerequisite to form-specific permission. It replaces old C and D
+with C1/C2 and D1/D2, adding two counted slots and two potential cards. The
+amended register has **eighty-one slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 10
+`PRUNED`, 31 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
+`Phi_SR = 36`, and `RCS-03C3C3C1` is the sole active card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-six owner cards under this twenty-three-times-corrected charter and will
+thirty-six owner cards under this twenty-four-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
 `RCS-03C3B2B`, `RCS-03C3B3`, `RCS-03C3B4`, `RCS-03C3C`, `RCS-03C3C3B`,
-`RCS-03C3C3B3`, `RCS-03C3C3B3B`, `RCS-03C3C3B4`, and `RCS-04`
+`RCS-03C3C3B3`, `RCS-03C3C3B3B`, `RCS-03C3C3B4`, `RCS-03C3C3C`,
+`RCS-03C3C3D`, and `RCS-04`
 remain readable parent aliases only; `RCS-03C3C3` is now also a non-counting
 parent alias. They are not additional counted slots.
 
@@ -2657,7 +2736,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 79 frozen candidate slots; current `Phi_SR = 36` after `RCS-03C3C3B3B1-A` selects authored whole-policy stances, prunes context branching, and the twenty-third correction makes complete bound stance laws the stochastic-support denominator | At most 36 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 81 frozen candidate slots; current `Phi_SR = 36` after `RCS-03C3C3B4A-A` selects deterministic whole-stance routing, prunes stochastic coupling, and the twenty-fourth correction splits resolved overlap exposure from conditional permission | At most 36 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
