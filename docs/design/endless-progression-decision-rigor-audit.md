@@ -4403,18 +4403,33 @@ condition-dependent build families even before exact content placement is
 authored.
 
 If `R` is nonempty, E2 asks whether any responsive law has a matched
-player-causal witness. Such a witness holds the canonical law, versioned Relic
-and relationship identities, bound stance, prior committed state, selected
-exact pair and proof structure, and every independently variable permission
-input outside one legal upstream participant or counterplay action's complete
-authoritative factual delta fixed. That action, including all inseparable
-consequences, must flip the bit. Splitting the same delta across stored fields,
-or combining those fields, cannot change classification. Variation only by
-tag/relationship identity, selected tuple, an unalterable flag, or an earlier
-randomly chosen persistent variant is not that witness. E2 is binary
-empty/nonempty: one witness creates the new legal action type; universal
-saturation is AUTHOR/SPEC unless a distinct nonactionable-responsive build
-purpose later earns reopening.
+player-causal witness. Such a witness compares two lawful non-oracular policies
+from one common authoritative upstream decision state. They are identical at
+every independently revisable decision coordinate except one materially
+operative participant/counterplayer choice. Neither arm may be forced or
+illegal inaction. Later realized actions and facts may differ only through the
+complete direct, indirect, delayed, reactive, inseparable, and stochastic
+causal closure of that intervention. A prospectively bound finite episode can
+be the one choice; several independently revisable later choices cannot be
+bundled after the fact.
+
+Fix one positive-support semantic causal background, every non-descendant
+exogenous variable and other actor decision rule, and the canonical law,
+versioned Relic and relationship identities, bound stance, law-defining
+committed variant, eventual selected exact pair, and proof structure. Every
+permission input outside the causal closure remains fixed and the certain bits
+must differ. At least one changed permission-read fact needs authoritative
+upstream truth conditions and lifecycle independent of the desired permission
+bit. A material cost does not cleanse a disguised permission toggle. The
+causal relation must be prospectively versioned and audit-traceable rather than
+inferred from a favorable result; storage fields, callback layout, or eager
+versus delayed derivation cannot change classification. E2 remains binary
+empty/nonempty. If unobserved stochastic consequences mediate a witness, the
+decision must change reachable bit support or its conditional distribution
+under the lawful observation history; one positive-support crossover with an
+unchanged policy distribution is insufficient. One witness creates the causal
+gameplay topology; universal saturation is AUTHOR/SPEC unless a distinct
+nonactionable-responsive build purpose later earns reopening.
 
 If `K` is nonempty, E3 classifies its always-allow subset as empty, all, or
 nonempty proper. These are always-deny only, always-allow only, or both stable
@@ -4428,8 +4443,9 @@ and every other combination is mixed. Asking incidence again would duplicate
 rather than advance the frontier.
 
 E1-A prunes E2 and activates E3. E1-B activates E2 and prunes E3. E1-C makes
-E2 and E3 independent siblings; present E2 first because it changes a direct
-player/counterplay action. A factual action under E2 does not violate C2A-A:
+E2 and E3 independent siblings; present E2 first because it decides whether a
+material player/counterplay decision can cause a response. A factual decision
+under E2 does not violate C2A-A:
 the participant changes an input to the same intrinsic law, not the law through
 a permission setting. Deterministic response also supplies no nonconstant
 stochastic marginal and cannot activate G2.
@@ -4446,9 +4462,56 @@ the admitted families meaningful.
 Replacing counted C2E with E1/E2/E3 adds two rows and two potential cards.
 After C2D-A selects one former open row and E1 opens, the corrected register has
 89 rows: 37 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 34 `DIR-SELECTED`, 2
-`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. E1 is the current
-presented card and D1 remains independently ready but queued. The authoritative
-decision record remains unchanged.
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. At that checkpoint E1
+was the presented card and D1 remained independently ready but queued. The
+authoritative decision record remains unchanged.
+
+The owner selected E1-C. Responsive and context-invariant intrinsic exact-
+permission laws therefore coexist: `R^{exact-resp}_v` and `K_v` are both
+nonempty. This guarantees neither player-causal response nor either constant
+polarity. E1 moves to `DIR-SELECTED`; E2 and E3 become independent applicable
+siblings, with E2 first. D1 remains independently ready but queued.
+
+Two distinct post-answer audits then attacked one named claim each: whether
+E2's empty/nonempty support split was exhaustive, and whether its witness
+created real play rather than formal variation. Both returned partially broken
+because the one-action definition could false-negative bound multi-step or
+delayed causation and false-positive a forced move, illegal inaction, unrelated
+lucky trace, or permission-only flag. Their first repairs disagreed over whole-
+policy comparison and prospective player disclosure. Cross-challenge resolved
+both without adding a row.
+
+The exact causal unit is one independently revisable lawful decision. Compared
+policies may have different later traces only through the full causal closure
+of that intervention; if later decisions are independently revisable, they
+cannot be collected post hoc. A prospectively committed finite episode counts
+when its later member decisions are already bound. Stochastic consequences may
+qualify only under one named positive-support causal background with all non-
+descendant exogenous variables and other policies fixed. Independent random
+histories are correlation, not a counterfactual witness, and a hidden crossover
+with unchanged policy-level bit distribution is not a playable lever. A
+changed fact must possess upstream truth and lifecycle independent of the desired permission;
+`spend stamina to allow doubles` remains forbidden even if costly or delayed.
+
+Prospective semantic specification and auditability belong to E2. Actual
+player disclosure remains RCS-02/SR-10: an eventual E2-B direction would impose
+a compatibility obligation to make the factor understandable to the correct
+actor before the first irreversible divergence and attributable afterward,
+without selecting exact actor, UI, communication, or forecast now. The split
+remains A `M^{exact-causal}_v=∅` versus B
+`M^{exact-causal}_v≠∅`. Recommend B because it guarantees at least one
+real play-or-counterplay lever under a fixed intrinsic covenant. Its direct
+ideal fit occurs when one shared deed remains continuous while preserving or
+breaking a distinct covenant fact changes whether it may jointly participate
+in two relationships. Risks are denial loops, allied griefing, quarterbacking,
+token witnesses, and explanation burden; RCS-17/RCS-18 must reject strategically
+irrelevant or exploit-dominant realizations.
+
+No new row is required. After E1-C and E2's activation, the register has 89
+rows: 36 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 35 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. E2 is the current
+presented card; E3 and D1 remain ready but queued. The authoritative decision
+record remains unchanged.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

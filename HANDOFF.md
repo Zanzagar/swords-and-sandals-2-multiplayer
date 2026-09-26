@@ -1,5 +1,70 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 responsive and steadfast exact-permission laws — RCS-03C3C3C2E1-C selected
+
+The owner selected `RCS-03C3C3C2E1-C`: complete responsive intrinsic exact-
+permission laws coexist with complete context-invariant laws. At least one law
+returns both certain bits across its reachable domain, while at least one
+distinct law always denies or always allows throughout its domain. This selects
+no exact law identity, player-causal lever, or constant polarity. E2 and E3 are
+both applicable; E2 is presented first. D1 remains independently ready but
+queued.
+
+Two distinct bounded read-only post-answer audits attacked E2's completeness
+and gameplay meaning, then cross-challenged their repairs. The empty/nonempty
+owner boundary holds, but its old one-action witness did not: it could reject a
+bound finite episode or delayed consequence and admit a forced move, illegal
+inaction, unrelated lucky trace, or permission-only flag.
+
+The repaired E2 witness compares two lawful non-oracular policies from one
+common authoritative upstream decision state. They differ at exactly one
+independently revisable material participant/counterplayer choice. Later
+actions, reactions, delays, costs, and stochastic effects may differ only
+through that intervention's complete causal closure. A prospectively bound
+finite episode can be the one choice; independently revisable later choices
+cannot be bundled after the fact. Hold one positive-support causal background,
+all non-descendant exogenous variables and other actor decision rules, and the
+same law/version, Relic/relationship identities, stance, law-defining variant,
+eventual selected exact pair, and proof structure fixed. Inputs outside the
+closure remain fixed and the certain bits differ. If unobserved stochastic
+consequences mediate the witness, the decision must change reachable bit
+support or its conditional distribution under lawful observations; one hidden
+crossover with unchanged policy distribution is insufficient.
+
+At least one changed permission-read fact must have upstream truth conditions
+and lifecycle independent of the desired permission result. A costly or delayed
+`allow doubles` command remains forbidden participant permission control.
+Versioned audit-traceable causality is required, and field/callback layout
+cannot change classification. Actual player disclosure remains RCS-02/SR-10;
+if E2-B is chosen, those later rules must make the operative factor
+understandable before the correct actor's first irreversible divergence and
+attributable afterward.
+
+The eighty-nine-row register now contains 36 `SCREEN`, 1 `OWNER-OPEN`, 13
+`PRUNED`, 35 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`. `RCS-03C3C3C2E2` is the current presented card. E3 and D1
+remain ready but queued. The authoritative decision record remains unchanged.
+
+E2 asks whether any responsive law contains a real causal play-or-counterplay
+lever while the intrinsic law and eventual exact pair remain fixed:
+
+- A: no qualifying witness exists. Responsive laws vary only with immutable,
+  exogenous, automatic, forced, structurally different, or otherwise
+  nonqualifying context. This is simpler but risks descriptive lookup tables or
+  opaque gotchas.
+- B: at least one qualifying witness exists. Recommend B: it guarantees one
+  causal covenant lever without requiring every responsive law, bearer control,
+  both allied agency and opponent counterplay, immediate effects, or guaranteed
+  upstream success. For example, `Guard` preserves an independently meaningful
+  Ember Seal while `Burst` spends it for damage; under the same Ashen law and
+  eventual shared-Heat pair, the complete continuations yield allow versus
+  deny. Costs include explanation burden, cheap denial loops, allied griefing,
+  and quarterbacking.
+
+Either answer makes E3 the next presented sibling and reduces `Phi_SR` to 36.
+Deterministic factual response does not activate G2, and changing a real input
+to the same law does not violate C2A-A.
+
 ## 2026-09-26 deterministic intrinsic exact permission — RCS-03C3C3C2D-A selected
 
 The owner selected `RCS-03C3C3C2D-A`: every canonical complete intrinsic
@@ -18,12 +83,12 @@ deny law builds exist.
 
 Old C2E is now a non-counting parent for three rows. E1 classifies complete
 laws whose reachable deterministic image is `{0,1}` as absent, universal, or
-coexisting with context-invariant laws. Conditional E2 asks whether any
-responsive law has a matched player-causal factual witness while law, Relic/
-relationship identities, stance, prior state, and selected exact pair remain
-fixed, as do all independent inputs outside one legal action's complete factual
-delta. Inseparable consequences belong to that delta, and changing its field
-representation cannot change classification. Conditional E3 classifies
+coexisting with context-invariant laws. Conditional E2, as repaired after
+E1-C, compares lawful policies that differ at one independently revisable
+material decision while preserving the same law and eventual exact pair. It
+carries that decision's complete causal closure, fixes all non-descendant
+inputs, excludes forced moves, unrelated randomness, and permission-only
+toggles, and requires opposite certain bits. Conditional E3 classifies
 context-invariant laws as always-deny only, always-allow only, or both. E1/E3
 project to the seven nonempty class-support combinations; E2 is orthogonal
 where responsive laws exist, yielding eleven terminal paths. Global exact
@@ -34,11 +99,12 @@ E2/E3 independent siblings and queues E2 first. Deterministic response is not
 stochastic coupling and does not activate G2. A player action changing a factual
 input to the same intrinsic law does not violate C2A-A.
 
-The amended eighty-nine-slot register contains 37 `SCREEN`, 1 `OWNER-OPEN`, 13
+At that checkpoint the amended eighty-nine-slot register contained 37 `SCREEN`, 1 `OWNER-OPEN`, 13
 `PRUNED`, 34 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 38`. `RCS-03C3C3C2E1` is the current presented card. D1 remains
-independently prerequisite-ready but queued. The authoritative decision record
-remains unchanged.
+`Phi_SR = 38`. `RCS-03C3C3C2E1` was the presented card. D1 remained
+independently prerequisite-ready but queued. The newer section records E1-C
+and the repaired E2 frontier. The authoritative decision record remains
+unchanged.
 
 E1 asks whether deterministic intrinsic permission laws are steadfast,
 responsive, or both:
@@ -9931,7 +9997,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 07:09 UTC — deterministic intrinsic exact permission selected](docs/handoffs/2026-09-26-0709--relic-deterministic-permission-selected.md)**
+[2026-09-26 07:37 UTC — responsive and steadfast permission laws coexist](docs/handoffs/2026-09-26-0737--relic-responsive-law-coexistence-selected.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

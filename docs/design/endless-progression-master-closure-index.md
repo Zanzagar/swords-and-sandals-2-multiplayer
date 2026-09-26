@@ -2590,14 +2590,25 @@ Catalogs with the same global mixed incidence but different support for a
 constant always-allow or always-deny law admit different guaranteed builds.
 
 A responsive law may nevertheless vary only with an immutable or externally
-fixed fact. Its separate matched-actionability screen holds version/law, Relic
-and relationship identities, stance, prior committed state, selected exact
-pair and proof structure, and every independently variable permission input
-outside one legal upstream player/counterplay action's complete authoritative
-factual delta fixed. That action, including all inseparable consequences, must
-flip the bit; splitting or combining the same delta into stored fields cannot
-change classification. This is a factual-input policy, not participant
-reconfiguration of the intrinsic law and not a live permission prompt.
+fixed fact. Its separate matched-actionability screen compares two lawful non-
+oracular policies from one common authoritative upstream decision state. They
+are identical at every independently revisable decision coordinate except one
+material participant/counterplayer choice; neither arm is forced or illegal
+inaction. Later actions and facts may differ only through that intervention's
+complete direct, indirect, delayed, reactive, inseparable, and stochastic
+causal closure. Fix one positive-support semantic causal background, every
+non-descendant exogenous variable and other actor decision rule, and the same
+law/version, Relic/relationship identities, stance, law-defining committed
+variant, eventual selected exact pair, and proof structure. Permission inputs
+outside the closure remain fixed and the certain bits differ. At least one
+changed fact must have upstream truth and lifecycle independent of the desired
+permission result; a costed permission-only toggle is invalid. Versioned causal
+semantics and representation invariance prevent post-result or field-layout
+classification. With unobserved stochastic mediation, the decision must change
+reachable bit support or its conditional distribution under the lawful
+observation history; one favorable crossover under an unchanged policy
+distribution is insufficient. This changes a factual input to the intrinsic
+law; it is not participant reconfiguration or a live permission prompt.
 
 Old C2E therefore becomes a non-counting parent for E1 responsive-law
 prevalence, conditional E2 matched player-causal response support, and
@@ -2615,8 +2626,36 @@ AUTHOR/SPEC/TUNE.
 Replacing one counted C2E row with three adds two rows and two potential cards.
 After recording C2D-A and opening E1, the register has eighty-nine slots: 37
 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 34 `DIR-SELECTED`, 2 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. E1 is the current presented card;
-D1 remains independently ready but queued.
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. At that checkpoint E1 was the
+presented card; D1 remained independently ready but queued.
+
+**Post-answer screen and twenty-eighth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3C2E1-C`: responsive laws and context-invariant
+laws coexist. Thus `R^{exact-resp}_v` is a nonempty proper subset of the
+complete intrinsic-law set, while constant polarity remains unsettled. E1
+moves to `DIR-SELECTED`; E2 and E3 are both applicable, with E2 first.
+
+Two distinct bounded read-only audits, followed by mutual cross-challenge,
+upheld E2's empty/nonempty support boundary but broke its one-action witness.
+That wording rejected a bound finite episode or delayed causal consequence and
+admitted a forced move, illegal inaction, unrelated random coincidence, or a
+permission-only flag. The repaired witness uses one independently revisable
+lawful decision intervention. A prospectively bound finite episode can be that
+one choice; several independently revisable future choices cannot be bundled
+afterward. Compared policies fix every other decision coordinate and causal
+background, carry the intervention's complete causal closure, preserve the
+same law and eventual selected pair/proof, and differ in their deterministic
+bits. A changed permission-read fact needs upstream truth conditions and
+lifecycle independent of the desired permission. Exact actor, disclosure,
+trigger, success rate, and saturation remain RCS-02/SR-10 or
+AUTHOR/SPEC/TUNE. Any stochastic witness needs a later semantic-coupling proof;
+two unrelated lucky traces and a distribution-neutral hidden crossover never
+qualify. This semantic repair adds no row.
+
+After E1-C and E2's activation, the register has eighty-nine slots: 36
+`SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 35 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. E2 is the current presented card; E3
+and D1 remain prerequisite-ready but queued.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -2684,8 +2723,8 @@ overcompression.
 | `RCS-03C3C3C2C1` | Constructive participant permission-language prevalence across all participant-configurable permission forces | `PRUNED`; C2A-A leaves no participant permission language, coupled or independent, to classify |
 | `RCS-03C3C3C2C2` | Participant-composed context-branching prevalence among constructive-capable permission forces | `PRUNED`; C2A-A leaves no participant-constructed permission force and therefore no participant-composed permission branching |
 | `RCS-03C3C3C2D` | Stochastic support across canonical complete bound permission laws after applicable configuration and language rows | `DIR-SELECTED`; A makes every complete intrinsic law deterministic on every reachable fixed exact opportunity while permitting certain context response; no permission draw, retry, or reroute remains |
-| `RCS-03C3C3C2E1` | Responsive-law prevalence across complete deterministic intrinsic exact-permission laws | `OWNER-OPEN`; classify laws whose reachable exact-domain image is `{0,1}` as empty, universal, or nonempty proper; differing law identities and unreachable branches cannot manufacture response |
-| `RCS-03C3C3C2E2` | Matched player-causal factual-response support among responsive exact-permission laws | `SCREEN`; conditional on E1-B/C; classify empty or nonempty support by one legal action's complete authoritative factual delta, including inseparable consequences, while holding law, Relic/relationship identities, stance, prior state, selected exact pair/structure, and all independent inputs outside that delta fixed; field splitting or combining cannot change classification; exact triggers and saturation remain AUTHOR/SPEC/TUNE |
+| `RCS-03C3C3C2E1` | Responsive-law prevalence across complete deterministic intrinsic exact-permission laws | `DIR-SELECTED`; C requires responsive laws and context-invariant laws to coexist, without selecting actionability or constant polarity |
+| `RCS-03C3C3C2E2` | Matched player/counterplay-causal factual-response support among responsive exact-permission laws | `OWNER-OPEN`; classify the qualifying responsive-law subset as empty or nonempty using two lawful non-oracular policies that differ at exactly one independently revisable material decision, hold one causal background and all non-descendant inputs fixed, preserve the same law/identities/stance/eventual exact pair/proof, carry the decision's complete delayed/reactive/stochastic factual closure, and produce opposite certain bits; forced moves, unrelated random traces, distribution-neutral hidden crossovers, and permission-only toggles do not qualify; exact triggers and saturation remain AUTHOR/SPEC/TUNE |
 | `RCS-03C3C3C2E3` | Constant-law polarity among context-invariant intrinsic exact-permission laws | `SCREEN`; conditional on E1-A/C; classify the always-allow subset of the nonempty constant-law class as empty, universal, or nonempty proper, yielding always-deny only, always-allow only, or coexistence |
 | `RCS-03C3C3D1` | Post-routing authoritative distinct-related-form exposure support among resolved pair opportunities | `SCREEN`; independently prerequisite-ready after C1-B because exposure precedes permission, but queued behind the current exact-permission traversal; choose empty or nonempty `R^{resolved-related}_v` without granting joint survival |
 | `RCS-03C3C3D2` | Distinct-related-form restriction of the same resolved-pair joint-survival permission set | `SCREEN`; conditional on D1-B and its own fresh authority/randomness prerequisite screen; intentionally queued behind exact-first traversal but not logically dependent on C2E, and one exact-and-related pair retains one permission bit |
@@ -2908,16 +2947,24 @@ queued.
 `RCS-03C3C3C2D-A` then selects deterministic intrinsic permission laws. The
 twenty-seventh correction replaces counted C2E with responsive-law E1,
 conditional matched-actionability E2, and conditional constant-polarity E3,
-adding two rows and two unresolved potentials. The current register has
-**eighty-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 34
+adding two rows and two unresolved potentials. At that checkpoint the register
+had **eighty-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 34
 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
-E1 is the current presented card and D1 remains ready but queued.
+E1 was the presented card and D1 remained ready but queued.
+`RCS-03C3C3C2E1-C` then selects coexistence of responsive and context-
+invariant intrinsic laws. The twenty-eighth correction preserves E2's binary
+support boundary but repairs its witness from one action to one independently
+revisable lawful decision and its full causal closure. No row is added. The
+current register has **eighty-nine slots**: 36 `SCREEN`, 1 `OWNER-OPEN`, 13
+`PRUNED`, 35 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`. E2 is the current presented card; E3 and D1 are ready but
+queued.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-eight owner cards under this twenty-seven-times-corrected charter and will
+thirty-seven owner cards under this twenty-eight-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -2939,7 +2986,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 89 frozen candidate slots; current `Phi_SR = 38` after `RCS-03C3C3C2D-A` makes exact permission deterministic and the twenty-seventh correction separates responsive-law prevalence, player-actionable response, and constant-law polarity | At most 38 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 89 frozen candidate slots; current `Phi_SR = 37` after `RCS-03C3C3C2E1-C` requires responsive and context-invariant law families and the twenty-eighth correction repairs the matched causal witness | At most 37 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
