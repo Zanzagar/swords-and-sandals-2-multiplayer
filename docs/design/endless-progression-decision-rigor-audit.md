@@ -5385,6 +5385,85 @@ severance reopens it with A; failure of both reopens E5-C through its recorded
 fallback. E1 selects no receipt identity, width, authority, compensation,
 payoff, exact law, actor, randomness, claim, rarity, or implementation.
 
+Zanzagar then explicitly delegated the direction call (“your call pending deep
+thought”). Codex selected E1-C after three distinct read-only attacks on
+gameplay policy, information/anti-grief feasibility, and downstream systemic
+coherence. This provenance matters: it is an owner-authorized direction
+selection, not an explicit acceptance of normative record text.
+
+The audits established one credible non-token existence witness. A disclosed
+**Severed Chorus** package favors independent proof routing and cancels a
+collision, while a distinct disclosed **Fractured Concord** package favors
+deliberate proof convergence into a genuinely different continuation. The
+comparison must equalize unrelated package value. Each family must retain
+matchups or policies in which it is preferred; cancellation used only as a
+novice tax, compensation bribe, avoidable expert downside, or voluntary
+self-handicap fails. A positive result that weakly dominates cancellation,
+reconstructs both original entitlements, or adds an ignorable bit also fails.
+
+C gains two semantic information/agency guards without stealing later
+implementation authority. Before every affected player's last informed
+reversible commitment, the bound disposition family and each fact that can
+switch cancellation versus positivity must be truthfully available. The pair,
+law, switching fact, and result class must be attributable afterward. No cheap
+unilateral teammate action may force cancellation after another affected
+player crosses that point. Prospective avoidance, bilateral conditions, and
+meaningful contested cost remain possible later mechanisms; E1 selects none.
+RCS-02/SR-10 retain decision-holder and exact presentation authority, while
+RCS-17/RCS-18 retain comprehension, policy, solver/RL, balance, exploit, and
+playtest thresholds. Compensation cannot repair failed agency or teaching.
+
+The B/A fallbacks remain, with one strengthened upstream trigger: if cheap
+false-bit coercion stays abusive even when the settlement is positive, E1-B is
+not a cure and E5-C must reopen through its recorded fallback. E1-C creates no
+same-opportunity chooser. Different prospectively bound laws may populate the
+two result families while each fixed opportunity remains total and unique, so
+F does not activate merely from E1-C.
+
+E1 moves to `DIR-SELECTED` and E2 opens. The 102-row register now has 34
+`SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 46 `DIR-SELECTED`, 3 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+
+Two post-answer named-claim audits then tested E2. Because E1-C makes the
+positive domain nonempty and C3c.46-A caps every result at two receipts, let
+`D^{deny,2}_v={o in D^{deny,+}_v:|Y(o)|=2}`. Exactly three branches remain:
+
+- A: `D^{deny,2}_v=∅`; every positive denied output is singleton;
+- B: `D^{deny,2}_v=D^{deny,+}_v`; every positive denied output is two-wide; or
+- C: `∅⊊D^{deny,2}_v⊊D^{deny,+}_v`; singleton and double positive outputs
+  coexist.
+
+C3c.45-C does not derive E2-C because its focused/co-result witnesses range
+over all `E+`, not the positive denied restriction. E2-A opens E3 and prunes
+E4; E2-B prunes E3 and opens E4; E2-C keeps both applicable and presents E3
+first. Exact identity remains E3/E4 and AUTHOR/SPEC. Catalog-level mixed widths
+do not create F authority; one fixed opportunity must retain several lawful
+outputs after prospective binding.
+
+The gameplay audit recommends E2-A. Ordinary Relic design already requires
+focused and co-result contexts, caps global width at two, and broadly exposes
+dual-weave access. Singleton-only denial therefore adds a distinct and honest
+0-or-1 refusal silhouette instead of repeating dual weave inside the collision
+lane. It limits result-count dominance and forced-overlap upside while leaving
+E3's original-versus-substitute question as the meaningful next fork. A still
+needs E3 to prevent one preferred heir or near-equivalent substitute from
+laundering denial.
+
+E2-B can support a dramatic sever-or-refract fantasy, but every positive false
+bit would retain the maximum two materially meaningful receipts; it is the
+hardest branch to distinguish from allowed dual weave and makes cancellation
+look catastrophically inferior. E2-C admits sacrifice, singleton continuation,
+and double fracture, but likely creates a 0<1<2 power ladder with cancellation
+as trap, singleton as consolation, and double as premium. Its denied-double
+family must prove marginal policy value unavailable from ordinary dual weave,
+optimized singleton viability, deliberate cancellation, and resistance to
+cheap teammate steering before C becomes preferable. Width by itself provides
+no direct standing-ideal fit; E3/E4 identity and lineage must earn that locally.
+
+E2 selects no identity, mapping, actor, randomness, value, payoff, claim,
+rarity, or implementation. It is the sole presented card. The authoritative
+decision record remains unchanged.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

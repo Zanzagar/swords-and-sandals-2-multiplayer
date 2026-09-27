@@ -344,7 +344,11 @@ selected guarded RCS-03C3C3D2E5-C: steadfast compatibility and steadfast
 refusal coexist, with B/A/upstream reopening exactly as the card's viability
 failures require. A thirty-second prerequisite correction then split the
 overcompressed denied-pair result row into four finite support-topology rows.
-RCS-03C3C3E1 is the current owner-facing choice under SR-03.
+Under Zanzagar's explicit delegation, a three-angle deep audit selected
+guarded RCS-03C3C3E1-C: cancellation and positive denied-pair dispositions
+coexist, with strengthened last-reversible-commitment, attribution, and anti-
+grief obligations. RCS-03C3C3E2 is the current owner-facing choice under
+SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -23674,7 +23678,7 @@ result composition, and total output-selection authority.
 > `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 45 `DIR-SELECTED`, 3 `DERIVED`, 1
 > `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**. E1 is the sole presented card.
 
-### RCS-03C3C3E1 — positive-incidence topology after a denied pair — active owner choice
+### RCS-03C3C3E1 — positive-incidence topology after a denied pair — direction selected
 
 Let `D^{deny}_v` be the nonempty complete domain of prospective pair-local
 disposition outcomes reached after one realized false joint-survival bit under
@@ -23710,8 +23714,98 @@ steadfast-refusal policy has failed and reopens through its recorded fallback.
 E1 selects no original survivor, substitute family, output width, exact law,
 context mapping, actor, randomness, choice timing, compensation, payoff,
 claim, later reuse, rarity, release placement, or implementation. Either B or
-C opens E2; A prunes E2-E4 and positive-output authority in F. Any answer moves
-E1 to `DIR-SELECTED`. The authoritative decision record remains unchanged.
+C opens E2; A prunes E2-E4 and positive-output authority in F. Before the
+answer, any branch would move E1 to `DIR-SELECTED`. The authoritative decision
+record remains unchanged.
+
+**Direction answer — selected by Codex under Zanzagar's explicit 2026-09-26
+delegation (“your call pending deep thought”):** **C, cancellation and positive
+denied-pair dispositions coexist, with the complete conditionality below.**
+Thus `∅⊊D^{deny,+}_v⊊D^{deny}_v`. At least one reachable pair-local denied
+outcome emits no aligned receipt and at least one emits one or two truthful
+aligned receipts. The witnesses may be prospectively bound to different laws
+or contexts; C creates no live chooser, randomness, or same-opportunity
+ambiguity by itself.
+
+Three distinct read-only attacks tested gameplay value, information/anti-grief
+feasibility, and downstream E2-E4/F coherence. C survived only conditionally.
+Its clean existence witness is not “more variety”: **Severed Chorus** creates a
+separation policy in which players route independent proofs and an overlap
+burns both results, while **Fractured Concord** creates a transmutation policy
+in which players deliberately converge proofs into a genuinely different
+continuation. Each must own real favorable matchups after unrelated package
+value is equalized. A cancellation case used only as a novice tax, compensation
+bribe, voluntary self-handicap, or downside experts route away everywhere
+fails. A positive case that weakly dominates cancellation, reconstructs both
+original entitlements, or adds an ignorable consolation bit also fails.
+
+The information and agency conditions are semantic requirements on C, not a
+premature UI or actor selection. Before every affected player's **last informed
+reversible commitment**, the bound disposition family and every fact capable
+of switching cancellation versus positivity must be truthfully available to
+that player; after settlement, the pair, law, switching fact, and result class
+must be attributable. No cheap unilateral teammate act may force cancellation
+after another affected player passes that point. Later design may satisfy this
+through prospective avoidance, bilateral conditions, or meaningful contested
+cost; E1 chooses none. RCS-02/SR-10 still own decision holder, exact information
+surface, and presentation, while RCS-17/RCS-18 own novice-forecasting,
+causal-explanation, non-dominance, policy, solver/RL, exploit, and playtest
+thresholds. Compensation cannot repair failed agency or comprehension.
+
+If cancellation or coexistence fails those tests while an honest positive
+denial policy remains viable, reopen E1 with B. If every positive result
+launders denial while deliberate severance remains viable, reopen with A. If
+cheap false-bit coercion remains abusive even with positive settlement, or
+neither family remains viable, follow E5-C's recorded fallback rather than
+pretending E1-B solved the upstream problem.
+
+E1 moves to `DIR-SELECTED`; E2 becomes `OWNER-OPEN`. The 102-row register now
+contains 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 46 `DIR-SELECTED`, 3
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+
+Two further read-only audits tested E2 after C. The topology audit re-derived
+the nonempty positive domain, exact width-two cap, three exhaustive branches,
+E3/E4/F dependencies, and all register arithmetic. The gameplay audit found a
+strong asymmetry: ordinary Relic design already guarantees focused/co-result
+topology and broad dual-weave access, so denial need not duplicate that promise.
+No hidden width, identity, provenance, or authority card remains inside E2.
+
+### RCS-03C3C3E2 — positive denied-output width topology — active owner choice
+
+E1-C makes `D^{deny,+}_v` nonempty. C3c.46-A gives every member width one or
+two. Define
+`D^{deny,2}_v={o in D^{deny,+}_v:|Y(o)|=2}`. E2 asks whether positive
+denial always compresses to one receipt, always produces a two-receipt
+transformation, or supports both. It does not choose original/substitute
+identity, exact mapping, value, payoff, or authority.
+
+| Choice | Positive denied-output width rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — singleton-only positive denial** | `D^{deny,2}_v=∅`. Every positive denied disposition emits exactly one aligned receipt. Combined with E1-C, the pair-local result grammar is `{}` or one receipt. E3 opens and E4 prunes. | **Recommended production direction.** A makes “not both” mechanically honest and immediately readable: refusal either sacrifices the collision or preserves/transmutes exactly one continuation. It distinguishes denial from the already-selected ordinary dual weave, limits receipt-count dominance and forced-overlap upside, and spends the next decision on the meaningful identity question. Width alone is **neutral/protective**; a later genuine singleton substitute may become a direct ideal fit if the denied relation materially continues in a truly different result. The remaining risk is a preferred singleton that economically launders denial and makes cancellation the novice trap. | Severed Chorus settles `{}`. A positive Fractured Concord settlement emits exactly one `X`; E3 later decides whether `X` is one original tag, a genuine substitute, or whether both singleton kinds exist in the catalog. |
+| **B — double-only positive denial** | `D^{deny,2}_v=D^{deny,+}_v`. Every positive denied disposition emits exactly two distinct aligned receipts. Because `{P,Q}` is forbidden, every such result contains at least one genuine substitute. E3 prunes and E4 opens. | B creates a dramatic **sever-or-refract** grammar: denial yields either nothing or a transformed dual weave. It may support a rich fracture/reconstitution archetype, but it is the hardest branch to keep honest. A false bit still yields the maximum two materially meaningful receipts, duplicates the system's flagship dual-weave promise, magnifies payoff-access and farming pressure, makes cancellation look catastrophically inferior, and is awkward to teach as “not both.” Any ideal fit must be earned later by identity/lineage; two outputs do not prove it. | A positive collision emits either one retained original plus a genuine scar/result `{P,S}` or two genuine transformed receipts `{S1,S2}`. E4, not E2, chooses which composition families exist. No positive denial may emit a singleton. |
+| **C — singleton and double positive denial coexist** | `∅⊊D^{deny,2}_v⊊D^{deny,+}_v`. At least one positive denied result is singleton and at least one is two-wide. With E1-C, all three widths `{0,1,2}` occur. E3 and E4 both remain applicable and are presented one at a time. | **Higher-complexity stretch, not the default fallback.** C can support sacrifice, heir/fusion, and fracture as three precommitted build philosophies, but it recreates the focused/co-result split inside the narrower denial lane. Because every extra receipt is materially real, the likely degeneration is a simple power ladder: cancellation as trap, singleton as consolation, double as premium. It carries the largest teaching, UI, balance, selector-injection, teammate-grief, and authoring burden. Coexistence is only aggregate ideal fit. Promote C only if a denied-double policy adds fun unavailable from ordinary dual weaving while optimized singleton and cancellation policies remain chosen. | Three prospectively disclosed treatments settle comparable denied pairs as `{}`, `{X}`, and `{U,V}`. Exact identities and contract mapping remain later; a hidden roll among the three is not implied. |
+
+A/B/C are mutually exclusive and exhaustive because `D^{deny,+}_v` is
+nonempty and its width-two subset is empty, all of it, or a nonempty proper
+subset. C3c.45-C's global focused/co-result witnesses do not settle this
+denied-pair restriction. Catalog-level width coexistence does not activate F;
+F opens only if one fixed prospectively bound opportunity retains several
+lawful outputs.
+
+Every counted receipt retains C3c.44-A/C3c.45's truthful player identity,
+nonconstant reachability, distinctness, and material consumer obligation.
+Therefore a second receipt cannot be dismissed as decoration when defending B
+or C. Any denied-double branch must establish a marginal build/policy purpose
+beyond ordinary dual weave, preserve honest loss or transformation of at least
+one original entitlement, and resist cheap forced-denial farming. Exact
+compensation, payoff magnitude, and identity remain later and cannot rescue a
+failed width policy.
+
+E2 selects no original/substitute family, exact receipt, survivor, mapping,
+actor, randomness, choice timing, value, payoff, claim, rarity, release slice,
+or implementation. A opens E3 and prunes E4; B prunes E3 and opens E4; C leaves
+both applicable, with E3 presented first and E4 queued. The authoritative
+decision record remains unchanged.
 
 ## Session protocol and evidence
 

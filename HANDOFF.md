@@ -1,5 +1,76 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 delegated guarded denial coexistence; positive width is next
+
+Zanzagar explicitly delegated the E1 direction call (“your call pending deep
+thought”). After distinct gameplay, information/anti-grief, and systemic-
+coherence attacks, Codex selected guarded `RCS-03C3C3E1-C`. Cancellation and
+positive denied-pair dispositions coexist:
+`∅⊊D^{deny,+}_v⊊D^{deny}_v`.
+
+C survived because it can support two real policies rather than merely more
+outcomes. A disclosed **Severed Chorus** package favors independent proof
+routing and burns a collision; a distinct disclosed **Fractured Concord**
+package favors deliberate convergence into a genuinely changed continuation.
+After unrelated package value is equalized, each must retain matchups or
+policies in which it is preferred. Cancellation as novice tax, compensation
+bribe, avoidable expert downside, or self-handicap fails. A positive outcome
+that weakly dominates cancellation, reconstructs both original entitlements,
+or adds an ignorable bit fails.
+
+The selected C has strengthened semantic information and agency conditions.
+Before every affected player's **last informed reversible commitment**, the
+bound disposition family and every fact that can switch cancellation versus
+positivity must be truthfully available. The pair, law, switching fact, and
+result class must be attributable afterward. No cheap unilateral teammate act
+may force cancellation after another affected player crosses that boundary.
+Later cards still own the holder, surface, exact authority, compensation,
+payoff, and evaluation thresholds; E1 chooses none.
+
+Fallback remains explicit. If cancellation/coexistence fails while honest
+positive denial remains viable, reopen E1 with B. If positive settlement
+launders denial while deliberate severance remains viable, reopen with A. If
+cheap false-bit coercion remains abusive even with positive settlement, or
+neither family works, reopen E5-C through its recorded fallback rather than
+pretending B solved the upstream problem.
+
+E1 moves to `DIR-SELECTED`; E2 becomes `OWNER-OPEN`. The 102-row register now
+has 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 46 `DIR-SELECTED`, 3 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. The authoritative decision record
+remains unchanged.
+
+Two post-answer audits upheld E2 as one atomic three-way card. Let
+`D^{deny,2}_v={o in D^{deny,+}_v:|Y(o)|=2}`. Because every positive result has
+width one or two:
+
+- **A — singleton-only:** `D^{deny,2}_v=∅`. Every positive denial emits exactly
+  one aligned receipt. **Recommended.** With E1-C, refusal has a clean 0-or-1
+  silhouette: sacrifice or one heir/transmutation. This keeps “not both”
+  honest, distinguishes denial from ordinary dual weave, limits receipt-count
+  dominance and grief, opens E3, and prunes E4. A preferred singleton can still
+  launder denial, so E3 remains substantive.
+- **B — double-only:** `D^{deny,2}_v=D^{deny,+}_v`. Every positive denial emits
+  exactly two materially real receipts, necessarily including a substitute.
+  This supports a dramatic sever-or-refract fantasy but is hardest to keep
+  honest: denial still yields the global maximum, duplicates dual weave,
+  magnifies payoff-access/farming pressure, and makes cancellation look
+  catastrophic. E3 prunes and E4 opens.
+- **C — singleton and double coexist:**
+  `∅⊊D^{deny,2}_v⊊D^{deny,+}_v`. Alongside E1-C, widths 0, 1, and 2 all occur.
+  This can support sacrifice, heir/fusion, and fracture, but likely becomes a
+  0<1<2 power ladder—trap, consolation, premium—with the greatest teaching,
+  UI, balance, selector-injection, teammate-grief, and authoring burden. E3 and
+  E4 both remain applicable.
+
+Width alone has no direct *Achintya Bheda Abheda* fit; later identity/lineage
+must make participation and difference real. C becomes preferable only if a
+denied-double archetype adds policy value unavailable from ordinary dual weave
+while optimized singleton and cancellation policies remain chosen and cheap
+teammate steering is impossible. Catalog coexistence alone never activates F.
+
+E2 chooses no identity, survivor, substitute, mapping, actor, randomness,
+value, payoff, claim, rarity, or implementation. Ask for A, B, or C.
+
 ## 2026-09-26 guarded stable polarities selected; denied-pair positive incidence is next
 
 The owner selected `RCS-03C3C3D2E5-C` **with the complete conditional
@@ -10694,7 +10765,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 01:57 UTC — denied-pair positive incidence is next](docs/handoffs/2026-09-27-0157--relic-denied-pair-positive-incidence-next.md)**
+[2026-09-27 02:19 UTC — positive denied-output width is next](docs/handoffs/2026-09-27-0219--relic-denied-positive-width-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
