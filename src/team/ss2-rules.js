@@ -2581,22 +2581,44 @@ export const SS2_MOVEMENT_STEP_FACTOR = Object.freeze({
  * `round(sqrt(85^2 + 97^2)) = 129` against a reach of 129 and a STRICT `<`.
  * Neither number is wrong; they were answering different questions.
  *
- * **So a foe blocks only when it is close enough in DEPTH to actually be in
+ * ~~**So a foe blocks only when it is close enough in DEPTH to actually be in
  * the way**, which is what "overlap" already meant: `physical_size` is the
  * body's own extent, so two gladiators separated by more than that in y are
- * not touching and never were. A rank you are not standing in is scenery.
+ * not touching and never were.~~ A rank you are not standing in is scenery.
+ *
+ * ► **CORRECTED 2026-09-27 — the struck test did not say the sentence after
+ *   it, and the owner found the difference in play:** *"in some cases (larger
+ *   character models) a character in a different lane behind another cant
+ *   advance. it just walks in place when attempting to proceed."* The ranks
+ *   are `rankStride` (97) apart and `physical_size = 80 + round(strength /
+ *   1.5)` passes 97 at strength 27 — a colossus cast on the demo roster's
+ *   strength 9, and most of the build's own champions — so from strength 27 a
+ *   body blocked every walker in the NEIGHBOURING lane, and from 171 two lanes
+ *   off. Measured on the arena's own host with the build's champions, seeds
+ *   1-48: **77 of the 123 walks the AI chose that went nowhere in 3v3 (22 of
+ *   29 in 2v2) were parked by a body in another lane**, and at strength 111
+ *   the clamp line sits behind the walker, so a walk forward carried him
+ *   BACKWARD. The test that pinned this rule (`test/ss2-position.test.js`)
+ *   stood its body two ranks away and never tried one. The 2026-09-12 fix
+ *   this predicate made (the parked-one-unit-out-of-reach deadlock) holds
+ *   either way: that walker was blocked by a foe in ANOTHER rank.
+ *
+ * **So a body blocks a walk exactly when it stands in the walker's LANE**
+ * (`ss2SameLane`), which is what every other sentence here and every reader
+ * of this rule already said: the lane is the unit (`docs/design/battle-ui.md`
+ * decision 10, soft lanes — melee needs the same band, and so does being in
+ * somebody's way). One definition of a lane, so the soft-lanes band changes
+ * one function and not two. Inside the lane the clamp is the build's own.
  *
  * AUTHORED, and inside the silence that already covers it
  * (`MAP_SILENCE.multi-slot-arena-geometry`): vanilla has one gladiator a side
- * and both stand at `_y = 200`, so `|dy|` is 0 for every pair the build can
- * make and this predicate is CONSTANTLY TRUE there. **1v1 is therefore
+ * and both stand at `_y = 200`, so every pair the build can make shares the
+ * lane and this predicate is CONSTANTLY TRUE there. **1v1 is therefore
  * byte-identical, and so is every bout with the second axis switched off** —
- * a `null` y reads as 0 on both sides.
+ * `ss2SameLane` is true whenever either `y` is absent.
  */
 function ss2BodyBlocks(actor, foe) {
-  const actorY = Number.isFinite(actor?.y) ? actor.y : 0;
-  const foeY = Number.isFinite(foe?.y) ? foe.y : 0;
-  return Math.abs(actorY - foeY) < ss2PhysicalSize(foe);
+  return ss2SameLane(actor, foe);
 }
 
 /**
@@ -4148,7 +4170,9 @@ export function ss2SafelyOutOfRange(view) {
  * the foe's side — `ss2FightDistance`, ties by id) from ANOTHER RANK.
  *
  * ► **WHY: THE OWNER SAW IT ON SCREEN.** Across ranks no body blocks a walk
- *   (`ss2BodyBlocks` gates on `|dy| < physical_size`), so a foe heading for a
+ *   (`ss2BodyBlocks`, ~~which gates on `|dy| < physical_size`~~ the lane rule
+ *   since 2026-09-27 — the depth test let a body stronger than 26 block the
+ *   next lane, see its docstring), so a foe heading for a
  *   gladiator standing still in the next rank walks straight past it, and the
  *   arena shows a fighter strolling through the enemy line. Measured on the
  *   demo roster, 96 seeds: 2v2 crossings (`tools/engagement-census.mjs`'s
@@ -15648,9 +15672,16 @@ export function createSs2TeamRules({
         //   side, so a numbers advantage bought a queue rather than a pincer.
         //
         //   **It was never a geometry problem.** `ss2BodyBlocks` gates the walk
-        //   clamp on `|dy| < physical_size`, so at the shipped stride of 97 a
-        //   foe one rank away does NOT block: the far side is already legal to
-        //   walk to. What was missing is any reason to want it.
+        //   clamp on ~~`|dy| < physical_size`~~ the lane, so ~~at the shipped
+        //   stride of 97~~ a foe one rank away does NOT block: the far side is
+        //   already legal to walk to. What was missing is any reason to want it.
+        //   ► **CORRECTED 2026-09-27: until that day it was a geometry problem
+        //     for every target stronger than 26** — `physical_size` passes the
+        //     97 between ranks at strength 27, so a flanker walking past a
+        //     colossus or most of the build's champions was clamped by the
+        //     target itself and walked in place (the owner's playtest; see
+        //     `ss2BodyBlocks`). The census above was the demo roster, strength
+        //     9, where the sentence held.
         //
         //   ► **AND THIS IS NOT THE RULE THAT CAUSED THE PILE-UP.** That one
         //     was "move toward the nearest foe's rank", which fires at the

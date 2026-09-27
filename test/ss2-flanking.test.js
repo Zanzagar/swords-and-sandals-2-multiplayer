@@ -8,9 +8,17 @@
  *   SIDE.** A numbers advantage bought a queue, not a pincer.
  *
  * ► **AND IT WAS NEVER A GEOMETRY PROBLEM.** `ss2BodyBlocks` gates the walk
- *   clamp on `|dy| < physical_size(foe)`, so at the shipped stride of 97 a foe
- *   one rank away does not block. The far side was always legal to walk to;
- *   nothing wanted it.
+ *   clamp on ~~`|dy| < physical_size(foe)`~~ the lane, so ~~at the shipped
+ *   stride of 97~~ a foe one rank away does not block. The far side was always
+ *   legal to walk to; nothing wanted it.
+ *
+ *   ► **CORRECTED 2026-09-27: for a target stronger than 26 it WAS a geometry
+ *     problem.** `physical_size = 80 + round(strength / 1.5)` passes the 97
+ *     between ranks at strength 27, so a flanker walking past a colossus, or
+ *     most of the build's champions, was clamped by the target and walked in
+ *     place — the owner saw it in play. This file's `who` builds every body at
+ *     strength 0, where the sentence held. `ss2BodyBlocks` is now the lane
+ *     rule (`test/ss2-position.test.js` sweeps strength 0-300).
  *
  * The rule these tests pin is deliberately narrow, because the WIDE version of
  * it is a known trap: "move toward the nearest foe's rank" collapses all six
