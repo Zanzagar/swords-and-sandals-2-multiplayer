@@ -984,9 +984,10 @@ decision: `ss2BodyBlocks`, `57b2209`.)*
   conversion, pair turns to kill, idle share, stalls, overall balance); the result is recorded here
   and the owner picks.
 
-  **THE EVIDENCE (2026-09-27, session `f4d2f69f`; scratch census on the arena's own host,
-  `createVanillaBattleHost` + `demoSide` or the build's champions, 96 seeds a cell).** `aiPress` is
-  the rule-set option: `off` (the AI before P1/P2), `ranged-first`, `pincer-first`.
+  **THE EVIDENCE (2026-09-27, session `f4d2f69f`; `node tools/ai-press-census.mjs <kit> <perSide>
+  96 [h2h]` on the arena's own host, `createVanillaBattleHost` + `demoSide` or the build's champions,
+  96 seeds a cell — re-run, it reproduces this table).** `aiPress` is the rule-set option: `off`
+  (the AI before P1/P2), `ranged-first`, `pincer-first`.
 
   | roster | 2v1 converted (pair wins whole): off / ranged / pincer | both pair members on the lone foe | pair turns spent dancing | mean bout length |
   |---|---|---|---|---|
