@@ -5908,6 +5908,58 @@ idempotency, prospective disclosure, retrospective attribution, and a hard ban
 on cheap teammate-forced consumption are mandatory. D1 selects no exact
 prevalence, empty claim, footprint, recurrence, reuse, payoff, or implementation.
 
+Zanzagar selected D1-B. `K^{claim+}_v` is nonempty: at least one reachable
+positive original or substitute settlement claims a nonempty part of its
+selected authoritative causal proof union only after the whole aligned receipt
+set commits atomically. This changes only later eligibility for the active
+Relic; canonical truth, source ownership, history, and other-root availability
+remain intact. Exact positive prevalence and footprint stay unresolved. D1
+moves to `DIR-SELECTED`, D2 becomes `OWNER-OPEN`, and the 109-row register has
+24 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 52 `DIR-SELECTED`, 4 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`.
+
+Two named-claim audits then tested D2. Define `Z^0_v` over completed canonical
+product evaluations with one nonempty selected authoritative contender-ledger
+tuple and fixed empty aligned output `{}`. E1-C guarantees the domain is
+nonempty; F1-A makes each held-fixed denied opportunity single-valued. For
+`z in Z^0_v`, `U(z)` remains the nonempty deduplicated selected-ledger union.
+`K^{claim0}_v` contains exactly the empty settlements that make at least one
+member of `U(z)` unavailable as evidence to the active Relic after atomic empty
+settlement.
+
+D2-A makes `K^{claim0}_v` empty; D2-B makes it nonempty. This is exhaustive.
+Full versus proper-subset footprint is D3, not a third option; universal versus
+mixed cancellation-claim prevalence remains AUTHOR/SPEC at D2's support
+granularity. A true no-candidate invocation has no selected complete ledger
+tuple or defined `U(z)` and cannot burn partial matches without a new failed-
+proof identity boundary. Positive claims remain D1; held-truth reattempt remains
+D4. Either D2 answer opens D3 because D1-B already guarantees claim support,
+then D4 follows.
+
+Recommend D2-A. Together with D1-B it gives the clearest teachable grammar:
+positive manifestation may cash causal proof; no manifestation preserves it.
+The same committed Oracle realization cannot be redrawn, and D4 separately
+decides whether a genuinely distinct evaluation may occur under uninterrupted
+relationship sufficiency, so cancellation preservation is not free callback or
+reload retry. A is neutral/protective ideal fit and makes cancellation a useful
+option rather than “no result plus lost setup.”
+
+D2-B's strongest countermodel is a prospectively named sacrificial Severed
+Chorus whose refusal visibly scars what the Relic heard. That can be partial
+ideal fit when the continuing occurrence and new Relic-local scar remain
+meaningfully related, but an invisible burn tax is merely punitive. Automatic
+invocation makes B especially vulnerable to a teammate injecting the second
+tag or false-bit condition and burning another player's proof without producing
+a receipt. B therefore requires last-reversible-commitment disclosure, exact
+post-settlement attribution, atomic/idempotent Relic-local marking, and a hard
+anti-coercion test. Use guarded B only if later D4 tests show A creates a
+dominant free-option loop and a bounded sacrificial archetype remains legible;
+otherwise A is the required fallback.
+
+Either D2 answer would produce 23 `SCREEN`, 1 `OWNER-OPEN` at D3, 26 `PRUNED`,
+53 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`.
+The authoritative decision record remains unchanged.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

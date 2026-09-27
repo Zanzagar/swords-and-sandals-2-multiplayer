@@ -367,7 +367,8 @@ then derived C4: under the already-selected cut-atomic automatic semantics,
 several same-cut evaluators are exactly one product evaluator with labeled
 internal channels, not another player-material topology. C5-C7/G2/H/I prune,
 and a thirty-fourth prerequisite correction splits old RCS-03C3D into four
-independent evidence-use rows. RCS-03C3D1 is the current owner-facing choice
+independent evidence-use rows. Zanzagar selected RCS-03C3D1-B, requiring
+positive-result claim support; RCS-03C3D2 is now the current owner-facing choice
 under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
@@ -24319,7 +24320,7 @@ remains unchanged.
 > presented card. This correction exposes decisions that were already hidden;
 > it adds no player-facing mechanic by itself.
 
-### RCS-03C3D1 — positive-result evidence-claim support — active owner choice
+### RCS-03C3D1 — positive-result evidence-claim support — direction selected
 
 For one fixed completed canonical product evaluation `z`, hold the version,
 combatant, active Relic, cut, operative context, selected routing and complete
@@ -24360,8 +24361,83 @@ attributable afterward; cheap teammate-forced consumption fails. No extra
 combat command or prompt is created: the intended readable realization is one
 ordinary Relic result followed by a visible local evidence-state change.
 
-Under A or B, D1 moves to `DIR-SELECTED` and D2 becomes `OWNER-OPEN`, reducing
-`Phi_SR` from 26 to 25. The authoritative decision record remains unchanged.
+**Direction answer — selected by Zanzagar on 2026-09-27:** **B, require
+positive-result claim support.** Thus `K^{claim+}_v` is nonempty. The completed
+catalog must contain at least one reachable positive original or substitute
+settlement that, after its whole aligned receipt set commits atomically, makes
+a nonempty part of its selected authoritative causal proof union unavailable
+as evidence to that active Relic.
+
+The canonical occurrences, source ownership, battle history, and availability
+to other roots or Relics remain intact. This is a support promise, not universal
+positive-result consumption: exact prevalence and assignments remain AUTHOR/
+SPEC, and D3 still owns the footprint. D1-B chooses neither empty-result
+claiming nor failed-result recurrence. It is **potentially direct** at this
+boundary because one truthful source occurrence acquires a distinct claimed
+relation to the manifesting Relic while continuing to exist; D3-A can make that
+relation direct locally by selecting the complete causal footprint.
+
+D1 moves to `DIR-SELECTED`; D2 becomes `OWNER-OPEN`. The 109-row register now
+contains 24 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 52 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested D2. The topology audit re-derived
+one empty/nonempty support card, its nonempty ledger-bearing cancellation
+domain, true-no-candidate exclusion, downstream dependencies, and register
+arithmetic. The gameplay audit recommends A: positive manifestations may cash
+proof under D1-B, while a cancellation preserves it. D4—not evidence claim—
+owns whether held relationship truth may receive another distinct evaluation.
+
+### RCS-03C3D2 — ledger-bearing empty-result evidence-claim support — active owner choice
+
+Let `Z^0_v` contain the completed canonical product evaluations whose selected
+authoritative contender-ledger tuple is nonempty but whose fixed pair-local
+aligned receipt output is `{}`. Selected E1-C guarantees that this domain is
+nonempty, and F1-A makes each held-fixed denied opportunity single-valued.
+
+For one `z in Z^0_v`, hold the version, combatant, active Relic, cut,
+authoritative state and operative context, bound routing stance, selected
+complete contender-ledger tuple and pair, realized false permission bit,
+treatment law, every non-claim input, and final empty output fixed. Reuse
+`U(z)`, the nonempty deduplicated union of final child occurrences in the
+selected causal ledgers. A cancellation **claims evidence** when, after `{}`
+settles atomically, at least one member of `U(z)` becomes unavailable as
+evidence to this active Relic. Let `K^{claim0}_v` contain those cancellations.
+
+| Choice | Empty-result claim rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — ledger-bearing empty results never claim evidence** | `K^{claim0}_v=∅`. A cancellation settles `{}` without making any occurrence in its selected causal proof union Relic-locally unavailable. Freshness, source-owned clearing, and D4's later recurrence rule still apply. | **Recommended.** Combined with D1-B, A gives one teachable grammar: a visible positive manifestation may cash proof; a severed manifestation produces nothing and preserves the setup. Cancellation gains retained-option value without becoming a free reroll because the Oracle realization is already committed once and D4 separately governs another distinct evaluation. A avoids automatic failure or a teammate-forced false bit silently deleting another player's evidence. Its local standing-ideal role is **neutral/protective**: it preserves truthful distinct causes after no relationship result manifests. | `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` are individually ledger-satisfied, but **Severed Chorus** settles `{}`. `U(z)={g,h,t}` remains otherwise eligible to this Relic; D4 later decides whether unchanged relationship truth can be evaluated again. |
+| **B — require empty-result claim support** | `K^{claim0}_v` is nonempty. At least one ledger-bearing cancellation makes a nonempty part of `U(z)` Relic-locally unavailable despite committing no aligned receipt. B selects neither universal prevalence nor the footprint; D3 remains separate. | B's strongest case is an explicitly sacrificial **Severed Chorus** contract: “the Relic listened once and the refusal scarred what it heard.” This can make refusal consequential across later opportunities, but it is not needed to prevent redraw or retry farming. With automatic invocation it carries the highest opacity and grief risk: another participant may help create the second tag or false permission and burn a setup without producing a receipt. B is at most **partial** ideal fit when the severance relation is prospectively legible; otherwise it is merely punitive consumption. Use B only if a bounded sacrificial archetype remains fun after disclosure, anti-coercion, and matched-value tests. | The same selected `P/Q` tuple settles `{}` and a disclosed sacrificial policy claims a nonempty part of `{g,h,t}` afterward. D3 decides whether every claim must take all three. A true no-candidate invocation can never use this rule. |
+
+A/B are mutually exclusive and exhaustive because `K^{claim0}_v` is empty or
+nonempty. Universal versus mixed cancellation-claim prevalence and exact
+assignments remain AUTHOR/SPEC; complete-union versus proper-subset footprint is
+D3. A true no-candidate invocation has no selected complete contender-ledger
+tuple and no defined `U(z)`, so burning partial matches would require a new
+failed-proof identity boundary rather than a hidden D2 branch.
+
+D2 does not choose retry or reattempt. One Oracle opportunity already receives
+one committed realization with no redraw; callback, reload, reconnect, replay,
+or duplicate delivery cannot resample it. D4 later decides whether a genuinely
+distinct evaluation may occur while authored relationship sufficiency remains
+continuous. Under B, every empty-claim-capable contract and affected occurrence
+must be legible before each affected player's last reversible commitment and
+attributable after settlement; a cheap unilateral teammate action that forces
+the false bit or qualifying pair and thereby claims another player's evidence
+fails. Every claim remains atomic, idempotent, Relic-local, and unable to delete
+canonical occurrence truth or counterfeit C135 insufficiency.
+
+If D2-A later creates a dominant free-option policy under D4's completed
+recurrence rule, reopen guarded B only for a bounded prospectively named
+sacrificial archetype. If B cannot remain legible and independently desirable
+without compensation bribery, cheap coercion, or negative-proc clutter, fall
+back to A.
+
+Under A or B, D2 moves to `DIR-SELECTED` and D3 becomes `OWNER-OPEN` because
+D1-B already guarantees claim support. The register then contains 23 `SCREEN`,
+1 `OWNER-OPEN`, 26 `PRUNED`, 53 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 24`. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 
