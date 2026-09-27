@@ -954,6 +954,41 @@ the main session decided D1–D7 on a read-only wave's measurements (session `5b
   rule 14 and the ADR amendment · **G2** this repository adopts it, and the workflow template checks
   the `decided` pointer.
 
+<a id="decided-ai-press-2026-09-27"></a>
+
+### The AI presses a numbers advantage: DECIDED 2026-09-27
+
+The owner, after playtesting (2026-09-26): *"some ai is bad when 2 are in same lane one behind other
+or 2v1 where 2 are in separate lanes, the ai on the team of 2 never makes a concerted effort to corner
+the single gladiator oftentimes it just dances or waits for the 1v1 to finish instead of taking
+decisive maneuvers"*. Asked in chat with costed options (session `f4d2f69f`), on this measurement
+(the arena's own host, `demoSide` plain 2v2, seeds 1-96, every turn of a 2v1 phase, scratch census):
+the free pair member's turns were 18% crowd-pleasers (`wincrowd`, the "dance"), both pair members were
+in reach of the lone foe on **0%** of turns, and the pair killed the lone foe before losing a member in
+**8 of 96** phases. Traces: seed 3, blue-2 plays to the crowd ten turns running at x 380 while blue-1
+duels; seed 2, blue-2 walks up behind blue-1 in one lane and then walks in place on the clamp line.
+*(The owner's other defect, a big fighter walking in place beside another lane, was a Fix, not a
+decision: `ss2BodyBlocks`, `57b2209`.)*
+
+- **P1 — Help first.** No crowd-pleaser while an ally is fighting a foe this gladiator could go and
+  help against; it commits until that foe is down, then may play to the crowd. This narrows the
+  owner's crowd-play decision of 2026-09-23 (`SS2_AI_CROWD`) for this one case; the other gates stand.
+- **P2 — How the free member closes: DECIDED BY EVIDENCE, not yet decided.** The owner: *"I dont
+  have preference i just want evidence on way or the other."* Found while building it: shooting and
+  casting when something reaches is ALREADY the AI's order (a ranged option on offer goes to the
+  swing table before any move, and a bow owner at range arms the bow first), so the two variants are
+  **ranged first** (today's order, then go round when nothing reaches) against **pincer first**
+  (go round even while holding a shot). Going round is the same in both: out of a lane blocked by an
+  ally, past the foe in the next lane, back in on the far side (the back attack's +50% and the foe
+  caught between). Both are built behind a rule-set option and measured on seeded bouts (2v1
+  conversion, pair turns to kill, idle share, stalls, overall balance); the result is recorded here
+  and the owner picks.
+- **P3 — A walk that goes nowhere because of a body in your own lane is not offered; the ring shows
+  it greyed, "Blocked",** the way "Not built yet" is shown, and the AI can never pick it. (A walk
+  into the arena wall is not covered by this decision.)
+- **P4 — Finish your own fight.** `rankJoinSurplus` stays 0: only a gladiator with no foe in its own
+  lane leaves to help.
+
 ## Delivery order
 
 1. **Seats**: choose which fighters a human plays, with the rest AI (~~e.g. `?red=human&blue=ai`~~
