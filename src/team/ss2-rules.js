@@ -2592,9 +2592,12 @@ export const SS2_MOVEMENT_STEP_FACTOR = Object.freeze({
  *   advance. it just walks in place when attempting to proceed."* The ranks
  *   are `rankStride` (97) apart and `physical_size = 80 + round(strength /
  *   1.5)` passes 97 at strength 27 — a colossus cast on the demo roster's
- *   strength 9, and most of the build's own champions — so from strength 27 a
- *   body blocked every walker in the NEIGHBOURING lane, and from 171 two lanes
- *   off. Measured on the arena's own host with the build's champions, seeds
+ *   strength 9, 8 of the 18 decodable champions as they are built, and any of
+ *   them once colossus triples it — so from strength 27 a body blocked every
+ *   walker in the NEIGHBOURING lane, and from 172 two lanes off. *(This
+ *   block's commit, `57b2209`, said "most of the build's own champions" and
+ *   "171"; a write-nothing verifier re-derived both. At 171 `physical_size`
+ *   is 194, and 194 < 194 is false.)* Measured on the arena's own host with the build's champions, seeds
  *   1-48: **77 of the 123 walks the AI chose that went nowhere in 3v3 (22 of
  *   29 in 2v2) were parked by a body in another lane**, and at strength 111
  *   the clamp line sits behind the walker, so a walk forward carried him
@@ -2676,12 +2679,21 @@ export function ss2SameLane(actor, target) {
  * inside `MAP_SILENCE.multi-slot-arena-geometry`, which already covers
  * "positions, depths, and clip names for slots beyond the first".
  *
- * **`ss2BodyBlocks` is the precedent and this is deliberately the same shape.**
- * That predicate asks whether a body is close enough IN DEPTH to be in the way
- * of a walk, and answers with `|dy| < physical_size(body)` — the body's own
- * extent. This asks the same question of a straight line between two points
- * and answers it the same way: the blocker's perpendicular distance from the
- * shot line, against its own `physical_size`.
+ * ~~**`ss2BodyBlocks` is the precedent and this is deliberately the same
+ * shape.** That predicate asks whether a body is close enough IN DEPTH to be in
+ * the way of a walk, and answers with `|dy| < physical_size(body)` — the body's
+ * own extent.~~ This asks whether a body stands in the way of a straight line
+ * between two points, and answers with the blocker's perpendicular distance
+ * from the shot line, against its own `physical_size`.
+ *
+ * ► **CORRECTED 2026-09-27: `ss2BodyBlocks` is no longer that shape — it is the
+ *   lane rule** (`ss2SameLane`, since `57b2209`: the depth test let a body
+ *   stronger than 26 block walkers in the next lane, the owner's playtest).
+ *   This rule keeps the body's extent ON PURPOSE: a flat shot is a line
+ *   through the arena, not a walk along a lane, and the owner's decision of
+ *   2026-09-13 is that a front rank body-blocks for its archers. So a body
+ *   wider than the 97 between ranks (strength 27 and up) does screen a snipe
+ *   along the next lane. That consequence is recorded rather than decided.
  *
  * Three properties it was built to have, each of which a simpler rule loses:
  *
@@ -2726,7 +2738,8 @@ export function ss2ShotBlocked(actor, target, bodies) {
     if (t <= 0 || t >= 1) continue;
     const offX = actor.x + t * dx - body.x;
     const offY = actor.y + t * dy - body.y;
-    // `<` and not `<=`, matching `ss2BodyBlocks`, so a body exactly its own
+    // `<` and not `<=`, ~~matching `ss2BodyBlocks`~~ as `ss2BodyBlocks` did
+    // before it became the lane rule, so a body exactly its own
     // extent away is clear. Squared on both sides to keep it integer-exact and
     // free of a square root whose rounding would decide edge cases.
     const size = ss2PhysicalSize(body);
@@ -15678,7 +15691,7 @@ export function createSs2TeamRules({
         //   ► **CORRECTED 2026-09-27: until that day it was a geometry problem
         //     for every target stronger than 26** — `physical_size` passes the
         //     97 between ranks at strength 27, so a flanker walking past a
-        //     colossus or most of the build's champions was clamped by the
+        //     colossus or 8 of the 18 decodable champions was clamped by the
         //     target itself and walked in place (the owner's playtest; see
         //     `ss2BodyBlocks`). The census above was the demo roster, strength
         //     9, where the sentence held.

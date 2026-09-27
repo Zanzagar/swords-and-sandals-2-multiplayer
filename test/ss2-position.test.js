@@ -336,8 +336,8 @@ test("a foe standing in another rank does not block a walk, which is what makes 
  * strength a gladiator reaches in practice blocks, and so it never tried the
  * NEIGHBOURING rank, 97 away. `ss2BodyBlocks` read `|dy| < physical_size(body)`
  * and `physical_size = 80 + round(strength / 1.5)` passes 97 at strength 27 —
- * a colossus cast on the demo roster's strength 9, and most of the build's own
- * champions. So a strong gladiator stopped every walker in the lanes beside it,
+ * a colossus cast on the demo roster's strength 9, and 8 of the 18 decodable
+ * champions as they are built. So a strong gladiator stopped every walker in the lanes beside it,
  * while every sentence this engine had written about it said across ranks no
  * body blocks. Measured before the fix on the arena's own host
  * (`createVanillaBattleHost`, the build's champions, seeds 1-48): **77 of the

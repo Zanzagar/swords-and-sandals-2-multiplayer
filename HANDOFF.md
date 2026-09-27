@@ -2524,8 +2524,11 @@ shapes rendering as the blood in the death animations, and a 2v1 that pincers.
 ► **FLANKING: a 2v1 now pincers.** The owner watched one and said the survivors
   stood behind each other rather than going round. Measured: **208 outnumbered
   turns, 100% same-side, 0 crossings in 3,424 turns.** It was never geometry —
-  `ss2BodyBlocks` is `|dy| < physical_size`, so at stride 97 a foe one rank away
-  never blocked. **Pincered 0% -> 17.8%, simultaneous fights 273 -> 413 turns,
+  `ss2BodyBlocks` ~~is `|dy| < physical_size`, so at stride 97 a foe one rank
+  away never blocked~~ **— CORRECTED 2026-09-27: it was `|dy| < physical_size`,
+  and at stride 97 a foe one rank away DID block from strength 27 (a colossus,
+  8 of the 18 decodable champions); the owner saw big fighters walk in place.
+  It is the lane rule since `57b2209`, so the sentence is true now.** **Pincered 0% -> 17.8%, simultaneous fights 273 -> 413 turns,
   24/24 still settle, and the pile-up tell is absent** (97 and 150 return
   clearly different censuses). No golden moved: with the axis off every `y` is
   null and the arm is inert.

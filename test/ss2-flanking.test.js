@@ -15,7 +15,7 @@
  *   ► **CORRECTED 2026-09-27: for a target stronger than 26 it WAS a geometry
  *     problem.** `physical_size = 80 + round(strength / 1.5)` passes the 97
  *     between ranks at strength 27, so a flanker walking past a colossus, or
- *     most of the build's champions, was clamped by the target and walked in
+ *     8 of the 18 decodable champions, was clamped by the target and walked in
  *     place — the owner saw it in play. This file's `who` builds every body at
  *     strength 0, where the sentence held. `ss2BodyBlocks` is now the lane
  *     rule (`test/ss2-position.test.js` sweeps strength 0-300).

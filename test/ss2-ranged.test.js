@@ -801,8 +801,9 @@ test("a SUBMITTED swap to the bow with an empty quiver is refused, not resolved 
 
 test("a body in the lane blocks the shot, and one that is merely nearby does not", () => {
   // AUTHORED, owner's decision 2026-09-13, inside
-  // `MAP_SILENCE.multi-slot-arena-geometry`. Shaped after `ss2BodyBlocks`,
-  // which gates the walk clamp on the blocker's own `physical_size` — so the
+  // `MAP_SILENCE.multi-slot-arena-geometry`. Shaped after `ss2BodyBlocks`
+  // AS IT WAS until 2026-09-27, when it gated the walk clamp on the blocker's
+  // own `physical_size` (it is the lane rule since; see its docstring) — so the
   // threshold here is the blocker's extent from the shot line, not a constant.
   const body = (id, x, y, strength = 9) => ({ id, x, y, alive: true, stats: { strength } });
   const archer = body("archer", -250, 103);
@@ -818,7 +819,7 @@ test("a body in the lane blocks the shot, and one that is merely nearby does not
   );
   assert.equal(
     ss2ShotBlocked(archer, target, [body("ally", 0, 103 + size)]), false,
-    "and exactly its own extent is clear — `<`, matching ss2BodyBlocks"
+    "and exactly its own extent is clear — `<`, as ss2BodyBlocks had it"
   );
 
   // ► **A RANK AWAY DOES NOT BLOCK AT THE SHIPPED STRIDE, and that is not a
