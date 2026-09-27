@@ -1,5 +1,83 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 responsive and steadfast deterministic forms — RCS-03C3C3D2E3-C selected
+
+The owner selected `RCS-03C3C3D2E3-C`. Complete responsive and steadfast
+tagged deterministic related projections must coexist:
+`∅⊊X^{R-det-response}_v⊊D^R_v`. This remains projection-level; it requires
+neither two physical Relics nor both classes inside both `Q` and `H`.
+
+C preserves steadfast certainty, context-sensitive deterministic certainty,
+and responsive Oracle probability as distinct planning policies. It does not
+yet make any deterministic contrast player-causal. The hard viability
+obligation remains: both deterministic classes and their coexistence must be
+reachable, legible, viable, non-token, and non-dominated, or E3 reopens with A.
+
+Two bounded read-only audits upheld E4 as one binary matched-causal-support
+card. No prerequisite correction or new row is needed. The 99-row register now
+contains 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 43 `DIR-SELECTED`, 3
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. E6 is derived because
+responsive deterministic support supplies both certain endpoints.
+`RCS-03C3C3D2E4` is the sole presented card. The authoritative decision record
+remains unchanged.
+
+Let `M^{R-det-causal}_v⊆X^{R-det-response}_v` contain responsive tagged
+deterministic projections with at least one qualifying matched causal witness.
+Start from one common positive-support upstream state. Compare two lawful
+policies differing at exactly one independently revisable, materially
+meaningful participant or counterplayer decision. Hold the tagged `Q`/`H`
+projection, law/form/version, Relic/relationship, bindings, variant, eventual
+pair/proof, non-descendant facts, and other actors' rules fixed. Carry both
+arms through complete causal closure.
+
+- **A — no matched causal deterministic related response:** `M=∅`. Every
+  responsive certain-bit contrast depends on immutable, automatic, forced,
+  exogenous, or otherwise nonqualifying context. Players may forecast and
+  route around it, but cannot cause it under the matched test. This is a serious
+  anti-saturation choice because the exact lane already has one causal
+  deterministic witness and the Oracle lane one causal odds witness. It
+  minimizes hard vetoes, grief, quarterbacking, solved preservation loops, and
+  explanation burden, but makes every responsive deterministic related
+  covenant an omen players only accommodate.
+- **B — require at least one matched causal deterministic related response:**
+  `M≠∅`. **Conditionally recommended.** At least one responsive tagged
+  deterministic projection has a genuine play-or-counterplay lever. This makes
+  one related-form covenant lived statecraft rather than only a lookup table;
+  exact E2-B may be exact-only, while Oracle E2-B changes odds rather than a
+  deterministic law. Use A if no independently valuable exemplar survives the
+  guards.
+
+Illustratively, Guard preserves an independently useful Ember Seal while Burst
+consumes it for real damage. With Ashen Accord/Q and the eventual pair/proof
+fixed, clean complete closures make the law certainly allow versus deny.
+
+“Deterministic” describes the permission law at each realized opportunity, not
+necessarily guaranteed action success. If intervening combat makes Seal
+survival 70% after Guard and 20% after Burst, B may qualify because the
+decision changes eventual-bit distributions. One favorable trace from
+identical distributions does not. No Oracle permission draw is created.
+
+Both arms and the changed fact must remain materially meaningful when this
+permission consequence is ablated. Direct or cosmetically laundered
+permit/deny commands, changed law/variant/tag/pair/proof, movement between `Q`
+and `H`, post-result action, reroute, retry, unrelated RNG ordering, or lucky
+crossover fail. A hybrid witness stays inside one `H` projection and changes
+only its one inherited exact bit.
+
+Because exact E2-B and Oracle E2-B already require causal exemplars, the E4
+witness must earn a marginal related-form purpose. It may share its action,
+fact, or witness with those channels, but its availability on deterministic
+related-form opportunities must itself change a truthful legal policy or build
+purpose. Merely relabeling an earlier witness or using one Seal to tick three
+formal boxes fails. This is not a `Q`-only quota.
+
+B is existential. It chooses no universal coverage, actor, `Q`/`H` placement,
+guaranteed success, action, timing, disclosure, stable polarity, result,
+survivor, payoff, rarity, or implementation. The exemplar must be prospectively
+understandable, retrospectively attributable, non-token, non-dominated, and
+resistant to cheap veto loops. Either answer selects E4 and opens E5; ask for A
+or B.
+
 ## 2026-09-26 causal Oracle play/counterplay — RCS-03C3C3D2E2-B selected
 
 The owner selected `RCS-03C3C3D2E2-B`. At least one responsive related-only
@@ -21,11 +99,11 @@ legible, non-token witness survives, reopen E2 with A.
 
 Two bounded read-only audits re-derived the next card's tagged topology,
 dependencies, gameplay policies, prediction burden, and ideal fit. They upheld
-one A/B/C row and found no prerequisite correction. The 99-row register now
-contains 36 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 42 `DIR-SELECTED`, 2
-`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`.
-`RCS-03C3C3D2E3` is the sole presented card. The authoritative decision record
-remains unchanged.
+one A/B/C row and found no prerequisite correction. At that checkpoint the
+99-row register contained 36 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 42
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`.
+`RCS-03C3C3D2E3` was the sole presented card. The authoritative decision record
+remained unchanged.
 
 Use the nonempty tagged deterministic family
 `D^R_v=D^Q_v disjoint-union W^H_v`: complete related-only Witness laws plus
@@ -10437,7 +10515,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 00:50 UTC — deterministic related response is next](docs/handoffs/2026-09-27-0050--relic-deterministic-response-next.md)**
+[2026-09-27 01:11 UTC — causal deterministic related response is next](docs/handoffs/2026-09-27-0111--relic-causal-deterministic-response-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

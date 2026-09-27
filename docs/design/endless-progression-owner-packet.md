@@ -331,8 +331,11 @@ two-angle post-answer audit upheld one binary matched causal-response card.
 The owner selected RCS-03C3C3D2E2-B: at least one Oracle law must have a
 qualifying matched player/counterplayer-causal odds-response witness. A
 two-angle post-answer audit upheld the tagged deterministic related-response
-prevalence boundary. RCS-03C3C3D2E3 is the current owner-facing choice under
-SR-03.
+prevalence boundary. The owner selected RCS-03C3C3D2E3-C: responsive and
+steadfast deterministic related-form projections coexist under the hard
+viability obligation. A two-angle post-answer audit upheld one binary matched
+causal certain-bit-response card. RCS-03C3C3D2E4 is the current owner-facing
+choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -23296,7 +23299,7 @@ prediction burden, ideal fit, and countermodels for all three branches. Both
 upheld one empty/all/nonempty-proper response-prevalence card. No prerequisite
 correction or new row is needed.
 
-### RCS-03C3C3D2E3 — deterministic related-projection response prevalence — active owner choice
+### RCS-03C3C3D2E3 — deterministic related-projection response prevalence — direction selected
 
 D2D-C guarantees a nonempty deterministic-only related-only Witness family
 `D^Q_v`. Let `W^H_v` contain separately tagged canonical restrictions of exact
@@ -23365,6 +23368,114 @@ registers would be:
   `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`; or
 - C: 34 `SCREEN`, 1 `OWNER-OPEN` at E4, 16 `PRUNED`, 43 `DIR-SELECTED`, 3
   `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **C, steadfast and
+responsive deterministic related projections coexist.** Thus
+`∅⊊X^{R-det-response}_v⊊D^R_v`. At least one complete tagged deterministic
+projection is context-responsive and at least one is steadfast. This remains a
+projection-level requirement: it promises neither two physical Relics nor both
+classes inside both `Q` and `H`.
+
+C preserves three distinct related-form planning policies: steadfast certainty,
+context-sensitive deterministic certainty, and responsive Oracle probability.
+The responsive deterministic member can express one continuing law with
+genuinely different certain reception under meaningful relational facts; the
+catalog coexistence is only aggregate. C does not yet make any deterministic
+contrast player-causal. The selected hard obligation requires both deterministic
+classes and their coexistence to remain reachable, legible, viable, non-token,
+and non-dominated. If the responsive deterministic class cannot materially
+change truthful forecasting, routing, or hedging, reopen E3 with A.
+
+E3 moves to `DIR-SELECTED`; E4 becomes `OWNER-OPEN`; E5 remains screened and
+queued behind E4; and E6 becomes `DERIVED` because a responsive deterministic
+projection already supplies both certain endpoints. The 99-row register now
+contains 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 43 `DIR-SELECTED`, 3
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. The authoritative
+decision record remains unchanged.
+
+The E4 post-answer screen used two bounded read-only questions. One re-derived
+the causal witness, stochastic-mediation caveat, tagged hybrid inheritance,
+dependencies, and register arithmetic. The other tested whether causal
+deterministic related response adds a real policy purpose beyond the already-
+selected exact and Oracle causal witnesses. Both upheld one binary card with
+the materiality and marginal-nonredundancy safeguards below. No prerequisite
+correction or new row is needed.
+
+### RCS-03C3C3D2E4 — matched player/counterplay-causal deterministic related response — active owner choice
+
+Let `M^{R-det-causal}_v⊆X^{R-det-response}_v` contain the responsive tagged
+deterministic projections having at least one qualifying matched causal
+witness. A witness starts from one reachable positive-support authoritative
+upstream decision state and compares two lawful non-oracular policies. They are
+identical at every independently revisable decision coordinate except one
+materially operative participant or counterplayer decision. Neither arm may be
+forced, illegal inaction, or a token choice. A prospectively bound finite
+episode may be the one intervention only when its later member decisions are
+already bound.
+
+Hold fixed every non-descendant exogenous variable, other actors' decision
+rules, the same canonical tagged projection and `Q`/`H` form, law/version,
+Relic and relationship identities, prospective bindings, law-defining
+committed variant, selected authoritative tuple, eventual unordered pair, and
+complete proof structure. Carry both arms through the intervention's complete
+direct, indirect, delayed, reactive, inseparable, and stochastic causal
+closure. Every permission input outside that closure stays fixed. In the clean
+deterministic exemplar the resulting certain bits differ.
+
+Ordinary upstream randomness does not automatically disqualify a witness. If
+an unobserved stochastic descendant mediates the factual context, the
+intervention must change reachable bit support or the conditional bit
+distribution under the lawful observation history. One lucky crossover under
+unchanged policy distributions fails. The permission law still returns one
+certain bit at each realized fixed opportunity; no Oracle permission draw is
+created and G2 is not activated. Any stochastic-mediation witness carries a
+later semantic-coupling SPEC/EVALUATE obligation.
+
+| Choice | Matched causal deterministic-response rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no matched causal deterministic related response** | `M^{R-det-causal}_v=∅`. Every responsive deterministic related projection changes its certain bit only with immutable, automatic, forced, externally determined, structurally different, or otherwise nonqualifying context. Players may forecast and route around that certainty, but no lawful independently revisable decision changes it under the same tag, law, and eventual pair/proof. | A is the strongest anti-saturation case. The exact lane already contains one causal deterministic witness and the Oracle lane one causal odds witness, so A gives related-form deterministic response a quieter **omen/external-condition** identity. It minimizes hard teammate vetoes, grief, quarterbacking, solved preservation loops, causal explanation, and attribution burden. Its fit at this action/law boundary is neutral: the responsive law's continuity-and-difference remains, but play does not enact it. The cost is that every responsive deterministic related covenant is something players only read and accommodate. | **Ashen Omen/Q** certainly permits before an automatic Dusk transition and denies afterward. Dusk is disclosed but inevitable: no legal timing, preservation, acceleration, or disruption decision affects it while the same Ashen projection and pair/proof remain fixed. |
+| **B — require at least one matched causal deterministic related response** | `M^{R-det-causal}_v≠∅`. At least one responsive tagged deterministic projection has one qualifying decision intervention whose complete causal closure changes its eventual certain-bit support or conditional distribution while the same form, law, and pair/proof remain fixed. This is existential, not universal, and does not guarantee that either action arm always succeeds. | **Conditionally recommended.** E3-C has already admitted context-sensitive deterministic certainty; B makes at least one related-form covenant lived play-or-counterplay rather than only a lookup table. It adds a robust form-local policy not guaranteed by exact E2-B, whose witness may be exact-only, or Oracle E2-B, which changes odds rather than a deterministic law. At the action/law boundary, one meaningful deed changing how the same continuing covenant receives the same distinct-related pair is a direct ideal fit. Costs are denial grief, quarterbacking, solved preservation loops, causal/UI burden, and token relabeling of an earlier witness. Use A if no independently valuable exemplar survives the guards below. | From one common state, **Guard** preserves an independently useful Ember Seal while **Burst** consumes it for real damage. With Ashen Accord/Q and the eventual pair/proof fixed, clean complete closures make the law certainly allow versus deny. If intervening combat makes Seal survival 70% versus 20%, that can still qualify through changed eventual-bit distributions; one favorable trace from identical distributions cannot. |
+
+A/B are mutually exclusive and exhaustive because the nonempty responsive
+family has an empty or nonempty matched-causal subset. B does not require every
+responsive projection or context to qualify, identify the controlling side,
+require both ally agency and opponent counterplay, choose a `Q` or `H` witness,
+guarantee action success, disclose the full bit, or make the effect immediate.
+Those are stronger authoring minima or later information/tuning questions, not
+hidden branches.
+
+The changed law-read fact must have authoritative upstream truth conditions
+and a lifecycle independent of the desired permission bit. Both intervention
+arms must remain lawful and materially meaningful when this permission
+consequence is semantically ablated. A direct or cosmetically laundered
+`Permit Pair`/`Deny Pair` command, changed law/variant/tag/pair/proof,
+`Q`-to-`H` movement, post-result action, reroute, retry, unrelated RNG ordering,
+or lucky crossover fails. For a hybrid, both arms must remain inside the same
+`H` projection and may change only its one inherited exact bit—never add a
+second related grant, veto, or draw.
+
+Because exact E2-B and Oracle E2-B already require causal exemplars, the E4
+witness must also earn a marginal related-form purpose. An `H` occurrence may
+legitimately share its action, fact, or even witness with an earlier channel,
+but its availability on deterministic related-form opportunities must itself
+change a truthful legal policy or build purpose. Merely relabeling the exact
+witness or letting one Ember Seal tick three formal boxes does not satisfy the
+non-token obligation. This is a viability guard, not a `Q`-only witness rule or
+a requirement for separate actions and laws.
+
+B's required exemplar must be prospectively understandable to the correct
+actor before the first irreversible divergence, retrospectively attributable,
+non-dominated, and resistant to cheap allied/opponent veto loops. If later
+authoring and evaluation cannot establish that purpose, reopen E4 with A.
+RCS-02/SR-10 own the exact holder, forecast, UI, and communication contract;
+RCS-17/RCS-18 own simulation/RL, balance, exploit, and playtest acceptance.
+
+E4 chooses no exact actor, form, action, fact, sequence length, success rate,
+disclosure, stable polarity, result, survivor, payoff, incidence beyond one
+witness, rarity, or implementation. Either answer moves E4 to `DIR-SELECTED`
+and makes D2E5 the next presented card. The register would then contain 33
+`SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 44 `DIR-SELECTED`, 3 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
 
 ## Session protocol and evidence
 
