@@ -4911,15 +4911,82 @@ likewise derives both present. When D2E3-A plus D2E5-A/B leaves exactly one
 endpoint, D2E1-A derives the opposite absent because every Oracle kernel is
 fixed interior; D2E1-B/C leaves D2E6 open under its `Q_v` witness guard.
 
-Replacing one D2E row with six adds five rows and five potentials. The current
-register has 99 rows: 38 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 40
-`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`. D2E1
-is the sole presented card. Recommend D2E1-B: every Oracle law is distribution-
-responsive, although causal player control remains unsettled. This makes the
+Replacing one D2E row with six added five rows and five potentials. At that
+checkpoint the register had 99 rows: 38 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`,
+40 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`.
+D2E1 was the sole presented card. The audit recommended D2E1-B: every Oracle
+law is distribution-responsive, although causal player control remains
+unsettled. This makes the
 optional Oracle identity express changing relationship facts instead of a
 generic flat coin. A is the pure fixed-Fate alternative; C preserves both at
 the cost of a third prediction dialect. The authoritative decision record
 remains unchanged.
+
+The owner selected D2E1-B. Therefore
+`X^{Q-odds-response}_v=S^Q_v`: every stochastic-capable related-only Oracle law
+has at least two reachable permission probabilities. This chooses neither a
+causal player lever nor exact odds, endpoints, factual inputs, disclosure,
+payoff, or implementation. The same complete law continues across its
+contexts, while some relationship condition changes its distribution. E1 moves
+to `DIR-SELECTED` and E2 opens.
+
+The E2 post-answer audit used two independent read-only questions and a primary
+authority replay. The topology review attacked whether empty/nonempty matched
+causal support hid universal prevalence, actor, controllability, disclosure,
+immutable-context, or exact-odds branches. The gameplay review tested whether
+causal odds response could survive direct-control, token-action, dominance,
+grief, and legibility countermodels. Both upheld one binary owner row and
+recommended guarded B; no prerequisite correction is required.
+
+Let `M^{Q-odds-causal}_v⊆S^Q_v` contain the Oracle laws with at least one
+qualifying matched causal witness. Start from one positive-support
+authoritative upstream state and compare two lawful policies identical at every
+independently revisable decision coordinate except one materially operative
+participant or counterplayer decision. Hold the law/version, Relic and
+relationship identities, prospective bindings, law-defining variant, eventual
+selected related-only pair/proof, non-descendant exogenous facts, and other
+actors' decision rules fixed. Carry both arms through the intervention's
+complete causal closure. Qualification requires unequal conditional permission
+distributions immediately before semantic realization, not merely unequal
+sampled bits.
+
+The changed law-read fact needs authoritative truth conditions and a lifecycle
+independent of the desired permission result. Both intervention arms must
+remain lawful and materially meaningful when the Oracle consequence is
+semantically ablated. A direct or cosmetically laundered odds command, changed
+law or pair, post-draw action, reroll, unrelated RNG-call ordering, or lucky
+crossover fails. Stochastic mediation qualifies only if the intervention
+changes the conditional distribution or reachable support under the lawful
+observation history.
+
+The exhaustive E2 options are:
+
+- A: `M^{Q-odds-causal}_v=∅`; every Oracle response is immutable, automatic,
+  forced, exogenous, or otherwise nonqualifying, although players may forecast
+  and hedge around it; or
+- B: `M^{Q-odds-causal}_v≠∅`; at least one Oracle law has one qualifying
+  participant or counterplayer intervention under the matched test.
+
+Universal causal coverage is a stronger authoring minimum, not a third card,
+unless a distinct required product purpose later passes reopening. Actor
+distribution, exact UI, odds, thresholds, endpoints, action identities,
+sequence lengths, success rates, and prevalence beyond one witness remain with
+AUTHOR/SPEC/TUNE or their existing registered owners.
+
+Recommend guarded B. It requires one lived play-or-counterplay Oracle exemplar
+without turning every Oracle into an odds minigame. The same covenant and pair
+continue while one genuinely meaningful deed changes their conditional
+reception, a direct structural ideal fit at the action/law boundary. The
+required witness must materially change a truthful play, hedge, or counterplay
+policy and be prospectively understandable and retrospectively attributable;
+otherwise reopen E2 with A. A remains the coherent fate/weather alternative
+and minimizes causal tracking, grief, quarterbacking, threshold play, and
+blame.
+
+The current register has 99 rows: 37 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`,
+41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+D2E2 is the sole presented card. Either answer selects E2 and opens D2E3,
+yielding `Phi_SR = 37`. The authoritative decision record remains unchanged.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

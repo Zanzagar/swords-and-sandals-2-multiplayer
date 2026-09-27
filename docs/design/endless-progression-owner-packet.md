@@ -325,7 +325,10 @@ RCS-03C3C3D2D-C: deterministic Witness and stochastic-capable Oracle related-
 only law families coexist under the documented hard viability obligation. A
 thirty-first prerequisite correction then split old D2E into six response,
 causal-control, stable-polarity, and missing-certainty-endpoint rows.
-RCS-03C3C3D2E1 is the current owner-facing choice under SR-03.
+The owner selected RCS-03C3C3D2E1-B: every Oracle law has at least two
+reachable probabilities, without yet requiring a player-causal lever. A
+two-angle post-answer audit upheld one binary matched causal-response card.
+RCS-03C3C3D2E2 is the current owner-facing choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -23101,12 +23104,12 @@ unchanged.
 > RCS-17/RCS-18 own simulation/RL, fun, balance, exploit, and playtest
 > acceptance.
 >
-> Replacing one counted D2E row with six adds five slots and five unresolved
-> potentials. The register now contains **99 rows: 38 `SCREEN`, 1 `OWNER-OPEN`,
+> Replacing one counted D2E row with six added five slots and five unresolved
+> potentials. At that checkpoint the register contained **99 rows: 38 `SCREEN`, 1 `OWNER-OPEN`,
 > 16 `PRUNED`, 40 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-> `Phi_SR = 39`**. E1 is the sole presented card.
+> `Phi_SR = 39`**. E1 was the sole presented card.
 
-### RCS-03C3C3D2E1 — Oracle distribution-response prevalence — active owner choice
+### RCS-03C3C3D2E1 — Oracle distribution-response prevalence — direction selected
 
 D2D-C guarantees a nonempty family
 `S^Q_v=G^{Q-perm-stoch}_v` of intrinsic stochastic-capable related-only law
@@ -23148,6 +23151,116 @@ register depends only on that pruning: A yields 36 `SCREEN`, 1 `OWNER-OPEN`,
 17 `PRUNED`, 41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 37`. B/C yield 37 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 41
 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, every Oracle
+law is odds-responsive.** Thus
+`X^{Q-odds-response}_v=S^Q_v`. Every stochastic-capable related-only law has at
+least two reachable permission probabilities across its factual opportunity
+domain. One Oracle may vary only between interior probabilities; another may
+also reach a certain endpoint. The selection chooses neither certainty-endpoint
+support nor exact values.
+
+Oracle uncertainty must therefore express some changing condition of its
+relationship rather than remain one flat chance attached to every occurrence.
+The same complete law continues across its contexts while its probability
+differs, giving a direct continuity-and-distinction structure at the law
+boundary. The distinct children and their real shared cause—not randomness
+itself—remain the direct *Achintya Bheda Abheda* expression. Costs are universal
+Oracle forecast burden, threshold gaming, context gotchas, and harder robust
+policy comparison.
+
+E1-B does not make any contrast player-causal. Every probability change could
+still depend on an immutable, automatic, or externally fixed fact. It does not
+grant a direct odds setting, permission-only action, reroll, endpoint, exact
+preview, payoff, or result. E1 moves to `DIR-SELECTED`; E2 becomes the sole
+`OWNER-OPEN` row. The 99-row register now contains 37 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 38`. The authoritative decision record remains
+unchanged.
+
+The E2 post-answer screen used two bounded read-only questions. One attacked
+whether no-versus-some causal odds response hid universal prevalence, actor,
+control-mode, disclosure, or exact-odds decisions. The other tested whether a
+causal Oracle lever could be fun rather than a disguised odds command. A
+primary authority replay then checked the result against the repaired exact-
+permission causal test. All upheld one binary row with the material-policy and
+anti-laundering safeguards below. No prerequisite correction or new row is
+needed.
+
+### RCS-03C3C3D2E2 — matched player/counterplay-causal Oracle odds response — active owner choice
+
+E1-B makes every Oracle distribution-responsive, but a law may vary only with
+facts that no lawful decision can affect. Let `M^{Q-odds-causal}_v` contain an
+Oracle projection `w∈S^Q_v` exactly when it has at least one qualifying matched
+causal witness.
+
+A witness begins at one positive-support authoritative upstream decision state
+and compares two lawful, non-oracular policies. They are identical at every
+independently revisable decision coordinate except one materially operative
+participant or counterplayer decision. Both arms must be lawful and meaningful
+apart from permission; illegal inaction, a forced move, or a token side effect
+cannot provide the comparator. Later actions, reactions, delays, costs, and
+stochastic consequences may differ only as causal descendants of that one
+intervention.
+
+Hold fixed the version and canonical intrinsic law, Relic and relationship
+identities, all prospective bindings, the law-defining committed variant, the
+eventual selected related-only pair and proof, every non-descendant exogenous
+fact, and other actors' decision rules. Carry each arm through its complete
+direct, indirect, delayed, reactive, inseparable, and stochastic causal
+closure. Immediately before the one semantic permission realization, the two
+conditional allow probabilities must differ. A different sampled bit under an
+unchanged distribution does not qualify. Any changed law-read fact must have
+authoritative upstream truth conditions and a lifecycle independent of the
+desired permission result, including meaningful operation when the Oracle
+effect is semantically ablated.
+
+| Choice | Matched causal odds-response rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no matched causal Oracle response** | `M^{Q-odds-causal}_v=∅`. Every Oracle probability contrast depends on immutable, automatic, forced, externally determined, structurally different, or otherwise nonqualifying context. Players may forecast, route, and hedge around those contexts, but no lawful independently revisable decision supplies a matched causal change under the same law and eventual pair/proof. | A gives Oracles a **fate/weather** identity. It minimizes causal-state tracking, teammate grief, quarterbacking, threshold optimization, and blame. Its fit at this boundary is neutral/partial: contextual distinction exists, but play does not participate in producing it. The cost is that every Oracle becomes something players only read and accommodate, which can turn universal E1-B response into a lookup table or opaque gotcha. | **Veiled Eclipse:** the same Oracle is illustratively 65% before an automatic Dusk transition and 30% afterward. Dusk is inevitable; no lawful action can preserve, hasten, delay, or disrupt it. Choosing when to accept exposure remains strategy, but it is not causal odds shaping. |
+| **B — require at least one matched causal Oracle response** | `M^{Q-odds-causal}_v≠∅`. At least one responsive Oracle law has one qualifying decision intervention whose complete causal closure changes the conditional permission distribution while the same intrinsic law and eventual related-only pair/proof remain fixed. This is existential, not universal. | **Conditionally recommended.** B guarantees one lived play-or-counterplay expression without turning every Oracle into an odds-control minigame. At this action/law boundary, one meaningful deed changes how the same continuing covenant receives the same distinct-related pair—a direct structural fit with the standing ideal. Costs are causal/UI burden, allied sabotage, quarterbacking, optimal stalling, opaque blame, and disguised `+odds` actions. If no material, legible, non-token witness survives the safeguards below, use A. | From one decision state, **Guard** preserves an Ember Seal and supplies real defense, while **Burst** consumes it for real damage. With Veiled Chorus and the eventual pair/proof fixed, their complete closures are illustratively 70% versus 30%. Both actions matter without the Oracle modifier. An opponent's costly **Sunder** versus **Strike** could instead furnish the witness. |
+
+A/B are mutually exclusive and exhaustive because
+`M^{Q-odds-causal}_v⊆S^Q_v` is empty or nonempty. B does not require every
+Oracle or context to be actionable, identify the controlling side, guarantee
+action success, provide bearer control, require both ally agency and opponent
+counterplay, make the effect immediate, disclose exact percentages, or reach a
+certain endpoint. Requiring universal causal coverage is a replacement path,
+not hidden inside B; it may return only if a distinct required product purpose
+passes the reopening rule.
+
+A direct `Invoke Favor: spend mana for +20% Oracle chance` action fails even if
+costly, because permission odds are its semantic purpose. A nominal shield or
+damage rider added only to launder that command also fails. Changing the Relic,
+law, committed variant, selected pair, or proof is routing/configuration rather
+than a matched E2 witness. Acting after the draw, rerolling, comparing two
+ordinary samples, or relying on unrelated RNG-call order also fails. If an
+unobserved stochastic descendant mediates the contrast, the intervention must
+change the conditional distribution or reachable support under the lawful
+observation history, not merely yield one favorable crossover.
+
+B's required exemplar must remain materially play-shaping under semantic
+ablation: the intervention and changed fact have independent gameplay meaning,
+and enabling the Oracle consequence must change at least one truthful legal
+play, hedge, or counterplay policy. The operative factor must be understandable
+to the correct actor before the first irreversible divergence and attributable
+afterward; RCS-02/SR-10 later choose the exact holder, forecast, UI, and
+communication contract. An epsilon shift, dominated arm, cheap grief button,
+or hidden causal gotcha does not satisfy the required viable-purpose promise.
+If later authoring and evaluation cannot produce a qualifying witness, reopen
+E2 with A rather than shipping a token lever.
+
+E2 chooses no exact actor, probability, band, threshold, endpoint, prevalence
+beyond one witness, action identity, sequence length, success rate, payoff,
+result, seed, cross-pair coupling, rarity, or implementation. RCS-13 retains
+binding/lock horizons; E/F retain false-bit results and survivor authority; G2
+retains cross-pair stochastic coupling; RCS-17/RCS-18 retain simulation/RL,
+balance, exploit, and playtest acceptance.
+
+Either answer moves E2 to `DIR-SELECTED` and makes D2E3 the next presented
+card. The register would then contain 36 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 42 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`. E2 alone neither decides nor activates D2E6.
 
 ## Session protocol and evidence
 

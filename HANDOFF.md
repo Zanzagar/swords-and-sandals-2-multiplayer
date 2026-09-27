@@ -1,5 +1,62 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 universal Oracle response — RCS-03C3C3D2E1-B selected
+
+The owner selected `RCS-03C3C3D2E1-B`. Every stochastic-capable related-only
+Oracle law must have at least two reachable permission probabilities:
+`X^{Q-odds-response}_v=S^Q_v`. This makes Oracle uncertainty express a changing
+relationship condition rather than one flat chance, but it does not yet make
+any contrast player-causal. It selects no exact odds, endpoints, factual inputs,
+actor, disclosure, result, payoff, rarity, or implementation.
+
+Two bounded read-only audits tested the next card's mathematical topology and
+gameplay value; a primary authority replay checked it against the repaired
+exact-permission causal test. They upheld one binary row. Universal causal
+coverage, actor distribution, disclosure, immutable-versus-actionable family
+prevalence, and exact odds do not get additional cards absent a distinct
+required product purpose.
+
+The 99-row register now contains 37 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 41
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+`RCS-03C3C3D2E2` is the sole presented card. The authoritative decision record
+remains unchanged.
+
+D2E2 asks whether any Oracle probability contrast must be causally reachable
+through meaningful play. Let `M^{Q-odds-causal}_v` contain Oracle laws with a
+qualifying matched witness. Such a witness compares two lawful policies from
+one common upstream state, differing at exactly one independently revisable
+meaningful participant or counterplayer decision. Hold the intrinsic law,
+Relic/relationship, bindings, variant, eventual related-only pair/proof,
+non-descendant facts, and other actors' rules fixed; carry both arms through
+complete causal closure. Their conditional allow distributions before the one
+permission realization must differ. Different sampled bits do not qualify.
+
+- **A — no matched causal Oracle response:** `M=∅`. Every Oracle changes odds
+  only with immutable, automatic, forced, exogenous, or otherwise
+  nonqualifying context. Players may forecast and hedge around it, but cannot
+  cause it. Veiled Eclipse might be 65% before automatic Dusk and 30% afterward
+  when no action can preserve, hasten, delay, or disrupt Dusk.
+- **B — require at least one matched causal Oracle response:** `M≠∅`.
+  **Conditionally recommended.** At least one Oracle has one genuine play-or-
+  counterplay lever. From the same state, Guard might preserve an independently
+  useful Ember Seal while Burst consumes it for real damage; with the same law
+  and eventual pair/proof fixed, their complete closures are illustratively
+  70% versus 30%.
+
+B is existential; it does not make every Oracle actionable or identify the
+actor. Both arms and the changed fact must remain meaningful when the Oracle
+effect is removed. A direct or cosmetically laundered `+odds` command, changed
+law/pair/proof, post-draw action, reroll, unrelated RNG ordering, or lucky
+sample fails. The exemplar must materially change a truthful play, hedge, or
+counterplay policy and be understandable before the irreversible divergence
+and attributable afterward. If no such legible, viable, non-token witness can
+be authored, use A.
+
+Either answer selects E2 and makes deterministic related-response prevalence
+at D2E3 the next card; `Phi_SR` would become 37. D2E2 chooses no exact actor,
+probability, threshold, endpoint, action identity, prevalence beyond one
+witness, payoff, cross-pair coupling, seed, or implementation.
+
 ## 2026-09-26 Witness/Oracle coexistence — RCS-03C3C3D2D-C selected
 
 The owner selected `RCS-03C3C3D2D-C`. The completed related-only permission
@@ -40,15 +97,16 @@ the first five rows while only the latter gives a plan-relevant guaranteed-
 denial context. Its B witness must be a responsive `q∈Q_v`; hybrid placement
 cannot activate or satisfy it. There is no hybrid-composition card.
 
-The 99-row register now contains 38 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 40
-`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`.
-`RCS-03C3C3D2E1` is the sole presented card. The authoritative decision record
+At that checkpoint the 99-row register contained 38 `SCREEN`, 1 `OWNER-OPEN`,
+16 `PRUNED`, 40 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 39`.
+`RCS-03C3C3D2E1` was the sole presented card. The authoritative decision record
 remains unchanged.
 
-D2E1 asks whether each Oracle law keeps one fixed interior probability or
-responds with at least two probabilities across its reachable factual
-opportunities. This is law response, not differing random outcomes, different
-fixed odds on different laws, or player control:
+At that checkpoint D2E1 asked whether each Oracle law keeps one fixed interior
+probability or responds with at least two probabilities across its reachable
+factual opportunities. This is law response, not differing random outcomes,
+different fixed odds on different laws, or player control:
 
 - A: every Oracle is constant-chance. Each law keeps one fixed nondegenerate
   probability throughout its domain.
@@ -10303,7 +10361,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 00:13 UTC — Oracle response prevalence is next](docs/handoffs/2026-09-27-0013--relic-oracle-response-next.md)**
+[2026-09-27 00:26 UTC — causal Oracle response is next](docs/handoffs/2026-09-27-0026--relic-causal-oracle-response-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
