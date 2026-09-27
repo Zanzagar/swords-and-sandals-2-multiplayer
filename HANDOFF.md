@@ -1,5 +1,85 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 guarded stable polarities selected; denied-pair positive incidence is next
+
+The owner selected `RCS-03C3C3D2E5-C` **with the complete conditional
+recommendation**. Complete, separately tagged steadfast deterministic related
+projections include both always-allow and always-deny laws. Every selected
+polarity and their coexistence must add marginal related-form policy value
+beyond exact E3-C and responsive laws; inherited `H` tagging alone fails.
+
+All earlier conditions remain binding. Refusal must be instrumental,
+explicitly play-shaping, or a commensurately valued exploitable liability;
+compatibility may not dominate responsive Witness/Oracle policies. Both must be
+reachable, legible, non-token, non-dominated, and resistant to forced overlap,
+selector injection, teammate suppression, and grief. If refusal/coexistence
+fails while compatibility remains viable, reopen E5 with B. If compatibility
+fails while refusal remains viable, reopen with A. Failure of both reopens the
+E3 steadfast-class promise. The selection authorizes no implementation and
+does not change the authoritative decision record.
+
+A read-only dependency audit confirmed that C requires a reachable false-bit
+route, not a runtime-observed realization. E6 stays `DERIVED`. A separately
+aimed topology audit then broke old `RCS-03C3C3E` as an omnibus card. Under the
+false bit and C3c.46-A's width-two ceiling, a pair-local denied result has five
+semantic shapes: `{}`, one original, one genuine substitute, one original plus
+one substitute, or two distinct genuine substitutes. A substitute that merely
+renames/reconstructs both original entitlements is invalid denial laundering.
+
+The thirty-second prerequisite correction makes old E a non-counting parent:
+
+1. E1 — cancellation-only, positive-only, or both;
+2. E2 — conditional singleton-only, double-only, or both positive widths;
+3. E3 — conditional singleton original, substitute, or both; and
+4. E4 — conditional double original-plus-substitute, two substitutes, or both.
+
+Those four rows encode all 31 nonempty support subsets of the five shapes
+exactly once. F now owns total denied-output resolution authority only when one
+fixed opportunity retains several lawful dispositions after prospective
+binding; mixed catalog support alone creates no chooser. Exact receipt
+identities and mappings remain AUTHOR/SPEC, and three-plus aggregate treatment
+remains G/H/I.
+
+Replacing one E row with four adds three rows. The 102-row register now has 35
+`SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 45 `DIR-SELECTED`, 3 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. `RCS-03C3C3E1` is the sole presented
+card.
+
+Let `D^{deny}_v` be the nonempty prospective pair-local outcome domain after
+one false bit, `Y(o)` the aligned positive receipts caused by that disposition,
+and `D^{deny,+}_v={o in D^{deny}_v:|Y(o)|>=1}`. Unrelated same-cut receipts,
+later payoff/compensation, retries, reroutes, aliases, callback splits, and
+three-plus aggregate outputs do not count.
+
+- **A — cancellation only:** `D^{deny,+}_v=∅`. Every denied pair settles `{}`.
+  This is the clearest anti-compression/sacrifice grammar and cannot hide a
+  consolation proc, but it has the greatest erased-effort, trap, grief, and
+  compensation burden. Shared Heat can satisfy Guardian Vow `P` and Returning
+  Vow `Q`; Severed Chorus denies them and neither emits a pair-local receipt.
+- **B — every denied disposition remains positive:**
+  `D^{deny,+}_v=D^{deny}_v`. Every denial emits one or two aligned receipts;
+  later rows decide whether an original, substitute, or both. This is the
+  lower-risk fallback if cancellation cannot be fun, but an automatic preferred
+  heir or near-equivalent substitute can make “not both” economically fake.
+- **C — cancellation and positive disposition coexist:**
+  `∅⊊D^{deny,+}_v⊊D^{deny}_v`. **Conditionally recommended as the higher-ceiling
+  Souls and Simulacra target.** Severed Chorus may cancel while a disclosed
+  Fractured Concord treatment leaves a continuing/transformed result. This
+  supports sacrificial and heir/transmutation build philosophies, but their
+  coexistence is aggregate and risks cancellation becoming the novice trap.
+
+C requires both outcome families to be prospectively legible, independently
+policy-changing, non-token, and non-dominated. Cancellation must be deliberate
+or a commensurately valued exploitable liability. A positive disposition must
+irrecoverably remove or materially transform at least one original entitlement
+and not dominate allow/responsive laws. Fall back to B if cancellation fails;
+fall back to A if positive settlement launders denial; reopen E5-C if neither
+is viable.
+
+E1 chooses no survivor, substitute family, width, authority, exact law, actor,
+randomness, compensation, payoff, claim, rarity, or implementation. Ask for A,
+B, or C.
+
 ## 2026-09-26 causal deterministic related response — RCS-03C3C3D2E4-B selected conditionally
 
 The owner selected `RCS-03C3C3D2E4-B` **with its stated conditionality**. At
@@ -10614,7 +10694,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 01:32 UTC — stable deterministic related polarity is next](docs/handoffs/2026-09-27-0132--relic-stable-related-polarity-next.md)**
+[2026-09-27 01:57 UTC — denied-pair positive incidence is next](docs/handoffs/2026-09-27-0157--relic-denied-pair-positive-incidence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

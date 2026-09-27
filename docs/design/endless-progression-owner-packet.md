@@ -339,8 +339,12 @@ RCS-03C3C3D2E4-B with its stated conditional fallback: at least one responsive
 deterministic related projection must have a qualifying causal play-or-
 counterplay witness, or E4 reopens with A. A two-angle post-answer audit then
 upheld E5's three stable-polarity branches while strengthening their marginal
-related-form-purpose and anti-inheritance-laundering obligations.
-RCS-03C3C3D2E5 is the current owner-facing choice under SR-03.
+related-form-purpose and anti-inheritance-laundering obligations. The owner
+selected guarded RCS-03C3C3D2E5-C: steadfast compatibility and steadfast
+refusal coexist, with B/A/upstream reopening exactly as the card's viability
+failures require. A thirty-second prerequisite correction then split the
+overcompressed denied-pair result row into four finite support-topology rows.
+RCS-03C3C3E1 is the current owner-facing choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -23520,7 +23524,7 @@ relabel the exact E3-C witness without adding any related-form policy. The
 repaired card below requires marginal related-form purpose and rejects tag
 inheritance alone. No prerequisite correction or new row is needed.
 
-### RCS-03C3C3D2E5 — context-invariant deterministic related-projection polarity — active owner choice
+### RCS-03C3C3D2E5 — context-invariant deterministic related-projection polarity — direction selected
 
 E3-C guarantees a nonempty steadfast complement
 `F^{R-det-steady}_v=D^R_v setminus X^{R-det-response}_v`. Define
@@ -23586,10 +23590,128 @@ compensation, payoff, actor, disclosure surface, count, prevalence beyond the
 selected support topology, rarity, release placement, or implementation.
 RCS-02/SR-10 own exact information; E/F own denied-pair results and authority;
 SR-05/SR-06 and RCS-17/RCS-18 own authoring, simulation/RL, balance, exploit,
-and playtest proof. Any answer moves E5 to `DIR-SELECTED` and makes C3C3E the
-next presented card. The register would then contain 32 `SCREEN`, 1
-`OWNER-OPEN`, 16 `PRUNED`, 45 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 33`.
+and playtest proof. Before the post-answer audit, selecting any answer was
+expected to move E5 to `DIR-SELECTED`, open old C3C3E, and produce 32 `SCREEN`,
+1 `OWNER-OPEN`, 16 `PRUNED`, 45 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 33`. The thirty-second correction below supersedes that
+overcompressed forecast.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **C, both steadfast
+polarities coexist, with the full stated conditionality.** Thus
+`∅⊊F^{R-det,+}_v⊊F^{R-det-steady}_v`: at least one complete, separately tagged
+steadfast deterministic related projection always permits its pair and at
+least one always denies. This remains projection-level and creates no two-Relic
+or per-form quota. Each polarity and their coexistence must furnish reachable,
+legible, non-token, non-dominated marginal related-form policy value beyond
+exact E3-C and responsive related laws; inherited `H` tagging alone fails.
+
+Steadfast refusal must remain instrumental, explicitly play-shaping, or a
+commensurately valued exploitable liability, and later E/F plus adversarial
+evaluation must show that its false-bit result is fun rather than a trap, grief
+tool, or fake burden. Steadfast compatibility must not dominate responsive
+Witness or Oracle policies. If refusal or coexistence fails while compatibility
+remains viable, reopen E5 with B. If compatibility fails while refusal remains
+viable, reopen with A. If neither polarity remains viable, reopen E3-C's
+steadfast-class promise as already specified. C selects no concrete law,
+result, survivor, substitute, compensation, payoff, actor, count, rarity, or
+implementation. The authoritative decision record remains unchanged.
+
+The dependency audit independently confirmed that C supplies a **required
+reachable false-bit route**, not a runtime observation that a battle has
+already realized one. E6 stays `DERIVED`; the false bit still means only “not
+both.” A separate result-topology audit then broke old C3C3E as one card. The
+old label hid cancellation-versus-positive incidence, singleton-versus-double
+positive width, original-retention-versus-substitute identity, mixed double-
+result composition, and total output-selection authority.
+
+> **Thirty-second prerequisite correction, 2026-09-26:** for one canonical
+> denied resolved pair with original tags `T={P,Q}`, let `Y(o)` be only the
+> aligned positive receipts causally emitted by that pair's one prospective
+> completed disposition outcome `o`. Unrelated same-boundary receipts, later
+> payoff or compensation, retries, reroutes, callback splits, aliases, and the
+> aggregate settlement of a three-plus contender state do not enter `Y(o)`.
+> The false permission bit gives `|Y(o)∩T|<=1`; C3c.46-A gives
+> `|Y(o)|<=2`.
+>
+> Exactly five non-isomorphic pair-local shapes remain: empty cancellation
+> `{}`; one retained original `{P}` or `{Q}`; one genuine substitute `{S}`;
+> one retained original plus one substitute `{P,S}` or `{Q,S}`; and two
+> distinct genuine substitutes `{S1,S2}`. A one-receipt fusion or
+> transmutation is a substitute, not a sixth shape. A renamed receipt that
+> preserves both original consumer entitlements launders the false bit and is
+> invalid. Every substitute inherits C3c.44-A/C3c.45's truthful, reachable,
+> nonconstant, materially consumer-distinct receipt obligations. Persistent
+> Relic transformation remains downstream RCS-03D/RCS-03E.
+>
+> Old `RCS-03C3C3E` becomes a non-counting parent for four registered rows:
+>
+> 1. `RCS-03C3C3E1` — empty-versus-positive denied-pair disposition
+>    prevalence;
+> 2. `RCS-03C3C3E2` — conditional singleton-versus-double positive-width
+>    prevalence;
+> 3. `RCS-03C3C3E3` — conditional singleton identity-kind support: retained
+>    original, genuine substitute, or both; and
+> 4. `RCS-03C3C3E4` — conditional two-receipt composition support:
+>    original-plus-substitute, two substitutes, or both.
+>
+> E1-A prunes E2-E4 and the positive-output authority in F. E1-B/C activates
+> E2. E2-A activates E3 and prunes E4; E2-B prunes E3 and activates E4; E2-C
+> queues both, one at a time. E3 chooses no `P`-versus-`Q` survivor or exact
+> substitute. E4's two substitutes must be genuinely distinct. Exact receipt
+> identities and mappings remain AUTHOR/SPEC after the support families are
+> selected.
+>
+> These four rows encode every nonempty subset of the five shapes exactly once:
+> one cancellation-only terminal, then fifteen positive-support terminals for
+> each of positive-only and mixed cancellation/positive E1 branches. F is
+> retitled total denied-output resolution authority. It becomes an owner card
+> only if one fixed opportunity retains several lawful dispositions after
+> prospective binding; catalog-level mixed support alone does not manufacture
+> chooser authority. Three-plus aggregate cardinality and identity remain H/I.
+>
+> Replacing one counted E row with four adds three slots and unresolved
+> potentials. After E5-C, the corrected register contains **102 rows: 35
+> `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 45 `DIR-SELECTED`, 3 `DERIVED`, 1
+> `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**. E1 is the sole presented card.
+
+### RCS-03C3C3E1 — positive-incidence topology after a denied pair — active owner choice
+
+Let `D^{deny}_v` be the nonempty complete domain of prospective pair-local
+disposition outcomes reached after one realized false joint-survival bit under
+the fixed versioned contract. E5-C guarantees a reachable route into this
+domain. Let
+`D^{deny,+}_v={o in D^{deny}_v:|Y(o)|>=1}`. E1 asks only whether a denied pair
+emits no aligned positive receipt or at least one; E2-E4 and F retain every
+identity, width, and authority question.
+
+| Choice | Denied-pair positive-incidence rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — cancellation only** | `D^{deny,+}_v=∅`. Every denied pair-local disposition emits `{}`: neither original tag nor any genuine substitute survives this settlement. | A is the crispest anti-compression and sacrifice grammar. It makes refusal a real cost, cannot hide a consolation proc, and is **neutral/protective** for the standing ideal because it preserves distinction without continuing participation at this boundary. Its burden is severe: erased mastery can make steadfast refusal a trap, grief tool, or overcompensated package tax. | Shared **Heat h** makes Guardian Vow `P` and Returning Vow `Q` individually valid. **Severed Chorus** returns false, and the pair settles `{}`. Neither tag creates an aligned input receipt; unrelated results elsewhere are unaffected. |
+| **B — every denied disposition remains positive** | `D^{deny,+}_v=D^{deny}_v`. Every false-bit settlement emits at least one and at most two aligned positive receipts. E1 does not say whether an original remains, a genuine substitute appears, or both; later children decide. | **Lower-risk fallback if cancellation cannot be made fun.** B turns denial into guaranteed heirship or transformation rather than total erasure, preserving player effort and making steadfast refusal easier to teach. It can become a direct ideal fit only when later identity rules preserve a legible continuing relation and real difference. The danger is denial laundering: a preferred heir or near-equivalent substitute can make “not both” economically fake or pure upside. | The same denied `P/Q` pair may never settle empty. A later E3 answer could retain one Vow; a substitute branch could instead emit **Fractured Concord**. E1-B promises only that some truthful aligned receipt remains. |
+| **C — cancellation and positive disposition coexist** | `∅⊊D^{deny,+}_v⊊D^{deny}_v`. At least one denied outcome cancels the pair and at least one emits a positive pair-local receipt. The witnesses may use different disclosed laws or contexts; hidden or contrived token cases fail. | **Conditionally recommended as the higher-ceiling Souls and Simulacra target.** C supports both sacrificial anti-compression and heir/transmutation build philosophies. Their coexistence is catalog-level **aggregate** fit, not itself a stronger realization of the standing ideal. It adds a prediction dialect and risks cancellation becoming the novice trap while positive laws become the premium. Choose C only if both outcome families are prospectively legible, independently policy-changing, non-token, and non-dominated. | **Severed Chorus** cancels its denied pair, while a distinct disclosed **Fractured Concord** treatment always leaves a continuing or transformed aligned result. Players can build around which refusal philosophy they accept; E2-E4 still decide the actual positive shapes. |
+
+A/B/C are mutually exclusive and exhaustive because the positive subset of the
+nonempty denied domain is empty, all of it, or a nonempty proper subset. A
+technical no-op, an unrelated same-cut receipt, later payoff, compensation,
+reload, retry, reroute, or a renamed reconstruction of both original
+entitlements cannot manufacture positivity.
+
+C is conditional. Cancellation must be instrumental, an explicit
+play-shaping commitment, or a commensurately valued exploitable liability;
+mere lost progress, obscure incidence, grief, and automatic overcompensation
+fail. Positive dispositions must irrecoverably remove or materially transform
+at least one original entitlement, remain truthful under player/consumer
+alignment, and not dominate allow/responsive laws. If cancellation or its
+coexistence fails while honest positive denial remains viable, reopen E1 with
+B. If positive settlement cannot avoid denial laundering while deliberate
+severance remains viable, reopen with A. If neither is viable, E5-C's required
+steadfast-refusal policy has failed and reopens through its recorded fallback.
+
+E1 selects no original survivor, substitute family, output width, exact law,
+context mapping, actor, randomness, choice timing, compensation, payoff,
+claim, later reuse, rarity, release placement, or implementation. Either B or
+C opens E2; A prunes E2-E4 and positive-output authority in F. Any answer moves
+E1 to `DIR-SELECTED`. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

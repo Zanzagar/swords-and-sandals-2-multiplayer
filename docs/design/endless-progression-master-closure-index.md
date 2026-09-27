@@ -2957,13 +2957,39 @@ passes its own viable-purpose gate. Compatibility failure with viable refusal
 routes to A; failure of both polarities reopens D2E3-C's steadfast-class
 promise.
 
-The current register has **ninety-nine slots: 33 `SCREEN`, 1 `OWNER-OPEN`, 16
-`PRUNED`, 44 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 34`**. D2E5 is the current presented card.
+The owner selected guarded D2E5-C. Steadfast-allow and steadfast-deny related
+projections coexist, with the complete marginal-purpose, anti-laundering,
+legibility, non-dominance, anti-grief, and B/A/upstream fallback obligations
+unchanged. This guarantees a reachable false-bit route but does not claim a
+runtime-observed battle or choose its result.
+
+A two-question post-answer audit upheld that dependency transition and broke
+old C3C3E as one owner card. Under the false-bit and C3c.46-A constraints, a
+pair-local denied disposition has exactly five semantic shapes: empty; one
+retained original; one genuine substitute; one original plus one substitute;
+or two genuine substitutes. Cancellation incidence, positive width, singleton
+identity kind, double-result composition, and output authority change distinct
+settlement or gameplay boundaries.
+
+The thirty-second prerequisite correction therefore makes old E a non-counting
+parent for E1-E4 and broadens F to total denied-output resolution authority.
+E1 classifies cancel-only, positive-only, or both; E2 conditionally classifies
+singleton-only, double-only, or both positive widths; E3 conditionally
+classifies retained-original, substitute, or both singleton kinds; and E4
+conditionally classifies original-plus-substitute, two-substitute, or both
+double compositions. Together they encode every nonempty support subset of the
+five shapes exactly once. Exact identities and mappings remain AUTHOR/SPEC. F
+opens only when one fixed opportunity retains several lawful outputs after
+prospective binding; mixed catalog support alone creates no chooser.
+
+Replacing one counted E row with four adds three slots. The current register
+has **102 slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 45
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**.
+E1 is the current presented card.
 
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has ninety-nine
+To make that route genuinely finite, the remaining C3c pass has 102
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -3040,10 +3066,13 @@ overcompression.
 | `RCS-03C3C3D2E2` | Matched player/counterplayer-causal odds-response support among responsive Oracle laws | `DIR-SELECTED`; B requires at least one qualifying witness in which one independently meaningful lawful decision and complete causal closure change the conditional permission distribution under the same intrinsic law and eventual pair/proof, not merely the realized sample or a disguised direct odds command; universal coverage, exact actor, odds, and endpoint remain unsettled |
 | `RCS-03C3C3D2E3` | Responsive-law prevalence across tagged deterministic related-form projections, including related-only Witness and inherited hybrid restrictions | `DIR-SELECTED`; C requires responsive and steadfast complete tagged deterministic projections to coexist under the documented viable-purpose, non-token, non-dominance, legibility, and bounded-fallback obligation; it imposes no per-form or hybrid-existence quota |
 | `RCS-03C3C3D2E4` | Matched player/counterplayer-causal certain-bit response among responsive deterministic related projections | `DIR-SELECTED`; B conditionally requires at least one same-projection/law/form/pair/proof witness in which one independently meaningful lawful decision plus complete causal closure changes eventual bit support or conditional distribution; direct permission commands and relabeled exact/Oracle witnesses fail, and inability to author a qualifying marginal related-form policy reopens E4 with A |
-| `RCS-03C3C3D2E5` | Stable polarity among context-invariant deterministic related projections | `OWNER-OPEN`; classify steadfast refusal only, steadfast compatibility only, or both over complete separately tagged `Q`/`H` projections; a selected polarity must add marginal related-form policy value beyond exact E3-C and responsive related laws, and inherited `H` tagging alone cannot satisfy it |
+| `RCS-03C3C3D2E5` | Stable polarity among context-invariant deterministic related projections | `DIR-SELECTED`; guarded C requires steadfast refusal and compatibility to coexist over complete separately tagged `Q`/`H` projections under the marginal related-form-purpose, anti-inheritance-laundering, legibility, non-dominance, anti-grief, and B/A/upstream fallback obligations |
 | `RCS-03C3C3D2E6` | Missing-certainty endpoint support in responsive stochastic related-only laws after the deterministic form-wide baseline is known | `DERIVED`; D2E3-C's responsive deterministic support already supplies both certain endpoints, so no endpoint is missing from the form-wide baseline |
-| `RCS-03C3C3E` | Result disposition and survivor cardinality when two individually satisfied overlapping tags receive a false joint-survival permission bit | `SCREEN`; follows applicable C2E1-C2E3/D2 permission restrictions and their stochastic topology; prunes only if no selected overlap reaches treatment or every applicable exposed pair is permitted with probability one; a realized false bit enters this route once without redraw or rerouting |
-| `RCS-03C3C3F` | Authority selecting the survivor or legal substitute for a denied pair | `SCREEN`; conditional on C3C3E admitting a positive nonunique result; otherwise `PRUNED` or `DERIVED`; exact priority keys remain later only after authority is settled |
+| `RCS-03C3C3E1` | Empty-versus-positive pair-local disposition prevalence after a false joint-survival permission bit | `OWNER-OPEN`; choose cancellation only, a positive result after every denial, or both; one false bit enters once without retry, reroute, unrelated-result counting, later-payoff counting, or reconstruction of both original entitlements |
+| `RCS-03C3C3E2` | Positive denied-output width support under C3c.46-A's exact-two global receipt ceiling | `SCREEN`; conditional on E1-B/C; classify singleton-only, double-only, or both over the nonempty positive domain; E1-A prunes it |
+| `RCS-03C3C3E3` | Singleton denied-output identity-kind support | `SCREEN`; conditional on E2-A/C; classify one retained original, one genuine substitute, or both; exact `P`/`Q` and substitute identities remain AUTHOR/SPEC |
+| `RCS-03C3C3E4` | Two-receipt denied-output composition support | `SCREEN`; conditional on E2-B/C; classify original-plus-substitute, two distinct genuine substitutes, or both; two originals are forbidden by the false bit |
+| `RCS-03C3C3F` | Total authority resolving among several legal denied-pair outputs after prospective binding | `SCREEN`; conditional on some one fixed opportunity retaining multiple lawful empty/positive identity-set dispositions after E1-E4; otherwise `PRUNED` or `DERIVED`; catalog-level mixed support alone creates no chooser, and exact priority keys remain later only after authority is settled |
 | `RCS-03C3C3G1` | Support for at least three simultaneously individually ledger-satisfied receipt tags before within-evaluation treatment | `SCREEN`; follows the pair route; choose empty or nonempty support without treating engine callbacks or alternate ledger assignments as additional contenders |
 | `RCS-03C3C3G2` | Joint stochastic permission-draw coupling across distinct simultaneous unordered pair opportunities | `SCREEN`; conditional on G1 positive and at least two nonconstant pair-permission marginals in one reachable evaluation under applicable exact/related laws; otherwise `PRUNED` or `DERIVED`; requires a fresh prerequisite screen, and one hybrid exact-related pair remains one pair and draw |
 | `RCS-03C3C3H` | Output-cardinality topology for a three-plus contender state under the exact-two final receipt ceiling | `SCREEN`; conditional on G1 positive and following the applicable G2 disposition; otherwise `PRUNED`; options must be relative to actually feasible survivor subsets so an impossible pair is never a fake branch |
@@ -3341,22 +3370,28 @@ deterministic related-response witness, with A as the mandatory fallback if no
 marginal, legible, non-token policy purpose survives. A two-question audit
 upholds E5's deny-only/allow-only/both stable-polarity topology while adding a
 marginal related-form-purpose guard against inherited-`H` relabeling; no row is
-added. The current register has **ninety-nine slots**: 33 `SCREEN`, 1
-`OWNER-OPEN`, 16 `PRUNED`, 44 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 34`. D2E5 is the current presented card.
+added. `RCS-03C3C3D2E5-C` then selects both steadfast polarities with all stated
+viability conditions and fallback routes. A post-answer audit upholds the
+required false-bit route but breaks old E as an omnibus result card. The
+thirty-second correction replaces old E with four counted rows for empty/
+positive incidence, positive width, singleton identity kind, and double-result
+composition, while F retains only total output-resolution authority. The
+current register has **102 slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`,
+45 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`.
+E1 is the current presented card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-four owner cards under this thirty-one-times-corrected charter and will
+thirty-six owner cards under this thirty-two-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
 `RCS-03C3B2B`, `RCS-03C3B3`, `RCS-03C3B4`, `RCS-03C3C`, `RCS-03C3C3B`,
 `RCS-03C3C3B3`, `RCS-03C3C3B3B`, `RCS-03C3C3B4`, `RCS-03C3C3C`,
 `RCS-03C3C3C2`, `RCS-03C3C3C2E`, `RCS-03C3C3D`, `RCS-03C3C3D2`,
-`RCS-03C3C3D2E`,
+`RCS-03C3C3D2E`, `RCS-03C3C3E`,
 `RCS-03C3C3G`, and `RCS-04`
 remain readable parent aliases only; `RCS-03C3C3` is now also a non-counting
 parent alias. They are not additional counted slots.
@@ -3373,7 +3408,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 99 frozen candidate slots; current `Phi_SR = 34` after conditional `RCS-03C3C3D2E4-B` requires one qualifying causal deterministic related-response witness and opens stable related-projection polarity at D2E5 | At most 34 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 102 frozen candidate slots; current `Phi_SR = 36` after guarded `RCS-03C3C3D2E5-C` and the thirty-second amendment open denied-pair positive incidence at E1 | At most 36 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

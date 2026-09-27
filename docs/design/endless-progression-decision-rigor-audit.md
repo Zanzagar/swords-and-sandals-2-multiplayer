@@ -5279,9 +5279,111 @@ topology if its own guards continue to hold.
 
 E5 selects no exact law, form placement, result, survivor, substitute,
 compensation, payoff, actor, disclosure surface, count, rarity, release slice,
-or implementation. Any answer selects E5 and opens C3C3E, yielding
-`Phi_SR = 33`. D2E5 is the sole presented card. The authoritative decision
-record remains unchanged.
+or implementation. Before its post-answer prerequisite audit, any answer was
+expected to select E5 and open old C3C3E, yielding `Phi_SR = 33`. The
+thirty-second correction below supersedes that overcompressed forecast. The
+authoritative decision record remains unchanged.
+
+The owner selected E5-C **with all stated conditionality**. The nonempty
+steadfast deterministic related family contains both always-allow and always-
+deny complete tagged projections. Marginal related-form policy purpose,
+anti-`H`-inheritance laundering, precommitment legibility, non-token and non-
+dominance requirements, refusal-as-instrument/commitment/valued-liability,
+anti-grief evaluation, and the B/A/upstream fallback tree all remain binding.
+The selection creates no form quota, concrete law, result, survivor,
+substitute, compensation, payoff, rarity, or implementation authority.
+
+One read-only dependency audit re-derived the 99 committed rows and upheld the
+immediate transition: E5-C's steadfast-deny subset has a complete nonempty
+reachable domain and therefore requires a reachable false-bit route. This is a
+designed requirement, not evidence that an implemented battle has realized the
+route. E6 remains `DERIVED`, and no G2 prerequisite follows. Applying only the
+then-registered transition would have produced 32 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 45 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`.
+
+A separately aimed read-only topology audit broke old C3C3E as one atomic
+owner card. Let `T={P,Q}` be the two original contender tags and `Y(o)` the
+aligned positive receipt set causally emitted by one canonical pair-local
+denied disposition outcome. The false bit gives `|Y(o)∩T|<=1`, while
+C3c.46-A gives `|Y(o)|<=2`. C3c.44-A/C3c.45 make coextensive aliases,
+decorative scars, dormant bits, and receipts without truthful player/material
+consumer identity invalid. The complete non-isomorphic shape list is therefore:
+
+1. `{}` — mutual cancellation;
+2. `{P}` or `{Q}` — one retained original;
+3. `{S}` — one genuine substitute, including a genuine fusion/transmutation;
+4. `{P,S}` or `{Q,S}` — one retained original plus one substitute; and
+5. `{S1,S2}` — two distinct genuine substitutes.
+
+`{P,Q}` violates the false bit. Width three violates C3c.46-A. Renaming two
+receipts while preserving both original entitlements is denial laundering, not
+a sixth shape. Persistent Relic transformation remains RCS-03D/RCS-03E.
+Unrelated same-boundary receipts, later payoff or compensation, retries,
+reroutes, callback splits, and three-plus aggregate settlement do not enter the
+pair-local set.
+
+The smallest complete one-card-at-a-time factorization uses four rows:
+
+- E1 selects cancellation-only, positive-only, or mixed cancellation/positive
+  support;
+- conditional E2 selects singleton-only, double-only, or mixed positive width;
+- conditional E3 selects retained-original-only, genuine-substitute-only, or
+  both singleton identity kinds; and
+- conditional E4 selects original-plus-substitute-only, two-substitute-only,
+  or both double-result compositions.
+
+This is complete rather than an arbitrary preference for four questions. E1
+chooses whether the empty class occurs. Within the nonempty positive classes,
+E2 chooses whether singleton classes `{O,S}`, double classes `{OS,SS}`, or both
+occur. E3 resolves the nonempty singleton subset and E4 the nonempty double
+subset. That tree represents all 31 nonempty subsets of five shape classes
+exactly once: one cancellation-only terminal plus fifteen positive-support
+terminals under each of E1's positive-only and mixed branches.
+
+Each row passes the admission test. E1 changes nullification versus settlement;
+E2 changes positive result width and pre-payoff state; E3 changes original-
+relationship continuity versus transmutation; E4 changes retention-plus-
+emergence versus complete dual replacement. These alter settlement,
+information, build/counterplay policy, and required content-family presence,
+not merely notation or proof strength. C3c.45 is direct precedent for treating
+no/universal/mixed result topology as owner-material while exact identities and
+mapping remain AUTHOR/SPEC.
+
+E1-A prunes E2-E4 and positive-output authority. E1-B/C activates E2. E2-A
+activates E3 and prunes E4; E2-B prunes E3 and activates E4; E2-C queues both,
+one at a time. E3 chooses no `P`-versus-`Q` survivor or exact substitute. E4's
+two-substitute branch requires two genuinely distinct aligned receipts. F is
+broadened from survivor-only wording to total denied-output resolution
+authority, including empty-versus-positive and identity-set choice. It opens
+only when one fixed opportunity retains several lawful outputs after
+prospective binding; different opportunities populating different shape
+classes do not by themselves create a chooser.
+
+Replacing one E row with E1-E4 adds three rows. After E5-C, the register has
+102 rows: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 45 `DIR-SELECTED`, 3
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. E1 is the sole presented
+card.
+
+For E1, let `D^{deny}_v` be the nonempty complete prospective denied-pair
+outcome domain and let
+`D^{deny,+}_v={o in D^{deny}_v:|Y(o)|>=1}`. Exactly three branches exist: A
+makes the positive subset empty, B makes it the whole domain, and C makes it a
+nonempty proper subset. A is crisp mutual sacrifice but carries the greatest
+erased-effort, trap, and grief burden. B guarantees an heir or transformation
+and is the lower-risk fallback, but can make denial economically fake. Guarded
+C is the higher-ceiling recommendation because it supports both sacrificial
+anti-compression and heir/transmutation policies, provided both are disclosed,
+non-token, non-dominated, and independently policy-changing. Their catalog
+coexistence is aggregate rather than a stronger standing-ideal realization.
+
+Under C, cancellation must be instrumental, explicitly play-shaping, or a
+commensurately valued exploitable liability. Positive settlement must
+irrecoverably remove or materially transform at least one original entitlement
+and must not dominate allow/responsive laws. Cancellation failure with honest
+positive settlement reopens E1 with B; positive denial-laundering with viable
+severance reopens it with A; failure of both reopens E5-C through its recorded
+fallback. E1 selects no receipt identity, width, authority, compensation,
+payoff, exact law, actor, randomness, claim, rarity, or implementation.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
