@@ -5546,6 +5546,99 @@ viable and E2 must reopen; double-only is available only if E4 survives. E3 is
 the sole presented Relic card, while E4 remains queued. The authoritative
 decision record remains unchanged.
 
+Zanzagar selected E3-B with E3-A as the explicit qualified fallback. Thus
+`D^{deny,1,S}_v=D^{deny,1}_v`: every singleton positive denial emits one
+genuine substitute `{S}` and neither original tag survives. Exact substitute
+identity, downstream consumer overlap, cross-width reuse, and mapping remain
+AUTHOR/SPEC. The result must preserve the selected zero/sever versus one/fuse-
+or-transmute semantic distinction without becoming extra value by definition.
+
+The standing-ideal fit remains potentially direct rather than automatic. The
+denied pair must materially participate in one continuing `S` while the result
+is genuinely different at the same pair-local disposition boundary. A generic
+failure shard, premium currency, thematic label, or mere causal successor is
+neutral and fails. `S` may not reconstruct the joint availability of both
+original consumer entitlements, must remain legible and attributable under
+E1-C, and must change optimized policy relative to cancellation, ordinary
+allowed dual weave, and every applicable E4 double family. Exact overlap with
+either one original remains later.
+
+The A fallback is local only when B fails for substitute-specific authoring,
+reconstruction, comprehension, or cross-width-dominance reasons and retained-
+original singleton play remains viable under preferred-heir, coercion, and
+later `{P,S}` subset-dominance attacks. If A also fails, E2-C's required
+singleton family is not viable and E2 reopens. Identity-independent false-bit
+coercion follows E5-C's upstream fallback. C remains unselected.
+
+E3 moves to `DIR-SELECTED` and E4 moves from queued `SCREEN` to
+`OWNER-OPEN`. The 102-row register becomes 32 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 48 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 33`.
+
+Two post-answer named-claim audits then attacked E4. Define the all-substitute
+subset of E2-C's nonempty double domain:
+`D^{deny,2,SS}_v={o in D^{deny,2}_v:Y(o)∩T=∅}`. Every member of
+`D^{deny,2}_v` has exactly two distinct receipts, and the false bit permits at
+most one original. Therefore the only compositions are one retained original
+plus one substitute `{P,S}`/`{Q,S}`, or two distinct genuine substitutes
+`{S1,S2}`. The all-substitute subset is empty, all, or a nonempty proper subset,
+yielding exactly:
+
+- A: original-plus-substitute-only double support;
+- B: two-distinct-substitutes-only double support; or
+- C: both double composition families.
+
+No hidden fourth branch exists. `{P,Q}` violates the false bit, width three
+violates C3c.46-A, and coextensive aliases canonicalize together. C's “both” is
+support across outcomes or prospectively bound laws, not three receipts, a
+random composition, or a chooser at one fixed opportunity. E4 selects no exact
+survivor, substitute identity, cross-width reuse, mapping, actor, randomness,
+priority, value, compensation, payoff, claim, rarity, or implementation.
+
+The gameplay audit conditionally recommends B. Selected E3-B already makes
+zero receipts sever and one substitute fuse or transmute. Two substitutes
+complete a coherent refract/reconstitute grammar while holding original
+retention at zero across positive denial. That avoids reintroducing preferred-
+heir filtering at maximum width and keeps ordinary allowed `{P,Q}` uniquely
+responsible for preserving both originals. One integrated singleton identity
+can then compete horizontally with two separately addressable transformed
+routes rather than merely receiving fewer prizes.
+
+B has a higher continuity proof burden than A. Both receipts must inherit
+C3c.44-A/C3c.45-C's truthful, reachable, nonconstant, separately player-
+meaningful, materially consumer-distinct obligations and be genuinely distinct
+from each other. Together they may not reconstruct both original entitlements,
+become one-to-one renamed `P/Q`, or reduce to singleton `{S}` plus free upside.
+After unrelated package value is equalized, double replacement must change
+optimized policy relative to cancellation, singleton fusion, and ordinary
+allowed dual weave, with every comparator retaining real matchups. Count or
+extra payoff access alone fails.
+
+B is potentially direct standing-ideal fit only if the one denied relationship
+materially continues through two genuinely distinct manifestations at this
+boundary. Two new items, prizes, or labels prove nothing. A is easier to teach
+and author and gives the most immediately legible original-plus-difference
+witness, but its `{O,S}` result is structurally prone to preferred-heir and
+“best of both worlds” dominance over `{S}` and sometimes `{P,Q}`. C adds both
+same-width policies but enables nearly every denied shape and both laundering
+surfaces; coexistence is merely aggregate fit.
+
+Composition inherits E1-C's prospective disclosure, retrospective
+attribution, and anti-coercion obligations. Use E4-A if two genuine substitutes
+fail for reconstruction, comprehension, authoring, or cross-width-dominance
+reasons while anchored transformation survives preferred-heir and subset-
+dominance attacks. Promote C only if A and B independently change optimized
+policy and their coexistence changes precommitted play. If C is selected but
+coexistence alone fails while A and B remain individually viable, E4 reopens
+for a fresh A/B choice. If both fail, E2-C's double family fails and E2 reopens
+with singleton-only E2-A while E3-B remains viable. If E3 itself uses its A
+fallback, E4 must be re-audited rather than carrying this recommendation
+silently. Identity-independent coercion follows E5-C's fallback.
+
+Catalog composition support creates no F authority. F opens only if one fixed
+prospectively bound opportunity retains several lawful outputs. E4 is the sole
+presented Relic card. The authoritative decision record remains unchanged.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

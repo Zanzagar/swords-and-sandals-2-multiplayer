@@ -1,5 +1,68 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 substitute singleton selected; double composition is next
+
+Zanzagar selected guarded `RCS-03C3C3E3-B` with E3-A as the explicit
+qualified fallback. Every singleton positive denied result is one genuine
+substitute `{S}`; neither original tag survives. Exact `S`, downstream
+consumer overlap, cross-width reuse, mapping, actor, randomness, payoff, and
+authority remain later.
+
+B gives the selected denied-result grammar a distinct singleton verb: zero
+receipts sever while one fuses or transmutes. It is potentially direct
+standing-ideal fit only when the denied pair materially participates in a
+continuing result that is genuinely different at the same disposition
+boundary. A generic shard, premium currency, thematic label, or disguised
+`P+Q` fails. `S` must remain prospectively legible, attributable afterward,
+resistant to cheap teammate-forced transformation, and policy-distinct from
+cancellation, allowed dual weave, and every applicable double result.
+
+The A fallback is local only when B fails for substitute-specific authoring,
+reconstruction, comprehension, or cross-width-dominance reasons and retained-
+original singleton play still passes preferred-heir, coercion, and `{P,S}`
+subset-dominance attacks. If A also fails, reopen E2. Identity-independent
+forced denial still follows E5-C's upstream fallback. C is not selected.
+
+E3 moves to `DIR-SELECTED`; E4 becomes the sole presented `OWNER-OPEN` Relic
+row. The 102-row register now has 32 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 48
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 33`. The
+authoritative decision record remains unchanged.
+
+Two post-answer audits upheld E4 as one atomic double-composition card. Let
+`D^{deny,2,SS}_v` be the all-substitute subset of the nonempty two-receipt
+denied domain:
+
+- **A — original plus substitute only:** every double is `{P,S}` or `{Q,S}`.
+  This is the clearest production fallback: one familiar result stays and one
+  new result appears. It is potentially direct and especially legible when
+  both share material pair lineage. Its core exploit is “best of both worlds”:
+  retain valuable `P`, discard expendable `Q`, and gain `S`, potentially
+  dominating singleton fusion and allowed dual weave.
+- **B — two distinct genuine substitutes only:** every double is `{S1,S2}`.
+  **Conditionally recommended.** It completes a clean grammar—zero severs, one
+  fuses/transmutes, two refracts/reconstitutes—while original retention stays
+  zero throughout denied outcomes. Singleton can provide one integrated
+  consumer identity while the double provides two separately addressable
+  transformed routes. Both substitutes must be genuinely distinct and may not
+  collectively reconstruct `{P,Q}`, become generic shards, or reduce to
+  singleton `{S}` plus a free bonus.
+- **C — both double compositions coexist:** some doubles emit `{O,S}` and
+  others `{S1,S2}`. This supports anchored adaptation and full reconstitution,
+  but enables nearly the entire denied-shape vocabulary and both laundering
+  surfaces. It carries two meanings for width two and the highest UI, mapping,
+  authoring, balance, and steering burden. Coexistence is merely aggregate
+  ideal fit; choose C only if A and B each independently win optimized
+  matchups and their coexistence changes precommitted policy.
+
+A/B/C are exhaustive. Two originals violate the false bit; three receipts
+violate the global cap; aliases do not create a second receipt. E4 chooses no
+exact identities, survivor, mapping, actor, randomness, priority, payoff,
+rarity, or live option. Catalog coexistence creates no F authority. Use A if
+two honest substitutes fail while anchored transformation remains viable. If
+C's coexistence alone fails while A and B remain viable, reopen E4 for a fresh
+A/B choice; if both compositions fail, reopen E2 with singleton-only E2-A.
+Ask for A, B, or C.
+
 ## 2026-09-26 mixed denied widths selected; singleton identity is next
 
 Zanzagar selected guarded `RCS-03C3C3E2-C`. Positive denied-pair support now
@@ -10829,7 +10892,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 02:44 UTC — singleton denied-output identity is next](docs/handoffs/2026-09-27-0244--relic-singleton-denied-identity-next.md)**
+[2026-09-27 03:13 UTC — double denied-output composition is next](docs/handoffs/2026-09-27-0313--relic-double-denied-composition-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

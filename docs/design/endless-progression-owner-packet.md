@@ -350,8 +350,11 @@ coexist, with strengthened last-reversible-commitment, attribution, and anti-
 grief obligations. Zanzagar then selected guarded RCS-03C3C3E2-C: singleton
 and double positive denied outputs coexist, while cancellation, singleton,
 and double policies must remain independently chosen rather than forming a
-zero-to-two power ladder. RCS-03C3C3E3 is the current owner-facing choice
-under SR-03; E4 remains queued.
+zero-to-two power ladder. Zanzagar then selected guarded RCS-03C3C3E3-B with
+E3-A as the substitute-specific viable fallback: every singleton positive
+denial is one genuine substitute unless honest substitute authoring fails
+while retained-original singleton play survives. RCS-03C3C3E4 is the current
+owner-facing choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -23860,7 +23863,7 @@ E3/E4/F boundaries, and register arithmetic. The gameplay audit found that
 E2-C creates a special burden: the singleton family needs an intrinsic policy
 identity so it does not become the consolation tier beneath two receipts.
 
-### RCS-03C3C3E3 — singleton denied-output identity-kind topology — active owner choice
+### RCS-03C3C3E3 — singleton denied-output identity-kind topology — direction selected
 
 Define the nonempty singleton domain
 `D^{deny,1}_v=D^{deny,+}_v setminus D^{deny,2}_v` and its genuine-substitute
@@ -23908,6 +23911,111 @@ AUTHOR/SPEC. E4 remains queued for original-plus-substitute versus two-
 substitute double composition. Catalog support creates no F authority; F opens
 only if one fixed prospectively bound opportunity retains several lawful
 outputs. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, every
+singleton positive denied result is one genuine substitute, with A as the
+explicit qualified fallback.** Thus
+`D^{deny,1,S}_v=D^{deny,1}_v`: neither original tag survives any singleton
+positive denial. Every result is one truthful, nonconstant, materially
+consumer-distinct `{S}` rather than `{P}` or `{Q}`. This selects identity kind,
+not the exact `S`, its downstream consumer mapping, or whether any identity is
+reused in a double result.
+
+B completes a selected semantic distinction rather than promising extra value:
+zero receipts sever, one receipt fuses or transmutes, and the queued double
+family will decide how two receipts refract or reconstitute. The denied pair
+must materially participate in the continuing substitute while `S` remains
+genuinely different at the same pair-local disposition boundary. That gives B
+a **potentially direct**, never automatic, standing-ideal fit. A thematic name,
+generic failure shard, fungible premium currency, or mere causal succession
+fails.
+
+Every `S` must replace both original tag identities and may not reconstruct
+the joint availability of both original consumer entitlements. Exact
+downstream consumer overlap with either original remains AUTHOR/SPEC. `S` must
+remain prospectively legible, retrospectively attributable, resistant to cheap
+teammate-forced transformation, and policy-distinct from cancellation,
+ordinary allowed dual weave, and every applicable E4 double family. If every
+lawful mapping makes singleton `{S}` merely one fragment that a double always
+supplies plus another receipt, B fails rather than becoming the consolation
+tier prohibited by E2-C.
+
+The selected A fallback is deliberately qualified. Use retained-original-only
+E3-A when B fails for substitute-specific authoring, reconstruction,
+comprehension, or cross-width-dominance reasons **and** retained-original
+singleton play still passes preferred-heir, coercion, and later `{P,S}`
+subset-dominance attacks. If A also fails, reopen E2-C because its required
+singleton family has no viable identity. Identity-independent forced-denial
+abuse still follows E5-C's upstream fallback. C is not a fallback and remains
+unselected.
+
+E3 moves to `DIR-SELECTED`; E4 becomes the sole presented `OWNER-OPEN` Relic
+row. The 102-row register now contains 32 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 48 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 33`.
+
+Two read-only named-claim audits then tested E4. The topology audit re-derived
+the two exhaustive double-composition families, transition arithmetic, and
+E4/F boundary. The gameplay audit found that selected E3-B makes original
+retention the decisive E4 question: a double can restore one familiar original
+beside a substitute, or keep denial wholly transformational through two
+substitutes.
+
+### RCS-03C3C3E4 — two-receipt denied-output composition topology — active owner choice
+
+E2-C makes `D^{deny,2}_v` nonempty. Define its all-substitute subset
+`D^{deny,2,SS}_v={o in D^{deny,2}_v:Y(o)∩T=∅}`. Every member has exactly two
+distinct receipts and the false bit permits at most one original. A member
+outside the subset is therefore one retained original plus one genuine
+substitute (`{P,S}` or `{Q,S}`); a member inside it is two distinct genuine
+substitutes `{S1,S2}`. `{P,Q}` is forbidden, and aliases cannot manufacture
+two receipts.
+
+| Choice | Double denied-output composition rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — original plus substitute only** | `D^{deny,2,SS}_v=∅`. Every positive double denial emits `{P,S}` or `{Q,S}`. E4 does not require both survivor identities and does not choose which original remains. | **Production fallback if honest dual substitutes fail.** A is easiest to teach and author: one familiar result stays while one genuinely new result appears. It can be **potentially direct and especially legible** when both receipts remain materially joined by the denied pair's lineage rather than merely co-present. Its central degeneration is “best of both worlds”: pair valuable `P` with expendable `Q`, retain `P`, and gain `S`. That can dominate singleton `{S}` and even allowed `{P,Q}` when `S` is the preferred replacement. A needs real optimized policies where anchored continuity is useful without becoming universal premium denial. | A disclosed **Scarred Testament** outcome denies Guardian Vow `P` plus Returning Vow `Q` and emits `{P,S}`. `P` remains the original result; `S` is genuinely new and may not rename `Q` or jointly reconstruct `{P,Q}`. Exact survivor and mapping remain later. |
+| **B — two genuine substitutes only** | `D^{deny,2,SS}_v=D^{deny,2}_v`. Every positive double denial emits `{S1,S2}`. The receipts are extensionally distinct aligned identities, not duplicate instances, inseparable aliases, or necessarily one substitute per original. | **Conditionally recommended.** B completes a gameplay-first grammar: zero **severs**, one **fuses/transmutes**, and two **refracts/reconstitutes**. Original retention stays zero across singleton and double denial, avoiding preferred-heir filtering and preserving ordinary allowed `{P,Q}` as the route that keeps both originals. Singleton can own one integrated consumer identity while the double owns two separately addressable transformed routes, supporting concentration versus breadth rather than a count-only ladder. The fit is **potentially direct with a higher proof burden than A**: the denied relation must materially continue through two genuinely different manifestations. Two new prizes or labels prove nothing. | **Shattered Concord** replaces denied `P/Q` with `{S1,S2}`. Both receipts are truthful, separately meaningful, materially consumable, and genuinely distinct; together they may not reconstruct the joint original entitlements. Exact identities, cross-width reuse, and mapping remain later. |
+| **C — both double compositions coexist** | `∅⊊D^{deny,2,SS}_v⊊D^{deny,2}_v`. At least one double retains one original plus a substitute, and at least one emits two substitutes. “Both” is support across dispositions, never three receipts or a chooser at one opportunity. | C supports same-width **anchored adaptation** and **full reconstitution** policies. This is the highest local composition ceiling, but it enables nearly the whole denied-shape vocabulary—`{}`, `{S}`, `{O,S}`, `{S1,S2}`—and carries both laundering surfaces, two meanings for width two, and the greatest mapping, UI, authoring, balance, and steering burden. Local outcomes inherit A/B's possible fit; their catalog coexistence is only **aggregate**. Choose C only if A and B each independently win real optimized matchups and their coexistence changes precommitted policy. | A disclosed Scarred Testament outcome emits `{P,S}`, while a distinct Shattered Concord outcome emits `{S1,S2}`. The family must be knowable before the relevant commitment; a hidden post-denial composition roll does not satisfy C. |
+
+A/B/C are mutually exclusive and exhaustive because the all-substitute subset
+of the nonempty double domain is empty, all of it, or a nonempty proper subset.
+No third composition exists: two originals violate the false bit, three
+receipts violate C3c.46-A, and coextensive aliases canonicalize together.
+
+B is conditional. Both substitutes inherit C3c.44-A/C3c.45-C's truthful,
+reachable, nonconstant, separately player-meaningful, materially consumer-
+distinct obligations and must be genuinely distinct from one another. They
+may not jointly reconstruct both original consumer entitlements or become an
+economic rename of allowed `{P,Q}`; exact overlap with either one original
+remains AUTHOR/SPEC. After unrelated package value is equalized, double
+replacement must change optimized policy relative to cancellation, singleton
+fusion, and ordinary allowed dual weave, with each comparator retaining real
+matchups. Receipt count or extra payoff access alone fails.
+
+Composition-affecting facts inherit E1-C's last-informed-reversible-commitment
+disclosure, retrospective attribution, and anti-coercion obligations. Cheap
+teammate steering, forced-overlap farming, generic shards, renamed originals,
+and singleton-plus-free-bonus mappings fail. Exact substitute identities,
+cross-width reuse, mappings, actor, randomness, priority, value, compensation,
+payoff, claim, rarity, release slice, and implementation remain later.
+
+Use A if two honest substitutes fail for reconstruction, comprehension,
+authoring, or cross-width-dominance reasons while anchored transformation still
+passes preferred-heir and subset-dominance attacks. Promote C only if A and B
+pass independently and their coexistence changes real precommitted policy. If
+C is later selected but coexistence alone fails while A and B remain
+individually viable, reopen E4 for a fresh A/B choice. If both double
+compositions fail, E2-C's required double family fails and E2 reopens with
+singleton-only E2-A while E3-B remains viable. If E3 instead uses its retained-
+original A fallback, re-audit E4 rather than carrying this recommendation
+silently. Identity-independent coerced denial follows E5-C's upstream fallback.
+
+E4 selects no exact original survivor, substitute identity, cross-width reuse,
+mapping, actor, randomness, priority, live choice, value, compensation, payoff,
+claim, rarity, release slice, or implementation. Catalog composition support
+creates no F authority; F opens only if one fixed prospectively bound
+opportunity retains several lawful outputs. The authoritative decision record
+remains unchanged.
 
 ## Session protocol and evidence
 

@@ -3019,10 +3019,24 @@ singleton identity topology and recommend guarded B as the cleanest way to
 give width one an intrinsic fusion/transmutation policy rather than a
 consolation rank beneath doubles. A is the production fallback if no honest
 substitute survives; C is a stretch only if both singleton families
-independently change optimized policy. The current register has **102 slots:
-33 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 47 `DIR-SELECTED`, 3 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`**. E3 is the sole presented Relic
-card; E4 remains queued.
+independently change optimized policy.
+
+Zanzagar selected guarded E3-B with E3-A as the qualified local fallback when
+substitute-specific viability fails and retained-original singleton play
+survives. Every singleton positive denial is one genuine substitute; neither
+original tag survives, but exact downstream consumer overlap remains
+AUTHOR/SPEC. Failure of both singleton kinds reopens E2, while identity-
+independent forced denial follows E5-C's upstream fallback.
+
+Two further audits uphold E4's original-plus-substitute-only/two-substitute-
+only/both composition topology. They conditionally recommend B so all positive
+denial remains transformational and singleton integration can compete with
+double breadth without reintroducing preferred-heir filtering. A is the
+production fallback if two genuine substitutes fail but anchored
+transformation survives; C requires both local policies to pass independently.
+The current register has **102 slots: 32 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 48 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 33`**. E4 is the sole presented Relic card.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -3107,8 +3121,8 @@ overcompression.
 | `RCS-03C3C3D2E6` | Missing-certainty endpoint support in responsive stochastic related-only laws after the deterministic form-wide baseline is known | `DERIVED`; D2E3-C's responsive deterministic support already supplies both certain endpoints, so no endpoint is missing from the form-wide baseline |
 | `RCS-03C3C3E1` | Empty-versus-positive pair-local disposition prevalence after a false joint-survival permission bit | `DIR-SELECTED`; guarded C requires cancellation and positive dispositions to coexist as disclosed, attributable, non-token, non-dominated policies, known before each affected player's last informed reversible commitment and resistant to cheap post-commitment teammate coercion, with B/A/E5 fallback as documented |
 | `RCS-03C3C3E2` | Positive denied-output width support under C3c.46-A's exact-two global receipt ceiling | `DIR-SELECTED`; guarded C requires singleton and double positive denied outputs to coexist as non-token, non-dominated policies rather than a count ladder; double denial must add purpose beyond ordinary dual weave, with A/B/E1 fallback as documented; identity remains E3/E4 and catalog coexistence creates no F authority |
-| `RCS-03C3C3E3` | Singleton denied-output identity-kind support | `OWNER-OPEN`; conditional on E2-A/C; classify retained-original-only, genuine-substitute-only, or both; exact `P`/`Q`, substitute identities, mappings, and same-opportunity authority remain later |
-| `RCS-03C3C3E4` | Two-receipt denied-output composition support | `SCREEN`; conditional on E2-B/C; classify original-plus-substitute, two distinct genuine substitutes, or both; two originals are forbidden by the false bit |
+| `RCS-03C3C3E3` | Singleton denied-output identity-kind support | `DIR-SELECTED`; guarded B makes every singleton one genuine substitute, with A the qualified fallback only when substitute-specific viability fails and retained-original singleton play survives; exact substitute identities, mappings, and same-opportunity authority remain later |
+| `RCS-03C3C3E4` | Two-receipt denied-output composition support | `OWNER-OPEN`; conditional on E2-B/C; classify original-plus-substitute-only, two-distinct-substitutes-only, or both; two originals are forbidden by the false bit, while exact identities, mappings, and same-opportunity authority remain later |
 | `RCS-03C3C3F` | Total authority resolving among several legal denied-pair outputs after prospective binding | `SCREEN`; conditional on some one fixed opportunity retaining multiple lawful empty/positive identity-set dispositions after E1-E4; otherwise `PRUNED` or `DERIVED`; catalog-level mixed support alone creates no chooser, and exact priority keys remain later only after authority is settled |
 | `RCS-03C3C3G1` | Support for at least three simultaneously individually ledger-satisfied receipt tags before within-evaluation treatment | `SCREEN`; follows the pair route; choose empty or nonempty support without treating engine callbacks or alternate ledger assignments as additional contenders |
 | `RCS-03C3C3G2` | Joint stochastic permission-draw coupling across distinct simultaneous unordered pair opportunities | `SCREEN`; conditional on G1 positive and at least two nonconstant pair-permission marginals in one reachable evaluation under applicable exact/related laws; otherwise `PRUNED` or `DERIVED`; requires a fresh prerequisite screen, and one hybrid exact-related pair remains one pair and draw |
@@ -3424,16 +3438,19 @@ selected guarded `RCS-03C3C3E2-C`, requiring singleton and double positive
 denied outputs to coexist without becoming a count ladder. Two further audits
 uphold E3's exhaustive retained-original/substitute/both singleton topology and
 recommend conditional B, genuine-substitute-only, so width one can mean fusion
-or transmutation rather than consolation beneath width two. The current
-register has **102 slots**: 33 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 47
-`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`. E3 is
-the current presented Relic card and E4 remains queued.
+or transmutation rather than consolation beneath width two. Zanzagar selected
+that B with A as the qualified substitute-specific fallback. Two further audits
+uphold E4's exhaustive mixed-original/two-substitute/both double-composition
+topology and conditionally recommend two-substitute-only B. The current
+register has **102 slots**: 32 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 48
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 33`. E4 is
+the current presented Relic card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-four owner cards under this thirty-two-times-corrected charter and will
+thirty-three owner cards under this thirty-two-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3457,7 +3474,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 102 frozen candidate slots; current `Phi_SR = 34` after guarded `RCS-03C3C3E2-C` opens singleton denied-output identity at E3 and leaves E4 queued | At most 34 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 102 frozen candidate slots; current `Phi_SR = 33` after guarded `RCS-03C3C3E3-B` opens two-receipt denied-output composition at E4 | At most 33 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
