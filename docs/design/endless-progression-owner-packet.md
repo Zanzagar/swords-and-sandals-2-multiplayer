@@ -320,8 +320,12 @@ randomness, and final form-wide incidence boundaries while preserving one-bit
 hybrid inheritance. The owner then selected RCS-03C3C3D2A-A: no participant
 setting changes permission on a matched related-only opportunity, so D2B,
 D2C1, and D2C2 prune. A three-angle prerequisite audit upheld D2D as one
-empty-aware residual stochastic-support card. RCS-03C3C3D2D is the current
-owner-facing choice under SR-03.
+empty-aware residual stochastic-support card. The owner selected
+RCS-03C3C3D2D-C: deterministic Witness and stochastic-capable Oracle related-
+only law families coexist under the documented hard viability obligation. A
+thirty-first prerequisite correction then split old D2E into six response,
+causal-control, stable-polarity, and missing-certainty-endpoint rows.
+RCS-03C3C3D2E1 is the current owner-facing choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -22892,9 +22896,10 @@ an eventually permitted pair can still express distinct manifestations and one
 true causal unity directly. The costs are less downstream control, possible
 frustration under intrinsic refusal, and a heavier disclosure obligation.
 
-D2A moves to `DIR-SELECTED`; D2B, D2C1, and D2C2 move to `PRUNED`; D2D becomes
-the sole `OWNER-OPEN` row. The 94-row register now contains 34 `SCREEN`, 1
-`OWNER-OPEN`, 16 `PRUNED`, 39 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+D2A moved to `DIR-SELECTED`; D2B, D2C1, and D2C2 moved to `PRUNED`; D2D became
+the sole `OWNER-OPEN` row at that checkpoint. The 94-row register then
+contained 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 39 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 35`. The authoritative decision record remains
 unchanged.
 
@@ -22905,7 +22910,7 @@ downstream authority boundary. Two recommendation cross-challenges then
 attacked the only disagreement. The audits agreed that D2D is one
 prerequisite-ready card and needs no additional row.
 
-### RCS-03C3C3D2D — stochastic support across intrinsic related-only permission laws — active owner choice
+### RCS-03C3C3D2D — stochastic support across intrinsic related-only permission laws — direction selected
 
 Let `W^{Q-perm-law}_v` contain each canonical complete intrinsic permission-
 law projection whose reachable related-only domain
@@ -22998,6 +23003,151 @@ related-only pair-permission marginals would all be deterministic, leaving 32
 neither a three-plus contender state nor two simultaneous nonconstant
 marginals. A stronger requirement that every related-only opportunity roll is
 a replacement path, not hidden inside B.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **C,
+deterministic-only Witness and stochastic-capable Oracle related-only laws
+coexist.** Thus
+`∅⊊G^{Q-perm-stoch}_v⊊W^{Q-perm-law}_v`. At least one complete intrinsic
+related-only projection is deterministic throughout its reachable domain and
+at least one distinct projection has a reachable nondegenerate draw. `Q_v` is
+therefore nonempty and at least two complete related-only projections exist.
+Hybrids remain outside this denominator, inherit their deterministic exact bit,
+and cannot supply the Witness comparator.
+
+This makes variance an optional artifact/build identity rather than a universal
+tax. Stone Choir may support a reliable Witness policy while Veiled Chorus
+supports a distinct Oracle risk policy. Their coexistence is only an aggregate
+ideal fit: the direct *Achintya Bheda Abheda* expression remains the genuinely
+distinct children and their real shared nonmultiplying cause. Randomness does
+not create that unity.
+
+The hard validation obligation is part of the selection. Both families and
+their coexistence must furnish reachable, mechanically legible, viable,
+non-token, non-dominated build or policy purposes; the Oracle identity must
+materially change a truthful legal policy; and its risk must be prospectively
+understandable and retrospectively attributable. Failure reopens D2D with A as
+the bounded fallback. One opportunity still receives one committed realization
+with no retry, redraw, reroute, or hybrid second bit. C selects no odds,
+response rule, actor, endpoint, incidence, payoff, seed, disclosure surface,
+rarity, placement, or implementation.
+
+D2D moves to `DIR-SELECTED`. Before the correction below, the 94-row register
+would contain 33 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 40 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`. G2 remains conditional:
+C proves neither three-plus simultaneous contenders nor two simultaneous
+nonconstant pair marginals. The authoritative decision record remains
+unchanged.
+
+> **Thirty-first prerequisite correction, 2026-09-26:** three bounded read-only
+> audits independently tested D2E's minimum semantic topology, gameplay order,
+> and integration boundary. One two-question cross-challenge wave attacked the
+> only disagreements: whether the remaining all-related certainty boundary was
+> disguised hybrid-placement authoring and whether the deterministic lane had
+> to be presented first. The cross-challenges upheld six rows, required a
+> related-only witness for the final conditional endpoint row, rejected any
+> hybrid-composition quota, and put the independently ready Oracle question
+> first for player comprehension.
+>
+> Retain `W^{Q-perm-law}_v`, `O^Q_w`, and `pi^Q_w` from D2D. Write
+> `S^Q_v=G^{Q-perm-stoch}_v` for the nonempty Oracle family and
+> `D^Q_v=W^{Q-perm-law}_v setminus S^Q_v` for the nonempty deterministic
+> related-only Witness family. Let `W^H_v` contain tagged canonical
+> restrictions of exact laws to their nonempty reachable hybrid domains
+> `H_v`; each inherits the exact deterministic kernel. Define the deterministic
+> related projection family `D^R_v=D^Q_v disjoint-union W^H_v`. The tags are
+> load-bearing: one physical contract's `Q_v` and `H_v` restrictions may not be
+> merged to manufacture factual response. A fixed 50% Oracle plus an inherited
+> always-allow hybrid is not one responsive law.
+>
+> Old D2E becomes a non-counting parent for six registered rows:
+>
+> 1. `RCS-03C3C3D2E1` — Oracle distribution-response prevalence across `S^Q_v`;
+> 2. conditional `RCS-03C3C3D2E2` — matched causal odds-response support;
+> 3. `RCS-03C3C3D2E3` — deterministic related-projection response prevalence
+>    across `D^R_v`;
+> 4. conditional `RCS-03C3C3D2E4` — matched causal certain-bit response;
+> 5. conditional `RCS-03C3C3D2E5` — stable deterministic polarity; and
+> 6. conditional `RCS-03C3C3D2E6` — missing-certainty endpoint support in a
+>    responsive stochastic related-only law.
+>
+> E1-A prunes E2 and activates E3. E1-B/C activates E2, whose answer then
+> activates E3. E3-A prunes E4 and activates E5. E3-B activates E4, prunes E5,
+> and derives both certainty endpoints present. E3-C activates E4 then E5 and
+> also derives both endpoints present. E5-C likewise derives both present. If
+> E3-A and E5-A/B leave exactly one deterministic certainty endpoint, E1-A
+> derives the opposite endpoint absent because all Oracle laws are fixed at one
+> interior probability; E1-B/C instead leaves E6 open after the causal rows.
+> E6-B requires its missing endpoint witness on some `q∈Q_v` under a responsive
+> Oracle law. It may not be satisfied or activated merely by authoring an exact
+> opportunity into `H_v`. When the applicable rows settle, C3C3E opens.
+>
+> The six rows are independent and minimal. Deterministic bit response and
+> Oracle probability response yield different planning policies; their matched
+> causal witnesses can also vary independently. Stable deterministic laws have
+> a distinct deny/allow/both topology. Finally, catalogs with an invariant
+> always-allow Witness and an exogenously responsive Oracle image `{0.2,0.8}`
+> versus `{0.2,0}` agree on the first five rows, yet only the latter contains a
+> plan-relevant context with guaranteed denial. Zero versus every positive
+> probability is a qualitative robust-policy boundary, not odds tuning. The
+> required `Q_v` witness keeps that row from becoming disguised hybrid
+> placement.
+>
+> No separate hybrid-existence, hybrid-composition, stochastic endpoint-
+> prevalence, or exact-probability row passes admission. Concrete identities,
+> counts, contexts, kernels, thresholds, and hybrid membership remain
+> AUTHOR/SPEC/TUNE. E/F still own false-bit disposition and survivor authority;
+> G2 owns cross-pair draw coupling; RCS-02/SR-10 own information; RCS-13 owns
+> lock horizons; RCS-15/RCS-16 own persistence and migration; and
+> RCS-17/RCS-18 own simulation/RL, fun, balance, exploit, and playtest
+> acceptance.
+>
+> Replacing one counted D2E row with six adds five slots and five unresolved
+> potentials. The register now contains **99 rows: 38 `SCREEN`, 1 `OWNER-OPEN`,
+> 16 `PRUNED`, 40 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 39`**. E1 is the sole presented card.
+
+### RCS-03C3C3D2E1 — Oracle distribution-response prevalence — active owner choice
+
+D2D-C guarantees a nonempty family
+`S^Q_v=G^{Q-perm-stoch}_v` of intrinsic stochastic-capable related-only law
+projections. For each `w∈S^Q_v`, retain its nonempty reachable domain `O^Q_w`
+and kernel `pi^Q_w(q)`, and define its reachable probability image
+`I^Q_w={pi^Q_w(q):q∈O^Q_w}`. Because `w` is stochastic-capable, `I^Q_w`
+contains at least one probability strictly between zero and one.
+
+Let
+`X^{Q-odds-response}_v={w∈S^Q_v:|I^Q_w|>=2}`. Membership means the same
+complete intrinsic Oracle law assigns at least two probabilities across its
+reachable factual opportunities. It does not by itself mean that a player can
+cause the change, know the exact number, or choose the higher-odds context.
+
+| Choice | Oracle odds-response rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — constant-chance Oracles only** | `X^{Q-odds-response}_v=∅`. Every Oracle law uses one fixed nondegenerate probability throughout its reachable related-only domain. Different Oracle laws may use different fixed probabilities; that is catalog tuning, not response. | A gives a clean **Fate wager** identity: choose the artifact knowing its covenant always bears the same irreducible risk. It is easy to compare and simulate, but relationship facts never change the risk, so the Oracle can feel like a generic coin attached to otherwise relational content. Its ideal fit is partial/expressive at best. | **Veiled Die:** every reachable related-only opportunity under this law is illustratively 30% allow, whether Vow Integrity is whole, frayed, or restored. Another law may be 60%; neither is responsive. |
+| **B — every Oracle is odds-responsive** | `X^{Q-odds-response}_v=S^Q_v`. Every stochastic-capable related-only law has at least two reachable permission probabilities. This does not require an endpoint, exact odds disclosure, or player-causal control. | **Recommended.** Optional uncertainty earns its separate Oracle identity by expressing the condition of the actual relationship rather than remaining a generic tax. Players can learn that contexts matter even when E2 later finds the context immutable. This best supports meaningful distinction-with-continuity at the local law boundary, while the children/shared cause still supply the direct ideal. Costs are universal forecast/UI burden, threshold gaming, context gotchas, and harder robust policy comparison. | **Veiled Chorus:** while the two selected manifestations still arise through one living lineage, the law is illustratively 70%; after that lineage becomes scarred but unbroken, the same law is 25%. Those figures illustrate response only; E1 selects no numbers and E2 still decides whether play can cause the contrast. |
+| **C — constant-chance and responsive Oracles coexist** | `∅⊊X^{Q-odds-response}_v⊊S^Q_v`. At least one Oracle law keeps one fixed interior probability and at least one distinct Oracle law has two or more reachable probabilities. | C preserves a pure-Fate Oracle beside relationship-sensitive Oracles. That can make artifact personalities richer, but it adds a third prediction dialect beside deterministic Witnesses and responsive Oracles and risks making flat-chance artifacts feel like incomplete versions. Choose C if the pure-Fate build fantasy is independently valuable and can pass the same non-token, non-dominance, and legibility gates. | **Veiled Die** keeps A's fixed wager while **Veiled Chorus** uses B's context-sensitive law. One law containing both 25% and 75% contexts is only the responsive side; it does not establish C. |
+
+A/B/C are mutually exclusive and exhaustive because the nonempty responsive
+subset is empty, all of `S^Q_v`, or a nonempty proper subset. A probability
+image with two interior values is responsive; an image with an interior value
+and a certain endpoint is also responsive. Different realized allow/deny bits
+under one unchanged probability do not establish response. Different fixed
+probabilities on two complete laws do not establish response within either
+law.
+
+E1 chooses no odds, bands, thresholds, factual inputs, player/counterplayer
+control, endpoints, entropy, disclosure, payoff, rarity, or implementation.
+D2A-A still forbids a direct odds setting or permission-only command. E2 asks
+separately whether any responsive Oracle contrast is causally reachable through
+one independently meaningful lawful decision and its complete causal closure;
+mere immutable context response is legal under B/C.
+
+Any answer moves E1 to `DIR-SELECTED`. A prunes E2 and makes E3 the next
+presented card. B/C make E2 the next presented card. The exact post-answer
+register depends only on that pruning: A yields 36 `SCREEN`, 1 `OWNER-OPEN`,
+17 `PRUNED`, 41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`. B/C yield 37 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 41
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
 
 ## Session protocol and evidence
 

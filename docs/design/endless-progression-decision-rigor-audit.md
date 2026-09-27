@@ -4828,13 +4828,98 @@ rarity, threshold, or implementation. If either required family or their
 coexistence fails the obligation, reopen D2D with A as the bounded replacement
 rather than silently falling back or shipping token chance.
 
-After D2A-A the unchanged 94-row register contains 34 `SCREEN`, 1
+After D2A-A the then-unchanged 94-row register contained 34 `SCREEN`, 1
 `OWNER-OPEN`, 16 `PRUNED`, 39 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 35`. D2D is the sole presented card. Before any D2E
+`EVALUATE`; `Phi_SR = 35`. D2D was the sole presented card. Before any D2E
 amendment, B/C would reduce that potential to 34. A would reduce it to 33
 because exact C2D-A plus D2D-A makes every pair marginal deterministic and
 therefore immediately prunes G2. The authoritative decision record remains
 unchanged.
+
+The owner selected D2D-C. Therefore
+`∅⊊G^{Q-perm-stoch}_v⊊W^{Q-perm-law}_v`: the completed related-only catalog
+contains at least one deterministic-only Witness projection and at least one
+distinct stochastic-capable Oracle projection. `Q_v` is nonempty. The selected
+hard guard requires both families and their coexistence to have legible,
+viable, non-token, non-dominated policy purposes, with prospectively
+understandable and retrospectively attributable Oracle risk; failure reopens
+D2D with A. One opportunity receives one committed realization, hybrids remain
+deterministic with one inherited exact bit, and G2 remains conditional.
+
+Before D2E amendment, that selection would have yielded 94 rows: 33 `SCREEN`,
+1 `OWNER-OPEN`, 16 `PRUNED`, 40 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 34`.
+
+The D2E prerequisite screen used three independent read-only questions. The
+topology audit derived the minimum exhaustive law-family partition. The
+gameplay audit separated player policies and challenged recursive hybrid
+topology. The integration audit checked authority ownership, dependencies, and
+leakage into authoring/specification. One bounded two-question cross-challenge
+wave then attacked whether a sixth endpoint row was disguised hybrid placement
+and whether the deterministic lane had to appear first.
+
+The cross-challenge changed both disputed recommendations. First, the sixth row
+passes only with a related-only witness guard. Hold the invariant deterministic
+family at certain allow and the Oracle factual response exogenous. Oracle
+images `{0.2,0.8}` and `{0.2,0}` agree on stochastic response, stochastic causal
+control, deterministic response, deterministic causal control, and stable
+polarity; only the latter offers a plan-relevant context with guaranteed
+denial. That changes robust routing, hedging, coordination, and disclosure, so
+zero versus every positive probability is an owner-level certainty boundary.
+But B must be witnessed by a responsive `q∈Q_v`; `H_v` may remain identical.
+This prevents the row from turning into a hybrid-placement quota. Second, the
+Oracle response row is independently ready and is the clearer continuation of
+D2D-C; it should be presented before the deterministic lane even though the
+eventual closure graph is unchanged.
+
+This is the thirty-first explicit prerequisite correction. Retain the nonempty
+Oracle family `S^Q_v=G^{Q-perm-stoch}_v` and deterministic related-only family
+`D^Q_v=W^{Q-perm-law}_v setminus S^Q_v`. Let `W^H_v` be separately tagged
+canonical exact-law restrictions to nonempty hybrid domains and define
+`D^R_v=D^Q_v disjoint-union W^H_v`. The tags prevent one contract's fixed
+Oracle kernel and inherited deterministic hybrid bit from being mistaken for
+one responsive projection.
+
+Old D2E becomes a non-counting parent for six rows:
+
+1. D2E1 classifies Oracle distribution-response prevalence as empty,
+   universal, or nonempty proper within `S^Q_v`;
+2. conditional D2E2 asks whether one independently meaningful lawful decision
+   and its complete causal closure changes a responsive Oracle's conditional
+   distribution;
+3. D2E3 classifies deterministic response prevalence within `D^R_v`;
+4. conditional D2E4 applies the matched complete-causal-closure test to a
+   responsive certain bit;
+5. conditional D2E5 classifies stable deterministic polarity as deny only,
+   allow only, or both; and
+6. conditional D2E6 asks whether a responsive Oracle law supplies the certainty
+   endpoint missing from the form-wide deterministic baseline.
+
+These rows cannot be merged. Deterministic bit response and Oracle probability
+response induce different forecast and hedge policies, and their causal
+witnesses vary independently. Stable deterministic polarity supplies an
+everywhere guarantee rather than an authored local endpoint. D2E6 is the sole
+qualitative endpoint distinction not derived by the first five rows. No
+separate hybrid-existence/composition, stochastic endpoint-prevalence,
+probability, threshold, context, or identity row passes admission; those remain
+AUTHOR/SPEC/TUNE within the six selected boundaries.
+
+D2E1-A prunes D2E2; D2E1-B/C activates it. D2E3-A prunes D2E4 and activates
+D2E5; D2E3-B activates D2E4, prunes D2E5, and derives both certainty endpoints;
+D2E3-C activates D2E4 and D2E5 while also deriving both endpoints. D2E5-C
+likewise derives both present. When D2E3-A plus D2E5-A/B leaves exactly one
+endpoint, D2E1-A derives the opposite absent because every Oracle kernel is
+fixed interior; D2E1-B/C leaves D2E6 open under its `Q_v` witness guard.
+
+Replacing one D2E row with six adds five rows and five potentials. The current
+register has 99 rows: 38 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 40
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`. D2E1
+is the sole presented card. Recommend D2E1-B: every Oracle law is distribution-
+responsive, although causal player control remains unsettled. This makes the
+optional Oracle identity express changing relationship facts instead of a
+generic flat coin. A is the pure fixed-Fate alternative; C preserves both at
+the cost of a third prediction dialect. The authoritative decision record
+remains unchanged.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

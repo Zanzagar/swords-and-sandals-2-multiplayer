@@ -1,5 +1,76 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 Witness/Oracle coexistence — RCS-03C3C3D2D-C selected
+
+The owner selected `RCS-03C3C3D2D-C`. The completed related-only permission
+catalog must contain both a deterministic-only Witness law projection and a
+distinct stochastic-capable Oracle projection:
+`∅⊊G^{Q-perm-stoch}_v⊊W^{Q-perm-law}_v`. Thus `Q_v` and both families are
+nonempty. Hybrids cannot supply the deterministic comparator; they retain one
+intrinsic deterministic bit inherited from the exact lane.
+
+The selected hard guard remains binding. Both required families and their
+coexistence must support reachable, legible, viable, non-token, non-dominated
+build or policy purposes; the Oracle identity must materially change a truthful
+legal policy; and risk must be understandable before the relevant irreversible
+choice and attributable afterward. Failure reopens D2D with A. One opportunity
+receives one committed realization: no retry, redraw, denial reroute, callback
+duplication, or hybrid second bit. C chooses no odds, response rule, actor,
+endpoint, result, payoff, seed, disclosure, rarity, placement, or
+implementation. G2 remains conditional.
+
+Three bounded read-only audits examined old D2E's topology, gameplay order, and
+integration scope. A two-question cross-challenge wave resolved their only
+disagreements. This thirty-first prerequisite correction replaces old D2E with
+six rows:
+
+1. D2E1 — Oracle distribution-response prevalence;
+2. conditional D2E2 — matched causal odds response;
+3. D2E3 — deterministic related-projection response prevalence;
+4. conditional D2E4 — matched causal certain-bit response;
+5. conditional D2E5 — stable deterministic polarity; and
+6. conditional D2E6 — missing-certainty endpoint support in a responsive
+   stochastic related-only law.
+
+For the deterministic lane, use a tagged disjoint union of related-only Witness
+projections and exact-law restrictions to nonempty hybrid domains. Never merge
+one contract's `Q_v` and `H_v` restrictions into a fake responsive law. D2E6
+passes admission because Oracle images `{0.2,0.8}` and `{0.2,0}` can agree on
+the first five rows while only the latter gives a plan-relevant guaranteed-
+denial context. Its B witness must be a responsive `q∈Q_v`; hybrid placement
+cannot activate or satisfy it. There is no hybrid-composition card.
+
+The 99-row register now contains 38 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 40
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`.
+`RCS-03C3C3D2E1` is the sole presented card. The authoritative decision record
+remains unchanged.
+
+D2E1 asks whether each Oracle law keeps one fixed interior probability or
+responds with at least two probabilities across its reachable factual
+opportunities. This is law response, not differing random outcomes, different
+fixed odds on different laws, or player control:
+
+- A: every Oracle is constant-chance. Each law keeps one fixed nondegenerate
+  probability throughout its domain.
+- B: every Oracle is odds-responsive. Every law has at least two reachable
+  probabilities. **Recommend B.** It makes optional uncertainty express the
+  condition of the actual relationship rather than a generic flat coin, while
+  leaving causal actionability to D2E2.
+- C: constant-chance and responsive Oracles coexist. Choose this only if a
+  pure-Fate Oracle is an independently valuable, viable dialect worth the
+  additional prediction burden.
+
+Illustratively, Veiled Die stays 30% in every factual context (A). Veiled
+Chorus is 70% while its selected manifestations retain a living lineage and
+25% after that lineage becomes scarred but unbroken (B). C requires both laws;
+one law containing 25% and 75% contexts is only responsive. Exact figures are
+examples, not selections.
+
+E1 chooses no odds, thresholds, factual inputs, causal actor/control, endpoint,
+entropy, disclosure, result, payoff, rarity, or implementation. A prunes E2
+and activates E3; B/C activates E2. The decision record SHA-256 remains
+`e7e5c0fb047e42e5852648972f7f57f5539708bf990d97fe597d000ad5ed5358`.
+
 ## 2026-09-26 intrinsic related-only permission — RCS-03C3C3D2A-A selected
 
 The owner selected `RCS-03C3C3D2A-A`. There is no matched reachable related-
@@ -22,7 +93,7 @@ defining variants, and earlier committed authoritative state fixed. Let
 fixed opportunity whose allow probability remains strictly between zero and
 one immediately before the earliest semantic realization committing the bit.
 
-D2D is the sole presented card:
+At that checkpoint D2D was the sole presented card:
 
 - A: `G=∅`; all extant related-only law projections are deterministic, and
   `W`/`Q_v` may be empty. This is the safest coherent option and C's mandatory
@@ -53,8 +124,9 @@ implementation. Randomness itself is not the direct *Achintya Bheda Abheda*
 fit; the distinct children and real shared cause are. C's coexistence is an
 aggregate catalog identity.
 
-The 94-row register now contains 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 39
-`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+At that checkpoint the 94-row register contained 34 `SCREEN`, 1 `OWNER-OPEN`,
+16 `PRUNED`, 39 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 35`.
 The authoritative decision record remains unchanged.
 
 ## 2026-09-26 authoritative related exposure — RCS-03C3C3D1-B selected
@@ -77,14 +149,15 @@ veto, or precedence rule. Related-only opportunities in `Q_v` still have
 independent authority, coordinate, language, branching, and randomness
 questions.
 
-Old D2 is now a non-counting parent for six rows: D2A participant-
-configurability prevalence over related-only-capable contracts; conditional
+At that checkpoint, old D2 became a non-counting parent for six rows: D2A
+participant-configurability prevalence over related-only-capable contracts; conditional
 D2B independent coordinate recombination; conditional D2C1 constructive
 language; conditional D2C2 participant-composed context branching; D2D
 stochastic support over complete `Q_v` law projections; and D2E final
-permission topology over all `R_v`. D2A-A prunes D2B/D2C1/D2C2 and activates
-D2D. D2A-B/C activates D2B; every D2B answer activates D2C1; D2C1-A prunes
-D2C2, while D2C1-B/C activates it. D2D then precedes a fresh D2E audit.
+permission topology over all `R_v`. D2A-A would prune D2B/D2C1/D2C2 and
+activate D2D. D2A-B/C would activate D2B; every D2B answer would activate
+D2C1; D2C1-A would prune D2C2, while D2C1-B/C would activate it. D2D would then
+precede a fresh D2E audit.
 
 At that checkpoint D2A was the sole presented card. Let
 `S^{rel-only-perm}_v` contain contracts
@@ -10230,7 +10303,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 19:19 UTC — intrinsic related-only permission selected](docs/handoffs/2026-09-26-1919--relic-intrinsic-related-permission-selected.md)**
+[2026-09-27 00:13 UTC — Oracle response prevalence is next](docs/handoffs/2026-09-27-0013--relic-oracle-response-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
