@@ -5723,6 +5723,72 @@ favorable-resolution, hidden-priority, grief, retry, and stochastic-laundering
 attacks. If E4 falls back to `{O,S}`, the F subtree must be re-audited for
 preferred-heir selection.
 
+Zanzagar selected F1-A. `M^{deny}_v` is empty: after the complete base
+opportunity and every non-F input are held fixed, exactly one canonical
+pair-local output is lawful. Different disclosed contracts and contexts may
+still deterministically realize every selected E1-E4 output family. Exact
+mappings remain AUTHOR/SPEC, but no F-owned participant setting, priority
+ambiguity, or stochastic output realization remains. F1 moves to
+`DIR-SELECTED`; F2A/F2B1/F2B2/F3 prune; G1 becomes `OWNER-OPEN`. The 106-row
+register therefore contains 30 `SCREEN`, 1 `OWNER-OPEN`, 20 `PRUNED`, 50
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`.
+
+Two bounded read-only named-claim audits then attacked G1. For one held-fixed
+actual evaluation `z`, let `J_v(z)` contain the distinct canonical receipt tags
+individually ledger-satisfied immediately before treatment under the one
+selected authoritative complete ledger tuple, and define
+`G^{3+}_v={z:|J_v(z)|>=3}`. Alternate ledgers, aliases, callback or storage
+copies, unordered pair enumeration, exact/related double classification, and
+later E/F substitutes cannot increase the cardinality; different cuts,
+contexts, Relics, routes, configurations, or evaluations cannot be unioned.
+
+The topology audit upheld one binary card. A makes `G^{3+}_v` empty; every
+fixed evaluation has at most two pre-treatment tags. B makes the set nonempty;
+at least one fixed evaluation has three or more. B is existential and does not
+select exact-three as a maximum, universal prevalence, or a pairwise-overlap
+clique. Exact positive counts, maxima, prevalence, and pair incidence remain
+AUTHOR/SPEC because no separate player-material consequence currently
+distinguishes them. The exact-two C3c.46-A rule constrains final receipts, not
+structural pre-treatment tags, so neither branch is derived.
+
+The gameplay audit recommends A. Pair play already contains alternate ledgers,
+cross-tag responsive routing, exact/related permission, deterministic and
+Oracle laws, cancellation, singleton fusion, and double substitution. A keeps
+one active Relic focused on a legible dual relationship, prevents a third
+fulfilled tag from becoming free insurance or an unexplained discarded
+success, limits teammate selector injection, and produces the clearest causal
+and simulator/RL comparisons. This is neutral/protective standing-ideal fit,
+not a new direct expression; numerical breadth does not strengthen
+unity-with-difference.
+
+B's strongest countermodel is genuine three-plus scarce-capacity play: one
+supported constellation jointly shapes which at-most-two outputs survive, so
+players route proofs or hedge one Oracle refusal across one atomic
+compatibility graph. Its ideal fit is only potentially direct and requires all
+tags in the qualifying constellation to materially participate while remaining
+distinct. A generic “take the highest two,” costless breadth insurance, or any
+irrelevant tag is merely co-presence.
+
+B carries hard guards. Settlement must consume the complete canonical
+tag/relation graph atomically and permutation-invariantly; a left fold,
+callback/storage order, generated ID, or first-pair-wins rule fails. `J_v(z)`
+contender membership and every displacement-capable fact must be prospectively
+legible and retrospectively attributable. Cheap late teammate injection fails.
+A matched held-fixed extra-tag/constellation ablation must leave real optimized
+uses for both three-plus and pair-only policies after unrelated cost is
+equalized. If later G2/H/I cannot resolve one bounded teaching witness at the
+smallest supported three-plus cardinality without order artifacts, opaque loss,
+or always-add-a-tag dominance, use A.
+
+G1-A prunes G2/H/I and opens C4. G1-B sends G2 through a fresh prerequisite
+audit. Three tags create three unordered pairs, but selected Oracle support
+does not prove that two nonconstant pair-permission marginals coexist in one
+reachable evaluation; one exact/related hybrid pair remains one pair and one
+draw. H retains feasible aggregate output cardinalities and I retains identity
+authority. F1-A's unique output for each denied pair does not determine an
+aggregate settlement among several interacting pairs. The authoritative
+decision record remains unchanged.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

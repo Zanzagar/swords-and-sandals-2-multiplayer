@@ -2982,8 +2982,8 @@ five shapes exactly once. Exact identities and mappings remain AUTHOR/SPEC. F
 opens only when one fixed opportunity retains several lawful outputs after
 prospective binding; mixed catalog support alone creates no chooser.
 
-Replacing one counted E row with four adds three slots. The current register
-had **102 slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 45
+Replacing one counted E row with four adds three slots. At that checkpoint the
+register had **102 slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 45
 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**.
 E1 was the presented card.
 
@@ -3043,9 +3043,9 @@ decide whether several outputs remain lawful at one fixed opportunity, and the
 old row also bundled that existence fact with participant configurability,
 policy-language, and stochastic-law boundaries. The thirty-third prerequisite
 correction makes old F a non-counting parent for F1, F2A, F2B1, F2B2, and F3.
-The current register has **106 slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 16
+At that checkpoint the register had **106 slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 16
 `PRUNED`, 49 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 36`**. F1 is the sole presented Relic card.
+`Phi_SR = 36`**. F1 was the sole presented Relic card.
 
 Under the thirty-third correction, F1-A prunes F2A-F3. F1-B activates F2A;
 F2A-A prunes the two participant-language rows, while a configurable branch
@@ -3055,6 +3055,16 @@ complete law through a prospectively bound setting under held-fixed nonpolicy
 inputs; ordinary build/context changes and live post-denial selection do not
 count. Exact mappings, priorities, policy vocabulary, probabilities, seeds,
 and replay mechanics remain in their AUTHOR/SPEC/TUNE or assurance lanes.
+
+Zanzagar selected F1-A. Every fixed denied opportunity is single-valued, so
+F2A, F2B1, F2B2, and F3 prune. Two named-claim audits then upheld G1 as one
+empty/nonempty three-plus pre-treatment contender-support card. Exact positive
+counts, maxima, prevalence, and pair incidence remain AUTHOR/SPEC absent a new
+player-material consequence boundary; G2, H, and I retain stochastic coupling,
+aggregate output cardinality, and identity authority. The current register now
+has **106 slots: 30 `SCREEN`, 1 `OWNER-OPEN`, 20 `PRUNED`, 50
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`**. G1
+is the sole presented Relic card.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -3141,12 +3151,12 @@ overcompression.
 | `RCS-03C3C3E2` | Positive denied-output width support under C3c.46-A's exact-two global receipt ceiling | `DIR-SELECTED`; guarded C requires singleton and double positive denied outputs to coexist as non-token, non-dominated policies rather than a count ladder; double denial must add purpose beyond ordinary dual weave, with A/B/E1 fallback as documented; identity remains E3/E4 and catalog coexistence creates no F authority |
 | `RCS-03C3C3E3` | Singleton denied-output identity-kind support | `DIR-SELECTED`; guarded B makes every singleton one genuine substitute, with A the qualified fallback only when substitute-specific viability fails and retained-original singleton play survives; exact substitute identities, mappings, and same-opportunity authority remain later |
 | `RCS-03C3C3E4` | Two-receipt denied-output composition support | `DIR-SELECTED`; guarded B makes every double positive denial two genuinely distinct substitutes, with A the practical fallback only when dual-substitute viability fails and anchored transformation survives; exact identities, mappings, and same-opportunity resolution remain later |
-| `RCS-03C3C3F1` | Support for several canonical lawful denied outputs at one fixed base opportunity before F-owned resolution | `OWNER-OPEN`; choose empty or nonempty multiplicity support while holding the pair/proofs, false permission result, applicable contracts, upstream routing stance, factual context, and every non-F input fixed; different opportunities/laws and payoff-only variants do not count |
-| `RCS-03C3C3F2A` | Material participant output-law configurability prevalence across ambiguity-capable denied-output contracts | `SCREEN`; conditional on F1-B; classify empty, universal, or nonempty proper configurability using held-fixed prospective settings rather than ordinary build/context changes or a live post-denial prompt; otherwise `PRUNED` |
-| `RCS-03C3C3F2B1` | Closed whole-policy versus constructive participant output-policy language prevalence | `SCREEN`; conditional on participant configurability at F2A; classify closed-menu-only, constructive-only, or coexistence without bundling context branching; otherwise `PRUNED` |
-| `RCS-03C3C3F2B2` | Participant-composed context-branching prevalence among constructive-capable output policies | `SCREEN`; conditional on constructive support at F2B1; otherwise `PRUNED`; exact grammar and limits remain later |
-| `RCS-03C3C3F3` | Stochastic support across canonical complete bound denied-output laws | `SCREEN`; conditional on F1-B and following F2A plus every applicable language row; classify deterministic-only, universally stochastic-capable, or coexistence without treating a participant setting as a random draw; otherwise `PRUNED` |
-| `RCS-03C3C3G1` | Support for at least three simultaneously individually ledger-satisfied receipt tags before within-evaluation treatment | `SCREEN`; follows the pair route; choose empty or nonempty support without treating engine callbacks or alternate ledger assignments as additional contenders |
+| `RCS-03C3C3F1` | Support for several canonical lawful denied outputs at one fixed base opportunity before F-owned resolution | `DIR-SELECTED`; A makes every fixed denied opportunity single-valued while allowing different disclosed contracts/contexts to map deterministically to different selected E1-E4 output families; exact maps remain AUTHOR/SPEC |
+| `RCS-03C3C3F2A` | Material participant output-law configurability prevalence across ambiguity-capable denied-output contracts | `PRUNED`; F1-A leaves no same-opportunity output multiplicity for a participant setting to resolve |
+| `RCS-03C3C3F2B1` | Closed whole-policy versus constructive participant output-policy language prevalence | `PRUNED`; F1-A leaves no participant output-resolution policy language |
+| `RCS-03C3C3F2B2` | Participant-composed context-branching prevalence among constructive-capable output policies | `PRUNED`; F1-A leaves no participant-constructed output-resolution policy |
+| `RCS-03C3C3F3` | Stochastic support across canonical complete bound denied-output laws | `PRUNED`; F1-A makes every held-fixed opportunity's lawful output single-valued and admits no F-owned output realization draw |
+| `RCS-03C3C3G1` | Support for at least three simultaneously individually ledger-satisfied receipt tags before within-evaluation treatment | `OWNER-OPEN`; choose empty or nonempty `G^{3+}_v` over one held-fixed actual evaluation and one selected complete ledger tuple; canonical tags count once, and alternate ledgers, callbacks, aliases, pair enumeration, form membership, or E/F outputs cannot manufacture contenders |
 | `RCS-03C3C3G2` | Joint stochastic permission-draw coupling across distinct simultaneous unordered pair opportunities | `SCREEN`; conditional on G1 positive and at least two nonconstant pair-permission marginals in one reachable evaluation under applicable exact/related laws; otherwise `PRUNED` or `DERIVED`; requires a fresh prerequisite screen, and one hybrid exact-related pair remains one pair and draw |
 | `RCS-03C3C3H` | Output-cardinality topology for a three-plus contender state under the exact-two final receipt ceiling | `SCREEN`; conditional on G1 positive and following the applicable G2 disposition; otherwise `PRUNED`; options must be relative to actually feasible survivor subsets so an impossible pair is never a fake branch |
 | `RCS-03C3C3I` | Authority selecting receipt identities from a three-plus contender state when several legal bounded outputs remain | `SCREEN`; conditional on a positive nonunique C3C3H result; otherwise `PRUNED` or `DERIVED`; ordering, priority, participant choice, and any merge/substitution consequence cannot be hidden in implementation |
@@ -3468,15 +3478,20 @@ that B with A as the practical dual-substitute-specific fallback. Two next-
 frontier audits then found that old F assumed an unselected same-opportunity
 multiplicity fact and bundled it with three later resolution-law boundaries.
 The thirty-third correction replaces old F with five counted children. The
-current register has **106 slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`,
+register at that checkpoint had **106 slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`,
 49 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. F1
+was the presented Relic card. Zanzagar then selected F1-A, making every fixed
+denied opportunity single-valued and pruning all four conditional F children.
+Two audits uphold G1 as one binary three-plus contender-support card. The
+current register has **106 slots**: 30 `SCREEN`, 1 `OWNER-OPEN`, 20 `PRUNED`,
+50 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`. G1
 is the current presented Relic card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-six owner cards under this thirty-three-times-corrected charter and will
+thirty-one owner cards under this thirty-three-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3500,7 +3515,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 106 frozen candidate slots; current `Phi_SR = 36` after guarded `RCS-03C3C3E4-B` and the F1-F3 prerequisite correction open same-opportunity denied-output multiplicity at F1 | At most 36 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 106 frozen candidate slots; current `Phi_SR = 31` after `RCS-03C3C3F1-A` prunes four output-resolution children and opens three-plus contender support at G1 | At most 31 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

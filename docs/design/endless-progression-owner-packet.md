@@ -359,7 +359,9 @@ positive denial uses two genuinely distinct substitutes unless that
 composition fails while anchored transformation survives. A thirty-third
 prerequisite correction separates same-opportunity output multiplicity from
 participant configurability, policy language, and stochastic realization.
-RCS-03C3C3F1 is the current owner-facing choice under SR-03.
+Zanzagar selected RCS-03C3C3F1-A: every fixed denied opportunity is
+single-valued, pruning all four conditional output-resolution children.
+RCS-03C3C3G1 is the current owner-facing choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -24097,7 +24099,7 @@ fallback. The authoritative decision record remains unchanged.
 > `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**. F1 is the sole
 > presented Relic card.
 
-### RCS-03C3C3F1 — same-opportunity denied-output multiplicity support — active owner choice
+### RCS-03C3C3F1 — same-opportunity denied-output multiplicity support — direction selected
 
 Let `X^{deny}_v` contain reachable fixed denied-pair base opportunities after
 the authoritative pair/proofs, false permission result, applicable Relic and
@@ -24136,6 +24138,87 @@ coercion obligations. Stochastic mixing cannot rescue a dominated disposition,
 and participant configurability cannot become a backdoor preferred-heir
 selector. If E4 falls back to `{O,S}`, re-audit the F subtree against that
 specific survivor-selection risk.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **A, every fixed
+denied opportunity is single-valued.** Thus `M^{deny}_v=∅`: once the complete
+base opportunity and every non-F input are fixed, exactly one canonical
+pair-local output is lawful. Different disclosed contracts or factual contexts
+may still map deterministically to cancellation `{}`, singleton substitute
+`{S}`, double substitutes `{S1,S2}`, or different exact substitute identities;
+A does not collapse the selected E1-E4 catalog support.
+
+No F-owned participant setting, priority ambiguity, or stochastic realization
+remains. Exact deterministic opportunity-to-output mappings stay AUTHOR/SPEC
+and must remain total, prospective, reproducible, attributable, and
+nonresponsive to later payoff, claim, retry, callback, or favorable combat
+outcome. A is **neutral/protective** under the standing ideal: it preserves the
+meaningful transformed relationship at E3/E4 without claiming that resolution
+determinism itself expresses unity-with-difference. If E4 later uses its
+`{O,S}` practical fallback, re-audit this subtree for preferred-heir selection
+rather than carrying A automatically.
+
+F1 moves to `DIR-SELECTED`; F2A, F2B1, F2B2, and F3 move to `PRUNED`; G1
+becomes the sole presented `OWNER-OPEN` Relic row. The 106-row register now
+contains 30 `SCREEN`, 1 `OWNER-OPEN`, 20 `PRUNED`, 50 `DIR-SELECTED`, 3
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested G1. The topology audit re-derived
+one empty/nonempty three-plus support boundary, the exact status transition,
+and the G2/H/I dependency split. The gameplay audit found that pair play is
+already unusually rich; additional fulfilled tags create value only when every
+tag in a supported three-plus constellation materially shapes competition for
+the exact-two final ceiling, rather than becoming free insurance or an opaque
+discarded success.
+
+### RCS-03C3C3G1 — three-plus pre-treatment contender support — active owner choice
+
+For one reachable fixed actual evaluation `z`, hold the ruleset/catalog
+version, active Relic root and realization, semantic cut, operative context,
+prospectively bound routing stance/configuration, selected authoritative
+complete ledger tuple, and earlier committed state fixed. Let `J_v(z)` contain
+the distinct canonical receipt tags individually ledger-satisfied immediately
+before within-evaluation treatment. Define
+`G^{3+}_v={z:|J_v(z)|>=3}`.
+
+Count each canonical tag once. Alternate ledgers prove one tag rather than
+creating several; aliases, callbacks, serialization copies, unordered pair
+enumeration, exact-plus-related form membership, and E/F substitute outputs do
+not add contenders. Different cuts, contexts, Relics, routes, configurations,
+or evaluations cannot be unioned to create a witness. Individually satisfied
+tags are structural pre-treatment inputs, not provisional receipt candidates
+or committed results.
+
+| Choice | Three-plus support rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no three-plus contender state** | `G^{3+}_v=∅`. Every fixed evaluation has at most two distinct canonical individually ledger-satisfied tags before treatment. The selected catalog still contains real two-tag dual-weave states, and later C4 may independently admit several semantic evaluations at one cut. G2, H, and I are pruned. | **Recommended.** Alternate ledgers, responsive routing, exact/related permission, Oracle risk, cancellation, singleton fusion, and double substitution already make pair play deep. A keeps one active Relic focused on a legible dual relationship, prevents a successfully fulfilled third tag from becoming mandatory free insurance or an unexplained discarded success, minimizes teammate selector injection, and gives the cleanest causal explanation and simulator/RL policy comparison. Its standing-ideal role is **neutral/protective**: it protects the direct pair relationships already selected rather than treating greater count as greater unity-with-difference. The cost is excluding a true over-cap constellation inside one evaluation. | One **Twin Concord** evaluation may individually satisfy canonical tags `P` and `Q`, and treatment may permit, sever, fuse, or reconstitute them under the selected rules. A distinct tag `R` may be satisfied in another semantic evaluation, but no one fixed evaluation presents `{P,Q,R}` together. |
+| **B — at least one three-plus contender state** | `G^{3+}_v` is nonempty. At least one fixed evaluation contains three or more distinct canonical individually ledger-satisfied tags before treatment, although C3c.46-A still caps the final aligned receipt set at two. B is existential: it requires neither exact-three as the global maximum, universal prevalence, nor a pairwise-overlap clique. Exact positive counts, maxima, prevalence, and pair incidence remain AUTHOR/SPEC unless a later audit proves a distinct player-material boundary. | B creates a genuinely new scarce-capacity game only when one supported three-plus constellation jointly shapes which zero, one, or two results can survive. Its strongest case is routing proofs or hedging one Oracle refusal across one atomic compatibility graph. Its fit is **potentially direct**, never automatic: every tag in the qualifying constellation must materially participate in one permutation-invariant settlement while retaining its identity. “Take the highest two,” free breadth insurance, or any co-present irrelevant tag is merely numerical coexistence. Costs are quadratic pair-permission growth, compatibility-graph UI, discarded-success frustration, teammate grief, and harder policy attribution. Choose B only if a bounded teaching witness at the smallest supported three-plus cardinality passes the guards below and cannot be expressed as clearer pair-only or distinct-evaluation play. | One illustrative **Triune Concord** evaluation presents canonical `P`, `Q`, and `R`. `P/Q` has a deterministic exact conflict while `P/R` and `Q/R` expose related-form permission opportunities. All facts belong to one frozen evaluation. G2 later owns any joint stochastic pair-bit coupling, H owns feasible final cardinalities under the cap of two, and I owns identity authority if several outputs remain. |
+
+A/B are mutually exclusive and exhaustive because `G^{3+}_v` is empty or
+nonempty. B does not select pair permissions, independent/shared/correlated
+draws, output cardinality, survivor identity, substitute construction, actor,
+priority, merge, payoff, claim, persistence, release, or implementation. F1-A
+gives each denied pair one unique pair-local output; it does not determine the
+aggregate settlement when several simultaneous unordered pairs interact.
+
+Every B implementation must settle the complete canonical tag-and-relation
+graph atomically and permutation-invariantly. A left fold, callback order,
+storage order, generated ID, or “first pair wins” rule fails. `J_v(z)`
+contender membership and every fact capable of displacement must be
+prospectively legible and retrospectively attributable; a teammate may not
+cheaply inject a late tag that reroutes another player's committed result. A
+matched held-fixed extra-tag/constellation ablation must show that guarded
+three-plus and pair-only policies each retain optimized uses after unrelated
+cost is equalized. If downstream G2/H/I cannot resolve one bounded teaching
+witness at the smallest supported three-plus cardinality without order
+artifacts, opaque loss, or a dominant always-add-a-tag policy, fall back to A.
+
+Under A, G2/H/I prune and C4 becomes next. Under B, G2 receives a fresh
+prerequisite audit: three tags supply three unordered pairs, but selected
+Oracle support does not itself prove that two nonconstant pair-permission
+marginals coexist in one reachable evaluation, and one exact/related hybrid
+pair remains one pair and one draw. H follows the applicable G2 disposition;
+I activates only if H leaves several legal bounded identity outputs.
 
 ## Session protocol and evidence
 

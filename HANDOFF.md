@@ -1,5 +1,56 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 fixed denied outputs selected; three-plus contenders are next
+
+Zanzagar selected `RCS-03C3C3F1-A`. Every fixed denied-pair opportunity is
+single-valued: after the complete base opportunity and every non-F input are
+fixed, exactly one canonical pair-local output is lawful. Different disclosed
+contracts or contexts may still deterministically produce `{}`, `{S}`, or
+`{S1,S2}` and different exact substitutes; F1-A does not collapse E1-E4's
+selected catalog support.
+
+No F-owned participant setting, priority ambiguity, or stochastic output draw
+remains. Exact maps stay AUTHOR/SPEC and must be total, prospective,
+reproducible, and unable to inspect later payoff, claim, retry, callback, or
+combat outcome. F1-A is neutral/protective ideal fit. If E4 later uses its
+`{O,S}` practical fallback, re-audit F for preferred-heir selection.
+
+F1 moves to `DIR-SELECTED`; F2A, F2B1, F2B2, and F3 move to `PRUNED`; G1
+becomes the sole `OWNER-OPEN` Relic row. The 106-row register now has 30
+`SCREEN`, 1 `OWNER-OPEN`, 20 `PRUNED`, 50 `DIR-SELECTED`, 3 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`. The authoritative decision record
+remains unchanged.
+
+Two named-claim audits upheld G1 as one binary support card. For one fixed
+actual evaluation `z`, let `J_v(z)` contain its distinct canonical receipt tags
+individually ledger-satisfied immediately before treatment under the selected
+complete ledger tuple, and let `G^{3+}_v` contain evaluations with at least
+three such tags:
+
+- **A — no three-plus contender state:** `G^{3+}_v` is empty; every fixed
+  evaluation has at most two contender tags. **Recommended.** Pair play already
+  has alternate ledgers, responsive routing, exact/related permission, Oracle
+  risk, cancellation, fusion, and reconstitution. A keeps the dual weave
+  legible, avoids free third-tag insurance or mysteriously discarded success,
+  limits teammate selector injection, and gives the cleanest simulator/RL
+  comparison. It is neutral/protective ideal fit. G2/H/I prune and C4 follows.
+- **B — some three-plus contender state exists:** at least one fixed evaluation
+  has three or more tags before treatment, though at most two final receipts
+  may survive. B can create real scarce-capacity play if every tag in one
+  supported constellation materially shapes one atomic compatibility graph; it
+  is potentially direct ideal fit only then. “Take the highest two,” any
+  irrelevant tag, or costless breadth insurance is mere co-presence. B opens
+  later G2/H/I work and the highest combinatorial, UI, grief, and policy-
+  attribution burden.
+
+A/B are exhaustive. Count each canonical tag once: alternate ledgers, aliases,
+callbacks, pair enumeration, exact/related double classification, and later
+substitutes do not add contenders. B is existential and selects no exact
+maximum, prevalence, pair permissions, draw coupling, output cardinality,
+identity authority, actor, priority, merge, or payoff. Every B settlement must
+be atomic and permutation-invariant; callback/storage order and first-pair-wins
+fail. Ask for A or B.
+
 ## 2026-09-26 dual substitutes selected; fixed-output multiplicity is next
 
 Zanzagar selected guarded `RCS-03C3C3E4-B` with E4-A as the explicit
@@ -10953,7 +11004,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 03:31 UTC — fixed denied-output multiplicity is next](docs/handoffs/2026-09-27-0331--relic-denied-output-multiplicity-next.md)**
+[2026-09-27 03:53 UTC — three-plus pre-treatment contenders are next](docs/handoffs/2026-09-27-0353--relic-three-plus-contenders-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
