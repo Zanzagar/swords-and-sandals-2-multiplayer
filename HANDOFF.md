@@ -1,5 +1,66 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 dual substitutes selected; fixed-output multiplicity is next
+
+Zanzagar selected guarded `RCS-03C3C3E4-B` with E4-A as the explicit
+practical fallback. Every two-receipt positive denied result is `{S1,S2}`:
+two genuinely distinct substitutes, with neither original retained. This
+completes the selected pair-local grammar—zero severs, one fuses/transmutes,
+and two refracts/reconstitutes—without making receipt count a power ladder.
+
+Both substitutes must be truthful, reachable, nonconstant, separately
+player-meaningful, materially consumer-distinct, and distinct from one another.
+They may not rename `P/Q`, jointly reconstruct both original entitlements,
+become generic shards, or reduce to singleton `{S}` plus free upside. The
+standing-ideal fit is potentially direct only when the denied relationship
+materially continues through two genuinely different manifestations; two new
+labels or prizes prove nothing.
+
+Use E4-A only if dual substitutes fail for reconstruction, comprehension,
+authoring, or cross-width-dominance reasons while anchored `{O,S}` play still
+survives preferred-heir and subset-dominance attacks. If both compositions
+fail, reopen E2 with singleton-only E2-A. If E3 falls back to retained-original
+A, re-audit E4. If E4 uses practical fallback A, re-audit the F subtree so its
+resolution cannot become a backdoor `P`-versus-`Q` preferred-heir selector.
+E4-C remains unselected.
+
+Two next-frontier audits found that old F silently assumed an unselected fact:
+E1-E4 support different output families across the catalog, but never decide
+whether one fixed opportunity retains several lawful outputs. They also found
+that existence, participant configurability, policy language, and stochastic
+realization are independent. The thirty-third prerequisite correction makes
+old F a non-counting parent for F1, F2A, F2B1, F2B2, and F3.
+
+The 106-row register now has 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 49
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. F1 is
+the sole presented Relic card. The authoritative decision record remains
+unchanged.
+
+F1 asks whether any one held-fixed denied-pair base opportunity has several
+canonical lawful outputs before F-owned resolution:
+
+- **A — every fixed opportunity is single-valued:** no such opportunity
+  exists. Different disclosed contracts or contexts may still deterministically
+  produce `{}`, `{S}`, `{S1,S2}`, or different exact substitutes. **Recommended.**
+  E1-E4 already supply policy variety; A avoids an output shop, improves causal
+  explanation, team planning, replay trust, and later simulator/RL policy
+  comparison, and prunes F2A-F3. It is neutral/protective ideal fit.
+- **B — some fixed opportunity retains several lawful outputs:** at least one
+  held-fixed opportunity carries two or more canonical output identity sets.
+  This opens a real resolution surface but chooses no actor, setting language,
+  priority, or randomness. Its strongest case is a small prospectively bound
+  orientation that creates policy not expressible as clearer distinct
+  contracts or contexts. Multiplicity itself is not agency or direct ideal
+  fit, and later cards must defeat “always take two,” favorable-output,
+  quarterbacking, grief, retry, and stochastic-laundering failures.
+
+A/B are exhaustive. Different base opportunities, non-F contracts or contexts,
+payoff packages, and aliases do not create a multiplicity witness. Alternative
+F-owned complete laws over one base belong to B's later resolution subtree;
+they are not different base opportunities. Under B, exact participant
+configurability, policy language, and stochastic support remain separate
+one-at-a-time cards. Ask for A or B.
+
 ## 2026-09-26 substitute singleton selected; double composition is next
 
 Zanzagar selected guarded `RCS-03C3C3E3-B` with E3-A as the explicit
@@ -10892,7 +10953,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 03:13 UTC — double denied-output composition is next](docs/handoffs/2026-09-27-0313--relic-double-denied-composition-next.md)**
+[2026-09-27 03:31 UTC — fixed denied-output multiplicity is next](docs/handoffs/2026-09-27-0331--relic-denied-output-multiplicity-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

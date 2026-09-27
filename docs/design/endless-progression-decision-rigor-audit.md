@@ -5639,6 +5639,90 @@ Catalog composition support creates no F authority. F opens only if one fixed
 prospectively bound opportunity retains several lawful outputs. E4 is the sole
 presented Relic card. The authoritative decision record remains unchanged.
 
+Zanzagar selected E4-B with E4-A as the explicit practical fallback. Every
+two-receipt positive denial therefore emits two genuinely distinct substitutes
+and retains neither original. The selection keeps the zero/sever,
+one/fuse-or-transmute, two/refract-or-reconstitute grammar while reserving
+original-preserving `{P,Q}` for allowed dual weave. B remains conditional on
+two honest, separately meaningful transformed routes that neither reconstruct
+the joint originals nor reduce to singleton `{S}` plus free upside. Use A only
+if B fails for dual-substitute-specific reconstruction, comprehension,
+authoring, or cross-width-dominance reasons while anchored `{O,S}` play still
+survives preferred-heir and subset-dominance attacks. If both fail, reopen E2;
+if E3 falls back to retained-original A, re-audit E4. The authoritative
+decision record remains unchanged.
+
+Two bounded read-only named-claim audits then attacked F's prerequisite rather
+than assuming it. They independently produced two countermodels satisfying
+E1-C/E2-C/E3-B/E4-B:
+
+- separate fixed laws or contexts uniquely map to `{}`, `{S}`, and
+  `{S1,S2}`; and
+- at least one held-fixed base opportunity retains two canonical lawful output
+  identity sets.
+
+Therefore old F cannot become `OWNER-OPEN`, `PRUNED`, or `DERIVED` without
+silently choosing whether same-opportunity multiplicity exists. Its phrase
+“after prospective binding” was also circular: an F-owned participant stance
+could itself remove multiplicity. The repaired base opportunity fixes every
+upstream and non-F fact but deliberately precedes an F-owned setting,
+completion rule, or random realization.
+
+The authority audit also rejected “unique map,” “system priority,” “participant
+choice,” and “randomness” as peer options. A unique complete mapping and a
+compiled deterministic system priority are observationally the same topology;
+participant influence is a separate prospectively bound configurability
+question; closed versus constructive policy language is conditional on that
+influence; and stochastic support is orthogonal to both. A live post-denial
+prompt violates already-selected cut-atomic automatic invocation and would
+invite favorable-output selection, quarterbacking, and grief.
+
+The thirty-third prerequisite correction therefore makes old F a non-counting
+parent for five counted rows:
+
+1. F1 — same-opportunity lawful-output multiplicity support;
+2. F2A — participant output-law configurability prevalence;
+3. F2B1 — closed versus constructive participant policy-language prevalence;
+4. F2B2 — constructive context-branching prevalence; and
+5. F3 — stochastic support across complete bound output laws.
+
+F1-A prunes every descendant. F1-B activates F2A; absence of participant
+configurability prunes F2B1/B2, while a constructive language may activate
+F2B2. F3 follows the applicable authority/language route. This split adds four
+slots. Combined with selecting E4, the 106-row register contains 35 `SCREEN`,
+1 `OWNER-OPEN`, 16 `PRUNED`, 49 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 36`. F1 is the sole presented Relic card.
+
+For F1, let `X^{deny}_v` contain fixed denied-pair base opportunities after the
+authoritative pair/proofs, false permission result, applicable contracts,
+upstream routing stance, factual context, and every non-F input are fixed. Let
+`L^{deny}_v(x)` be the nonempty finite set of canonical lawful pair-local
+output identity sets before F resolution, and define
+`M^{deny}_v={x in X^{deny}_v:|L^{deny}_v(x)|>=2}`. Canonical identity-set
+alternatives count even when they share one E1-E4 shape; aliases, payoff-only
+variants, or outputs under different fixed opportunities do not.
+
+F1 has exactly two branches. A makes `M^{deny}_v` empty: every fixed
+opportunity is single-valued, though distinct disclosed contracts or contexts
+may deterministically supply every selected E1-E4 family. B makes the set
+nonempty: at least one fixed base opportunity retains several lawful outputs,
+without deciding participant configuration, language, or randomness. Universal
+versus mixed base multiplicity remains AUTHOR/SPEC unless a later audit proves
+a separate player-material consequence.
+
+The audit recommends A. E1-E4 already give cancellation, fusion, and
+reconstitution meaningful build/context diversity; A prevents denial from
+becoming an output shop, retains context-responsive learnable laws, improves
+causal explanation, team planning, replay trust, and later policy comparison,
+and avoids adding a second configuration dialect beside routing. This is
+neutral/protective standing-ideal support, not a new direct relation. B's best
+case is a small prospectively committed orientation that creates a
+nonredundant held-fixed policy, but multiplicity itself is neither agency nor
+unity-in-difference. B must later defeat the dominant “always take two,”
+favorable-resolution, hidden-priority, grief, retry, and stochastic-laundering
+attacks. If E4 falls back to `{O,S}`, the F subtree must be re-audited for
+preferred-heir selection.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

@@ -353,8 +353,13 @@ and double policies must remain independently chosen rather than forming a
 zero-to-two power ladder. Zanzagar then selected guarded RCS-03C3C3E3-B with
 E3-A as the substitute-specific viable fallback: every singleton positive
 denial is one genuine substitute unless honest substitute authoring fails
-while retained-original singleton play survives. RCS-03C3C3E4 is the current
-owner-facing choice under SR-03.
+while retained-original singleton play survives. Zanzagar then selected
+guarded RCS-03C3C3E4-B with E4-A as the practical fallback: every two-receipt
+positive denial uses two genuinely distinct substitutes unless that
+composition fails while anchored transformation survives. A thirty-third
+prerequisite correction separates same-opportunity output multiplicity from
+participant configurability, policy language, and stochastic realization.
+RCS-03C3C3F1 is the current owner-facing choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -23961,7 +23966,7 @@ retention the decisive E4 question: a double can restore one familiar original
 beside a substitute, or keep denial wholly transformational through two
 substitutes.
 
-### RCS-03C3C3E4 — two-receipt denied-output composition topology — active owner choice
+### RCS-03C3C3E4 — two-receipt denied-output composition topology — direction selected
 
 E2-C makes `D^{deny,2}_v` nonempty. Define its all-substitute subset
 `D^{deny,2,SS}_v={o in D^{deny,2}_v:Y(o)∩T=∅}`. Every member has exactly two
@@ -24016,6 +24021,121 @@ claim, rarity, release slice, or implementation. Catalog composition support
 creates no F authority; F opens only if one fixed prospectively bound
 opportunity retains several lawful outputs. The authoritative decision record
 remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, every
+two-receipt positive denied result is two genuinely distinct substitutes, with
+A as the explicit practical fallback.** Thus
+`D^{deny,2,SS}_v=D^{deny,2}_v`: neither original tag survives a double denial,
+and every result is `{S1,S2}` rather than `{P,S}` or `{Q,S}`. This selects the
+composition family, not exact substitute identities, whether a singleton
+substitute is reused, or any output-resolution law.
+
+B completes the selected pair-local grammar: zero receipts sever, one
+substitute fuses or transmutes, and two substitutes refract or reconstitute.
+The double family must own two separately addressable transformed routes while
+the singleton owns one integrated consumer identity. Both substitutes remain
+truthful, reachable, nonconstant, separately player-meaningful, materially
+consumer-distinct, and genuinely distinct from each other. They may not be
+renamed originals, generic shards, a reconstruction of the joint `{P,Q}`
+entitlements, or singleton `{S}` plus free upside. After unrelated package
+value is equalized, cancellation, singleton fusion, double reconstitution, and
+ordinary allowed dual weave must each retain real optimized matchups.
+
+The standing-ideal fit is potentially direct, never automatic: the denied
+relationship must materially continue through two genuinely different
+manifestations at the same pair-local disposition boundary. Two new labels,
+items, or prizes do not establish that continuity. Composition-affecting facts
+retain E1-C's last-informed-reversible-commitment disclosure, retrospective
+attribution, and anti-coercion obligations.
+
+Use practical fallback E4-A only if two honest substitutes fail for
+reconstruction, comprehension, authoring, or cross-width-dominance reasons
+while `{O,S}` anchored transformation still survives preferred-heir and
+subset-dominance attacks. If both compositions fail, reopen E2-C with
+singleton-only E2-A while E3-B remains viable. If E3 uses its retained-original
+A fallback, re-audit E4 rather than carrying B or A silently. E4-C remains
+unselected. Identity-independent coerced denial follows E5-C's upstream
+fallback. The authoritative decision record remains unchanged.
+
+> **Thirty-third prerequisite correction, 2026-09-26:** two bounded
+> read-only named-claim audits broke old `RCS-03C3C3F` before presentation.
+> E1-E4 classify support across the catalog or across prospectively distinct
+> contexts; none decides whether one fixed opportunity retains several lawful
+> outputs. Both a total single-valued mapping and a same-opportunity
+> multi-output relation satisfy E1-C/E2-C/E3-B/E4-B. Marking old F
+> `OWNER-OPEN` would silently select multiplicity, while `PRUNED` would silently
+> select uniqueness; neither is derived.
+>
+> Old `RCS-03C3C3F` is now a non-counting parent for five registered rows:
+>
+> 1. `RCS-03C3C3F1` — support for several canonical lawful denied outputs at
+>    one fixed base opportunity;
+> 2. `RCS-03C3C3F2A` — conditional material participant-configurability
+>    prevalence across ambiguity-capable denied-output contracts;
+> 3. `RCS-03C3C3F2B1` — conditional closed whole-policy versus constructive
+>    participant output-policy language prevalence;
+> 4. `RCS-03C3C3F2B2` — conditional participant-composed context-branching
+>    prevalence among constructive-capable output policies; and
+> 5. `RCS-03C3C3F3` — conditional stochastic support across canonical complete
+>    bound denied-output laws.
+>
+> F1-A prunes F2A-F3. F1-B activates F2A; F2A-A prunes F2B1-F2B2, while
+> participant-configurable branches activate F2B1 and any constructive branch
+> may activate F2B2. F3 follows F2A and every applicable language row.
+> Participant leverage means a prospectively bound setting changes the
+> complete output law under held-fixed nonpolicy inputs; ordinary Relic/build
+> changes and upstream combat actions are not hidden F authority. A live
+> post-denial prompt remains incompatible with cut-atomic automatic invocation.
+> Exact output identities, maps, system priorities, setting vocabulary,
+> probabilities, seeds, and replay realization remain AUTHOR/SPEC/TUNE or
+> their already registered assurance owners after topology is selected. Each
+> child receives its own prerequisite audit before presentation.
+>
+> Replacing one counted F row with five adds four slots and four unresolved
+> potentials; selecting E4 consumes one. The corrected register contains
+> **106 rows: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 49 `DIR-SELECTED`, 3
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**. F1 is the sole
+> presented Relic card.
+
+### RCS-03C3C3F1 — same-opportunity denied-output multiplicity support — active owner choice
+
+Let `X^{deny}_v` contain reachable fixed denied-pair base opportunities after
+the authoritative pair/proofs, false permission result, applicable Relic and
+relationship contract, upstream routing stance, factual context, and every
+non-F input are fixed, but before any F-owned participant output setting,
+completion rule, or random realization. For `x in X^{deny}_v`, let
+`L^{deny}_v(x)` be the complete nonempty finite set of canonical pair-local
+output identity sets still lawful under E1-E4. Define
+`M^{deny}_v={x in X^{deny}_v:|L^{deny}_v(x)|>=2}`.
+
+`L^{deny}_v(x)` counts extensionally distinct canonical identity sets, not
+payoff packages or aliases. Two different prospectively bound contracts,
+contexts, or opportunities never create one multiplicity witness. Same-shape
+alternatives such as `{S1,S2}` versus `{S3,S4}` do count when their receipt
+identities are genuinely distinct; renamed or consumer-equivalent aliases do
+not.
+
+| Choice | Fixed-opportunity output topology | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every fixed opportunity is single-valued** | `M^{deny}_v=emptyset`. Once the fixed base opportunity is known, exactly one canonical denied output is lawful. Different disclosed contracts or contexts may still map deterministically to `{}`, `{S}`, `{S1,S2}`, or different exact substitute identities; A does not collapse E1-E4's catalog support. F2A-F3 are pruned. | **Recommended.** E1-E4 already provide sever, fusion, and reconstitution policies across known laws and contexts. A keeps denial from becoming a conversion menu, protects causal explanation, team planning, replay trust, and eventual simulator/RL policy comparison, and avoids a second configuration dialect beside the existing routing stance. Context-responsive deterministic maps can remain deep but learnable. Its standing-ideal role is **neutral/protective**: it preserves the meaningful transformed relationship selected at E3/E4 but adds no new unity-with-difference claim. The cost is no same-opportunity output orientation or numinous manifestation variance. | With **Shattered Concord**, a fixed `P/Q` denial under one exact Relic realization, routing stance, proof pair, and visible context has exactly one lawful `{S1,S2}` result. A different disclosed context may deterministically sever or fuse, but repeating this same base opportunity cannot expose a second lawful output. |
+| **B — some fixed opportunity retains several lawful outputs** | `M^{deny}_v` is nonempty. At least one held-fixed base opportunity has two or more canonical lawful dispositions. B does not decide whether every ambiguity-capable contract behaves this way, who may configure its resolution, whether its policy language is closed or constructive, or whether the complete bound law is deterministic or stochastic; F2A-F3 own those questions. | B creates a genuine output-resolution surface rather than relying only on catalog/context diversity. Its strongest case is a small prospectively committed orientation that makes the same Relic relationship settle differently without a live prompt. But multiplicity itself is not agency or an ideal expression: only one output becomes operative, and unbounded choice risks a dominant “always take two” conversion shop, quarterbacking, grief, and weaker causal explanation. Choose B only if the held-fixed alternatives support nonredundant precommitment policies that cannot be authored as clearer distinct contracts or contexts. | One fixed **Prismatic Concord** base opportunity retains both `{S}` and `{S1,S2}` as lawful. B says only that both survive into the resolution domain. A later card must determine whether an intrinsic law, a prospectively bound setting, or a stochastic realization commits exactly one; the player may not choose after seeing the denial. |
+
+A/B are mutually exclusive and exhaustive because `M^{deny}_v` is either
+empty or nonempty. B's support is existential; universal-versus-mixed
+prevalence remains AUTHOR/SPEC unless a later prerequisite audit proves a
+separate player-material consequence boundary. Neither answer changes exact
+receipt identities, output value, compensation, payoff, rarity, claim,
+persistence, release slice, or implementation.
+
+Under A, the complete design must expose every resolution-relevant factual
+input before the affected players' last informed reversible commitment and
+must make the output reproducible from the bound law; a hidden priority, retry,
+or callback is not a second option. Under B, every later resolution policy must
+still preserve E1-E4's anti-ladder, non-dominance, attribution, and anti-
+coercion obligations. Stochastic mixing cannot rescue a dominated disposition,
+and participant configurability cannot become a backdoor preferred-heir
+selector. If E4 falls back to `{O,S}`, re-audit the F subtree against that
+specific survivor-selection risk.
 
 ## Session protocol and evidence
 
