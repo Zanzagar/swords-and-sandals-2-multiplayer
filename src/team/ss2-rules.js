@@ -2805,6 +2805,38 @@ export function ss2WalkDestination(actor, foes, direction) {
 }
 
 /**
+ * ► **A WALK THAT GOES NOWHERE BECAUSE OF A BODY IN THE WALKER'S OWN LANE —
+ *   withheld from the offer, and greyed "blocked" on the ring. The owner's
+ *   decision P3, 2026-09-27 (`docs/design/battle-ui.md#decided-ai-press-2026-09-27`).**
+ *
+ * The build offers every walk its controller frame wires and lets the overlap
+ * clamp (`+0x3de6`) decide where it lands, so a walk into a body you already
+ * stand against costs its stamina and leaves you where you were. With teams
+ * that became a queue: a gladiator behind his own ally chose the walk toward
+ * the fight turn after turn, the walk playing on the spot (the owner's
+ * playtest, 2026-09-26; 66 such walks on the `buffs` kit's 3v3, seeds 1-48,
+ * one gladiator 13 running). AUTHORED — vanilla has no ally to stand behind
+ * (`MAP_SILENCE.multi-slot-arena-geometry`).
+ *
+ * **"Nowhere" is exact**: a walk the clamp cuts to one unit is a walk and is
+ * offered. **"Because of a body" is tested by removing the bodies**: a walk
+ * that would go nowhere with nobody there is standing at the ARENA WALL,
+ * which the decision does not cover, so it is still offered as the build
+ * offers it. The bodies are every other living one, as the walk's own
+ * resolution reads them; `ss2BodyBlocks` keeps it to the walker's lane.
+ *
+ * In 1v1 it cannot fire on a warrior's toward-walk: that is a `closerange`
+ * frame the moment a foe is in reach, and `closerange_warrior` wires no
+ * toward-walk. It fires wherever a body at the clamp line is OUT of reach —
+ * a foe bigger than the walker's reach, or an ally.
+ */
+export function ss2WalkBlocked(actor, bodies, direction) {
+  if (!Number.isFinite(actor?.x)) return false;
+  if (ss2WalkDestination(actor, bodies, direction) !== actor.x) return false;
+  return ss2WalkDestination(actor, [], direction) !== actor.x;
+}
+
+/**
  * WHICH WAY EVERY GLADIATOR IS FACING, recomputed from where they stand.
  *
  * ► **THE BUILD DOES THIS EVERY PHASE ADVANCE AND THIS ENGINE DID IT ONCE, AT
@@ -11227,7 +11259,15 @@ export function createSs2TeamRules({
         //   build orders the two buttons by direction and never by their
         //   relationship to the opponent — which it cannot do, because the
         //   slots are wired once per frame and the opponent moves.
-        for (const type of offered) actions.push({ type, targetId: actorId });
+        //
+        // ► **A WALK THAT WOULD GO NOWHERE AGAINST A BODY IN THE WALKER'S LANE
+        //   IS WITHHELD** (the owner's decision P3, 2026-09-27;
+        //   `ss2WalkBlocked`). The ring greys it "blocked"; the AI, which
+        //   picks only from this list, can never pick it.
+        for (const type of offered) {
+          if (ss2WalkBlocked(view.actor, snipeBodies, SS2_WALK_DIRECTION[type])) continue;
+          actions.push({ type, targetId: actorId });
+        }
       }
 
       // ► **THE TAUNT, AND WHICH CONTROLLER WIRES IT IS THE WHOLE GATE.**
@@ -16878,6 +16918,7 @@ export const SS2_UNAVAILABLE_REASONS = Object.freeze(Object.fromEntries([
   ["duel", "grey", "team", "Two left standing: you may only close the gap."],
   ["no-rank", "grey", "team", "There is no rank that way."],
   ["rank-full", "grey", "team", "There is no free ground in that rank."],
+  ["blocked", "grey", "team", "Blocked: someone in your lane is in the way, so this walk would go nowhere."],
   ["not-built", "grey", "engine", "Not built yet."],
   ["undeclared", "grey", "engine", "This fighter cannot hold what this writes."],
   ["not-offered", "grey", "engine", "Not on offer."]
@@ -17069,7 +17110,8 @@ export function ss2UnavailableActions(view, targetId, legal, { rankStride = SS2_
       case Ss2ActionType.WALK_LEFT:
       case Ss2ActionType.WALK_RIGHT:
         if (!positioned) return "unpositioned";
-        return onCloseFrame && type !== retreat ? "in-reach" : null;
+        if (onCloseFrame && type !== retreat) return "in-reach";
+        return ss2WalkBlocked(actor, snipeBodies, SS2_WALK_DIRECTION[type]) ? "blocked" : null;
       case Ss2ActionType.REST:
         // Inferred, not derived — see the docblock.
         if (offered(Ss2ActionType.REST, actor.id)) return null;

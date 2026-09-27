@@ -383,9 +383,12 @@ const GREY_CODES = Object.values(SS2_UNAVAILABLE_REASONS).filter((reason) => rea
 const HIDE_CODES = Object.values(SS2_UNAVAILABLE_REASONS).filter((reason) => reason.display === "hide").map((reason) => reason.code);
 
 test("EVERY CODE IN THE ENGINE'S TABLE: a grey one shows its button greyed with the engine's words; a hide one renders nothing — staged on the step-forward arrow, whose own reason no bout can make `rank-full`", () => {
-  // The engine's table has ~~19 codes: 9 grey, 10 hide~~ **20 codes: 9 grey, 11 hide** (`SS2_UNAVAILABLE_REASONS`)
-  // — `no-arrows` (hide, the build's own rule) joined in 39da762, after this slice's base; re-pinned at merge.
-  assert.deepEqual([GREY_CODES.length, HIDE_CODES.length], [9, 11]);
+  // The engine's table has ~~19 codes: 9 grey, 10 hide~~ ~~20 codes: 9 grey, 11 hide~~ **21 codes: 10 grey, 11
+  // hide** (`SS2_UNAVAILABLE_REASONS`) — `no-arrows` (hide, the build's own rule) joined in 39da762, after this
+  // slice's base; re-pinned at merge. `blocked` (grey, a team rule: a walk that would go nowhere against a body
+  // in the walker's lane, the owner's decision P3 of 2026-09-27) joined after it, and the loop below draws it.
+  assert.deepEqual([GREY_CODES.length, HIDE_CODES.length], [10, 11]);
+  assert.ok(GREY_CODES.includes("blocked"), "the P3 code is one of the grey ones this loop draws");
   // 2v2 seed 1, 8 AI turns in: red-1's step forward is withheld (`no-rank`). Its entry is re-stamped with each
   // code in turn — as the engine stamps one, with that code's display — so every code reaches the ring.
   const host = stagedHost({ perSide: 2, seed: 1, turns: 8 });

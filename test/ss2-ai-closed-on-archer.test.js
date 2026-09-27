@@ -298,9 +298,18 @@ test("AND A WALK AWAY THAT A BODY BEHIND TURNS ROUND IS NOT A RETREAT EITHER, wh
         { id: "rival", x: rivalX, y: FRONT, fields: gladiator({ gladiator_dir: rivalX > 0 ? "left" : "right" }) }
       ]
     });
-    assertClosedOnWithNothingToBash(battle);
-    const landing = retreatLandsAt(battle, Ss2ActionType.WALK_LEFT);
-    assert.ok(landing >= archerX, `from ${archerX} the walk left lands at ${landing}, not farther from the closer`);
+    const offered = assertClosedOnWithNothingToBash(battle);
+    // ► **FROM 6 THE WALK LEFT IS NOT OFFERED AT ALL SINCE 2026-09-27**: 6 is
+    //   the mate's clamp line (-80 + 86), so the walk goes nowhere, and a walk
+    //   that goes nowhere against a body in the walker's lane is withheld (the
+    //   owner's decision P3, `ss2WalkBlocked`). From 0 it still moves six units
+    //   TOWARD the closer, which is a walk, so it is still offered.
+    if (!offered.includes(Ss2ActionType.WALK_LEFT)) {
+      assert.equal(archerX, 6, "only the case already on the clamp line loses the walk");
+    } else {
+      const landing = retreatLandsAt(battle, Ss2ActionType.WALK_LEFT);
+      assert.ok(landing >= archerX, `from ${archerX} the walk left lands at ${landing}, not farther from the closer`);
+    }
     const chosen = suggestAction(battle, "archer");
     // ~~TAUNT at the rival~~ — the swap since 2026-09-24; see the test above.
     assert.deepEqual({ type: chosen.type, targetId: chosen.targetId }, { type: Ss2ActionType.SWAP_WEAPONS, targetId: "archer" },

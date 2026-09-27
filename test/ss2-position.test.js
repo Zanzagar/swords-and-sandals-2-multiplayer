@@ -1401,7 +1401,17 @@ test("and OUTSIDE 65 the build's own gate shuts, which is a fidelity gap and not
     if (battle.result) settled += 1;
   }
   assert.equal(settled, 8, "every bout must still settle — a shut gate on one side is not a hung bout");
-  assert.equal(weakAttackTurns, 0, "the smaller gladiator is never offered a swing, which is the gap named above");
+  // ~~The smaller gladiator is never offered a swing.~~ **MOVED 2026-09-27 by
+  // the owner's decision P3 (`ss2WalkBlocked`): the walk that parked him on the
+  // bigger one's clamp line, out of his own reach, went NOWHERE, so it is no
+  // longer offered.** Before, he walked in place there every turn (20 walks,
+  // 0 swings over these 8 seeds); now he taunts from the line instead (16
+  // walks, 4 taunts), and twice the bigger one's own approach lands inside the
+  // small one's reach and he is offered a swing. The gap named above is the
+  // same arithmetic; he is just no longer stuck walking into it. Blue still
+  // wins all 8.
+  assert.ok(weakAttackTurns < strongAttackTurns,
+    `the smaller gladiator must still be the one the gap shuts out (${weakAttackTurns} against ${strongAttackTurns})`);
   assert.ok(strongAttackTurns > 0, "and the bigger one is, or this proves nothing about the cause");
   assert.ok(WALKS.size === 2);
 });
@@ -1588,14 +1598,28 @@ test("a walk may never carry a gladiator past a foe — including when the CLAMP
       }
     ]
   });
-  // The case only exists because the retreat is offered while a foe stands the
-  // other way — assert that, or the test proves nothing about the clamp.
+  // ~~The case only exists because the retreat is offered while a foe stands
+  // the other way — assert that, or the test proves nothing about the clamp.~~
+  // **Since 2026-09-27 the retreat is NOT offered, and that is this guard's own
+  // answer reaching the offer:** the reversal goes nowhere, and a walk that
+  // goes nowhere because of a body in the walker's lane is withheld (the
+  // owner's decision P3, `ss2WalkBlocked`). The guard still governs the
+  // resolution, so the walk is forced straight at `resolveAction`, past
+  // `legalActions`, the way the 1v1 reversal test above reaches its case.
   const offered = typesOf(battle, "actor");
-  assert.equal(offered.includes(Ss2ActionType.WALK_RIGHT), true, "the retreat must be on offer");
+  assert.equal(offered.includes(Ss2ActionType.WALK_RIGHT), false, "the retreat that goes nowhere is not on offer");
   assert.equal(ss2PhysicalSize(combatantById(battle, "right-foe")), 86);
 
-  applyAction(battle, { actorId: "actor", type: Ss2ActionType.WALK_RIGHT, targetId: "actor" });
-  const landed = combatantById(battle, "actor").x;
+  const forced = battle.rules.resolveAction({
+    type: Ss2ActionType.WALK_RIGHT,
+    actorId: "actor",
+    targetId: "actor",
+    actor: combatantById(battle, "actor"),
+    target: combatantById(battle, "actor"),
+    foes: [combatantById(battle, "left-foe"), combatantById(battle, "right-foe")],
+    turnNumber: 1
+  }, { randomBetween: () => 0, randomNumber: () => 0 });
+  const landed = forced.effects.find((effect) => effect.kind === EffectKind.POSITION).to;
   assert.ok(landed >= -10, `a walk must never end past the foe at -10; it ended at ${landed}`);
   assert.equal(landed, 0, "and the reversal that would cross it goes NOWHERE, not part-way");
 
