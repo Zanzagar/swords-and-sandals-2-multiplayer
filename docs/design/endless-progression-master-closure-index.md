@@ -3061,14 +3061,38 @@ F2A, F2B1, F2B2, and F3 prune. Two named-claim audits then upheld G1 as one
 empty/nonempty three-plus pre-treatment contender-support card. Exact positive
 counts, maxima, prevalence, and pair incidence remain AUTHOR/SPEC absent a new
 player-material consequence boundary; G2, H, and I retain stochastic coupling,
-aggregate output cardinality, and identity authority. The current register now
-has **106 slots: 30 `SCREEN`, 1 `OWNER-OPEN`, 20 `PRUNED`, 50
+aggregate output cardinality, and identity authority. At that checkpoint the
+register had **106 slots: 30 `SCREEN`, 1 `OWNER-OPEN`, 20 `PRUNED`, 50
 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`**. G1
+was the sole presented Relic card.
+
+Zanzagar selected G1-A, forbidding three-plus contender sets inside one fixed
+evaluation. An exploratory follow-up briefly proposed separate cross-evaluation
+coupling and aggregate-settlement rows. A stricter canonicality audit broke
+that proposal before commit: under the selected automatic, immediate,
+cut-atomic semantics, any finite family of same-cut evaluators is exactly one
+product evaluator with labeled internal channels. Splitting it changes no
+player-observable policy, transition, information, or authority and cannot
+evade G1-A. C4 is therefore `DERIVED`; G2, H/I, and C5-C7 prune; C3D opens. The
+register then remained **106 slots: 22 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 51 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`**.
+
+A prerequisite audit of C3D then found four independent player-material
+boundaries: whether positive settlements claim evidence, whether ledger-bearing
+empty settlements claim evidence, which occurrences inside the authoritative
+selected ledger tuple are claimed, and whether held relationship truth can
+support another distinct evaluation after failure. The two claim-trigger bits
+must stay separate because no selected invariant forbids a failure-only claim
+law, however unattractive it may be. The thirty-fourth correction makes old
+C3D a non-counting parent and replaces it with C3D1-C3D4. The current register
+has **109 slots: 25 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 51
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. C3D1
 is the sole presented Relic card.
 
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has 106
+To make that route genuinely finite, the remaining C3c pass has 109
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -3156,17 +3180,20 @@ overcompression.
 | `RCS-03C3C3F2B1` | Closed whole-policy versus constructive participant output-policy language prevalence | `PRUNED`; F1-A leaves no participant output-resolution policy language |
 | `RCS-03C3C3F2B2` | Participant-composed context-branching prevalence among constructive-capable output policies | `PRUNED`; F1-A leaves no participant-constructed output-resolution policy |
 | `RCS-03C3C3F3` | Stochastic support across canonical complete bound denied-output laws | `PRUNED`; F1-A makes every held-fixed opportunity's lawful output single-valued and admits no F-owned output realization draw |
-| `RCS-03C3C3G1` | Support for at least three simultaneously individually ledger-satisfied receipt tags before within-evaluation treatment | `OWNER-OPEN`; choose empty or nonempty `G^{3+}_v` over one held-fixed actual evaluation and one selected complete ledger tuple; canonical tags count once, and alternate ledgers, callbacks, aliases, pair enumeration, form membership, or E/F outputs cannot manufacture contenders |
-| `RCS-03C3C3G2` | Joint stochastic permission-draw coupling across distinct simultaneous unordered pair opportunities | `SCREEN`; conditional on G1 positive and at least two nonconstant pair-permission marginals in one reachable evaluation under applicable exact/related laws; otherwise `PRUNED` or `DERIVED`; requires a fresh prerequisite screen, and one hybrid exact-related pair remains one pair and draw |
-| `RCS-03C3C3H` | Output-cardinality topology for a three-plus contender state under the exact-two final receipt ceiling | `SCREEN`; conditional on G1 positive and following the applicable G2 disposition; otherwise `PRUNED`; options must be relative to actually feasible survivor subsets so an impossible pair is never a fake branch |
-| `RCS-03C3C3I` | Authority selecting receipt identities from a three-plus contender state when several legal bounded outputs remain | `SCREEN`; conditional on a positive nonunique C3C3H result; otherwise `PRUNED` or `DERIVED`; ordering, priority, participant choice, and any merge/substitution consequence cannot be hidden in implementation |
-| `RCS-03C3C4` | Support for multiple semantically distinct automatic evaluation opportunities of one active Relic at one semantic cut | `SCREEN`; follows the settled C1-C3 route; an engine splitting one opportunity into callbacks is never support, and exact opportunity taxonomy remains AUTHOR/SPEC |
-| `RCS-03C3C5` | Cross-opportunity proof-overlap support when distinct same-cut evaluations coexist | `SCREEN`; conditional on `RCS-03C3C4-B`; otherwise `PRUNED`; uses the same exact-child/lineage/accounting non-independence test before any post-invocation claim |
-| `RCS-03C3C6` | Form support among C5-positive cross-opportunity overlaps: exact same final child, distinct related proofs, or both | `SCREEN`; conditional on positive `RCS-03C3C5` support; otherwise `PRUNED`; exact identities and distribution remain AUTHOR/SPEC |
-| `RCS-03C3C7` | Cross-opportunity same-cut fan-out treatment over supported overlaps | `SCREEN`; follows applicable `RCS-03C3C6`; choose empty, universal, or nonempty proper permission while technical batching of one semantic opportunity remains invariant |
-| `RCS-03C3D` | Post-invocation Relic-local evidence-claim/consumption trigger and no-result disposition without deleting canonical occurrence truth | `SCREEN`; follows the settled `RCS-03C3C1`–`RCS-03C3C7` route, including C3C3A-C3C3I, and C133/C134 under `SR-03`/`SR-04` |
-| `RCS-03C3E` | Later same-tag reuse of otherwise-admissible evidence after a C135-valid break/renew/rearm | `SCREEN`; follows `RCS-03C3D` and may close `DERIVED` if the selected claim topology leaves no branch |
-| `RCS-03C3F` | Later-cut different-tag evidence reuse within the same active Relic | `SCREEN`; follows `RCS-03C3D`/`RCS-03C3E` and may close `DERIVED` if the selected claim topology leaves no branch |
+| `RCS-03C3C3G1` | Support for at least three simultaneously individually ledger-satisfied receipt tags before within-evaluation treatment | `DIR-SELECTED`; A makes `G^{3+}_v` empty, so every held-fixed actual evaluation contains at most two canonical pre-treatment contender tags under its selected complete ledger tuple |
+| `RCS-03C3C3G2` | Joint stochastic permission-draw coupling across distinct simultaneous unordered pair opportunities inside one evaluation | `PRUNED`; G1-A admits no three-plus within-evaluation state containing the required distinct pair opportunities |
+| `RCS-03C3C3H` | Complete feasible final-cardinality topology for a three-plus settlement domain | `PRUNED`; G1-A admits no qualifying three-plus settlement domain |
+| `RCS-03C3C3I` | Authority and identity consequences when a three-plus settlement domain retains several lawful final identity sets | `PRUNED`; G1-A prunes H and leaves no qualifying nonunique three-plus identity output |
+| `RCS-03C3C4` | Support for multiple semantically distinct automatic evaluation opportunities of one active Relic at one semantic cut | `DERIVED`; selected automatic, immediate, cut-atomic semantics canonicalize every finite same-cut evaluator family into one product evaluator with labeled internal channels and the same joint law, outputs, transition, information, and authority |
+| `RCS-03C3C5` | Cross-opportunity proof-overlap support when distinct same-cut evaluations coexist | `PRUNED`; C4 derives one canonical product evaluation and leaves no distinct same-cut evaluation opportunities |
+| `RCS-03C3C6` | Form support among C5-positive cross-opportunity overlaps: exact same final child, distinct related proofs, or both | `PRUNED`; C5 prunes |
+| `RCS-03C3C7` | Cross-opportunity same-cut fan-out treatment over supported overlaps | `PRUNED`; C5/C6 prune and technical internal channels cannot manufacture cross-opportunity fan-out |
+| `RCS-03C3D1` | Positive-result Relic-local evidence-claim support without deleting canonical occurrence truth | `OWNER-OPEN`; choose empty or nonempty positive-settlement claim support; substitutes are positive aligned results and retain both causal original ledgers |
+| `RCS-03C3D2` | Ledger-bearing empty-result Relic-local evidence-claim support | `SCREEN`; follows D1 regardless of its answer; choose empty or nonempty empty-settlement claim support; a true no-candidate invocation has no authoritative selected ledger footprint and remains outside the claim domain |
+| `RCS-03C3D3` | Claimed-proof footprint inside the authoritative selected contender-ledger tuple | `SCREEN`; conditional on D1-B or D2-B, otherwise `PRUNED`; choose the complete deduplicated final-child union or support for a prospectively fixed proper nonempty subset; alternate ledgers, hidden compound members, lineage relatives, and other Relics/roots/combatants remain outside the footprint |
+| `RCS-03C3D4` | Failed-result recurrence while authored relationship sufficiency remains uninterrupted | `SCREEN`; follows D1-D3; choose no second distinct evaluation inside one continuous-sufficiency interval or nonempty held-truth reattempt support; callback, reload, replay, and duplicate delivery never create a distinct evaluation |
+| `RCS-03C3E` | Later same-tag reuse of otherwise-admissible evidence after a C135-valid break/renew/rearm | `SCREEN`; follows `RCS-03C3D1`–`RCS-03C3D4` and may close `DERIVED` if D1-A/D2-A leave no Relic-local claim branch |
+| `RCS-03C3F` | Later-cut different-tag evidence reuse within the same active Relic | `SCREEN`; follows `RCS-03C3D1`–`RCS-03C3E` and may close `DERIVED` if D1-A/D2-A leave no Relic-local claim branch |
 | `RCS-03D` | Transformation-cause eligibility: which authored events may propose a persistent transition | `SCREEN`; follows `RCS-03A`–`RCS-03C3F` under `SR-04` |
 | `RCS-03E` | Transformation agency and approval: discretionary, precommitted, or deterministic authority under the selected cause | `SCREEN`; follows `RCS-03D` under `SR-04` |
 | `RCS-04A` | Collision precedence and settlement when multiple already-legal transformation proposals coexist | `SCREEN`; follows `RCS-03E` and any applicable `RCS-03B4`/`RCS-03B7` under `SR-04` |
@@ -3482,16 +3509,26 @@ register at that checkpoint had **106 slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `
 49 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. F1
 was the presented Relic card. Zanzagar then selected F1-A, making every fixed
 denied opportunity single-valued and pruning all four conditional F children.
-Two audits uphold G1 as one binary three-plus contender-support card. The
-current register has **106 slots**: 30 `SCREEN`, 1 `OWNER-OPEN`, 20 `PRUNED`,
-50 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`. G1
-is the current presented Relic card.
+Two audits upheld G1 as one binary three-plus contender-support card. Zanzagar
+selected G1-A. An exploratory post-answer audit then proposed C8-C9 for a
+supposed plural-evaluator branch, but a stricter semantic audit broke that
+repair before commit: a same-cut evaluator family under the selected atomic
+semantics is one canonical product evaluator, not a second topology. C4 derives;
+G2/H/I and C5-C7 prune; the proposed C8-C9 rows never enter the register. The
+register then remained **106 slots**: 22 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 51 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`. A prerequisite audit then split old C3D into positive-result
+claim support, ledger-bearing empty-result claim support, claimed-proof
+footprint, and failed-result recurrence. The current register has **109
+slots**: 25 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 51 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`. C3D1 is the current
+presented Relic card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-one owner cards under this thirty-three-times-corrected charter and will
+twenty-six owner cards under this thirty-four-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3515,7 +3552,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 106 frozen candidate slots; current `Phi_SR = 31` after `RCS-03C3C3F1-A` prunes four output-resolution children and opens three-plus contender support at G1 | At most 31 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 109 frozen candidate slots; current `Phi_SR = 26` after G1-A caps each evaluation at two contender tags, C4 derives one canonical same-cut product evaluator, and old C3D splits into four evidence-use boundaries | At most 26 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

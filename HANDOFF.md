@@ -1,5 +1,62 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-27 canonical evaluator derived; positive-result evidence claims are next
+
+Zanzagar selected `RCS-03C3C3G1-A`. Every fixed actual evaluation contains at
+most two distinct canonical receipt tags individually ledger-satisfied before
+treatment under its selected complete ledger tuple. A strict canonicality audit
+then broke a draft plural-evaluator branch: under the selected automatic,
+immediate, cut-atomic semantics, any same-cut evaluator family is exactly one
+product evaluator with labeled internal channels. C4 is `DERIVED`; G2/H/I and
+C5-C7 prune; proposed C8/C9 rows never enter the register. This removes
+procedural convolution without flattening alternate ledgers, responsive
+routing, exact/related permission, Oracle risk, cancellation, fusion, or
+reconstitution.
+
+A subsequent audit found old C3D hid four independent questions: positive-
+result claim support, empty-result claim support, claimed-proof footprint, and
+failed-result recurrence. The thirty-fourth correction splits those rows rather
+than bulk-accepting them. The current register has 109 rows: 25 `SCREEN`, 1
+`OWNER-OPEN`, 26 `PRUNED`, 51 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 26`. This is a maximum number of remaining owner cards,
+not 26 new mechanics. Four are Charm-only. Of the 22 that touch Relics or the
+shared ecosystem, six close evidence use/retry, four transformation/identity,
+four power/compatibility/team play, three Relic/shared acquisition/equip/
+persistence, and five information/balance/release gates. Many will derive or
+prune, and several exist precisely to prevent invisible implementation rules.
+
+`RCS-03C3D1` is the sole presented choice. It asks only whether any **positive
+result** makes causal evidence locally unavailable to the active Relic:
+
+- **A — no positive-result claims:** successful Relic results read history but
+  never spend it. This is the strongest clarity/fantasy fallback: “history is
+  truth, not ammunition.” It has the lowest tracking and grief burden, but
+  enables more cross-cut hub-evidence harvesting and makes positive settlement
+  more likely to dominate cancellation.
+- **B — require positive-result claim support:** at least one successful
+  original or substitute settlement claims a nonempty part of its selected
+  causal proof union after the whole result commits. **Recommended.** A visible
+  success cashes in proof and bounds repeated extraction. If D2 later excludes
+  empty-result claims, cancellation also gains retained-option value; D1 alone
+  does not choose that consequence. It adds no prompt or combat button: the
+  evidence state changes only after the ordinary Relic result appears.
+
+Example: `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` use the
+deduplicated causal union `{g,h,t}`. Under A, a `{P,Q}`, `{S}`, or `{S1,S2}`
+result leaves all three available to this Relic. Under B, at least one such
+positive policy claims a nonempty part after settlement; later D3 decides
+whether every claim takes the complete `{g,h,t}` union. D2 separately asks
+whether ledger-bearing cancellation `{}` can claim. A true no-candidate
+invocation has no selected proof tuple and cannot burn an undefined partial
+match.
+
+A/B are exhaustive because positive claim support is empty or nonempty. Claims
+never delete canonical occurrence truth, source ownership, or history; they
+change only later eligibility for this active Relic. They settle atomically,
+deduplicate shared `h`, survive reload/replay idempotently, never counterfeit a
+C135 relationship break, and must be prospectively legible and retrospectively
+attributable. Cheap teammate-forced consumption fails. Ask for A or B.
+
 ## 2026-09-26 fixed denied outputs selected; three-plus contenders are next
 
 Zanzagar selected `RCS-03C3C3F1-A`. Every fixed denied-pair opportunity is
@@ -11004,7 +11061,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 03:53 UTC — three-plus pre-treatment contenders are next](docs/handoffs/2026-09-27-0353--relic-three-plus-contenders-next.md)**
+[2026-09-27 05:03 UTC — positive-result evidence-claim support is next](docs/handoffs/2026-09-27-0503--relic-positive-evidence-claim-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

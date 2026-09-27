@@ -361,7 +361,14 @@ prerequisite correction separates same-opportunity output multiplicity from
 participant configurability, policy language, and stochastic realization.
 Zanzagar selected RCS-03C3C3F1-A: every fixed denied opportunity is
 single-valued, pruning all four conditional output-resolution children.
-RCS-03C3C3G1 is the current owner-facing choice under SR-03.
+Zanzagar then selected RCS-03C3C3G1-A: no fixed evaluation may contain three
+or more pre-treatment contender tags. A strict representation-invariance audit
+then derived C4: under the already-selected cut-atomic automatic semantics,
+several same-cut evaluators are exactly one product evaluator with labeled
+internal channels, not another player-material topology. C5-C7/G2/H/I prune,
+and a thirty-fourth prerequisite correction splits old RCS-03C3D into four
+independent evidence-use rows. RCS-03C3D1 is the current owner-facing choice
+under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -24171,7 +24178,7 @@ tag in a supported three-plus constellation materially shapes competition for
 the exact-two final ceiling, rather than becoming free insurance or an opaque
 discarded success.
 
-### RCS-03C3C3G1 — three-plus pre-treatment contender support — active owner choice
+### RCS-03C3C3G1 — three-plus pre-treatment contender support — direction selected
 
 For one reachable fixed actual evaluation `z`, hold the ruleset/catalog
 version, active Relic root and realization, semantic cut, operative context,
@@ -24191,7 +24198,7 @@ or committed results.
 
 | Choice | Three-plus support rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
 | --- | --- | --- | --- |
-| **A — no three-plus contender state** | `G^{3+}_v=∅`. Every fixed evaluation has at most two distinct canonical individually ledger-satisfied tags before treatment. The selected catalog still contains real two-tag dual-weave states, and later C4 may independently admit several semantic evaluations at one cut. G2, H, and I are pruned. | **Recommended.** Alternate ledgers, responsive routing, exact/related permission, Oracle risk, cancellation, singleton fusion, and double substitution already make pair play deep. A keeps one active Relic focused on a legible dual relationship, prevents a successfully fulfilled third tag from becoming mandatory free insurance or an unexplained discarded success, minimizes teammate selector injection, and gives the cleanest causal explanation and simulator/RL policy comparison. Its standing-ideal role is **neutral/protective**: it protects the direct pair relationships already selected rather than treating greater count as greater unity-with-difference. The cost is excluding a true over-cap constellation inside one evaluation. | One **Twin Concord** evaluation may individually satisfy canonical tags `P` and `Q`, and treatment may permit, sever, fuse, or reconstitute them under the selected rules. A distinct tag `R` may be satisfied in another semantic evaluation, but no one fixed evaluation presents `{P,Q,R}` together. |
+| **A — no three-plus contender state** | `G^{3+}_v=∅`. Every fixed evaluation has at most two distinct canonical individually ledger-satisfied tags before treatment. The selected catalog still contains real two-tag dual-weave states. G2, H, and I prune. | **Recommended.** Alternate ledgers, responsive routing, exact/related permission, Oracle risk, cancellation, singleton fusion, and double substitution already make pair play deep. A keeps one active Relic focused on a legible dual relationship, prevents a successfully fulfilled third tag from becoming mandatory free insurance or an unexplained discarded success, minimizes teammate selector injection, and gives the cleanest causal explanation and simulator/RL policy comparison. Its standing-ideal role is **neutral/protective**: it protects the direct pair relationships already selected rather than treating greater count as greater unity-with-difference. The cost is excluding a true over-cap constellation inside one evaluation. | One **Twin Concord** evaluation may individually satisfy canonical tags `P` and `Q`, and treatment may permit, sever, fuse, or reconstitute them under the selected rules. A distinct tag `R` may be satisfied at another cut, but no one fixed evaluation presents `{P,Q,R}` together. |
 | **B — at least one three-plus contender state** | `G^{3+}_v` is nonempty. At least one fixed evaluation contains three or more distinct canonical individually ledger-satisfied tags before treatment, although C3c.46-A still caps the final aligned receipt set at two. B is existential: it requires neither exact-three as the global maximum, universal prevalence, nor a pairwise-overlap clique. Exact positive counts, maxima, prevalence, and pair incidence remain AUTHOR/SPEC unless a later audit proves a distinct player-material boundary. | B creates a genuinely new scarce-capacity game only when one supported three-plus constellation jointly shapes which zero, one, or two results can survive. Its strongest case is routing proofs or hedging one Oracle refusal across one atomic compatibility graph. Its fit is **potentially direct**, never automatic: every tag in the qualifying constellation must materially participate in one permutation-invariant settlement while retaining its identity. “Take the highest two,” free breadth insurance, or any co-present irrelevant tag is merely numerical coexistence. Costs are quadratic pair-permission growth, compatibility-graph UI, discarded-success frustration, teammate grief, and harder policy attribution. Choose B only if a bounded teaching witness at the smallest supported three-plus cardinality passes the guards below and cannot be expressed as clearer pair-only or distinct-evaluation play. | One illustrative **Triune Concord** evaluation presents canonical `P`, `Q`, and `R`. `P/Q` has a deterministic exact conflict while `P/R` and `Q/R` expose related-form permission opportunities. All facts belong to one frozen evaluation. G2 later owns any joint stochastic pair-bit coupling, H owns feasible final cardinalities under the cap of two, and I owns identity authority if several outputs remain. |
 
 A/B are mutually exclusive and exhaustive because `G^{3+}_v` is empty or
@@ -24213,12 +24220,148 @@ cost is equalized. If downstream G2/H/I cannot resolve one bounded teaching
 witness at the smallest supported three-plus cardinality without order
 artifacts, opaque loss, or a dominant always-add-a-tag policy, fall back to A.
 
-Under A, G2/H/I prune and C4 becomes next. Under B, G2 receives a fresh
+Under A, G2/H/I prune and C4 receives the canonicality audit below. Under B,
+G2 would receive a fresh
 prerequisite audit: three tags supply three unordered pairs, but selected
 Oracle support does not itself prove that two nonconstant pair-permission
 marginals coexist in one reachable evaluation, and one exact/related hybrid
-pair remains one pair and one draw. H follows the applicable G2 disposition;
-I activates only if H leaves several legal bounded identity outputs.
+pair remains one pair and one draw.
+
+**Direction answer — selected by Zanzagar on 2026-09-27:** **A, no
+three-plus contender state.** Thus `G^{3+}_v=∅`: every reachable fixed actual
+evaluation contains at most two distinct canonical receipt tags individually
+ledger-satisfied immediately before treatment under its selected complete
+ledger tuple. The rule does not cap the catalog's total tags, union different
+evaluations, or decide whether several semantic evaluations may coincide at
+one cut.
+
+A preserves the selected dual-weave focus while retaining alternate ledgers,
+responsive routing, exact/related permission, Oracle risk, cancellation,
+singleton fusion, and double reconstitution. It is **neutral/protective** under
+the standing ideal: it protects already meaningful distinct relationships
+without treating additional count as stronger unity-with-difference. G2's
+within-evaluation coupling route is pruned. The authoritative decision record
+remains unchanged.
+
+> **Post-answer canonicality correction, 2026-09-27:** one exploratory audit
+> briefly proposed separate C8/C9 rows and re-routed H/I through a supposed
+> several-evaluator C4 branch. A stricter semantic audit broke that proposal
+> before commit. Under already-selected B1-A, C1-A, and C2A-A, every same-cut
+> evaluation is automatic, immediate, cut-atomic, and reads the same frozen
+> authoritative state; the complete result settles atomically and
+> permutation-invariantly, with no evaluator observing another's result, claim,
+> consumption, or draw.
+>
+> Therefore any finite family of same-cut evaluators `f_1,...,f_n` is
+> observationally equivalent to one canonical product evaluator
+> `F=(f_1,...,f_n)`. `F` preserves every labeled internal channel, routing
+> choice, joint RNG law, tagged output, post-cut transition, attribution fact,
+> and player-visible continuation. Splitting or merging those functions changes
+> only representation. A distinct semantic evaluator would require another
+> commit, claim, response, lifetime, information, or authority boundary; those
+> are either already forbidden at this cut or explicitly owned later.
+>
+> The illustrative Echo/Mirror pair therefore does not witness C4-B. If its
+> product has at most two canonical contender tags, it is one lawful G1-A
+> evaluation with labeled channels. If it has three or more, splitting it only
+> launders the selected G1-A cap. Cross-channel correlated randomness remains
+> part of the one evaluator's complete joint law; it does not require a second
+> topology card.
+>
+> `RCS-03C3C4` is consequently **DERIVED** as one canonical product evaluation
+> transaction per active Relic per semantic cut. Internal labeled channels may
+> remain as authored structure, but cannot multiply invocation, retry, claim,
+> caps, or player-facing proc opportunities. C5-C7 and H/I prune with G2; the
+> proposed C8/C9 rows never enter the register. `RCS-03C3D` becomes the sole
+> `OWNER-OPEN` row.
+>
+> The frozen register remains **106 rows**: 22 `SCREEN`, 1 `OWNER-OPEN`, 26
+> `PRUNED`, 51 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 23`. This is a representation-invariance result and a material
+> complexity reduction, not an unchosen gameplay direction. The authoritative
+> decision record remains unchanged.
+
+> **Thirty-fourth prerequisite correction, 2026-09-27:** screening old C3D
+> found four independent player-material boundaries that one answer could not
+> safely settle: positive-result claim support, ledger-bearing empty-result
+> claim support, the claimed footprint inside the selected authoritative proof
+> tuple, and recurrence after a failed result while relationship sufficiency
+> remains uninterrupted.
+>
+> Positive and empty claims must be separate bits. No selected invariant
+> forbids a failure-only law that scars evidence on cancellation but preserves
+> it on success, however unattractive that policy may be; silently excluding it
+> would make a combined three-way card nonexhaustive. A true no-candidate
+> invocation is different from a ledger-bearing empty settlement: it has no
+> selected complete proof tuple and therefore no defined evidence footprint to
+> claim. Burning partial matches would require a new failed-proof identity
+> boundary and is not admitted here.
+>
+> Old `RCS-03C3D` becomes a non-counting parent for:
+>
+> 1. `RCS-03C3D1` — positive-result evidence-claim support;
+> 2. `RCS-03C3D2` — ledger-bearing empty-result evidence-claim support;
+> 3. `RCS-03C3D3` — complete-union versus proper-subset claimed footprint; and
+> 4. `RCS-03C3D4` — failed-result recurrence under uninterrupted relationship
+>    sufficiency.
+>
+> D1 precedes D2. If both reject claim support, D3 prunes; otherwise D3 follows.
+> D4 follows in every branch because failure recurrence is not evidence claim.
+> C133/C134 seal positive candidates but leave failed scheduling open; C135
+> governs recommitment after success and explicitly projects consumption/retry
+> bookkeeping out of relationship sufficiency. Claim and recurrence state may
+> not be aliased. Cross-Relic, cross-root, or cross-combatant fan-out remains
+> RCS-08.
+>
+> Replacing one counted C3D row with four raises the frozen register from 106 to
+> **109 rows**: 25 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 51 `DIR-SELECTED`,
+> 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`. D1 is the sole
+> presented card. This correction exposes decisions that were already hidden;
+> it adds no player-facing mechanic by itself.
+
+### RCS-03C3D1 — positive-result evidence-claim support — active owner choice
+
+For one fixed completed canonical product evaluation `z`, hold the version,
+combatant, active Relic, cut, operative context, selected routing and complete
+authoritative contender-ledger tuple, permission realization, treatment, and
+positive aligned receipt output fixed. “Positive” means the committed receipt
+set is nonempty; an original `{P,Q}`, singleton substitute `{S}`, and double
+substitute `{S1,S2}` all qualify. Let `U(z)` be the nonempty deduplicated union
+of final child occurrences in every selected authoritative causal ledger. An
+exact shared child appears once; distinct related proofs remain distinct.
+
+The evaluation **claims evidence** when, after its whole positive receipt set
+commits atomically, at least one member of `U(z)` becomes unavailable as
+evidence to this active Relic because of that use. The canonical occurrence,
+source ownership, battle history, and availability to other roots or Relics do
+not disappear. D3 later owns whether the claimed subset is all of `U(z)` or a
+prospectively fixed proper nonempty subset. Let `K^{claim+}_v` contain the
+positive settlements that claim evidence.
+
+| Choice | Positive-result claim rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — positive results never claim evidence** | `K^{claim+}_v=∅`. Every positive settlement reads canonical history without making any selected proof occurrence Relic-locally unavailable. D2 still independently asks whether an empty settlement may claim. | **Strong clarity fallback.** History remains truth rather than ammunition, producing the lowest UI and teammate-grief burden. Finite freshness and break-before-rearm still limit some reuse. The cost is cross-cut hub harvesting: a successful manifestation preserves every proof for other tags and later opportunities, so positive output can weakly dominate cancellation. A is **neutral/protective** at this boundary because it preserves inherited relationships without creating a new operative distinction. | `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` settle as `{P,Q}` or substitutes. `g,h,t` remain eligible for later otherwise-lawful readings by this Relic. |
+| **B — require positive-result claim support** | `K^{claim+}_v` is nonempty. At least one positive settlement makes a nonempty part of its selected causal proof union Relic-locally unavailable after the receipts commit. B selects neither universal prevalence nor the footprint; D2 and D3 remain separate. | **Recommended.** A successful weave visibly cashes in at least one causal proof and bounds hub-evidence harvesting. If D2 later excludes empty-result claims, this also gives cancellation retained-option value instead of making zero/one/two results a pure power ladder; D1 alone does not choose that consequence. The irreversible state change coincides with a visible receipt, so humans, logs, and simulator policies can attribute it. B is **potentially direct** here and becomes direct locally if D3 later selects the complete causal union: the occurrence remains truthful and source-owned while gaining a distinct claimed relation to this Relic. Costs are tracking, disclosure, and teammate-forced-use risk, which the guards below must contain. | The same `P/Q` proof tuple settles as `{S}`. Although neither original receipt survives, the substitute is a positive result caused by both selected ledgers, so the settlement claims some nonempty part of `U(z)={g,h,t}`; D3 decides whether all three must be claimed. |
+
+A/B are mutually exclusive and exhaustive because `K^{claim+}_v` is empty or
+nonempty. Exact positive prevalence, Relic assignments, receipt assignments,
+and claim footprint remain AUTHOR/SPEC or D3; a token B witness is not enough
+for final balance/comprehension acceptance. D1 does not decide empty-result
+claiming, failure retry, later same-tag/different-tag reuse, cross-root use,
+payoff, persistence, or implementation.
+
+Every claim writes only after the complete product evaluation settles. One tag
+cannot claim shared `h` early and invalidate another tag at the same cut.
+Claims are idempotent across callback, retry, reconnect, reload, replay, and
+duplicate delivery. Claim bookkeeping cannot manufacture C135 relationship
+insufficiency. Every claim-capable contract and affected occurrence must be
+legible before the affected players' last reversible commitment and
+attributable afterward; cheap teammate-forced consumption fails. No extra
+combat command or prompt is created: the intended readable realization is one
+ordinary Relic result followed by a visible local evidence-state change.
+
+Under A or B, D1 moves to `DIR-SELECTED` and D2 becomes `OWNER-OPEN`, reducing
+`Phi_SR` from 26 to 25. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 
