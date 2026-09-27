@@ -5464,6 +5464,88 @@ E2 selects no identity, mapping, actor, randomness, value, payoff, claim,
 rarity, or implementation. It is the sole presented card. The authoritative
 decision record remains unchanged.
 
+Zanzagar selected E2-C. Therefore
+`∅⊊D^{deny,2}_v⊊D^{deny,+}_v`: the positive denied domain contains at least
+one singleton and at least one double result, while E1-C separately guarantees
+at least one cancellation. This is support across prospectively bound outcomes
+or laws, not a live chooser or hidden roll among widths at one opportunity.
+E2 moves to `DIR-SELECTED`, E3 moves from `SCREEN` to `OWNER-OPEN`, and E4
+remains queued at `SCREEN`. The 102-row register becomes 33 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 47 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 34`.
+
+The selected branch inherits a hard anti-ladder obligation. Cancellation,
+singleton, and double-denial families must each retain optimized matchups or
+strategies after unrelated package value is equalized. The double family must
+add marginal policy purpose unavailable from ordinary allowed dual weave, and
+the singleton family cannot remain merely as consolation. Every extra receipt
+is materially real under C3c.44-A/C3c.45-C, so a decorative second channel
+cannot excuse double support. Width-affecting facts inherit E1-C's last-
+informed-reversible-commitment disclosure, retrospective attribution, and
+anti-coercion requirements.
+
+If double support itself fails while singleton remains viable, E2 reopens with
+A. If singleton support itself fails while double remains viable, it reopens
+with B. If both families remain individually viable but their coexistence
+fails, E2 reopens for a fresh A/B choice. If neither positive width remains
+viable, E1's positive family has failed and E1 reopens through its recorded
+fallback. Identity-independent false-bit coercion still follows E5-C's
+upstream fallback. Catalog coexistence alone does not activate F.
+
+Two post-answer named-claim audits then attacked E3's topology and gameplay
+purpose. Define the nonempty singleton domain
+`D^{deny,1}_v=D^{deny,+}_v setminus D^{deny,2}_v` and substitute subset
+`D^{deny,1,S}_v={o in D^{deny,1}_v:Y(o)∩T=∅}`. Because every
+member has width one and the five-shape proof is complete, a member is either
+one retained original `{P}`/`{Q}` or one genuine substitute `{S}`. Fusion and
+transmutation are substitutes, not extra kinds. The subset is empty, all, or a
+nonempty proper subset, yielding exactly:
+
+- A: retained-original-only singleton support;
+- B: genuine-substitute-only singleton support; or
+- C: both singleton identity kinds.
+
+E3 chooses no `P`-versus-`Q` survivor, exact `S`, mapping, actor, randomness,
+priority, live choice, value, compensation, payoff, claim, rarity, or
+implementation. “Both” is catalog/outcome support, not two receipts inside a
+singleton. E4 alone retains double composition. Exact identities and mappings
+remain AUTHOR/SPEC, and F still requires several lawful outputs at one fixed
+prospectively bound opportunity.
+
+The gameplay audit conditionally recommends B. Under E2-C it gives width an
+intrinsic semantic grammar: zero severs, one fuses or transmutes, and two later
+fractures or reconstitutes. One indivisible result identity is not a lesser
+two-receipt set; C3c.45 makes it a distinct consumer contract. B also avoids
+A's preferred-heir filter, where a player pairs valuable `P` with expendable
+`Q`, induces denial, and retains the result already wanted. Its standing-ideal
+fit is potentially direct only when the denied pair materially participates in
+one continuing `S` that is mechanically different at the same disposition
+boundary. A name, generic consolation token, or mere causal succession proves
+nothing.
+
+B's conditions are strict. `S` must replace both original tag identities and
+may not reconstruct the joint availability of both original consumer
+entitlements. Exact downstream consumer overlap with either original remains
+AUTHOR/SPEC. It must remain prospectively legible, retrospectively
+attributable, materially consumer-distinct, nonfungible as a generic premium
+currency, resistant to cheap teammate-forced transformation, and policy-
+distinct from every applicable E4 double family. A disguised `P+Q` bundle or
+one fragment that a double result always supplies plus an extra receipt fails.
+
+A is the production fallback if no honest, teachable substitute survives. It
+is clearest and cheapest, and its fit is partial/protective because one original
+continues while the other is distinctly lost; it does not itself create a
+genuinely different continuing manifestation. A must still survive preferred-
+heir filtering and possible `{P,S}` subset dominance. C is a higher-complexity
+stretch only if retained-original and substitute singletons each independently
+win real optimized matchups and their coexistence changes precommitted policy.
+Coexistence itself is merely aggregate ideal fit.
+
+If both singleton kinds fail, selected E2-C's required singleton family is not
+viable and E2 must reopen; double-only is available only if E4 survives. E3 is
+the sole presented Relic card, while E4 remains queued. The authoritative
+decision record remains unchanged.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

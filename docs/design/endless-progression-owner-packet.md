@@ -347,8 +347,11 @@ overcompressed denied-pair result row into four finite support-topology rows.
 Under Zanzagar's explicit delegation, a three-angle deep audit selected
 guarded RCS-03C3C3E1-C: cancellation and positive denied-pair dispositions
 coexist, with strengthened last-reversible-commitment, attribution, and anti-
-grief obligations. RCS-03C3C3E2 is the current owner-facing choice under
-SR-03.
+grief obligations. Zanzagar then selected guarded RCS-03C3C3E2-C: singleton
+and double positive denied outputs coexist, while cancellation, singleton,
+and double policies must remain independently chosen rather than forming a
+zero-to-two power ladder. RCS-03C3C3E3 is the current owner-facing choice
+under SR-03; E4 remains queued.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -23770,7 +23773,7 @@ strong asymmetry: ordinary Relic design already guarantees focused/co-result
 topology and broad dual-weave access, so denial need not duplicate that promise.
 No hidden width, identity, provenance, or authority card remains inside E2.
 
-### RCS-03C3C3E2 — positive denied-output width topology — active owner choice
+### RCS-03C3C3E2 — positive denied-output width topology — direction selected
 
 E1-C makes `D^{deny,+}_v` nonempty. C3c.46-A gives every member width one or
 two. Define
@@ -23806,6 +23809,105 @@ actor, randomness, choice timing, value, payoff, claim, rarity, release slice,
 or implementation. A opens E3 and prunes E4; B prunes E3 and opens E4; C leaves
 both applicable, with E3 presented first and E4 queued. The authoritative
 decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **C, singleton and
+double positive denied outputs coexist, with the complete safeguards below.**
+Thus `∅⊊D^{deny,2}_v⊊D^{deny,+}_v`: the completed support must contain at
+least one positive singleton denied disposition and at least one positive
+two-receipt denied disposition. Together with E1-C, reachable pair-local
+denied support includes widths zero, one, and two. This is catalog/outcome
+support, not a random roll or live choice among widths at one fixed
+opportunity.
+
+C is not permission to author a `0 < 1 < 2` reward ladder. After unrelated
+package value is equalized, deliberate cancellation, optimized singleton, and
+optimized double-denial policies must each retain real matchups or strategies
+in which they are selected. The double family must add marginal policy value
+unavailable from ordinary allowed dual weave; receipt count, extra payoff
+access, or an easily forced collision cannot be its sole purpose. The
+singleton family may not survive merely as consolation beneath doubles. Every
+second receipt remains truthful, nonconstant, separately player-meaningful,
+and materially consumer-distinct under C3c.44-A/C3c.45-C; it cannot be called
+decorative to evade the comparison.
+
+E1-C's information and agency conditions carry through the width split. The
+bound disposition family and every fact that can switch the resulting width
+must be truthfully available before each affected player's last informed
+reversible commitment; the width-affecting pair, law, fact, and result must be
+attributable afterward. Cheap unilateral teammate steering after that point
+fails. Different prospectively bound laws may supply the singleton and double
+witnesses, so their coexistence alone creates no F authority.
+
+If the double family itself fails while singleton positive denial remains
+viable, reopen E2 with A. If singleton support itself fails while a distinct
+double-denial policy remains viable, reopen with B. If both width families
+remain individually viable but their coexistence fails, reopen E2 for a fresh
+A/B choice rather than selecting either silently. If neither positive width
+family remains viable, E1-C's positive-denial promise has failed and E1 must
+reopen through its recorded fallback. Identity-independent false-bit coercion
+still reopens E5-C rather than being disguised as a width problem. E2-C
+selects no receipt identity, mapping, actor, randomness, value, payoff, claim,
+rarity, release slice, or implementation.
+
+E2 moves to `DIR-SELECTED`; E3 becomes the sole presented `OWNER-OPEN` Relic
+row, while E4 remains queued at `SCREEN`. The 102-row register now contains 33
+`SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 47 `DIR-SELECTED`, 3 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
+
+Two read-only named-claim audits then tested E3. The topology audit re-derived
+the nonempty singleton domain, three exhaustive identity-kind branches,
+E3/E4/F boundaries, and register arithmetic. The gameplay audit found that
+E2-C creates a special burden: the singleton family needs an intrinsic policy
+identity so it does not become the consolation tier beneath two receipts.
+
+### RCS-03C3C3E3 — singleton denied-output identity-kind topology — active owner choice
+
+Define the nonempty singleton domain
+`D^{deny,1}_v=D^{deny,+}_v setminus D^{deny,2}_v` and its genuine-substitute
+subset
+`D^{deny,1,S}_v={o in D^{deny,1}_v:Y(o)∩T=∅}`. Because every
+member has exactly one receipt, a member outside this subset retains exactly
+one original (`{P}` or `{Q}`), while a member inside it emits exactly one
+genuine substitute `{S}`. A fusion or transmutation is a substitute, not a
+third identity kind.
+
+| Choice | Singleton identity-kind rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — retained-original singleton only** | `D^{deny,1,S}_v=∅`. Every positive singleton denied result is `{P}` or `{Q}`. E3 does not require both original survivor identities and does not choose which one survives. | **Production fallback if honest substitutes fail.** A is the most literal and teachable reading of “not both”: one established result continues and the other is lost. Its fit is **partial/protective** at this boundary—continuity and selective loss are real, but the surviving result is not itself a genuinely different manifestation. The main degeneration is **preferred-heir filtering**: pair a valuable `P` with expendable `Q`, induce denial, and keep exactly what was wanted. If E4 later permits `{P,S}`, focused `{P}` also needs a real precision, reliability, tempo, or liability-avoidance policy rather than becoming its strict subset. | A disclosed **Last Testament** treatment denies Guardian Vow `P` plus Returning Vow `Q` and emits only `{P}` under one prospectively bound mapping. Another outcome may retain `Q`, but E3-A promises neither symmetry nor live survivor choice. |
+| **B — genuine-substitute singleton only** | `D^{deny,1,S}_v=D^{deny,1}_v`. Every positive singleton denied result is `{S}`: neither original tag survives, and the one receipt has a genuinely new player/consumer identity. | **Conditionally recommended.** B gives E2-C a coherent semantic grammar: zero **severs**, one **fuses/transmutes**, and two later **fractures/reconstitutes**. One indivisible consumer identity is horizontally different from two separately addressable receipts, so singleton need not mean “weaker double.” It also removes singleton survivor favoritism. The ideal fit is **potentially direct, never automatic**: the denied `P/Q` relation must materially participate in a continuing `S` that is genuinely different at the same settlement boundary. A generic consolation token, thematic name, or causal succession alone fails. Costs are a new result vocabulary and a real semantic/consumer witness for every supported singleton family. | **Fractured Concord** replaces the denied Vow identities with one indivisible **Concord Seal `S`** at this disposition. `S` is not `P` or `Q` and cannot reconstruct their joint entitlements; exact downstream consumer overlap with either original remains AUTHOR/SPEC. Exact `S` identity and payoff remain later. |
+| **C — retained-original and substitute singletons coexist** | `∅⊊D^{deny,1,S}_v⊊D^{deny,1}_v`. At least one singleton retains an original and at least one emits a genuine substitute. “Both” means support across dispositions, never two receipts in one singleton. | C supports two same-width policies: **heirship** preserves known synergy while **transmutation** enters a new consumer route. This is the highest local policy ceiling, but E1-C/E2-C already establish three widths; C now gives width one two dialects before E4 adds width-two composition. It carries both laundering surfaces, the greatest mapping/teaching burden, and a strong risk that known original synergy or premium substitute utility tokenizes the other family. Their coexistence is only **aggregate** ideal fit. Choose C only if both families independently win real optimized matchups after unrelated value is equalized and neither is dominated by queued E4 doubles. | A disclosed **Last Testament** outcome emits `{P}`, while a distinct disclosed **Fractured Concord** outcome emits `{S}`. Players must be able to build differently around continuity versus transformation before the relevant commitment; a hidden post-collision roll does not satisfy C. |
+
+A/B/C are mutually exclusive and exhaustive because the substitute subset of
+the nonempty singleton domain is empty, all of it, or a nonempty proper subset.
+Payoff, compensation, unrelated receipts, aliases, and renamed reconstructions
+of original entitlements cannot manufacture a substitute identity.
+
+B is conditional. Every `S` must replace both original tag identities and may
+not reconstruct the joint availability of both original consumer entitlements.
+Exact downstream consumer overlap with either original remains AUTHOR/SPEC.
+`S` must remain prospectively legible and retrospectively attributable under
+E1-C and change optimized policy beyond every applicable E4 double family. It
+cannot become fungible premium currency, a disguised `P+Q` bundle, a generic
+failure shard, or one fragment that every two-receipt outcome supplies plus
+something else. Cheap teammate-forced transformation fails even when `S` is
+valuable.
+
+If no honest, teachable, non-dominating substitute family survives while
+retained-original singleton play does, use A and subject it to the preferred-
+heir and later `{P,S}`-dominance attacks. Promote C only if A and B each pass
+independently and their coexistence changes real precommitted policy; support-
+count symmetry is insufficient. If both singleton kinds fail, E2-C's required
+singleton family is not viable and E2 must reopen; double-only remains possible
+only if E4 survives. Identity-independent forced-denial abuse follows E5-C's
+recorded fallback.
+
+E3 selects no `P`-versus-`Q` survivor, exact substitute, mapping, output actor,
+randomness, priority, live choice, value, compensation, payoff, claim, rarity,
+release slice, or implementation. Exact receipt identities and mappings remain
+AUTHOR/SPEC. E4 remains queued for original-plus-substitute versus two-
+substitute double composition. Catalog support creates no F authority; F opens
+only if one fixed prospectively bound opportunity retains several lawful
+outputs. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

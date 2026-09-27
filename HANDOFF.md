@@ -1,5 +1,69 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 mixed denied widths selected; singleton identity is next
+
+Zanzagar selected guarded `RCS-03C3C3E2-C`. Positive denied-pair support now
+requires both singleton and double outcomes:
+`∅⊊D^{deny,2}_v⊊D^{deny,+}_v`. With selected E1-C, reachable pair-local
+denied support includes widths zero, one, and two. This is catalog/outcome
+support, not a chooser or random width at one fixed opportunity.
+
+C carries an explicit anti-ladder obligation. Deliberate cancellation,
+optimized singleton, and optimized double-denial policies must each retain real
+matchups or strategies after unrelated package value is equalized. Doubles
+must add purpose unavailable from ordinary allowed dual weave; singleton cannot
+be a consolation tier, and a second materially real receipt cannot be called
+decorative. E1-C's last-informed-reversible-commitment disclosure,
+attribution, and anti-coercion guards apply to every width-affecting fact. Cheap
+teammate steering fails.
+
+Fallbacks are bounded. Failure of double support with viable singleton reopens
+E2 with A; failure of singleton support with viable double reopens it with B.
+If both remain viable but coexistence fails, E2 reopens for a fresh A/B choice.
+Failure of both positive widths reopens E1. Identity-independent false-bit
+coercion still follows E5-C's recorded upstream fallback. Catalog coexistence
+alone creates no F authority.
+
+E2 moves to `DIR-SELECTED`; E3 becomes the sole presented `OWNER-OPEN` Relic
+row; E4 remains queued at `SCREEN`. The 102-row register now has 33 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 47 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 34`. The authoritative decision record remains
+unchanged.
+
+Two post-answer audits upheld E3 as one atomic singleton identity-kind card.
+Let `D^{deny,1}_v` be the nonempty singleton domain and
+`D^{deny,1,S}_v` its genuine-substitute subset:
+
+- **A — retained-original singleton only:** the substitute subset is empty;
+  every singleton is `{P}` or `{Q}`. This is the clearest production fallback
+  and preserves known synergy, but risks **preferred-heir filtering**: pair a
+  valuable `P` with expendable `Q`, induce denial, and retain exactly what was
+  wanted. Its standing-ideal fit is partial/protective because continuity and
+  selective loss coexist, but no genuinely different manifestation continues.
+- **B — genuine-substitute singleton only:** the substitute subset is the
+  whole singleton domain; every singleton is `{S}` and neither original
+  survives. **Conditionally recommended.** It makes width itself teach a
+  semantic grammar—zero severs, one fuses/transmutes, two fractures or
+  reconstitutes—and prevents singleton from reading as a weaker double. Its
+  standing-ideal fit is potentially direct only when the denied pair materially
+  participates in a continuing result that is genuinely different. A generic
+  consolation token, premium currency, disguised `P+Q` bundle, or fragment
+  dominated by every double fails.
+- **C — both singleton identity kinds coexist:** at least one singleton
+  retains an original and at least one emits a substitute. This adds heirship
+  and transmutation as same-width policies, but E1/E2 already produce three
+  widths and E4 still adds double composition. C carries the greatest mapping,
+  teaching, dominance, and grief burden; coexistence is merely aggregate ideal
+  fit. Choose it only if both families independently win optimized matchups
+  after unrelated value is equalized.
+
+A/B/C are exhaustive. “Both” means support across dispositions, never two
+receipts in one singleton. E3 chooses no `P`-versus-`Q` survivor, exact `S`,
+mapping, actor, randomness, priority, choice timing, compensation, payoff,
+rarity, or implementation. Exact identities/mappings remain AUTHOR/SPEC, E4
+retains double composition, and F retains same-opportunity output authority.
+Ask for A, B, or C.
+
 ## 2026-09-26 delegated guarded denial coexistence; positive width is next
 
 Zanzagar explicitly delegated the E1 direction call (“your call pending deep
@@ -10765,7 +10829,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 02:19 UTC — positive denied-output width is next](docs/handoffs/2026-09-27-0219--relic-denied-positive-width-next.md)**
+[2026-09-27 02:44 UTC — singleton denied-output identity is next](docs/handoffs/2026-09-27-0244--relic-singleton-denied-identity-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
