@@ -983,6 +983,36 @@ decision: `ss2BodyBlocks`, `57b2209`.)*
   caught between). Both are built behind a rule-set option and measured on seeded bouts (2v1
   conversion, pair turns to kill, idle share, stalls, overall balance); the result is recorded here
   and the owner picks.
+
+  **THE EVIDENCE (2026-09-27, session `f4d2f69f`; scratch census on the arena's own host,
+  `createVanillaBattleHost` + `demoSide` or the build's champions, 96 seeds a cell).** `aiPress` is
+  the rule-set option: `off` (the AI before P1/P2), `ranged-first`, `pincer-first`.
+
+  | roster | 2v1 converted (pair wins whole): off / ranged / pincer | both pair members on the lone foe | pair turns spent dancing | mean bout length |
+  |---|---|---|---|---|
+  | plain 2v2 | 8.3% / 10.4% / 10.4% | 0.0 / 1.4 / 1.4% | 18.3 / 3.1 / 3.1% | 50.9 / 50.2 / 50.2 |
+  | plain 3v3 | 53.3 / 70.0 / 69.9% | 6.4 / 28.6 / 30.4% | 37.3 / 1.5 / 1.1% | 85.5 / 80.4 / 80.3 |
+  | buffs 2v2 | 54.2 / 54.2 / 52.1% | 7.9 / 8.4 / 8.4% | 1.7 / 0 / 0% | 49.1 / 48.8 / 49.2 |
+  | buffs 3v3 | 50.0 / 67.9 / 65.1% | 9.7 / 26.9 / 33.2% | 28.4 / 2.0 / 0.9% | 95.0 / 85.3 / 86.2 |
+  | tricks 3v3 | 47.2 / 60.0 / 54.4% | 0.4 / 1.7 / 1.5% | 23.5 / 8.7 / 8.7% | 205.9 / 203.0 / 202.9 |
+  | crowd 3v3 | 53.3 / 68.1 / 67.4% | 4.3 / 30.6 / 33.2% | 41.3 / 2.4 / 0.5% | 203.4 / 193.4 / 192.7 |
+  | champions 2v2 | 97.9 / 97.9 / 95.8% | 19.0 / 18.8 / 21.1% | 2.8 / 1.4 / 0.5% | 36.2 / 36.5 / 37.5 |
+  | champions 3v3 | 78.8 / 81.3 / 80.0% | 3.4 / 5.7 / 11.9% | 6.0 / 3.4 / 2.7% | 61.6 / 63.3 / 70.0 |
+
+  - **P1 + going round, either variant, against `off`:** in 3v3 the pair converts a 2v1 far more
+    often (+15 to +18 points on plain, buffs and crowd; +7 to +13 on tricks), both members are on
+    the lone foe 3-7x as often, the dance falls from 23-41% of the free member's turns to 1-9%,
+    and bouts get shorter. 2v2 barely moves: the 2v1 there is usually over before a 5-6-walk detour
+    arrives. No bout failed to settle in any cell; no AI walk went nowhere.
+  - **Ranged-first against pincer-first: no difference in strength.** Head to head (each side a
+    different variant, both colour assignments, 96 seeds, all eight rosters): **770 wins to 766 over
+    1,536 bouts.** The variants choose differently on 0.3-0.6% of demo-roster turns and 5.6-7.5% of
+    champion turns (mostly pincer-first sheathing a bow where ranged-first bombards). Pincer-first
+    corners more VISIBLY on champions (the pair on both sides of the lone foe 47% of 2v1 turns
+    against 23% in 2v2, back attacks 22% of the pair's blows against 11%) and makes champion 3v3
+    bouts ~10% longer; conversion differences are inside the noise (n = 32-96 phases a cell).
+  - **Shipped: `ranged-first`**, today's order, equal in strength and the shorter bouts. The owner
+    may flip it for the more visible cornering; the option is one word (`aiPress`).
 - **P3 — A walk that goes nowhere because of a body in your own lane is not offered; the ring shows
   it greyed, "Blocked",** the way "Not built yet" is shown, and the AI can never pick it. (A walk
   into the arena wall is not covered by this decision.)

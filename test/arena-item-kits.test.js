@@ -444,15 +444,24 @@ const KIT_BOUTS = Object.freeze({
   //   red-2 puts the bow away where it walked right. The first 10 casts are
   //   unchanged; ~~gale, ghost strike, command, whirlwind, teleport, ghost
   //   strike, wincrowd, wincrowd~~ is the tail it replaces.
+  // ► **MOVED 2026-09-27 BY THE OWNER'S P1/P2 (help first, going round;
+  //   `docs/design/battle-ui.md#decided-ai-press-2026-09-27`), AND BY NOTHING
+  //   ELSE:** with `aiPress: "off"` this loop reproduces the old pin exactly
+  //   (60 actions, no result, 26 casts), so the blocked-walk rule (P3), which
+  //   has no switch, moves nothing here. With the press in, the crowd-pleaser
+  //   at the 17th cast — a free member playing to the crowd while his ally
+  //   fought — is gone, the pair finishes the fight, and the bout ends by
+  //   elimination at 45 actions. The same list under `ranged-first` and
+  //   `pincer-first`. Was: 60 actions, no result, and … command, wincrowd,
+  //   teleport, weaken, wincrowd, whirlwind, wincrowd x3, gale, wincrowd.
   tricks: {
-    actions: 60,
-    result: null,
+    actions: 45,
+    result: "elimination",
     casts: [
       "cast-command", "cast-weaken-armour", "cast-weaken-armour", "cast-ghost-strike", "cast-weaken-armour",
       "cast-whirlwind", "cast-command", "cast-gale", "cast-command", "cast-ghost-strike",
       "cast-whirlwind", "cast-teleport", "cast-gale", "cast-ghost-strike", "cast-ghost-strike", "cast-command",
-      "wincrowd", "cast-teleport", "cast-weaken-armour", "wincrowd", "cast-whirlwind", "wincrowd", "wincrowd",
-      "wincrowd", "cast-gale", "wincrowd"
+      "cast-teleport", "cast-weaken-armour", "wincrowd", "cast-whirlwind", "wincrowd"
     ]
   },
   crowd: {

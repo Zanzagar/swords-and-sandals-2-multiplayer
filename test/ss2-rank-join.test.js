@@ -94,7 +94,7 @@ const gladiator = (overrides = {}) => ({
 const FRONT = SS2_ARENA.frontY;
 const BACK = SS2_ARENA.frontY - SS2_ARENA.rankStride;
 
-function staged({ red, blue, seed = 3, rankJoinSurplus, aiPlaysToCrowd }) {
+function staged({ red, blue, seed = 3, rankJoinSurplus, aiPlaysToCrowd, aiPress }) {
   const place = (prefix, list) => ({
     id: prefix,
     name: prefix,
@@ -108,9 +108,9 @@ function staged({ red, blue, seed = 3, rankJoinSurplus, aiPlaysToCrowd }) {
   });
   const battle = createTeamBattle({
     seed,
-    rules: rankJoinSurplus === undefined && aiPlaysToCrowd === undefined
+    rules: rankJoinSurplus === undefined && aiPlaysToCrowd === undefined && aiPress === undefined
       ? ss2TeamRules
-      : createSs2TeamRules({ rankJoinSurplus, aiPlaysToCrowd }),
+      : createSs2TeamRules({ rankJoinSurplus, aiPlaysToCrowd, aiPress }),
     teams: [place("red", red), place("blue", blue)]
   });
   for (const [prefix, list] of [["red", red], ["blue", blue]]) {
@@ -142,10 +142,11 @@ function staged({ red, blue, seed = 3, rankJoinSurplus, aiPlaysToCrowd }) {
  *   behavioural test returned `walk-right`.** Worth keeping: a test that stages
  *   past the arm it means to exercise reports the wrong function green.
  */
-function brawl(rankJoinSurplus, { keeper = true, aiPlaysToCrowd } = {}) {
+function brawl(rankJoinSurplus, { keeper = true, aiPlaysToCrowd, aiPress } = {}) {
   return staged({
     rankJoinSurplus,
     aiPlaysToCrowd,
+    aiPress,
     red: [
       { id: "hero", fields: gladiator(), x: 600, y: BACK },
       { id: "mate", fields: gladiator(), x: -60, y: FRONT }
@@ -184,7 +185,18 @@ test("THE SHIPPED RULE SET JOINS, at `SS2_RANK_JOIN_SURPLUS` — owner's call 20
     Ss2ActionType.RANK_FRONT,
     "at the shipped join default a gladiator with a clear rank walks into its ally's fight"
   );
-  assert.equal(suggestAction(brawl(undefined, { keeper: false }), "hero").type, Ss2ActionType.WINCROWD);
+  // ► **AND MOVED BACK 2026-09-27 BY THE OWNER'S DECISION P1, HELP FIRST**
+  //   (`docs/design/battle-ui.md#decided-ai-press-2026-09-27`): "the ai on
+  //   the team of 2 ... just dances or waits for the 1v1 to finish". An ally
+  //   is fighting a foe `hero` could go and help against, so no crowd-pleaser;
+  //   it joins. `aiPress: "off"`, the AI before P1, still dances here — the
+  //   proof that P1 and nothing else moved it.
+  assert.equal(
+    suggestAction(brawl(undefined, { keeper: false, aiPress: "off" }), "hero").type,
+    Ss2ActionType.WINCROWD,
+    "the AI before P1 played to the crowd here"
+  );
+  assert.equal(suggestAction(brawl(undefined, { keeper: false }), "hero").type, Ss2ActionType.RANK_FRONT);
 });
 
 test("AND THE SHIPPED DEFAULT CARRIES NO SUFFIX, which is what keeps every pinned hash", () => {
@@ -304,7 +316,10 @@ test("AND AT 0 IT DOES JOIN once its own rank is clear", () => {
     suggestAction(brawl(0, { keeper: false, aiPlaysToCrowd: false }), "hero").type,
     Ss2ActionType.RANK_FRONT
   );
-  assert.equal(suggestAction(brawl(0, { keeper: false }), "hero").type, Ss2ActionType.WINCROWD);
+  // ~~`wincrowd`~~ — `rank-front` again since 2026-09-27, P1 help first (see
+  // the first test); `aiPress: "off"` is the AI that danced.
+  assert.equal(suggestAction(brawl(0, { keeper: false, aiPress: "off" }), "hero").type, Ss2ActionType.WINCROWD);
+  assert.equal(suggestAction(brawl(0, { keeper: false }), "hero").type, Ss2ActionType.RANK_FRONT);
 });
 
 test("IT JOINS ONLY A RANK WHERE AN ALLY IS ALREADY ENGAGED — the anti-pile-up guard", () => {

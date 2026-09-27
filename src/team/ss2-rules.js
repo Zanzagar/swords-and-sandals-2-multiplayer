@@ -4409,6 +4409,132 @@ const SS2_RANK_DIRECTION = Object.freeze({
 });
 
 /**
+ * ► **THE AI PRESSES A NUMBERS ADVANTAGE — the owner's decisions P1, P2 and P4,
+ *   2026-09-27 (`docs/design/battle-ui.md#decided-ai-press-2026-09-27`).**
+ *
+ * The owner, after playtesting: *"the ai on the team of 2 never makes a
+ * concerted effort to corner the single gladiator oftentimes it just dances or
+ * waits for the 1v1 to finish"*. Measured on the arena's own host (`demoSide`
+ * plain 2v2, seeds 1-96, every turn of a 2v1 phase): the free member's turns
+ * were 18% crowd-pleasers, both pair members stood in reach of the lone foe on
+ * 0% of turns, and the pair finished him before losing somebody in 8 of 96
+ * phases. Nothing in the AI looked at a fight an ally was already in except
+ * the flank walk, which only fired from another lane and handed over to arms
+ * that were never about the pincer.
+ *
+ * **The press target is the foe an ally is FIGHTING** — in the ally's lane and
+ * inside the ally's own reach, the melee reading of "engaged" the facing and
+ * lane rules use — nearest to the actor, ties by id. `null`:
+ *
+ * - **with no depth** (`y` absent, `rankStride` 0): going round is a lane
+ *   tactic, and in one lane a walk can never pass a foe, so there is nothing
+ *   to press toward. Every 1v1, golden and 1-D bout is untouched;
+ * - **P4, finish your own fight**: when a foe in the actor's own lane is one
+ *   no ally is fighting — that one is the actor's fight already
+ *   (`rankJoinSurplus` 0, "fight who is in front of you");
+ * - when no ally is fighting anybody.
+ *
+ * AUTHORED: vanilla has one gladiator a side and nobody to help
+ * (`MAP_SILENCE.multi-slot-arena-geometry`).
+ */
+export function ss2PressTarget(view) {
+  const actor = view.actor;
+  if (!Number.isFinite(actor?.x) || !Number.isFinite(actor?.y)) return null;
+  // `?? []`: `chooseAiAction` is called directly by tests with a view that
+  // carries only the list they care about, and the press must not throw
+  // before the checks that are the point of such a test.
+  const allies = (view.allies ?? []).filter((ally) =>
+    ally.id !== actor.id && ally.alive !== false && Number.isFinite(ally.x));
+  const fought = (foe) => allies.some((ally) =>
+    ss2SameLane(ally, foe) && ss2FightDistance(ally, foe) < ss2Reach(ally));
+  const living = (view.foes ?? []).filter((foe) => foe.alive !== false && Number.isFinite(foe.x));
+  if (living.some((foe) => ss2SameLane(actor, foe) && !fought(foe))) return null;
+  let best = null;
+  let bestDistance = Infinity;
+  for (const foe of living) {
+    if (!fought(foe)) continue;
+    const distance = ss2FightDistance(actor, foe);
+    if (distance < bestDistance || (distance === bestDistance && best && foe.id < best.id)) {
+      best = foe;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+/**
+ * ► **GOING ROUND — the move that presses `target`, or `null` (P2).** The same
+ *   under both `aiPress` variants; they differ only in what it outranks (the
+ *   ranged choices and the taunt; see `pincerFirst` in `chooseAiAction`).
+ *
+ * 1. **In the target's lane with an ally between** (the queue the owner saw:
+ *    the walk toward is blocked by the ally's body, `ss2WalkBlocked`): step
+ *    OUT, to a neighbouring lane with no foe in it first, the front before the
+ *    back — **but only to a lane whose walk toward the target is not blocked
+ *    where the step lands**, or the actor would step out, find no way past,
+ *    and be sent back into the queue by the arms below, forever.
+ * 2. **In the target's lane with the way clear**: the walk toward.
+ * 3. **In another lane, every fighting ally on the actor's side of him**: walk
+ *    toward — and, turn by turn, PAST him, since a body in another lane is
+ *    scenery (`ss2BodyBlocks`). The arm `ss2FlankingWalk` was, re-asked from
+ *    the lane he is in.
+ * 4. **In another lane, on the far side from a fighting ally** (or level with
+ *    him): step into his lane. `ss2RankArrivalX` lands the actor at the free
+ *    spot nearest where he stands, which from the far side is the far side —
+ *    the pincer, and the back attack's +50% (`ss2IsBackAttack`).
+ *
+ * Every step is an offered option or nothing: a walk the offer withholds, or a
+ * rank with no free ground, returns `null` and the arms below decide.
+ */
+export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankStride) {
+  const actor = view.actor;
+  if (!target || ![actor.x, actor.y, target.x, target.y].every(Number.isFinite)) return null;
+  const find = (type) => options.find((option) => option.type === type) ?? null;
+  const toward = target.x > actor.x ? 1 : -1;
+  const towardWalk = toward > 0 ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
+  const allies = (view.allies ?? []).filter((ally) =>
+    ally.id !== actor.id && ally.alive !== false && Number.isFinite(ally.x));
+  const foes = view.foes ?? [];
+  const bodies = [...foes, ...allies];
+
+  if (ss2SameLane(actor, target)) {
+    const queued = allies.some((ally) => ss2SameLane(ally, actor)
+      && (ally.x - actor.x) * toward > 0 && (target.x - ally.x) * toward > 0);
+    if (!queued) return find(towardWalk);
+    const steps = [Ss2ActionType.RANK_FRONT, Ss2ActionType.RANK_BACK].map(find).filter(Boolean);
+    const open = steps.filter((step) => {
+      const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
+      const x = ss2RankArrivalX(actor.x, bodies, y);
+      if (x === null) return false;
+      const landed = { ...actor, x, y };
+      const way = target.x > x ? 1 : -1;
+      return !ss2WalkBlocked(landed, bodies, way);
+    });
+    const clear = open.find((step) => {
+      const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
+      return !foes.some((foe) => foe.alive !== false && foe.y === y);
+    });
+    return clear ?? open[0] ?? null;
+  }
+
+  const side = Math.sign(actor.x - target.x);
+  const fighting = allies.filter((ally) =>
+    ss2SameLane(ally, target) && ss2FightDistance(ally, target) < ss2Reach(ally));
+  const farSide = side === 0 || fighting.some((ally) => Math.sign(ally.x - target.x) !== side);
+  if (!farSide) return find(towardWalk);
+  return find(target.y > actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK);
+}
+
+/** The `aiPress` values `createSs2TeamRules` takes; see `ss2PressMove`. */
+export const SS2_AI_PRESS = Object.freeze(["off", "ranged-first", "pincer-first"]);
+/**
+ * The shipped `aiPress`. **"ranged-first" UNTIL THE EVIDENCE DECIDES** — it is
+ * today's order (shoot and cast when something reaches, then go round), so
+ * shipping it changes least while P2 is measured. See the decision's P2.
+ */
+export const SS2_AI_PRESS_DEFAULT = "ranged-first";
+
+/**
  * Each attacking verb's `attack_direction` and its `staminacost` factor.
  *
  * ► **`low`/`high` MEANS "DRAW ONE", `direction` MEANS "DO NOT". The
@@ -10166,8 +10292,21 @@ export function createSs2TeamRules({
    *   before it — the CODE VERSION, not the id, tells a peer running this
    *   policy from one running the last.
    */
-  aiPlaysToCrowd = true
+  aiPlaysToCrowd = true,
+  /**
+   * How an AI gladiator presses a numbers advantage (the owner's decisions P1,
+   * P2, P4, 2026-09-27; `ss2PressTarget`, `ss2PressMove`). `"off"` is the AI
+   * before them — no help-first gate on the crowd-pleaser, no going round —
+   * kept as the measurement baseline. `"ranged-first"` goes round when nothing
+   * reaches (after arming the bow, shooting, casting and the priced taunt);
+   * `"pincer-first"` goes round ahead of all four whenever no melee verb is on
+   * offer. Named in the id when not the shipped default, the `aiTaunts` rule.
+   */
+  aiPress = SS2_AI_PRESS_DEFAULT
 } = {}) {
+  if (!SS2_AI_PRESS.includes(aiPress)) {
+    throw new TeamRuleSetError(`aiPress must be one of: ${SS2_AI_PRESS.join(", ")}; got ${String(aiPress)}.`);
+  }
   if (!FIGHT_MODES.includes(fightMode)) {
     throw new TeamRuleSetError(`fightMode must be one of: ${FIGHT_MODES.join(", ")}.`);
   }
@@ -10240,8 +10379,10 @@ export function createSs2TeamRules({
   // Same rule as the taunt's, and the same spelling: shipped ON, so the suffix
   // appears when it is OFF.
   const crowdPlaySuffix = aiPlaysToCrowd ? "" : "-no-crowd-play";
+  // Same rule once more: the suffix names the press when it is not the default.
+  const pressSuffix = aiPress === SS2_AI_PRESS_DEFAULT ? "" : `-press-${aiPress}`;
   const ruleSetId =
-    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}${joinSuffix}${crowdPlaySuffix}`;
+    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}${joinSuffix}${crowdPlaySuffix}${pressSuffix}`;
 
   // Named rather than returned directly so `chooseAiAction` can read the
   // rule set's own offer for a FOE (`ss2ReturnBlows`) without leaning on
@@ -15563,6 +15704,26 @@ export function createSs2TeamRules({
       const closedOnBow = boltOnOffer ? null : ss2ClosedOnBowMove(view, options);
       if (attackOnOffer && closedOnBow) return closedOnBow;
 
+      // ► **THE PRESS (the owner's P1/P2/P4, 2026-09-27; `ss2PressTarget`).**
+      //   Read once: the crowd arm's help-first gate and both press arms use
+      //   it. `pincerFirst` is the P2 variant that goes round AHEAD of every
+      //   ranged choice — a shot or a bolt on offer, arming the bow, and the
+      //   taunt (the build's long-range verb) — whenever no MELEE verb is on
+      //   offer, which is the one thing the press is for; it puts a drawn bow
+      //   away to do it, since the far side is fought with the sword.
+      //   `ranged-first` reaches its press arm below the bow swap and the
+      //   taunt, inside the out-of-range block.
+      const pressTarget = aiPress === "off" ? null : ss2PressTarget(view);
+      const pincerFirst = pressTarget !== null && aiPress === "pincer-first"
+        && !options.some((option) => MELEE_ATTACKS.includes(option.type));
+      if (pincerFirst) {
+        const sheathe = ss2InBowMode(actor)
+          ? options.find((option) => option.type === Ss2ActionType.SWAP_WEAPONS)
+          : null;
+        const round = sheathe ?? ss2PressMove(view, options, pressTarget, rankStride);
+        if (round) return round;
+      }
+
       if (!attackOnOffer) {
         const nearest = nearestFoe(view);
 
@@ -15613,7 +15774,8 @@ export function createSs2TeamRules({
         //     the floor or beyond, that one the nearest foe inside the floor.
         //     Running out of arrows still swaps
         //     it back — that one is forced, in `legalActions`.
-        if (!ss2InBowMode(actor) && resourceValue(actor, "ammo_left", 0) > 0) {
+        // `!pincerFirst`: that variant goes round rather than arm the bow.
+        if (!pincerFirst && !ss2InBowMode(actor) && resourceValue(actor, "ammo_left", 0) > 0) {
           const swap = options.find((option) => option.type === Ss2ActionType.SWAP_WEAPONS);
           const range = nearest ? ss2FightDistance(actor, nearest) : null;
           if (swap && range !== null && range >= ss2ArcherMinimumRange(actor)) return swap;
@@ -15644,7 +15806,12 @@ export function createSs2TeamRules({
         //
         //   ► **ADULATION IS NOT PRICED HERE**: ladder arm 28 above casts it on
         //     possession beyond 300, the build's rule, and returns first.
-        if (aiPlaysToCrowd && nearest && ss2CanBePriced(actor)) {
+        // ► **P1, HELP FIRST (2026-09-27): never while an ally is fighting a
+        //   foe this gladiator could go and help against (`pressTarget`).**
+        //   A 2v1 makes the free member safe and ahead, which is exactly when
+        //   the gates below opened — the "dance" the owner saw while the other
+        //   two fought. The other gates stand for every other case.
+        if (aiPlaysToCrowd && !pressTarget && nearest && ss2CanBePriced(actor)) {
           const pleaser = options.find((option) => option.type === Ss2ActionType.WINCROWD);
           if (pleaser
             && resourceValue(actor, "staminaleft", 0) > SS2_WINCROWD.staminaCost
@@ -15817,6 +15984,14 @@ export function createSs2TeamRules({
             // More than rounding, as in the swing table (`SS2_AI_PRICE_TOLERANCE`).
             if (worth > ss2ApproachValue(actor, tauntee, bestSwing) + SS2_AI_PRICE_TOLERANCE) return tauntHere;
           }
+        }
+
+        // ► **GOING ROUND (P2, `ss2PressMove`)**, below the taunt in both
+        //   variants and above the older flank arm, which it subsumes when
+        //   there is a fight to press and which still answers when there is not.
+        if (pressTarget) {
+          const round = ss2PressMove(view, options, pressTarget, rankStride);
+          if (round) return round;
         }
 
         const flank = positionedInDepth && nearest && Number.isFinite(nearest.y)
