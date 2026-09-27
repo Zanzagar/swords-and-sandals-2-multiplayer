@@ -1,5 +1,104 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 causal deterministic related response — RCS-03C3C3D2E4-B selected conditionally
+
+The owner selected `RCS-03C3C3D2E4-B` **with its stated conditionality**. At
+least one responsive tagged deterministic related projection must have a
+qualifying matched causal play-or-counterplay witness. From one common
+positive-support state, one independently revisable and materially meaningful
+decision must change eventual certain-bit support or its conditional
+distribution under complete causal closure while the same projection, form,
+law, pair, and proof remain fixed.
+
+B remains existential and does not guarantee universal causal coverage,
+bearer control, action success, a `Q` witness, exact disclosure, or either
+result. Both arms and the changed fact must remain meaningful under permission-
+effect ablation. The related-form consequence must independently change a
+truthful build or policy beyond the exact and Oracle causal witnesses. Direct
+or laundered permission commands, changed law/tag/pair/proof, `Q`/`H` movement,
+post-result action, reroute, retry, unrelated RNG ordering, or lucky crossover
+fail. The exemplar must be prospectively understandable, retrospectively
+attributable, non-token, non-dominated, and resistant to cheap veto loops. If
+none survives authoring/evaluation, E4 reopens with A.
+
+Two bounded read-only audits upheld the next card's stable-polarity topology.
+The gameplay audit caught one necessary strengthening: an exact steadfast-deny
+law cannot satisfy the related card merely by acquiring an `H` tag. Every
+selected polarity must produce a marginal related-form policy purpose.
+
+The 99-row register now contains 33 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 44
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
+`RCS-03C3C3D2E5` is the sole presented card. The authoritative decision record
+remains unchanged.
+
+Let
+`F^{R-det-steady}_v=D^R_v setminus X^{R-det-response}_v` be the nonempty steadfast family,
+and let `F^{R-det,+}_v` contain its always-allow projections. Each member is one
+complete, nonempty, separately `Q`- or `H`-tagged projection whose image is
+exactly `{0}` or `{1}`.
+
+- **A — steadfast refusal only:** `F^{R-det,+}_v=∅`. Every steadfast projection
+  always denies. This supports hard severance or anti-compression, but supplies
+  no reliable related-form compatibility anchor and carries the greatest trap,
+  ally-suppression, forced-overlap, and compensation burden. **Severed
+  Chorus/Q** always returns false for its Twin Vow pair; that means only “not
+  both,” with E/F still deciding the result and authority.
+- **B — steadfast compatibility only:** `F^{R-det,+}_v=F^{R-det-steady}_v`. Every steadfast
+  projection always allows. **This is the lower-risk production baseline
+  and C's default fallback when compatibility remains viable.** It gives a dependable Stone Choir/Q anchor
+  while causal responsive Ashen and probabilistic Veiled remain distinct
+  policies. Responsive deterministic laws still provide both certain bits, so
+  B removes no global denial endpoint. It excludes context-proof related-form
+  refusal as its own build identity.
+- **C — both steadfast polarities coexist:**
+  `∅⊊F^{R-det,+}_v⊊F^{R-det-steady}_v`. **Conditionally recommended as the higher-ceiling
+  target; choose it only with every guard below.** Use B if the extra refusal
+  or coexistence case fails while compatibility remains viable; use A if
+  compatibility fails while refusal remains viable. Stone Choir/Q may always
+  allow while Severed Chorus/Q always denies, adding a robust precommitted
+  refusal policy beside compatibility, causal conditional certainty, and
+  Oracle risk. Costs are a fourth prediction dialect, hard-veto and grief
+  risk, trap-versus-overcompensation pressure, and heavier authoring, UI, and
+  evaluation. Stable allow can directly express distinct manifestations
+  participating together; stable deny protects distinction or rejects proof
+  compression. Their coexistence is aggregate, not a stronger local
+  theological analogue.
+
+A/B/C are exhaustive over the nonempty steadfast family. Polarity is gate-
+local: allow passes only this permission coordinate; deny means only “not
+both.” Neither decides candidacy, commitment, final survival, result, survivor,
+substitute, compensation, or payoff. One contract may furnish opposite `Q` and
+`H` tagged projections; this does not require two Relics or both polarities in
+each form. A singleton domain counts formally but proves no viable policy, and
+no output/context/code split may manufacture a class.
+
+Exact E3-C does not decide this card, but it creates the main false-positive
+risk. A steadfast exact law may contribute an `H` restriction; inheritance
+alone does not prove a new policy. Every selected polarity—and, under C, their
+coexistence—must be reachable, legible, non-token, non-dominated, and
+**marginally useful on related-form opportunities** beyond exact E3-C and
+responsive related laws. A
+`Q` witness proves that cleanly. An `H` witness may qualify only if hybrid
+availability independently changes truthful forecasting, routing, or build
+policy; merely relabeling exact Severed Bell fails.
+
+For C, steadfast refusal must be instrumental, an explicit play-shaping
+commitment, or a compensated exploitable liability. Symmetry coverage,
+self-handicap, contrived domains, dominated traps, and fake compensation fail.
+Stable allow may not dominate responsive Witness and Oracle identities.
+Affected actors need precommitment legibility, and later evaluation must attack
+cheap forced overlap, selector injection, unilateral teammate suppression,
+grief, and optimized packages that erase the downside. E/F must later prove
+the false-bit result is fun. If refusal or coexistence fails while compatibility
+remains viable, reopen E5 with B. If compatibility fails while refusal remains
+viable, reopen E5 with A. If neither polarity is viable, D2E3-C's steadfast
+class has failed and E3 must reopen; E3-B remains the responsive-only route if
+its guards still hold.
+
+E5 chooses no concrete law, Relic, form placement, result, survivor,
+compensation, payoff, actor, count, rarity, or implementation. Any answer
+selects E5 and opens C3C3E, reducing `Phi_SR` to 33. Ask for A, B, or C.
+
 ## 2026-09-26 responsive and steadfast deterministic forms — RCS-03C3C3D2E3-C selected
 
 The owner selected `RCS-03C3C3D2E3-C`. Complete responsive and steadfast
@@ -10515,7 +10614,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 01:11 UTC — causal deterministic related response is next](docs/handoffs/2026-09-27-0111--relic-causal-deterministic-response-next.md)**
+[2026-09-27 01:32 UTC — stable deterministic related polarity is next](docs/handoffs/2026-09-27-0132--relic-stable-related-polarity-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

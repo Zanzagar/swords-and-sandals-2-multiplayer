@@ -2928,18 +2928,38 @@ distribution. For an `H` witness, the one inherited exact bit remains the only
 permission bit. Direct permission commands, cross-form movement, changed
 pair/proof, rerouting, and lucky stochastic crossovers fail.
 
-E4-B would require one causal deterministic related-form lever, not universal
-coverage or guaranteed action success. If upstream stochastic descendants
-intervene, the decision must change reachable bit support or its conditional
-distribution; every realized fixed opportunity still receives one certain bit.
-The related-form consequence must also add a marginal truthful policy purpose
-rather than merely relabel the already-required exact or Oracle causal
-exemplar. The audit conditionally recommends guarded B, with A as the coherent
-anti-saturation fallback.
+The owner selected D2E4-B with its conditional fallback. At least one
+responsive deterministic related projection must have a qualifying causal
+play-or-counterplay witness, but B grants neither universal coverage nor
+guaranteed action success. The decision must change eventual bit support or
+its conditional distribution under complete causal closure, and the related-
+form consequence must add a marginal truthful policy purpose rather than
+relabel an exact or Oracle causal exemplar. Failure reopens E4 with A.
 
-The current register has **ninety-nine slots: 34 `SCREEN`, 1 `OWNER-OPEN`, 16
-`PRUNED`, 43 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 35`**. D2E4 is the current presented card.
+Two bounded read-only audits then upheld E5's empty/all/nonempty-proper stable-
+allow topology over the nonempty steadfast complement. A means steadfast
+refusal only, B steadfast compatibility only, and C both polarities. Complete
+`Q` and `H` projections remain separately tagged; polarity is gate-local; a
+singleton domain does not prove a viable category; and no branch selects a
+result or survivor.
+
+The gameplay audit found that ordinary viable-purpose language was too weak:
+an exact E3-C steadfast-deny law could acquire a nonempty hybrid restriction
+and formally satisfy related E5 without changing play. Every selected E5
+polarity must therefore add a marginal related-form policy purpose beyond
+exact E3-C and responsive related laws. An `H` witness may qualify, but tag
+inheritance alone may not. C is the conditionally recommended higher-ceiling
+target only if steadfast refusal becomes an instrumental strategy, explicit
+commitment, or compensated exploitable liability and all polarity policies
+remain legible, non-token, non-dominated, and resistant to cheap veto/grief;
+B is the production baseline and default fallback only while compatibility
+passes its own viable-purpose gate. Compatibility failure with viable refusal
+routes to A; failure of both polarities reopens D2E3-C's steadfast-class
+promise.
+
+The current register has **ninety-nine slots: 33 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 44 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 34`**. D2E5 is the current presented card.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -3019,8 +3039,8 @@ overcompression.
 | `RCS-03C3C3D2E1` | Distribution-response prevalence across stochastic-capable related-only Oracle law projections | `DIR-SELECTED`; B makes every Oracle law distribution-responsive with at least two reachable probabilities while selecting no causal control, exact odds, or endpoint |
 | `RCS-03C3C3D2E2` | Matched player/counterplayer-causal odds-response support among responsive Oracle laws | `DIR-SELECTED`; B requires at least one qualifying witness in which one independently meaningful lawful decision and complete causal closure change the conditional permission distribution under the same intrinsic law and eventual pair/proof, not merely the realized sample or a disguised direct odds command; universal coverage, exact actor, odds, and endpoint remain unsettled |
 | `RCS-03C3C3D2E3` | Responsive-law prevalence across tagged deterministic related-form projections, including related-only Witness and inherited hybrid restrictions | `DIR-SELECTED`; C requires responsive and steadfast complete tagged deterministic projections to coexist under the documented viable-purpose, non-token, non-dominance, legibility, and bounded-fallback obligation; it imposes no per-form or hybrid-existence quota |
-| `RCS-03C3C3D2E4` | Matched player/counterplayer-causal certain-bit response among responsive deterministic related projections | `OWNER-OPEN`; classify qualifying support as empty or nonempty; a witness stays within one tagged projection/law/form/pair/proof and requires one meaningful lawful decision plus complete causal closure to change eventual bit support or conditional distribution, while direct permission commands and mere relabeling of earlier causal exemplars fail |
-| `RCS-03C3C3D2E5` | Stable polarity among context-invariant deterministic related projections | `SCREEN`; conditional on D2E3-A/C, otherwise `PRUNED`; classify stable denial only, stable compatibility only, or both, without selecting identities, counts, or hybrid composition |
+| `RCS-03C3C3D2E4` | Matched player/counterplayer-causal certain-bit response among responsive deterministic related projections | `DIR-SELECTED`; B conditionally requires at least one same-projection/law/form/pair/proof witness in which one independently meaningful lawful decision plus complete causal closure changes eventual bit support or conditional distribution; direct permission commands and relabeled exact/Oracle witnesses fail, and inability to author a qualifying marginal related-form policy reopens E4 with A |
+| `RCS-03C3C3D2E5` | Stable polarity among context-invariant deterministic related projections | `OWNER-OPEN`; classify steadfast refusal only, steadfast compatibility only, or both over complete separately tagged `Q`/`H` projections; a selected polarity must add marginal related-form policy value beyond exact E3-C and responsive related laws, and inherited `H` tagging alone cannot satisfy it |
 | `RCS-03C3C3D2E6` | Missing-certainty endpoint support in responsive stochastic related-only laws after the deterministic form-wide baseline is known | `DERIVED`; D2E3-C's responsive deterministic support already supplies both certain endpoints, so no endpoint is missing from the form-wide baseline |
 | `RCS-03C3C3E` | Result disposition and survivor cardinality when two individually satisfied overlapping tags receive a false joint-survival permission bit | `SCREEN`; follows applicable C2E1-C2E3/D2 permission restrictions and their stochastic topology; prunes only if no selected overlap reaches treatment or every applicable exposed pair is permitted with probability one; a realized false bit enters this route once without redraw or rerouting |
 | `RCS-03C3C3F` | Authority selecting the survivor or legal substitute for a denied pair | `SCREEN`; conditional on C3C3E admitting a positive nonunique result; otherwise `PRUNED` or `DERIVED`; exact priority keys remain later only after authority is settled |
@@ -3316,15 +3336,20 @@ related projections to coexist under the hard viability obligation. E6 derives
 because responsive deterministic support supplies both certain endpoints. A
 two-question audit upholds E4 as one empty/nonempty matched-causal support card
 with stochastic-mediation and marginal-related-purpose guards; no row is added.
-The current register has **ninety-nine slots**: 34 `SCREEN`, 1 `OWNER-OPEN`,
-16 `PRUNED`, 43 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 35`. D2E4 is the current presented card.
+`RCS-03C3C3D2E4-B` then conditionally requires at least one qualifying causal
+deterministic related-response witness, with A as the mandatory fallback if no
+marginal, legible, non-token policy purpose survives. A two-question audit
+upholds E5's deny-only/allow-only/both stable-polarity topology while adding a
+marginal related-form-purpose guard against inherited-`H` relabeling; no row is
+added. The current register has **ninety-nine slots**: 33 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 44 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 34`. D2E5 is the current presented card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-five owner cards under this thirty-one-times-corrected charter and will
+thirty-four owner cards under this thirty-one-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3348,7 +3373,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 99 frozen candidate slots; current `Phi_SR = 35` after `RCS-03C3C3D2E3-C` requires steadfast and responsive deterministic related projections, derives E6, and opens matched causal deterministic response at D2E4 | At most 35 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 99 frozen candidate slots; current `Phi_SR = 34` after conditional `RCS-03C3C3D2E4-B` requires one qualifying causal deterministic related-response witness and opens stable related-projection polarity at D2E5 | At most 34 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

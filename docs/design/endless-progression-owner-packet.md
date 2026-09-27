@@ -334,8 +334,13 @@ two-angle post-answer audit upheld the tagged deterministic related-response
 prevalence boundary. The owner selected RCS-03C3C3D2E3-C: responsive and
 steadfast deterministic related-form projections coexist under the hard
 viability obligation. A two-angle post-answer audit upheld one binary matched
-causal certain-bit-response card. RCS-03C3C3D2E4 is the current owner-facing
-choice under SR-03.
+causal certain-bit-response card. The owner selected
+RCS-03C3C3D2E4-B with its stated conditional fallback: at least one responsive
+deterministic related projection must have a qualifying causal play-or-
+counterplay witness, or E4 reopens with A. A two-angle post-answer audit then
+upheld E5's three stable-polarity branches while strengthening their marginal
+related-form-purpose and anti-inheritance-laundering obligations.
+RCS-03C3C3D2E5 is the current owner-facing choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -23401,7 +23406,7 @@ selected exact and Oracle causal witnesses. Both upheld one binary card with
 the materiality and marginal-nonredundancy safeguards below. No prerequisite
 correction or new row is needed.
 
-### RCS-03C3C3D2E4 — matched player/counterplay-causal deterministic related response — active owner choice
+### RCS-03C3C3D2E4 — matched player/counterplay-causal deterministic related response — direction selected
 
 Let `M^{R-det-causal}_v⊆X^{R-det-response}_v` contain the responsive tagged
 deterministic projections having at least one qualifying matched causal
@@ -23476,6 +23481,115 @@ witness, rarity, or implementation. Either answer moves E4 to `DIR-SELECTED`
 and makes D2E5 the next presented card. The register would then contain 33
 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 44 `DIR-SELECTED`, 3 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, require at
+least one matched causal deterministic related response, subject to the stated
+fallback.** Thus `M^{R-det-causal}_v≠∅`. At least one responsive tagged
+deterministic projection must have one qualifying participant or counterplayer
+intervention whose complete causal closure changes eventual certain-bit
+support or its conditional distribution while the same projection, form, law,
+pair, and proof remain fixed.
+
+The conditionality is part of the selected direction. Both arms and the
+changed fact must remain independently meaningful under permission-effect
+ablation; the related-form consequence must independently change a truthful
+policy or build purpose beyond the already-required exact and Oracle causal
+witnesses; and the exemplar must be prospectively understandable,
+retrospectively attributable, non-token, non-dominated, and resistant to cheap
+veto loops. Direct or laundered permission commands, changed
+law/variant/tag/pair/proof, cross-form movement, post-result action, rerouting,
+retry, unrelated RNG order, and lucky crossover remain invalid. If later
+authoring and evaluation cannot establish a qualifying exemplar, E4 reopens
+with A rather than silently weakening B.
+
+B is existential. It selects no universal coverage, actor, form, action,
+guaranteed success, disclosure, result, survivor, payoff, rarity, or
+implementation. E4 moves to `DIR-SELECTED`; E5 becomes `OWNER-OPEN`. The
+99-row register now contains 33 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 44
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`. The
+authoritative decision record remains unchanged.
+
+The E5 post-answer screen used two bounded read-only questions. One
+independently re-derived the steadfast complement, complete-domain binary
+topology, separate `Q`/`H` tags, dependencies, and register arithmetic. The
+other tested whether steadfast refusal could add fun and policy depth beyond
+the already-selected exact steadfast-deny family, responsive deterministic
+denial, and Oracle risk. The topology survived unchanged, but the gameplay
+audit broke a weaker viability test: an inherited `H` false bit could otherwise
+relabel the exact E3-C witness without adding any related-form policy. The
+repaired card below requires marginal related-form purpose and rejects tag
+inheritance alone. No prerequisite correction or new row is needed.
+
+### RCS-03C3C3D2E5 — context-invariant deterministic related-projection polarity — active owner choice
+
+E3-C guarantees a nonempty steadfast complement
+`F^{R-det-steady}_v=D^R_v setminus X^{R-det-response}_v`. Define
+`F^{R-det,+}_v={d in F^{R-det-steady}_v:I^D_d={1}}` and
+`F^{R-det,-}_v=F^{R-det-steady}_v setminus F^{R-det,+}_v`. Every member uses its complete nonempty
+reachable domain under one fixed form tag. Because it is deterministic and not
+responsive, its complete image is exactly `{0}` or `{1}`.
+
+| Choice | Steadfast deterministic related polarity | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — steadfast refusal only** | `F^{R-det,+}_v=∅`. Every steadfast tagged deterministic related projection always returns zero throughout its own complete reachable domain. Responsive deterministic laws still allow in some contexts and deny in others. | A makes context-robust severance the only dependable related-form philosophy. It can support a hard anti-compression or single-heir commitment, but supplies no steadfast compatibility anchor. Its ideal fit is **neutral/protective**: it preserves distinction while participation must come from responsive laws. Costs are the greatest trap, ally-suppression, forced-overlap, and compensation pressure. | **Severed Chorus/Q** always refuses joint survival for its Twin Vow pair. The bit means only “not both”; E/F still decides the result and authority. The projection qualifies as gameplay only if players can deliberately build or route around that reliable refusal rather than merely suffer it. |
+| **B — steadfast compatibility only** | `F^{R-det,+}_v=F^{R-det-steady}_v`. Every steadfast tagged deterministic related projection always returns one throughout its own complete reachable domain. Responsive deterministic projections retain both certain bits, so B removes no global denial endpoint. | **Lower-risk production baseline and C's default fallback when compatibility remains viable.** B gives related Witnesses/hybrids a dependable compatibility anchor while E3-C/E4-B retain causal conditional certainty and the Oracle lane retains responsive risk. An always-allow law can directly express two genuinely distinct related manifestations participating together. It has the lowest trap and teaching burden, but excludes context-robust related-form refusal as its own policy identity. | **Stone Choir/Q** always permits its Twin Vow pair through this gate. A player can treat that relationship as a reliable anchor while **Ashen Accord/Q** remains causally responsive and **Veiled Chorus/Q** remains probabilistic. Later candidacy, commitment, payoff, and final survival are still unsettled. |
+| **C — both steadfast polarities coexist** | `∅⊊F^{R-det,+}_v⊊F^{R-det-steady}_v`. At least one steadfast tagged projection always allows and at least one always denies. This is projection-level support, not a requirement for two Relics or for both polarities inside both forms. | **Conditionally recommended as the higher-ceiling target.** Use B if the extra refusal/coexistence case fails while compatibility remains viable; use A if compatibility fails while refusal remains viable. C can add a fourth robust policy beside steadfast compatibility, causal conditional certainty, and Oracle risk: a player knowingly builds around context-proof refusal. Stable allow may directly express participation; stable deny protects distinction or rejects proof compression; their catalog coexistence is only **aggregate**, not a stronger theological analogue. Costs are another prediction dialect, automatic hard-veto and grief risk, trap-versus-overcompensation pressure, and substantial authoring/UI/evaluation burden. | **Stone Choir/Q** always allows while **Severed Chorus/Q** always denies. Severed Chorus qualifies only if its predictable false bit changes a real build or routing policy—for example a disclosed single-heir or anti-compression package—not because the matrix wanted a deny cell. Responsive Ashen and probabilistic Veiled remain separate policies. |
+
+A/B/C are mutually exclusive and exhaustive because nonempty
+`F^{R-det-steady}_v` has a stable-allow subset that is empty, all of
+`F^{R-det-steady}_v`, or a nonempty proper subset.
+A singleton reachable domain is formally steadfast but cannot by itself prove
+a viable policy. One physical contract may contribute opposite steadfast
+polarities under separately complete `Q` and `H` tags; those remain two
+projections, not one responsive projection. Never split a projection by bit,
+context, instance, callback, helper, generated identity, or code variant to
+manufacture a polarity.
+
+Polarity is gate-local. An allow bit passes only this joint-survival permission
+coordinate; it guarantees no candidate, commitment, final co-survival, receipt,
+or payoff. A deny bit means only “not both” and enters E/F; it chooses no
+survivor, substitute, benefit, reroute, retry, or alternate proof. E3-C's
+responsive deterministic projection already supplies both certain endpoints,
+so no E5 answer changes E6 or global related-form bit incidence.
+
+Exact E3-C does not decide E5. An exact steadfast law contributes here only if
+it has a nonempty hybrid restriction, and exact responsive laws may have no
+hybrid domain or a steadfast restriction. More importantly, formal inheritance
+is not gameplay proof. Each polarity required by the selected E5 branch—and,
+under C, their coexistence—must create a reachable, legible, non-token,
+non-dominated **marginal related-form policy purpose** beyond exact E3-C and
+responsive related laws. A `Q` Witness demonstrates that purpose cleanly, but E5 imposes no
+`Q`-only quota. An `H` witness qualifies only when its availability on hybrid
+opportunities independently changes truthful forecasting, routing, or build
+policy; merely tagging the exact Severed Bell false bit as `H` fails.
+
+Under C, steadfast refusal must be used instrumentally, function as an explicit
+play-shaping commitment, or remain an exploitable liability inside a package
+receiving commensurate value. Symmetry coverage, contrived or obscure domains,
+voluntary self-handicap, dominated traps, and compensation that changes no
+preferred policy fail. Steadfast compatibility must likewise not make the
+responsive Witness and Oracle policies dominated. Because invocation and
+related-only permission are intrinsic rather than a live permission toggle,
+affected actors need precommitment legibility; cheap forced overlap, unilateral
+receipt suppression, selector injection, grief, and optimized packages that
+erase the stated downside require adversarial evaluation. E/F must later prove
+that the false-bit result lets refusal remain fun rather than a trap or fake
+burden. If the added steadfast-refusal or coexistence purpose fails while
+steadfast compatibility remains viable, reopen E5 with B. If compatibility
+fails while refusal remains viable, reopen E5 with A. If neither polarity can
+furnish a viable purpose, D2E3-C's required steadfast class has failed and E3
+must reopen; E3-B is the remaining responsive-only topology if that class
+continues to pass its own guards.
+
+E5 chooses no exact law, Relic, tag placement, result, survivor, substitute,
+compensation, payoff, actor, disclosure surface, count, prevalence beyond the
+selected support topology, rarity, release placement, or implementation.
+RCS-02/SR-10 own exact information; E/F own denied-pair results and authority;
+SR-05/SR-06 and RCS-17/RCS-18 own authoring, simulation/RL, balance, exploit,
+and playtest proof. Any answer moves E5 to `DIR-SELECTED` and makes C3C3E the
+next presented card. The register would then contain 32 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 45 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 33`.
 
 ## Session protocol and evidence
 

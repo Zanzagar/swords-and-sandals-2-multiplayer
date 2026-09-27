@@ -5183,6 +5183,106 @@ implementation. Either answer selects E4 and opens E5, yielding `Phi_SR = 34`.
 D2E4 is the sole presented card. The authoritative decision record remains
 unchanged.
 
+The owner selected D2E4-B **with the stated conditionality**. Therefore
+`M^{R-det-causal}_v` is nonempty: at least one responsive tagged deterministic
+related projection must have a qualifying matched causal play-or-counterplay
+witness. This remains existential and does not guarantee universal
+actionability, actor control, action success, a `Q` witness, full disclosure,
+or either result. The same-projection/law/form/pair/proof causal-closure test,
+semantic-ablation materiality, stochastic-mediation distribution test,
+anti-laundering exclusions, prospective legibility, retrospective attribution,
+marginal related-form purpose, cheap-veto resistance, and fallback to A all
+remain binding.
+
+E4 moves to `DIR-SELECTED`; E5 opens. The register now has 99 rows: 33
+`SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 44 `DIR-SELECTED`, 3 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
+
+The E5 post-answer screen used two bounded read-only named-claim audits. The
+topology audit independently re-derived the steadfast complement, binary image
+partition, separate complete `Q`/`H` tags, exact-lane non-derivation,
+dependencies, and all 99 register rows. The gameplay audit tested the strongest
+policy case for each polarity and specifically attacked C for redundancy with
+exact E3-C, responsive deterministic denial, and Oracle risk. The three-way
+topology held, but the gameplay audit found the initial viability condition
+insufficient because inherited hybrid tagging could launder the exact
+steadfast-deny witness. The repaired card adds a marginal related-form-purpose
+test without imposing a `Q`-only quota. No prerequisite correction or new row
+is needed.
+
+Let
+`F^{R-det-steady}_v=D^R_v setminus X^{R-det-response}_v`. D2E3-C proves that this
+steadfast family is nonempty. For each member's complete nonempty reachable
+tagged domain, nonresponsiveness plus binary determinism makes its image exactly
+`{0}` or `{1}`. Define
+`F^{R-det,+}_v={d in F^{R-det-steady}_v:I^D_d={1}}`. Exactly three branches remain:
+
+- A: `F^{R-det,+}_v=∅`; every steadfast deterministic related projection
+  always denies;
+- B: `F^{R-det,+}_v=F^{R-det-steady}_v`; every steadfast deterministic related projection
+  always allows; or
+- C: `∅⊊F^{R-det,+}_v⊊F^{R-det-steady}_v`; at least one of
+  each steadfast polarity exists.
+
+These are complete separately `Q`/`H`-tagged projections. One physical
+contract may supply opposite polarities under different tags, but that is two
+projections rather than one responsive projection and creates no two-Relic or
+per-form quota. A singleton domain is formally steadfast but proves no viable
+policy breadth. Splitting by output, context, instance, callback, helper,
+generated identity, or code structure cannot manufacture support.
+
+Polarity remains gate-local. Stable allow passes only this permission
+coordinate; stable deny means only “not both.” Neither decides candidacy,
+commitment, final survival, result, survivor, substitute, compensation, payoff,
+reroute, or retry. E3-C's responsive deterministic projection already supplies
+both certain endpoints, so all E5 branches retain global allow and deny
+incidence and E6 stays derived.
+
+Exact E3-C does not derive E5's answer. An exact steadfast law contributes an
+`H` projection only on a nonempty hybrid restriction, while an exact responsive
+law may have no hybrid domain or a steadfast restriction. But incidence alone
+is not sufficient: an exact steadfast-deny law could gain one hybrid domain,
+inherit the same false bit, and formally witness E5 denial without changing a
+player policy. Each polarity required by the selected E5 branch—and, under C,
+their coexistence—must therefore furnish a reachable, legible, non-token,
+non-dominated **marginal related-form purpose** beyond exact E3-C and responsive
+related laws. A `Q` witness establishes that cleanly; an `H` witness remains
+legal only when hybrid availability independently changes truthful forecasting,
+routing, or build policy. Tag inheritance by itself fails.
+
+A is the hard-severance case and has the greatest trap, teammate-suppression,
+and compensation burden. B is the lower-risk production baseline: stable
+compatibility anchors coexist with E3-C/E4-B's causal responsive certainty and
+responsive Oracle risk, while responsive laws retain denial. C is defensible as
+the higher-ceiling conditional target because context-robust related-form
+refusal can add a genuinely new precommitted policy, but its fun is not yet
+proven. Stable allow can directly express distinct manifestations
+participating together; stable denial mainly protects distinction or rejects
+proof compression. Their catalog coexistence is aggregate, so the standing
+ideal cannot substitute for policy value.
+
+Guarded C is the recommendation. B is the default fallback only when the added
+refusal/coexistence purpose fails while compatibility remains viable. Each
+selected polarity—and, under C, their coexistence—must be reachable, legible,
+non-token, non-dominated, and marginally useful. Steadfast refusal must be instrumental, an explicit
+play-shaping commitment, or a compensated exploitable liability; symmetry,
+self-handicap, token domains, dominated traps, and compensation that changes no
+preferred policy fail. Steadfast allow may not dominate responsive Witness and
+Oracle identities. Because invocation and related-only permission are
+intrinsic, C additionally requires precommitment disclosure to affected actors,
+cheap-forced-overlap and selector-injection resistance, no low-cost unilateral
+teammate suppression, and later E/F validation that false-bit disposition is
+actually fun. Compatibility failure with viable refusal instead reopens E5
+with A. If neither polarity has a viable purpose, D2E3-C's required steadfast
+class has failed and E3 must reopen; E3-B is the remaining responsive-only
+topology if its own guards continue to hold.
+
+E5 selects no exact law, form placement, result, survivor, substitute,
+compensation, payoff, actor, disclosure surface, count, rarity, release slice,
+or implementation. Any answer selects E5 and opens C3C3E, yielding
+`Phi_SR = 33`. D2E5 is the sole presented card. The authoritative decision
+record remains unchanged.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

@@ -140,6 +140,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [stable deterministic related polarity is next](2026-09-27-0132--relic-stable-related-polarity-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | Conditional D2E4-B requires one qualifying causal deterministic related-response witness; a two-angle audit preserves E5's three polarity branches, closes an inherited-`H` laundering gap, and leaves D2E5 as the sole presented frontier. |
 | [causal deterministic related response is next](2026-09-27-0111--relic-causal-deterministic-response-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D2E3-C requires responsive and steadfast deterministic related projections; a two-angle audit preserves one guarded causal-response card and leaves D2E4 as the sole presented frontier. |
 | [deterministic related response is next](2026-09-27-0050--relic-deterministic-response-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D2E2-B requires one genuine matched causal Oracle response; a two-angle audit preserves one tagged deterministic response-prevalence card and leaves D2E3 as the sole presented frontier. |
 | [causal Oracle response is next](2026-09-27-0026--relic-causal-oracle-response-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D2E1-B makes every Oracle distribution-responsive; a two-angle audit preserves one guarded binary causal-response card and leaves D2E2 as the sole presented frontier. |
