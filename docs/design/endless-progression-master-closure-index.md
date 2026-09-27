@@ -2876,9 +2876,43 @@ sampled bit. Direct odds commands and token side effects do not qualify.
 No universal-actionability, actor, disclosure, exact-odds, or endpoint row is
 added. Those are stronger authoring minima or remain with their existing
 owners unless a distinct required product purpose later passes reopening. The
-current register has **ninety-nine slots: 37 `SCREEN`, 1 `OWNER-OPEN`, 16
-`PRUNED`, 41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 38`**. D2E2 is the current presented card.
+register at that checkpoint had **ninety-nine slots: 37 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 38`**. D2E2 was the presented card.
+
+The owner selected `RCS-03C3C3D2E2-B`. At least one responsive Oracle law must
+have a qualifying matched player/counterplayer-causal witness: one materially
+meaningful lawful decision changes the conditional permission distribution
+through its complete causal closure while the intrinsic law and eventual
+related-only pair/proof remain fixed. This is existential, not universal; a
+direct or cosmetically laundered odds command, changed law/pair/proof,
+post-draw action, reroll, RNG-ordering artifact, or lucky sample does not
+qualify. The witness remains subject to the documented material-policy,
+legibility, non-token, and bounded-fallback guards.
+
+Two bounded read-only post-answer audits re-derived D2E3's tagged projection
+topology and attacked all three branches' gameplay purposes. They upheld one
+empty/all/nonempty-proper response-prevalence card and found no prerequisite
+correction or new row. Use each related-only Witness law's complete nonempty
+`Q` domain and each exact law's complete nonempty `H` restriction as separately
+tagged deterministic projections. Never split one projection by output or
+context, concatenate one contract's `Q` and `H` outputs, or slice certain
+endpoint contexts from an Oracle into deterministic projections.
+
+D2E3-A makes every tagged deterministic projection steadfast. D2E3-B makes
+every one responsive, so each complete domain reaches both certain bits.
+D2E3-C requires responsive and steadfast projections to coexist, without
+promising two physical contracts or per-form coverage. Exact E1-C does not
+settle this boundary: a responsive exact law may have no hybrid domain or may
+be steadfast when restricted to one. The audit conditionally recommends C for
+the distinct anchor, context-sensitive deterministic certainty, and Oracle-
+hedge policies, with active manipulation reserved to E4. A is the bounded
+fallback if the responsive deterministic class cannot prove a legible, viable,
+non-token, non-dominated purpose.
+
+The current register has **ninety-nine slots: 36 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 42 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`**. D2E3 is the current presented card.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -2956,8 +2990,8 @@ overcompression.
 | `RCS-03C3C3D2C2` | Participant-composed related context-branching prevalence among constructive-capable related-only permission forces | `PRUNED`; D2A-A leaves no participant-constructed related-permission force and therefore no participant-composed context branching |
 | `RCS-03C3C3D2D` | Stochastic support across complete bound related-only permission-law projections after applicable configuration and language rows | `DIR-SELECTED`; C requires deterministic-only Witness and stochastic-capable Oracle related-only projection families to coexist under the documented viable-purpose, non-token, non-dominance, legibility, and bounded-fallback obligation; each opportunity receives one committed realization, while inherited hybrid bits remain deterministic |
 | `RCS-03C3C3D2E1` | Distribution-response prevalence across stochastic-capable related-only Oracle law projections | `DIR-SELECTED`; B makes every Oracle law distribution-responsive with at least two reachable probabilities while selecting no causal control, exact odds, or endpoint |
-| `RCS-03C3C3D2E2` | Matched player/counterplayer-causal odds-response support among responsive Oracle laws | `OWNER-OPEN`; classify qualifying support as empty or nonempty; a witness requires one independently meaningful lawful decision and complete causal closure to change the conditional permission distribution under the same intrinsic law and eventual pair/proof, not merely the realized sample or a disguised direct odds command |
-| `RCS-03C3C3D2E3` | Responsive-law prevalence across tagged deterministic related-form projections, including related-only Witness and inherited hybrid restrictions | `SCREEN`; follows applicable D2E2; classify responsive support as empty, universal, or nonempty proper without merging one contract's `Q_v` and `H_v` restrictions into a fake responsive projection |
+| `RCS-03C3C3D2E2` | Matched player/counterplayer-causal odds-response support among responsive Oracle laws | `DIR-SELECTED`; B requires at least one qualifying witness in which one independently meaningful lawful decision and complete causal closure change the conditional permission distribution under the same intrinsic law and eventual pair/proof, not merely the realized sample or a disguised direct odds command; universal coverage, exact actor, odds, and endpoint remain unsettled |
+| `RCS-03C3C3D2E3` | Responsive-law prevalence across tagged deterministic related-form projections, including related-only Witness and inherited hybrid restrictions | `OWNER-OPEN`; classify responsive support as empty, universal, or nonempty proper over complete separately tagged `Q`/`H` domains; never split a projection or merge one contract's `Q_v` and `H_v` outputs into fake response; exact E1-C does not determine its hybrid restrictions |
 | `RCS-03C3C3D2E4` | Matched player/counterplayer-causal certain-bit response among responsive deterministic related projections | `SCREEN`; conditional on D2E3-B/C, otherwise `PRUNED`; uses the complete causal-closure test while preserving one inherited bit for hybrids and forbidding a direct permission command |
 | `RCS-03C3C3D2E5` | Stable polarity among context-invariant deterministic related projections | `SCREEN`; conditional on D2E3-A/C, otherwise `PRUNED`; classify stable denial only, stable compatibility only, or both, without selecting identities, counts, or hybrid composition |
 | `RCS-03C3C3D2E6` | Missing-certainty endpoint support in responsive stochastic related-only laws after the deterministic form-wide baseline is known | `SCREEN`; conditionally `OWNER-OPEN` only when D2E3/D2E5 leave exactly one certain endpoint and D2E1-B/C permits the missing endpoint; B requires a responsive `q∈Q_v` witness and can never be activated or satisfied merely through hybrid placement; otherwise `DERIVED` |
@@ -3239,16 +3273,23 @@ not constrain hybrid composition. At that checkpoint the register had
 presented card.
 `RCS-03C3C3D2E1-B` then makes every Oracle law distribution-responsive. A
 two-question audit upholds one binary matched causal odds-response card without
-adding prevalence, actor, disclosure, or tuning rows. The current register has
-**ninety-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 41
+adding prevalence, actor, disclosure, or tuning rows. The register at that
+checkpoint had **ninety-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 41
 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. D2E2
-is the current presented card.
+was the presented card.
+`RCS-03C3C3D2E2-B` then requires at least one qualifying matched causal Oracle
+odds-response witness under the material-policy and anti-laundering guards. A
+two-question audit upholds D2E3's empty/all/nonempty-proper classification over
+complete separately tagged deterministic `Q` and `H` projections; no row is
+added. The current register has **ninety-nine slots**: 36 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 42 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 37`. D2E3 is the current presented card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-eight owner cards under this thirty-one-times-corrected charter and will
+thirty-seven owner cards under this thirty-one-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3272,7 +3313,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 99 frozen candidate slots; current `Phi_SR = 38` after `RCS-03C3C3D2E1-B` makes every Oracle distribution-responsive and opens matched causal odds response at D2E2 | At most 38 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 99 frozen candidate slots; current `Phi_SR = 37` after `RCS-03C3C3D2E2-B` requires one matched causal Oracle odds-response witness and opens deterministic related-response prevalence at D2E3 | At most 37 future owner cards without another explicit charter amendment; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

@@ -1,5 +1,79 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-26 causal Oracle play/counterplay — RCS-03C3C3D2E2-B selected
+
+The owner selected `RCS-03C3C3D2E2-B`. At least one responsive related-only
+Oracle law must have one qualifying matched causal witness. From one
+positive-support upstream state, two lawful policies differ at exactly one
+independently revisable, materially meaningful participant or counterplayer
+decision; with the intrinsic law and eventual pair/proof fixed, their complete
+causal closures produce different conditional permission distributions before
+the one realization. A changed sample alone does not qualify.
+
+B is existential, not universal. It chooses no exact actor, odds, endpoint,
+disclosure, action, prevalence beyond one witness, payoff, or implementation.
+The decision and changed fact must remain meaningful when the Oracle consequence
+is ablated. Direct or cosmetically laundered odds commands, changed laws/pairs,
+post-draw actions, rerolls, RNG-order artifacts, and lucky samples fail. The
+witness must change a truthful play, hedge, or counterplay policy and remain
+prospectively understandable and retrospectively attributable. If no viable,
+legible, non-token witness survives, reopen E2 with A.
+
+Two bounded read-only audits re-derived the next card's tagged topology,
+dependencies, gameplay policies, prediction burden, and ideal fit. They upheld
+one A/B/C row and found no prerequisite correction. The 99-row register now
+contains 36 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 42 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`.
+`RCS-03C3C3D2E3` is the sole presented card. The authoritative decision record
+remains unchanged.
+
+Use the nonempty tagged deterministic family
+`D^R_v=D^Q_v disjoint-union W^H_v`: complete related-only Witness laws plus
+complete nonempty hybrid restrictions inheriting their exact law's one
+deterministic bit. For each `d`, let
+`I^D_d={b_d(o):o in O_d}` and let `X` contain the projections with
+`I^D_d={0,1}`.
+
+- **A — every deterministic related projection is steadfast:** `X=∅`.
+  Witnesses/hybrids provide reliable anchors; different projections may be
+  stable-allow or stable-deny, which E5 decides. This gives the clearest
+  Witness-versus-Oracle promise and is C's bounded fallback, but removes
+  context-sensitive deterministic certainty.
+- **B — every deterministic related projection is responsive:** `X=D^R_v`.
+  Every Witness law and every nonempty hybrid restriction certainly allows in
+  one reachable context and certainly denies in another. This gives a universal
+  condition-matters grammar but removes all steadfast anchors and heavily
+  constrains hybrid placement. Do not recommend it.
+- **C — steadfast and responsive deterministic projections coexist:** `X` is
+  a nonempty proper subset of `D^R_v`. **Conditionally recommended.** It
+  supports a steadfast anchor, context-sensitive deterministic certainty that
+  players forecast or route around, and the already-selected responsive Oracle
+  hedge. Active manipulation or
+  protection of those facts becomes statecraft only if E4 later selects causal
+  support. Require both deterministic classes and their coexistence to be
+  legible, viable, non-token, and non-dominated; failure reopens E3 with A.
+
+Illustratively, Stone Choir/Q stays certain throughout its domain, Ashen
+Accord/Q certainly permits while an independently useful Ember Seal is
+preserved and denies after it is consumed, and Veiled Chorus/Q carries
+responsive Oracle risk. These names show three policies, not a required
+three-contract quota. E3 is agnostic about whether a decision can preserve or
+consume the Seal; E4 owns that.
+
+The anti-fake guard is load-bearing. Keep `Q` and `H` tags disjoint and use each
+projection's whole reachable domain. Never split by output or context, merge a
+contract's `Q` and `H` bits into one response, or slice endpoint contexts from
+an Oracle. A singleton domain is formally steadfast but proves no viable
+category. C is projection-level: one physical contract may supply differently
+classified form-tagged projections, and C promises neither hybrid existence
+nor both classes in each form. Exact E1-C does not settle E3 because an exact
+responsive law may have no hybrid domain or a steadfast hybrid restriction.
+
+E3 chooses no identities, contexts, actor/control, disclosure, result, payoff,
+hybrid composition, incidence, rarity, or implementation. A prunes E4 and
+opens E5. B opens E4, prunes E5, and derives E6. C opens E4, queues E5, and
+derives E6. Ask for A, B, or C.
+
 ## 2026-09-26 universal Oracle response — RCS-03C3C3D2E1-B selected
 
 The owner selected `RCS-03C3C3D2E1-B`. Every stochastic-capable related-only
@@ -16,9 +90,10 @@ coverage, actor distribution, disclosure, immutable-versus-actionable family
 prevalence, and exact odds do not get additional cards absent a distinct
 required product purpose.
 
-The 99-row register now contains 37 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 41
-`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
-`RCS-03C3C3D2E2` is the sole presented card. The authoritative decision record
+At that checkpoint the 99-row register contained 37 `SCREEN`, 1 `OWNER-OPEN`,
+16 `PRUNED`, 41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 38`.
+`RCS-03C3C3D2E2` was the sole presented card. The authoritative decision record
 remains unchanged.
 
 D2E2 asks whether any Oracle probability contrast must be causally reachable
@@ -52,8 +127,9 @@ counterplay policy and be understandable before the irreversible divergence
 and attributable afterward. If no such legible, viable, non-token witness can
 be authored, use A.
 
-Either answer selects E2 and makes deterministic related-response prevalence
-at D2E3 the next card; `Phi_SR` would become 37. D2E2 chooses no exact actor,
+Either answer would select E2 and make deterministic related-response
+prevalence at D2E3 the next card; `Phi_SR` would become 37. D2E2 chooses no
+exact actor,
 probability, threshold, endpoint, action identity, prevalence beyond one
 witness, payoff, cross-pair coupling, seed, or implementation.
 
@@ -10361,7 +10437,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 00:26 UTC — causal Oracle response is next](docs/handoffs/2026-09-27-0026--relic-causal-oracle-response-next.md)**
+[2026-09-27 00:50 UTC — deterministic related response is next](docs/handoffs/2026-09-27-0050--relic-deterministic-response-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

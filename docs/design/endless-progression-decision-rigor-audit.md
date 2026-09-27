@@ -4983,10 +4983,96 @@ otherwise reopen E2 with A. A remains the coherent fate/weather alternative
 and minimizes causal tracking, grief, quarterbacking, threshold play, and
 blame.
 
-The current register has 99 rows: 37 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`,
-41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
-D2E2 is the sole presented card. Either answer selects E2 and opens D2E3,
-yielding `Phi_SR = 37`. The authoritative decision record remains unchanged.
+At that checkpoint the register had 99 rows: 37 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 38`. D2E2 was the sole presented card. Either answer would select E2
+and open D2E3, yielding `Phi_SR = 37`. The authoritative decision record
+remained unchanged.
+
+The owner selected D2E2-B. Therefore
+`M^{Q-odds-causal}_v` is nonempty: at least one responsive Oracle law must
+contain one qualifying matched causal play-or-counterplay witness. The
+selection is existential. It does not make every Oracle or context actionable,
+choose the actor, grant direct bearer control, disclose exact odds, or require
+a certain endpoint. The complete same-law/same-pair causal-closure test,
+semantic-ablation materiality test, anti-laundering exclusions, prospective
+legibility, retrospective attribution, and fallback to A all remain binding.
+
+E2 moves to `DIR-SELECTED`; E3 opens. The register now has 99 rows: 36
+`SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 42 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`.
+
+The E3 post-answer screen used two bounded read-only questions. The topology
+audit independently re-derived the complete tagged denominator, challenged
+singleton and cross-form counterexamples, traced exact-lane inheritance, and
+recomputed every downstream branch count. The gameplay audit tested whether
+each branch changed a real player policy, whether C added an intolerable
+prediction dialect, and whether the standing ideal was doing illegitimate work
+for the recommendation. Both upheld one A/B/C card. No prerequisite correction
+or new row is needed.
+
+For each `d in D^R_v=D^Q_v disjoint-union W^H_v`, use the complete nonempty
+reachable domain for that exact form tag and the projection's deterministic
+bit. Let
+`X^{R-det-response}_v={d:{b_d(o):o in O_d}={0,1}}`. D2D-C proves
+`D^Q_v` and therefore `D^R_v` nonempty, so exactly three branches exist:
+
+- A: `X` is empty; every deterministic related projection is steadfast;
+- B: `X=D^R_v`; every deterministic related projection is responsive; or
+- C: `X` is a nonempty proper subset of `D^R_v`; responsive and steadfast
+  tagged projections coexist.
+
+The tag and whole-domain guards are substantive. One canonical law contributes
+at most one complete projection under each form tag. A projection may not be
+split by bit, context, instance, callback, helper, or implementation identity.
+One contract that is steadfast-deny in `Q` and steadfast-allow in `H` supplies
+two steadfast projections, not one responsive projection. An Oracle remains
+outside `D^Q_v` even in zero- or one-probability contexts. Multiple contexts
+with the same bit are steadfast. A singleton domain is formally steadfast but
+cannot by itself prove a viable policy category. One physical contract may
+legitimately supply a responsive projection under one tag and a steadfast
+projection under the other, so C does not imply two contracts or two builds.
+
+Exact E1-C does not derive E3-C. An exact responsive law can have no hybrid
+opportunity or can become steadfast when restricted to its nonempty hybrid
+domain; an exact steadfast law contributes here only if it has such a domain.
+Nor does E3 choose hybrid existence, composition, or per-form class coverage.
+
+The audit conditionally recommends C. It supports three related-form planning
+policies: a steadfast deterministic **anchor**, **context-sensitive certainty**
+that players can forecast, route, or hedge around without a roll, and the
+already-selected responsive probabilistic Oracle **hedge**. Active manipulation
+or protection of the responsive facts becomes statecraft only if E4 later
+selects causal support. A removes context-sensitive deterministic response; B
+removes the anchor and forces every nonempty hybrid restriction to span both
+bits. C reuses the prediction grammar already selected in the exact lane rather
+than inventing a wholly new one, but it remains worthwhile only if the form-
+local conditional-certainty policy is real.
+
+The operative ideal fit is local, not catalog-wide: a responsive deterministic
+projection may directly express one continuing law with genuinely different
+certain reception under meaningful relational facts. A steadfast projection
+is protective/partial, and coexistence is merely aggregate. The distinct
+children and genuine shared cause remain the primary direct fit. The ideal
+therefore supports explaining C but cannot manufacture its gameplay purpose.
+
+C must carry a hard deferred viability obligation. Its steadfast and responsive
+classes and their coexistence must be reachable, legible, viable, non-token,
+and non-dominated; the responsive class must materially change truthful legal
+forecasting, routing, or hedging and cannot survive only through an obscure
+second context or artificial domain carving. If later authoring/evaluation
+cannot prove that purpose, reopen
+E3 with A. A is the coherent bounded fallback because it preserves the clearest
+Witness-versus-Oracle promise. B is not recommended because it removes every
+steadfast related anchor and universalizes forecast, context-gotcha, UI, and
+hybrid-placement burdens. C and B alone imply no player-causal lever.
+
+E3-A prunes E4 and opens E5, producing `Phi_SR = 35`. E3-B opens E4, prunes
+E5, and derives E6, producing `Phi_SR = 34`. E3-C opens E4, queues E5 behind
+it, and derives E6, producing `Phi_SR = 35`. E3 chooses no exact law, form,
+context, actor, causal control, disclosure, payoff, hybrid placement, incidence,
+rarity, or implementation. D2E3 is the sole presented card. The authoritative
+decision record remains unchanged.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

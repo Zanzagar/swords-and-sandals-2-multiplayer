@@ -328,7 +328,11 @@ causal-control, stable-polarity, and missing-certainty-endpoint rows.
 The owner selected RCS-03C3C3D2E1-B: every Oracle law has at least two
 reachable probabilities, without yet requiring a player-causal lever. A
 two-angle post-answer audit upheld one binary matched causal-response card.
-RCS-03C3C3D2E2 is the current owner-facing choice under SR-03.
+The owner selected RCS-03C3C3D2E2-B: at least one Oracle law must have a
+qualifying matched player/counterplayer-causal odds-response witness. A
+two-angle post-answer audit upheld the tagged deterministic related-response
+prevalence boundary. RCS-03C3C3D2E3 is the current owner-facing choice under
+SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -23187,7 +23191,7 @@ permission causal test. All upheld one binary row with the material-policy and
 anti-laundering safeguards below. No prerequisite correction or new row is
 needed.
 
-### RCS-03C3C3D2E2 — matched player/counterplay-causal Oracle odds response — active owner choice
+### RCS-03C3C3D2E2 — matched player/counterplay-causal Oracle odds response — direction selected
 
 E1-B makes every Oracle distribution-responsive, but a law may vary only with
 facts that no lawful decision can affect. Let `M^{Q-odds-causal}_v` contain an
@@ -23261,6 +23265,106 @@ Either answer moves E2 to `DIR-SELECTED` and makes D2E3 the next presented
 card. The register would then contain 36 `SCREEN`, 1 `OWNER-OPEN`, 16
 `PRUNED`, 42 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 37`. E2 alone neither decides nor activates D2E6.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, require at
+least one matched causal Oracle response.** Thus
+`M^{Q-odds-causal}_v≠∅`. At least one responsive Oracle law must have
+one qualifying intervention whose complete causal closure changes the
+conditional permission distribution while the intrinsic law and eventual
+related-only pair/proof remain fixed.
+
+This is an existential play-or-counterplay promise, not universal causal
+coverage. It does not make every Oracle or context actionable, identify the
+controlling side, give the bearer direct control, disclose exact odds, or
+require a certain endpoint. The qualifying decision and changed law-read fact
+must remain independently meaningful under semantic ablation; a direct or
+cosmetically laundered odds command, changed law/variant/pair/proof, post-draw
+action, reroll, unrelated RNG ordering, or lucky sample still fails. The
+witness must change a truthful play, hedge, or counterplay policy and remain
+prospectively understandable and retrospectively attributable. Failure to
+author a viable, legible, non-token witness reopens E2 with A.
+
+E2 moves to `DIR-SELECTED`; E3 becomes the sole `OWNER-OPEN` row. The 99-row
+register now contains 36 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 42
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. The
+authoritative decision record remains unchanged.
+
+The E3 post-answer screen used two bounded read-only questions. One re-derived
+the tagged projection topology, inheritance rules, downstream dependencies,
+and register arithmetic. The other attacked the player-policy value,
+prediction burden, ideal fit, and countermodels for all three branches. Both
+upheld one empty/all/nonempty-proper response-prevalence card. No prerequisite
+correction or new row is needed.
+
+### RCS-03C3C3D2E3 — deterministic related-projection response prevalence — active owner choice
+
+D2D-C guarantees a nonempty deterministic-only related-only Witness family
+`D^Q_v`. Let `W^H_v` contain separately tagged canonical restrictions of exact
+laws to their nonempty reachable hybrid domains. Retain the tagged disjoint
+union `D^R_v=D^Q_v disjoint-union W^H_v`; hence `D^R_v` is nonempty even when
+there are no hybrids.
+
+For each `d in D^R_v`, use its complete nonempty reachable domain `O_d`. A
+`Q`-tagged Witness uses its deterministic related-only bit `b_d(q)`; an
+`H`-tagged projection uses the one deterministic bit inherited from its exact
+law. Define
+`I^D_d={b_d(o):o in O_d}` and
+`X^{R-det-response}_v={d in D^R_v:I^D_d={0,1}}`. Membership means that one
+complete tagged projection certainly allows in at least one reachable factual
+context and certainly denies in another. It does not mean that a player can
+cause the change; D2E4 owns that question.
+
+| Choice | Deterministic related-response rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every deterministic related projection is steadfast** | `X^{R-det-response}_v=∅`. Every related-only Witness law and every extant hybrid restriction keeps one certain bit throughout its own complete reachable domain. Different projections may keep different bits; D2E5 decides their stable-polarity support. | A creates the sharpest product promise: **Witnesses are reliable anchors; Oracles carry responsive risk.** It minimizes forecasting, hidden-condition gotchas, and hybrid-placement constraints. The cost is excluding any deterministic related permission whose certain result changes with factual context. Its ideal fit here is protective/partial rather than direct. **A is C's bounded fallback if the responsive deterministic dialect cannot earn a real build purpose.** | **Stone Choir/Q** always permits its Twin Vow pair throughout that projection's domain, whether the lineage is whole or scarred. A different projection may always deny. A broader exact law may be responsive outside a hybrid restriction while that separately tagged `H` restriction remains steadfast. |
+| **B — every deterministic related projection is responsive** | `X^{R-det-response}_v=D^R_v`. Every related-only Witness projection and every extant nonempty hybrid restriction reaches both certain bits within its own tagged domain. | B gives one universal grammar—relationship condition always matters—while preserving certainty as the Witness/hybrid distinction from Oracle risk. A responsive law directly expresses continuity and real difference at one operative boundary. But B removes every steadfast related anchor, universalizes forecast and gotcha burden, and heavily constrains hybrid placement: no context-invariant exact law may contribute a nonempty hybrid restriction. It is not recommended. | **Ashen Accord/Q** certainly permits Guard Pulse plus Riposte Mark while an independently useful Ember Seal is preserved and certainly denies when the Seal has been lawfully consumed; no draw occurs. E3 is agnostic about whether a decision can preserve or consume it—E4 owns that. Under B, every other `Q` Witness and every nonempty `H` restriction needs its own internally two-bit domain. |
+| **C — steadfast and responsive deterministic projections coexist** | `∅⊊X^{R-det-response}_v⊊D^R_v`. At least one tagged deterministic projection is responsive and at least one is steadfast. This is a projection-level promise, not a requirement for two physical Relics or for both classes inside both `Q` and `H`. | **Conditionally recommended.** C preserves a dependable **anchor** policy while adding **context-sensitive certainty**: forecast, route, or hedge around relationship facts without accepting Oracle variance. If E4 later finds causal support, that dialect can additionally become active statecraft through manipulating or protecting those facts. Beside the already-selected responsive Oracle lane, the catalog can support steadfast certainty, conditional certainty, and conditional probability. The responsive member can directly express same-law continuity with fact-sensitive difference; coexistence is only aggregate. Costs are another local prediction category, stable-allow dominance risk, Oracle comparison pressure, and UI burden. Require both classes and their coexistence to be legible, viable, non-token, and non-dominated; otherwise use A. | **Stone Choir/Q** supplies the steadfast anchor, **Ashen Accord/Q** supplies the certain preserved-Seal/consumed-Seal contrast, and **Veiled Chorus/Q** supplies responsive Oracle risk. Whether play can cause Ashen's contrast remains E4's question. These names illustrate three policies, but C can formally be witnessed by differently tagged projections of one physical contract if one projection is internally responsive and the other steadfast. |
+
+A/B/C are mutually exclusive and exhaustive because the nonempty family
+`D^R_v` has a responsive subset that is empty, all of `D^R_v`, or a nonempty
+proper subset. A responsive projection must have image exactly `{0,1}`.
+Multiple contexts with the same bit remain steadfast. A singleton reachable
+domain is legitimately steadfast, but cannot by itself prove a viable policy
+dialect.
+
+The tags and whole-domain rule are load-bearing. One canonical law contributes
+at most one complete projection per form tag; never split a projection by
+output, context component, instance, callback, helper, or generated identifier.
+A genuine law-defining committed variant may be a separate law, while code or
+refactor shape may not multiply laws. Never concatenate one contract's `Q` and
+`H` outputs: always-deny in `Q` plus always-allow in `H` is two steadfast
+tagged projections, not one responsive projection. Oracle contexts remain
+outside `D^Q_v` even when their probability reaches zero or one; D2E6 owns
+stochastic certainty-endpoint support.
+
+Exact E1-C does not settle E3. A responsive complete exact law may have no
+hybrid opportunity, or its nonempty hybrid restriction may contain only one of
+its exact-law bits. Conversely, any context-invariant exact law with a nonempty
+hybrid restriction contributes a steadfast `H` projection. C therefore adds a
+form-local gameplay promise, not a new system-wide prediction grammar.
+
+C's deferred viability obligation is hard. The steadfast and responsive
+deterministic classes and their coexistence must each furnish reachable,
+legible, non-token, non-dominated policy purposes. The responsive class must
+materially change truthful legal forecasting, routing, or hedging rather than
+survive only in an obscure, dominated, or artificially carved context.
+SR-05/SR-06/SR-09, RCS-02/SR-10, SR-12, and RCS-17/RCS-18 own authoring,
+comprehension, simulation/RL, balance, exploit, and playtest proof. Failure
+reopens E3 with A.
+
+E3 chooses no exact laws, forms, contexts, actor, causal control, disclosure,
+result, payoff, hybrid existence, hybrid composition, incidence, rarity, or
+implementation. Under A, E4 prunes and E5 opens. Under B, E4 opens, E5 prunes,
+and E6 derives because both certain endpoints are already present. Under C, E4
+opens, E5 remains queued behind it, and E6 likewise derives. The resulting
+registers would be:
+
+- A: 34 `SCREEN`, 1 `OWNER-OPEN` at E5, 17 `PRUNED`, 43 `DIR-SELECTED`, 2
+  `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`;
+- B: 33 `SCREEN`, 1 `OWNER-OPEN` at E4, 17 `PRUNED`, 43 `DIR-SELECTED`, 3
+  `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`; or
+- C: 34 `SCREEN`, 1 `OWNER-OPEN` at E4, 16 `PRUNED`, 43 `DIR-SELECTED`, 3
+  `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
 
 ## Session protocol and evidence
 

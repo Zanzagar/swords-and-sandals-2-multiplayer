@@ -140,6 +140,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [deterministic related response is next](2026-09-27-0050--relic-deterministic-response-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D2E2-B requires one genuine matched causal Oracle response; a two-angle audit preserves one tagged deterministic response-prevalence card and leaves D2E3 as the sole presented frontier. |
 | [causal Oracle response is next](2026-09-27-0026--relic-causal-oracle-response-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D2E1-B makes every Oracle distribution-responsive; a two-angle audit preserves one guarded binary causal-response card and leaves D2E2 as the sole presented frontier. |
 | [Oracle response prevalence is next](2026-09-27-0013--relic-oracle-response-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D2D-C requires viable deterministic Witness and stochastic Oracle related-only laws; a cross-challenged six-row correction preserves one-bit hybrids and leaves Oracle distribution-response prevalence at D2E1 as the sole presented card. |
 | [intrinsic related-only permission selected](2026-09-26-1919--relic-intrinsic-related-permission-selected.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D2A-A makes related-only permission participant-intrinsic and prunes three control-language rows; a five-part audit upholds one empty-aware D2D stochastic-support card and conditionally recommends Witness/Oracle coexistence with deterministic fallback. |
