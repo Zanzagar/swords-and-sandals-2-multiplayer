@@ -28,8 +28,11 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 14:18 — big fighters walk again, and the AI presses a 2v1](docs/handoffs/2026-09-28-1418--big-fighters-walk-and-the-ai-presses-a-2v1.md)**
-(session `f4d2f69f`). Start there. **The owner's two playtest defects are fixed; P2 (ranged-first or
+[2026-09-28 17:50 — the press heads for a spot, and ring3 is paused](docs/handoffs/2026-09-28-1750--the-press-heads-for-a-spot-and-ring3-is-paused.md)**
+(session `f4d2f69f`). Start there: **the P2 census and a verifier on 06beab0 are NOT done, and the ring3
+workflow is stopped mid-slice with resume steps.** *(It supersedes
+[2026-09-28 14:18 — big fighters walk again, and the AI presses a 2v1](docs/handoffs/2026-09-28-1418--big-fighters-walk-and-the-ai-presses-a-2v1.md),
+whose owner calls still stand.)* **The owner's two playtest defects are fixed; P2 (ranged-first or
 pincer-first) and a pre-engagement crowd-play question wait on the owner.** *(It supersedes
 [2026-09-26 03:05 — the gate is adopted, and main is current](docs/handoffs/2026-09-26-0305--the-gate-is-adopted-and-main-is-current.md),
 **whose defects 1 and 2 are DONE and whose items 1, 2 and 4 carry forward.** EVERY COMMIT NEEDS A
