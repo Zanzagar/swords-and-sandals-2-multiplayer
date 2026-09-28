@@ -388,10 +388,12 @@ transformation; D1T1 prunes. Zanzagar then selected D1VT-A, so an actual
 true/allow permission verdict governs coexistence but never directly proposes
 transformation; D1VT1 prunes. Zanzagar then selected D1VF-A, so an actual
 false/not-both permission verdict routes the deterministic denied disposition
-but never directly proposes transformation; D1VF1 prunes. **RCS-03D1K is now
-the sole owner-facing choice under SR-03:** whether one complete positive
-provisional output becoming sealed may directly propose transformation before
-that output's later receipt-set commit.
+but never directly proposes transformation; D1VF1 prunes. Zanzagar then
+selected D1K-A, so one complete positive provisional output becomes sealed
+without that completion itself proposing transformation; D1K1 prunes.
+**RCS-03D1Z is now the sole owner-facing choice under SR-03:** whether an
+actual ledger-bearing `{}` settlement commit may directly propose
+transformation.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -25604,7 +25606,7 @@ and 1 `EVALUATE`; `Phi_SR = 33`**. Ten cause parent/child slots remain from K
 through M; closing them returns D2 as the sole frontier at `Phi_SR = 23`. The
 authoritative decision record remains unchanged.
 
-### RCS-03D1K — complete positive provisional-output sealing as transformation cause — active owner choice
+### RCS-03D1K — complete positive provisional-output sealing as transformation cause — A selected
 
 Let `D_K` contain each definition in `D_mut` with at least one reachable
 **provisional-completion transformation-cause witness**. For one actual
@@ -25612,11 +25614,11 @@ cut-atomic canonical evaluation `z` on the positive branch, let `Y_z` be its
 complete nonempty provisional output set after the selected tuple, any
 permission verdict, and the deterministic disposition are fixed. `Y_z` may be
 an allowed original set `{P}` or `{P,Q}`, or a positive denied substitute set
-`{S}` or `{S1,S2}`. Let `kappa(z)` be the single semantic occurrence at which
+`{S}` or `{S1,S2}`. Let `seal_K(z)` be the single semantic occurrence at which
 that whole set becomes complete and every member is sealed under C134-A.
 
 This set-level definition is a required safeguard against ambiguity in C134's
-older tag-level candidate notation. One evaluation has **one** `kappa(z)`, not
+older tag-level candidate notation. One evaluation has **one** `seal_K(z)`, not
 one occurrence per receipt. A width-two set becoming complete is one coherent
 output becoming inevitable. Raw candidate fragments, individual tag
 completions, counterfactual predicate sufficiency, resolver callbacks, and
@@ -25627,14 +25629,14 @@ unrevocable.
 A K witness requires:
 
 1. one actual positive evaluation `z` and its single complete, sealed
-   nonempty provisional output-set occurrence `kappa(z)`;
-2. one prospectively versioned direct K-locus edge from `kappa(z)` to a
+   nonempty provisional output-set occurrence `seal_K(z)`;
+2. one prospectively versioned direct K-locus edge from `seal_K(z)` to a
    materially distinct legal assignment in the same RCS-03A dialect and
    active persistent Relic;
 3. deletion of only that edge removes the proposal while `Y_z`, its sealing,
    the later P commit, every independently authored P proposal, any later
    claim, the completed trace, and the current assignment remain fixed;
-4. the edge reads only facts authoritative no later than `kappa(z)`, never the
+4. the edge reads only facts authoritative no later than `seal_K(z)`, never the
    later receipt commit, claim, payoff, approval, or collision result; and
 5. K cannot alter the output, its sealing, or settlement. The current
    assignment remains authoritative pending RCS-03E/RCS-04A/RCS-04B.
@@ -25652,7 +25654,7 @@ cannot duplicate either stable identity.
 | Choice | Provisional-completion cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
 | --- | --- | --- | --- |
 | **A — sealing guarantees manifestation but never transforms** | `D_K=emptyset`. Becoming complete and unrevocable retains every consequence of C133-A/C134-A but never itself proposes persistent change. | **Recommended.** A teaches: **the relationship becomes inevitable; what it actually manifests may shape the Relic**. K remains meaningful—it unifies distinct receipt identities into one sealed output and prevents either agency or opaque automatic evolution from making that output fizzle—while D1P-B already gives every transforming Relic a readable success-shaped biography path at actual commit. This is neutral/protective under Achintya Bheda Abheda: becoming and manifestation remain continuous but really distinct without making every meaningful intermediate boundary another biography trigger. A avoids a nearly simultaneous K/P double-proposal language, subtle cause attribution, success farming, and extra collision/UI load. Cost: no Relic can remember the precise instant its manifestation became inevitable before it became actual. | Guard `g` plus Heat `h` makes complete sealed `{P,Q}`. K creates no proposal. The later atomic commit may still use an authored P edge to create `CONCORDANT PROPOSED`. |
-| **B — every transforming Relic has a sealing-shaped path** | `D_K=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable `kappa(z)` whose direct K edge proposes a materially distinct assignment; not every K occurrence must transform. | B makes “every Relic can be changed when one possible manifestation becomes inevitable” a universal thesis. It is coherent, but every definition already needs a P-shaped path and no player can answer or change the sealed result between K and P. The catalog therefore carries two success-adjacent causal languages, with maximum authoring, explanation, farming, and collision burden. B does not require both edges on the same trace, but it permits one success to create independently attributable K and P proposals. | Complete sealed `{P}` may create `AWAKENED PROPOSED`; its later P commit may independently create `DEFIANCE PROPOSED`. Deleting only the K edge must leave `{P}`, the commit, and `DEFIANCE PROPOSED` unchanged. |
+| **B — every transforming Relic has a sealing-shaped path** | `D_K=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable `seal_K(z)` whose direct K edge proposes a materially distinct assignment; not every K occurrence must transform. | B makes “every Relic can be changed when one possible manifestation becomes inevitable” a universal thesis. It is coherent, but every definition already needs a P-shaped path and no player can answer or change the sealed result between K and P. The catalog therefore carries two success-adjacent causal languages, with maximum authoring, explanation, farming, and collision burden. B does not require both edges on the same trace, but it permits one success to create independently attributable K and P proposals. | Complete sealed `{P}` may create `AWAKENED PROPOSED`; its later P commit may independently create `DEFIANCE PROPOSED`. Deleting only the K edge must leave `{P}`, the commit, and `DEFIANCE PROPOSED` unchanged. |
 | **C — a disclosed Becoming-bound subset changes on sealing** | `D_K` is a nonempty proper subset of `D_mut`; D1K1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Strongest thematic countercase.** A named `BECOMING-BOUND`, Threshold, or Premonition family may remember the instant a latent form becomes unavoidable, while ordinary Relics wait for manifested receipts. This can give Souls and Simulacra a real play-language distinction between becoming and having become. It is justified only when K provenance changes player policy, is prospectively disclosed and independently fun, remains non-dominated, and cannot honestly be expressed as a distinctive P trigger or target. Otherwise the family is a premium extra-evolution-roll caste built from an almost imperceptible timing distinction. | Dreamglass may create `FORETOLD PROPOSED` when `{S1,S2}` becomes complete and sealed after a denied-pair refraction. `{S1,S2}` is one K occurrence, never two; its later atomic P commit remains independently classifiable. |
 
 A/B/C are exhaustive because `D_K` is a subset of nonempty `D_mut`: empty,
@@ -25668,6 +25670,100 @@ The exact trigger and target catalog, within-definition prevalence, rates,
 copy, surface, power, persistence, anti-farming rules, approval, collision, and
 implementation remain AUTHOR/SPEC/TUNE or later registered decisions. The
 authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, sealing
+guarantees manifestation but never transforms.** Thus `D_K=emptyset`. The
+whole positive provisional output still becomes complete and unrevocable under
+C133-A/C134-A, but its K locus has no direct persistent-transformation proposal
+edge. The later actual receipt-set commit retains its independent D1P-B cause
+classification. D1K moves to `DIR-SELECTED`, and `RCS-03D1K1` moves to
+`PRUNED`.
+
+The post-answer audit also found and corrects one notation error of mine. D4
+already uses `kappa(z)` for a canonical cancellation-pair recurrence key; the
+first D1K draft reused that symbol for the sealing occurrence. Current D1K
+wording now uses `seal_K(z)`. This correction changes no selected rule,
+semantic occurrence, dependency, or count.
+
+After the selected transition, the 141-row register contains **30 `SCREEN`, 1
+`OWNER-OPEN` at D1Z, 39 `PRUNED`, 64 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 31`**. Eight cause parent/child slots remain from Z
+through M; closing them returns D2 as the sole frontier at `Phi_SR = 23`. The
+authoritative decision record remains unchanged.
+
+### RCS-03D1Z — actual ledger-bearing empty settlement as transformation cause — active owner choice
+
+Reuse nonempty `Z^0_v`, the completed canonical product evaluations with a
+nonempty selected authoritative contender-ledger tuple and final pair-local
+output `{}`. Selected E1-C guarantees that at least one such cancellation is
+reachable somewhere in the completed catalog. It does not require a
+cancellation-capable route for every transforming definition.
+
+Let `D_Z` contain each definition in `D_mut` with at least one reachable
+**empty-settlement transformation-cause witness**. Such a witness requires:
+
+1. one actual evaluation in `Z^0_v`: exactly two ledger-satisfied contender
+   tags, one selected complete tuple, one realized false/not-both permission
+   bit, its prospectively fixed cancellation disposition, and one atomic
+   authoritative ledger-bearing `{}` settlement commit;
+2. one prospectively versioned direct Z-locus edge from that actual empty
+   commit to a materially distinct legal assignment in the same RCS-03A
+   dialect and active persistent Relic;
+3. deletion of only that edge removes the proposal while the selected tuple
+   and pair, false bit, fixed disposition, `{}` commit, D2-A preserved proof,
+   later L latch write, every independently authored L proposal, completed
+   trace, and current assignment remain fixed;
+4. the edge reads no later latch, relationship break/renewal, approval,
+   collision, or committed-transformation fact; and
+5. Z cannot create a positive receipt, claim evidence, change the recurrence
+   rule, or alter the empty settlement. The current assignment remains
+   authoritative pending RCS-03E/RCS-04A/RCS-04B.
+
+One evaluation has one Z occurrence. `{}` contains no receipt identities, so
+the two vanished contender tags, their ledgers, proof children, participants,
+and hypothetical “missing receipts” cannot multiply it. A forecast or intent
+to cancel, the earlier false bit, the deterministic mapping alone, a positive
+denied disposition, an unreachable no-candidate conclusion, abort, callback,
+rendering, reload, replay, and duplicate delivery are not Z.
+
+Z is mechanically distinct from both neighboring loci. VF is the earlier
+permission verdict that says the original pair may not both continue. Z is the
+later final fact that this fixed denied opportunity actually committed no
+aligned receipt. L is the still-later persistent write that records “this
+canonical pair has already been heard during this unbroken bond.” D2-A means Z
+claims no evidence; D4-A means the same pair cannot immediately reroll while
+its relationship stays continuously sufficient. Neither rule decides whether
+the empty commit itself may propose biography.
+
+| Choice | Empty-settlement cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — cancellation settles absence but never transforms** | `D_Z=emptyset`. Every `{}` retains its no-receipt, no-claim, and later recurrence-latch consequences but never itself proposes persistent change. | **Strong production fallback.** A keeps one simple catalog-wide biography rule: actual positive manifestation may shape every transforming Relic under D1P-B; an empty settlement closes and latches the bond without adding another evolution route. It has the lowest failure-farming, ally-coercion, collision, and explanation burden. Cost: no Relic can be shaped specifically by an actual relationship ending in absence; that fantasy must attach honestly to the later latch, another lived event, or a dedicated operation. | Guardian Vow `P` and Returning Vow `Q` settle `{}` under Severed Chorus. Their proof stays lit and L later marks `LISTENED—SEVERED`, but Z creates no transformation proposal. |
+| **B — every transforming Relic has a cancellation-shaped path** | `D_Z=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable actual `{}` settlement whose direct Z edge proposes a materially distinct assignment; not every cancellation must transform. | B asserts that every Soul/Relic can be changed by absence. It is far stronger than E1-C's catalog-level cancellation witness: every definition now needs a two-contender, deny-capable, cancellation-capable path in addition to its D1P-B positive path. This pressures singleton, steadfast-allow, and positive-denial identities; turns deliberate failure into a universal progression route; and maximizes authored-content, teammate-steering, break/rebuild farming, and later Z/L collision burden. Choose B only for an explicit universal thesis that every Relic must remember nonmanifestation. | Every transforming definition needs some Severed-Chorus-like route. Its actual `{}` may create `MOURNING PROPOSED`; a later L edge, if independently supported, could create a second proposal about adopting the no-relisten memory. |
+| **C — a disclosed Absence-bound subset changes on cancellation** | `D_Z` is a nonempty proper subset of `D_mut`; D1Z1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Conditionally recommended higher-ceiling direction, with A as the practical fallback.** A named `ABSENCE-BOUND`, Hollow Witness, or Mourning family may be shaped by an actual empty settlement while ordinary Relics are not. Unlike K, Z is a final, visible, strategically costly outcome: the player receives no receipt and the pair becomes latched until genuine break and renewal. That can support a clear policy of deliberately accepting severance to pursue a loss-shaped branch. Under the standing ideal, two truthful distinct relationships can fail to co-manifest while their real relation-through-absence still shapes the continuing Relic; limiting this to named Relics preserves genuine catalog difference. C fails and reopens with A if it becomes free failure insurance, a premium extra-evolution caste, cheap ally-steered progression, dominant blink-reset farming, or cannot be explained in one sentence. | An `ABSENCE-BOUND` Dreamglass commits `{}` from the denied `P/Q` pair and creates `MOURNING PROPOSED`. Deleting only its Z edge leaves `{}`, preserved proof, and the later `LISTENED—SEVERED` latch unchanged. An ordinary Ashen can undergo the same cancellation without a Z proposal. |
+
+A/B/C are exhaustive because `D_Z` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. B means one qualifying cancellation path
+per transforming definition, not that every cancellation transforms. C
+classifies definitions, not exact/related/hybrid proof form, deterministic or
+Oracle denial, routing stance, law, context, pair identity, or proof shape.
+Those facts may condition exact authored edges but create no new Z authority,
+lifetime, or settlement event.
+
+C's retained viability conditions are hard requirements, not automatic
+compensation. Before every affected player's last informed reversible
+commitment, the cancellation family and every fact capable of switching this
+opportunity into `{}` must remain truthfully available; cheap unilateral ally
+coercion fails. Matched policy tests must find real cases in which optimized
+players seek Z and real cases in which they avoid it. No-receipt cost,
+preserved-proof value, the later latch, proposal access, break/rebuild cadence,
+and alternative positive paths all enter that comparison. RCS-17/RCS-18 own
+the solver, RL, human-comprehension, fun, non-dominance, and exploit gates.
+
+Under A/B, D1Z1 prunes and D1L opens. Under C, D1Z1 opens next. Exact
+definitions, triggers, targets, within-definition prevalence, rates, copy,
+surface, power, persistence, proposal approval, collision, and implementation
+remain AUTHOR/SPEC/TUNE or later registered decisions. This card authorizes no
+implementation, and the authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

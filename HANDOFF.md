@@ -1,6 +1,84 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 refusal routes without transforming; provisional sealing is next
+## 2026-09-28 sealing remains noncausal; actual empty settlement is next
+
+Zanzagar selected `RCS-03D1K-A`. A complete positive provisional output still
+becomes sealed and cannot fizzle before its receipt-set commit, but that K
+occurrence never itself proposes persistent transformation. D1K is
+`DIR-SELECTED`; D1K1 is `PRUNED`; D1Z is the sole frontier. The authoritative
+decision record remains unchanged.
+
+The 141-row register now contains 30 `SCREEN`, 1 `OWNER-OPEN` at D1Z, 39
+`PRUNED`, 64 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 31`. Eight cause parent/child slots remain from Z through M. Closing
+them returns D2 at 23; D2-D5 still lead to RCS-03E at 19.
+
+The post-answer audit caught one notation error of mine. D4 already uses
+`kappa(z)` for its canonical cancellation-pair recurrence key; the first D1K
+draft reused that symbol for sealing. The live owner packet and rigor audit now
+use `seal_K(z)` for K. The prior handoff remains frozen and is superseded by
+the current correction. No semantic rule, selection, dependency, or count
+changed.
+
+`RCS-03D1Z` asks whether one actual atomic ledger-bearing `{}` settlement
+commit may directly propose a Relic transformation. Z is the final empty
+outcome, not the earlier false permission verdict and not the later persistent
+“already listened” recurrence-latch write.
+
+The occurrence is atomic. One canonical evaluation with two ledger-satisfied
+contenders selects one complete tuple, realizes false/not-both, follows its
+fixed cancellation disposition, and commits `{}`. That is one Z event—not one
+per vanished tag, proof child, participant, or imaginary missing receipt.
+D2-A preserves its proof; D4-A later latches the same pair until genuine bond
+break and renewal. Deleting a direct Z edge must remove only its proposal while
+the false bit, `{}` commit, preserved proof, later latch, any separate L
+proposal, completed trace, and current assignment remain fixed.
+
+Selected E1-C guarantees cancellation somewhere in the catalog. It does not
+make a cancellation route available to every transforming Relic.
+
+- **A — cancellation settles absence but never transforms.** `D_Z=emptyset`.
+  `{}` still commits no receipt, claims no proof, and causes the later
+  recurrence latch, but no persistent-transformation proposal. This is the
+  strong production fallback: every Relic already has a positive biography
+  path under D1P-B, and A minimizes failure farming, ally coercion, explanation,
+  and Z/L collision. Cost: actual manifested absence can never itself shape a
+  Relic.
+- **B — every transforming Relic has a cancellation-shaped path.**
+  `D_Z=D_mut`. Every transforming definition must have at least one reachable
+  two-contender deny/cancel route whose actual `{}` proposes change. Not every
+  cancellation transforms. This newly forces cancellation capability across
+  singleton-, steadfast-allow-, and positive-denial-oriented identities and
+  makes deliberate failure a universal progression route alongside D1P-B.
+- **C — a disclosed proper subset is Absence-bound. Conditionally
+  recommended, with A as fallback.** `D_Z` is nonempty proper. A named
+  `ABSENCE-BOUND`, Hollow Witness, or Mourning family may be shaped by actual
+  `{}` while ordinary Relics are not. Unlike K, Z is final, visible, and
+  strategically costly: no receipt commits, and the pair latches until true
+  break/renewal. A player can therefore deliberately accept severance to seek
+  a loss-shaped branch. This directly serves Souls and Simulacra and the
+  standing ideal when two truthful distinct relationships fail to co-manifest
+  yet their real relation-through-absence shapes the continuing Relic.
+
+C falls back to A if it becomes free failure insurance, a premium extra-
+evolution caste, cheap ally-steered progression, dominant blink-reset farming,
+or cannot be taught as “this Relic learns from an actual empty settlement.”
+Matched policy tests must preserve optimized reasons both to seek and to avoid
+Z after counting the lost receipt, preserved proof, latch, reset cadence,
+proposal access, and positive alternatives. E1-C's last-informed-commitment
+and anti-cheap-coercion rules carry forward.
+
+Example: Guardian Vow P and Returning Vow Q are both proven. Severed Chorus
+returns false and its fixed disposition commits `{}`. Under A, proof remains
+lit and L writes `LISTENED—SEVERED`, but no Z proposal exists. Under C, an
+Absence-bound Dreamglass may create `MOURNING PROPOSED`; removing only the Z
+edge leaves `{}`, proof, and the latch unchanged. An ordinary Ashen can undergo
+the same cancellation without a Z proposal.
+
+Ask only for D1Z A, B, or C. Under A/B, D1Z1 prunes and D1L opens. Under C,
+D1Z1 opens next.
+
+## 2026-09-28 refusal routes without transforming; provisional sealing was next — superseded frontier
 
 Zanzagar selected `RCS-03D1VF-A`. An actual authoritative `false`/not-both
 permission verdict retains its full mechanical consequence: the original pair
@@ -69,8 +147,8 @@ PROPOSED`. Removing only the K edge must leave `{P,Q}`, its commit, and the P
 proposal untouched. A false pair whose fixed disposition is `{S1,S2}` follows
 the same grammar: one K event for the whole substitute set, then one P commit.
 
-Ask only for D1K A, B, or C. Under A/B, D1K1 prunes and D1Z opens. Under C,
-D1K1 opens next.
+This section preserves the prior D1K frontier. D1K-A is now selected; do not
+ask it again. The current single choice is D1Z in the newer section above.
 
 ## 2026-09-28 permission permits without transforming; false verdict was next — superseded frontier
 
@@ -146,7 +224,8 @@ Z/L facts, and every independent proposal unchanged. A different fixed denied
 opportunity may yield `{S}` and later K/P without changing the causal boundary.
 
 This section preserves the prior D1VF frontier. D1VF-A is now selected; do not
-ask it again. The current single choice is D1K in the newer section above.
+ask it again. D1K-A is also selected; the current single choice is D1Z in the
+newest section above.
 
 ## 2026-09-28 success shapes every Relic; claim-write cause selected — superseded frontier
 
@@ -209,8 +288,8 @@ rendering, duplicate delivery, and idempotent re-claim cannot mint another
 cause occurrence. Ally proof retains ownership/payment and grants no approval.
 This section records the prior D1C frontier. D1C-A is now selected; do not ask
 it again. **Corrected 2026-09-28:** D1I-A, D1T-A, D1VT-A, and D1VF-A are also
-selected and must not be asked again; D1N is derived empty, and the current
-single choice is D1K above.
+selected and must not be asked again; D1N is derived empty, D1K-A is now also
+selected, and the current single choice is D1Z above.
 
 ## 2026-09-28 claimed proof is Relic-wide spent; positive-settlement cause is next
 
@@ -11377,7 +11456,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 05:56 UTC — complete provisional-output sealing cause is next](docs/handoffs/2026-09-28-0556--relic-provisional-sealing-cause-next.md)**
+[2026-09-28 06:07 UTC — actual ledger-bearing empty-settlement cause is next](docs/handoffs/2026-09-28-0607--relic-empty-settlement-cause-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

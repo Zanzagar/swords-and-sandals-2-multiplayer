@@ -6869,14 +6869,14 @@ two ordered semantic loci.
 Because C134 originally states its revocability test per candidate tag, D1K
 must expressly aggregate those candidates. For one evaluation `z`, `Y_z` is
 the full positive provisional output `{P}`, `{P,Q}`, `{S}`, or `{S1,S2}`, and
-`kappa(z)` is its one complete/sealed occurrence. Width two does not mint two K
+`seal_K(z)` is its one complete/sealed occurrence. Width two does not mint two K
 causes. Allowed-original versus positive-denied provenance, width one versus
 two, and original versus substitute identity may condition an authored K
 edge, but all are attributes of the same authority/lifetime/settlement event.
 Raw candidate fragments, individual tags, counterfactual sufficiency,
 callbacks, rendering, and serialization do not pass the admission test.
 
-A qualifying K witness contains one actual `kappa(z)` and a prospectively
+A qualifying K witness contains one actual `seal_K(z)` and a prospectively
 versioned direct K-locus edge to a materially distinct same-dialect assignment
 of the same active Relic. Deleting only that edge must remove the proposal
 while holding the entire `Y_z`, sealing, later P commit, every independent P
@@ -6922,6 +6922,91 @@ sealed K event and later one atomic P commit—never two K events. Under A/B,
 D1K1 prunes and D1Z opens. Under C, D1K1 opens. Exact definitions, triggers,
 targets, prevalence, rates, copy, power, UI, persistence, approval, collision,
 and implementation remain later work.
+
+Zanzagar selected D1K-A. Thus `D_K=∅`: the complete positive provisional
+output still becomes sealed and unrevocable, but K has no direct persistent-
+transformation proposal edge. D1K moves to `DIR-SELECTED`, D1K1 moves to
+`PRUNED`, and D1Z becomes the sole `OWNER-OPEN` row. The 141-row register now
+contains 30 `SCREEN`, 1 `OWNER-OPEN`, 39 `PRUNED`, 64 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`. Eight cause parent/child
+slots remain from Z through M; closing them returns D2 as the sole frontier at
+23. No authoritative-record text changed.
+
+**Post-answer notation correction — my first D1K draft reused an existing
+symbol.** D4 already defines `kappa(z)` as its canonical cancellation-pair
+recurrence key. D1K now uses `seal_K(z)` for the one complete/sealed positive
+output-set occurrence. The semantic event, answer, dependencies, and counts do
+not change.
+
+**D1Z prerequisite and atomicity audit — passes without a row split.** Selected
+E1-C guarantees nonempty catalog-level cancellation support, and `Z^0_v`
+already contains exactly the completed evaluations with a nonempty selected
+contender-ledger tuple and final pair-local `{}`. D2-A makes the empty commit
+claim no evidence. D4-A requires the subsequent canonical pair-recurrence
+latch write and prevents another listen while the same bond stays continuously
+sufficient. These rules prove a reachable Z occurrence, not a direct Z cause
+edge and not cancellation support for every transforming definition.
+
+A qualifying witness contains one actual atomic ledger-bearing `{}` settlement
+commit and a prospectively versioned direct Z edge to a materially distinct
+same-dialect assignment of the same active Relic. Deleting only that edge must
+remove its proposal while holding the selected tuple/pair, realized false bit,
+fixed cancellation disposition, actual empty commit, preserved proof, later L
+write and any L proposal, completed trace, and current assignment fixed. Z may
+inspect no later latch, break/renewal, approval, collision, or committed-
+transformation fact and may change neither settlement, claim, nor recurrence.
+
+One evaluation has one Z event. The vanished contender tags, ledgers, proof
+children, participants, and imagined missing receipts cannot multiply an empty
+set. Predicted cancellation, VF, the deterministic mapping, a positive denied
+result, unreachable no-candidate conclusion, abort, callback, rendering,
+reload, replay, and duplicate delivery are not Z. Exact/related/hybrid proof
+form, deterministic/Oracle denial, routing stance, law, context, pair identity,
+and proof shape may condition exact edges but add no authority/lifetime split.
+
+The next card is therefore atomic and exhaustive over `D_Z⊆D_mut`:
+
+- D1Z-A makes `D_Z=∅`. Cancellation retains no-receipt, no-claim, and later
+  latch consequences but never proposes biography. **This is the strong
+  production fallback:** D1P-B already supplies every definition a positive
+  cause path, and A minimizes failure farming, ally coercion, explanation, and
+  Z/L collision. It gives up Relics shaped specifically by manifested absence.
+- D1Z-B makes `D_Z=D_mut`. Every transforming definition must have at least
+  one reachable two-contender deny/cancel path whose actual `{}` directly
+  proposes change. This is much stronger than E1-C, pressures singleton,
+  steadfast-allow, and positive-denial identities, and universalizes
+  deliberate failure as a progression route alongside D1P-B. It is justified
+  only by an explicit thesis that every Relic must remember absence.
+- D1Z-C makes `D_Z` nonempty proper and opens D1Z1. **Conditionally recommended
+  as the higher-ceiling direction, with A as fallback.** A disclosed
+  `ABSENCE-BOUND`, Hollow Witness, or Mourning family may be shaped by actual
+  `{}` while ordinary Relics are not. Unlike K, Z is final, visible, and
+  strategically costly: no receipt commits and the pair latches until real
+  break/renewal. A player can therefore knowingly accept severance to pursue a
+  loss-shaped branch. Two truthful distinct relationships can fail to
+  co-manifest while their real relation-through-absence shapes the continuing
+  Relic; named proper support preserves catalog difference.
+
+For the separating trace, Guardian Vow P and Returning Vow Q are both proven,
+Severed Chorus returns false, and its fixed disposition commits `{}`. Under A,
+proof remains lit and L writes `LISTENED—SEVERED`, but Z proposes nothing.
+Under B/C, a qualifying Z edge may create `MOURNING PROPOSED`; deleting only
+that edge leaves `{}`, proof availability, the later latch, and every L
+proposal fixed. Z and L cannot merge or prioritize their proposals.
+
+C fails and reopens with A if it becomes free failure insurance, a premium
+extra-evolution caste, cheap ally-steered progression, dominant blink-reset
+farming, or cannot be explained as “this Relic learns from an actual empty
+settlement.” E1-C's last-informed-commitment and anti-coercion requirements
+carry forward. Matched policy tests must preserve optimized cases that seek Z
+and cases that avoid it after no-receipt cost, preserved proof, latch, proposal
+access, reset cadence, and positive alternatives are all counted. RCS-17/RCS-
+18 retain simulator/RL, human-comprehension, fun, non-dominance, and exploit
+acceptance.
+
+Under A/B, D1Z1 prunes and D1L opens. Under C, D1Z1 opens. Exact identities,
+triggers, targets, rates, power, UI, persistence, approval, collision, and
+implementation remain later work.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

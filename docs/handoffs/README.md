@@ -140,6 +140,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [actual ledger-bearing empty-settlement cause is next](2026-09-28-0607--relic-empty-settlement-cause-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D1K-A keeps sealing meaningful but noncausal; two audits uphold one actual ledger-bearing `{}` commit as the distinct Z locus, correct D1K's reused occurrence symbol, and leave D1Z as the sole presented choice. |
 | [complete provisional-output sealing cause is next](2026-09-28-0556--relic-provisional-sealing-cause-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D1VF-A lets refusal route its deterministic disposition without directly transforming; two audits uphold one whole positive provisional-output set becoming complete/sealed as a distinct K locus and D1K as the sole presented choice. |
 | [actual false/not-both permission-verdict cause is next](2026-09-28-0542--relic-false-verdict-cause-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D1VT-A lets permission govern coexistence without directly transforming; two audits uphold the realized false/not-both bit as one atomic reachable cause locus and D1VF as the sole presented choice. |
 | [actual true/allow permission-verdict cause is next](2026-09-28-0529--relic-true-verdict-cause-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D1T-A keeps actual tuple selection authoritative but noncausal; two audits uphold the realized true/allow bit as one atomic reachable cause locus and D1VT as the sole presented choice. |
