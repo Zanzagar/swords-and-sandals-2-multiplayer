@@ -16110,7 +16110,9 @@ export function createSs2TeamRules({
           const others = [...view.foes, ...view.allies.filter((ally) => ally.id !== actor.id)];
           const landX = step ? ss2RankArrivalX(actor.x, others, nearest.y) : null;
           const way = landX !== null && nearest.x > landX ? 1 : -1;
-          const queued = landX !== null && view.allies.some((ally) => ally.id !== actor.id && ally.alive !== false
+          // Only with the press on: `aiPress: "off"` is the AI before the
+          // press, kept exact as the measurement baseline.
+          const queued = aiPress !== "off" && landX !== null && view.allies.some((ally) => ally.id !== actor.id && ally.alive !== false
             && ally.y === nearest.y && (ally.x - landX) * way > 0 && (nearest.x - ally.x) * way > 0);
           if (step && !queued) return step;
         }

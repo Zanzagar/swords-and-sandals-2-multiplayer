@@ -534,3 +534,29 @@ test("the build's champions, 3v3 seed 28: no free member taunts from afar four t
   }
   assert.ok(longest < 4, `red-2 taunted ${longest} of his turns running`);
 });
+
+test("aiPress \"off\" stays the AI before the press: the rank-arm queue guard (06beab0) applies only with the press on", () => {
+  // red-2 has no foe in his own lane; the nearest foe, blue-1, is a rank over,
+  // and red-1 — not yet in reach of him, so no press target — stands between
+  // red-2's landing and blue-1. The press variants skip the step into that
+  // queue and close in their own lane; the old AI steps in, as it always did.
+  const stage = (aiPress) => {
+    const place = (fields, id, where) => ss2Combatant(gladiator(fields), { id, name: id, controller: "local", ...where });
+    return createTeamBattle({
+      seed: 1,
+      // Crowd play off: safe and ahead, the old AI would play to the crowd
+      // here first, which is not the arm under test.
+      rules: createSs2TeamRules({ aiPress, aiPlaysToCrowd: false }),
+      teams: [
+        { id: "red", combatants: [place({ gladiator_dir: "right" }, "red-1", { x: 0, y: FRONT }), place({ gladiator_dir: "right" }, "red-2", { x: -200, y: SECOND })] },
+        { id: "blue", combatants: [place({ gladiator_dir: "left" }, "blue-1", { x: 400, y: FRONT })] }
+      ]
+    });
+  };
+  const old = stage("off");
+  assert.equal(ss2PressTarget(viewFor(old, "red-2")), null, "the rig has no press target: red-1 is out of reach");
+  assert.equal(suggestAction(old, "red-2").type, Ss2ActionType.RANK_FRONT, "the old AI steps into the rank");
+  for (const aiPress of ["ranged-first", "pincer-first"]) {
+    assert.notEqual(suggestAction(stage(aiPress), "red-2").type, Ss2ActionType.RANK_FRONT, `${aiPress} skips the step into the queue`);
+  }
+});
