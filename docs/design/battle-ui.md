@@ -991,34 +991,39 @@ decision: `ss2BodyBlocks`, `57b2209`.)*
 
   | roster | 2v1 converted (pair wins whole): off / ranged / pincer | both pair members on the lone foe | pair turns spent dancing | mean bout length |
   |---|---|---|---|---|
-  | plain 2v2 | 8.3% / 10.4% / 10.4% | 0.0 / 1.4 / 1.4% | 18.3 / 3.1 / 3.1% | 50.9 / 50.2 / 50.2 |
-  | plain 3v3 | 53.3 / 70.0 / 69.9% | 6.4 / 28.6 / 30.4% | 37.3 / 1.5 / 1.1% | 85.5 / 80.4 / 80.4 |
-  | buffs 2v2 | 54.2 / 54.2 / 52.1% | 7.9 / 8.4 / 8.4% | 1.7 / 0 / 0% | 49.1 / 48.8 / 49.2 |
-  | buffs 3v3 | 50.0 / 65.4 / 59.3% | 9.7 / 26.1 / 30.5% | 28.4 / 2.2 / 1.1% | 95.0 / 86.2 / 89.4 |
-  | tricks 3v3 | 47.2 / 58.2 / 54.4% | 0.4 / 1.6 / 1.4% | 23.5 / 8.9 / 8.9% | 205.9 / 204.3 / 203.2 |
+  | plain 2v2 | 8.3% / 15.6% / 9.4% | 0.0 / 4.0 / 1.9% | 18.3 / 14.0 / 6.9% | 50.9 / 51.4 / 50.5 |
+  | plain 3v3 | 53.3 / 73.0 / 72.8% | 6.4 / 28.8 / 30.5% | 37.3 / 1.4 / 1.0% | 85.5 / 79.6 / 79.6 |
+  | buffs 2v2 | 54.2 / 54.2 / 39.6% | 7.9 / 21.4 / 11.5% | 1.7 / 0.5 / 0.4% | 49.1 / 51.3 / 61.6 |
+  | buffs 3v3 | 50.0 / 80.0 / 78.3% | 9.7 / 30.9 / 29.1% | 28.4 / 2.2 / 1.5% | 95.0 / 67.6 / 79.2 |
+  | tricks 3v3 | 47.2 / 57.4 / 60.0% | 0.4 / 1.5 / 2.0% | 23.5 / 8.4 / 8.9% | 205.9 / 203.2 / 204.6 |
   | crowd 3v3 | 53.3 / 68.1 / 68.1% | 4.3 / 29.7 / 31.7% | 41.3 / 2.4 / 0.9% | 203.4 / 193.7 / 193.8 |
-  | champions 2v2 | 97.9 / 97.9 / 95.8% | 19.0 / 18.7 / 21.3% | 2.8 / 1.4 / 0.5% | 36.2 / 36.5 / 37.5 |
-  | champions 3v3 | 78.8 / 80.6 / 80.6% | 3.4 / 2.7 / 16.8% | 6.0 / 3.4 / 2.4% | 61.6 / 62.6 / 68.6 |
+  | champions 2v2 | 97.9 / 97.9 / 96.9% | 19.0 / 19.8 / 16.3% | 2.8 / 1.4 / 0.7% | 36.2 / 36.3 / 38.9 |
+  | champions 3v3 | 78.8 / 81.8 / 78.4% | 3.4 / 3.2 / 13.6% | 6.0 / 3.0 / 3.2% | 61.6 / 61.5 / 66.4 |
 
-  *Measured at `74c0014`, after the far-side guard (a write-nothing verifier refuted "the press
-  cannot oscillate": with the target's far side already taken it shuttled a fighter between lanes).
-  The first measurement, at `5cb6977`, differed by at most 6 points in any conversion, and gave
-  770 : 766 head to head.*
+  *Measured at `92f9701`, the third measurement. Two write-nothing verifiers moved the code under it:
+  `74c0014` (the press shuttled a fighter between lanes when the target's far side was already
+  taken) and `92f9701` (a drawn bow far down the lane counted as holding a side of the target). The
+  first two measurements, at `5cb6977` and `74c0014`, gave 770 : 766 and 773 : 763 head to head.
+  "Dancing" counts every crowd-pleaser in a 2v1 phase: on plain 2v2 all 134 under ranged-first are
+  turns where nobody is fighting yet (the lone foe still walking in), which P1 leaves to the
+  2026-09-23 crowd rule.*
 
-  - **P1 + going round, either variant, against `off`:** in 3v3 the pair converts a 2v1 far more
-    often (ranged-first: plain +16.7 points, buffs +15.4, crowd +14.8, tricks +11.0), both members
-    are on the lone foe 3-7x as often on the demo rosters, the dance falls from 23-41% of the free
-    member's turns to 1-9%, and demo-roster bouts get shorter; champion bouts are within 2% under
-    ranged-first. 2v2 barely moves: the 2v1 there is usually over before a 5-6-walk detour arrives.
-    No bout failed to settle in any cell; no AI walk went nowhere.
-  - **Ranged-first against pincer-first: no difference in strength.** Head to head (each side a
-    different variant, both colour assignments, 96 seeds, all eight rosters): **773 wins to 763 over
-    1,536 bouts.** The variants choose differently on 0.3-0.6% of demo-roster turns and 5.6-7.5% of
-    champion turns (measured at `5cb6977`; mostly pincer-first sheathing a bow where ranged-first
-    bombards). Pincer-first corners more VISIBLY on champions (the pair on both sides of the lone foe
-    47% of 2v1 turns against 22% in 2v2, back attacks 22% of the pair's blows against 11%) and makes
-    champion 3v3 bouts ~10% longer; on buffs 3v3 it converts less (59.3% against 65.4%, n = 52-59).
-  - **Shipped: `ranged-first`**, today's order, equal in strength and the shorter bouts. The owner
+  - **P1 + going round, against `off` (ranged-first, the shipped variant):** in 3v3 the pair
+    converts a 2v1 far more often (plain +19.7 points, buffs +30.0, crowd +14.8, tricks +10.2), both
+    members are on the lone foe 3-7x as often on the demo rosters, the dance while an ally fights a
+    foe this gladiator could help against is gone (P1, pinned by `test/ss2-ai-press.test.js`; the
+    remaining 1-9% in 3v3 is crowd play P1 leaves to the 2026-09-23 rule: nobody fighting yet, or a
+    foe of his own still coming, P4), and demo-roster bouts get shorter
+    (buffs 3v3 95 -> 68 turns). Champion bouts are within 1%. 2v2 moves less: the 2v1 there is
+    usually over before a 5-6-walk detour arrives. No bout failed to settle in any cell; no AI walk
+    went nowhere.
+  - **Ranged-first against pincer-first: ranged-first is at least as strong.** Head to head (each
+    side a different variant, both colour assignments, 96 seeds, all eight rosters): **784 wins to
+    752 over 1,536 bouts**, with pincer-first losing clearly only on buffs 2v2 (39.6% converted
+    against 54.2%, bouts 62 against 51 turns). Pincer-first still corners more VISIBLY on champions
+    (the pair on both sides of the lone foe 32% of 2v1 turns against 14% in 2v2, back attacks 13.5%
+    of the pair's blows against 4.2%) and makes champion 3v3 bouts ~8% longer.
+  - **Shipped: `ranged-first`**, today's order, at least as strong and with the shorter bouts. The owner
     may flip it for the more visible cornering; the option is one word (`aiPress`).
 - **P3 — A walk that goes nowhere because of a body in your own lane is not offered; the ring shows
   it greyed, "Blocked",** the way "Not built yet" is shown, and the AI can never pick it. (A walk
