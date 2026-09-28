@@ -1,5 +1,66 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-28 success shapes every Relic; claim-write cause is next
+
+Zanzagar selected `RCS-03D1P-B`. Every transforming state-supporting and
+boundary-supporting Relic definition must have at least one reachable positive
+result whose authoritative commit causes a prospectively authored persistent-
+transformation proposal for that same active Relic. This is an aggregate
+definition-level promise: not every result transforms, not every edge uses P,
+and no proposal approves or commits itself.
+
+D1P moves to `DIR-SELECTED`; D1P1 prunes because universal support necessarily
+reaches both nonempty transformation dialects; D1C becomes the sole
+`OWNER-OPEN` row. The 129-row register now contains 32 `SCREEN`, 1
+`OWNER-OPEN`, 32 `PRUNED`, 58 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 33`. The authoritative decision record remains
+unchanged.
+
+Two read-only named-claim audits upheld D1C as independent. A positive receipt
+commits first; an actual claim writes later. D1P-B guarantees one P path per
+definition but neither makes every result causal nor makes the later write a
+cause. D1C therefore classifies definitions with a reachable proposal that
+disappears when only the actual claim write is projected out while the result
+and earlier facts remain fixed.
+
+`RCS-03D1C` asks whether that later actual claim write may independently cause
+a transformation proposal:
+
+- **A — never:** claims retain their complete proof-spend and reuse effects but
+  never cause transformation. **Recommended.** The grammar stays
+  “manifestation may propose biography; claiming spends proof.” Every Relic
+  already has a success-shaped path under D1P-B, and claiming already creates a
+  direct Relic-local relation without becoming cosmetic.
+- **B — every transforming Relic has a claim-shaped path:** every definition
+  must support a reachable actual claim write that independently proposes
+  change. This expresses a universal “every Relic is shaped by what it
+  sacrifices” thesis, but forces claim-capable content and a second cause
+  language across the catalog.
+- **C — a disclosed subset is claim-shaped:** some definitions can be changed
+  by what they claim and some cannot; D1C1 then chooses state-only, boundary-
+  only, or support in both dialects. This is the guarded thematic alternative
+  for a named `WITNESS-BOUND`, Scar, Hunger, or Vow family.
+
+Concrete A timeline: Ashen in `Mercy` commits Covenant P and may receive
+`DEFIANCE PROPOSED` from the result. Its later atomic claim spends
+`{Guard g, Heat h}` for that active Relic but creates no second proposal.
+Under B/C, a later claim could instead produce a distinct `SCARRED PROPOSED`;
+if P also proposed `Defiance`, both remain separate inputs to later collision
+rules. D1C cannot merge, prioritize, deduplicate, or approve them.
+
+A is the recommendation because the complete claim weave is already materially
+meaningful and direct under the standing ideal, while P-B already makes every
+artifact biographical. C should be chosen only if claim-specific Scar/Vow play
+is independently fun, visible before commitment, non-dominated, and cannot be
+represented honestly by the earlier receipt cause. B needs an explicit
+system-wide sacrifice thesis.
+
+Only an actual atomic full-union write qualifies—never a claim-capable label,
+intended claim, or one trigger per claimed child. Replay, reload, callbacks,
+rendering, duplicate delivery, and idempotent re-claim cannot mint another
+cause occurrence. Ally proof retains ownership/payment and grants no approval.
+Ask only for D1C A, B, or C.
+
 ## 2026-09-28 claimed proof is Relic-wide spent; positive-settlement cause is next
 
 Zanzagar selected `RCS-03C3F-A`. From the immutable first operative claim
@@ -63,7 +124,8 @@ Only actual final tags count; intended outputs do not inherit substitute
 identity. `{}` and no-candidate invocations have later rows. Proposal identity
 is prospective, atomic, and idempotent. Later gates must control cheapest-
 recipe farming, success snowball, ally steering, proposal spam, and opaque
-substitute causation. Ask only for D1P A, B, or C.
+substitute causation. At that checkpoint the next action was to ask for D1P A,
+B, or C; D1P-B is now selected, so the newer section above supersedes that ask.
 
 ## 2026-09-28 fresh proof after rearm selected; new-incidence reuse is next
 
@@ -11161,7 +11223,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 03:53 UTC — positive-settlement transformation cause is next](docs/handoffs/2026-09-28-0353--relic-positive-settlement-cause-next.md)**
+[2026-09-28 04:10 UTC — evidence-claim-write transformation cause is next](docs/handoffs/2026-09-28-0410--relic-claim-write-cause-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

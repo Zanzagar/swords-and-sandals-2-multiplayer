@@ -3132,7 +3132,16 @@ rows, one conditional state/boundary incidence child for each proper branch,
 and four transition-topology rows. Replacing one counted row with sixteen adds
 fifteen slots. The repaired register has **129 slots: 34 `SCREEN`, 1
 `OWNER-OPEN`, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 35`**. RCS-03D1P is the sole presented Relic card.
+`EVALUATE`; `Phi_SR = 35`**. At that checkpoint, RCS-03D1P was the sole
+presented Relic card.
+
+Zanzagar selected D1P-B. Every transforming definition must have at least one
+reachable positive-result cause path, without making every result causal or
+any proposal self-authorizing. D1P moves to `DIR-SELECTED`; P1 prunes because
+universal support necessarily reaches both dialects; D1C becomes the sole
+`OWNER-OPEN` row. The register remains 129 slots and now contains 32 `SCREEN`,
+1 `OWNER-OPEN`, 32 `PRUNED`, 58 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 33`.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -3243,9 +3252,9 @@ overcompression.
 | `RCS-03C3F3` | Claimed-occurrence first-attribution propagation topology across later settlements after nonempty new-incidence support | `PRUNED`; C3F-A leaves no later first-attribution transition to form a terminal edge, path, or branch-capable DAG |
 | `RCS-03C3F4A` | Positive-substitute relay-attempt authorization-consumption prevalence | `PRUNED`; C3F-A admits no new-incidence relay attempt whose unused intended authorization needs disposition after positive substitution |
 | `RCS-03C3F4B` | Empty-settlement relay-attempt authorization-consumption prevalence | `PRUNED`; C3F-A admits no new-incidence relay attempt whose unused intended authorization needs disposition after `{}` |
-| `RCS-03D1P` | Positive committed-settlement transformation-cause prevalence across transforming Relic definitions | `OWNER-OPEN`; choose empty, universal, or nonempty proper support for at least one reachable prospective transition proposal caused by the same active Relic's authoritative nonempty final receipt commit; recommendation B makes support universal across definitions without making every result transform or any proposal self-authorizing |
-| `RCS-03D1P1` | State/boundary transformation-dialect incidence for proper positive-settlement cause support | `SCREEN`; opens only under D1P-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1P-A/B |
-| `RCS-03D1C` | Actual Relic-local evidence-claim-write transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1P and applicable P1; the authoritative claim write is later than the receipt commit and therefore an independent possible cause locus |
+| `RCS-03D1P` | Positive committed-settlement transformation-cause prevalence across transforming Relic definitions | `DIR-SELECTED`; B makes positive-result cause support universal across `D_mut`, so every transforming state- and boundary-supporting definition has at least one reachable prospectively authored proposal caused by its same active Relic's authoritative nonempty final receipt commit; exact results, edges, targets, prevalence, authority, and power remain later |
+| `RCS-03D1P1` | State/boundary transformation-dialect incidence for proper positive-settlement cause support | `PRUNED`; D1P-B's universal definition support necessarily reaches both nonempty dialects and leaves no proper-subset incidence to choose |
+| `RCS-03D1C` | Actual Relic-local evidence-claim-write transformation-cause prevalence across transforming definitions | `OWNER-OPEN`; choose empty, universal, or nonempty proper support for a proposal independently caused by the actual atomic full-union claim write after positive settlement; recommendation A keeps manifestation as biography and claiming as proof expenditure, while guarded C remains available for a disclosed Scar/Vow family |
 | `RCS-03D1C1` | State/boundary transformation-dialect incidence for proper claim-write cause support | `SCREEN`; opens only under D1C-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1C-A/B |
 | `RCS-03D1Z` | Ledger-bearing `{}` cancellation-settlement transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1C and applicable C1; cancellation commits no positive receipt and no evidence claim under C3D2-A |
 | `RCS-03D1Z1` | State/boundary transformation-dialect incidence for proper cancellation cause support | `SCREEN`; opens only under D1Z-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1Z-A/B |
@@ -3607,10 +3616,12 @@ counted B-only rows. The then-current register had **114 slots**: 25 `SCREEN`, 1
 Relic-wide and pruning F1-F4B. The thirty-sixth correction then replaced old
 RCS-03D's bundled cause/direction/adjacency/clearing/reversibility promise with
 six cause-prevalence rows, their six conditional proper-branch dialect
-children, and four transition-topology rows. The current register has **129
-slots**: 34 `SCREEN`, 1 `OWNER-OPEN`, 31 `PRUNED`, 57 `DIR-SELECTED`, 4
-`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. RCS-03D1P is the current
-presented Relic card. Closing each cause parent plus its conditional child by
+children, and four transition-topology rows. Zanzagar then selected D1P-B,
+requiring every transforming definition to have at least one positive-result
+cause path and pruning P1. The current register has **129 slots**: 32 `SCREEN`,
+1 `OWNER-OPEN`, 32 `PRUNED`, 58 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 33`. RCS-03D1C is the current presented Relic card.
+Closing each remaining cause parent plus its conditional child by
 selection or pruning opens D2 at `Phi_SR = 23`; closing D2-D5 one at a time
 opens RCS-03E at `Phi_SR = 19`.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
@@ -3618,7 +3629,7 @@ one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-five owner cards under this thirty-six-times-corrected charter and will
+thirty-three owner cards under this thirty-six-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3642,7 +3653,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 129 frozen candidate slots; current `Phi_SR = 35` after C3F-A spends claimed proof across its active Relic and prunes five conditional relay rows, while the old transformation row is repaired into six cause-prevalence decisions, six conditional dialect-incidence children, and four transition-topology decisions | At most 35 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; each cause child prunes unless its parent selects proper support, so the cause pass closes at `Phi_SR = 23`, and D2-D5 close before agency opens at 19; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 129 frozen candidate slots; current `Phi_SR = 33` after C3F-A spends claimed proof across its active Relic, the old transformation row is repaired into sixteen atomic rows, and D1P-B gives every transforming definition at least one positive-result cause path while pruning its proper-branch dialect child | At most 33 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; each remaining cause child prunes unless its parent selects proper support, so the cause pass closes at `Phi_SR = 23`, and D2-D5 close before agency opens at 19; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

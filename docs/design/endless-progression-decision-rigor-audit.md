@@ -6422,6 +6422,87 @@ Later agency, adjacency, power, lock, and evaluation gates must defeat
 cheapest-recipe farming, success snowball, ally steering, proposal spam, and
 opaque substitute causation.
 
+Zanzagar selected D1P-B. Thus `D_P=D_mut`: every completed transforming
+definition in both nonempty RCS-03A dialects must have at least one reachable,
+prospectively authored positive-settlement cause witness. The promise is
+aggregate at definition level and neither makes every result causal nor
+authorizes a proposal. D1P moves to `DIR-SELECTED`; D1P1 moves to `PRUNED`
+because universal support necessarily reaches both dialects; D1C becomes the
+sole `OWNER-OPEN` row. The 129-row register now contains 32 `SCREEN`, 1
+`OWNER-OPEN`, 32 `PRUNED`, 58 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 33`.
+
+Two read-only named-claim audits tested D1C. The first found that D1P-B does not
+derive it away. C3D1-B requires only globally nonempty positive claim support
+and leaves exact definition/receipt incidence AUTHOR/SPEC; C3D3-A fixes the
+complete-union footprint only when a claim occurs. More importantly, the
+positive receipt commits first and the actual Relic-local claim writes later.
+A D1C witness can therefore hold the result commit and every earlier fact
+fixed, project out only the later claim write, and require its C-attributed
+proposal to disappear. Empty, universal, and nonempty proper `D_C` remain
+independent and exhaustive. P-B already covers `D_mut`, so every D1C branch
+satisfies the joint-cause coverage invariant. D1C1 correctly prunes under
+empty A or universal B and opens only under proper C.
+
+The gameplay audit recommends D1C-A, with C retained as a guarded reopening.
+Claiming already has a material job: after a positive result, one atomic write
+makes the complete deduplicated selected proof union unavailable to this active
+Relic, while canonical truth, source ownership, and availability elsewhere
+remain. C3E-A/C3F-A keep that proof spent across later incidences. D1P-B already
+gives every definition a success-shaped biography path. A therefore preserves
+two readable verbs—manifestation may propose biography; claiming spends
+proof—without making claims cosmetic or leaving any Relic unable to transform.
+The direct claim relation and D1P's direct cause/proposal relation already carry
+the standing ideal; another trigger is not a stronger theological fit.
+
+Let `D_C ⊆ D_mut` contain definitions with at least one reachable witness in
+which the same active Relic's completed positive settlement is held fixed, an
+actual later C3D1-B/C3D3-A full-union claim writes atomically, a prospectively
+authored proposal names a materially distinct assignment of that same Relic,
+and projecting out only the write projects out the proposal. A claim-capable
+label, intended claim, provisional ledger, earlier receipt, animation, or later
+payoff is not a C witness. The current assignment remains authoritative;
+agency, collision, and committed identity remain RCS-03E/RCS-04A/RCS-04B.
+
+- D1C-A makes `D_C=∅`. Claims keep all selected proof-spend and reuse
+  consequences but never themselves propose transformation. **Recommended.**
+  Ashen may receive `DEFIANCE PROPOSED` from Covenant P; its later claim of
+  `{Guard g, Heat h}` spends those occurrences for this Relic but creates no
+  second proposal. A's cost is that a true “the sacrifice scars me” artifact
+  cannot cite the sacrifice itself as cause.
+- D1C-B makes `D_C=D_mut`. Every transforming definition must have at least one
+  independent claim-write path. The strongest nonredundant construction gives
+  each definition a nonclaiming P path and a separate claiming result with no
+  P proposal whose later write proposes a Scar/Vow assignment. B is legal but
+  forces claim-capable content and a second teachable cause route across the
+  entire catalog despite prior claim prevalence being open. It requires an
+  explicit universal “every Relic is shaped by sacrifice” thesis to justify
+  collision, UI, ally-pressure, and farming burden.
+- D1C-C makes `D_C` nonempty proper and opens D1C1. A disclosed
+  `WITNESS-BOUND`/Scar/Vow subset may be changed by what it claims while every
+  Relic still has its D1P-B path. This is the guarded thematic alternative: it
+  avoids a “can evolve” caste, but the extra route becomes a premium subtype if
+  pure upside, a trap if punitive, and opacity if undisclosed. It must be
+  independently fun, non-dominated, visible before commitment, and not
+  honestly expressible as the earlier receipt cause.
+
+The principal B/C failure is a single claiming settlement whose result creates
+P proposal `Defiance` and whose later claim creates either another `Defiance`
+proposal or conflicting `Debt`. The two loci and proposal identities remain
+distinct; D1C cannot silently deduplicate equal targets, prioritize conflicts,
+merge causes, or approve either proposal. RCS-04A must later resolve their
+coexistence after RCS-03E supplies authority.
+
+One atomic claim write is one cause occurrence rather than one per member of
+its complete union; exact proposal cardinality remains unselected. Shared
+children deduplicate, and no ancestor, sibling, alternate ledger, other root,
+Relic, combatant, or owner joins the write. Only the actual write qualifies.
+Replay, reload, callback, reconnect, rendering, duplicate delivery, and
+idempotent re-claim cannot mint another cause occurrence. Ally evidence retains
+ownership/payment and grants no approval. The semantic proof must preserve
+result commit, any P proposal, claim write, any C proposal, and unchanged
+current assignment in order; RCS-02/SR-10 retain exact surface design.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or
