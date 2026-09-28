@@ -1,6 +1,78 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 absence may shape a disclosed subset; its dialect incidence is next
+## 2026-09-28 absence spans both dialects; spent-bond latch cause is next
+
+Zanzagar selected `RCS-03D1Z1-C`. The globally proper Absence-bound subset now
+has nonempty state- and boundary-dialect incidence. At least one state Relic
+may change what it bears after actual `{}`, and at least one boundary Relic may
+change how it listens; at least one transforming definition remains outside
+`D_Z`. One definition still has one dialect, and neither every definition nor
+every cancellation becomes causal.
+
+The bare C answer selected no new scope fallback. The previously recommended
+D1Z1-A fallback remains advisory and unselected. The separately selected
+parent D1Z-A fallback remains armed if the entire empty-settlement biography
+mechanic later fails, and no fallback has fired.
+
+D1Z1 is `DIR-SELECTED`; D1L is the sole frontier. The 141-row register now
+contains 28 `SCREEN`, 1 `OWNER-OPEN` at D1L, 39 `PRUNED`, 66
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 29`.
+Six cause slots remain—L/L1, X/X1, and M/M1. Closing them returns D2 at 23;
+D2-D5 still lead to RCS-03E at 19. The authoritative decision record remains
+unchanged.
+
+`RCS-03D1L` asks whether the later persistent pair-recurrence latch write may
+itself directly propose transformation. Z and L are ordered but distinct:
+
+```text
+actual `{}` commits (Z)
+  -> canonical pair changes from unlatched to LISTENED—SEVERED (L)
+  -> same pair cannot listen again until genuine break and renewal
+```
+
+One L occurrence is the first authoritative latch write for one canonical pair
+in its current unbroken relationship interval. It is not one per tag, ledger,
+proof child, participant, UI refresh, save, replay, or repeated `Already heard`
+check. Deleting an L cause edge must remove only its proposal while preserving
+the `{}` commit, proof, every Z proposal, the latch, its no-reattempt effect,
+the complete trace, and current assignment. L cannot inspect a later break,
+renewal, evaluation, approval, collision, or committed transformation.
+
+- **A — the latch governs recurrence but never transforms. Recommended.**
+  `D_L=emptyset`. L still closes rerolls, marks the continuing pair as spent,
+  and forces real break/renewal, but creates no second proposal immediately
+  after Z. The teaching rule is **“absence may shape an Absence-bound Relic;
+  remembering that this bond was heard governs recurrence.”** This preserves
+  one bond with genuinely changed status without making every meaningful
+  boundary another biography trigger. Cost: no Relic can change specifically
+  because it adopted the persistent memory that this bond has been heard.
+- **B — every transforming Relic has a latch-write path.** `D_L=D_mut`.
+  Every definition needs a reachable deny/cancel/latch route whose first L
+  write can propose change. This effectively restores universal cancellation-
+  shaped biography after D1Z kept it proper, and maximizes pair rotation,
+  reset farming, ally steering, and Z/L double-proposal collisions.
+- **C — a disclosed Closure-bound proper subset changes on L.** `D_L` is
+  nonempty proper and D1L1 opens. A Vow-bound, Closure-bound, or Last Witness
+  family might change because the continuing bond became persistently spent,
+  not merely because `{}` occurred. Example: `{}` creates no Z proposal for a
+  Vowscar, then `LISTENED—SEVERED(P,Q)` proposes `RESOLVED CONDITION`.
+  The idea is evocative, but current D4-A gives players no choice between its Z
+  occurrence and L write; without a latch-specific policy it merely launders
+  another cancellation trigger through a later label.
+
+C is a replacement path, not a selected fallback. It earns reopening only if
+players can explain “empty manifestation” versus “the bond becoming spent,” a
+proposal truly requires the new persistent pair memory rather than facts Z
+already knows, that difference changes whether players preserve, break, or
+replace the bond, optimized play sometimes seeks and sometimes avoids L, and
+self-reset, pair rotation, replay, ally coercion, and premium double-proposal
+loops all fail. Exact definitions, overlap with `D_Z`, targets, rates, power,
+UI, approval, collision, and implementation remain later.
+
+Ask only for D1L A, B, or C. Under A/B, D1L1 prunes and D1X opens. Under C,
+D1L1 opens next.
+
+## 2026-09-28 absence may shape a disclosed subset; its dialect incidence was next — superseded frontier
 
 Zanzagar selected `RCS-03D1Z-C` with `RCS-03D1Z-A` as the explicit failure
 fallback. A disclosed nonempty proper Absence-bound subset of transforming
@@ -69,7 +141,8 @@ receipt, preserved proof, latch, current assignment, target, and positive
 alternatives are counted. The relevant cancellation facts remain knowable
 before each affected player's last informed reversible commitment.
 
-Ask only for D1Z1 A, B, or C. Every answer opens D1L next.
+This section preserves the prior D1Z1 frontier. D1Z1-C is now selected; do not
+ask it again. The current single choice is D1L above.
 
 ## 2026-09-28 sealing remains noncausal; actual empty settlement was next — superseded frontier
 
@@ -146,8 +219,9 @@ Absence-bound Dreamglass may create `MOURNING PROPOSED`; removing only the Z
 edge leaves `{}`, proof, and the latch unchanged. An ordinary Ashen can undergo
 the same cancellation without a Z proposal.
 
-This section preserves the prior D1Z frontier. D1Z-C with A fallback is now
-selected; do not ask it again. The current single choice is D1Z1 above.
+This section preserves the prior D1Z frontier. D1Z-C with A fallback and
+D1Z1-C are now selected; do not ask them again. The current single choice is
+D1L in the newest section above.
 
 ## 2026-09-28 refusal routes without transforming; provisional sealing was next — superseded frontier
 
@@ -219,8 +293,8 @@ proposal untouched. A false pair whose fixed disposition is `{S1,S2}` follows
 the same grammar: one K event for the whole substitute set, then one P commit.
 
 This section preserves the prior D1K frontier. D1K-A is now selected; do not
-ask it again. D1Z-C with A fallback is also selected; the current single choice
-is D1Z1 in the newest section above.
+ask it again. D1Z-C with A fallback and D1Z1-C are also selected; the current
+single choice is D1L in the newest section above.
 
 ## 2026-09-28 permission permits without transforming; false verdict was next — superseded frontier
 
@@ -296,8 +370,8 @@ Z/L facts, and every independent proposal unchanged. A different fixed denied
 opportunity may yield `{S}` and later K/P without changing the causal boundary.
 
 This section preserves the prior D1VF frontier. D1VF-A is now selected; do not
-ask it again. D1K-A and D1Z-C with A fallback are also selected; the current
-single choice is D1Z1 in the newest section above.
+ask it again. D1K-A, D1Z-C with A fallback, and D1Z1-C are also selected; the
+current single choice is D1L in the newest section above.
 
 ## 2026-09-28 success shapes every Relic; claim-write cause selected — superseded frontier
 
@@ -360,9 +434,9 @@ rendering, duplicate delivery, and idempotent re-claim cannot mint another
 cause occurrence. Ally proof retains ownership/payment and grants no approval.
 This section records the prior D1C frontier. D1C-A is now selected; do not ask
 it again. **Corrected 2026-09-28:** D1I-A, D1T-A, D1VT-A, and D1VF-A are also
-selected and must not be asked again; D1N is derived empty, D1K-A and D1Z-C
-with A fallback are now also selected, and the current single choice is D1Z1
-above.
+selected and must not be asked again; D1N is derived empty, D1K-A, D1Z-C with
+A fallback, and D1Z1-C are now also selected, and the current single choice is
+D1L above.
 
 ## 2026-09-28 claimed proof is Relic-wide spent; positive-settlement cause is next
 
@@ -11529,7 +11603,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 06:23 UTC — Absence-bound transformation-dialect incidence is next](docs/handoffs/2026-09-28-0623--relic-absence-dialect-next.md)**
+[2026-09-28 17:42 UTC — persistent spent-bond latch cause is next](docs/handoffs/2026-09-28-1742--relic-spent-bond-latch-cause-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

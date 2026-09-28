@@ -7079,6 +7079,86 @@ proof, latch, reset cadence, current assignment, proposed target, and positive
 alternatives held in the comparison. E1-C's last-informed-commitment and anti-
 cheap-coercion gates remain mandatory.
 
+Zanzagar selected D1Z1-C. Both `D_Z^S` and `D_Z^B` are nonempty while
+`D_Z ⊊ D_mut` remains mandatory. Every Z proposal stays in its definition's
+one selected RCS-03A dialect. The bare C answer did not select the recommended
+D1Z1-A scope fallback; it remains advisory. The separately selected parent
+D1Z-A system fallback remains in force and has not fired.
+
+D1Z1 moves to `DIR-SELECTED`, and D1L moves from `SCREEN` to the sole
+`OWNER-OPEN` row. The 141-row register contains 28 `SCREEN`, 1 `OWNER-OPEN`,
+39 `PRUNED`, 66 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 29`. Six cause parent/child slots remain—L/L1, X/X1, and M/M1—so
+closing them returns D2 at 23. No authoritative-record text changed.
+
+**D1L prerequisite, atomicity, and merge audit — reachable, independent, and
+one card.** Selected D4-A requires one listen per unbroken canonical pair bond.
+For each actual `z in Z^0_v`, its canonical `kappa(z)` receives one first
+authoritative unlatched-to-`LISTENED—SEVERED` persistent write during the
+current continuous-sufficiency interval. D1Z1-C guarantees actual qualifying
+cancellation support in both dialects, so L occurrences are reachable in both;
+it authors no direct L edge.
+
+A qualifying L witness contains that one actual first latch write and a
+prospectively versioned direct L-locus edge to a materially distinct same-
+dialect assignment of the same active Relic. Deleting only that edge removes
+the L proposal while holding the false bit, fixed disposition, `{}` commit,
+preserved proof, every Z proposal, latch write/state, no-reattempt consequence,
+completed trace, and current assignment fixed. L may inspect no later break,
+renewal, rearm, evaluation, approval, collision, or committed transformation
+and may alter neither settlement, proof, key, interval, latch, nor recurrence.
+
+One first unlatched-to-latched transition is one L occurrence. Tags, ledgers,
+proof children, participants, pair order, UI refreshes, save fields, reads of an
+already-set latch, polls, serialization, callbacks, duplicate delivery, reload,
+replay, route churn, and idempotent rewrites cannot multiply it. Genuine break
+ends the interval and renewal may permit a later episode; neither belongs to
+the original L occurrence. If guarded D4-B ever replaces D4-A, L must be
+replayed against that changed recurrence contract.
+
+L cannot merge with Z. Z is the actual final empty manifestation; L is the
+later persistent fact that this still-sufficient pair has now been heard and
+cannot listen again during the bond. Merging them would hide possible double
+proposals from RCS-04A. L cause support also cannot derive from Z-C: Z plus
+D4-A derives a latch occurrence, not a prospectively authored direct proposal
+edge. State/boundary incidence remains isolated in D1L1, so no split is needed.
+
+The three exhaustive D1L directions are:
+
+- D1L-A makes `D_L=emptyset`. **Recommended.** The latch remains mechanically
+  and strategically meaningful—it closes the reroll, preserves proof, marks a
+  spent bond, and forces true break/renewal—but never creates a second proposal
+  immediately after Z. The readable grammar is “absence may shape an Absence-
+  bound Relic; remembering that this bond was heard governs recurrence.”
+- D1L-B makes `D_L=D_mut`. Every transforming definition needs a reachable
+  two-contender cancellation/latch path with a direct L edge. That effectively
+  universalizes cancellation-shaped biography after D1Z deliberately kept Z
+  proper, while maximizing pair rotation, reset farming, ally steering, and
+  collision load.
+- D1L-C makes `D_L` nonempty proper and opens D1L1. A disclosed Closure-bound,
+  Vow-bound, or Last Witness family may change because the continuing bond
+  became persistently spent rather than merely because `{}` occurred. This is
+  the only credible thematic countermodel, but currently has no independent
+  occurrence-level lever: no player can reach L without accepting its Z
+  occurrence or accept that Z occurrence without the L write.
+
+A is the strongest standing-ideal fit at the system boundary. L already gives
+one continuing bond a genuinely changed recurrence status; keeping that fact
+noncausal is neutral/protective and avoids treating every philosophically rich
+boundary as biography. C can become a direct local fit only if the new pair
+memory is indispensable to a proposal and materially changes the later choice
+to preserve, break, or replace the spent bond. Different target names or flavor
+text do not suffice.
+
+C is a guarded replacement path, not a selected fallback. Reopen it only if
+human and policy tests distinguish empty manifestation from spent-bond memory,
+find optimized reasons both to seek and avoid L, prove an honest Z edge cannot
+express the mechanic, reject self-reset, pair rotation, replay, and ally-
+coercion loops, and keep any Z/L coexistence legible and non-stacking after the
+later collision rule. Exact definitions, `D_L ∩ D_Z`, dialect incidence,
+triggers, targets, rates, power, UI, persistence realization, approval,
+collision, identity, break/renew cadence, and implementation remain later.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or
