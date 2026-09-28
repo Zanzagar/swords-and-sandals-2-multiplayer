@@ -391,9 +391,12 @@ false/not-both permission verdict routes the deterministic denied disposition
 but never directly proposes transformation; D1VF1 prunes. Zanzagar then
 selected D1K-A, so one complete positive provisional output becomes sealed
 without that completion itself proposing transformation; D1K1 prunes.
-**RCS-03D1Z is now the sole owner-facing choice under SR-03:** whether an
-actual ledger-bearing `{}` settlement commit may directly propose
-transformation.
+Zanzagar then selected D1Z-C with D1Z-A retained as the explicit failure
+fallback, so a disclosed nonempty proper Absence-bound subset may be shaped by
+an actual ledger-bearing `{}` settlement. **RCS-03D1Z1 is now the sole owner-
+facing choice under SR-03:** whether that proper subset occurs only in the
+remembered-condition dialect, only in the remembered-attunement dialect, or in
+both.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -25691,7 +25694,7 @@ and 1 `EVALUATE`; `Phi_SR = 31`**. Eight cause parent/child slots remain from Z
 through M; closing them returns D2 as the sole frontier at `Phi_SR = 23`. The
 authoritative decision record remains unchanged.
 
-### RCS-03D1Z — actual ledger-bearing empty settlement as transformation cause — active owner choice
+### RCS-03D1Z — actual ledger-bearing empty settlement as transformation cause — C selected with A failure fallback
 
 Reuse nonempty `Z^0_v`, the completed canonical product evaluations with a
 nonempty selected authoritative contender-ledger tuple and final pair-local
@@ -25763,6 +25766,88 @@ Under A/B, D1Z1 prunes and D1L opens. Under C, D1Z1 opens next. Exact
 definitions, triggers, targets, within-definition prevalence, rates, copy,
 surface, power, persistence, proposal approval, collision, and implementation
 remain AUTHOR/SPEC/TUNE or later registered decisions. This card authorizes no
+implementation, and the authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **C, a disclosed
+Absence-bound proper subset, with A as the explicit failure fallback.** Thus
+`D_Z` is nonempty and proper in `D_mut`. At least one transforming definition
+has a reachable actual ledger-bearing `{}` settlement whose direct Z edge
+proposes a materially distinct same-dialect assignment, and at least one
+transforming definition has no such edge. This does not make every cancellation
+causal, approve any proposal, or select exact definitions, triggers, targets,
+rates, or power.
+
+The fallback is part of the selected direction, not a second simultaneously
+active ruleset. C remains active while RCS-17/RCS-18 can establish a
+prospectively legible, independently fun, non-dominated policy surface in which
+optimized players sometimes seek Z and sometimes avoid it. If Absence-bound
+play instead becomes free failure insurance, a premium extra-evolution caste,
+cheap ally-steered progression, dominant break/renew farming, or cannot be
+taught as “this Relic learns from an actual empty settlement,” the direction
+reopens to D1Z-A and `D_Z=emptyset`. No fallback condition has yet fired.
+
+D1Z moves to `DIR-SELECTED`, and `RCS-03D1Z1` becomes the sole
+`OWNER-OPEN` row. The 141-row register now contains **29 `SCREEN`, 1
+`OWNER-OPEN` at D1Z1, 39 `PRUNED`, 65 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 30`**. Seven cause parent/child slots remain from
+Z1 through M; closing them returns D2 as the sole frontier at `Phi_SR = 23`.
+The authoritative decision record remains unchanged.
+
+### RCS-03D1Z1 — transformation-dialect incidence of Absence-bound support — active owner choice
+
+RCS-03A-C partitions the nonempty transforming-definition domain `D_mut` into
+nonempty disjoint state-supporting `D_S` and boundary-supporting `D_B`. A
+state-supporting Relic can transform its lineage-carried remembered condition
+while its authored evaluation boundary stays fixed. A boundary-supporting Relic
+can transform its lineage-carried remembered evaluation-boundary attunement
+while its state stays fixed. One definition never transforms both coordinates.
+
+Selected D1Z-C fixes only a nonempty proper Absence-bound subset
+`D_Z ⊊ D_mut`. Define its dialect incidences:
+
+- `D_Z^S = D_Z ∩ D_S`; and
+- `D_Z^B = D_Z ∩ D_B`.
+
+Membership means that at least one definition in that dialect has a qualifying
+D1Z witness. It does not mean every definition in the included dialect, every
+empty settlement for a qualifying definition, or every legal transition uses
+Z. Each proposal remains inside its definition's existing RCS-03A dialect: a
+state Relic proposes a remembered-condition assignment, and a boundary Relic
+proposes a remembered-attunement assignment. D1Z1 cannot create a hybrid axis
+or change the Z occurrence, authority, or fallback.
+
+| Choice | Dialect incidence of the selected proper Z support | Recommendation, ideal fit, and gameplay tradeoff | Concrete design example |
+| --- | --- | --- | --- |
+| **A — Absence-bound support occurs only in the state dialect** | `D_Z^S` is nonempty and `D_Z^B` is empty. Because `D_B` is nonempty, `D_Z` remains globally proper even if authoring later puts every state definition in `D_Z`. | **Strong scope fallback.** The one-line fantasy is **“absence changes what the Relic bears.”** A loss-shaped settlement can scar, temper, or recondition a state Relic without adding boundary-attunement timing and snapshot complexity. This is the easiest form to explain and preview. Its cost is a structural caste: only remembered-condition Relics receive the extra absence-biography route, so they may read as richer or premium. Favorable conditions invite pair-rotation farming; unfavorable conditions can make the family a punishment; ally-forced cancellation can steer another player's state. | A state-supporting Hollow Ashen in `Mercy` commits `{}` and proposes `MOURNING CONDITION`. A boundary-supporting Dreamglass may undergo the same cancellation but has no Z proposal. |
+| **B — Absence-bound support occurs only in the boundary dialect** | `D_Z^S` is empty and `D_Z^B` is nonempty. Because `D_S` is nonempty, `D_Z` remains globally proper even if authoring later puts every boundary definition in `D_Z`. | The one-line fantasy is **“silence changes how the Relic listens.”** This is the sharpest direct relation-through-absence expression: failed co-manifestation retunes the continuing relationship rather than changing an inner condition. It is also the hardest to teach and optimize. Cancellation can become a route to a best listening point, snapshot arbitrage, self-reinforcing retune loops, or severe ally-forced build disruption. Choose B only if that narrower, stranger identity is worth excluding state-side scars entirely. | A boundary-supporting Hollow Lens in `Oath` commits `{}` and proposes `ECHO ATTUNEMENT` while remembered state stays fixed. A state-supporting Ashen has no Z proposal. |
+| **C — disclosed Absence-bound support occurs in both dialects** | Both `D_Z^S` and `D_Z^B` are nonempty, while inherited `D_Z ⊊ D_mut` remains mandatory. C does not decide whether either intersection is universal or proper inside its dialect. | **Recommended if D1Z-C is retained.** One causal sentence—**“this Relic can learn from an actual empty settlement”**—has two genuinely distinct expressions. A state Relic changes what it bears; a boundary Relic changes how it listens. The same continuing artifact and one real absence relation persist while the material coordinate differs, a direct Souls and Simulacra and Achintya Bheda Abheda fit without collapsing the dialects. The cost is two policy surfaces to author, teach, simulate, and balance. A token example in either dialect, a premium extra-route class, or one dialect that optimized play always seeks or always avoids fails the direction. | Hollow Ashen may propose `MOURNING CONDITION`; Hollow Lens may propose `ECHO ATTUNEMENT`; ordinary state and boundary Relics can still commit `{}` without any Z proposal. |
+
+A/B/C are exhaustive. Because `D_Z` is nonempty, its intersections cannot both
+be empty; because `D_S` and `D_B` partition `D_mut`, the remaining possibilities
+are state only, boundary only, or both. In C, global properness remains explicit:
+support in both dialects must not be misread as `D_Z=D_mut`.
+
+The recommendation has a two-level fallback ladder. If both included dialects
+produce legible, policy-changing, non-dominated play, retain D1Z1-C. If state-
+condition play passes but boundary-attunement play remains opaque or creates a
+best-attunement loop, D1Z1-A is the narrower scope fallback. If even state-only
+absence biography becomes farming, coercion, premium-caste design, punishment,
+or explanation debt, use the already selected parent fallback D1Z-A and prune
+D1Z1. Neither fallback is selected by this recommendation.
+
+For every included dialect, RCS-17/RCS-18 must later find material optimized
+cases that seek Z and cases that avoid it after counting the lost receipt,
+preserved proof, latch horizon, positive alternatives, current assignment, and
+proposed target. The cancellation family and every fact capable of changing the
+opportunity to `{}` remain knowable before the affected player's last informed
+reversible commitment. A shared disclosed Absence-bound classification and
+distinct `CONDITION PROPOSED` versus `ATTUNEMENT PROPOSED` semantic vocabulary
+are required; the exact marker, copy, and UI remain later work.
+
+Exact definitions, within-dialect prevalence, Z triggers, targets, edge maps,
+rates, power, presentation, persistence, approval, collision, L/X/M cause
+eligibility, and implementation remain AUTHOR/SPEC/TUNE or later registered
+decisions. Under every D1Z1 answer, D1L opens next. This card authorizes no
 implementation, and the authoritative decision record remains unchanged.
 
 ## Session protocol and evidence

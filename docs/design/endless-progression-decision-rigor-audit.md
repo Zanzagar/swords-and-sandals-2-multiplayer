@@ -7008,6 +7008,77 @@ Under A/B, D1Z1 prunes and D1L opens. Under C, D1Z1 opens. Exact identities,
 triggers, targets, rates, power, UI, persistence, approval, collision, and
 implementation remain later work.
 
+Zanzagar selected D1Z-C with D1Z-A as the explicit failure fallback. Thus
+`D_Z` is nonempty proper: at least one transforming definition has a reachable
+direct Z proposal edge at an actual ledger-bearing `{}` commit, and at least
+one transforming definition has none. C is the active worksheet direction.
+The fallback is not a concurrent ruleset; RCS-17/RCS-18 may reopen A if the
+mechanic proves to be free failure insurance, a premium extra-evolution caste,
+cheap ally-steered progression, dominant break/renew farming, or cannot sustain
+both optimized seek-Z and avoid-Z policies with one-sentence comprehension.
+
+D1Z moves to `DIR-SELECTED`, and D1Z1 moves from `SCREEN` to the sole
+`OWNER-OPEN` row. The 141-row register contains 29 `SCREEN`, 1 `OWNER-OPEN`,
+39 `PRUNED`, 65 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 30`. Seven cause parent/child slots remain—Z1, L/L1, X/X1, and
+M/M1—so closing them returns D2 at 23. No authoritative-record text changed.
+
+**D1Z1 prerequisite, exhaustiveness, and split audit — passes.** RCS-03A-C
+partitions nonempty `D_mut` into nonempty disjoint state-supporting `D_S` and
+boundary-supporting `D_B`. Define `D_Z^S=D_Z ∩ D_S` and
+`D_Z^B=D_Z ∩ D_B`. Since selected D1Z-C makes `D_Z` nonempty, the two
+intersections cannot both be empty. Exactly three incidence patterns remain:
+
+1. state only: `D_Z^S` nonempty and `D_Z^B` empty;
+2. boundary only: `D_Z^S` empty and `D_Z^B` nonempty; or
+3. both: both intersections nonempty while inherited `D_Z ⊊ D_mut`
+   remains mandatory.
+
+The card is not derived. D1P-B guarantees a positive-settlement cause path in
+both dialects, not an empty-settlement edge. Excluding an entire dialect from
+Z changes its legal proposal set and resulting player policy. Splitting D1Z1
+into two yes/no cards would reintroduce the impossible empty/empty branch and
+then need a reconciliation rule. Within-dialect all-versus-some prevalence
+changes authoring breadth, not Z authority or occurrence, so it remains
+AUTHOR/SPEC/TUNE. The global properness inherited from D1Z-C prevents the both-
+dialects option from silently becoming universal D1Z-B.
+
+Every qualifying proposal remains same-dialect. A state-supporting Relic may
+propose another lineage-carried remembered condition at fixed authored
+evaluation boundary. A boundary-supporting Relic may propose another remembered
+evaluation-boundary attunement at fixed state. D1Z1 cannot create a hybrid
+coordinate, select exact family members, make every cancellation causal, or
+decide triggers, targets, rates, authority, power, L/X/M causes, persistence,
+collision, or implementation.
+
+The gameplay countermodels leave three genuine directions:
+
+- D1Z1-A makes support state-only. “Absence changes what the Relic bears” is
+  the clearest scar/mourning grammar and avoids attunement timing complexity.
+  It risks making state Relics the richer caste, pair-rotation farming,
+  punitive conditions, and ally steering.
+- D1Z1-B makes support boundary-only. “Silence changes how the Relic listens”
+  is the sharpest relation-through-absence fantasy, but has the greatest
+  opacity, best-listening-point, snapshot-arbitrage, self-retune-loop, and
+  ally-disruption risk.
+- D1Z1-C requires nonempty support in both dialects while preserving proper
+  global support. **Recommend C if D1Z-C is retained.** One actual absence
+  relation can shape what one continuing Relic bears and how another continuing
+  Relic listens without collapsing their real coordinate difference. This is
+  a direct Souls and Simulacra and Achintya Bheda Abheda design fit at each
+  local cause/proposal relation; catalog coexistence remains aggregate.
+
+The recommendation carries two distinct fallbacks, neither silently selected.
+D1Z1-A is the scope fallback if state-condition play remains legible and fun
+but boundary-attunement play stays opaque or self-farming. The already selected
+parent D1Z-A fallback removes Z causes entirely if even state-only absence
+biography fails. A token definition in an included dialect does not establish
+viability: later matched policy tests must find material optimized reasons to
+seek and avoid Z in each included dialect, with the no-receipt cost, preserved
+proof, latch, reset cadence, current assignment, proposed target, and positive
+alternatives held in the comparison. E1-C's last-informed-commitment and anti-
+cheap-coercion gates remain mandatory.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

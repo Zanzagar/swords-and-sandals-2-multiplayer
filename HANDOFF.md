@@ -1,6 +1,77 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 sealing remains noncausal; actual empty settlement is next
+## 2026-09-28 absence may shape a disclosed subset; its dialect incidence is next
+
+Zanzagar selected `RCS-03D1Z-C` with `RCS-03D1Z-A` as the explicit failure
+fallback. A disclosed nonempty proper Absence-bound subset of transforming
+Relics may receive a persistent-transformation proposal from one actual atomic
+ledger-bearing `{}` settlement commit. At least one transforming definition
+has such a Z path and at least one does not. This does not make every
+cancellation causal, approve a proposal, or choose exact families, edges,
+targets, rates, or power.
+
+C is the active worksheet direction. A is not a simultaneous ruleset; it is
+the selected production fallback if RCS-17/RCS-18 later show free failure
+insurance, a premium extra-evolution caste, cheap ally steering, dominant
+break/renew farming, no optimized reasons both to seek and avoid Z, or failure
+of the one-sentence rule “this Relic learns from an actual empty settlement.”
+No fallback condition has fired.
+
+D1Z is `DIR-SELECTED`; D1Z1 is the sole frontier. The 141-row register now
+contains 29 `SCREEN`, 1 `OWNER-OPEN` at D1Z1, 39 `PRUNED`, 65
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`.
+Seven cause slots remain—Z1, L/L1, X/X1, and M/M1. Closing them returns D2 at
+23; D2-D5 still lead to RCS-03E at 19. The authoritative decision record
+remains unchanged.
+
+`RCS-03D1Z1` asks which of the two already-selected transformation dialects
+contain at least one Absence-bound definition. State-supporting Relics
+transform what remembered condition they bear while their evaluation boundary
+stays fixed. Boundary-supporting Relics transform how they are persistently
+attuned to listen while state stays fixed. One definition never changes both
+coordinates.
+
+Let `D_Z^S` and `D_Z^B` be the state- and boundary-dialect portions of the
+selected proper `D_Z`. The cases are exhaustive: because `D_Z` is nonempty,
+both cannot be empty; because the two dialects partition all transforming
+definitions, support is state only, boundary only, or both. Support in both
+dialects still leaves `D_Z` globally proper and does not mean every definition
+or every cancellation transforms.
+
+- **A — state-dialect Absence-bound support only.** `D_Z^S` is nonempty and
+  `D_Z^B` is empty. The readable rule is **“absence changes what the Relic
+  bears.”** A Hollow Ashen in `Mercy` might commit `{}` and propose `MOURNING
+  CONDITION`; a boundary Dreamglass never gets a Z proposal. This is the
+  strongest scope fallback and easiest to teach, but risks making state Relics
+  the richer caste and invites condition farming, punitive scars, or ally-
+  steered state changes.
+- **B — boundary-dialect Absence-bound support only.** `D_Z^S` is empty and
+  `D_Z^B` is nonempty. The readable rule is **“silence changes how the Relic
+  listens.”** A Hollow Lens in `Oath` might commit `{}` and propose `ECHO
+  ATTUNEMENT`; a state Ashen never gets a Z proposal. This has the sharpest
+  relation-through-absence identity, but the greatest opacity, best-listening-
+  point, snapshot, self-retune-loop, and ally-disruption risk.
+- **C — disclosed Absence-bound support in both dialects. Recommended if the
+  parent C is retained.** Both portions are nonempty while `D_Z` remains
+  globally proper. State examples change what they bear; boundary examples
+  change how they listen; ordinary Relics in both dialects still cancel
+  without Z proposals. One real cause has two genuinely different expressions,
+  fitting Souls and Simulacra and Achintya Bheda Abheda without collapsing the
+  coordinates. Cost: two policy surfaces must each be legible, material,
+  non-dominated, and resistant to farming and coercion; a token example fails.
+
+The recommended fallback ladder has two levels and is not yet selected:
+D1Z1-C if both dialects pass; D1Z1-A if state-condition play works but boundary
+attunement remains opaque or self-farming; the already selected parent D1Z-A
+if even state-only absence biography fails. Every included dialect must later
+produce optimized cases that seek Z and cases that avoid it after the lost
+receipt, preserved proof, latch, current assignment, target, and positive
+alternatives are counted. The relevant cancellation facts remain knowable
+before each affected player's last informed reversible commitment.
+
+Ask only for D1Z1 A, B, or C. Every answer opens D1L next.
+
+## 2026-09-28 sealing remains noncausal; actual empty settlement was next — superseded frontier
 
 Zanzagar selected `RCS-03D1K-A`. A complete positive provisional output still
 becomes sealed and cannot fizzle before its receipt-set commit, but that K
@@ -75,8 +146,8 @@ Absence-bound Dreamglass may create `MOURNING PROPOSED`; removing only the Z
 edge leaves `{}`, proof, and the latch unchanged. An ordinary Ashen can undergo
 the same cancellation without a Z proposal.
 
-Ask only for D1Z A, B, or C. Under A/B, D1Z1 prunes and D1L opens. Under C,
-D1Z1 opens next.
+This section preserves the prior D1Z frontier. D1Z-C with A fallback is now
+selected; do not ask it again. The current single choice is D1Z1 above.
 
 ## 2026-09-28 refusal routes without transforming; provisional sealing was next — superseded frontier
 
@@ -148,7 +219,8 @@ proposal untouched. A false pair whose fixed disposition is `{S1,S2}` follows
 the same grammar: one K event for the whole substitute set, then one P commit.
 
 This section preserves the prior D1K frontier. D1K-A is now selected; do not
-ask it again. The current single choice is D1Z in the newer section above.
+ask it again. D1Z-C with A fallback is also selected; the current single choice
+is D1Z1 in the newest section above.
 
 ## 2026-09-28 permission permits without transforming; false verdict was next — superseded frontier
 
@@ -224,8 +296,8 @@ Z/L facts, and every independent proposal unchanged. A different fixed denied
 opportunity may yield `{S}` and later K/P without changing the causal boundary.
 
 This section preserves the prior D1VF frontier. D1VF-A is now selected; do not
-ask it again. D1K-A is also selected; the current single choice is D1Z in the
-newest section above.
+ask it again. D1K-A and D1Z-C with A fallback are also selected; the current
+single choice is D1Z1 in the newest section above.
 
 ## 2026-09-28 success shapes every Relic; claim-write cause selected — superseded frontier
 
@@ -288,8 +360,9 @@ rendering, duplicate delivery, and idempotent re-claim cannot mint another
 cause occurrence. Ally proof retains ownership/payment and grants no approval.
 This section records the prior D1C frontier. D1C-A is now selected; do not ask
 it again. **Corrected 2026-09-28:** D1I-A, D1T-A, D1VT-A, and D1VF-A are also
-selected and must not be asked again; D1N is derived empty, D1K-A is now also
-selected, and the current single choice is D1Z above.
+selected and must not be asked again; D1N is derived empty, D1K-A and D1Z-C
+with A fallback are now also selected, and the current single choice is D1Z1
+above.
 
 ## 2026-09-28 claimed proof is Relic-wide spent; positive-settlement cause is next
 
@@ -11456,7 +11529,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 06:07 UTC — actual ledger-bearing empty-settlement cause is next](docs/handoffs/2026-09-28-0607--relic-empty-settlement-cause-next.md)**
+[2026-09-28 06:23 UTC — Absence-bound transformation-dialect incidence is next](docs/handoffs/2026-09-28-0623--relic-absence-dialect-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
