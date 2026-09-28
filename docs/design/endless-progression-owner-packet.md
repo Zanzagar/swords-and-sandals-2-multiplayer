@@ -384,9 +384,11 @@ invocation listen without transforming. The thirty-eighth correction then
 proved the registered D1N true-zero-contender domain empty under the selected
 readiness/evidence/tuple rules and pruned D1N1. Zanzagar then selected D1T-A,
 so actual joint tuple selection routes proof but never directly proposes
-transformation; D1T1 prunes. **RCS-03D1VT is now the sole owner-facing choice
-under SR-03:** whether an actual authoritative true/allow permission verdict
-may directly propose transformation.
+transformation; D1T1 prunes. Zanzagar then selected D1VT-A, so an actual
+true/allow permission verdict governs coexistence but never directly proposes
+transformation; D1VT1 prunes. **RCS-03D1VF is now the sole owner-facing choice
+under SR-03:** whether an actual authoritative false/not-both permission
+verdict may directly propose transformation.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -25438,7 +25440,7 @@ After that transition, the 141-row register contains **36 `SCREEN`, 1
 remain from VT through M; closing them returns D2 as the sole frontier at
 `Phi_SR = 23`. The authoritative decision record remains unchanged.
 
-### RCS-03D1VT — actual true/allow permission verdict as transformation cause — active owner choice
+### RCS-03D1VT — actual true/allow permission verdict as transformation cause — A selected
 
 Let `D_VT` contain each definition in `D_mut` with at least one reachable
 **true-verdict transformation-cause witness**. Such a witness requires:
@@ -25498,6 +25500,91 @@ power, persistence, and balance remain later work. This card selects neither
 approval nor collision resolution and authorizes no implementation.
 
 Under A/B, D1VT1 prunes and D1VF opens. Under C, D1VT1 opens next. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, permission
+allows coexistence but never transforms.** Thus `D_VT=emptyset`. The actual
+true bit retains every gate consequence: the selected pair may continue into
+its lawful disposition and result. The VT locus has no persistent-
+transformation proposal edge. A later positive commit may independently
+satisfy D1P-B. D1VT moves to `DIR-SELECTED`, and `RCS-03D1VT1` moves to
+`PRUNED`.
+
+After that transition, the 141-row register contains **34 `SCREEN`, 1
+`OWNER-OPEN` at D1VF, 37 `PRUNED`, 62 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`**. Twelve cause parent/child slots
+remain from VF through M; closing them returns D2 as the sole frontier at
+`Phi_SR = 23`. The authoritative decision record remains unchanged.
+
+### RCS-03D1VF — actual false/not-both permission verdict as transformation cause — active owner choice
+
+Let `D_VF` contain each definition in `D_mut` with at least one reachable
+**false-verdict transformation-cause witness**. Such a witness requires:
+
+1. one actual canonical evaluation with exactly two contender tags and one
+   selected complete joint ledger tuple whose unordered pair reaches the
+   permission coordinate;
+2. one actual authoritative permission result `false`/not-both for that pair,
+   whether the bound law is deterministic or the bit is the once-committed
+   realization of a lawful Oracle distribution;
+3. one prospectively versioned direct VF-locus edge from that realized false
+   bit to a materially distinct legal assignment in the same RCS-03A dialect
+   and active Relic;
+4. deletion of only that edge removes the proposal while the selected tuple,
+   pair, law, context, bound stance, false bit, derived deterministic
+   disposition, later K/P/Z/L/C facts, every independently created proposal
+   fact, completed trace, and current assignment remain fixed; and
+5. no inspection of the later disposition, provisional output, positive or
+   empty commit, evidence claim, recurrence-latch write, approval, or collision
+   result.
+
+The false bit means only **the two original manifestations may not both
+continue**. It does not itself choose cancellation `{}`, singleton substitute
+`{S}`, or double substitutes `{S1,S2}`. Selected F1-A makes each fixed denied
+opportunity's eventual disposition single-valued, but that disposition remains
+a derived mapping after VF rather than another cause occurrence. Exact-shared,
+distinct-related, and hybrid proof forms feed the same semantic bit; a hybrid
+does not receive two votes. G1-A permits at most two contenders, so one
+evaluation has at most one unordered pair and one VF occurrence.
+
+Deterministic versus Oracle realization, responsive versus steadfast law,
+routing stance, factual context, and the later denied-output class may
+condition authoring but do not create separate VF loci. A denial probability,
+always-deny declaration, raw random draw, contemplated false branch,
+deterministic disposition, later output, callback, replay, reload, rendering,
+or duplicate delivery is not VF.
+
+False-verdict reachability is already positive. Selected exact-permission
+E1-C requires a responsive law with reachable true and false bits, and E3-C
+requires a distinct context-invariant always-deny law over its own nonempty
+reachable domain. Selected related-form polarity independently includes a
+steadfast-refusal projection. These guarantees create actual false verdicts
+but no direct VF proposal edge, and they do not imply that every transforming
+definition has a deny-capable pair path.
+
+| Choice | False-verdict-cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — refusal routes manifestation but never transforms** | `D_VF=emptyset`. The actual false/not-both verdict retains every permission and denied-disposition consequence but never itself proposes persistent change. | **Recommended.** A teaches: **the covenant refuses coexistence; what that refusal becomes may shape the Relic**. Refusal is already mechanically rich: it forbids the original pair's joint continuation and routes a prospectively legible severance, fusion/transmutation, or refraction/reconstitution. A positive denied output may later transform through K/P; an empty settlement and its recurrence latch retain their later Z/L classifications. The false bit protectively preserves real distinction under Achintya Bheda Abheda without mistaking negation alone for manifested biography. A avoids engineered-denial farming, ally-steered scars, and stacked VF-with-K/P-or-Z/L proposals. Cost: no Relic can be changed specifically by the instant its covenant says “not both.” | Guardian Vow `P` and Returning Vow `Q` select ledgers sharing `Heat h`; Severed Chorus returns false. The verdict forbids `{P,Q}` but creates no proposal. This fixed context's predetermined disposition later settles `{}`; other prospectively distinct denied opportunities may settle `{S}` or `{S1,S2}`. Each applicable downstream locus remains independent. |
+| **B — every transforming Relic has a refusal-shaped path** | `D_VF=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable real two-contender permission opportunity whose actual false verdict directly proposes change; not every false verdict must transform. | B makes “every Relic can be changed by refused coexistence” universal. A singleton, an always-deny label without an actual evaluation, or a later empty/substitute result cannot satisfy it. This forces pair-capable, deny-capable content across the transforming catalog, pressures singleton and steadfast-allow identities, rewards cheap second-contender or certain-denial engineering, permits teammate-steered biography, and can stack with every later result-side cause. Choose B only for an explicit system-wide thesis that refusal itself must be biographical. | Every transforming definition needs some reachable denied pair. When Severed Chorus returns false, a direct VF edge may create `REBUKED PROPOSED` before its fixed disposition; a later positive commit or empty settlement remains a separate occurrence. |
+| **C — a disclosed dissonance-bound subset changes on refusal** | `D_VF` is a nonempty proper subset of `D_mut`; D1VF1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Guarded thematic alternative.** A named `DISSONANCE-BOUND`, Broken Covenant, or Refusal-Witness family may remember the actual “not both” verdict whether the denied relationship later severs, fuses, or refracts, while ordinary Relics wait for what manifests. This can make rejection itself part of Souls and Simulacra biography, but it adds another causal sentence and risks a premium extra-evolution caste or punitive trap. Use C only if refusal-specific memory is prospectively visible, independently policy-changing, resistant to cheap ally coercion and denial farming, non-dominated, and not honestly an outcome-specific K/P/Z cause. | Dreamglass may attach `REBUKED PROPOSED` directly to its false bit while Ashen treats the same false bit only as a route into its fixed disposition. Deleting Dreamglass's VF edge must leave its eventual `{}`, `{S}`, or `{S1,S2}` result unchanged. |
+
+A/B/C are exhaustive because `D_VF` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. B means one qualifying path per
+transforming definition, not that every false verdict transforms. C classifies
+definitions, not proof form, law family, or denied-output class; exact trigger
+assignments and prevalence within a supported definition remain AUTHOR/SPEC.
+
+One actual false bit is one VF occurrence. Tags, ledger components, exact and
+related labels, hybrid membership, law predicates, RNG calls, disposition
+branches, callbacks, renderings, reloads, and duplicate delivery cannot
+multiply it. A VF edge may be recorded transactionally but cannot be presented
+or exercise authority until the cut-atomic evaluation completes, and it cannot
+affect the deterministic disposition, K/P, Z/L, or settlement. Exact
+definitions, pair identities, triggers, targets, rates, copy, surface, power,
+persistence, and balance remain later work. This card selects neither approval
+nor collision resolution and authorizes no implementation.
+
+Under A/B, D1VF1 prunes and D1K opens. Under C, D1VF1 opens next. The
 authoritative decision record remains unchanged.
 
 ## Session protocol and evidence

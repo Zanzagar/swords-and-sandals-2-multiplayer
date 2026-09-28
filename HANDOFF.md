@@ -1,72 +1,80 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 tuple selection routes proof; true permission verdict is next
+## 2026-09-28 permission permits without transforming; false verdict is next
 
-Zanzagar selected `RCS-03D1T-A`. An actual nontrivial authoritative selection
-among multiple complete ledger tuples still chooses the one operative
-proof-weave and can thereby change downstream permission, settlement, and
-claim consequences. The selection occurrence itself never directly proposes
-persistent transformation. D1T is `DIR-SELECTED`; D1T1 is `PRUNED`; D1VT is
-the sole frontier. The authoritative decision record remains unchanged.
+Zanzagar selected `RCS-03D1VT-A`. An actual authoritative `true`/allow
+permission verdict retains its full mechanical consequence: it lets the
+selected manifestations continue together into their lawful disposition and
+result. The verdict itself never directly proposes persistent transformation.
+D1VT is `DIR-SELECTED`; D1VT1 is `PRUNED`; D1VF is the sole frontier. The
+authoritative decision record remains unchanged.
 
-The 141-row register now contains 36 `SCREEN`, 1 `OWNER-OPEN` at D1VT, 36
-`PRUNED`, 61 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 37`. Fourteen cause parent/child slots remain from VT through M.
+The 141-row register now contains 34 `SCREEN`, 1 `OWNER-OPEN` at D1VF, 37
+`PRUNED`, 62 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 35`. Twelve cause parent/child slots remain from VF through M.
 Closing them returns D2 at 23; D2-D5 still lead to RCS-03E at 19.
 
-`RCS-03D1VT` asks whether one actual authoritative `true`/allow permission
+`RCS-03D1VF` asks whether one actual authoritative `false`/not-both permission
 verdict may itself directly propose a Relic transformation. This is the real
 verdict reached after exactly two contender tags have one selected complete
-tuple and their unordered pair reaches permission. A singleton has no
-permission verdict. A probability above zero, an always-allow declaration, a
-raw random draw, contemplated branching, or a later successful result is not
-the VT occurrence.
+tuple and their unordered pair reaches permission. It says only that the two
+original manifestations may not both continue. It does not choose what happens
+next.
 
 The row is atomic. Exact-shared, distinct-related, and hybrid proof forms feed
-the same semantic permission bit; a hybrid does not get an exact vote and a
-related vote. Deterministic Witness and stochastic Oracle laws likewise differ
-in how the bit is produced, not in the authority of the realized bit. With at
-most two contenders, one evaluation has at most one unordered pair and one VT
-occurrence. True verdicts are already reachable under selected exact-law
-requirements, but no prior choice gives them a direct transformation edge.
+the same semantic permission bit; a hybrid does not get two votes.
+Deterministic Witness and stochastic Oracle laws differ in how the bit is
+produced, not in the authority of the realized bit. Responsive versus
+steadfast laws and factual contexts are likewise inputs. With at most two
+contenders, one evaluation has at most one unordered pair and one VF
+occurrence. False verdicts are already reachable under selected exact- and
+related-law requirements, but no prior choice gives them a direct
+transformation edge.
 
-- **A — permission allows coexistence but never transforms. Recommended.** The
-  true bit retains its full mechanical consequence: it decides that the two
-  distinct manifestations may continue together. It simply creates no extra
-  biography proposal. D1P-B already guarantees every transforming definition
-  a positive-manifestation path. This gives the readable rule **“the covenant
-  permits coexistence; what manifests may shape the Relic.”** It is the
-  cleanest protective Achintya Bheda Abheda fit: permission preserves unity and
-  difference in play without making the gate's “yes” a second transformation
-  event. It also avoids farming safe always-allow pairs, ally-steered access,
-  and stacked VT/K/P proposals. Cost: no Relic can change merely because its
-  covenant allowed two manifestations to coexist.
-- **B — every transforming Relic has a true-verdict-shaped path.** Every
+The later deterministic disposition is deliberately separate. Depending on
+the prospectively fixed law and context, a false verdict eventually becomes
+severance `{}`, fusion/transmutation `{S}`, or refraction/reconstitution
+`{S1,S2}`. Each fixed opportunity has one predetermined disposition. Positive
+outputs then proceed through K/P; empty settlement proceeds through Z/L. An
+output-specific transformation belongs at those later loci, not at VF.
+
+- **A — refusal routes manifestation but never transforms. Recommended.** The
+  false bit enforces “not both” and enters its fixed denied disposition, but
+  creates no extra biography proposal. The readable rule is **“the covenant
+  refuses coexistence; what that refusal becomes may shape the Relic.”** This
+  protectively preserves real distinction under Achintya Bheda Abheda while
+  leaving lived severance, fusion, or refraction to carry transformation. It
+  avoids engineered-denial farming, ally-steered scars, and stacked
+  VF-with-K/P-or-Z/L proposals. Cost: no Relic can change specifically at the
+  instant its covenant says “not both.”
+- **B — every transforming Relic has a refusal-shaped path.** Every
   state- and boundary-supporting transforming definition must have at least one
-  reachable genuine two-contender allow occurrence whose true bit directly
-  proposes change. Not every allow verdict must transform. A singleton success
-  path cannot satisfy B. This universalizes “permission itself changes every
-  Relic,” but forces pair-capable, allow-capable content throughout the catalog,
-  pressures singleton and steadfast-refusal identities, encourages safe-pair
-  farming, and may stack a VT proposal with later result proposals.
-- **C — a disclosed proper subset is concord-bound.** A named
-  `CONCORD-BOUND`, Open Covenant, or Communion family may change on its actual
-  allow bit; ordinary Relics use the same bit only as a gate. This makes the
-  theme explicit without universalizing it, but creates another causal dialect
-  and risks a premium “extra evolution route” caste or a trap caste. It is
-  viable only if the distinction is prospectively visible, independently fun,
-  non-dominated, and cannot be expressed honestly through the later positive
-  manifestation.
+  reachable genuine two-contender false verdict whose direct VF edge proposes
+  change. Not every denial must transform. A singleton, an always-deny label
+  without an actual evaluation, or the later output cannot satisfy B. This
+  universalizes refusal-biography, but forces deny-capable pair content across
+  the catalog, pressures singleton and steadfast-allow identities, encourages
+  cheap-denial engineering, and permits teammate-steered transformation.
+- **C — a disclosed proper subset is dissonance-bound.** A named
+  `DISSONANCE-BOUND`, Broken Covenant, or Refusal-Witness family may remember
+  the actual “not both” verdict whether the later fixed disposition severs,
+  fuses, or refracts; ordinary Relics wait for what manifests. This is the
+  guarded thematic alternative, but adds another causal language and risks a
+  premium extra-evolution caste or punitive trap. Use it only if refusal-
+  specific biography is visible, independently policy-changing, resistant to
+  denial farming and ally coercion, non-dominated, and not honestly a later
+  K/P/Z cause.
 
-Example: Guardian Vow P and Returning Vow Q select complete ledgers sharing
-`Heat h`; Stone Witness returns true. Under A, both continue together, but the
-verdict creates no transformation proposal. If their later positive commit has
-an authored P edge, it may independently propose `CONCORDANT`. Under B/C, the
-true bit may instead create `CONCORD-MARKED PROPOSED` before the result
-completes; later outcome facts cannot retroactively define that VT cause.
+Example: Guardian Vow P and Returning Vow Q select ledgers sharing `Heat h`;
+Severed Chorus returns false. Under A, the verdict forbids `{P,Q}` but creates
+no proposal; this fixed context's predetermined disposition later settles
+`{}`. Under B/C, the false bit may instead create `REBUKED PROPOSED` before
+that disposition. Deleting the VF edge must leave the false bit, `{}`, later
+Z/L facts, and every independent proposal unchanged. A different fixed denied
+opportunity may yield `{S}` and later K/P without changing the causal boundary.
 
-Ask only for D1VT A, B, or C. Under A/B, D1VT1 prunes and D1VF opens. Under C,
-D1VT1 opens next.
+Ask only for D1VF A, B, or C. Under A/B, D1VF1 prunes and D1K opens. Under C,
+D1VF1 opens next.
 
 ## 2026-09-28 success shapes every Relic; claim-write cause selected — superseded frontier
 
@@ -128,9 +136,9 @@ intended claim, or one trigger per claimed child. Replay, reload, callbacks,
 rendering, duplicate delivery, and idempotent re-claim cannot mint another
 cause occurrence. Ally proof retains ownership/payment and grants no approval.
 This section records the prior D1C frontier. D1C-A is now selected; do not ask
-it again. **Corrected 2026-09-28:** D1I-A and D1T-A are also selected and must
-not be asked again; D1N is derived empty, and the current single choice is
-D1VT above.
+it again. **Corrected 2026-09-28:** D1I-A, D1T-A, and D1VT-A are also selected
+and must not be asked again; D1N is derived empty, and the current single
+choice is D1VF above.
 
 ## 2026-09-28 claimed proof is Relic-wide spent; positive-settlement cause is next
 
@@ -11297,7 +11305,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 05:29 UTC — actual true/allow permission-verdict cause is next](docs/handoffs/2026-09-28-0529--relic-true-verdict-cause-next.md)**
+[2026-09-28 05:42 UTC — actual false/not-both permission-verdict cause is next](docs/handoffs/2026-09-28-0542--relic-false-verdict-cause-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

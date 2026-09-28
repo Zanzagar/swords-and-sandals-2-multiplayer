@@ -6773,6 +6773,81 @@ to redefine the VT cause. Under A/B, D1VT1 prunes and D1VF opens. Under C,
 D1VT1 opens. No option selects exact definitions, triggers, targets, rates,
 copy, surface, power, persistence, approval, collision, or implementation.
 
+Zanzagar selected D1VT-A. Thus `D_VT=∅`: the actual true/allow bit retains
+every coexistence, deterministic-disposition, and downstream result
+consequence, but the verdict occurrence has no direct persistent-
+transformation proposal edge. D1VT moves to `DIR-SELECTED`, D1VT1 moves to
+`PRUNED`, and D1VF becomes the sole `OWNER-OPEN` row. The 141-row register now
+contains 34 `SCREEN`, 1 `OWNER-OPEN`, 37 `PRUNED`, 62 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. Twelve cause
+parent/child slots remain from VF through M; closing them returns D2 as the
+sole frontier at 23. No authoritative-record text changed.
+
+**D1VF prerequisite and atomicity audit — passes without a row split.** A
+qualifying VF witness contains one actual canonical evaluation with two
+contender tags, one selected complete tuple, one unordered pair reaching
+permission, and one authoritative realized `false`/not-both bit. It also
+contains a prospectively versioned direct VF-locus edge whose deletion removes
+the proposal while the tuple, pair, law, context, stance, false bit, derived
+deterministic disposition, later K/P/Z/L/C facts, every independently created
+proposal fact, completed trace, and current assignment remain fixed. The edge
+may inspect no later disposition, output, commit, claim, latch, approval, or
+collision result. A singleton has no permission verdict and cannot witness VF.
+
+The false bit means only that the two original manifestations may not both
+continue. It does not select cancellation `{}`, singleton substitute `{S}`, or
+double substitutes `{S1,S2}`. F1-A makes each fixed denied opportunity's
+eventual mapping single-valued, but deterministic disposition is expressly a
+derived mapping after VF rather than another semantic cause occurrence. Exact-
+shared, distinct-related, and hybrid proof forms are inputs to one bit;
+deterministic versus Oracle, responsive versus steadfast, stance, and context
+classify how that bit is produced. Cancellation versus positive substitution
+belongs to the downstream K/P or Z/L branches. Once the actual bit and later
+trace are fixed, none changes the VF authority or transition dialect, so no
+additional owner row passes the admission test. Exact trigger placement by
+form, law, context, stance, or known disposition remains AUTHOR/SPEC.
+
+False-verdict reachability is positive independently of any VF edge. Selected
+exact-permission E1-C requires a responsive law with reachable true and false
+results; E3-C requires a distinct context-invariant always-deny law over its
+own nonempty reachable domain. Selected related-form polarity also includes a
+steadfast-refusal projection. These guarantees author no direct VF edge and do
+not require every transforming definition to have a deny-capable pair route.
+
+The next card is therefore atomic and exhaustive over `D_VF⊆D_mut`:
+
+- D1VF-A makes `D_VF=∅`. **Recommended.** Refusal enforces not-both and routes
+  the fixed denied disposition but never itself proposes biography. Positive
+  denied outputs retain K/P; empty settlement and recurrence retain later Z/L
+  classifications. This keeps the readable rule “the covenant refuses
+  coexistence; what that refusal becomes may shape the Relic,” while avoiding
+  engineered-denial farming, ally-steered scars, and stacked
+  VF-with-K/P-or-Z/L proposals.
+- D1VF-B makes `D_VF=D_mut`. Every transforming definition must have at least
+  one reachable genuine two-contender false occurrence with a direct VF edge;
+  a singleton, declaration, or later denied output cannot satisfy it. This
+  universal refusal-biography thesis pressures singleton and steadfast-allow
+  identities and imposes pair-capable, deny-capable authoring across the
+  catalog.
+- D1VF-C makes `D_VF` nonempty proper and opens D1VF1. A disclosed
+  `DISSONANCE-BOUND`, Broken Covenant, or Refusal-Witness family may remember
+  the actual not-both verdict whether the later fixed disposition severs,
+  fuses, or refracts. It is the guarded thematic alternative, viable only if
+  visible, independently policy-changing, non-dominated, resistant to denial
+  farming and ally coercion, and not honestly an outcome-specific K/P/Z cause.
+
+For a separating trace, Guardian Vow P and Returning Vow Q may select ledgers
+sharing `Heat h`; Severed Chorus then returns false. Under A, the verdict
+forbids `{P,Q}` but creates no proposal, and this fixed opportunity's
+predetermined disposition later settles `{}`. Under B/C, the false bit may
+instead create `REBUKED PROPOSED` before that disposition; deleting only the VF
+edge leaves the bit, `{}`, Z/L facts, and every independent proposal unchanged.
+A different prospectively fixed denied opportunity may yield `{S}` and later
+K/P without changing the same causal boundary. Under A/B, D1VF1 prunes and
+D1K opens. Under C, D1VF1 opens. No option selects exact definitions, output
+maps, triggers, targets, rates, copy, surface, power, persistence, approval,
+collision, or implementation.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or
