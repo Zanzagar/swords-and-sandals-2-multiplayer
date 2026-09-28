@@ -1,6 +1,6 @@
 {
- "updatedAt": "2026-09-24",
- "head": "674cf9e",
+ "updatedAt": "2026-09-27",
+ "head": "bb3a691",
  "lede": "Every system in the Swords and Sandals II team-arena project — the engine behind Swords and Sandals II: Souls and Simulacra (working title) — and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -74,12 +74,12 @@
    "column": "gaps",
    "order": 3,
    "title": "Movement: walk, rank change, taunted flee",
-   "summary": "walk-left and walk-right use the build's own displacement loop (ss2WalkDisplacement, movement_speed*16 eased). The taunted flee uses ss2RunDisplacement (*40, stop gap 10). rank-back and rank-front are AUTHORED verbs for the second axis, because the build has no sidestep.",
-   "gaps": "The walk and run displacements have no runtime observation. The movement step factors are guarded only by a tool run on the capture box (tools/walk-displacement-derivation.mjs), not by node --test.",
+   "summary": "walk-left and walk-right use the build's own displacement loop (ss2WalkDisplacement, movement_speed*16 eased). The taunted flee uses ss2RunDisplacement (*40, stop gap 10). rank-back and rank-front are AUTHORED verbs for the second axis, because the build has no sidestep. A body blocks a walk only in the walker's own lane (57b2209: the depth test let a body stronger than 26 block the next lane, so big fighters walked in place), and a walk that would go nowhere against a body in the lane is withheld and greyed \"Blocked\" on the ring (P3, 8f63c00).",
+   "gaps": "The walk and run displacements have no runtime observation. The movement step factors are guarded only by a tool run on the capture box (tools/walk-displacement-derivation.mjs), not by node --test. A walk into the arena wall is still offered and goes nowhere (not covered by P3).",
    "next": "Get a pacing decision (frontX / walk distance), then re-census.",
-   "evidence": "Ss2ActionType.WALK_LEFT/RIGHT, RANK_BACK/FRONT, TAUNTED_PHASE; ss2-rules.js:2232-2400 (the step-factor table); resolveAction ~11120-11180 (the flee). The HANDOFF living head, around line 3011, measures pacing: 53% of a 3v3 is walking (35/48/91 actions).",
+   "evidence": "Ss2ActionType.WALK_LEFT/RIGHT, RANK_BACK/FRONT, TAUNTED_PHASE; ss2-rules.js:2232-2400 (the step-factor table); resolveAction ~11120-11180 (the flee). The HANDOFF living head, around line 3011, measures pacing: 53% of a 3v3 is walking (35/48/91 actions). ss2BodyBlocks, ss2WalkBlocked; test/ss2-position.test.js, test/ss2-blocked-walk.test.js.",
    "ownerDecision": "The pacing number is recorded as the owner's decision, not a defect (HANDOFF.md ~3011). I found no recorded answer in the living head.",
-   "updated": "2026-09-23"
+   "updated": "2026-09-27"
   },
   {
    "id": "charge-and-jump-verbs-the-build-has-them-the-eng",
@@ -152,12 +152,12 @@
    "column": "gaps",
    "order": 9,
    "title": "Crowd verbs: wincrowd and cast_adulation",
-   "summary": "wincrowd (herolevel >= 3) adds round(charisma/2) to the crowd and takes zero combat samples; the clip pick is deterministic. Adulation (id 47) writes crowd_action 50. Wincrowd uses the ACTOR's charisma by owner decision; the build always reads the hero's.",
+   "summary": "wincrowd (herolevel >= 3) adds round(charisma/2) to the crowd and takes zero combat samples; the clip pick is deterministic. Adulation (id 47) writes crowd_action 50. Wincrowd uses the ACTOR's charisma by owner decision; the build always reads the hero's. The AI never plays to the crowd while an ally fights a foe it could help against (P1, 5cb6977).",
    "gaps": "Map-derived only; no candidate or golden. The build's clip pick is RandomNumber(6), replaced by a deterministic pick. That is presentation, but it is still a named difference.",
    "next": "None blocking. Keep as named in the divergence list.",
    "evidence": "SS2_WINCROWD (ss2-rules.js:5731), SS2_ADULATION (5655); 951047e, cefaf83; test/ss2-wincrowd.test.js, test/ss2-adulation.test.js.",
    "ownerDecision": "",
-   "updated": "2026-09-23"
+   "updated": "2026-09-27"
   },
   {
    "id": "potions-drink-potion-items-2-9",
@@ -282,12 +282,12 @@
    "column": "gaps",
    "order": 19,
    "title": "Team AI (authored layer): targeting, ranks, flanking, crowd and taunt valuation",
-   "summary": "Authored team behaviour on top of the ladder: swing at the weakest REACHABLE foe; walk at the own-rank foe; change rank only when its own rank is empty of foes; join an ally's fight (SS2_RANK_JOIN_SURPLUS 0); go round a foe an ally is fighting; draw the bow rather than walk; price taunts in hitpoints; play to the crowd when safe and ahead (SS2_AI_CROWD purseInSwings 100, aheadShare).",
-   "gaps": "The coefficients were tuned on the demo roster only. The latest handoff names residual render-sweep wall cases (a ghost strike cast facing away at the wall). The b81f3dc fix exposed that the AI could chase to the wall (16 of 25 tricks bouts stalled), so behaviour under new rosters is unmeasured.",
-   "next": "Re-census the AI on non-demo rosters, including the tournament bosses (?red=&blue=).",
-   "evidence": "ss2-rules.js:3142 (ss2FlankingWalk), 3295 (ss2TauntValue), 3529-3839 (SS2_AI_CROWD, ss2SafelyOutOfRange, ss2CrowdPleaserValue, ss2RankToJoin); bf53d81, b81f3dc, 69e4217; test/ss2-ai-crowd.test.js, test/ss2-flanking.test.js, test/ss2-rank-join.test.js, test/ss2-ai-tired-rest.test.js.",
+   "summary": "Authored team behaviour on top of the ladder: swing at the weakest REACHABLE foe; walk at the own-rank foe; change rank only when its own rank is empty of foes; join an ally's fight (SS2_RANK_JOIN_SURPLUS 0); go round a foe an ally is fighting; draw the bow rather than walk; price taunts in hitpoints; play to the crowd when safe and ahead (SS2_AI_CROWD purseInSwings 100, aheadShare). Presses a numbers advantage (P1/P2/P4, 5cb6977): no crowd-pleaser while an ally fights a foe it could help against; out of a lane blocked by an ally, past the foe in the next lane, in from the far side, only while that far side is open (74c0014 and 92f9701: verifiers caught the press shuttling a fighter between lanes when the far side was taken, and a distant drawn bow counted as holding a side). aiPress ranged-first ships; pincer-first is one word away.",
+   "gaps": "Ranged-first is at least as strong as pincer-first (784-752 head to head over 1,536 bouts at 92f9701); pincer-first corners more visibly on champions, lengthens their 3v3 bouts ~8% and converts clearly less on buffs 2v2. A pair still plays to the crowd in a 2v1 before anyone engages (the 2026-09-23 rule), which may read as waiting. The archer's closed-on test ignores lanes: a foe in another lane takes away an archer's shots and its walk toward (verifier, 2026-09-27). The coefficients were tuned on the demo roster only. The latest handoff names residual render-sweep wall cases (a ghost strike cast facing away at the wall). The b81f3dc fix exposed that the AI could chase to the wall (16 of 25 tricks bouts stalled), so behaviour under new rosters is unmeasured.",
+   "next": "Owner: keep ranged-first or flip to pincer-first (docs/design/battle-ui.md #decided-ai-press-2026-09-27). Decide whether the archer's closed-on test should read the lane.",
+   "evidence": "ss2-rules.js:3142 (ss2FlankingWalk), 3295 (ss2TauntValue), 3529-3839 (SS2_AI_CROWD, ss2SafelyOutOfRange, ss2CrowdPleaserValue, ss2RankToJoin); bf53d81, b81f3dc, 69e4217; test/ss2-ai-crowd.test.js, test/ss2-flanking.test.js, test/ss2-rank-join.test.js, test/ss2-ai-tired-rest.test.js. ss2PressTarget, ss2PressMove; test/ss2-ai-press.test.js. 74c0014 (the far-side guard); tools/ai-press-census.mjs. 92f9701.",
    "ownerDecision": "",
-   "updated": "2026-09-23"
+   "updated": "2026-09-27"
   },
   {
    "id": "crowd-economy-and-the-victory-purse",
@@ -552,15 +552,15 @@
   {
    "id": "name-plates",
    "lane": "presentation",
-   "column": "gaps",
+   "column": "done",
    "order": 40,
    "title": "Name plates",
-   "summary": "Each fighter's name is drawn in canvas system font (ui-sans-serif), centred 22 units below the feet at the drawn (not resting) position, dimmed for the dead. It does not use the game's font, a team colour, health or any build art.",
-   "gaps": "The build has no over-head plates to copy, so this is authored UI. It is not in the extracted game font, although text.js can lay out arbitrary strings in it.",
-   "next": "Render the plates through text.js fieldOpsFor-style layout in the game font, or fold them into the HUD design.",
-   "evidence": "tools/arena/main.js 3942-3957 (fillText at view.toY(origin.y, -22)).",
-   "ownerDecision": "Whether plates stay, and what they show in 3v3 (name only, or health, team colour or an acting marker).",
-   "updated": "2026-09-23"
+   "summary": "Each fighter's name in his team's colour, stroked dark (#0b0a0d), at the drawn position, dimmed to 0.4 when fallen; no disc, initial or underline (D1, the owner: \"Colors suffice.\", aab0d8e). tools/arena/team-hud.js namePlateFor/namePlateLayout, under the suite.",
+   "gaps": "Still the canvas system font, not the game's. Red and blue are 1.11:1 in luminance, so the side is not readable in greyscale (D1's stated cost).",
+   "next": "Open owner call: fade the fallen fighter's plate with the D6 gauge hold.",
+   "evidence": "tools/arena/main.js (the name plate block, namePlateFor); docs/design/battle-ui.md #decided-inframe-hud-2026-09-24 D1.",
+   "ownerDecision": "Decided 2026-09-24 (D1): colour is the only side cue.",
+   "updated": "2026-09-27"
   },
   {
    "id": "ui-bar-sprite-1531",
@@ -580,13 +580,13 @@
    "lane": "presentation",
    "column": "done",
    "order": 42,
-   "title": "Team HUD: fighter rows, turn order, crowd meter",
-   "summary": "Built (a1f6500, 93b2179, f9a135e): team-coloured name plates with an R/B disc; two team panels (health, energy, armour, turn highlight, condition chips, you/AI); the crowd meter with the build's ten moods; a turn-order strip above the stage. Seen in a real browser.",
-   "gaps": "Stamina, armourclass, crowd_interest (a battle resource since cefaf83) and potion counts are invisible, although they drive the rules. The roster shows internal tokens like 'facing-left' to a player. combat_panel is two-sided hero/villain and has no layout for 3v3.",
-   "next": "",
-   "evidence": "Design: docs/design/battle-ui.md and the 'Team Battle UI' canvas (https://claude.ai/artifact/GCRMqD9qVoqWazVTqgWDVa). Build HUD mapped by wave wf_e90ae76e-4af (q4).",
+   "title": "Team HUD: the build's own gauges and crowd bar, in the frame",
+   "summary": "In the frame since 2026-09-25: each fighter's cluster is the build's own combat_panel gauges (health, energy, armour, name banner), a 1v1 at the build's own place; the crowd bar is the build's own (2aa4eab), top right; the camera keeps team fighters above the HUD (76b9ca9); gauges hold until the blow lands (D6). The side panel's bars are visually hidden meters for screen readers.",
+   "gaps": "In team bouts damage pop-ups pass under the crowd bar ~2-4% of frames (1v1: none); a grown colossus's shadow sits under the HUD ~24-27 frames while the camera eases.",
+   "next": "Owner calls: keep the crowd bar where the build puts it, move it, or paint pop-ups over the HUD; snap the camera for a colossus cast.",
+   "evidence": "docs/design/battle-ui.md #decided-inframe-hud-2026-09-24 (D1-D8); 2aa4eab; 76b9ca9.",
    "ownerDecision": "\"Wraith\" (the build) or \"Life-drained\"; the build's typo \"Tranfixed\"; chips for timed spells.",
-   "updated": "2026-09-24"
+   "updated": "2026-09-27"
   },
   {
    "id": "damage-number-pop-ups",
@@ -997,12 +997,12 @@
    "column": "gaps",
    "order": 74,
    "title": "Tests and CI",
-   "summary": "I measured the suite on this tree: 2962 tests, 2961 pass, 0 fail, 1 skipped (the raw-trace archive check), about 252 s serially under node v26.3.1. That matches the documented main-tree profile. There is no CI of any kind.",
+   "summary": "I measured the suite on this tree: 2962 tests, 2961 pass, 0 fail, 1 skipped (the raw-trace archive check), about 252 s serially under node v26.3.1. That matches the documented main-tree profile. Since 2026-09-26 one CI job exists, .github/workflows/grill-gate.yml, which checks commit trailers and PR descriptions; no CI job runs the test suite.",
    "gaps": "The browser shells (tools/arena/main.js at 4,760 lines, tools/screens/main.js) cannot be imported by the suite. The PowerShell pipeline is tested only through validate-vehicle. The Windows-native path depends on the Codex runtime's node.",
    "next": "Add a GitHub Actions job running the fresh-clone profile (expect 10 skipped, per AGENTS.md).",
-   "evidence": "My own run of node --test --test-concurrency=1. No .github/ directory. No non-sample .git/hooks. package.json has 'test': 'node --test' without concurrency 1. 113 test files.",
+   "evidence": "My own run of node --test --test-concurrency=1. .github/workflows/grill-gate.yml only (since 2026-09-26). No non-sample .git/hooks. package.json has 'test': 'node --test' without concurrency 1. 113 test files.",
    "ownerDecision": "",
-   "updated": "2026-09-23"
+   "updated": "2026-09-27"
   },
   {
    "id": "branch-merge-and-worktree-state",
@@ -1010,12 +1010,12 @@
    "column": "gaps",
    "order": 75,
    "title": "Branch, merge and worktree state",
-   "summary": "All the playable work lives on arena/champion-capture, 496 commits ahead of main. main was last changed 2026-08-31 and has no PR for this branch, so a clone of the default branch gets no arena, hotseat, extractors or file backend.",
-   "gaps": "No stated eligibility rule for reaching main in this repo (harness rule only). Agent worktrees cannot be proven merged from outside.",
-   "next": "Open a PR for arena/champion-capture (the owner's call), and prune the agent worktrees after a glance.",
-   "evidence": "git log main..HEAD | wc -l gives 496. git log -1 main: 362859a on 2026-08-31. gh pr list shows only #1 and #2 (merged) and #3 (the design packet, open). git ls-tree main tools/ has no hotseat, arena or extract-*. .claude/worktrees holds 58 directories (743 MB), each with an uncommitted diff by design. .claude/settings.local.json (gitignored) allows Bash(rm -rf *).",
-   "ownerDecision": "When and how arena/champion-capture reaches main.",
-   "updated": "2026-09-23"
+   "summary": "main equals arena/champion-capture since 2026-09-26 (the owner dropped SS2's main-push block, 9a2a34b): agents merge to arena and fast-forward main, so a clone of the default branch gets the arena, hotseat and extractors. GitHub branch protection on main blocks force-pushes and deletion.",
+   "gaps": "77 directories under .claude/worktrees (agent and wf_ worktrees, the hud-* and night-gate slices), all believed merged; each holds an uncommitted diff by design, so none can be proven merged from outside.",
+   "next": "Prune the merged worktrees after a look.",
+   "evidence": "git ls-remote github refs/heads/main refs/heads/arena/champion-capture (both a9d3baa on 2026-09-27); 9a2a34b; ls .claude/worktrees | wc -l gives 77.",
+   "ownerDecision": "",
+   "updated": "2026-09-27"
   },
   {
    "id": "documentation-health",
@@ -1062,12 +1062,12 @@
    "column": "done",
    "order": 79,
    "title": "Multi-agent workflow infrastructure",
-   "summary": "The fan-out workflow hard-caps questions and verifiers at 6 each. settings.json denies pushes to main or master and force-pushes, and allows feature-branch pushes.",
+   "summary": "The fan-out workflow hard-caps questions and verifiers at 6 each. settings.json denies force-pushes in every spelling and deleting main or master, allows every other push (the main-push deny was dropped by the owner 2026-09-26), and asks before a push --delete.",
    "gaps": "The workflow cites docs/multi-agent-field-rules.md and docs/adr/0001, which exist only in ~/projects/claude-harness, not in this repo. The precedence of broad ALLOW over narrower ASK for push --delete is unmeasured (settings.json's own note).",
    "next": "Point the citations at the harness repo explicitly.",
    "evidence": ".claude/workflows/question-fanout-audit.js:59-62. .claude/settings.json deny, allow and ask lists, and _ss2_workflow.",
    "ownerDecision": "",
-   "updated": "2026-09-23"
+   "updated": "2026-09-27"
   },
   {
    "id": "doc-code-disagreements",
@@ -1345,18 +1345,30 @@
   {
    "id": "grilling-gate",
    "lane": "verification",
-   "column": "in-progress",
+   "column": "done",
    "order": 82,
    "title": "The grilling gate: every commit carries Decided: or a class trailer",
-   "summary": "The owner's decision (#decided-hud-2026-09-24 item 8): a commit-msg hook and a CI job check every commit for Decided: <doc#anchor> or Fix:/Docs:/Chore:/Test:, binding Claude, Codex and humans alike; rolled out per project by the harness's adopt.sh. No author-date exemption; --no-verify denied; a PR template + a PR-description check.",
-   "gaps": "Built and pushed on night/gate (9c6f6de) and the harness's gate/grilling-trailers (3f49e92), NOT adopted: Codex pass 6 has three open medium findings.",
-   "next": "Fix pass 6, review to approve, then adopt in the order the handoff gives.",
-   "evidence": "docs/design/battle-ui.md #decided-hud-2026-09-24; the two branch commits.",
+   "summary": "Every commit carries Decided: <doc#anchor> or Fix:/Docs:/Chore:/Test:, checked by .githooks/commit-msg (core.hooksPath .githooks, once per clone) and re-checked in CI (grill-gate.yml), with --no-verify denied. ADOPTED 2026-09-26 (6a6afe7 merge, eac0352).",
+   "gaps": "One narrow false refusal: git commit --cleanup=strip -F with a comment line in the trailer paragraph (use git -c commit.cleanup=strip commit -F).",
+   "next": "",
+   "evidence": "eac0352; .githooks/commit-msg; .github/workflows/grill-gate.yml; docs/design/battle-ui.md #decided-hud-2026-09-24 item 8.",
    "ownerDecision": "",
-   "updated": "2026-09-24"
+   "updated": "2026-09-27"
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-27",
+   "text": "The AI presses a 2v1: no dancing while an ally fights, and it goes round to the far side when that side is open (5cb6977, 74c0014, 92f9701)."
+  },
+  {
+   "date": "2026-09-27",
+   "text": "Big fighters no longer walk in place beside another lane, and a walk that goes nowhere is greyed \"Blocked\" (57b2209, 8f63c00)."
+  },
+  {
+   "date": "2026-09-26",
+   "text": "The HUD is in the frame (the build's own gauges and crowd bar), and every commit now carries a Decided: or class trailer (2aa4eab, eac0352)."
+  },
   {
    "date": "2026-09-24",
    "text": "The team HUD is built: team colours, health / energy / armour panels, the crowd meter and a turn-order strip (a1f6500, 93b2179, f9a135e)."
