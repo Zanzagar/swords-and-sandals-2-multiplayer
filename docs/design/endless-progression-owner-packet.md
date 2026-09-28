@@ -396,9 +396,11 @@ fallback, so a disclosed nonempty proper Absence-bound subset may be shaped by
 an actual ledger-bearing `{}` settlement. Zanzagar then selected D1Z1-C, so
 that proper subset has nonempty incidence in both transformation dialects while
 remaining globally proper; the proposed D1Z1-A scope fallback was not selected.
-**RCS-03D1L is now the sole owner-facing choice under SR-03:** whether the
-later persistent “this pair has already been heard” latch write may itself
-directly propose transformation.
+Zanzagar then selected D1L-A, so the later persistent “this pair has already
+been heard” latch keeps its full recurrence force but never itself proposes
+transformation; D1L1 prunes. **RCS-03D1X is now the sole owner-facing choice
+under SR-03:** whether an independently meaningful combat, source, or
+relationship event may itself directly propose transformation.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -25874,7 +25876,7 @@ and 1 `EVALUATE`; `Phi_SR = 29`**. Six cause parent/child slots remain—L/L1,
 X/X1, and M/M1—so closing them returns D2 as the sole frontier at
 `Phi_SR = 23`. The authoritative decision record remains unchanged.
 
-### RCS-03D1L — persistent canonical-pair recurrence-latch write as transformation cause — active owner choice
+### RCS-03D1L — persistent canonical-pair recurrence-latch write as transformation cause — A selected
 
 Selected D4-A gives every actual ledger-bearing `{}` cancellation one listen
 per unbroken canonical pair bond. For `z in Z^0_v`, `kappa(z)` fixes the
@@ -25949,6 +25951,117 @@ power, presentation, persistence realization, approval, collision, committed
 identity, break/renew cadence, and implementation remain AUTHOR/SPEC/TUNE or
 later registered decisions. This card authorizes no implementation, and the
 authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, the latch
+governs recurrence but never transforms.** Thus `D_L=emptyset`. Every actual
+first `LISTENED—SEVERED` write retains its canonical key, persistent spent-bond
+memory, proof preservation, and no-reattempt effect until genuine break and
+renewal, but no direct L-locus edge may create a transformation proposal.
+Selected D1Z-C remains the only cancellation-side biography route currently
+admitted; L cannot relabel or duplicate it.
+
+D1L moves to `DIR-SELECTED`, D1L1 moves to `PRUNED`, and `RCS-03D1X`
+becomes the sole `OWNER-OPEN` row. The 141-row register now contains **26
+`SCREEN`, 1 `OWNER-OPEN` at D1X, 40 `PRUNED`, 67 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`**. Four cause
+parent/child slots remain—X/X1 and M/M1—so closing them returns D2 as the sole
+frontier at `Phi_SR = 23`. The authoritative decision record remains
+unchanged.
+
+Two read-only audits then challenged D1X as a possible residual catch-all. They
+upheld one prevalence card only after adding the positive independence test
+below. The words “combat event” alone are insufficient: an event invented only
+to carry a Relic proposal, an evaluator result renamed as an event, or a bare
+clock cut is not X.
+
+### RCS-03D1X — independently meaningful combat/source/relationship event as transformation cause — active owner choice
+
+Let `E^{ind}_v` be the prospectively versioned set of qualifying independent-
+event occurrences. An actual occurrence `x` belongs to `E^{ind}_v` only when:
+
+1. `x` is an authoritative committed occurrence already owned by a combat,
+   source, or relationship rule outside Relic transformation-cause logic;
+2. its owning rule supplies its canonical identity and semantic cut, and with
+   every transformation-proposal edge projected out, changing or removing `x`
+   still materially changes a native combat, source, relationship, accounting,
+   evidence, or legal-continuation fact;
+3. deleting an X edge leaves `x` and all its native facts unchanged, including
+   applicable actor, target, authorization, payment, combat result, source
+   lineage, `H`/`S` fact, relationship status, and legal continuations; and
+4. the X edge may read only `x` and facts authoritative no later than its cut.
+   It may not inspect a later evaluator result, dedicated operation, proposal
+   approval, collision, or committed transformation.
+
+Let `D_X` contain each definition in `D_mut` with at least one reachable
+**independent-event transformation-cause witness**. Such a witness contains the
+same active persistent Relic in current operative assignment `a`, one actual
+`x in E^{ind}_v`, and one prospectively versioned direct X-locus edge from `x`
+to a materially distinct legal assignment `a'` in that definition's existing
+RCS-03A dialect. Deleting only that edge must remove only the named X proposal
+while holding fixed `x`, every native consequence above, the full completed
+trace, every I/T/VT/VF/K/P/C/Z/L occurrence and proposal, any independently
+initiated M operation and proposal, every other transformation edge, and `a`.
+The proposal does not commit `a'`; `a` remains authoritative pending
+RCS-03E/RCS-04A/RCS-04B.
+
+One canonical native event is one X occurrence. Its tags, roots, ledgers,
+proof roles, participants, observers, consumers, aliases, UI representations,
+callbacks, log records, saves, replays, or duplicate deliveries cannot multiply
+it. Several genuinely distinct canonical events may occur at one cut and may
+create separately attributable proposals for later collision handling. Exact
+event identity remains with the event's owning combat/source/relationship
+system; D1X cannot split or merge that identity for transformation convenience.
+
+The boundary is deliberately closed. I, T, VT, VF, K, P, C, Z, and L remain
+their own evaluator-chain loci even if code serializes them as events.
+Readiness, eligibility, contender truth, evidence or tuple reads, exact/related
+classification, raw RNG, and deterministic disposition are predicates or
+mappings, not X. A label, tick, frame, callback, animation, post-hoc match,
+bare turn/round/encounter/Circuit cut, storage write, reload, replay, or event
+invented solely to carry an X edge is ineligible. A dedicated Relic evolution
+or reconfiguration operation belongs to M. Reward/acquisition, cross-root or
+cross-combatant force, migration/repair, collision, and committed identity
+remain RCS-09/RCS-08/RCS-15–16/RCS-04A/RCS-04B.
+The examples below stay within the bearer-owned event domain; D1X does not
+silently authorize an ally's or opponent's event to force another combatant's
+Relic proposal.
+
+A semantic expiry is X only when the expiry is itself an independently
+meaningful native event—for example, it actually ends a material state or
+relationship and changes its ordinary legal consequences. A bare timer pulse
+is not X. If that expiry separately initiates a dedicated Relic reattunement
+operation, the native expiry is X and the operation is M; direct edges at both
+loci remain separate proposals rather than one double-counted cause.
+
+| Choice | Independent-event cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete design example |
+| --- | --- | --- | --- |
+| **A — lived events affect battle but never directly transform** | `D_X=emptyset`. Qualifying events retain every native combat, source, relationship, evidence, and evaluator consequence but have no direct X-locus transformation edge. | **Practical production fallback.** A keeps the catalog-wide causal grammar compact: every transforming Relic already has its D1P-B success-shaped path, the disclosed Absence-bound subset has Z, and deliberate operations remain available at M. It sharply limits event farming, accidental scars, teammate steering, proposal spam, and attribution debt. Its fit is neutral/protective. The cost is real: a Relic cannot directly remember a wound, defense, source loss, or relationship rupture merely because it lived through it; that experience matters only through ordinary combat, a later evaluator result, or a dedicated operation. | Aster's paid `Temper` materially revises bearer-owned `Heat I` to `Heat II`, changing ordinary predicates and counterplay and possibly becoming later evidence. The event creates no `TEMPERED CONDITION` proposal. |
+| **B — every transforming Relic has at least one lived-event path** | `D_X=D_mut`. Every state- and boundary-supporting transforming definition has at least one reachable qualifying independent event whose direct X edge proposes a materially distinct assignment; not every event transforms. | B gives one strong universal fantasy: **every Relic may be shaped both by what it manifests and by something it lives through**. At a valid event/proposal boundary, one independently real event retains its native consequence while participating in the continuing artifact's distinct proposed memory—a direct local Achintya Bheda Abheda fit; universal prevalence is aggregate and eventual committed change remains partial. The price is a mandatory second organic cause language for every definition on top of D1P-B, inviting token `take damage` edges, cheapest-event farming, self-harm or expiry loops, ally steering, P/X collisions, and pressure that can make M redundant. | Every definition needs some honest lived-event route. Ashen might propose `TEMPERED CONDITION` when the bearer's paid `Heat I -> Heat II` revision completes; Dreamglass might propose `AFTER-ECHO ATTUNEMENT` when a material bearer-owned Ward genuinely expires. |
+| **C — a disclosed Event-bound subset changes on lived events** | `D_X` is a nonempty proper subset of `D_mut`; D1X1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Conditionally recommended higher-ceiling direction, with A as the practical fallback.** A named `EVENT-BOUND`, Scar-bound, or World-Witness family can make external lived experience a genuine policy surface without forcing two organic cause languages onto every Relic. Included witnesses have B's direct local fit; coexistence across the catalog is only aggregate. Players may deliberately pay for a material state revision, preserve a soon-expiring source, or deny the event. C fails if the extra path is pure upside, hidden, token, cheaply farmed, or merely a premium “more ways to evolve” caste. | An Event-bound Vowscar may receive `TEMPERED CONDITION PROPOSED` when the bearer's Heat genuinely revises, while an ordinary Ashen undergoes the same native revision with no X proposal. An Event-bound Hourglass may instead receive `AFTER-ECHO ATTUNEMENT PROPOSED` when its material Ward expires; those examples do not preselect D1X1. |
+
+A/B/C are exhaustive because `D_X` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. Selected D1P-B guarantees every
+transforming definition a positive-result path, so A leaves no definition
+uncaused. C does not select an exact family, event catalog, actor or target
+scope, trigger, target assignment, frequency, rate, cap, power, or overlap
+with `D_P`/`D_Z`; D1X1 alone owns dialect incidence if C is selected.
+
+The recommendation is C only if later RCS-17/RCS-18 human and policy tests
+show that players can distinguish the native event, proposal, and eventual
+committed transformation; the event remains meaningful without its proposal;
+optimized policies materially sometimes seek and sometimes avoid X; cheap
+self-damage, expiry cycling, source churn, ally coercion, replay, and event-spam
+loops fail; Event-bound Relics are not a pure-upside caste; and X/P/M
+coexistence remains attributable after collision rules. If those gates fail,
+replace C with A rather than preserving a decorative route. The fallback is a
+recommendation, not selected unless the owner says so.
+
+Under A/B, D1X1 prunes and D1M opens. Under C, D1X1 opens next. Exact event
+catalogs, definition identities, within-dialect prevalence, edge maps, target
+assignments, rates, caps, power, presentation, approval, collision, committed
+identity, M support, persistence realization, and implementation remain
+AUTHOR/SPEC/TUNE or later registered decisions. This card authorizes no
+implementation, and the authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

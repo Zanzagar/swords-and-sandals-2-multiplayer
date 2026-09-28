@@ -7159,6 +7159,93 @@ later collision rule. Exact definitions, `D_L ∩ D_Z`, dialect incidence,
 triggers, targets, rates, power, UI, persistence realization, approval,
 collision, identity, break/renew cadence, and implementation remain later.
 
+Zanzagar selected D1L-A. Thus `D_L=emptyset`: the actual first persistent
+`LISTENED—SEVERED` write keeps every selected recurrence consequence but no
+direct L edge may propose transformation. D1L moves to `DIR-SELECTED`, D1L1
+moves to `PRUNED`, and D1X becomes the sole `OWNER-OPEN` row. The 141-row
+register contains 26 `SCREEN`, 1 `OWNER-OPEN`, 40 `PRUNED`, 67
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`.
+Four cause parent/child slots remain—X/X1 and M/M1—so closing them returns D2
+at 23. No authoritative-record text changed.
+
+**D1X prerequisite, atomicity, and residual-bucket audit — reachable and one
+card only after a positive independence test.** The register's phrase
+“independent combat/source/relationship event” was too broad to present by
+itself. It could otherwise absorb any timestamped implementation occurrence,
+invent a token event solely to carry an edge, or rename an evaluator result.
+The repaired boundary first defines `E^{ind}_v`: actual authoritative events
+whose identity and cut are supplied by a native combat, source, or relationship
+rule and whose removal still changes at least one material native fact when all
+transformation-proposal edges are projected out.
+
+For definition `d`, a qualifying X witness contains the same active persistent
+Relic in current assignment `a`, one actual `x in E^{ind}_v`, and one
+prospectively versioned direct edge from `x` to a materially distinct legal
+same-dialect assignment. Deleting only that edge removes only its proposal.
+The event, actor and target, authorization and payment, native combat result,
+source lineage and child identity, `H`/`S` facts, relationship transition,
+legal continuations, every evaluator-chain occurrence and proposal, any
+independently initiated M operation, complete trace, other edges, and `a` all
+remain fixed. The edge may inspect no fact later than the event's semantic cut.
+
+One canonical native event is one occurrence regardless of tags, roots,
+ledgers, proof roles, participants, observers, consumers, aliases, rendering,
+callbacks, logs, saves, replays, or duplicate delivery. D1X inherits identity
+from the native owner and cannot split or merge events to manufacture support.
+Several genuinely distinct events at one cut remain distinct and may produce
+separate later collision inputs.
+
+The negative boundary is complete. I/T/VT/VF/K/P/C/Z/L remain their own loci;
+readiness, eligibility, contender truth, tuple or evidence reads,
+exact/related classification, RNG, and deterministic disposition remain
+predicates or mappings. Labels, post-hoc matches, ticks, frames, bare cadence
+or encounter/Circuit cuts, callbacks, UI, storage, reload, and replay are not
+X. Dedicated evolution/reconfiguration operations are M. Acquisition,
+cross-root or cross-combatant force, migration/repair, collision, and output
+identity retain their registered owners. A semantic expiry is X only when it
+is itself a material native event; if it separately initiates a dedicated
+operation, X and M remain independently deletable loci.
+
+No combat/source/relationship split is required. Those words identify three
+possible native owners, not three transformation authorities, and the same
+prevalence question and edge intervention apply to all. Exact event classes,
+definition assignments, actors, targets, rates, caps, and within-category
+prevalence remain AUTHOR/SPEC/TUNE. Existing material combat/source/
+relationship occurrences establish reachability but author no X edge.
+
+The three exhaustive D1X directions are:
+
+- D1X-A makes `D_X=emptyset`. Independent lived events retain every native and
+  evaluator consequence but never directly propose transformation. This is the
+  practical production fallback: D1P-B already gives every definition one
+  success-shaped biography, Z serves the disclosed Absence-bound subset, and M
+  may later admit deliberate operations. It minimizes farming and attribution
+  debt but excludes organic event-shaped artifact memory.
+- D1X-B makes `D_X=D_mut`. Every transforming definition needs at least one
+  reachable independent-event path. This gives the simple universal sentence
+  “every Relic may be shaped both by what it manifests and by something it
+  lives through,” with direct local ideal fit at each event/proposal boundary.
+  It also mandates a second organic cause language for every definition and
+  maximizes token edges, cheap-event farming, self-harm/expiry loops, teammate
+  steering, collision load, and pressure on M.
+- D1X-C makes `D_X` nonempty proper and opens D1X1. **Conditionally recommend C
+  as the higher-ceiling direction, with A as the practical fallback.** A
+  disclosed Event-bound, Scar-bound, or World-Witness family preserves the new
+  external-lived-event policy surface without forcing it across the catalog.
+  Included witnesses have direct local ideal fit; catalog coexistence is only
+  aggregate. The branch risks a hidden premium “more evolution routes” caste
+  and token one-event compliance.
+
+C survives only if later human and policy tests distinguish native event,
+proposal, and committed change; the event remains meaningful without its
+proposal; optimized play materially sometimes seeks and sometimes avoids it;
+self-damage, expiry cycling, source churn, ally coercion, replay, and event spam
+fail; the subtype is not pure upside; and X/P/M coexistence stays attributable
+after collision. Otherwise use A. That fallback is not selected unless the
+owner includes it in the answer. Under A/B, X1 prunes and M opens; under C, X1
+opens. Exact family, event catalog, dialect incidence, overlap, targets, rates,
+power, authority, collision, persistence, and implementation remain later.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

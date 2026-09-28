@@ -1,6 +1,78 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 absence spans both dialects; spent-bond latch cause is next
+## 2026-09-28 spent-bond memory stays noncausal; independent lived-event cause is next
+
+Zanzagar selected `RCS-03D1L-A`. The first persistent
+`LISTENED—SEVERED` write for a canonical pair keeps its complete spent-bond and
+no-reattempt meaning, but never itself proposes transformation. L remains
+distinct from the earlier `{}` commit and cannot duplicate selected D1Z-C.
+`RCS-03D1L1` therefore prunes.
+
+D1L is `DIR-SELECTED`; D1X is the sole frontier. The 141-row register now
+contains 26 `SCREEN`, 1 `OWNER-OPEN` at D1X, 40 `PRUNED`, 67
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`.
+Four cause slots remain—X/X1 and M/M1. Closing them returns D2 at 23; D2-D5
+still lead to RCS-03E at 19. The authoritative decision record remains
+unchanged.
+
+`RCS-03D1X` asks whether an independently meaningful combat, source, or
+relationship event may directly propose persistent Relic transformation. It
+is not a residual “anything happened” bucket. A qualifying event already has
+an authoritative native identity and semantic cut, and it remains materially
+meaningful with every transformation edge projected out. Removing the event
+must still change a native combat, source, relationship, accounting, evidence,
+or legal-continuation fact.
+
+A qualifying X witness adds one prospectively versioned direct edge from that
+actual event to a materially distinct same-dialect assignment of the same
+active Relic. Deleting only the edge removes only the proposal while preserving
+the event, actor/target, authorization/payment, native result, source lineage,
+`H`/`S` facts, relationship transition, legal continuations, complete
+evaluator trace and proposals, any independent M operation, every other edge,
+and current assignment. The edge may inspect no later fact.
+
+One native event is one occurrence regardless of tags, roots, ledgers, proof
+roles, participants, observers, aliases, callbacks, UI, logs, saves, replay, or
+duplicate delivery. The owning subsystem fixes identity. Evaluator loci
+I/T/VT/VF/K/P/C/Z/L, predicates and RNG, bare ticks/turns/encounter cuts,
+storage/UI events, and dedicated evolution operations are not X. A semantic
+expiry can be X only when it independently ends a material state or
+relationship; an operation it separately starts is M.
+
+- **A — lived events affect battle but never directly transform.**
+  `D_X=emptyset`. The event may still change combat, become evidence, or affect
+  a later Relic result. This is the practical fallback and clearest anti-farm
+  rule; D1P-B already gives every definition a success-shaped biography. Cost:
+  Relics cannot directly remember wounds, defenses, source loss, or ruptures
+  merely because they lived through them.
+- **B — every transforming Relic has at least one lived-event path.**
+  `D_X=D_mut`. Every definition needs one honest X edge, though not every event
+  transforms. The universal fantasy is clear—every Relic is shaped both by
+  what it manifests and by something it lives through—but it mandates a
+  second organic cause language everywhere and invites token damage edges,
+  cheapest-event farming, self-harm/expiry loops, ally steering, and proposal
+  collisions.
+- **C — a disclosed Event-bound proper subset changes on lived events.
+  Conditionally recommended higher-ceiling direction, with A as the practical
+  fallback.** `D_X` is nonempty proper and D1X1 opens. A Scar-bound or
+  World-Witness Relic might propose `TEMPERED CONDITION` when the bearer's paid
+  `Heat I -> Heat II` revision completes, or `AFTER-ECHO ATTUNEMENT` when a
+  material bearer-owned Ward genuinely expires. Ordinary Relics experience the
+  same native events without X proposals. This preserves organic external
+  biography without forcing it onto every Relic, but risks a pure-upside
+  premium caste or token subtype. Cross-combatant event force remains RCS-08.
+
+C survives only if the native event, proposal, and later committed change are
+separately understandable; the event is meaningful without the proposal;
+optimized policies sometimes seek and sometimes avoid it; cheap self-damage,
+expiry cycling, source churn, ally coercion, replay, and spam fail; and X/P/M
+collisions stay attributable. Otherwise use A. That fallback is not selected
+unless the owner includes it in the answer.
+
+Ask only for D1X A, B, or C. Under A/B, D1X1 prunes and D1M opens. Under C,
+D1X1 opens next.
+
+## 2026-09-28 absence spans both dialects; spent-bond latch cause is next — superseded frontier
 
 Zanzagar selected `RCS-03D1Z1-C`. The globally proper Absence-bound subset now
 has nonempty state- and boundary-dialect incidence. At least one state Relic
@@ -11603,7 +11675,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 17:42 UTC — persistent spent-bond latch cause is next](docs/handoffs/2026-09-28-1742--relic-spent-bond-latch-cause-next.md)**
+[2026-09-28 18:34 UTC — independent lived-event transformation cause is next](docs/handoffs/2026-09-28-1834--relic-independent-lived-event-cause-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

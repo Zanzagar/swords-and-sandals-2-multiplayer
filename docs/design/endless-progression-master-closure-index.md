@@ -3217,11 +3217,14 @@ policy, comprehension, non-dominance, or anti-exploit evaluation fails. D1Z is
 `DIR-SELECTED`. Zanzagar then selected D1Z1-C, so the proper Absence-bound
 subset has nonempty support in both transformation dialects while remaining
 globally proper. The proposed D1Z1-A scope fallback was not selected. D1Z1 is
-`DIR-SELECTED`, and D1L is the sole frontier.
+`DIR-SELECTED`. Zanzagar then selected D1L-A: the persistent canonical-pair
+latch retains its no-reattempt force but never directly proposes
+transformation. D1L is `DIR-SELECTED`, D1L1 is `PRUNED`, and D1X is the sole
+frontier.
 
-The current 141-row register contains **28 `SCREEN`, 1 `OWNER-OPEN` at D1L,
-39 `PRUNED`, 66 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 29`**. Six still-open cause parent/child slots remain from L through
+The current 141-row register contains **26 `SCREEN`, 1 `OWNER-OPEN` at D1X,
+40 `PRUNED`, 67 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 27`**. Four still-open cause parent/child slots remain from X through
 M; closing them returns D2 as the sole frontier at `Phi_SR = 23`.
 D2-D5 still lead to RCS-03E at 19. The register now describes eleven reachable
 cause families plus one derived-empty audit placeholder, not twelve reachable
@@ -3354,9 +3357,9 @@ overcompression.
 | `RCS-03D1C1` | State/boundary transformation-dialect incidence for proper claim-write cause support | `PRUNED`; D1C-A leaves no proper claim-write support whose dialect incidence could be chosen |
 | `RCS-03D1Z` | Ledger-bearing `{}` cancellation-settlement transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; C makes direct Z-cause support a disclosed nonempty proper Absence-bound subset, with A explicitly retained if later policy/comprehension/non-dominance/exploit gates fail; the actual empty commit remains distinct from the earlier false bit and later latch write |
 | `RCS-03D1Z1` | State/boundary transformation-dialect incidence for proper cancellation cause support | `DIR-SELECTED`; C gives the globally proper Absence-bound subset nonempty state- and boundary-dialect incidence without universalizing support or creating a hybrid axis; the proposed D1Z1-A scope fallback was not selected, while the earlier parent D1Z-A system fallback remains |
-| `RCS-03D1L` | Canonical pair-recurrence-latch-write transformation-cause prevalence across transforming definitions | `OWNER-OPEN`; choose empty, universal, or nonempty proper support for a direct proposal edge at the first persistent D4-A `LISTENED—SEVERED` write in an unbroken canonical pair bond; recommendation A keeps the latch recurrence-significant but noncausal, with C only a guarded replacement if spent-bond memory proves independently policy-changing |
-| `RCS-03D1L1` | State/boundary transformation-dialect incidence for proper latch-write cause support | `SCREEN`; opens only under D1L-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1L-A/B |
-| `RCS-03D1X` | Independent non-evaluation combat-semantic-event transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1L and applicable L1; the cause must already be a meaningful combat, source, or relationship event rather than an evaluation-result alias |
+| `RCS-03D1L` | Canonical pair-recurrence-latch-write transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; A makes direct latch-write cause support empty, so the first persistent D4-A `LISTENED—SEVERED` write retains every no-reattempt consequence but never itself proposes transformation |
+| `RCS-03D1L1` | State/boundary transformation-dialect incidence for proper latch-write cause support | `PRUNED`; D1L-A leaves no proper latch-write support whose dialect incidence could be chosen |
+| `RCS-03D1X` | Independently meaningful non-evaluation combat/source/relationship-event transformation-cause prevalence across transforming definitions | `OWNER-OPEN`; choose empty, universal, or nonempty proper support for direct proposal edges at authoritative combat/source/relationship events that retain material native meaning with transformation projected out; recommendation C admits a disclosed Event-bound proper subset with A as the unselected practical fallback |
 | `RCS-03D1X1` | State/boundary transformation-dialect incidence for proper independent-event cause support | `SCREEN`; opens only under D1X-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1X-A/B |
 | `RCS-03D1M` | Dedicated evolution/reconfiguration-operation transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1X and applicable X1; this row decides cause eligibility, RCS-03E retains operation authority, and RCS-13 retains initiation and lock horizon |
 | `RCS-03D1M1` | State/boundary transformation-dialect incidence for proper dedicated-operation cause support | `SCREEN`; opens only under D1M-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1M-A/B |
@@ -3746,10 +3749,12 @@ transformation. D1K is `DIR-SELECTED` and D1K1 is `PRUNED`. Zanzagar then
 selected D1Z-C with D1Z-A as the explicit failure fallback: a disclosed
 nonempty proper Absence-bound subset may change on actual `{}`. Zanzagar then
 selected D1Z1-C: that proper subset has nonempty incidence in both dialects,
-and D1L is the sole frontier. The current register has **141 slots**: 28
-`SCREEN`, 1 `OWNER-OPEN`, 39 `PRUNED`, 66 `DIR-SELECTED`, 5 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 29`. Closing the six still-open cause
-parent/child slots from L through M returns D2 as the sole frontier at
+then selected D1L-A: the first persistent canonical-pair latch write remains
+recurrence-significant but is noncausal. D1X is the sole frontier. The current
+register has **141 slots**: 26 `SCREEN`, 1 `OWNER-OPEN`, 40 `PRUNED`, 67
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`.
+Closing the four still-open cause parent/child slots from X through M returns
+D2 as the sole frontier at
 `Phi_SR = 23`;
 closing D2-D5 one at a time opens RCS-03E at `Phi_SR = 19`.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
@@ -3757,7 +3762,7 @@ one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-twenty-nine owner cards under this thirty-eight-times-corrected charter and will
+twenty-seven owner cards under this thirty-eight-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3781,7 +3786,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 141 frozen candidate slots; current `Phi_SR = 29` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, D1N is derived empty, D1T-A keeps tuple selection authoritative but noncausal, D1VT-A lets permission govern coexistence without itself transforming, D1VF-A lets refusal route disposition without itself transforming, D1K-A keeps sealing meaningful but noncausal, D1Z-C reserves disclosed proper Absence-bound support with A as failure fallback, and D1Z1-C gives that proper subset nonempty incidence in both transformation dialects | At most 29 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children; closing the six still-open cause slots from L through M returns D2 at `Phi_SR = 23`, and D2-D5 close before agency opens at 19; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 141 frozen candidate slots; current `Phi_SR = 27` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, D1N is derived empty, D1T-A keeps tuple selection authoritative but noncausal, D1VT-A lets permission govern coexistence without itself transforming, D1VF-A lets refusal route disposition without itself transforming, D1K-A keeps sealing meaningful but noncausal, D1Z-C reserves disclosed proper Absence-bound support with A as failure fallback, D1Z1-C gives that proper subset nonempty incidence in both transformation dialects, and D1L-A keeps the spent-bond latch recurrence-significant but noncausal | At most 27 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children; closing the four still-open cause slots from X through M returns D2 at `Phi_SR = 23`, and D2-D5 close before agency opens at 19; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
