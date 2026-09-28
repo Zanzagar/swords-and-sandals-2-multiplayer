@@ -44,7 +44,23 @@ and charge greyed "Not built yet") is on `main` (`457003a`), and its other three
   and `test/arena-ring.test.js` sat outside my track's file glob (MY error) — the implementer's
   prepared re-pin applied.
 
-## If you restart now
+## PAUSED 2026-09-28 ~19:50 for the owner's PC restart — start here
+
+Both background runs were STOPPED cleanly by the main session before the restart:
+
+- **ring3 (`wf_58a376ee-0f2`)**: preflight passed; the `spellrow` implementer was stopped while still
+  probing, **before it changed any file** — `.claude/worktrees/ring3` is clean on branch `ring3/rest` at
+  `457003a`. Its probes are in `~/.cache/ss2-scratch/ring3/run3-stopped/spellrow/` (the next run's
+  scratch path is free). **To restart it: relaunch `Workflow({ name: "implement-slices", args })` with the
+  same args as that run** (they are in the run's script/transcript dir
+  `~/.claude/projects/-home-corey-projects-swords-and-sandals-2-multiplayer/f4d2f69f-ef73-4cfd-b04c-02450290559a/subagents/workflows/wf_58a376ee-0f2/`,
+  base `457003a`, slices spellrow -> reach -> camera, file list covering every test/arena-* and
+  test/render-* file). If `main` has moved, advance the worktree first
+  (`git -C .claude/worktrees/ring3 switch -c ring3/rest2 <new main>`) and use that as the base.
+- **The sixth press verifier** was stopped before reporting anything: re-run it from scratch (its brief
+  is in this session's transcript; the claim is in "Next" item 2 below).
+
+## If you restart now (written before the pause; superseded by the block above)
 
 Two background runs die with the restart; both leave their state on disk:
 
