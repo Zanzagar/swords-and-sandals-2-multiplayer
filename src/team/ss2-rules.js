@@ -4426,9 +4426,13 @@ const SS2_RANK_DIRECTION = Object.freeze({
  * inside the ally's own reach, the melee reading of "engaged" the facing and
  * lane rules use — nearest to the actor, ties by id. `null`:
  *
- * - **with no depth** (`y` absent, `rankStride` 0): going round is a lane
+ * - **with no depth** (`y` absent — every battle the host builds at
+ *   `rankStride` 0; a hand-built one that states `y` has lanes whatever the
+ *   stride, as it does for every other lane rule): going round is a lane
  *   tactic, and in one lane a walk can never pass a foe, so there is nothing
- *   to press toward. Every 1v1, golden and 1-D bout is untouched;
+ *   to press toward. Every 1v1 (no ally), golden and host-built 1-D bout
+ *   plays exactly as under `aiPress: "off"` — the rule-set id, and so the
+ *   hash, still names the difference;
  * - **P4, finish your own fight**: when a foe in the actor's own lane is one
  *   no ally is fighting — that one is the actor's fight already
  *   (`rankJoinSurplus` 0, "fight who is in front of you");
@@ -4485,6 +4489,20 @@ export function ss2PressTarget(view) {
  *
  * Every step is an offered option or nothing: a walk the offer withholds, or a
  * rank with no free ground, returns `null` and the arms below decide.
+ *
+ * ► **ONLY WHEN THERE IS A FAR SIDE TO REACH — added 2026-09-27 after a
+ *   write-nothing verifier REFUTED "the press cannot oscillate".** Without
+ *   this, a free member whose target already had both flanks held (a 3v1), or
+ *   stood against the arena wall, went round, stepped in BEHIND an ally — the
+ *   queue — and was stepped out again by arm 1, forever: 99 rank steps and 0
+ *   attacks in 100 of his turns in the verifier's 3v1, and the same on the
+ *   arena's own host (buffs 3v3 seed 34, champions 3v3 seed 23, the shipped
+ *   default). So arms 1 and 3 go round only while the spot one body-width past
+ *   the target, on the side away from the actor, is open — inside the wall, no
+ *   fighting ally already there, no body on it — and arm 4 steps in only where
+ *   `ss2RankArrivalX` lands the actor with no ally between him and the target.
+ *   When the far side is shut the press has nothing to add, returns `null`, and
+ *   the fighter does what the AI did before the press (test/ss2-ai-press.test.js).
  */
 export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankStride) {
   const actor = view.actor;
@@ -4497,10 +4515,31 @@ export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankS
   const foes = view.foes ?? [];
   const bodies = [...foes, ...allies];
 
+  const fighting = allies.filter((ally) =>
+    ss2SameLane(ally, target) && ss2FightDistance(ally, target) < ss2Reach(ally));
+  // Which side of the target the actor is on; level with him counts as the
+  // side he would walk in from.
+  const side = Math.sign(actor.x - target.x) || -toward;
+  // An ally in the target's lane strictly between `x` and the target: the queue.
+  const queuedAt = (x) => {
+    const way = target.x > x ? 1 : -1;
+    return allies.some((ally) => ally.y === target.y
+      && (ally.x - x) * way > 0 && (target.x - ally.x) * way > 0);
+  };
+  // The spot a pincer needs, one body-width past the target on the side away
+  // from the actor: inside the wall, not already held, and clear of bodies.
+  const farSideOpen = () => {
+    const spot = target.x - side * ss2PhysicalSize(target);
+    if (clamp(spot, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max) !== spot) return false;
+    if (fighting.some((ally) => Math.sign(ally.x - target.x) === -side)) return false;
+    return bodies.every((body) => body.alive === false || body.y !== target.y || body.id === target.id
+      || Math.abs(body.x - spot) >= ss2PhysicalSize(body));
+  };
+
   if (ss2SameLane(actor, target)) {
-    const queued = allies.some((ally) => ss2SameLane(ally, actor)
-      && (ally.x - actor.x) * toward > 0 && (target.x - ally.x) * toward > 0);
+    const queued = queuedAt(actor.x);
     if (!queued) return find(towardWalk);
+    if (!farSideOpen()) return null;
     const steps = [Ss2ActionType.RANK_FRONT, Ss2ActionType.RANK_BACK].map(find).filter(Boolean);
     const open = steps.filter((step) => {
       const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
@@ -4517,11 +4556,10 @@ export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankS
     return clear ?? open[0] ?? null;
   }
 
-  const side = Math.sign(actor.x - target.x);
-  const fighting = allies.filter((ally) =>
-    ss2SameLane(ally, target) && ss2FightDistance(ally, target) < ss2Reach(ally));
-  const farSide = side === 0 || fighting.some((ally) => Math.sign(ally.x - target.x) !== side);
-  if (!farSide) return find(towardWalk);
+  const onFarSide = actor.x === target.x || fighting.some((ally) => Math.sign(ally.x - target.x) !== side);
+  if (!onFarSide) return farSideOpen() ? find(towardWalk) : null;
+  const arrival = ss2RankArrivalX(actor.x, bodies, target.y);
+  if (arrival === null || queuedAt(arrival)) return null;
   return find(target.y > actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK);
 }
 
@@ -15717,11 +15755,15 @@ export function createSs2TeamRules({
       const pincerFirst = pressTarget !== null && aiPress === "pincer-first"
         && !options.some((option) => MELEE_ATTACKS.includes(option.type));
       if (pincerFirst) {
-        const sheathe = ss2InBowMode(actor)
+        // The bow is put away only when there is a way round to take — else
+        // a press target that flickers off would have the bow-arming arm draw
+        // it again next turn (a write-nothing verifier saw sheathe, draw,
+        // sheathe on three turns running, 2026-09-27).
+        const round = ss2PressMove(view, options, pressTarget, rankStride);
+        const sheathe = round && ss2InBowMode(actor)
           ? options.find((option) => option.type === Ss2ActionType.SWAP_WEAPONS)
           : null;
-        const round = sheathe ?? ss2PressMove(view, options, pressTarget, rankStride);
-        if (round) return round;
+        if (sheathe ?? round) return sheathe ?? round;
       }
 
       if (!attackOnOffer) {

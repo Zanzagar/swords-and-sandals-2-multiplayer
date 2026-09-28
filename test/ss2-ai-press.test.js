@@ -23,7 +23,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { combatantById, createTeamBattle, legalActions, suggestAction } from "../src/team/index.js";
+import { applyAction, combatantById, createTeamBattle, currentCombatant, legalActions, suggestAction } from "../src/team/index.js";
 import {
   createSs2TeamRules,
   ss2Combatant,
@@ -215,4 +215,111 @@ test("over the arena's own bouts: no AI walk goes nowhere against a body, and no
   }
   assert.ok(walks > 100, `the sweep must walk, or it proves nothing (${walks})`);
   assert.ok(pressTurns > 20, `and must reach turns with a fight to press (${pressTurns})`);
+});
+
+/**
+ * ► **THE PRESS MUST NOT PING-PONG A FIGHTER BETWEEN LANES — found by a
+ *   write-nothing verifier, 2026-09-27, against the claim that it could not.**
+ *   When the target's far side is already taken — both flanks held in a 3v1,
+ *   or the lone foe pinned against the arena wall — going round lands the free
+ *   member BEHIND an ally, which is the queue; the press then stepped him out
+ *   again, and back in, forever: 99 rank steps and 0 attacks in 100 of his
+ *   turns in the verifier's 3v1, and the same on the arena's own host (buffs
+ *   3v3 seed 34, champions 3v3 seed 23). The old AI (`aiPress: "off"`) did not.
+ */
+function stagedPress(spec, aiPress) {
+  const tank = { vitality: 40, herolevel: 40, character_level: 40, defence: 30 };
+  const teams = ["red", "blue"].map((team) => ({
+    id: team,
+    combatants: spec.filter((entry) => entry[1] === team).map(([id, , x, y, sturdy]) =>
+      ss2Combatant(gladiator({ gladiator_dir: team === "red" ? "right" : "left", ...(sturdy ? tank : {}),
+        ...(sturdy === "boss" ? { vitality: 99, herolevel: 99, character_level: 99 } : {}) }),
+      { id, name: id, controller: "local", x, y }))
+  }));
+  return createTeamBattle({ seed: 1, rules: createSs2TeamRules({ aiPress }), teams });
+}
+
+function rankStepsOf(battle, id, actions) {
+  let steps = 0;
+  let turns = 0;
+  for (let taken = 0; taken < actions && !battle.result; taken += 1) {
+    const actorId = currentCombatant(battle).id;
+    const chosen = suggestAction(battle, actorId);
+    if (actorId === id) {
+      turns += 1;
+      if (/^rank-/.test(chosen.type)) steps += 1;
+    }
+    applyAction(battle, { actorId, ...chosen });
+  }
+  return { steps, turns };
+}
+
+for (const aiPress of ["ranged-first", "pincer-first"]) {
+  test(`${aiPress}: with both flanks held in a 3v1, the free member does not shuttle between lanes`, () => {
+    const battle = stagedPress([
+      ["red-1", "red", -120, FRONT, true], ["red-2", "red", 120, FRONT, true],
+      ["red-3", "red", -400, SECOND, false], ["blue-1", "blue", 0, FRONT, "boss"]
+    ], aiPress);
+    const { steps, turns } = rankStepsOf(battle, "red-3", 200);
+    assert.ok(turns >= 20, `the rig must give red-3 turns (${turns})`);
+    assert.ok(steps <= 2, `red-3 took ${steps} rank steps in ${turns} turns`);
+  });
+
+  test(`${aiPress}: with the lone foe at the wall, the queued member does not circle through the next lane`, () => {
+    const wall = SS2_ARENA.clamp.max;
+    const battle = stagedPress([
+      ["red-1", "red", wall - 120, FRONT, true], ["red-2", "red", wall - 206, FRONT, false],
+      ["blue-1", "blue", wall, FRONT, "boss"]
+    ], aiPress);
+    const { steps, turns } = rankStepsOf(battle, "red-2", 200);
+    assert.ok(turns >= 20, `the rig must give red-2 turns (${turns})`);
+    assert.ok(steps <= 2, `red-2 took ${steps} rank steps in ${turns} turns`);
+  });
+}
+
+/**
+ * The arena's own bouts where the press ALONE drove a four-turn shuttle before
+ * the far-side guard (5cb6977; every one of the four alternating steps was the
+ * press's move). Measured over demo 3v3 buffs/tricks/crowd/plain, seeds 1-48:
+ * bouts with a fighter alternating rank steps on four of his own turns running
+ * went, ranged-first 12 -> 3 and pincer-first 11 -> 1, against the old AI's 4
+ * (`aiPress: "off"`) — the remainder are chases where the allies themselves
+ * hop lanes and the older rank arm answers between the press's turns, a class
+ * the old AI shows too. This pins the ones that were purely the press's.
+ */
+const PRESS_SHUTTLES = Object.freeze([
+  ["ranged-first", "buffs", 9], ["ranged-first", "buffs", 34], ["ranged-first", "tricks", 5], ["ranged-first", "tricks", 29],
+  ["pincer-first", "buffs", 35], ["pincer-first", "tricks", 15], ["pincer-first", "tricks", 30], ["pincer-first", "tricks", 34],
+  ["pincer-first", "tricks", 43]
+]);
+
+test("the arena's own bouts where the press alone shuttled a fighter between lanes no longer do", async () => {
+  const { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } = await import("../src/adapter/index.js");
+  const { ss2BattleValues } = await import("../src/team/ss2-rules.js");
+  const { demoItemsFrom, demoSide } = await import("../tools/arena/roster.js");
+  const shuttles = [];
+  for (const [aiPress, kit, seed] of PRESS_SHUTTLES) {
+    const items = demoItemsFrom(kit);
+    const host = createVanillaBattleHost({
+      teams: ["red", "blue"].map((side) => demoSide(side, 3, { ss2Combatant, ss2BattleValues, items, seed })),
+      rules: createSs2TeamRules({ aiPress }), bindings: SS2_STATIC_MAP_BINDINGS, seed, awaitAnimations: true
+    });
+    host.constructArena();
+    const run = new Map();
+    for (let taken = 0; taken < 900 && !host.battle.result; taken += 1) {
+      const actorId = host.currentCombatantId();
+      const chosen = host.suggestAction(actorId);
+      const last = run.get(actorId) ?? { type: null, length: 0 };
+      const rank = /^rank-/.test(chosen.type);
+      const next = rank
+        ? { type: chosen.type, length: last.type && last.type !== chosen.type ? last.length + 1 : 1 }
+        : { type: null, length: 0 };
+      run.set(actorId, next);
+      if (next.length === 4) shuttles.push(`${aiPress} ${kit} seed ${seed} ${actorId} at action ${taken}`);
+      const step = host.submit({ actorId, ...chosen });
+      for (const token of step.actionTokens) host.reportActionAnimation(token);
+    }
+    assert.ok(host.battle.result, `${aiPress} ${kit} seed ${seed} must still settle`);
+  }
+  assert.deepEqual(shuttles, [], "a fighter alternated rank steps on four of his own turns running");
 });
