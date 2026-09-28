@@ -28,9 +28,13 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-26 03:05 — the gate is adopted, and main is current](docs/handoffs/2026-09-26-0305--the-gate-is-adopted-and-main-is-current.md)**
-(session `5bb96879`). Start there. **EVERY COMMIT NOW NEEDS A `Decided:` OR `Fix:`/`Docs:`/`Chore:`/`Test:`
-TRAILER (the grilling gate is adopted), and `main` is kept equal to `arena` by the agent.** *(It supersedes
+[2026-09-28 14:18 — big fighters walk again, and the AI presses a 2v1](docs/handoffs/2026-09-28-1418--big-fighters-walk-and-the-ai-presses-a-2v1.md)**
+(session `f4d2f69f`). Start there. **The owner's two playtest defects are fixed; P2 (ranged-first or
+pincer-first) and a pre-engagement crowd-play question wait on the owner.** *(It supersedes
+[2026-09-26 03:05 — the gate is adopted, and main is current](docs/handoffs/2026-09-26-0305--the-gate-is-adopted-and-main-is-current.md),
+**whose defects 1 and 2 are DONE and whose items 1, 2 and 4 carry forward.** EVERY COMMIT NEEDS A
+`Decided:` OR `Fix:`/`Docs:`/`Chore:`/`Test:` TRAILER, and `main` is kept equal to `arena` by the
+agent.)* *(That one supersedes
 [2026-09-25 23:40 — the HUD is in the frame](docs/handoffs/2026-09-25-2340--the-hud-is-in-the-frame.md),
 **whose item 2 (the gate) is DONE and whose items 1, 3 and 4 carry forward.**)* *(That one supersedes
 [2026-09-24 14:50 — the team HUD is built, and the gate waits](docs/handoffs/2026-09-24-1450--the-team-hud-is-built-and-the-gate-waits.md),
