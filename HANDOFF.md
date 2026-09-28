@@ -1,6 +1,85 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 Event-bound Relics selected; their transformation dialects are next
+## 2026-09-28 Event-bound support spans both dialects; dedicated operation cause is next
+
+Zanzagar selected `RCS-03D1X1-C` with `RCS-03D1X1-A` as the explicit child
+scope fallback. The globally proper Event-bound subset now has nonempty support
+in both transformation dialects: some state Relics may change what they bear
+from a meaningful lived event, and some boundary Relics may change how they
+listen. At least one transforming definition remains outside `D_X`.
+
+C is active. D1X1-A replaces it only if boundary-attunement event play fails
+while state-side event biography remains viable; it then removes boundary
+support but retains nonempty state support. If state-side play fails, the
+already selected parent D1X-A system fallback removes the whole Event-bound
+mechanic. D1X1-B is not a fallback. Neither fallback has fired.
+
+D1X1 is `DIR-SELECTED`; D1M is the sole frontier. The 141-row register now
+contains 24 `SCREEN`, 1 `OWNER-OPEN` at D1M, 40 `PRUNED`, 69
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`.
+Only M and conditional M1 remain before D2 returns at 23. The authoritative
+decision record remains unchanged.
+
+**Agent correction:** earlier D1M source/register shorthand said RCS-03E
+retained “operation authority.” RCS-03E actually owns transformation agency
+and proposal approval; RCS-13 owns operation initiation/admission and lock
+horizons. D1M owns only whether an actual dedicated evolution/reconfiguration
+operation may directly
+originate a proposal. The source wording is corrected; no answer or count
+changed. The current owner-summary label is also corrected from `SR-03` to
+`SR-04`, the manifest's actual persistent-transformation gate. The SR-04
+dashboard cell was stale as well: it now summarizes all resolved cause loci and
+names only D1M as the open cause rather than calling every non-P/C locus open.
+
+`RCS-03D1M` asks whether a real dedicated evolution or reconfiguration
+operation may itself cause a persistent-transformation proposal. One M
+occurrence is one canonically identified admitted semantic operation for one
+active Relic at the later RCS-13 cause cut—not a UI click, callback, generic
+equip/Charm action, reload, or acceptance of a proposal already created by P,
+Z, or X. Its direct edge proposes a materially distinct assignment in the
+Relic's existing dialect; deletion removes only that proposal while preserving
+the operation and every independent cause/proposal. RCS-03E still decides
+agency/approval, so M neither approves nor commits its target.
+
+- **A — dedicated operations never originate transformation proposals.**
+  `D_M` is empty. This is the strong system fallback and lowest-complexity
+  biography: Relics transform through universal P and any applicable Z/X
+  causes, while later
+  configuration or approval may act only within its own authority. It blocks
+  respec, preview-counterpick, currency, and operation-spam loops, but offers no
+  operation-originated M path; it does not remove deliberate cultivation or
+  approval of proposals created elsewhere.
+- **B — every transforming Relic has at least one dedicated-operation path.
+  Recommended, with A as an explicitly selectable system fallback.**
+  `D_M=D_mut`. Every state and boundary definition has some reachable M path,
+  but not every target or direction is selectable and no proposal is thereby
+  approved. B removes a formal no-M class, but does not select player control,
+  one common rite form, or equal practical access. Its prevalence promise is
+  aggregate; a concrete rite earns direct ideal fit only if distinct Soul/
+  bearer commitment and existing Relic biography visibly co-constrain one
+  proposal. It fails if it becomes target-any respec, compulsory grind, a
+  token or renamed organic path, dominant shortcut, counterpick, or churn.
+- **C — a disclosed Rite-bound proper subset has operation paths.** `D_M` is
+  nonempty proper and D1M1 opens. This offers the greatest catalog
+  differentiation but adds a third subset taxonomy beside Absence-bound and
+  Event-bound Relics and risks making the subset a premium extra-route caste.
+  Narrowing a generic respec problem does not cure it.
+
+Because D1P-B already makes `D_P=D_mut`, every M-supporting definition also
+has a positive-result path: `D_M ∩ D_P=D_M`. Under B, universal M support
+also forces `D_M ∩ D_Z=D_Z` and `D_M ∩ D_X=D_X`; this is definition-level
+co-membership, not same-trace or same-target coexistence. B survives only if
+later lock, policy, comprehension, and exploit tests find non-token M value,
+matched optimized cases that choose M and cases that prefer organic P/Z/X,
+no duplicated already-live proposal, viable special Z/X use under forced
+co-membership, and clear separation of operation, proposal, approval, and
+commit. If those gates fail, use A rather than C.
+
+Ask only for D1M A, B, or C. If the recommended replacement fallback is wanted,
+require the explicit answer **“B with D1M-A system fallback.”** Under A/B,
+D1M1 prunes and D2 opens at `Phi_SR = 23`; under C, D1M1 opens at 24.
+
+## 2026-09-28 Event-bound Relics selected; their transformation dialects are next — superseded frontier
 
 Zanzagar selected `RCS-03D1X-C` with `RCS-03D1X-A` as the explicit system
 fallback. A disclosed nonempty proper Event-bound subset may receive persistent-
@@ -11741,7 +11820,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 19:58 UTC — Event-bound transformation dialect incidence is next](docs/handoffs/2026-09-28-1958--relic-lived-event-dialect-next.md)**
+[2026-09-28 22:26 UTC — dedicated evolution/reconfiguration operation cause is next](docs/handoffs/2026-09-28-2226--relic-dedicated-operation-cause-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

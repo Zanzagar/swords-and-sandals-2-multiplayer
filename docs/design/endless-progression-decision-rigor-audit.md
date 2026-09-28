@@ -7323,6 +7323,111 @@ implementation remain later. Any D1X1 answer makes D1M the sole frontier and
 produces 24 `SCREEN`, 1 `OWNER-OPEN`, 40 `PRUNED`, 69 `DIR-SELECTED`, 5
 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`.
 
+Zanzagar selected D1X1-C with D1X1-A as the explicit child scope fallback.
+Thus `D_X^S` and `D_X^B` are both nonempty while `D_X` remains globally
+proper. C is active. If boundary-attunement event play fails while state-side
+event biography remains viable, D1X1-A replaces C and narrows X to nonempty
+state-only support. If state-side play fails, the already selected parent
+D1X-A instead removes the whole X mechanic. D1X1-B is not a fallback, and no
+fallback has fired. Exact definition identities and within-dialect prevalence
+remain unselected.
+
+D1X1 moves to `DIR-SELECTED`, and D1M becomes the sole `OWNER-OPEN` row. The
+141-row register contains 24 `SCREEN`, 1 `OWNER-OPEN`, 40 `PRUNED`, 69
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`.
+Two cause slots remain—M and conditional M1—so closing them returns D2 at 23.
+No authoritative-record text changed.
+
+**D1M prerequisite and atomicity audit — one exhaustive operation-cause
+prevalence card, with one source wording correction.** Earlier source/register
+shorthand said RCS-03E retained “operation authority.” That was too broad:
+RCS-03E owns transformation agency and proposal approval, while RCS-13 owns
+operation initiation/admission and lock horizons. D1M owns only whether an
+actual dedicated evolution/reconfiguration operation may directly originate a
+persistent-transformation proposal. The register wording is corrected without
+changing a prior choice or count.
+
+The current owner-summary routing label also inherited `SR-03` from the source-
+and-input lane even though D1M is a persistent-transformation cause choice.
+The master manifest routes this frontier under `SR-04`; the owner summary is
+corrected to match. This is a gate-label correction, not a new owner choice.
+
+The master manifest's SR-04 current-state cell was also stale: it still named
+only P/C among resolved cause loci and called every other locus open. It now
+records the selected empty I/T/VT/VF/K/C/L support, derived-empty N, proper
+both-dialect Z/X support with fallbacks, and D1M as the sole open cause locus.
+No status or count changed; the dashboard was repaired to match the register.
+
+One M occurrence is an admitted, canonically identified semantic operation for
+one active persistent Relic at the later RCS-13 cause cut. It is not a UI
+click, callback, receipt, reload, generic equip/Charm action, or approval of an
+existing proposal. A direct M edge proposes a materially distinct legal
+same-dialect assignment; its deletion preserves the operation and applicable
+admission/payment/lock facts, every independent P/Z/X occurrence and proposal,
+all other transformation edges, and the current assignment. The edge can read
+no later approval, collision, or committed transformation. Unlike X, an honest
+M operation may exist specifically to seek transformation and need not retain
+separate native combat meaning after its edge is projected out.
+
+Evolution and reconfiguration do not require separate prevalence cards. At
+this boundary they share the same operation-to-proposal intervention; exact
+operation kinds, initiation, actors, costs, and locks remain later work. A
+semantic expiry is X; only a separately admitted reattunement operation is M.
+Accepting an existing P/Z/X proposal belongs to later agency/approval, not a
+new M cause.
+
+The exhaustive D1M directions are:
+
+- D1M-A makes `D_M` empty. This is the lowest-complexity system fallback:
+  transformation biography remains rooted in universal P plus applicable Z/X
+  causes, and macro configuration or approval cannot mint a fresh proposal. It
+  avoids counter-respec, currency loops, operation spam, and another operation
+  surface, but offers no operation-originated M route. It does not remove later
+  deliberate cultivation or approval of proposals caused elsewhere.
+- D1M-B makes `D_M=D_mut`. Every transforming definition has at least one
+  reachable dedicated-operation cause path, without selecting every target,
+  direction, cost, initiator, approval, or commit. **Recommend B with D1M-A as
+  the explicit replacement fallback if the owner includes it.** B removes a
+  formal no-M class but does not select player control, a common rite form,
+  equal access/cost/usefulness, or practical parity. Its prevalence promise is
+  aggregate. A concrete rite earns direct ideal fit only if distinct Soul/
+  bearer commitment and existing Relic biography visibly co-constrain one
+  proposal without collapsing their authority. B fails if M becomes target-
+  any respec, compulsory grind, a token or renamed P/Z/X path, a post-preview
+  counterpick, or the dominant shortest route past organic causes.
+- D1M-C makes `D_M` a nonempty proper subset and opens D1M1. A disclosed
+  Rite-bound family adds the most catalog differentiation, but also a third
+  subset taxonomy and the greatest risk that some Relics simply receive an
+  extra operation route. Narrowing a generic respec problem does
+  not cure it, so C is not the recommended fallback.
+
+A/B/C exhaust empty, universal, and nonempty proper subsets of nonempty
+`D_mut`. Selected D1P-B also forces `D_M ∩ D_P=D_M`; operation support is
+always an additional path, never causal coverage required to keep a definition
+transformable. Under A, definition-level M overlap with both proper `D_Z` and
+`D_X` is empty; under B, `D_M ∩ D_Z=D_Z` and `D_M ∩ D_X=D_X`; only C leaves
+those definition-level overlaps open. Whether the necessarily distinct cause
+edges yield proposals on the same trace or for the same target remains
+unselected. Exact operations, actors, costs, rates, power, agency, collision,
+persistence, and implementation also remain unselected.
+
+B survives only if RCS-13/RCS-17/RCS-18 later establish a non-token purpose for
+every required M path; matched optimized cases that choose M and cases that
+prefer an organic P/Z/X proposal; no renamed or duplicate already-live
+proposal; retained viable Z/X policy use for definitions forced to support
+both; a real commitment rather than free respec; preview-safe locks; resistance
+to payment/reload/oscillation/spam loops; and comprehension of operation versus
+proposal versus approval versus commit. A possible witness is a pre-information
+lock-bearing commitment whose target current Soul/Relic biography constrains,
+while an organic route remains faster in other matched states. That witness is
+illustrative, not a selected actor, timing, lock, or target rule. If those gates
+fail, the recommended replacement is A, not C.
+
+Under D1M-A/B, D1M1 prunes and D2 opens with 22 `SCREEN`, 1 `OWNER-OPEN`,
+41 `PRUNED`, 70 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`. Under D1M-C, D1M1 opens at `Phi_SR = 24`; its closure then
+opens D2 at 23.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

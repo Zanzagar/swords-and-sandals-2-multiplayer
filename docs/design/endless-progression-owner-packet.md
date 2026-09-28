@@ -401,8 +401,12 @@ been heard” latch keeps its full recurrence force but never itself proposes
 transformation; D1L1 prunes. Zanzagar then selected D1X-C with D1X-A as the
 explicit system fallback, so a disclosed proper Event-bound subset may be
 shaped by independently meaningful lived events unless the complete mechanic
-fails its gates. **RCS-03D1X1 is now the sole owner-facing choice under
-SR-03:** which transformation dialects contain Event-bound definitions.
+fails its gates. Zanzagar then selected D1X1-C with D1X1-A as the explicit
+scope fallback, so the proper Event-bound subset has nonempty incidence in both
+transformation dialects unless boundary-attunement event play fails while
+state-side play survives. **RCS-03D1M is now the sole owner-facing choice under
+SR-04:** whether a dedicated Relic evolution or reconfiguration operation may
+itself directly propose persistent transformation.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -25015,8 +25019,9 @@ unchanged.
 > has neither selected contender tuple nor causal union. X covers an already
 > meaningful independent combat/source/relationship event rather than an
 > evaluation result. M covers the existence of a dedicated semantic evolution
-> or reconfiguration operation; RCS-03E still owns its authority, while RCS-13
-> owns its initiation and lock horizon. A semantic expiry is X when it is an
+> or reconfiguration operation; RCS-03E still owns transformation agency and
+> proposal approval, while RCS-13 owns operation initiation and lock horizon.
+> A semantic expiry is X when it is an
 > independently existing event and M when it initiates such an operation; it
 > is not a seventh cause family. Bare encounter/Circuit cuts remain inert under
 > C131-A/C132-A. Reward/acquisition, cross-root/team force, migration/repair,
@@ -26097,7 +26102,7 @@ D1X moves to `DIR-SELECTED`, and `RCS-03D1X1` becomes the sole
 remain—X1, M, and M1—so closing them returns D2 as the sole frontier at
 `Phi_SR = 23`. The authoritative decision record remains unchanged.
 
-### RCS-03D1X1 — transformation-dialect incidence of Event-bound support — active owner choice
+### RCS-03D1X1 — transformation-dialect incidence of Event-bound support — C selected with A scope fallback
 
 RCS-03A-C partitions nonempty `D_mut` into nonempty disjoint state-supporting
 `D_S` and boundary-supporting `D_B`. State definitions transform what
@@ -26131,14 +26136,12 @@ boundary only, or both. In C, global properness remains explicit: support in
 both dialects does not imply `D_X=D_mut`, every event transforms, or one Relic
 has two transformation axes.
 
-The recommendation has a three-level production ladder, but only the parent
-system fallback is currently selected. Select D1X1-C only if both dialects can
-produce legible, policy-changing, non-dominated play. If boundary-attunement
-play proves opaque, cyclical, or dominated while state-side play survives, the
-newly offered D1X1-A scope fallback would retain state-condition event
-biography; it is not selected unless the owner says so. The already selected
-parent D1X-A system fallback removes every X edge if even state-side event
-biography fails. No fallback has fired.
+The selected direction has a three-level production ladder. D1X1-C is active
+while both dialects produce legible, policy-changing, non-dominated play. If
+boundary-attunement play proves opaque, cyclical, or dominated while state-side
+play survives, the selected D1X1-A child scope fallback retains state-condition
+event biography. The already selected parent D1X-A system fallback removes
+every X edge if even state-side event biography fails. No fallback has fired.
 
 For every included dialect, RCS-17/RCS-18 must later establish non-token native
 events, optimized reasons both to seek and avoid them, clear separation among
@@ -26155,6 +26158,120 @@ D1M becomes the sole `OWNER-OPEN` row; and the register contains 24 `SCREEN`,
 1 `OWNER-OPEN`, 40 `PRUNED`, 69 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and
 1 `EVALUATE`, with `Phi_SR = 25`. This card authorizes no implementation, and
 the authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **C, disclosed
+Event-bound support in both transformation dialects, with D1X1-A as the
+explicit child scope fallback.** Thus `D_X^S` and `D_X^B` are both nonempty
+while inherited `D_X ⊊ D_mut` remains mandatory. At least one state-supporting
+and one distinct boundary-supporting definition has a qualifying X cause path,
+and at least one transforming definition remains outside `D_X`. Every proposal
+stays inside its definition's one RCS-03A dialect. C creates neither a hybrid
+axis nor universal Event-bound support.
+
+C is active. D1X1-A is an armed replacement, not a simultaneous rule: if
+boundary-attunement event play fails its comprehension, policy,
+non-dominance, or anti-exploit gates while state-side event biography remains
+viable, then `D_X^S` remains nonempty, `D_X^B` becomes empty, and the X
+mechanic narrows to state Relics. If state-side event biography fails, the
+already selected parent D1X-A system fallback instead makes `D_X` empty and
+prunes the child incidence rule. D1X1-B is not a fallback. Neither selected
+fallback has fired.
+
+D1X1 moves to `DIR-SELECTED`, and `RCS-03D1M` becomes the sole
+`OWNER-OPEN` row. The 141-row register now contains **24 `SCREEN`, 1
+`OWNER-OPEN` at D1M, 40 `PRUNED`, 69 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`**. Two cause parent/child slots
+remain—M and M1—so closing them returns D2 as the sole frontier at
+`Phi_SR = 23`. The authoritative decision record remains unchanged.
+
+### RCS-03D1M — dedicated evolution/reconfiguration operation as transformation cause — active owner choice
+
+Let `O^M_v` be the prospectively versioned set of authoritative dedicated
+Relic evolution or reconfiguration operations. An actual occurrence `m`
+belongs to `O^M_v` only when:
+
+1. `m` is one admitted semantic operation concerning one active persistent
+   Relic, explicitly authored to seek evolution or persistent reconfiguration;
+   it is not a UI click, animation, callback, save write, generic equip or
+   Charm action, or acceptance of an already-existing proposal;
+2. the operation contract supplies one canonical identity and semantic cause
+   cut under the later RCS-13 initiation/admission law; aliases, retries,
+   callbacks, receipts, reloads, and duplicate delivery cannot multiply it;
+3. one prospectively versioned direct M-locus edge runs from `m` to a
+   materially distinct legal assignment in that definition's existing
+   RCS-03A dialect and may inspect no later approval, collision, or committed
+   transformation; and
+4. deleting only that edge removes only the named M proposal while holding
+   fixed `m`, its applicable admission/payment/lock facts, every independent
+   P/Z/X occurrence and proposal, every other transformation edge, and the
+   current assignment.
+
+Let `D_M` contain each definition in `D_mut` with at least one reachable
+**dedicated-operation transformation-cause witness**. Unlike X, M need not
+retain separate non-transformation value when its edge is projected out: its
+honest semantic purpose may be to seek transformation. It must nevertheless be
+a real admitted operation rather than an interface or engine step invented to
+multiply proposals. The current assignment remains authoritative until later
+RCS-03E agency/approval, RCS-04A collision, and RCS-04B committed-identity
+rules act.
+
+Evolution and reconfiguration need not split on this card. Their exact
+operation kinds may differ, but the question here is only whether at least one
+actual operation supplies a direct M edge for a definition. RCS-13 retains
+operation initiation, admission, configuration, and lock horizons; RCS-03E
+retains transformation agency and proposal approval. Pressing “accept” on an
+existing P/Z/X proposal is therefore not a fresh M cause. A semantic expiry is
+X when it is an independently meaningful native event; only a separately
+admitted operation it initiates can be M.
+
+| Choice | Dedicated-operation cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — dedicated operations never originate transformation proposals** | `D_M` is empty. Later configuration or approval workflows may act within their own authority, but no dedicated operation creates a new persistent-transformation proposal. | **Strong system fallback and lowest-complexity direction.** Every transforming definition already has a positive-manifestation path under D1P-B; selected proper subsets may additionally learn from absence or lived events. A keeps biography organic, prevents currency-to-best-state loops, post-preview counter-respec, operation spam, and a second macro operation surface. Its ideal fit is protective: the Relic is shaped through real relationship history rather than treated as an inert object. Cost: no operation-originated M path can redirect a long-lived Relic, though later deliberate cultivation or approval of P/Z/X proposals remains possible under its own authority. | Ashen has already received `TEMPERED CONDITION PROPOSED` from a legal P or X cause. A later confirmation or lock may act on that existing proposal under RCS-03E/RCS-13, but it creates no second proposal. Opening a Reliquary or requesting a retune without P/Z/X cannot originate one. |
+| **B — every transforming Relic has a dedicated-operation path** | `D_M=D_mut`. Every state- and boundary-supporting definition has at least one reachable actual dedicated operation whose direct M edge may originate a proposal. This does not make every target or direction selectable, every operation free, or any proposal automatically approved or committed. | **Recommended universal-operation direction, with A as the explicit system fallback if selected.** B removes a formal no-M class, but does not itself select participant control, one common rite form, equal access/cost/usefulness, or a shared teaching grammar. At this prevalence boundary its ideal fit is aggregate. A later concrete rite can fit directly only if a distinct Soul/bearer commitment and the Relic's existing biography jointly and visibly constrain one proposal while neither becomes the other's authority. B fails if it becomes universal respec, mandatory grind, a token path, a renamed P/Z/X proposal, the dominant shortcut past organic causes, a post-information counterpick, or operation churn. | At a later legal macro horizon, an admitted Vowscar rite may propose `TEMPERED CONDITION`; an admitted Hourglass rite may propose `AFTER-ECHO ATTUNEMENT`. The operations do not themselves approve or commit those targets, and the example selects no actor, payment, horizon, or common operation form. |
+| **C — a disclosed Rite-bound proper subset has dedicated-operation paths** | `D_M` is a nonempty proper subset of `D_mut`; D1M1 then chooses state-only, boundary-only, or nonempty support in both dialects. | C offers the greatest catalog differentiation: some Relics have an authored operation path while others transform only through manifestation, absence, or lived events. Each honest operation may later earn B's conditional direct local ideal fit, but subset coexistence is merely aggregate. C also adds a third cause-subset taxonomy beside Absence-bound and Event-bound and carries the greatest premium-caste risk: “this Relic gets an extra operation route” can dominate an otherwise comparable identity. Narrowing a generic respec problem to a subset does not cure it. | A named Rite-bound Vowscar may admit a reconciliation operation that proposes a new remembered condition. An ordinary Hourglass may have no M edge and still transform through its universal P path. The example does not preselect D1M1's dialect incidence. |
+
+A/B/C are exhaustive because `D_M` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. B means at least one qualifying operation
+path per definition, not that every assignment, direction, operation, or
+request transforms. Under C, exact within-dialect prevalence remains later.
+
+The recommendation is B with D1M-A offered as an explicit replacement
+fallback, not C. B guarantees operation capability, not on-demand player
+control or practical parity. It survives only if later RCS-13, RCS-17, and
+RCS-18 work proves all of the following: every required M path has a non-token
+purpose; matched optimized cases sometimes choose M and sometimes prefer an
+organic P/Z/X proposal; M neither duplicates an already-live organic proposal
+nor dominates the special Z/X policy surface for definitions forced to support
+both; the operation is a costly or constraining commitment rather than target-
+any respec; preview timing and locks prevent counterpick abuse; payment,
+reload, oscillation, and repeated-operation loops fail; and players can
+distinguish operation, proposal, approval, and committed change. A later-valid
+realization might permit a pre-information, lock-bearing commitment whose
+target is constrained by current Soul/Relic biography rather than freely
+picked, while a faster organic route remains strategically preferable in other
+matched states. That is an illustrative gate witness, not a selected actor,
+timing, lock, or target rule. If the gates fail, A removes every M edge without
+removing deliberate cultivation or approval of proposals created elsewhere.
+No fallback is selected unless the owner includes it in the answer.
+
+Selected D1P-B fixes `D_P=D_mut`, so necessarily `D_M ∩ D_P=D_M`: every
+definition with an operation path also has a positive-result path. The A and B
+branches also determine definition-level overlap with the selected proper cause
+subsets: under A both `D_M ∩ D_Z` and `D_M ∩ D_X` are empty; under B they equal
+`D_Z` and `D_X` respectively. Only C leaves those definition-level overlaps
+open. Whether the necessarily distinct cause edges yield proposals on the same
+trace or for the same target remains unselected under every branch. A P receipt
+used later as an operation input does not become M; P and M retain distinct
+occurrences and edges.
+
+Under A/B, D1M1 prunes and D2 opens, producing 22 `SCREEN`, 1 `OWNER-OPEN`,
+41 `PRUNED`, 70 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`,
+with `Phi_SR = 23`. Under C, D1M1 opens next at `Phi_SR = 24`; closing it
+then opens D2 at 23. Exact operations, actors, initiation/admission, costs,
+locks, targets, rates, power, presentation, agency, approval, collision,
+persistence, fault handling, and implementation remain later registered work.
+This card authorizes no implementation, and the authoritative decision record
+remains unchanged.
 
 ## Session protocol and evidence
 
