@@ -6848,6 +6848,81 @@ D1K opens. Under C, D1VF1 opens. No option selects exact definitions, output
 maps, triggers, targets, rates, copy, surface, power, persistence, approval,
 collision, or implementation.
 
+Zanzagar selected D1VF-A. Thus `D_VF=∅`: refusal keeps its full not-both and
+deterministic-disposition authority but never directly proposes persistent
+transformation. D1VF moves to `DIR-SELECTED`, D1VF1 moves to `PRUNED`, and
+D1K becomes the sole `OWNER-OPEN` row. The 141-row register now contains 32
+`SCREEN`, 1 `OWNER-OPEN`, 38 `PRUNED`, 63 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 33`. Ten cause parent/child slots remain
+from K through M; closing them returns D2 as the sole frontier at 23. No
+authoritative-record text changed.
+
+**D1K prerequisite and atomicity audit — passes with one wording safeguard and
+no row split.** K is the actual completion and C134-A sealing of one whole
+nonempty provisional output set after tuple selection, permission, and
+deterministic disposition. P is the later atomic authoritative commit of that
+same receipt set. C133-A/C134-A ensure that neither participant response nor
+automatic semantic evolution can revoke the completed set before P, but their
+pre-commit episode still ends at commit; inevitability and actuality remain
+two ordered semantic loci.
+
+Because C134 originally states its revocability test per candidate tag, D1K
+must expressly aggregate those candidates. For one evaluation `z`, `Y_z` is
+the full positive provisional output `{P}`, `{P,Q}`, `{S}`, or `{S1,S2}`, and
+`kappa(z)` is its one complete/sealed occurrence. Width two does not mint two K
+causes. Allowed-original versus positive-denied provenance, width one versus
+two, and original versus substitute identity may condition an authored K
+edge, but all are attributes of the same authority/lifetime/settlement event.
+Raw candidate fragments, individual tags, counterfactual sufficiency,
+callbacks, rendering, and serialization do not pass the admission test.
+
+A qualifying K witness contains one actual `kappa(z)` and a prospectively
+versioned direct K-locus edge to a materially distinct same-dialect assignment
+of the same active Relic. Deleting only that edge must remove the proposal
+while holding the entire `Y_z`, sealing, later P commit, every independent P
+proposal, any claim, the completed trace, and current assignment fixed. The
+edge may inspect no later commit, claim, payoff, approval, or collision fact
+and may alter neither output nor settlement. Transactional recording cannot
+leak a precommit proposal: presentation/authority wait for successful whole-
+set commit, a technical abort leaves neither fact, and replay cannot duplicate
+the stable identities.
+
+D1P-B already requires every transforming definition to have at least one
+reachable positive-commit cause path. Every such P has a K predecessor, so K
+occurrence reachability is universal; direct K-edge support is not. The next
+card is therefore atomic and exhaustive over `D_K⊆D_mut`:
+
+- D1K-A makes `D_K=∅`. **Recommended.** Sealing remains meaningful and
+  guarantees manifestation, but biography attaches only when the receipt set
+  actually commits. The readable rule is “the relationship becomes
+  inevitable; what it actually manifests may shape the Relic.” This preserves
+  becoming and manifestation as continuous but distinct under the standing
+  ideal while avoiding an almost simultaneous K/P double-proposal language,
+  opaque attribution, farming, and collision/UI load.
+- D1K-B makes `D_K=D_mut`. Every transforming definition must have at least
+  one reachable whole-output sealing whose direct K edge proposes change.
+  Not every K must transform and K/P need not both fire on the same trace, but
+  every definition now needs two success-adjacent causal languages because
+  D1P-B remains universal. No player can answer or change the sealed result
+  between them.
+- D1K-C makes `D_K` nonempty proper and opens D1K1. A disclosed
+  `BECOMING-BOUND`, Threshold, or Premonition family may remember the instant a
+  latent form becomes unavoidable while ordinary Relics wait for manifested
+  receipts. This is the strongest thematic countercase, viable only if K
+  provenance changes policy, is independently fun and legible, is
+  non-dominated, and cannot honestly be encoded as a distinctive P trigger or
+  target; otherwise it is a premium extra-evolution caste.
+
+For an allowed trace, Guard plus Heat can make complete sealed `{P,Q}`. Under
+A, K proposes nothing and its later P commit may still create `CONCORDANT
+PROPOSED`. Under B/C, K may create `AWAKENED PROPOSED`; deleting only that edge
+leaves `{P,Q}`, its commit, and any `CONCORDANT` proposal fixed. For a positive
+denied trace, a fixed refraction disposition `{S1,S2}` becomes one complete
+sealed K event and later one atomic P commit—never two K events. Under A/B,
+D1K1 prunes and D1Z opens. Under C, D1K1 opens. Exact definitions, triggers,
+targets, prevalence, rates, copy, power, UI, persistence, approval, collision,
+and implementation remain later work.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

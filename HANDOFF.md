@@ -1,6 +1,78 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 permission permits without transforming; false verdict is next
+## 2026-09-28 refusal routes without transforming; provisional sealing is next
+
+Zanzagar selected `RCS-03D1VF-A`. An actual authoritative `false`/not-both
+permission verdict retains its full mechanical consequence: the original pair
+cannot continue together, and the verdict routes the one prospectively fixed
+deterministic disposition. The verdict itself never directly proposes
+persistent transformation. D1VF is `DIR-SELECTED`; D1VF1 is `PRUNED`; D1K is
+the sole frontier. The authoritative decision record remains unchanged.
+
+The 141-row register now contains 32 `SCREEN`, 1 `OWNER-OPEN` at D1K, 38
+`PRUNED`, 63 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 33`. Ten cause parent/child slots remain from K through M. Closing
+them returns D2 at 23; D2-D5 still lead to RCS-03E at 19.
+
+`RCS-03D1K` asks whether one positive provisional output becoming complete and
+sealed may itself directly propose a Relic transformation before the later
+authoritative receipt-set commit. The row is real but intentionally narrow:
+K is inevitability; P is actuality. C133-A/C134-A allow neither participant
+response nor automatic revocation between them, but their ordered semantic
+facts remain independently attributable.
+
+The audit added one wording safeguard without adding a row. K is **one whole
+nonempty output-set occurrence per canonical evaluation**, never one cause per
+receipt. `{P,Q}` becoming complete and sealed is one K occurrence, as is a
+positive denied-pair substitute set `{S1,S2}`. Allowed versus denied origin,
+width one versus two, and original versus substitute identity may condition
+authoring but do not create more owner choices. A K edge must be deletable
+while the whole provisional set, its sealing, later P commit, any independent
+P proposal, later claim, completed trace, and current assignment remain fixed.
+
+D1P-B already guarantees every transforming definition at least one positive-
+commit cause path, and every P has a K predecessor. That guarantees reachable
+K occurrences, not direct K transformation edges.
+
+- **A — sealing guarantees manifestation but never transforms. Recommended.**
+  K keeps all of its anti-fizzle meaning, but biography attaches only when the
+  receipt set actually commits. The rule is **“the relationship becomes
+  inevitable; what it actually manifests may shape the Relic.”** This keeps
+  becoming and manifestation continuous but distinct under Achintya Bheda
+  Abheda without turning every meaningful intermediate boundary into a second
+  biography trigger. It avoids an almost simultaneous K/P double-proposal
+  language, subtle attribution, farming, and added collision/UI load. Cost:
+  no Relic remembers the precise precommit instant at which its manifestation
+  became inevitable.
+- **B — every transforming Relic has a sealing-shaped path.** Every state- and
+  boundary-supporting transforming definition must have at least one reachable
+  complete sealed output whose K edge proposes change. Not every K must
+  transform, and K/P need not both fire on the same trace. But D1P-B already
+  gives every definition a P path, so the whole catalog carries two success-
+  adjacent causal languages even though no player can answer or change the
+  sealed result between them.
+- **C — a disclosed proper subset is Becoming-bound.** A named
+  `BECOMING-BOUND`, Threshold, or Premonition family may remember the instant a
+  latent form becomes unavoidable; ordinary Relics wait for actual manifested
+  receipts. This is the strongest thematic countercase for Souls and
+  Simulacra, but is valid only if K provenance changes player policy, is
+  prospectively legible and independently fun, remains non-dominated, and
+  cannot honestly be represented as a distinctive P trigger or target.
+  Otherwise it is a premium extra-evolution caste based on an imperceptible
+  timing distinction.
+
+Example: Guard plus Heat makes the complete output `{P,Q}` sealed. Under A, K
+creates no proposal; the later atomic receipt commit may still create
+`CONCORDANT PROPOSED` through an authored P edge. Under B/C, K may instead
+create `AWAKENED PROPOSED`, and P may independently create `CONCORDANT
+PROPOSED`. Removing only the K edge must leave `{P,Q}`, its commit, and the P
+proposal untouched. A false pair whose fixed disposition is `{S1,S2}` follows
+the same grammar: one K event for the whole substitute set, then one P commit.
+
+Ask only for D1K A, B, or C. Under A/B, D1K1 prunes and D1Z opens. Under C,
+D1K1 opens next.
+
+## 2026-09-28 permission permits without transforming; false verdict was next — superseded frontier
 
 Zanzagar selected `RCS-03D1VT-A`. An actual authoritative `true`/allow
 permission verdict retains its full mechanical consequence: it lets the
@@ -73,8 +145,8 @@ that disposition. Deleting the VF edge must leave the false bit, `{}`, later
 Z/L facts, and every independent proposal unchanged. A different fixed denied
 opportunity may yield `{S}` and later K/P without changing the causal boundary.
 
-Ask only for D1VF A, B, or C. Under A/B, D1VF1 prunes and D1K opens. Under C,
-D1VF1 opens next.
+This section preserves the prior D1VF frontier. D1VF-A is now selected; do not
+ask it again. The current single choice is D1K in the newer section above.
 
 ## 2026-09-28 success shapes every Relic; claim-write cause selected — superseded frontier
 
@@ -136,9 +208,9 @@ intended claim, or one trigger per claimed child. Replay, reload, callbacks,
 rendering, duplicate delivery, and idempotent re-claim cannot mint another
 cause occurrence. Ally proof retains ownership/payment and grants no approval.
 This section records the prior D1C frontier. D1C-A is now selected; do not ask
-it again. **Corrected 2026-09-28:** D1I-A, D1T-A, and D1VT-A are also selected
-and must not be asked again; D1N is derived empty, and the current single
-choice is D1VF above.
+it again. **Corrected 2026-09-28:** D1I-A, D1T-A, D1VT-A, and D1VF-A are also
+selected and must not be asked again; D1N is derived empty, and the current
+single choice is D1K above.
 
 ## 2026-09-28 claimed proof is Relic-wide spent; positive-settlement cause is next
 
@@ -11305,7 +11377,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 05:42 UTC — actual false/not-both permission-verdict cause is next](docs/handoffs/2026-09-28-0542--relic-false-verdict-cause-next.md)**
+[2026-09-28 05:56 UTC — complete provisional-output sealing cause is next](docs/handoffs/2026-09-28-0556--relic-provisional-sealing-cause-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
