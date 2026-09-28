@@ -6019,6 +6019,82 @@ claims nothing under D2-A and lies outside D3. Either D3 answer would produce
 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`. C3E and C3F still follow
 D4 and receive their own dependency audit; neither is silently derived here.
 
+Zanzagar selected D3-A. For every claiming positive settlement `z`,
+`C(z)=U(z)`: the claim takes the complete deduplicated union of final child
+occurrences in the selected authoritative causal ledgers. Exact shared
+occurrences count once; distinct related occurrences remain distinct; positive
+substitutes retain both original selected ledgers. D1-B still leaves claim
+prevalence and assignments AUTHOR/SPEC. D3 moves to `DIR-SELECTED`, D4 becomes
+`OWNER-OPEN`, and the 109-row register has 22 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 54 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`.
+
+Two named-claim audits then tested D4. They found that the old “failed-result
+recurrence” label was overbroad: a true no-candidate invocation has no selected
+complete contender pair, ledger relationship, or canonical failed-proof
+identity. Including it would invent a new readiness-identity boundary. The
+registered row therefore narrows, without splitting or changing the count, to
+ledger-bearing `{}` cancellation recurrence for the already-nonempty `Z^0_v`
+domain.
+
+Each cancellation quotients to a canonical key containing the fixed version,
+combatant, active Relic, operative context, treatment contract, and unordered
+original contender pair `{P,Q}`. Pair order, aliases, callbacks, product-
+evaluator channels, and alternate selected ledgers cannot mint another key.
+Exact-ledger scope would permit retry laundering by route churn; per-tag scope
+would suppress a genuinely different `P/R` relationship and consume C3F's
+later boundary. The continuous-sufficiency interval projects claim/retry/
+cooldown bookkeeping out and ends only when the canonical pair relationship or
+context becomes authoritatively insufficient or unavailable.
+
+A distinct re-evaluation is a newly authorized product evaluation of that key
+at a strictly later semantic cut with a fresh coherent current-cut evidence
+read. It excludes redraw, delayed or duplicate settlement, callback, reload,
+replay, pair enumeration, alias/routing churn, and internal product channels.
+Let `R^{fail-hold}_v` contain keys with one fully specified legal history having
+initial empty settlement `e1` and later distinct evaluation `e2` inside one
+continuous-sufficiency interval.
+
+D4-A makes `R^{fail-hold}_v` empty; D4-B makes it nonempty. This is exhaustive.
+Universal and mixed support both lie in B; exact prevalence and assignments
+remain AUTHOR/SPEC. Retry-until-success, one versus many reattempts, cooldown,
+cap, interval length, and exact trigger remain later specification/cadence.
+Positive results return to D1/D3/C135. A true no-candidate invocation, a
+genuinely different pair, post-break renewal, persistent payoff, later evidence
+reuse, and cross-root/Relic/combatant use all remain outside D4.
+
+The gameplay audit recommends D4-A: **one listen per unbroken bond**. C135-A
+already requires break-before-rearm after success; A gives cancellation the
+same episode grammar without claiming its evidence. Under D2-A the causal
+occurrences stay available, but the pair is visibly `Listened—Severed` and
+cannot ask the Oracle again while its relationship stays continuously
+sufficient. This blocks the heads-win/tails-reroll loop in which repeated
+chance `p` approaches success `1-(1-p)^n`, along with timer power, automatic
+proc spam, deterministic denial noise, and teammate-forced repeated attempts.
+A is neutral/protective standing-ideal fit while the initial causal relation may
+remain direct; the cost is stranded maintained formations and incentive to
+flicker a cheap condition, which later authoring/playtests must reject as a
+dominant reset.
+
+D4-B's strongest countermodel is a named maintained-covenant family such as
+Echoing Covenant. A visible, independently meaningful semantic act like
+`Temper the Vow` changes a law-relevant fact while the same pair bond stays
+sufficient and authorizes a genuinely new hearing. Such a two-evaluation/
+one-continuing-relation history is at most partial standing-ideal fit. A timer,
+poll, Rest, no-op, unchanged-context random draw, or ledger switch is not.
+Guarded B is the fallback only if human tests show A creates dominant reset-
+flicker or intolerably stranded formations and the retry event remains
+forecastable, attributable, bounded, anti-coercive, and independently fun.
+
+For `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}`, initial `{}`
+leaves `g,h,t` available under D2-A. Under A, held `P/Q` produces no later
+evaluation; Heat must become authoritatively false and later rebuild before a
+new opportunity can exist. Under B, an authored material event may authorize
+`e2` while `P/Q` remains held. Either D4 answer would move D4 to
+`DIR-SELECTED` and C3E to `OWNER-OPEN`, leaving C3F screened behind it. The
+register would then have 21 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 55
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

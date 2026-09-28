@@ -369,8 +369,10 @@ internal channels, not another player-material topology. C5-C7/G2/H/I prune,
 and a thirty-fourth prerequisite correction splits old RCS-03C3D into four
 independent evidence-use rows. Zanzagar selected RCS-03C3D1-B, requiring
 positive-result claim support, then selected RCS-03C3D2-A so ledger-bearing
-empty results never claim evidence. RCS-03C3D3 is now the current owner-facing
-choice under SR-03.
+empty results never claim evidence, then selected RCS-03C3D3-A so every claim
+takes its complete selected-ledger union. RCS-03C3D4 is now the current owner-
+facing choice under SR-03, narrowed by audit to ledger-bearing cancellation
+recurrence rather than unkeyed no-candidate failure.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -24304,11 +24306,12 @@ remains unchanged.
 > 1. `RCS-03C3D1` — positive-result evidence-claim support;
 > 2. `RCS-03C3D2` — ledger-bearing empty-result evidence-claim support;
 > 3. `RCS-03C3D3` — complete-union versus proper-subset claimed footprint; and
-> 4. `RCS-03C3D4` — failed-result recurrence under uninterrupted relationship
->    sufficiency.
+> 4. `RCS-03C3D4` — ledger-bearing empty-settlement recurrence under
+>    uninterrupted canonical pair-relationship sufficiency.
 >
 > D1 precedes D2. If both reject claim support, D3 prunes; otherwise D3 follows.
-> D4 follows in every branch because failure recurrence is not evidence claim.
+> D4 follows in every branch because ledger-bearing cancellation recurrence is
+> not evidence claim.
 > C133/C134 seal positive candidates but leave failed scheduling open; C135
 > governs recommitment after success and explicitly projects consumption/retry
 > bookkeeping out of relationship sufficiency. Claim and recurrence state may
@@ -24461,7 +24464,7 @@ gameplay audit recommends A. Authoritative tuple routing already supplies
 proof-selection buildcraft, and full-union claiming makes the chosen tuple's
 entire causal cost honest without adding a second hidden cherry-pick surface.
 
-### RCS-03C3D3 — claimed-proof footprint — active owner choice
+### RCS-03C3D3 — claimed-proof footprint — direction selected
 
 Under D1-B/D2-A, the claim domain is nonempty and positive-only:
 `K^{claim}_v=K^{claim+}_v` and `K^{claim0}_v=∅`. For each claiming settlement
@@ -24508,6 +24511,109 @@ Under A or B, D3 moves to `DIR-SELECTED` and D4 becomes `OWNER-OPEN`. The
 register then contains 22 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 54
 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`. The
 authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, every claim
+takes the complete selected-ledger union.** Thus `C(z)=U(z)` for every claiming
+settlement. The rule applies only when a positive settlement actually claims;
+D1-B still leaves exact claim prevalence and assignments to AUTHOR/SPEC.
+
+Every final child occurrence in the selected authoritative causal tuple becomes
+unavailable as evidence to that active Relic after the complete output commits.
+Exact shared children count once, distinct related children remain distinct,
+and a fused `{S}` or reconstituted `{S1,S2}` output retains both original
+selected causal ledgers. No ancestor, sibling, hidden compound member,
+unselected alternate ledger, other root, Relic, combatant, or owner enters the
+claim. This is **direct** local standing-ideal fit: one complete causal weave
+acquires one Relic-local claim relation while each occurrence preserves its
+distinct identity, source ownership, and history.
+
+D3 moves to `DIR-SELECTED`; D4 becomes `OWNER-OPEN`. The 109-row register now
+contains 22 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 54 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested D4. They found no need to split the
+registered row, but they did find that its old shorthand, “failed-result
+recurrence,” was overbroad. A true no-candidate invocation has no selected
+complete contender pair or failed-proof identity to key; silently including it
+would invent a new readiness-identity system. D4 therefore narrows to
+ledger-bearing `{}` cancellations and uses one canonical pair-level key. This
+scope correction changes no row count.
+
+### RCS-03C3D4 — ledger-bearing empty-settlement held-pair reattempt support — active owner choice
+
+Reuse nonempty `Z^0_v`, the completed product evaluations with a nonempty
+selected authoritative contender-ledger tuple and final pair-local output `{}`.
+For `z in Z^0_v`, let `kappa(z)` canonically contain the fixed version,
+combatant, active Relic, operative context, treatment contract, and unordered
+original contender pair `{P,Q}`. Pair order, receipt aliases, internal product-
+evaluator channels, callbacks, and alternate selected ledgers do not create a
+new key. Exact-ledger scope would launder retries by switching proof routes;
+per-tag scope would wrongly suppress `P` in a genuinely different `P/R` pair.
+
+The canonical pair relationship is **continuously sufficient** while the fixed
+context and both contender relationships remain operatively supported after
+every authoritative semantic transition, projecting out bookkeeping whose only
+purpose is claim, cooldown, retry, or recurrence suppression. Alternate lawful
+proof routes may change without ending the interval. Genuine loss of either
+contender relationship, context termination/unavailability, or another
+authoritative state that makes the pair insufficient ends it. A frame, poll,
+callback, log entry, serialization step, duplicate delivery, or repeated
+observation does not.
+
+A **distinct re-evaluation** is one newly authorized product evaluation of the
+same `kappa(z)` at a strictly later semantic cut, with its own coherent current-
+cut evidence read. It is not a redraw of the settled opportunity, delayed or
+duplicate settlement, reload, replay, pair enumeration, routing/alias churn,
+or another internal channel. Let `R^{fail-hold}_v` contain exactly the canonical
+cancellation keys with a fully specified legal history containing initial
+empty settlement `e1` and a later distinct evaluation `e2` inside the same
+continuous-sufficiency interval.
+
+| Choice | Held-pair reattempt rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — one listen per unbroken bond** | `R^{fail-hold}_v=∅`. After a ledger-bearing `{}` settlement, the same canonical pair cannot receive another evaluation until its relationship genuinely becomes insufficient and later sufficient again. A does not guarantee that a post-break reattempt exists. | **Recommended.** A extends C135-A's success grammar to cancellation: one relationship episode produces at most one automatic listen. D2-A preserves the causal evidence, but it does not turn Oracle denial into a heads-win/tails-reroll option. The UI can leave evidence lit while marking the pair `LISTENED — SEVERED`, then explain `Already heard` until a real break. A's marginal recurrence exclusion is **neutral/protective**; the initial Soul–Relic–distinct-source relation may remain **direct**, and universal no-reattempt prevalence is **aggregate**. Costs: an expensive maintained formation may become inert after unavoidable denial, and players may seek a cheap false/true reset. Later authoring and human playtests must reject dominant blink-reset play. | `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` settle `{}`. D2-A leaves `g,h,t` available. While the same `P/Q` bond stays sufficient, later turns produce no new evaluation or proc flash. Heat becoming authoritatively false ends the interval; rebuilding it may create a later opportunity. |
+| **B — require held-pair reattempt support** | `R^{fail-hold}_v` is nonempty. At least one canonical cancellation key has a legal later distinct evaluation while the same pair relationship remains continuously sufficient. B selects neither universal prevalence, success, a periodic pulse, exact trigger, cadence, nor attempt cap. | B's strongest case is a named maintained-covenant family such as **Echoing Covenant**: after denial, a visible and independently meaningful action like `Temper the Vow` changes a law-relevant fact while the `P/Q` bond stays sufficient, authorizing a genuinely new hearing. That can reward maintaining an expensive formation and is at most **partial** ideal fit across two distinct evaluations of one continuing relation. An unchanged-context timer, Rest, poll, or new random draw is not unity-in-difference. Unguarded B converts probability `p` into eventual success `1-(1-p)^n`, undermines Witness denial, creates automatic proc spam, and lets allies force repeated attempts. Use B only if A produces dominant reset-flicker or intolerably stranded formations and the material retry event remains forecastable, attributable, bounded, and fun; otherwise fall back to A. | After `{}` leaves `g,h,t` intact, a disclosed `Temper the Vow` action spends a meaningful turn/resource while `P/Q` stays true and authorizes `e2`. `e2` may fail again or produce a positive result. Merely ending a turn, changing ledger route, reloading, or asking the same Oracle again cannot qualify. |
+
+A/B are mutually exclusive and exhaustive because `R^{fail-hold}_v` is empty
+or nonempty. Universal and mixed reattempt support both belong to B; exact
+assignments and prevalence remain AUTHOR/SPEC. Retry-until-success, one versus
+many reattempts, cooldown, interval length, and caps remain later cadence and
+specification work. Incomplete reachable-domain analysis is unresolved, not A.
+
+A true no-candidate invocation lies outside D4 because it has no selected
+complete pair/ledger relationship to key. Admitting its recurrence requires a
+new explicit failed-readiness identity boundary. A positive `{P,Q}`, `{S}`, or
+`{S1,S2}` settlement also lies outside D4: D1/D3 govern its claim and C135
+governs recurrence after a receipt commit. A genuinely different pair is not a
+D4 reattempt; later different-tag reuse remains C3F, and cross-root/Relic/
+combatant effects remain RCS-08.
+
+Claim state and the pair-recurrence latch are separate. The latch cannot claim
+evidence, counterfeit relationship insufficiency, or erase canonical truth.
+Every opportunity, evaluation, interval, and pair key must be stable under
+replay and permutation. No callback, reload, duplicate settlement, no-op,
+Rest, hidden timer, routing/ledger churn, or RNG-ordinal movement creates `e2`.
+Cheap teammate coercion after another affected player's last informed
+reversible commitment fails. D4 grants no compensation, side payoff, evidence
+reuse, exact cadence/cap, retry button, persistence scheme, or implementation.
+
+The teaching rule under A is **one listen per unbroken bond**: on `{}`, keep
+evidence icons lit but mark the pair `Listened—Severed`; show `Already heard`
+while truth remains held, `Bond broken` on genuine insufficiency, and `Ready`
+only after lawful renewal. B additionally requires its exact material retry
+trigger and whatever reattempt authorization or budget later authoring supplies
+to be visible before the last reversible commitment. Simulator/RL traces must
+expose the pair key, interval,
+opportunity/evaluation identity, attempt ordinal, selected causal union, Oracle
+coordinate/realization, output, latch/break/renewal, and claim mask; human
+comprehension and fun remain the acceptance test.
+
+Under A or B, D4 moves to `DIR-SELECTED` and C3E becomes `OWNER-OPEN`. D1-B
+guarantees a real positive claim branch, so C3E does not derive away. C3F
+remains `SCREEN` behind C3E. The register then contains 21 `SCREEN`, 1
+`OWNER-OPEN`, 26 `PRUNED`, 55 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 22`. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 
