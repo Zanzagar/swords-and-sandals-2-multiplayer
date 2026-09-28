@@ -6378,8 +6378,9 @@ assigned to old D.
 The sole active card is `RCS-03D1P`. Let `D_P ⊆ D_mut` contain each completed
 transforming definition with at least one reachable, prospectively authored
 transition proposal for which the same active Relic's authoritative nonempty
-final receipt commit is counterfactually necessary. The complete actual
-settlement identity must satisfy the cause contract; an intended tag,
+final receipt commit owns a direct P-locus cause edge. Deleting only that edge
+must remove the proposal while the actual commit and completed trace remain
+fixed. The complete actual settlement identity must satisfy the cause contract; an intended tag,
 provisional candidate, partial contender, animation, callback, later payoff,
 or merely coincident transition is not a witness. The proposal names a
 materially distinct legal assignment of the same RCS-03A dialect and Relic
@@ -6459,10 +6460,12 @@ Let `D_C ⊆ D_mut` contain definitions with at least one reachable witness in
 which the same active Relic's completed positive settlement is held fixed, an
 actual later C3D1-B/C3D3-A full-union claim writes atomically, a prospectively
 authored proposal names a materially distinct assignment of that same Relic,
-and projecting out only the write projects out the proposal. A claim-capable
-label, intended claim, provisional ledger, earlier receipt, animation, or later
-payoff is not a C witness. The current assignment remains authoritative;
-agency, collision, and committed identity remain RCS-03E/RCS-04A/RCS-04B.
+and deleting only the prospectively versioned C-locus direct cause edge removes
+the proposal while the actual write and completed trace remain fixed. A
+claim-capable label, intended claim, provisional ledger, earlier receipt,
+animation, or later payoff is not a C witness. The current assignment remains
+authoritative; agency, collision, and committed identity remain
+RCS-03E/RCS-04A/RCS-04B.
 
 - D1C-A makes `D_C=∅`. Claims keep all selected proof-spend and reuse
   consequences but never themselves propose transformation. **Recommended.**
@@ -6502,6 +6505,109 @@ idempotent re-claim cannot mint another cause occurrence. Ally evidence retains
 ownership/payment and grants no approval. The semantic proof must preserve
 result commit, any P proposal, claim write, any C proposal, and unchanged
 current assignment in order; RCS-02/SR-10 retain exact surface design.
+
+Zanzagar selected D1C-A. Thus `D_C=∅`: actual claim writes keep the complete
+proof-spend and later-reuse effects already selected, but no transforming
+definition may attach a direct C-locus transformation-proposal edge to that
+write. D1C moves to `DIR-SELECTED`; D1C1 moves to `PRUNED`. Under the
+then-current correction D1Z would have become the sole owner-open row, with 129
+slots and `Phi_SR = 31`. No authoritative-record text was changed.
+
+**Thirty-seventh prerequisite correction: BROKEN thirty-sixth cause taxonomy,
+repaired before D1Z presentation.** The previous correction tested visible
+outcomes but did not walk the selected canonical evaluator from its actual
+invocation through its final cancellation-side write. Three bounded read-only
+challenges independently found omitted player-material cause loci. The final
+audit was required to state a stopping line and rejected substeps that were
+merely truth, input, derivation, or implementation.
+
+The cause test is now explicitly **direct and locus-specific**. For family F, a
+witness contains an actual authoritative occurrence `f` at the named locus and
+a prospectively versioned edge from `f` to one transformation proposal.
+Deleting only that edge, while holding `f` and the entire completed trace fixed,
+must remove that proposal. Generic but-for ancestry is insufficient: invocation
+does not inherit a proposal created only by a later verdict or settlement, and
+a verdict does not inherit one created only by a later commit. This sharpened
+contract governs P and C as well as the newly exposed rows without changing
+their selected directions.
+
+The minimal semantic lifecycle is:
+
+1. I — the one actual canonical product-evaluator invocation for an active
+   Relic at an eligible cut;
+2. N — a terminal true-no-candidate conclusion, or else contender truth as a
+   derived predicate;
+3. the ledger tuple becomes fixed either as one uniquely forced tuple, which
+   creates no cause occurrence, or by T—an actual nontrivial authoritative
+   selection among multiple valid complete tuples;
+4. where permission is realized after either tuple-fixing route, VT or VF is
+   respectively the actual true/allow bit or actual false/not-both bit; they
+   cannot be one prevalence row because their reachable traces and meanings
+   differ;
+5. a derived deterministic disposition, then K for an actual completed/sealed
+   positive provisional output or Z for an actual ledger-bearing `{}` commit;
+6. P after K for final positive receipt-set commit, optionally followed by C
+   for its actual evidence claim; or L after Z for the selected persistent
+   canonical-pair recurrence-latch write; and
+7. X and M outside that evaluator chain for an independent combat/source/
+   relationship event or a dedicated evolution/reconfiguration operation.
+
+The twelve exhaustive parent families are therefore `I, N, T, VT, VF, K, P,
+C, Z, L, X, M`. Each independently classifies its supported definition subset
+as empty, universal, or nonempty proper; only proper support opens one
+state-only/boundary-only/both dialect child. D2-D5 remain the four later graph-
+topology rows. The six additions are I, T, VT, VF, K, and L plus their six
+conditional children, so the old sixteen-row D repair becomes twenty-eight
+rows.
+
+The audit rejects further rows for readiness or eligibility, contender
+satisfaction, tuple/evidence reads, exact/related classification, raw RNG,
+deterministic disposition, frames, callbacks, rendering, replay, or duplicate
+delivery. Those are inputs, derived mappings, or nonsemantic mechanics. No
+selected positive-result recurrence latch exists. This proves a finite stopping
+line rather than treating any implementation step as a new product choice.
+
+After D1C-A, the amended register has 141 slots: 42 `SCREEN`, 1 `OWNER-OPEN`
+at D1I, 33 `PRUNED`, 59 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 43`. Closing the twenty still-open cause parent/child
+slots returns D2 as the sole frontier at 23; D2-D5 still open RCS-03E at 19.
+The amendment adds no Relic, source, result, payoff, slot, or implementation
+mechanic.
+
+The active card is D1I. Let `D_I ⊆ D_mut` contain definitions with a reachable
+actual canonical-invocation occurrence whose direct I-locus edge proposes a
+materially distinct same-dialect assignment based only on invocation identity
+and facts bound before invocation. The edge-deletion test holds both invocation
+and every downstream outcome fixed. One Relic/cut has one invocation; internal
+channels, tags, pairs, callbacks, reloads, and renderings cannot multiply it.
+
+- D1I-A makes `D_I=∅`. **Recommended.** Invocation listens but never itself
+  transforms. D1P-B already guarantees every definition a result-shaped path,
+  so this preserves the readable rule “the relationship makes the Relic
+  listen; what it manifests may shape it.” It avoids automatic proposals on N,
+  duplicate I/P proposals on success, ally-steered invocation pressure, and
+  fresh-cut farming. Its real cost is excluding the fantasy of an artifact
+  changed merely by being consulted.
+- D1I-B makes `D_I=D_mut`. Every transforming definition has at least one
+  invocation-shaped path, though not every invocation transforms. On a
+  separately reachable and authored trace, an invocation may create
+  `AWAKE PROPOSED` before that trace later ends N; a successful trace may
+  separately create a P proposal. B neither requires nor guarantees an N-ending
+  witness, and neither downstream result determines I. It supports a universal
+  “being listened through changes every Relic” thesis at substantial content,
+  collision, and UI cost.
+- D1I-C makes `D_I` nonempty proper and opens D1I1. A disclosed
+  `LISTENER-BOUND` or First Hearing family may awaken on invocation while
+  ordinary Relics wait for outcomes. It is viable only if independently fun,
+  non-dominated, and protected against automatic-trigger farming rather than
+  functioning as a premium subtype or trap.
+
+An I edge may be recorded transactionally but cannot be shown or exercise
+authority until the cut-atomic evaluator completes; otherwise the proposal
+could contaminate tuple selection or settlement. Ally evidence can satisfy an
+upstream fact without granting proposal authority. Exact gates, rates, targets,
+surface, persistence, and balance remain later owners. A/B/C are exhaustive,
+and no option selects agency or collision.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

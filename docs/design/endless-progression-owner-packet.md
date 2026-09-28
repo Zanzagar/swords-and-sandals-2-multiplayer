@@ -24936,10 +24936,12 @@ unchanged.
 > transform different persistent coordinates, so excluding either entire
 > dialect changes legal proposals and state transitions.
 >
-> Old `RCS-03D` is therefore a non-counting parent for sixteen registered rows:
+> At that checkpoint, old `RCS-03D` became a non-counting parent for sixteen
+> registered rows:
 > six cause-prevalence rows, one proper-branch dialect-incidence child for each,
-> and four transition-topology rows. This is the minimum repaired boundary used
-> by the current pass:
+> and four transition-topology rows. This was the first repaired boundary used
+> by the pass; the thirty-seventh correction below supersedes its incomplete
+> cause-family list without undoing any selected direction:
 >
 > | Row | Atomic boundary | Dependency |
 > | --- | --- | --- |
@@ -25006,8 +25008,10 @@ prospectively authored persistent-transition proposal such that:
 2. the complete actual settlement identity, not a provisional candidate,
    intended tag, partial contender, animation, callback, or later payoff,
    satisfies the versioned cause contract;
-3. projecting out that committed positive settlement projects out this
-   proposal, so a merely coincident transition is not a witness;
+3. intervening only on the prospectively versioned P-locus cause edge, while
+   holding the actual committed settlement and every other completed-trace fact
+   fixed, removes this proposal; transitive ancestry or coincidence is not a
+   witness;
 4. the proposal names a materially distinct legal assignment `a'` of the same
    RCS-03A dialect and same Relic instance; and
 5. the current assignment remains authoritative. D1P creates a proposal only;
@@ -25078,7 +25082,7 @@ double-proposal and collision burden without strengthening the standing ideal.
 C remains a guarded reopening for a disclosed Scar/Vow archetype whose fun
 cannot be represented honestly by the earlier receipt cause.
 
-### RCS-03D1C — actual evidence-claim-write transformation cause — active owner choice
+### RCS-03D1C — actual evidence-claim-write transformation cause — A selected
 
 Let `D_C` contain each definition in `D_mut` with at least one reachable
 **claim-write transformation-cause witness**. Such a witness contains the same
@@ -25094,9 +25098,10 @@ that:
    complete deduplicated selected-ledger union `U(z)` after settlement; a
    merely claim-capable contract, intended claim, or provisional ledger is not
    a witness;
-3. the cause contract names that actual later claim-write locus, and projecting
-   out only the write while holding the committed result and all earlier facts
-   fixed projects out this proposal;
+3. the cause contract names that actual later claim-write locus, and
+   intervening only on its prospectively versioned C-locus cause edge while
+   holding the write, committed result, and every other completed-trace fact
+   fixed removes this proposal;
 4. the proposal names a materially distinct legal assignment `a'` of the same
    RCS-03A dialect and same Relic instance; and
 5. `a` remains authoritative. D1C creates a proposal only; RCS-03E, RCS-04A,
@@ -25134,6 +25139,169 @@ contract remain RCS-02/SR-10. Exact claim-capable definitions, trigger and
 target catalogs, prevalence within a supported dialect, frequency, power,
 balance, persistence schema, and release content remain later work. The
 authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, claims spend
+proof but never cause transformation.** Thus `D_C=emptyset`. An actual atomic
+full-union claim retains all selected proof-spend and later-reuse consequences,
+but its C-locus cause edge is absent for every transforming definition. A
+positive receipt may still create its distinct D1P-B proposal; the later claim
+creates no second proposal.
+
+D1C moves to `DIR-SELECTED`, and `RCS-03D1C1` moves to `PRUNED`. Under the
+then-current sixteen-row repair, D1Z would have become the sole `OWNER-OPEN`
+row; the register would have remained 129 rows with 30 `SCREEN`, 1
+`OWNER-OPEN`, 33 `PRUNED`, 59 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 31`. The prerequisite audit below supersedes that
+frontier before another owner question. The authoritative decision record
+remains unchanged.
+
+> **Thirty-seventh prerequisite correction, 2026-09-28 — my thirty-sixth
+> correction was still incomplete.** The earlier repair separated six obvious
+> cause families, but it did not walk the already-selected evaluator from its
+> first actual invocation to its last cancellation-side write. Three bounded,
+> read-only challenges found six additional authoritative semantic occurrences
+> that can independently create a proposal without changing any selected
+> result, claim, or recurrence rule. Omitting them would have let authoring
+> decide material transformation causes while the register falsely claimed the
+> cause surface was closed.
+>
+> Cause here means a **prospectively versioned direct edge at one named
+> semantic locus**, not generic but-for ancestry. A witness contains the actual
+> authoritative occurrence at that locus and a proposal edge authored there.
+> Its edge-deletion intervention holds that occurrence and the entire completed
+> trace fixed, removes only the named direct edge, and removes the proposal.
+> An earlier occurrence cannot inherit proposals created only by a downstream
+> verdict, settlement, claim, or latch merely because the downstream trace
+> would not exist without it. This correction also applies that sharper rule to
+> the already-selected P and C families; it changes neither answer.
+>
+> The finite lifecycle is:
+>
+> ```text
+> I — actual canonical evaluator invocation
+> ├─ N — terminal true-no-candidate conclusion
+> └─ contender truth [derived predicate, not a cause row]
+>    └─ ledger tuple becomes fixed by either:
+>       ├─ one uniquely forced tuple [derived; no T occurrence]
+>       └─ T — nontrivial selection among multiple valid complete tuples
+>          [the two routes rejoin]
+>          └─ no pair, or exactly one permission realization:
+>             ├─ VT — true/allow verdict
+>             └─ VF — false/not-both verdict
+>                [the verdict routes rejoin]
+>                └─ deterministic disposition [derived mapping]
+>                   ├─ K — positive provisional output becomes complete/sealed
+>                   │  └─ P — positive receipt-set commit
+>                   │     └─ C — optional later claim write
+>                   └─ Z — ledger-bearing `{}` settlement commit
+>                      └─ L — canonical pair-recurrence latch write
+>
+> X — independent combat/source/relationship event
+> M — dedicated evolution/reconfiguration operation
+> ```
+>
+> `I`, `T`, `VT`, `VF`, `K`, and `L` are the six missed occurrences. `N` is
+> narrowed to the terminal true-no-candidate conclusion rather than the whole
+> invocation. A unique forced ledger tuple is input truth, not a T occurrence;
+> T exists only when the authority actually chooses among multiple valid
+> complete tuples. `VT` and `VF` must remain separate because true/allow and
+> false/not-both are different authoritative bits with different reachable
+> consequences. `K` is the selected C134-A provisional completion/sealing
+> occurrence, which precedes and is not the final P commit. `L` is the selected
+> D4-A persistent pair-recurrence latch write after `{}`, not the empty
+> settlement itself.
+>
+> The completed cause partition therefore has twelve parent families, each
+> with one conditional proper-support dialect child, followed by the four
+> transition-topology rows:
+>
+> | Row | Atomic boundary | Dependency |
+> | --- | --- | --- |
+> | `RCS-03D1I` | Actual canonical-evaluator-invocation cause prevalence | first open cause row |
+> | `RCS-03D1I1` | State/boundary incidence for proper invocation support | only D1I-C; otherwise pruned |
+> | `RCS-03D1N` | Terminal true-no-candidate-conclusion cause prevalence | follows I and applicable I1 |
+> | `RCS-03D1N1` | State/boundary incidence for proper no-candidate support | only D1N-C; otherwise pruned |
+> | `RCS-03D1T` | Actual nontrivial authoritative ledger-tuple-selection cause prevalence | follows N and applicable N1 |
+> | `RCS-03D1T1` | State/boundary incidence for proper tuple-selection support | only D1T-C; otherwise pruned |
+> | `RCS-03D1VT` | Actual true/allow permission-verdict cause prevalence | follows T and applicable T1 |
+> | `RCS-03D1VT1` | State/boundary incidence for proper true-verdict support | only D1VT-C; otherwise pruned |
+> | `RCS-03D1VF` | Actual false/not-both permission-verdict cause prevalence | follows VT and applicable VT1 |
+> | `RCS-03D1VF1` | State/boundary incidence for proper false-verdict support | only D1VF-C; otherwise pruned |
+> | `RCS-03D1K` | Positive provisional-output completion/sealing cause prevalence | follows VF and applicable VF1 |
+> | `RCS-03D1K1` | State/boundary incidence for proper provisional-completion support | only D1K-C; otherwise pruned |
+> | `RCS-03D1P` | Positive receipt-set-commit cause prevalence | `DIR-SELECTED`; D1P-B |
+> | `RCS-03D1P1` | State/boundary incidence for proper positive-commit support | `PRUNED`; D1P-B |
+> | `RCS-03D1C` | Actual evidence-claim-write cause prevalence | `DIR-SELECTED`; D1C-A |
+> | `RCS-03D1C1` | State/boundary incidence for proper claim-write support | `PRUNED`; D1C-A |
+> | `RCS-03D1Z` | Ledger-bearing `{}` settlement-commit cause prevalence | follows K and applicable K1 |
+> | `RCS-03D1Z1` | State/boundary incidence for proper cancellation support | only D1Z-C; otherwise pruned |
+> | `RCS-03D1L` | Canonical pair-recurrence-latch-write cause prevalence | follows Z and applicable Z1 |
+> | `RCS-03D1L1` | State/boundary incidence for proper latch-write support | only D1L-C; otherwise pruned |
+> | `RCS-03D1X` | Independent combat/source/relationship-event cause prevalence | follows L and applicable L1 |
+> | `RCS-03D1X1` | State/boundary incidence for proper independent-event support | only D1X-C; otherwise pruned |
+> | `RCS-03D1M` | Dedicated evolution/reconfiguration-operation cause prevalence | follows X and applicable X1 |
+> | `RCS-03D1M1` | State/boundary incidence for proper operation support | only D1M-C; otherwise pruned |
+> | `RCS-03D2` | Direct-versus-staged nonclear assignment adjacency | follows all twelve parents and applicable children |
+> | `RCS-03D3` | Direct reverse-edge support among nonclear adjacent assignments | follows D2 |
+> | `RCS-03D4` | Explicit clear-to-unassigned support | follows D3 |
+> | `RCS-03D5` | Eventual nonclear return/reversibility topology | follows D4 and all cause rows |
+>
+> No additional lifecycle row passes the same test. Readiness, eligibility,
+> contender satisfaction, tuple/evidence reads, and exact/related identity are
+> inputs or derived predicates. Raw RNG is represented by the semantic verdict
+> it realizes. Deterministic disposition is a mapping into K/P or Z rather than
+> another occurrence. Frames, callbacks, rendering, replay, and duplicate
+> delivery are nonsemantic. There is no positive-result recurrence latch under
+> the selected rules. The audit therefore reaches an explicit stopping line
+> rather than opening an unbounded decomposition.
+>
+> Replacing the incomplete sixteen-row D subtree with twenty-eight rows adds
+> twelve slots. After D1C-A, the repaired register contains **141 rows: 42
+> `SCREEN`, 1 `OWNER-OPEN` at D1I, 33 `PRUNED`, 59 `DIR-SELECTED`, 4
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 43`**. Closing the twenty
+> still-open cause parent/child slots returns D2 as the sole frontier at
+> `Phi_SR = 23`; D2-D5 still close one at a time before RCS-03E opens at 19.
+> The twelve added slots are decision accounting, not twelve added mechanics.
+
+### RCS-03D1I — actual canonical evaluator invocation as transformation cause — active owner choice
+
+Let `D_I` contain each definition in `D_mut` with at least one reachable
+**invocation transformation-cause witness**. Under selected C1-A, C2A-A, and
+C4, an eligible semantic cut invokes exactly one canonical product evaluator
+for the active Relic, cut-atomically and without prompt, veto, banking, or a
+second same-cut opportunity. A witness requires:
+
+1. one actual invocation identity for that Relic and cut—not mere readiness,
+   eligibility, a future call, or an internal channel;
+2. a prospectively authored direct I-locus proposal edge based only on that
+   invocation identity and facts already bound before invocation, never on a
+   later N/T/verdict/K/P/Z/L outcome;
+3. deletion of only that edge removes the proposal while the actual invocation
+   and entire completed downstream trace remain fixed;
+4. a materially distinct legal assignment of the same RCS-03A dialect and
+   Relic instance; and
+5. the old assignment remains authoritative pending RCS-03E/RCS-04A/RCS-04B.
+
+| Choice | Invocation-cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — invocation listens but never transforms** | `D_I=emptyset`. The act of running the canonical evaluator never itself proposes persistent change. | **Recommended.** A teaches: **the relationship makes the Relic listen; what it actually manifests may shape it**. D1P-B already gives every transforming definition a positive-result biography path. A prevents an automatic proposal on no-candidate traces, a second proposal on successful traces, ally-steered invocation pressure, and fresh-cut invocation farming. It is the cleanest protective reading of the standing ideal. Cost: the catalog cannot truthfully express an artifact changed merely by having been listened through; that fantasy must use an actual result, event, or operation. | Guard plus ally Heat makes Ashen eligible, so its one evaluator actually invokes. The invocation itself proposes nothing. If it later commits P, D1P-B may produce `DEFIANCE PROPOSED`; if it ends N, no I proposal exists. |
+| **B — every transforming Relic has an invocation-shaped path** | `D_I=D_mut`. Every state- and boundary-supporting transforming definition has at least one reachable actual invocation that directly proposes change, even though not every invocation must do so. | B makes “being consulted changes every Relic” a universal thesis. It guarantees an invocation-shaped path for every transforming definition, but neither requires nor guarantees that a qualifying path ends N—or even that N is reachable for that definition. If separately reachable and authored, an I proposal may coexist with an N-ending trace. B puts a cause path on the automatic operation itself and forces invocation-capable content across the catalog. Successful traces can also produce a distinct P proposal, increasing collision and UI load before agency is even chosen. | On one separately authored trace, Ashen's evaluator invokes, creates `AWAKE PROPOSED` from only pre-invocation facts, and later ends N. On another, it may invoke, create the same I proposal, then commit P and independently create `DEFIANCE PROPOSED`. B requires only at least one qualifying I path; neither downstream result determines I. |
+| **C — a disclosed listener-bound subset changes on invocation** | `D_I` is a nonempty proper subset of `D_mut`; D1I1 then chooses state-only, boundary-only, or nonempty support in both dialects. | C can support a named `LISTENER-BOUND` or First Hearing family whose important fantasy is awakening when the bond is consulted, while ordinary Relics wait for a semantic outcome. It is viable only if disclosed, independently fun, non-dominated, and protected from cheap cut/rearm farming; otherwise it becomes either a premium subtype or an automatic-trigger trap. | Dreamglass may propose `AWAKE OATH` at its actual invocation even if the evaluator later returns N. Ashen invokes normally but cannot cite invocation as cause and still relies on its D1P-B result path. |
+
+A/B/C are exhaustive because `D_I` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. “Every definition has a path” does not
+mean every invocation transforms. Conversely, a later outcome-specific edge
+belongs to its own family and cannot be relabeled I. One active Relic at one
+cut has one invocation occurrence: tags, contender pairs, channels, callbacks,
+reloads, and renderings cannot multiply it.
+
+The system may record the I-locus edge transactionally, but it must withhold
+proposal presentation and authority until the cut-atomic evaluation completes;
+an invocation proposal cannot influence tuple selection, permission, or
+settlement. Ally evidence can make the pre-invocation facts true without
+granting the ally authority over the proposal. Exact anti-farming gates, rates,
+targets, copy, UI, and balance remain later work. The authoritative decision
+record remains unchanged.
 
 ## Session protocol and evidence
 

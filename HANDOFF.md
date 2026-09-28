@@ -1,6 +1,80 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 success shapes every Relic; claim-write cause is next
+## 2026-09-28 claim writes spend proof; lifecycle cause audit repaired; invocation cause is next
+
+Zanzagar selected `RCS-03D1C-A`. Actual atomic full-union claim writes retain
+all selected proof-spend and reuse consequences but never directly cause a
+persistent-transformation proposal. A prior positive receipt may still produce
+its distinct D1P-B proposal. D1C is `DIR-SELECTED`, and D1C1 is `PRUNED`. The
+authoritative decision record remains unchanged.
+
+Before presenting D1Z, three bounded read-only challenges found that the
+thirty-sixth correction's six-family cause list was incomplete. It had not
+walked the selected canonical evaluator across every authoritative semantic
+occurrence. The thirty-seventh correction adds six missed parents and their
+conditional dialect children:
+
+- I — actual canonical evaluator invocation;
+- T — actual nontrivial selection among multiple valid complete ledger tuples;
+- VT — actual true/allow permission verdict;
+- VF — actual false/not-both permission verdict;
+- K — actual positive provisional-output completion/sealing; and
+- L — actual post-`{}` canonical pair-recurrence latch write.
+
+Together with the existing terminal no-candidate N, positive commit P, claim
+write C, empty commit Z, independent event X, and dedicated operation M, the
+finite cause universe is `I,N,T,VT,VF,K,P,C,Z,L,X,M`. N no longer aliases the
+whole invocation. Readiness, contender truth, reads, raw RNG, deterministic
+disposition, frames, callbacks, and rendering fail the occurrence test. There
+is no selected positive-result recurrence latch. This is the explicit stopping
+line.
+
+Every cause witness now uses one prospectively versioned **direct edge at its
+named locus**. Deleting only that edge while holding the actual occurrence and
+completed trace fixed must remove the proposal. Generic but-for ancestry is not
+a witness, so invocation cannot inherit a proposal authored only at a later
+verdict or settlement. The rule sharpens P and C without changing their
+selected directions.
+
+The incomplete sixteen-row D subtree is now twenty-eight rows: twelve cause
+parents, twelve C-only proper-support dialect children, and D2-D5. The 141-row
+register contains 42 `SCREEN`, 1 `OWNER-OPEN` at D1I, 33 `PRUNED`, 59
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 43`.
+Closing the twenty still-open cause slots returns D2 as the sole frontier at
+23; D2-D5 still lead to RCS-03E at 19. This is additional decision rigor, not
+additional gameplay systems.
+
+`RCS-03D1I` asks whether the one actual canonical evaluator invocation may
+directly cause a transformation proposal independently of every downstream
+outcome:
+
+- **A — invocation listens but never transforms. Recommended.** The relationship
+  makes the Relic listen; what it actually manifests may shape it through the
+  already-selected D1P-B path. This avoids automatic proposals on true
+  no-candidate traces, duplicate invocation/result proposals on success,
+  ally-steered invocation pressure, and cheap fresh-cut farming. Cost: no
+  artifact can truthfully change merely because it was listened through.
+- **B — every transforming definition has an invocation-shaped path.** Not
+  every invocation must transform, but every definition needs at least one
+  actual invocation that directly proposes change. `AWAKE PROPOSED` can arise
+  on a separately reachable, authored trace that later ends N; a success can
+  separately create a P proposal. B neither requires nor guarantees an N-ending
+  witness. This requires a universal “being consulted changes every Relic”
+  thesis and carries substantial collision/UI burden.
+- **C — a disclosed proper subset is listener-bound.** A named First Hearing or
+  `LISTENER-BOUND` family may awaken at invocation; D1I1 then chooses state,
+  boundary, or both dialects. This must be independently fun, visible, non-
+  dominated, and protected from automatic-trigger farming.
+
+Example: Guard plus ally Heat makes Ashen eligible, and its one evaluator
+actually invokes. Under A, invocation makes no proposal. If the evaluation
+later commits P, D1P-B may create `DEFIANCE PROPOSED`; if it reaches N, neither
+invocation nor no-candidate is silently treated as the same cause. Under B/C,
+an I edge may instead create `AWAKE PROPOSED` using only pre-invocation facts,
+but it cannot inspect or influence the downstream outcome; neither N nor P
+determines whether the I edge exists. Ask only for D1I A, B, or C.
+
+## 2026-09-28 success shapes every Relic; claim-write cause selected — superseded frontier
 
 Zanzagar selected `RCS-03D1P-B`. Every transforming state-supporting and
 boundary-supporting Relic definition must have at least one reachable positive
@@ -59,7 +133,8 @@ Only an actual atomic full-union write qualifies—never a claim-capable label,
 intended claim, or one trigger per claimed child. Replay, reload, callbacks,
 rendering, duplicate delivery, and idempotent re-claim cannot mint another
 cause occurrence. Ally proof retains ownership/payment and grants no approval.
-Ask only for D1C A, B, or C.
+This section records the prior D1C frontier. D1C-A is now selected; do not ask
+it again. The current single choice is D1I above.
 
 ## 2026-09-28 claimed proof is Relic-wide spent; positive-settlement cause is next
 
@@ -11223,7 +11298,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 04:10 UTC — evidence-claim-write transformation cause is next](docs/handoffs/2026-09-28-0410--relic-claim-write-cause-next.md)**
+[2026-09-28 04:39 UTC — canonical evaluator invocation cause is next](docs/handoffs/2026-09-28-0439--relic-invocation-cause-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
