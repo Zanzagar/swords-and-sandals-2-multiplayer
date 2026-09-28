@@ -373,10 +373,18 @@ empty results never claim evidence, then selected RCS-03C3D3-A so every claim
 takes its complete selected-ledger union, then selected RCS-03C3D4-A with B as
 a guarded reopening fallback: one listen per unbroken bond. Zanzagar then
 selected RCS-03C3E-A, so a claimed occurrence cannot return through any exact
-tag to which it was causally attributed before that tag's rearm. RCS-03C3F is
-now the current owner-facing choice under SR-03: whether that claimed
-occurrence may later acquire a new causal incidence inside the same active
-Relic.
+tag to which it was causally attributed before that tag's rearm. Zanzagar then
+selected RCS-03C3F-A, spending claimed proof across every later result
+incidence of the same active Relic and pruning its five B-only children. The
+thirty-sixth and thirty-seventh prerequisite corrections decomposed Relic
+transformation causes into registered direct semantic loci and graph-topology
+rows. Zanzagar selected D1P-B, giving every transforming definition a positive-
+result cause path; D1C-A, keeping claim writes noncausal; and D1I-A, making
+invocation listen without transforming. The thirty-eighth correction then
+proved the registered D1N true-zero-contender domain empty under the selected
+readiness/evidence/tuple rules and pruned D1N1. **RCS-03D1T is now the sole
+owner-facing choice under SR-03:** whether the actual joint selection among
+multiple valid complete ledger tuples may directly propose transformation.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -18407,7 +18415,7 @@ Several boundaries are already fixed and are not choices on this card:
 
 | Choice | Evaluation-lifetime rule | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
 | --- | --- | --- | --- |
-| **A — cut-atomic evaluations only** | `K^{pending}_v` is empty. No player-semantic Relic evaluation persists across pre-completion semantic cuts. Whenever an evaluation is invoked at a cut that later choices make eligible, one atomic Relic-side tuple is combined with the combat evidence selected later by `RCS-03C3`; the evaluation reaches provisional completion or yields no candidate at that cut. Earlier actions and `H` facts may still be essential inputs, but they do not create a dormant attempt. | **Recommended.** A keeps the drama in assembling the relationship rather than adding a second queue of half-open rituals. At the decisive cut, Soul, Relic, Charm, and qualifying combat evidence can participate in one **direct** result relation; continuity supplied by earlier `H` facts remains **partial** across time; excluding a separate pending object is **neutral/protective**; catalog-wide atomicity is **aggregate**. The benefits are crisp causality, readable counterplay through the facts themselves, no snapshot hoard, no cancellation grief, and no expiry/concurrency subgame competing with other systems. The cost is real: Relics may feel more like uncanny reactive instruments than visible rituals being woven over several actions, and the eventual eligible cut and presentation must prevent results from feeling like opaque procs. | Aster guarded earlier, so `Guard` exists in `H`; Borel now creates `Heat` in `S`. Whenever the later-selected cadence and authority permit invocation, Ashen's current `Defiance` assignment, Soul resonance, Charms, and later-selected evidence sample either produce receipt P or do not at that same cut. There was no older `Mercy` evaluation waiting in the background merely because Guard happened earlier. |
+| **A — cut-atomic evaluations only** | `K^{pending}_v` is empty. No player-semantic Relic evaluation persists across pre-completion semantic cuts. Whenever an evaluation is invoked at a cut that later choices make eligible, one atomic Relic-side tuple is combined with the combat evidence selected later by `RCS-03C3`; the evaluation reaches its provisional output at that cut. The old alternative “or yields no candidate” was later disproved by the selected readiness/evidence/tuple contract and is corrected in the thirty-eighth prerequisite note below. Earlier actions and `H` facts may still be essential inputs, but they do not create a dormant attempt. | **Recommended.** A keeps the drama in assembling the relationship rather than adding a second queue of half-open rituals. At the decisive cut, Soul, Relic, Charm, and qualifying combat evidence can participate in one **direct** result relation; continuity supplied by earlier `H` facts remains **partial** across time; excluding a separate pending object is **neutral/protective**; catalog-wide atomicity is **aggregate**. The benefits are crisp causality, readable counterplay through the facts themselves, no snapshot hoard, no cancellation grief, and no expiry/concurrency subgame competing with other systems. The cost is real: Relics may feel more like uncanny reactive instruments than visible rituals being woven over several actions, and the eventual eligible cut and presentation must prevent results from feeling like opaque procs. | Aster guarded earlier, so `Guard` exists in `H`; Borel now creates `Heat` in `S`. Whenever the later-selected cadence and authority permit invocation, Ashen's current `Defiance` assignment, Soul resonance, Charms, and later-selected evidence sample produce either a positive provisional output or, after pair treatment, ledger-bearing `{}` at that same cut. There was no older `Mercy` evaluation waiting in the background merely because Guard happened earlier. |
 | **B — every supported tag is pending-capable** | `K^{pending}_v = K^{candidate}_v`. Every supported relationship tag has at least one legal occurrence in which a real evaluation begins before completion, persists across a later meaningful cut or decision, and then completes or terminates. This is a universal capability witness, not a demand that every occurrence be delayed. | **Most ritualistic countercase.** B can make Relics feel like relationships players visibly begin, sustain, protect, disrupt, or complete together. The same evaluation persists while genuinely distinct contributions arrive over time, giving a **partial** realization at the one-attempt/across-changing-contributions boundary; universal tag support is **aggregate**. It offers strong anticipation, cooperation, bluffing, and enemy disruption. It also creates a second combat state machine: pending-attempt UI, opening and expiry rules, stale-attunement questions, pre-open hoarding, cancellation grief, orphaned attempts after death/disconnect, reload persistence, and burst queues. Those are not implementation trivia; they materially shape play and require the later conditional cards. | Ashen visibly opens a `Covenant` attempt while attuned to `Mercy`. Another participant then receives and takes a meaningful action while that same attempt remains open; a later contribution brings it to `q`. This card does not decide whether the attempt is bound to old Mercy, follows Ashen into Defiance, or dies on that change. |
 | **C — atomic and pending-capable tags coexist** | `K^{pending}_v` is a nonempty proper subset of `K^{candidate}_v`. At least one supported tag has a cross-cut pending witness, and at least one other tag is proved cut-atomic in every legal occurrence. | C supports deliberate Vows beside instantaneous Echoes and therefore the richest cadence vocabulary. Each pending-positive tag has B's **partial** temporal fit; each atomic-only tag has A's **direct-at-cut** inherited relation; their coexistence is only **aggregate**. This can make different Relics feel radically distinct, but it teaches two temporal languages on top of the already-selected state/boundary transformation dialects. Pending tags are also likely to read as premium or more sophisticated unless acquisition, power, UI, and non-dominance rules compensate. | One authored Ashen tag may open a visible Vow that survives another meaningful action before completion, while a Dreamglass tag can only listen and resolve at the exact cut where its complete relationship exists. These names are illustrative; C selects the coexistence rule, not those assignments. |
 
@@ -18478,8 +18486,10 @@ No player-semantic Soul Relic evaluation begins before its decisive semantic
 cut or remains authoritative across a later meaningful cut before provisional
 completion. Whenever later cadence and authority choices permit an evaluation
 to be invoked, one co-temporal Relic-side tuple is combined with the applicable
-contingent combat evidence; the evaluation reaches provisional completion or
-yields no candidate at that cut. Earlier
+contingent combat evidence; the evaluation reaches its provisional output at
+that cut. The earlier “or yields no candidate” clause was later disproved by
+the selected readiness/evidence/tuple contract and is corrected in the thirty-
+eighth prerequisite note below. Earlier
 actions and bounded `H` facts may remain essential, but neither they nor an
 animation, callback, delayed payoff, cache, or stored identifier create a
 dormant attempt. C133-A/C134-A still seal and promptly commit a successful
@@ -18518,11 +18528,15 @@ and authorizes no implementation.
 ### RCS-03C1 — cut-atomic evaluation-eligibility cadence — A selected
 
 RCS-03B1-A says an evaluation exists only at the cut where it atomically
-produces a provisional candidate or no candidate. It does not say **which
-canonical semantic cut first permits that evaluation**. RCS-03C1 resolves only
-that cadence. RCS-03C2A will separately decide system-versus-participant
-invocation control, RCS-03C2B will conditionally decide participant-
-authorization timing, and RCS-03C3 will separately screen evidence acquisition.
+produces its provisional output. Later-selected readiness, evidence, and tuple
+rules now prove that every actual invocation has at least one valid selected
+contender-ledger tuple; the earlier worksheet phrase “or no candidate” was
+wrong and is superseded by the thirty-eighth prerequisite correction below. It
+does not say **which canonical semantic cut first permits that evaluation**.
+RCS-03C1 resolves only that cadence. RCS-03C2A will separately decide system-
+versus-participant invocation control, RCS-03C2B will conditionally decide
+participant-authorization timing, and RCS-03C3 will separately screen evidence
+acquisition.
 
 For one fixed tag and legal history, a **non-cadence-readiness episode** is a
 maximal uninterrupted interval during which all inputs other than evaluation-
@@ -18762,9 +18776,13 @@ but they are not invocation authority unless their authored semantics carry
 that still-operative role—and no such role is legal under this selection.
 
 This selects invocation, not successful output. The coherent evidence
-projection screened in RCS-03C3 may still produce a provisional candidate or
-no candidate, C134-A still seals a completed candidate, and C135-A still
-prevents repeated same-tag commitment while sufficiency remains continuous.
+projection screened in RCS-03C3 may produce a positive provisional candidate
+or a ledger-bearing `{}` cancellation after pair treatment. Later-selected
+readiness, evidence, and tuple rules prove that it cannot produce a true
+zero-contender/no-tuple conclusion; the earlier “no candidate” wording here was
+wrong and is superseded by the thirty-eighth prerequisite correction below.
+C134-A still seals a completed positive candidate, and C135-A still prevents
+repeated same-tag commitment while sufficiency remains continuous.
 At the manifestation cut, distinct Soul, Relic, Charm, and relationship facts
 participate **directly**; deliberate agency across their formation history is
 **partial**; excluding a redundant invoke command is **neutral/protective**;
@@ -24392,8 +24410,10 @@ decision record remains unchanged.
 
 Two read-only named-claim audits then tested D2. The topology audit re-derived
 one empty/nonempty support card, its nonempty ledger-bearing cancellation
-domain, true-no-candidate exclusion, downstream dependencies, and register
-arithmetic. The gameplay audit recommends A: positive manifestations may cash
+domain, exclusion of the then-assumed true-no-candidate branch, downstream
+dependencies, and register arithmetic. The thirty-eighth prerequisite audit
+later proved that assumed branch unreachable. The gameplay audit recommends A:
+positive manifestations may cash
 proof under D1-B, while a cancellation preserves it. D4—not evidence claim—
 owns whether held relationship truth may receive another distinct evaluation.
 
@@ -24951,8 +24971,8 @@ unchanged.
 > | `RCS-03D1C1` | State/boundary dialect incidence for proper claim-write support | only D1C-C; otherwise pruned |
 > | `RCS-03D1Z` | Ledger-bearing `{}` cancellation-settlement transformation-cause prevalence | follows D1C and applicable C1 |
 > | `RCS-03D1Z1` | State/boundary dialect incidence for proper cancellation support | only D1Z-C; otherwise pruned |
-> | `RCS-03D1N` | True-no-candidate invocation transformation-cause prevalence | follows D1Z and applicable Z1 |
-> | `RCS-03D1N1` | State/boundary dialect incidence for proper no-candidate support | only D1N-C; otherwise pruned |
+> | `RCS-03D1N` | Then-hypothesized true-no-candidate invocation transformation-cause prevalence; later derived unreachable | followed D1Z in this superseded list |
+> | `RCS-03D1N1` | State/boundary dialect incidence for proper no-candidate support | later pruned because D1N's domain is empty |
 > | `RCS-03D1X` | Independent non-evaluation combat-semantic event transformation-cause prevalence | follows D1N and applicable N1 |
 > | `RCS-03D1X1` | State/boundary dialect incidence for proper independent-event support | only D1X-C; otherwise pruned |
 > | `RCS-03D1M` | Dedicated evolution/reconfiguration-operation transformation-cause prevalence | follows D1X and applicable X1 |
@@ -25179,8 +25199,7 @@ remains unchanged.
 >
 > ```text
 > I — actual canonical evaluator invocation
-> ├─ N — terminal true-no-candidate conclusion
-> └─ contender truth [derived predicate, not a cause row]
+> └─ nonempty contender truth [derived predicate, not a cause row]
 >    └─ ledger tuple becomes fixed by either:
 >       ├─ one uniquely forced tuple [derived; no T occurrence]
 >       └─ T — nontrivial selection among multiple valid complete tuples
@@ -25196,13 +25215,18 @@ remains unchanged.
 >                   └─ Z — ledger-bearing `{}` settlement commit
 >                      └─ L — canonical pair-recurrence latch write
 >
+> NC — hypothetical true zero-contender conclusion [derived unreachable;
+>      retained only as registered row `RCS-03D1N`]
+>
 > X — independent combat/source/relationship event
 > M — dedicated evolution/reconfiguration operation
 > ```
 >
-> `I`, `T`, `VT`, `VF`, `K`, and `L` are the six missed occurrences. `N` is
-> narrowed to the terminal true-no-candidate conclusion rather than the whole
-> invocation. A unique forced ledger tuple is input truth, not a T occurrence;
+> `I`, `T`, `VT`, `VF`, `K`, and `L` are the six missed registered loci. The
+> later prerequisite audit proved that the proposed terminal no-candidate locus
+> has no reachable occurrence under the selected readiness contract; `NC` is
+> used here to avoid collision with the earlier successful no-response class
+> named `N`. A unique forced ledger tuple is input truth, not a T occurrence;
 > T exists only when the authority actually chooses among multiple valid
 > complete tuples. `VT` and `VF` must remain separate because true/allow and
 > false/not-both are different authoritative bits with different reachable
@@ -25211,17 +25235,18 @@ remains unchanged.
 > D4-A persistent pair-recurrence latch write after `{}`, not the empty
 > settlement itself.
 >
-> The completed cause partition therefore has twelve parent families, each
-> with one conditional proper-support dialect child, followed by the four
-> transition-topology rows:
+> The register therefore retains twelve parent rows, each with one conditional
+> proper-support dialect child, followed by the four transition-topology rows.
+> Eleven parents describe reachable cause families; D1N is a derived-empty
+> audit placeholder rather than a twelfth reachable family:
 >
 > | Row | Atomic boundary | Dependency |
 > | --- | --- | --- |
-> | `RCS-03D1I` | Actual canonical-evaluator-invocation cause prevalence | first open cause row |
-> | `RCS-03D1I1` | State/boundary incidence for proper invocation support | only D1I-C; otherwise pruned |
-> | `RCS-03D1N` | Terminal true-no-candidate-conclusion cause prevalence | follows I and applicable I1 |
-> | `RCS-03D1N1` | State/boundary incidence for proper no-candidate support | only D1N-C; otherwise pruned |
-> | `RCS-03D1T` | Actual nontrivial authoritative ledger-tuple-selection cause prevalence | follows N and applicable N1 |
+> | `RCS-03D1I` | Actual canonical-evaluator-invocation cause prevalence | `DIR-SELECTED`; D1I-A |
+> | `RCS-03D1I1` | State/boundary incidence for proper invocation support | `PRUNED`; D1I-A |
+> | `RCS-03D1N` | Hypothetical terminal true-zero-contender conclusion cause prevalence | `DERIVED`; reachable domain empty under selected readiness/evidence/tuple rules |
+> | `RCS-03D1N1` | State/boundary incidence for proper no-candidate support | `PRUNED`; D1N has empty domain |
+> | `RCS-03D1T` | Actual nontrivial authoritative ledger-tuple-selection cause prevalence | follows I directly because N is derived empty |
 > | `RCS-03D1T1` | State/boundary incidence for proper tuple-selection support | only D1T-C; otherwise pruned |
 > | `RCS-03D1VT` | Actual true/allow permission-verdict cause prevalence | follows T and applicable T1 |
 > | `RCS-03D1VT1` | State/boundary incidence for proper true-verdict support | only D1VT-C; otherwise pruned |
@@ -25256,14 +25281,14 @@ remains unchanged.
 > rather than opening an unbounded decomposition.
 >
 > Replacing the incomplete sixteen-row D subtree with twenty-eight rows adds
-> twelve slots. After D1C-A, the repaired register contains **141 rows: 42
+> twelve slots. After D1C-A, the repaired register at that checkpoint contained **141 rows: 42
 > `SCREEN`, 1 `OWNER-OPEN` at D1I, 33 `PRUNED`, 59 `DIR-SELECTED`, 4
 > `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 43`**. Closing the twenty
-> still-open cause parent/child slots returns D2 as the sole frontier at
+> then-open cause parent/child slots would return D2 as the sole frontier at
 > `Phi_SR = 23`; D2-D5 still close one at a time before RCS-03E opens at 19.
 > The twelve added slots are decision accounting, not twelve added mechanics.
 
-### RCS-03D1I — actual canonical evaluator invocation as transformation cause — active owner choice
+### RCS-03D1I — actual canonical evaluator invocation as transformation cause — A selected
 
 Let `D_I` contain each definition in `D_mut` with at least one reachable
 **invocation transformation-cause witness**. Under selected C1-A, C2A-A, and
@@ -25284,9 +25309,9 @@ second same-cut opportunity. A witness requires:
 
 | Choice | Invocation-cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
 | --- | --- | --- | --- |
-| **A — invocation listens but never transforms** | `D_I=emptyset`. The act of running the canonical evaluator never itself proposes persistent change. | **Recommended.** A teaches: **the relationship makes the Relic listen; what it actually manifests may shape it**. D1P-B already gives every transforming definition a positive-result biography path. A prevents an automatic proposal on no-candidate traces, a second proposal on successful traces, ally-steered invocation pressure, and fresh-cut invocation farming. It is the cleanest protective reading of the standing ideal. Cost: the catalog cannot truthfully express an artifact changed merely by having been listened through; that fantasy must use an actual result, event, or operation. | Guard plus ally Heat makes Ashen eligible, so its one evaluator actually invokes. The invocation itself proposes nothing. If it later commits P, D1P-B may produce `DEFIANCE PROPOSED`; if it ends N, no I proposal exists. |
-| **B — every transforming Relic has an invocation-shaped path** | `D_I=D_mut`. Every state- and boundary-supporting transforming definition has at least one reachable actual invocation that directly proposes change, even though not every invocation must do so. | B makes “being consulted changes every Relic” a universal thesis. It guarantees an invocation-shaped path for every transforming definition, but neither requires nor guarantees that a qualifying path ends N—or even that N is reachable for that definition. If separately reachable and authored, an I proposal may coexist with an N-ending trace. B puts a cause path on the automatic operation itself and forces invocation-capable content across the catalog. Successful traces can also produce a distinct P proposal, increasing collision and UI load before agency is even chosen. | On one separately authored trace, Ashen's evaluator invokes, creates `AWAKE PROPOSED` from only pre-invocation facts, and later ends N. On another, it may invoke, create the same I proposal, then commit P and independently create `DEFIANCE PROPOSED`. B requires only at least one qualifying I path; neither downstream result determines I. |
-| **C — a disclosed listener-bound subset changes on invocation** | `D_I` is a nonempty proper subset of `D_mut`; D1I1 then chooses state-only, boundary-only, or nonempty support in both dialects. | C can support a named `LISTENER-BOUND` or First Hearing family whose important fantasy is awakening when the bond is consulted, while ordinary Relics wait for a semantic outcome. It is viable only if disclosed, independently fun, non-dominated, and protected from cheap cut/rearm farming; otherwise it becomes either a premium subtype or an automatic-trigger trap. | Dreamglass may propose `AWAKE OATH` at its actual invocation even if the evaluator later returns N. Ashen invokes normally but cannot cite invocation as cause and still relies on its D1P-B result path. |
+| **A — invocation listens but never transforms** | `D_I=emptyset`. The act of running the canonical evaluator never itself proposes persistent change. | **Recommended.** A teaches: **the relationship makes the Relic listen; what it actually manifests may shape it**. D1P-B already gives every transforming definition a positive-result biography path. A prevents an automatic proposal before any meaningful evaluator result, a second proposal on successful traces, ally-steered invocation pressure, and fresh-cut invocation farming. It is the cleanest protective reading of the standing ideal. Cost: the catalog cannot truthfully express an artifact changed merely by having been listened through; that fantasy must use an actual result, event, or operation. | Guard plus ally Heat makes Ashen eligible, so its one evaluator actually invokes. The invocation itself proposes nothing. A later P may produce `DEFIANCE PROPOSED`; a ledger-bearing `{}` may instead write its recurrence latch. Neither outcome is relabeled as I. |
+| **B — every transforming Relic has an invocation-shaped path** | `D_I=D_mut`. Every state- and boundary-supporting transforming definition has at least one reachable actual invocation that directly proposes change, even though not every invocation must do so. | B makes “being consulted changes every Relic” a universal thesis. It guarantees an invocation-shaped path for every transforming definition and puts a cause path on the automatic operation itself. A successful trace can also produce a distinct P proposal, increasing collision and UI load before agency is even chosen. | Ashen's evaluator invokes and creates `AWAKE PROPOSED` from only facts fixed before invocation. The completed evaluation later commits P and independently creates `DEFIANCE PROPOSED`; neither the downstream result nor its selected ledger determines whether the I edge exists. |
+| **C — a disclosed listener-bound subset changes on invocation** | `D_I` is a nonempty proper subset of `D_mut`; D1I1 then chooses state-only, boundary-only, or nonempty support in both dialects. | C can support a named `LISTENER-BOUND` or First Hearing family whose important fantasy is awakening when the bond is consulted, while ordinary Relics wait for outcomes. It is viable only if disclosed, independently fun, non-dominated, and protected from cheap cut/rearm farming; otherwise it becomes either a premium subtype or an automatic-trigger trap. | Dreamglass may propose `AWAKE OATH` at its actual invocation, before its selected ledger is known. Ashen invokes normally but cannot cite invocation as cause and still relies on its D1P-B result path. |
 
 A/B/C are exhaustive because `D_I` is a subset of nonempty `D_mut`: empty,
 the whole domain, or nonempty proper. “Every definition has a path” does not
@@ -25302,6 +25327,100 @@ settlement. Ally evidence can make the pre-invocation facts true without
 granting the ally authority over the proposal. Exact anti-farming gates, rates,
 targets, copy, UI, and balance remain later work. The authoritative decision
 record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, invocation
+listens but never transforms.** Thus `D_I=emptyset`. Running the one actual
+canonical evaluator cannot itself propose a persistent transformation. A later
+semantic locus retains its own independent classification: in particular,
+D1P-B still gives every transforming definition at least one positive-result
+cause path. D1I moves to `DIR-SELECTED`, and `RCS-03D1I1` moves to `PRUNED`.
+
+> **Thirty-eighth prerequisite correction, 2026-09-28 — my newly registered
+> true-no-candidate branch is unreachable under the rules already selected.**
+> I caught this before presenting D1N, so the owner is not being asked to
+> choose among decorative options. The thirty-seventh audit correctly found
+> the invocation and tuple-selection loci, but it carried forward four old
+> placeholder clauses saying that an invocation might produce no candidate.
+> Those clauses are now corrected where they occurred.
+>
+> A readiness episode is defined for one fixed tag only after its relationship
+> facts and tag-specific occurrence/recurrence inputs are sufficient and no
+> other non-phase input blocks evaluation. C1-A makes its opening cut eligible,
+> C2A-A invokes there, and C3A reads the same cut's coherent authoritative
+> evidence. A satisfied tag supplies a valid complete ledger, so the contender
+> set is nonempty. A unique ledger tuple is fixed by derivation; multiplicity
+> is resolved by C3C3B1-A to exactly one complete tuple, never none. G1-A leaves
+> at most two contenders. A singleton proceeds positively; a pair either
+> survives permission or follows the selected false-pair disposition, whose
+> empty branch is the **ledger-bearing** `{}` settlement Z. Therefore every
+> actual invocation reaches a positive K/P route or ledger-bearing Z. It cannot
+> reach a true zero-contender/no-tuple terminal.
+>
+> The hypothetical terminal is called `NC` in current prose because `N`
+> already names an earlier successful no-response class; the registered ID
+> remains `RCS-03D1N` so the frozen index does not churn. D1N moves directly to
+> `DERIVED` with an empty reachable domain, and D1N1 moves to `PRUNED`. A future
+> design could create NC only by explicitly reopening invocation topology to
+> permit speculative evaluation outside a sufficient fixed-tag readiness
+> episode. The cause register therefore contains eleven reachable cause
+> families plus this one derived-empty audit placeholder—not twelve reachable
+> families.
+>
+> After D1I-A and the NC derivation, the 141-row register contains **38
+> `SCREEN`, 1 `OWNER-OPEN` at D1T, 35 `PRUNED`, 60 `DIR-SELECTED`, 5
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`**. Sixteen cause
+> parent/child slots remain from T through M; closing all of them returns D2 as the sole
+> frontier at `Phi_SR = 23`. D2-D5 still close before RCS-03E opens at 19. No
+> Relic mechanic was removed: an impossible outcome was removed from the choice
+> surface. The authoritative decision record remains unchanged.
+
+### RCS-03D1T — actual nontrivial authoritative ledger-tuple selection as transformation cause — active owner choice
+
+Let `D_T` contain each definition in `D_mut` with at least one reachable
+**tuple-selection transformation-cause witness**. Such a witness requires:
+
+1. one actual canonical evaluation whose valid complete ledger-tuple set `X`
+   has `|X| >= 2`—mere authored or structural multiplicity without an actual
+   evaluation does not qualify;
+2. one prospectively bound complete deterministic selector stance/law that
+   actually chooses exactly one authoritative tuple `x` from `X`;
+3. a prospectively versioned direct T-locus edge from that one completed
+   selection occurrence to a materially distinct legal assignment in the same
+   RCS-03A dialect and active Relic;
+4. deletion of only that edge removes the proposal while `X`, the bound law,
+   selected tuple `x`, invocation, later verdict, K/P/Z/L facts, completed
+   trace, and current assignment all remain fixed; and
+5. no inspection of a later permission bit, result, claim, or recurrence write.
+
+A uniquely forced tuple creates no T occurrence. Binding a stance is not T;
+reading a tuple is not T; rejected alternatives, per-tag comparisons, tie-break
+substeps, and downstream verdicts are not extra T occurrences. One actual
+evaluation has at most one T occurrence because C3C3B1-A returns one complete
+joint tuple, even if that tuple spans two tags.
+
+| Choice | Tuple-selection-cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — selection chooses proof but never transforms** | `D_T=emptyset`. The actual nontrivial choice among valid complete ledger tuples can change which proof becomes operative, but that selection occurrence never directly proposes persistent change. | **Recommended.** The routing stance remains mechanically consequential: holding the contender-tag set fixed, it can change the selected complete tuple, each contender's operative ledger, downstream permission/result inputs, and which proof a later claim spends. SR-05/SR-06/RCS-17 must still prove the authored stance menu is strategically worthwhile and fun; T-biography cannot rescue a hollow menu. D1P-B can still let the resulting positive manifestation shape every transforming Relic. A therefore teaches one readable causal sentence: **interpretation chooses which truthful proof-weave becomes operative; manifestation may shape the Relic**. This fits Achintya Bheda Abheda protectively—the distinct valid proof-weaves remain real, while one coherent authority makes one operative without pretending that every act of interpretation must become permanent biography. It avoids deliberate ledger-multiplicity farming, hidden pre-result proposals, and a universal authoring burden. Cost: no Relic can cite the act of choosing among equally valid proofs as its direct transformation cause. | With fixed contender set `{P,Q}`, Ashen admits `X={(L_v,L_q),(L_h,L_q)}`, where `L_v={Guard g,Vow v}`, `L_h={Guard g,Heat h}`, and `L_q={Return t,Heat h}`. Bound Dissonance selects `(L_v,L_q)` while Chorus would select `(L_h,L_q)`. The chosen complete tuple governs downstream mechanics and any claimed union but creates no T proposal. A later positive P edge may still propose `DEFIANCE`. |
+| **B — every transforming Relic has a selection-shaped path** | `D_T=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable multiplicity-positive evaluation whose actual authoritative tuple selection directly proposes change; not every selection must transform. | B makes “every Relic can be changed when it interprets plural truths” universal. It is thematically strong, but much stronger than the existing existential alternate-ledger promise: every transforming definition now needs a reachable multi-ledger route and a distinct T-shaped proposal path. Players gain a reason to engineer ambiguity, so authoring, disclosure, balance, and anti-farm burden rise across the whole catalog. A later P proposal may coexist and RCS-04A must eventually resolve both. | Every transforming Ashen- or Dreamglass-like definition needs some reachable `|X|>=2` state. On `X={(L_v,L_q),(L_h,L_q)}`, selection of the full tuple `(L_h,L_q)` may create `HEAT-REMEMBERING PROPOSED` before permission is realized; a later positive commit may independently create `DEFIANCE PROPOSED`. |
+| **C — a disclosed interpreter-bound subset changes on selection** | `D_T` is a nonempty proper subset of `D_mut`; D1T1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Guarded thematic alternative.** A named `INTERPRETER-BOUND`, Forked Memory, or Simulacrum family can be changed when one equally true proof-weave becomes operative, while ordinary Relics use selection only to route play. A route-sensitive remembered target is permitted authoring, not guaranteed by this row. This is the most explicit poetic fit with one-and-different truths, but also the easiest to make opaque: if extra biography is pure upside the subtype becomes premium; if its costs dominate it becomes a trap. Use C only if the distinction is prospectively visible, independently fun, non-dominated, and worth a second causal sentence. | Dreamglass may author its selection of full tuple `(L_v,L_q)` to propose `FORK-MARKED`; Ashen may make the same complete-tuple choice with no T proposal. Both selections still determine operative proof normally. |
+
+A/B/C are exhaustive because `D_T` is a subset of the nonempty `D_mut`:
+empty, the whole domain, or nonempty proper. The selected upstream contract
+guarantees that at least one actual T occurrence is reachable: C3C3A-B requires
+a reachable alternate-ledger state, C3C3B1-A resolves its multiplicity to one
+complete tuple, and C3C3B3A-B requires prospectively bindable settings that
+select differently on a held-fixed reachable product. That occurrence does not
+force any direct T edge. Conversely, B would add a per-definition universal
+path obligation that upstream choices do not already imply.
+
+Under A, D1T1 prunes and D1VT opens. Under B, D1T1 also prunes because universal
+support necessarily reaches both nonempty dialects. Under C, D1T1 opens next.
+The T edge may be recorded transactionally, but presentation and authority wait
+until the cut-atomic evaluation completes; the proposal cannot feed permission
+or settlement. Exact definitions, ledgers, stances, targets, rates, copy,
+surface, power, persistence, and balance remain later work. This card selects
+neither proposal approval nor collision resolution, and it authorizes no
+implementation. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

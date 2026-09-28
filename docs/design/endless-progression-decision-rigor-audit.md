@@ -6344,7 +6344,8 @@ transforming definitions `D_mut` as empty, universal, or nonempty proper:
 1. `D1P`: authoritative nonempty final receipt commit;
 2. `D1C`: later actual Relic-local evidence-claim write;
 3. `D1Z`: ledger-bearing `{}` cancellation settlement;
-4. `D1N`: true-no-candidate invocation;
+4. `D1N`: proposed true-no-candidate invocation, later proved unreachable and
+   retained as a derived-empty audit row;
 5. `D1X`: an already meaningful independent non-evaluation combat, source, or
    relationship event; and
 6. `D1M`: a dedicated evolution or reconfiguration operation.
@@ -6535,8 +6536,9 @@ The minimal semantic lifecycle is:
 
 1. I — the one actual canonical product-evaluator invocation for an active
    Relic at an eligible cut;
-2. N — a terminal true-no-candidate conclusion, or else contender truth as a
-   derived predicate;
+2. N — a hypothesized terminal true-no-candidate conclusion, later proved
+   unreachable; every actual invocation instead has nonempty contender truth as
+   a derived predicate;
 3. the ledger tuple becomes fixed either as one uniquely forced tuple, which
    creates no cause occurrence, or by T—an actual nontrivial authoritative
    selection among multiple valid complete tuples;
@@ -6552,13 +6554,14 @@ The minimal semantic lifecycle is:
 7. X and M outside that evaluator chain for an independent combat/source/
    relationship event or a dedicated evolution/reconfiguration operation.
 
-The twelve exhaustive parent families are therefore `I, N, T, VT, VF, K, P,
-C, Z, L, X, M`. Each independently classifies its supported definition subset
-as empty, universal, or nonempty proper; only proper support opens one
-state-only/boundary-only/both dialect child. D2-D5 remain the four later graph-
-topology rows. The six additions are I, T, VT, VF, K, and L plus their six
-conditional children, so the old sixteen-row D repair becomes twenty-eight
-rows.
+The register therefore contains twelve parent rows `I, N, T, VT, VF, K, P, C,
+Z, L, X, M`. The subsequent reachability audit below proves N empty; the other
+eleven form the exhaustive reachable cause surface. Each reachable parent
+independently classifies its supported definition subset as empty, universal,
+or nonempty proper; only proper support opens one state-only/boundary-only/both
+dialect child. D2-D5 remain the four later graph-topology rows. The six additions
+are I, T, VT, VF, K, and L plus their six conditional children, so the old
+sixteen-row D repair becomes twenty-eight rows.
 
 The audit rejects further rows for readiness or eligibility, contender
 satisfaction, tuple/evidence reads, exact/related classification, raw RNG,
@@ -6567,14 +6570,15 @@ delivery. Those are inputs, derived mappings, or nonsemantic mechanics. No
 selected positive-result recurrence latch exists. This proves a finite stopping
 line rather than treating any implementation step as a new product choice.
 
-After D1C-A, the amended register has 141 slots: 42 `SCREEN`, 1 `OWNER-OPEN`
-at D1I, 33 `PRUNED`, 59 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 43`. Closing the twenty still-open cause parent/child
-slots returns D2 as the sole frontier at 23; D2-D5 still open RCS-03E at 19.
+After D1C-A, the amended register at that checkpoint had 141 slots: 42
+`SCREEN`, 1 `OWNER-OPEN` at D1I, 33 `PRUNED`, 59 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 43`. Closing the twenty
+then-open cause parent/child slots would have returned D2 as the sole frontier
+at 23; D2-D5 still open RCS-03E at 19.
 The amendment adds no Relic, source, result, payoff, slot, or implementation
 mechanic.
 
-The active card is D1I. Let `D_I ⊆ D_mut` contain definitions with a reachable
+The active card at that checkpoint was D1I. Let `D_I ⊆ D_mut` contain definitions with a reachable
 actual canonical-invocation occurrence whose direct I-locus edge proposes a
 materially distinct same-dialect assignment based only on invocation identity
 and facts bound before invocation. The edge-deletion test holds both invocation
@@ -6584,16 +6588,15 @@ channels, tags, pairs, callbacks, reloads, and renderings cannot multiply it.
 - D1I-A makes `D_I=∅`. **Recommended.** Invocation listens but never itself
   transforms. D1P-B already guarantees every definition a result-shaped path,
   so this preserves the readable rule “the relationship makes the Relic
-  listen; what it manifests may shape it.” It avoids automatic proposals on N,
-  duplicate I/P proposals on success, ally-steered invocation pressure, and
-  fresh-cut farming. Its real cost is excluding the fantasy of an artifact
-  changed merely by being consulted.
+  listen; what it manifests may shape it.” It avoids automatic proposals before
+  a meaningful evaluator result, duplicate I/P proposals on success,
+  ally-steered invocation pressure, and fresh-cut farming. Its real cost is
+  excluding the fantasy of an artifact changed merely by being consulted.
 - D1I-B makes `D_I=D_mut`. Every transforming definition has at least one
   invocation-shaped path, though not every invocation transforms. On a
-  separately reachable and authored trace, an invocation may create
-  `AWAKE PROPOSED` before that trace later ends N; a successful trace may
-  separately create a P proposal. B neither requires nor guarantees an N-ending
-  witness, and neither downstream result determines I. It supports a universal
+  reachable authored trace, an invocation may create `AWAKE PROPOSED`; a
+  successful trace may separately create a P proposal. Neither downstream
+  result determines I. It supports a universal
   “being listened through changes every Relic” thesis at substantial content,
   collision, and UI cost.
 - D1I-C makes `D_I` nonempty proper and opens D1I1. A disclosed
@@ -6608,6 +6611,96 @@ could contaminate tuple selection or settlement. Ally evidence can satisfy an
 upstream fact without granting proposal authority. Exact gates, rates, targets,
 surface, persistence, and balance remain later owners. A/B/C are exhaustive,
 and no option selects agency or collision.
+
+Zanzagar selected D1I-A. Thus `D_I=∅`: the actual canonical invocation can
+listen but cannot itself create a persistent-transformation proposal. D1I moves
+to `DIR-SELECTED`, and D1I1 moves to `PRUNED`. D1P-B's positive-result path
+remains independent. No authoritative-record text changed.
+
+**Thirty-eighth prerequisite correction: BROKEN D1N premise, derived empty
+before presentation.** Two independent read-only derivations attacked whether
+the registered terminal no-candidate locus was actually reachable. It is not.
+For one fixed tag, non-cadence readiness already requires sufficient
+relationship and tag-specific occurrence/recurrence inputs and no other
+non-phase blocker. C1-A makes the episode-opening cut eligible; C2A-A invokes
+there; C3A reads coherent authoritative evidence at that same cut. A satisfied
+tag supplies a valid ledger, so the contender set cannot be empty. A unique
+complete tuple is fixed directly, while C3C3B1-A maps a multiplicity-positive
+product to exactly one complete tuple rather than none. G1-A permits one or two
+contenders. The singleton route is positive; a denied pair follows the selected
+disposition into a positive result or ledger-bearing Z. It is not a zero-tuple
+terminal.
+
+The contrary no-candidate clauses in the earlier B1 option and selected text
+and the later C1 and C2A worksheet text were unsupported placeholders and are
+corrected at their instructions. The row ID `RCS-03D1N` remains frozen for
+audit continuity, but
+the hypothetical terminal is called `NC` in current prose because `N` already
+names a successful no-response class elsewhere. D1N is `DERIVED` with empty
+reachable domain; D1N1 is `PRUNED`. Reintroducing NC would require reopening
+invocation topology to admit speculative evaluation outside a sufficient fixed-
+tag readiness episode. The cause surface therefore has eleven reachable
+families plus one derived-empty registered placeholder.
+
+After D1I-A and that derivation, the 141-row register contains 38 `SCREEN`, 1
+`OWNER-OPEN` at D1T, 35 `PRUNED`, 60 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 39`. Sixteen cause parent/child slots remain from
+T through M; closing them returns D2 at 23. The correction removes a fake choice, not a
+mechanic.
+
+The next frontier is D1T. A qualifying T witness contains one actual evaluation
+with complete tuple set `X`, `|X|>=2`; one prospectively bound deterministic
+whole-stance law selecting exactly one complete joint tuple `x`; and one
+prospectively versioned direct T-locus proposal edge. Deleting only that edge
+must remove the proposal while `X`, the stance, `x`, invocation, later verdict,
+settlement, claim/latch facts, completed trace, and current assignment remain
+fixed. The edge cannot inspect downstream permission or result. A unique tuple,
+structural multiplicity without evaluation, stance binding, tuple reading,
+rejected alternatives, per-tag comparison steps, and later verdicts are not T.
+One evaluation has one joint T occurrence, never one per tag.
+
+- D1T-A makes `D_T=∅`. **Recommended.** Selection determines which complete
+  truthful proof-weave becomes operative but never directly proposes biography.
+  This does not make routing mechanically hollow: with a fixed contender set,
+  selected ledgers can change overlap/permission input, disposition, and the
+  complete proof union later spent by a claim. D1P-B independently preserves a
+  result-shaped path for every transforming definition. SR-05/SR-06/RCS-17 must
+  still prove that actual stance content is strategically worthwhile and fun;
+  a T edge may not rescue a hollow menu. A is neutral/protective under the
+  standing ideal: plural valid proof-weaves remain distinct while one coherent
+  tuple becomes operative. It avoids ambiguity farming, selector-injection
+  pressure, hidden pre-result proposals, and T/P collisions. Its cost is that
+  selection itself cannot be the remembered cause.
+- D1T-B makes `D_T=D_mut`. Every transforming state- and boundary-supporting
+  definition needs at least one reachable multiplicity-positive selection path
+  with a direct proposal edge, though not every selection transforms. This is
+  stronger than C3C3A-B's existential multiplicity promise and forces plural-
+  ledger authoring across the entire transforming catalog. It supports a
+  universal “interpretation can change every Relic” thesis at the cost of
+  multiplicity farming, ally-steered biography, cancellation harvesting,
+  disclosure load, and later collision handling.
+- D1T-C makes `D_T` nonempty proper and opens D1T1. A disclosed
+  `INTERPRETER-BOUND`, Forked Memory, or Simulacrum subset can be changed when
+  one of several truthful proof-weaves becomes operative. Exact route-sensitive
+  memory is permitted authoring, not entailed by C. This is the strongest
+  thematic countercase but risks a premium or trap subtype and a second causal
+  dialect; retain it only if visible, non-dominated, and independently fun.
+
+The concrete joint witness uses fixed contender set `{P,Q}` and
+`X={(L_v,L_q),(L_h,L_q)}`, where `L_v={Guard g,Vow v}`,
+`L_h={Guard g,Heat h}`, and `L_q={Return t,Heat h}`. Dissonance selects
+`(L_v,L_q)` and Chorus selects `(L_h,L_q)`. The latter exposes exact shared
+Heat; the former avoids it; their claimed unions may differ. Under A neither
+selection creates a T proposal. Under B/C an authored edge at one completed
+selection may create `FORK-MARKED PROPOSED` before permission is realized, but
+cannot read or affect the later outcome.
+
+A/B/C are exhaustive over `D_T⊆D_mut`. T occurrence reachability is positive:
+C3C3A-B supplies a reachable multiple-ledger product, C3C3B1-A actually selects
+one complete tuple, and C3C3B3A-B supplies bound laws that differ on a held-
+fixed reachable product. That existence does not force a direct T proposal.
+Under A/B, T1 prunes; under C, T1 opens. No option decides approval, collision,
+exact catalog, UI, power, balance, persistence, or implementation.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
