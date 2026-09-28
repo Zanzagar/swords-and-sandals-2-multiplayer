@@ -194,6 +194,7 @@ import {
   ringLabelBoxOf,
   ringLabelSizeFor,
   ringMoveButtonsAt,
+  ringPaintOrder,
   ringPlacementFor,
   ringSlotAt,
   ringSwapButtonAt
@@ -5283,7 +5284,12 @@ function paintRing(view, fit) {
   });
   // The boxes of the labels drawn so far this frame, which the next keeps off.
   const labelled = [];
-  for (const button of drawn) {
+  // ~~`for (const button of drawn)`~~ — decision 9 (slice "jumpcharge",
+  // 2026-09-28): the greyed jumps and charges are painted FIRST, under every
+  // label, and everything else in its own order, as before
+  // (`ringPaintOrder`): a label is placed as if they were not there
+  // (`ringLabelAt`), so it may cross one, and must be drawn over it.
+  for (const button of ringPaintOrder(drawn)) {
     paintRingButton(button);
     // A move no slot holds carries no label: its glyph is its arrow, and its
     // key is that arrow (the strip says both).
@@ -5293,6 +5299,8 @@ function paintRing(view, fit) {
     // BEFORE a label is placed, so no label lands on it. Measured: labelled,
     // a greyed swing's label had no free place beside a walk (2v2 tricks
     // seed 2, 14 AI submissions in, blue-2's optionB) and ran across it.
+    // (A greyed jump or charge, decision 9, is the one a label may cross:
+    // `ringUnderLabels`.)
     if (button.reason) continue;
     // A place of the items row (S5) is labelled with its letter alone, above
     // it; the build's own name for its item is the strip's.
@@ -6866,7 +6874,10 @@ function ringProvenance() {
     "A hovered or focused button's preview — its hit chance, damage and stamina — and the target's odds in the " +
     "strip are the engine's own numbers (the hit chance is the build's rollover percentage); their words and " +
     "places are authored, and so is \"confirm every move\", off unless you turn it on. " +
-    "A dimmed button is one the team rules forbid this turn: the engine's reason, in its own words, shows when you " +
+    // ~~"A dimmed button is one the team rules forbid this turn: …"~~ —
+    // decision 9 (2026-09-28) dims the jumps and charges, which no team rule forbids.
+    "A dimmed button is one the team rules forbid this turn, or one the engine has not built yet — the jumps and " +
+    "charges the build wires, and an item it has no spell or potion for: the engine's reason, in its own words, shows when you " +
     "point at it or focus it; the dimmed look and the words' places are authored (the build hides, never greys). " +
     `The AI's pace — Shift held draws its turns at ${RING_PACE_HELD_RATE}×, and Skip to my turn as fast as a frame may — is authored ` +
     "too, and changes only how fast the arena is drawn: every step, and its order, is the same at any pace."];
