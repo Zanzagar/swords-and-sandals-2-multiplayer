@@ -127,9 +127,15 @@ test("in the next lane and not yet past the foe, the free member walks toward an
   assert.equal(suggestAction(battle, "red-2").type, Ss2ActionType.WALK_RIGHT);
 });
 
-test("past the foe in the next lane, the free member steps back into his lane on the far side", () => {
-  const battle = twoOnOne({ free: { x: 400, y: SECOND } });
-  assert.equal(suggestAction(battle, "red-2").type, Ss2ActionType.RANK_FRONT);
+test("past the foe in the next lane, the free member steps back into his lane on the far side — once within one walk of it", () => {
+  // ~~Stepped in from wherever he stood past the foe.~~ Since 2026-09-28 he
+  // heads for the far-side SPOT (one body-width past the target, x 186 here)
+  // and steps in only within one walk of it (`ss2PressMove`, the goal spot);
+  // from further out, stepping in opened the long-range taunt (a verifier).
+  const far = twoOnOne({ free: { x: 400, y: SECOND } });
+  assert.equal(suggestAction(far, "red-2").type, Ss2ActionType.WALK_LEFT, "from 214 away, walk to the spot first");
+  const near = twoOnOne({ free: { x: 250, y: SECOND } });
+  assert.equal(suggestAction(near, "red-2").type, Ss2ActionType.RANK_FRONT, "within one walk, step in");
 });
 
 test("P1: help first — a free member that would play to the crowd presses instead", () => {
@@ -291,7 +297,11 @@ for (const aiPress of ["ranged-first", "pincer-first"]) {
 const PRESS_SHUTTLES = Object.freeze([
   ["ranged-first", "buffs", 9], ["ranged-first", "buffs", 34], ["ranged-first", "tricks", 5], ["ranged-first", "tricks", 29],
   ["pincer-first", "buffs", 35], ["pincer-first", "tricks", 15], ["pincer-first", "tricks", 30], ["pincer-first", "tricks", 34],
-  ["pincer-first", "tricks", 43]
+  ["pincer-first", "tricks", 43],
+  // Added 2026-09-28: the bouts that shuttled only at 92f9701 (a fourth
+  // verifier's census; none shuttles at 74c0014). The last field is the side size.
+  ["ranged-first", "tricks", 46], ["ranged-first", "buffs", 6, 2], ["pincer-first", "buffs", 6, 2],
+  ["ranged-first", "buffs", 11, 2], ["pincer-first", "buffs", 11, 2]
 ]);
 
 test("the arena's own bouts where the press alone shuttled a fighter between lanes no longer do", async () => {
@@ -299,10 +309,10 @@ test("the arena's own bouts where the press alone shuttled a fighter between lan
   const { ss2BattleValues } = await import("../src/team/ss2-rules.js");
   const { demoItemsFrom, demoSide } = await import("../tools/arena/roster.js");
   const shuttles = [];
-  for (const [aiPress, kit, seed] of PRESS_SHUTTLES) {
+  for (const [aiPress, kit, seed, perSide = 3] of PRESS_SHUTTLES) {
     const items = demoItemsFrom(kit);
     const host = createVanillaBattleHost({
-      teams: ["red", "blue"].map((side) => demoSide(side, 3, { ss2Combatant, ss2BattleValues, items, seed })),
+      teams: ["red", "blue"].map((side) => demoSide(side, perSide, { ss2Combatant, ss2BattleValues, items, seed })),
       rules: createSs2TeamRules({ aiPress }), bindings: SS2_STATIC_MAP_BINDINGS, seed, awaitAnimations: true
     });
     host.constructArena();
@@ -316,7 +326,7 @@ test("the arena's own bouts where the press alone shuttled a fighter between lan
         ? { type: chosen.type, length: last.type && last.type !== chosen.type ? last.length + 1 : 1 }
         : { type: null, length: 0 };
       run.set(actorId, next);
-      if (next.length === 4) shuttles.push(`${aiPress} ${kit} seed ${seed} ${actorId} at action ${taken}`);
+      if (next.length === 4) shuttles.push(`${aiPress} ${kit} ${perSide}v${perSide} seed ${seed} ${actorId} at action ${taken}`);
       const step = host.submit({ actorId, ...chosen });
       for (const token of step.actionTokens) host.reportActionAnimation(token);
     }
@@ -365,7 +375,7 @@ test("and a member in the next lane is not judged already round because a shoote
   assert.equal(move?.type, Ss2ActionType.WALK_RIGHT, "walk toward and past, as without the shooter");
 });
 
-test("with only a shooter on the target, the free member steps into his lane and closes, rather than going round", () => {
+test("with only a shooter on the target, the free member closes on his near side, rather than going round", () => {
   // No melee fighter at all: no side is taken, so there is nothing to go round.
   const place = (fields, id, where) => ss2Combatant(gladiator(fields), { id, name: id, controller: "local", ...where });
   const battle = createTeamBattle({
@@ -380,6 +390,147 @@ test("with only a shooter on the target, the free member steps into his lane and
     ]
   });
   assert.equal(ss2PressTarget(viewFor(battle, "red-2"))?.id, "blue-1", "a foe an ally is shooting at is one to help against (P1)");
+  // ~~Steps into his lane at once.~~ Since 2026-09-28: walks toward his near
+  // spot (x 14) in its own lane first, and steps in within one walk of it —
+  // stepping in from afar opened the long-range taunt (a verifier's finding).
   const move = ss2PressMove(viewFor(battle, "red-2"), legalActions(battle, "red-2"), combatantById(battle, "blue-1"));
-  assert.equal(move?.type, Ss2ActionType.RANK_FRONT);
+  assert.equal(move?.type, Ss2ActionType.WALK_RIGHT, "from 414 away, walk first");
+  combatantById(battle, "red-2").x = -50;
+  const close = ss2PressMove(viewFor(battle, "red-2"), legalActions(battle, "red-2"), combatantById(battle, "blue-1"));
+  assert.equal(close?.type, Ss2ActionType.RANK_FRONT, "within one walk, step in");
+});
+
+/**
+ * ► **THE PRESS HEADS FOR AN OPEN SPOT BESIDE THE TARGET, AND ENTERS HIS LANE
+ *   ONLY WITHIN ONE WALK OF IT — a fourth write-nothing verifier's findings,
+ *   2026-09-28, against 92f9701.** With only a drawn bow on the target (no side
+ *   held in melee), the press stepped the free member into the target's lane
+ *   from wherever he stood: from ~1,800 away that opened the priced taunt,
+ *   which ranged-first ranks above the press, and he taunted 8 turns running
+ *   instead of closing (champions 3v3 seed 28); and queued behind the archer
+ *   in the target's lane he was stepped out, found his landing still behind
+ *   the archer, and the older join arm stepped him back in, turn after turn
+ *   (tricks 3v3 seed 46). Neither happened at 74bb257.
+ */
+function stagedRun(spec, { aiPress = "ranged-first", actions = 120 } = {}) {
+  const sturdy = { vitality: 60, herolevel: 60, character_level: 60, defence: 30 };
+  const teams = ["red", "blue"].map((team) => ({
+    id: team,
+    combatants: spec.filter((entry) => entry.team === team).map((entry) =>
+      ss2Combatant(gladiator({ gladiator_dir: team === "red" ? "right" : "left",
+        ...(entry.sturdy ? sturdy : {}), ...(entry.bow ? { secondary_weapon: 61, equipped_weapon: 2 } : {}) }),
+      { id: entry.id, name: entry.id, controller: "local", x: entry.x, y: entry.y }))
+  }));
+  const battle = createTeamBattle({ seed: 1, rules: createSs2TeamRules({ aiPress }), teams });
+  const log = [];
+  for (let taken = 0; taken < actions && !battle.result; taken += 1) {
+    const actorId = currentCombatant(battle).id;
+    const chosen = suggestAction(battle, actorId);
+    log.push({ actorId, type: chosen.type, targetId: chosen.targetId });
+    applyAction(battle, { actorId, ...chosen });
+  }
+  const turnsOf = (id) => log.filter((entry) => entry.actorId === id);
+  const longestRun = (id, matches) => {
+    let best = 0;
+    let run = 0;
+    for (const entry of turnsOf(id)) { run = matches(entry) ? run + 1 : 0; best = Math.max(best, run); }
+    return best;
+  };
+  const shuttle = (id) => {
+    let best = 0;
+    let run = 0;
+    let last = null;
+    for (const entry of turnsOf(id)) {
+      const rank = /^rank-/.test(entry.type);
+      run = rank && last && last !== entry.type ? run + 1 : rank ? 1 : 0;
+      last = rank ? entry.type : null;
+      best = Math.max(best, run);
+    }
+    return best;
+  };
+  const struck = (id, foe) => turnsOf(id).some((entry) => /attack$/.test(entry.type) && entry.targetId === foe);
+  return { battle, log, turnsOf, longestRun, shuttle, struck };
+}
+
+for (const aiPress of ["ranged-first", "pincer-first"]) {
+  test(`${aiPress}: queued behind a shooting ally in the target's lane, the free member goes round and strikes, never shuttling`, () => {
+    const run = stagedRun([
+      { id: "red-1", team: "red", x: -600, y: SECOND },
+      { id: "red-2", team: "red", x: -886, y: SECOND, bow: true },
+      { id: "blue-2", team: "blue", x: -1729, y: SECOND, sturdy: true },
+      { id: "blue-3", team: "blue", x: -1100, y: FRONT, sturdy: true }
+    ], { aiPress });
+    assert.ok(run.shuttle("red-1") < 4, `red-1 alternated rank steps ${run.shuttle("red-1")} turns running`);
+    assert.ok(run.struck("red-1", "blue-2") || run.struck("red-1", "blue-3"), "red-1 reaches a foe and strikes");
+  });
+
+  test(`${aiPress}: one lane over from a foe only a bow is on, the free member closes in his own lane rather than taunt from afar`, () => {
+    const wall = SS2_ARENA.clamp.max;
+    const run = stagedRun([
+      { id: "red-2", team: "red", x: 300, y: SECOND },
+      { id: "red-3", team: "red", x: 900, y: FRONT, bow: true },
+      { id: "blue-3", team: "blue", x: wall, y: FRONT, sturdy: true }
+    ], { aiPress });
+    assert.equal(run.turnsOf("red-2")[0]?.type, Ss2ActionType.WALK_RIGHT, "first, walk toward him in his own lane");
+    assert.ok(run.longestRun("red-2", (entry) => entry.type === Ss2ActionType.TAUNT) < 4, "no run of long-range taunts");
+    assert.ok(run.struck("red-2", "blue-3"), "and he gets there and strikes");
+  });
+
+  test(`${aiPress}: queued behind a shooter with the target at the wall, the free member still goes round to his near side`, () => {
+    const wall = SS2_ARENA.clamp.max;
+    // red-1 sturdy too: the rig's target is a level-60 archer whose bombard
+    // otherwise kills a level-5 red-1 on his way round, which proves nothing.
+    const run = stagedRun([
+      { id: "red-1", team: "red", x: 614, y: FRONT, sturdy: true },
+      { id: "red-2", team: "red", x: 700, y: FRONT, bow: true },
+      { id: "blue-1", team: "blue", x: wall, y: FRONT, sturdy: true, bow: true }
+    ], { aiPress });
+    assert.ok(run.longestRun("red-1", (entry) => entry.type === Ss2ActionType.TAUNT || entry.type === Ss2ActionType.REST) < 4,
+      "no run of taunts or rests from the queue");
+    assert.ok(run.struck("red-1", "blue-1"), "red-1 reaches him and strikes");
+  });
+
+  test(`${aiPress}: queued behind a shooter on the near side while a melee ally holds the far side, the free member takes the near side`, () => {
+    const run = stagedRun([
+      { id: "red-3", team: "red", x: 120, y: FRONT, sturdy: true },
+      { id: "red-2", team: "red", x: -500, y: FRONT, bow: true },
+      { id: "red-1", team: "red", x: -586, y: FRONT },
+      { id: "blue-1", team: "blue", x: 0, y: FRONT, sturdy: true }
+    ], { aiPress });
+    assert.ok(run.longestRun("red-1", (entry) => entry.type === Ss2ActionType.TAUNT) < 4, "no run of taunts from the queue");
+    assert.ok(run.struck("red-1", "blue-1"), "red-1 comes in on the near side and strikes");
+  });
+}
+
+test("the build's champions, 3v3 seed 28: no free member taunts from afar four turns running where it could close", async (t) => {
+  // The fourth verifier's arena case: at 92f9701 red-2 stepped into the
+  // target's lane ~1,800 away (only red-3's bow on him) and taunted 8 turns
+  // running; at 74c0014 it walked. Needs the player's own champion pack.
+  const fs = await import("node:fs");
+  const file = new URL("../assets/champions/champions.json", import.meta.url);
+  if (!fs.existsSync(file)) { t.skip("no champion pack (node tools/extract-champions.mjs)"); return; }
+  const { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } = await import("../src/adapter/index.js");
+  const { citationFor } = await import("../src/adapter/vanilla-fields.js");
+  const { ss2BattleValues } = await import("../src/team/ss2-rules.js");
+  const { championSide } = await import("../tools/arena/roster.js");
+  const pack = JSON.parse(fs.readFileSync(file, "utf8"));
+  const bosses = pack.champions.filter((c) => c.dnaFrom !== "hero" && c.whichBoss !== 17).map((c) => c.whichBoss);
+  const seed = 28;
+  const pick = (k) => Array.from({ length: 3 }, (unused, i) => bosses[(seed * 7 + k * 5 + i * 3) % bosses.length]);
+  const deps = { ss2Combatant, ss2BattleValues, pack, admitResource: citationFor };
+  const host = createVanillaBattleHost({
+    teams: [championSide("red", pick(0), deps), championSide("blue", pick(1), deps)],
+    rules: ss2TeamRules, bindings: SS2_STATIC_MAP_BINDINGS, seed, awaitAnimations: true
+  });
+  host.constructArena();
+  let run = 0;
+  let longest = 0;
+  for (let taken = 0; taken < 900 && !host.battle.result; taken += 1) {
+    const actorId = host.currentCombatantId();
+    const chosen = host.suggestAction(actorId);
+    if (actorId === "red-2") { run = chosen.type === Ss2ActionType.TAUNT ? run + 1 : 0; longest = Math.max(longest, run); }
+    const step = host.submit({ actorId, ...chosen });
+    for (const token of step.actionTokens) host.reportActionAnimation(token);
+  }
+  assert.ok(longest < 4, `red-2 taunted ${longest} of his turns running`);
 });

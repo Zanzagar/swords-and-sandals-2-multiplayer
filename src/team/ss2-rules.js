@@ -4541,28 +4541,43 @@ export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankS
     return allies.some((ally) => ally.y === target.y
       && (ally.x - x) * way > 0 && (target.x - ally.x) * way > 0);
   };
-  // The spot a pincer needs, one body-width past the target on the side away
-  // from the actor: inside the wall, not already held, and clear of bodies.
-  const farSideOpen = () => {
-    const spot = target.x - side * ss2PhysicalSize(target);
+  // ► **THE GOAL: AN OPEN SPOT BESIDE THE TARGET — rebuilt 2026-09-28 after a
+  //   fourth write-nothing verifier REFUTED 92f9701.** With only a drawn bow on
+  //   the target, 92f9701 stepped the free member into his lane from wherever
+  //   he stood: from ~1,800 away that opened the priced taunt, which
+  //   ranged-first ranks above the press, and he taunted 8 turns running
+  //   (champions 3v3 seed 28); queued behind the archer in the target's lane,
+  //   he was stepped out, his landing was still behind the archer, and the
+  //   older join arm stepped him back in, turn after turn (tricks 3v3 seed 46,
+  //   buffs 2v2 seeds 6 and 11). So the press now heads for a SPOT: one
+  //   body-width from the target on the actor's own side if that is open,
+  //   else on the far side if that is — open meaning inside the wall, not held
+  //   by a melee fighter, and clear of bodies — and returns null only when
+  //   neither is (both flanks held, or the far side shut and the near one
+  //   held: the 3v1 and the wall of 74c0014).
+  const spotOf = (sd) => target.x + sd * ss2PhysicalSize(target);
+  const spotOpen = (sd) => {
+    const spot = spotOf(sd);
     if (clamp(spot, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max) !== spot) return false;
-    if (fighting.some((ally) => Math.sign(ally.x - target.x) === -side)) return false;
+    if (fighting.some((ally) => Math.sign(ally.x - target.x) === sd)) return false;
     return bodies.every((body) => body.alive === false || body.y !== target.y || body.id === target.id
       || Math.abs(body.x - spot) >= ss2PhysicalSize(body));
   };
+  const goal = spotOpen(side) ? side : spotOpen(-side) ? -side : null;
+  if (goal === null) return null;
+  const goalX = spotOf(goal);
+  const toGoal = goalX > actor.x ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
 
   if (ss2SameLane(actor, target)) {
-    const queued = queuedAt(actor.x);
-    if (!queued) return find(towardWalk);
-    if (!farSideOpen()) return null;
+    if (!queuedAt(actor.x)) return find(towardWalk);
+    // Queued: out of the lane, to one whose walk toward the goal is not
+    // blocked where the step lands — or the arms below would step him back.
     const steps = [Ss2ActionType.RANK_FRONT, Ss2ActionType.RANK_BACK].map(find).filter(Boolean);
     const open = steps.filter((step) => {
       const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
       const x = ss2RankArrivalX(actor.x, bodies, y);
       if (x === null) return false;
-      const landed = { ...actor, x, y };
-      const way = target.x > x ? 1 : -1;
-      return !ss2WalkBlocked(landed, bodies, way);
+      return !ss2WalkBlocked({ ...actor, x, y }, bodies, goalX > x ? 1 : -1);
     });
     const clear = open.find((step) => {
       const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
@@ -4571,14 +4586,17 @@ export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankS
     return clear ?? open[0] ?? null;
   }
 
-  // With nobody on him in melee no side is taken, and there is nothing to go
-  // round: step into his lane and close, as from the far side.
-  const onFarSide = actor.x === target.x || fighting.length === 0
-    || fighting.some((ally) => Math.sign(ally.x - target.x) !== side);
-  if (!onFarSide) return farSideOpen() ? find(towardWalk) : null;
+  // Another lane: walk to within one walk of the goal in his own lane (a body
+  // in another lane is scenery, `ss2BodyBlocks`), and only then step into the
+  // target's lane, where `ss2RankArrivalX` lands him with nobody between him
+  // and the target, on the goal's side. The landing is read in the TARGET's
+  // lane, a look-ahead: from two lanes away the step lands in the middle one.
+  if (Math.abs(actor.x - goalX) > ss2WalkDisplacement(ss2MovementSpeed(actor))) return find(toGoal);
   const arrival = ss2RankArrivalX(actor.x, bodies, target.y);
-  if (arrival === null || queuedAt(arrival)) return null;
-  return find(target.y > actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK);
+  if (arrival !== null && !queuedAt(arrival) && Math.sign(arrival - target.x) === goal) {
+    return find(target.y > actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK);
+  }
+  return actor.x !== goalX ? find(toGoal) : null;
 }
 
 /** The `aiPress` values `createSs2TeamRules` takes; see `ss2PressMove`. */
@@ -16077,10 +16095,24 @@ export function createSs2TeamRules({
           }
         }
 
+        // ► **NOT INTO A QUEUE (2026-09-28, a fourth verifier's finding against
+        //   92f9701): a step whose landing puts an ally between the actor and
+        //   the foe is skipped, and the toward-walk below closes in the
+        //   actor's own lane instead.** When a melee ally was knocked out of
+        //   reach the press target vanished for a turn, this arm stepped the
+        //   free member into the queue behind that ally, and the press stepped
+        //   him out again when the ally re-engaged — a shuttle on the arena's
+        //   own host (buffs 2v2 seeds 6 and 11). Read in the foe's lane, the
+        //   press's own look-ahead.
         if (positionedInDepth && !ownRankHasFoe && nearest && Number.isFinite(nearest.y)) {
           const towardRank = nearest.y > view.actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK;
           const step = options.find((option) => option.type === towardRank);
-          if (step) return step;
+          const others = [...view.foes, ...view.allies.filter((ally) => ally.id !== actor.id)];
+          const landX = step ? ss2RankArrivalX(actor.x, others, nearest.y) : null;
+          const way = landX !== null && nearest.x > landX ? 1 : -1;
+          const queued = landX !== null && view.allies.some((ally) => ally.id !== actor.id && ally.alive !== false
+            && ally.y === nearest.y && (ally.x - landX) * way > 0 && (nearest.x - ally.x) * way > 0);
+          if (step && !queued) return step;
         }
 
         // ► **A DRAWN BOW CLOSED ON WITH NOTHING TO BASH ~~BACKS AWAY~~ TAKES THE
