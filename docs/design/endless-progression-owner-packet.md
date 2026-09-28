@@ -368,8 +368,9 @@ several same-cut evaluators are exactly one product evaluator with labeled
 internal channels, not another player-material topology. C5-C7/G2/H/I prune,
 and a thirty-fourth prerequisite correction splits old RCS-03C3D into four
 independent evidence-use rows. Zanzagar selected RCS-03C3D1-B, requiring
-positive-result claim support; RCS-03C3D2 is now the current owner-facing choice
-under SR-03.
+positive-result claim support, then selected RCS-03C3D2-A so ledger-bearing
+empty results never claim evidence. RCS-03C3D3 is now the current owner-facing
+choice under SR-03.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -24389,7 +24390,7 @@ arithmetic. The gameplay audit recommends A: positive manifestations may cash
 proof under D1-B, while a cancellation preserves it. D4—not evidence claim—
 owns whether held relationship truth may receive another distinct evaluation.
 
-### RCS-03C3D2 — ledger-bearing empty-result evidence-claim support — active owner choice
+### RCS-03C3D2 — ledger-bearing empty-result evidence-claim support — direction selected
 
 Let `Z^0_v` contain the completed canonical product evaluations whose selected
 authoritative contender-ledger tuple is nonempty but whose fixed pair-local
@@ -24434,10 +24435,79 @@ sacrificial archetype. If B cannot remain legible and independently desirable
 without compensation bribery, cheap coercion, or negative-proc clutter, fall
 back to A.
 
-Under A or B, D2 moves to `DIR-SELECTED` and D3 becomes `OWNER-OPEN` because
-D1-B already guarantees claim support. The register then contains 23 `SCREEN`,
-1 `OWNER-OPEN`, 26 `PRUNED`, 53 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 24`. The authoritative decision record remains unchanged.
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A,
+ledger-bearing empty results never claim evidence.** Thus
+`K^{claim0}_v=∅`. Every cancellation with a selected complete contender-ledger
+tuple settles `{}` without making any member of its causal union Relic-locally
+unavailable. Freshness, source-owned clearing, and D4's later recurrence rule
+remain operative.
+
+Together with D1-B, the selected rule is: a positive manifestation may cash
+proof; no manifestation preserves it. This does not grant a redraw or held-
+truth retry. The opportunity's committed Oracle realization and settlement are
+idempotent, while D4 separately owns whether another distinct evaluation may
+occur. D2-A is **neutral/protective** standing-ideal fit because it preserves
+the truthful distinct causes after no aligned relation manifests.
+
+D2 moves to `DIR-SELECTED`; D3 becomes `OWNER-OPEN`. The 109-row register now
+contains 23 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 53 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested D3. The topology audit proved that
+every nonempty claim footprint is either the complete deduplicated selected-
+ledger union or a proper nonempty subset; no third topology survives. The
+gameplay audit recommends A. Authoritative tuple routing already supplies
+proof-selection buildcraft, and full-union claiming makes the chosen tuple's
+entire causal cost honest without adding a second hidden cherry-pick surface.
+
+### RCS-03C3D3 — claimed-proof footprint — active owner choice
+
+Under D1-B/D2-A, the claim domain is nonempty and positive-only:
+`K^{claim}_v=K^{claim+}_v` and `K^{claim0}_v=∅`. For each claiming settlement
+`z`, let `C(z)` be the nonempty set of final child occurrences that become
+unavailable as evidence to the active Relic. Existing boundaries require
+
+`∅ != C(z) subseteq U(z)`,
+
+where `U(z)` is the deduplicated union of final child occurrences in the
+selected authoritative causal ledgers. An exact shared occurrence counts once;
+distinct related occurrences remain distinct. For a positive substitute
+`{S}` or `{S1,S2}`, `U(z)` still comes from both original selected contender
+ledgers rather than invented substitute proofs.
+
+| Choice | Claim-footprint rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every claim takes the complete selected-ledger union** | For every claiming settlement `z`, `C(z)=U(z)`. This says full footprint whenever a claim occurs, not that every positive settlement claims; D1-B still leaves claim prevalence and assignments open. | **Recommended.** A makes the selected authoritative tuple the honest causal cost: choose the proof route whose whole consequence you accept. It preserves existing Dissonance/Chorus routing buildcraft without adding a second post-route proof-cost optimizer, blocks cheap-leaf and preserved-hub laundering, and is simplest to animate—highlight the causal inputs, commit the result, then grey all highlighted inputs once. A is **direct** ideal fit locally: the complete distinct causal weave participates in one result and acquires one Relic-local claimed relation while every occurrence retains identity, source ownership, and history. Cost: elaborate multi-source setups are fully cashed and may chain less often. | `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` give `U(z)={g,h,t}`. If `{P,Q}`, fused `{S}`, or reconstituted `{S1,S2}` is a claiming result, A claims `g,h,t` after the whole output commits; shared `h` is claimed once. |
+| **B — require proper-subset claim support** | At least one claiming settlement has `∅` strictly contained in `C(z)` strictly contained in `U(z)`, with the subset law fixed prospectively. B includes all-partial and mixed full/partial catalogs; it selects no exact prevalence or mapping. | B's strongest case is a named **fuel-versus-witness** law: shared `Heat h` is the consumable catalyst while `Guard g` and `Return t` remain historical witnesses. That can preserve combo continuity and become **potentially direct** when the differentiated causal role is intrinsic and legible. Unguarded B instead adds hidden footprint routing, preserves valuable hubs by burning cheap leaves, or selectively burns a teammate's rare contribution. Use B only with a tiny closed semantic-role vocabulary, no post-result chooser, and proof that the partial rule remains more readable and fun than reducing which positive contracts claim under D1-B. | The same claiming result prospectively claims only `{h}` while retaining `{g,t}`, or claims `{g,t}` while retaining `{h}`. It may not claim one ledger's “copy” of shared `h`, because only one canonical `h` occurrence exists. |
+
+A/B are mutually exclusive and exhaustive because the claim domain is nonempty:
+either every `C(z)` equals `U(z)`, or at least one `C(z)` is a proper nonempty
+subset. Universal proper-only support and mixed full/proper support both belong
+to B; exact prevalence and masks remain AUTHOR/SPEC. `C(z)=∅` is no claim, not
+a third footprint.
+
+Only final children in the selected authoritative tuple are claimable.
+Unselected alternate ledgers, lineage ancestors or siblings, hidden compound
+members, other roots, Relics, combatants, and owners remain outside `U(z)`.
+Shared occurrences deduplicate; a compound final child cannot be peeled into
+hidden member sites. Every claim writes after the whole receipt set commits,
+is atomic/idempotent/permutation-invariant, and changes only active-Relic
+eligibility—not canonical truth, source state, future occurrences, or custody.
+
+Any B subset law must be total under fixed inputs, prospectively disclosed,
+and unable to inspect payoff or choose the cheapest, freshest, or most valuable
+proof after settlement. Cheap teammate contender injection or positive-result
+coercion that forces another player's expensive proof into a claim mask fails.
+If full-union claims suppress satisfying chains in human playtests, first reduce
+which positive contracts claim under D1-B. Use guarded B only if a real fuel/
+witness archetype still needs partial treatment; if its role cannot be
+forecast, animated, and kept free of hub/cheap-proof exploits, fall back to A.
+
+Under A or B, D3 moves to `DIR-SELECTED` and D4 becomes `OWNER-OPEN`. The
+register then contains 22 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 54
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`. The
+authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

@@ -3090,9 +3090,11 @@ the register had **109 slots: 25 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 51
 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. C3D1
 was the sole presented Relic card. Zanzagar then selected D1-B, requiring
 nonempty positive-result claim support without choosing prevalence or footprint.
-The current register has **109 slots: 24 `SCREEN`, 1 `OWNER-OPEN`, 26
-`PRUNED`, 52 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 25`**. C3D2 is the sole presented Relic card.
+Zanzagar then selected D2-A, so ledger-bearing empty settlements preserve their
+selected causal evidence while the committed realization remains non-redrawable.
+The current register has **109 slots: 23 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 53 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 24`**. C3D3 is the sole presented Relic card.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -3193,8 +3195,8 @@ overcompression.
 | `RCS-03C3C6` | Form support among C5-positive cross-opportunity overlaps: exact same final child, distinct related proofs, or both | `PRUNED`; C5 prunes |
 | `RCS-03C3C7` | Cross-opportunity same-cut fan-out treatment over supported overlaps | `PRUNED`; C5/C6 prune and technical internal channels cannot manufacture cross-opportunity fan-out |
 | `RCS-03C3D1` | Positive-result Relic-local evidence-claim support without deleting canonical occurrence truth | `DIR-SELECTED`; B makes positive-result claim support nonempty, so at least one positive original or substitute settlement claims a nonempty part of its selected causal proof union after atomic commit; prevalence and footprint remain unresolved |
-| `RCS-03C3D2` | Ledger-bearing empty-result Relic-local evidence-claim support | `OWNER-OPEN`; choose empty or nonempty empty-settlement claim support; a true no-candidate invocation has no authoritative selected ledger footprint and remains outside the claim domain |
-| `RCS-03C3D3` | Claimed-proof footprint inside the authoritative selected contender-ledger tuple | `SCREEN`; conditional on D1-B or D2-B, otherwise `PRUNED`; choose the complete deduplicated final-child union or support for a prospectively fixed proper nonempty subset; alternate ledgers, hidden compound members, lineage relatives, and other Relics/roots/combatants remain outside the footprint |
+| `RCS-03C3D2` | Ledger-bearing empty-result Relic-local evidence-claim support | `DIR-SELECTED`; A makes empty-settlement claim support empty, so cancellation preserves every occurrence in its selected causal union; a true no-candidate invocation remains outside the claim domain, and D4 still owns recurrence |
+| `RCS-03C3D3` | Claimed-proof footprint inside the authoritative selected contender-ledger tuple | `OWNER-OPEN`; choose the complete deduplicated final-child union or support for a prospectively fixed proper nonempty subset; alternate ledgers, hidden compound members, lineage relatives, and other Relics/roots/combatants remain outside the footprint |
 | `RCS-03C3D4` | Failed-result recurrence while authored relationship sufficiency remains uninterrupted | `SCREEN`; follows D1-D3; choose no second distinct evaluation inside one continuous-sufficiency interval or nonempty held-truth reattempt support; callback, reload, replay, and duplicate delivery never create a distinct evaluation |
 | `RCS-03C3E` | Later same-tag reuse of otherwise-admissible evidence after a C135-valid break/renew/rearm | `SCREEN`; follows `RCS-03C3D1`–`RCS-03C3D4` and may close `DERIVED` if D1-A/D2-A leave no Relic-local claim branch |
 | `RCS-03C3F` | Later-cut different-tag evidence reuse within the same active Relic | `SCREEN`; follows `RCS-03C3D1`–`RCS-03C3E` and may close `DERIVED` if D1-A/D2-A leave no Relic-local claim branch |
@@ -3526,16 +3528,17 @@ claim support, ledger-bearing empty-result claim support, claimed-proof
 footprint, and failed-result recurrence. That checkpoint had **109 slots**: 25
 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 51 `DIR-SELECTED`, 4 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`. Zanzagar then selected D1-B, requiring
-nonempty positive-result claim support. The current register has **109 slots**:
-24 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 52 `DIR-SELECTED`, 4 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`. C3D2 is the current presented Relic
-card.
+nonempty positive-result claim support. Zanzagar then selected D2-A, making
+ledger-bearing empty-result claim support empty without selecting recurrence.
+The current register has **109 slots**: 23 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 53 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 24`. C3D3 is the current presented Relic card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-twenty-five owner cards under this thirty-four-times-corrected charter and will
+twenty-four owner cards under this thirty-four-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3559,7 +3562,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 109 frozen candidate slots; current `Phi_SR = 25` after G1-A caps each evaluation at two contender tags, C4 derives one canonical same-cut product evaluator, old C3D splits into four evidence-use boundaries, and D1-B selects positive-result claim support | At most 25 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 109 frozen candidate slots; current `Phi_SR = 24` after G1-A caps each evaluation at two contender tags, C4 derives one canonical same-cut product evaluator, old C3D splits into four evidence-use boundaries, D1-B selects positive-result claim support, and D2-A preserves evidence on empty settlement | At most 24 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

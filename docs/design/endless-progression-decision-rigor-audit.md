@@ -5960,6 +5960,65 @@ Either D2 answer would produce 23 `SCREEN`, 1 `OWNER-OPEN` at D3, 26 `PRUNED`,
 53 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`.
 The authoritative decision record remains unchanged.
 
+Zanzagar selected D2-A. `K^{claim0}_v` is empty: when a completed evaluation
+has a selected nonempty authoritative contender-ledger tuple but settles `{}`,
+none of that tuple's causal occurrences becomes unavailable as evidence to the
+active Relic. Cancellation preserves the proof relation for otherwise-lawful
+later use, while the committed Oracle realization and settlement remain
+idempotent rather than redrawable. D4 still owns whether uninterrupted
+relationship sufficiency can support another distinct evaluation. D2 moves to
+`DIR-SELECTED`, D3 becomes `OWNER-OPEN`, and the 109-row register has 23
+`SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 53 `DIR-SELECTED`, 4 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`.
+
+Two named-claim audits then tested D3. Under D1-B/D2-A the claim domain is
+nonempty and positive-only. For each claiming settlement `z`, let `C(z)` be
+its nonempty Relic-local claim footprint and let `U(z)` be the deduplicated
+union of final child occurrences in its selected authoritative causal ledgers.
+Existing boundaries force `C(z)` to be a nonempty subset of `U(z)`. Exact
+shared children occur once; distinct related children remain distinct;
+positive substitutes retain both original selected ledgers. Ancestors,
+siblings, hidden compound members, unselected alternate ledgers, other roots,
+Relics, combatants, and owners remain outside the footprint.
+
+The topology audit proved one exhaustive binary card. D3-A requires
+`C(z)=U(z)` for every claiming settlement. D3-B requires at least one claiming
+settlement with a prospectively fixed proper nonempty subset of `U(z)`;
+all-partial and mixed full/partial catalogs both belong to B, while exact
+prevalence and masks remain AUTHOR/SPEC. An empty footprint is no claim, not a
+third option. Neither branch permits live or post-result subset shopping, one
+ledger's fictional copy of an exact shared occurrence, or peeling a compound
+final child into hidden member sites.
+
+The gameplay audit recommends D3-A. The selected tuple is already the
+authoritative causal account, so claiming its full union makes that proof
+route's cost honest and legible without adding a second hidden footprint
+optimizer. It blocks cheap-leaf and hub-preservation laundering and admits the
+clearest animation: highlight the complete causal weave, commit the result,
+then grey those inputs once. This is direct local ideal fit: one complete weave
+acquires a Relic-local claim relation while its distinct occurrences retain
+identity, source ownership, and history. Its cost is real—elaborate setups are
+fully cashed and may chain less often—but D1-B still allows claim prevalence to
+be reduced without weakening the footprint of claims that do occur.
+
+D3-B's strongest countermodel is a small, named fuel-versus-witness grammar:
+for example, shared Heat may be the consumable catalyst while Guard and Return
+remain historical witnesses. B is viable only if those roles are intrinsic,
+prospectively disclosed, animated, governed by a tiny closed vocabulary, and
+immune to cheapest-proof selection or teammate-forced expensive consumption.
+If full-union claiming suppresses satisfying chains, first reduce which
+positive contracts claim under D1-B; use B only if a genuine fuel/witness
+archetype still needs partial treatment, otherwise fall back to A.
+
+For `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}`,
+`U(z)={g,h,t}`. Under A, a claiming `{P,Q}`, `{S}`, or `{S1,S2}` settlement
+claims all three after the whole output commits, with shared `h` counted once.
+Under B, an authored law might claim only `{h}` or only `{g,t}`. Cancellation
+claims nothing under D2-A and lies outside D3. Either D3 answer would produce
+22 `SCREEN`, 1 `OWNER-OPEN` at D4, 26 `PRUNED`, 54 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`. C3E and C3F still follow
+D4 and receive their own dependency audit; neither is silently derived here.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

@@ -1,53 +1,58 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-27 positive results may claim evidence; empty-result claims are next
+## 2026-09-28 empty results preserve evidence; positive claim footprint is next
 
-Zanzagar selected `RCS-03C3D1-B`. Positive-result evidence-claim support is
-nonempty: at least one reachable positive original or substitute settlement
-makes a nonempty part of its selected authoritative causal proof union
-unavailable as evidence to that active Relic after the whole result commits.
-Canonical occurrence truth, source ownership, battle history, and other-root
-availability remain intact. Exact prevalence and footprint remain unresolved.
+Zanzagar selected `RCS-03C3D2-A`. Together with the previously selected D1-B,
+the rule is now: a positive manifestation may claim its causal proof; an empty
+manifestation never does. A ledger-bearing cancellation preserves every final
+child occurrence in its selected authoritative causal union for otherwise-
+lawful later use. This does not redraw the committed Oracle realization or
+grant another evaluation; D4 still owns recurrence.
 
-D1 moves to `DIR-SELECTED`; D2 becomes the sole `OWNER-OPEN` row. The 109-row
-register now contains 24 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 52
-`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`. The
+D2 moves to `DIR-SELECTED`; D3 becomes the sole `OWNER-OPEN` row. The 109-row
+register now contains 23 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 53
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`. The
 authoritative decision record remains unchanged.
 
-Two read-only audits uphold D2 as one binary support card. It asks whether a
-completed evaluation with a selected nonempty authoritative contender-ledger
-tuple but final aligned output `{}` can claim any of that tuple's deduplicated
-proof union:
+For each claiming positive settlement `z`, let `U(z)` be the deduplicated union
+of final child occurrences in its selected authoritative causal ledgers and
+let `C(z)` be what becomes unavailable as evidence to this active Relic. Exact
+shared children count once; distinct related children remain distinct. A
+positive substitute still carries both original selected ledgers. Two read-
+only audits uphold one exhaustive D3 choice:
 
-- **A — ledger-bearing empty results never claim evidence:** cancellation
-  preserves all selected causal evidence for otherwise-lawful later use.
-  **Recommended.** Together with D1-B this teaches one clean rule: a positive
-  manifestation may cash proof; no manifestation preserves it. This is not a
-  free reroll—the existing Oracle realization cannot redraw, and D4 separately
-  decides whether uninterrupted relationship truth can receive another
-  distinct evaluation. A avoids automatic failure or a teammate-forced false
-  bit erasing another player's setup. Its ideal role is neutral/protective.
-- **B — require empty-result claim support:** at least one ledger-bearing
-  cancellation claims a nonempty part of its selected causal proof union. The
-  strongest case is a prospectively named sacrificial **Severed Chorus**:
-  “the Relic listened once and its refusal scarred what it heard.” B can be
-  partial ideal fit when that severance remains visible and meaningful, but it
-  risks becoming “no result plus lost setup,” opaque proc noise, or a teammate
-  grief tool. It is not itself the retry solution.
+- **A — every claim takes the complete selected-ledger union:** whenever a
+  positive settlement actually claims, `C(z)=U(z)`. **Recommended.** This does
+  not make every positive result a claim; D1-B left claim prevalence open. It
+  makes the chosen proof route's entire cost honest, blocks burning a cheap
+  leaf while preserving a valuable hub, and is easiest to read: highlight the
+  complete causal weave, commit the result, then grey those inputs once. It is
+  direct local ideal fit because the complete weave acquires one Relic-local
+  relation while every occurrence retains identity, source ownership, and
+  history. The tradeoff is that elaborate setups are fully cashed and may
+  chain less often.
+- **B — require proper-subset claim support:** at least one claiming settlement
+  consumes a prospectively fixed proper nonempty subset of `U(z)`. Its strongest
+  form is a named **fuel-versus-witness** law: shared Heat is consumable fuel,
+  while Guard and Return remain historical witnesses. That can preserve combo
+  continuity, but only if the semantic roles are intrinsic, plainly animated,
+  and selected from a tiny closed vocabulary. Post-result selection, cheapest-
+  proof optimization, valuable-hub preservation, and teammate-forced expensive
+  consumption all fail.
 
-Example: `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` use
-`U={g,h,t}`. When Severed Chorus settles `{}`, A leaves `g,h,t` locally
-eligible to this Relic; B requires at least one supported cancellation to claim
-a nonempty part after settlement. D3 later decides complete union versus proper
-subset. A true no-candidate invocation has no selected ledger tuple and cannot
-claim an undefined partial match.
+Example: `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` give
+`U(z)={g,h,t}`. For a claiming `{P,Q}`, `{S}`, or `{S1,S2}` result, A claims
+`g,h,t` after the whole output commits, with shared `h` counted once. B might
+prospectively claim only `{h}`, or only `{g,t}`. The `{}` cancellation claims
+nothing under D2-A and is outside this choice.
 
-A/B are exhaustive because empty-result claim support is empty or nonempty.
-Callback, reload, reconnect, replay, or duplicate delivery never redraws the
-same opportunity. Any B contract must be known before affected players' last
-reversible commitment, attributable afterward, atomic, idempotent, and unable
-to delete canonical truth or counterfeit a C135 break; cheap unilateral
-teammate-forced consumption fails. Ask for A or B.
+A/B are exhaustive: every nonempty `C(z)` is either the whole `U(z)`, or at
+least one supported claim is a proper nonempty subset. Unselected alternate
+ledgers, ancestors, siblings, hidden compound members, other roots, Relics,
+combatants, and owners are never claimable. If A suppresses satisfying chains,
+first reduce which positive contracts claim under D1-B. Use B only if a genuine
+fuel/witness archetype still needs partial treatment and remains forecastable;
+otherwise fall back to A. Ask for A or B.
 
 ## 2026-09-26 fixed denied outputs selected; three-plus contenders are next
 
@@ -11053,7 +11058,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-27 17:48 UTC — ledger-bearing empty-result evidence-claim support is next](docs/handoffs/2026-09-27-1748--relic-empty-evidence-claim-next.md)**
+[2026-09-28 01:20 UTC — positive-result claim footprint is next](docs/handoffs/2026-09-28-0120--relic-claim-footprint-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

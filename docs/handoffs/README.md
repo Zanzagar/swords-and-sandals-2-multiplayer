@@ -140,6 +140,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [positive-result claim footprint is next](2026-09-28-0120--relic-claim-footprint-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D2-A preserves causal evidence on empty settlement; two audits uphold D3's full-union/proper-subset footprint topology and recommend full-union claiming. |
 | [ledger-bearing empty-result evidence-claim support is next](2026-09-27-1748--relic-empty-evidence-claim-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D1-B requires positive-result claim support; two audits uphold D2's empty/nonempty cancellation-claim topology and recommend preserving evidence on empty settlement. |
 | [positive-result evidence-claim support is next](2026-09-27-0503--relic-positive-evidence-claim-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | G1-A caps each fixed evaluation at two contenders; canonicality derives one same-cut product evaluator, and a four-row C3D split leaves positive-result Relic-local evidence-claim support as the sole presented choice. |
 | [three-plus pre-treatment contenders are next](2026-09-27-0353--relic-three-plus-contenders-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | F1-A makes every fixed denied opportunity single-valued and prunes four conditional resolution rows; two audits uphold G1's empty/nonempty three-plus contender-support topology and recommend the pair-focused empty branch. |
