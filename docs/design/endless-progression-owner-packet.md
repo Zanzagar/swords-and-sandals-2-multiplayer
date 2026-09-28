@@ -382,9 +382,11 @@ rows. Zanzagar selected D1P-B, giving every transforming definition a positive-
 result cause path; D1C-A, keeping claim writes noncausal; and D1I-A, making
 invocation listen without transforming. The thirty-eighth correction then
 proved the registered D1N true-zero-contender domain empty under the selected
-readiness/evidence/tuple rules and pruned D1N1. **RCS-03D1T is now the sole
-owner-facing choice under SR-03:** whether the actual joint selection among
-multiple valid complete ledger tuples may directly propose transformation.
+readiness/evidence/tuple rules and pruned D1N1. Zanzagar then selected D1T-A,
+so actual joint tuple selection routes proof but never directly proposes
+transformation; D1T1 prunes. **RCS-03D1VT is now the sole owner-facing choice
+under SR-03:** whether an actual authoritative true/allow permission verdict
+may directly propose transformation.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -25374,7 +25376,7 @@ cause path. D1I moves to `DIR-SELECTED`, and `RCS-03D1I1` moves to `PRUNED`.
 > Relic mechanic was removed: an impossible outcome was removed from the choice
 > surface. The authoritative decision record remains unchanged.
 
-### RCS-03D1T — actual nontrivial authoritative ledger-tuple selection as transformation cause — active owner choice
+### RCS-03D1T — actual nontrivial authoritative ledger-tuple selection as transformation cause — A selected
 
 Let `D_T` contain each definition in `D_mut` with at least one reachable
 **tuple-selection transformation-cause witness**. Such a witness requires:
@@ -25421,6 +25423,82 @@ or settlement. Exact definitions, ledgers, stances, targets, rates, copy,
 surface, power, persistence, and balance remain later work. This card selects
 neither proposal approval nor collision resolution, and it authorizes no
 implementation. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, selection
+routes proof but never transforms.** Thus `D_T=emptyset`. An actual nontrivial
+selection still fixes the one authoritative complete joint ledger tuple and all
+of its downstream proof, permission, result, and claim consequences, but the T
+locus has no persistent-transformation proposal edge. A later positive commit
+may independently satisfy D1P-B. D1T moves to `DIR-SELECTED`, and
+`RCS-03D1T1` moves to `PRUNED`.
+
+After that transition, the 141-row register contains **36 `SCREEN`, 1
+`OWNER-OPEN` at D1VT, 36 `PRUNED`, 61 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`**. Fourteen cause parent/child slots
+remain from VT through M; closing them returns D2 as the sole frontier at
+`Phi_SR = 23`. The authoritative decision record remains unchanged.
+
+### RCS-03D1VT — actual true/allow permission verdict as transformation cause — active owner choice
+
+Let `D_VT` contain each definition in `D_mut` with at least one reachable
+**true-verdict transformation-cause witness**. Such a witness requires:
+
+1. one actual canonical evaluation with exactly two contender tags and one
+   selected complete joint ledger tuple whose pair reaches the permission
+   coordinate—a singleton has no permission verdict;
+2. one actual authoritative permission result `true`/allow for that unordered
+   pair, whether the bound law is deterministic or the bit is the committed
+   realization of a lawful Oracle distribution;
+3. one prospectively versioned direct VT-locus edge from that realized true bit
+   to a materially distinct legal assignment in the same RCS-03A dialect and
+   active Relic;
+4. deletion of only that edge removes the proposal while the selected tuple,
+   pair, law, context, true bit, later K/P/C facts, every independently created
+   proposal fact, completed trace, and current assignment remain fixed; and
+5. no inspection of a later provisional output, receipt commit, evidence claim,
+   recurrence write, approval, or collision result.
+
+The exact-shared, distinct-related, and hybrid forms are inputs to the same
+semantic permission verdict, not separate VT occurrences. A hybrid pair has one
+bit. G1-A permits at most two contenders, so one evaluation has at most one
+unordered pair and one VT occurrence. Deterministic versus stochastic law,
+responsive versus steadfast context, the earlier bound routing stance, and the
+factual reason for allowance may condition authoring but do not create new
+cause loci. The permission-law read, probability, raw random draw, contemplated
+allow branch, later positive output, and replayed bit are not VT.
+
+True-verdict reachability is already positive. Selected exact-permission E1-C
+requires a responsive law with reachable true and false bits, while E3-C
+separately requires a context-invariant always-allow law over its own nonempty
+reachable domain. These guarantees establish actual true verdicts but no direct
+VT proposal edge. They do not imply that every transforming definition has an
+allow-capable pair path.
+
+| Choice | True-verdict-cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — permission allows coexistence but never transforms** | `D_VT=emptyset`. An actual true/allow verdict retains every selected permission and downstream result consequence but never itself proposes persistent change. | **Recommended.** A teaches: **the covenant decides whether distinct manifestations may participate together; what actually manifests may shape the Relic**. The true bit remains mechanically decisive, and D1P-B preserves a positive-result biography path for every transforming definition. This is neutral/protective under Achintya Bheda Abheda: unity and difference are lived in the allowed pair without requiring the gate's “yes” to become a second biography event. A avoids automatic transformation access through cheap always-allow pairs, ally-steered second contenders, and stacked VT/K/P proposals. Cost: no Relic can be changed merely because its covenant permitted coexistence; that fantasy must attach to the later manifestation or another cause. | Guardian Vow `P` and Returning Vow `Q` select complete ledgers sharing `Heat h`. A context-invariant Stone Witness law returns true. Both pass the joint-survival gate, but the verdict creates no proposal. If their later positive commit has an authored P edge, it may independently propose `CONCORDANT`. |
+| **B — every transforming Relic has a true-verdict-shaped path** | `D_VT=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable real two-contender permission opportunity whose actual true verdict directly proposes change; not every true verdict must transform. | B makes “every Relic can be changed by permitting plurality” universal. It is much stronger than the selected catalog-level true-bit guarantees: every transforming definition now needs pair-capable, allow-capable content and a distinct VT proposal path. This pressures singleton-focused and steadfast-refusal identities, rewards farming safe always-allow pairs, and can stack a pre-result proposal with later K/P proposals. Choose B only for an explicit system-wide thesis that permission itself—not merely manifestation—must be biographical. | Every transforming definition needs some reachable pair like `P/Q`. When its permission law returns true, a direct VT edge may create `CONCORD-MARKED PROPOSED` before K completes; a later positive commit may independently create another proposal. |
+| **C — a disclosed concord-bound subset changes on true verdicts** | `D_VT` is a nonempty proper subset of `D_mut`; D1VT1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Guarded thematic alternative.** A named `CONCORD-BOUND`, Open Covenant, or Communion family can be changed when its relationship actually permits distinct manifestations to continue together, while ordinary Relics treat the same true bit only as permission. This can make the Souls and Simulacra theme tangible without universalizing it, but it adds a second causal sentence and risks a premium “extra evolution route” caste. Use C only if the true-verdict-specific biography is visible before the relevant commitment, independently fun, non-dominated, and cannot be expressed honestly as a later P-cause path. | Stone Witness may attach a direct `CONCORD-MARKED PROPOSED` edge to its actual true bit; Ashen may return the same true bit with no VT proposal. Both permission verdicts retain identical gate authority. |
+
+A/B/C are exhaustive because `D_VT` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. B means one qualifying path per
+transforming definition, not that every true verdict transforms. C classifies
+definitions, not exact versus related proof forms or deterministic versus
+Oracle implementations; exact trigger assignments and prevalence within a
+supported definition remain AUTHOR/SPEC under the selected semantic-locus
+stopping line.
+
+One actual true bit is one VT occurrence. Tags, ledger components, exact and
+related labels, hybrid membership, law predicates, RNG calls, callbacks,
+renderings, reloads, and duplicate delivery cannot multiply it. A VT edge may
+be recorded transactionally but cannot be presented or exercise authority until
+the cut-atomic evaluation completes, and it cannot affect K, P, or settlement.
+Exact definitions, pair identities, triggers, targets, rates, copy, surface,
+power, persistence, and balance remain later work. This card selects neither
+approval nor collision resolution and authorizes no implementation.
+
+Under A/B, D1VT1 prunes and D1VF opens. Under C, D1VT1 opens next. The
+authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

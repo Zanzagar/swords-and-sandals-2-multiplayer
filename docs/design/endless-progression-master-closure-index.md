@@ -3187,12 +3187,19 @@ is `DERIVED` with empty reachable domain; D1N1 is `PRUNED`. Current prose calls
 the hypothetical terminal `NC` to avoid collision with the earlier successful
 no-response class named N.
 
-The current 141-row register contains **38 `SCREEN`, 1 `OWNER-OPEN` at D1T,
-35 `PRUNED`, 60 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 39`**. Sixteen still-open cause parent/child slots remain from T through M;
-closing them returns D2 as the sole frontier at `Phi_SR = 23`. D2-D5 still
-lead to RCS-03E at 19. The register now describes eleven reachable cause
-families plus one derived-empty audit placeholder, not twelve reachable
+Zanzagar then selected D1T-A. The actual selection among multiple valid
+complete ledger tuples remains mechanically authoritative: it chooses the one
+operative proof-weave and may thereby change later permission, settlement, and
+claim consequences. The act of selection never itself proposes persistent
+transformation. D1T is `DIR-SELECTED`, D1T1 is `PRUNED`, and D1VT is the sole
+frontier.
+
+The current 141-row register contains **36 `SCREEN`, 1 `OWNER-OPEN` at D1VT,
+36 `PRUNED`, 61 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`**. Fourteen still-open cause parent/child slots remain from VT
+through M; closing them returns D2 as the sole frontier at `Phi_SR = 23`.
+D2-D5 still lead to RCS-03E at 19. The register now describes eleven reachable
+cause families plus one derived-empty audit placeholder, not twelve reachable
 families.
 
 ### 7.3 Frozen remaining Relic slot register
@@ -3308,9 +3315,9 @@ overcompression.
 | `RCS-03D1I1` | State/boundary transformation-dialect incidence for proper invocation cause support | `PRUNED`; D1I-A leaves no proper invocation-cause support whose dialect incidence could be chosen |
 | `RCS-03D1N` | Hypothetical terminal true-zero-contender-conclusion transformation-cause prevalence across transforming definitions | `DERIVED`; selected fixed-tag readiness, immediate invocation, coherent same-cut evidence, and total tuple resolution make the reachable domain empty; a denied pair has a positive K/P disposition or ledger-bearing Z, neither N/NC |
 | `RCS-03D1N1` | State/boundary transformation-dialect incidence for proper no-candidate cause support | `PRUNED`; D1N has no reachable occurrence or proper support whose dialect incidence could be chosen |
-| `RCS-03D1T` | Actual nontrivial authoritative ledger-tuple-selection transformation-cause prevalence across transforming definitions | `OWNER-OPEN`; choose empty, universal, or nonempty proper support for a direct proposal edge at the one actual selection among multiple valid complete tuples; recommendation A lets selection route proof without itself transforming |
-| `RCS-03D1T1` | State/boundary transformation-dialect incidence for proper tuple-selection cause support | `SCREEN`; opens only under D1T-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1T-A/B |
-| `RCS-03D1VT` | Actual true/allow permission-verdict transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1T and applicable T1; the true authoritative permission bit is its own semantic occurrence rather than raw RNG or later positive settlement |
+| `RCS-03D1T` | Actual nontrivial authoritative ledger-tuple-selection transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; A makes direct tuple-selection-cause support empty, so the selected complete joint tuple retains every downstream consequence but the act of choosing it never itself proposes transformation |
+| `RCS-03D1T1` | State/boundary transformation-dialect incidence for proper tuple-selection cause support | `PRUNED`; D1T-A leaves no proper tuple-selection-cause support whose dialect incidence could be chosen |
+| `RCS-03D1VT` | Actual true/allow permission-verdict transformation-cause prevalence across transforming definitions | `OWNER-OPEN`; choose empty, universal, or nonempty proper support for a direct proposal edge at the one actual true permission bit; recommendation A lets permission govern coexistence without itself transforming |
 | `RCS-03D1VT1` | State/boundary transformation-dialect incidence for proper true-verdict cause support | `SCREEN`; opens only under D1VT-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1VT-A/B |
 | `RCS-03D1VF` | Actual false/not-both permission-verdict transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1VT and applicable VT1; the false authoritative permission bit is distinct from true/allow and from its deterministic disposition |
 | `RCS-03D1VF1` | State/boundary transformation-dialect incidence for proper false-verdict cause support | `SCREEN`; opens only under D1VF-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1VF-A/B |
@@ -3700,18 +3707,21 @@ tuple resolution returns exactly one complete tuple rather than none. A denied
 pair has a positive K/P disposition or the ledger-bearing Z branch. D1N is
 therefore `DERIVED` empty and N1
 is `PRUNED`; the register retains its row as an audit placeholder but has
-eleven reachable cause families, not twelve. The current register has **141
-slots**: 38 `SCREEN`, 1 `OWNER-OPEN`, 35 `PRUNED`, 60 `DIR-SELECTED`, 5
-`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`. RCS-03D1T is the current
-presented Relic card. Closing the sixteen still-open cause parent/child slots
-returns D2 as the sole frontier at `Phi_SR = 23`; closing D2-D5 one at a time
-opens RCS-03E at `Phi_SR = 19`.
+eleven reachable cause families, not twelve. Zanzagar then selected D1T-A:
+actual nontrivial tuple selection chooses the operative complete proof-weave
+but never itself proposes persistent transformation. D1T is `DIR-SELECTED`,
+D1T1 is `PRUNED`, and D1VT is the sole frontier. The current register has
+**141 slots**: 36 `SCREEN`, 1 `OWNER-OPEN`, 36 `PRUNED`, 61 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. Closing the fourteen
+still-open cause parent/child slots from VT through M returns D2 as the sole
+frontier at `Phi_SR = 23`; closing D2-D5 one at a time opens RCS-03E at
+`Phi_SR = 19`.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-nine owner cards under this thirty-eight-times-corrected charter and will
+thirty-seven owner cards under this thirty-eight-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3735,7 +3745,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 141 frozen candidate slots; current `Phi_SR = 39` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, and D1N is derived empty | At most 39 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children; closing the sixteen still-open cause slots returns D2 at `Phi_SR = 23`, and D2-D5 close before agency opens at 19; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 141 frozen candidate slots; current `Phi_SR = 37` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, D1N is derived empty, and D1T-A keeps tuple selection authoritative but noncausal | At most 37 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children; closing the fourteen still-open cause slots from VT through M returns D2 at `Phi_SR = 23`, and D2-D5 close before agency opens at 19; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

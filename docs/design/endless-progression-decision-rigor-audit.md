@@ -6642,15 +6642,17 @@ invocation topology to admit speculative evaluation outside a sufficient fixed-
 tag readiness episode. The cause surface therefore has eleven reachable
 families plus one derived-empty registered placeholder.
 
-After D1I-A and that derivation, the 141-row register contains 38 `SCREEN`, 1
+At that checkpoint after D1I-A and that derivation, the 141-row register
+contains 38 `SCREEN`, 1
 `OWNER-OPEN` at D1T, 35 `PRUNED`, 60 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
 and 1 `EVALUATE`; `Phi_SR = 39`. Sixteen cause parent/child slots remain from
 T through M; closing them returns D2 at 23. The correction removes a fake choice, not a
 mechanic.
 
-The next frontier is D1T. A qualifying T witness contains one actual evaluation
-with complete tuple set `X`, `|X|>=2`; one prospectively bound deterministic
-whole-stance law selecting exactly one complete joint tuple `x`; and one
+The next frontier at that checkpoint was D1T. A qualifying T witness contains
+one actual evaluation with complete tuple set `X`, `|X|>=2`; one prospectively
+bound deterministic whole-stance law selecting exactly one complete joint
+tuple `x`; and one
 prospectively versioned direct T-locus proposal edge. Deleting only that edge
 must remove the proposal while `X`, the stance, `x`, invocation, later verdict,
 settlement, claim/latch facts, completed trace, and current assignment remain
@@ -6701,6 +6703,75 @@ one complete tuple, and C3C3B3A-B supplies bound laws that differ on a held-
 fixed reachable product. That existence does not force a direct T proposal.
 Under A/B, T1 prunes; under C, T1 opens. No option decides approval, collision,
 exact catalog, UI, power, balance, persistence, or implementation.
+
+Zanzagar selected D1T-A. Thus `D_T=∅`: actual nontrivial tuple selection stays
+authoritative and may change every lawful downstream consequence of the
+selected complete proof-weave, but the selection occurrence has no direct
+persistent-transformation proposal edge. D1T moves to `DIR-SELECTED`, D1T1
+moves to `PRUNED`, and D1VT becomes the sole `OWNER-OPEN` row. The 141-row
+register now contains 36 `SCREEN`, 1 `OWNER-OPEN`, 36 `PRUNED`, 61
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`.
+Fourteen cause parent/child slots remain from VT through M; closing them returns
+D2 as the sole frontier at 23. No authoritative-record text changed.
+
+**D1VT prerequisite and atomicity audit — passes without a row split.** A
+qualifying VT witness contains exactly one actual canonical evaluation with two
+contender tags, one selected complete tuple, one unordered pair that reaches
+permission, and one authoritative realized `true`/allow bit. It also contains a
+prospectively versioned direct VT-locus edge whose deletion removes the
+proposal while the tuple, pair, law, context, participant stance, true bit,
+later K/P/C facts, every independently created proposal fact, completed trace,
+and current assignment remain fixed. The edge may inspect no later provisional
+output, commit, claim, latch, approval, or collision result. A singleton has no
+permission verdict and cannot witness VT.
+
+The realized true bit is the one material occurrence. Exact-shared,
+distinct-related, and hybrid proof forms are inputs to that bit rather than
+separate causes; a hybrid has one permission result, not one exact vote plus one
+related vote. G1-A permits at most two contender tags, so one evaluation has at
+most one unordered pair and one VT occurrence. Deterministic versus Oracle,
+responsive versus steadfast, and routing stance/context classify how the same
+semantic bit is produced. Once that bit is fixed, they do not change authority,
+settlement state, or transition dialect and therefore fail the admission test
+for extra owner rows. Raw probability, RNG draw, contemplated branch,
+callbacks, rendering, replay, reload, and duplicate delivery are not VT. Exact
+trigger placement by form, law, context, or stance remains AUTHOR/SPEC.
+
+Reachability is positive independently of any VT edge. E1-C requires a
+responsive exact-permission law with reachable true and false results. E3-C
+also requires a context-invariant always-allow exact law over its own nonempty
+reachable domain. Neither guarantee says that every transforming definition
+has an allow-capable two-contender route, and neither turns an allow bit into a
+transformation proposal.
+
+The next card is therefore atomic and exhaustive over `D_VT⊆D_mut`:
+
+- D1VT-A makes `D_VT=∅`. **Recommended.** Permission decides whether distinct
+  manifestations may continue together but never itself proposes biography.
+  D1P-B already supplies every transforming definition with a positive-result
+  path. This keeps the readable rule “the covenant permits coexistence; what
+  manifests may shape the Relic,” while avoiding safe-pair farming,
+  ally-steered transformation access, and stacked VT/K/P proposals.
+- D1VT-B makes `D_VT=D_mut`. Every transforming definition must have at least
+  one reachable genuine two-contender allow occurrence with a direct VT edge;
+  a singleton K/P route cannot satisfy it. This supports a universal
+  “permission itself changes every Relic” thesis, but pressures singleton and
+  steadfast-refusal identities and imposes pair-capable authoring across the
+  catalog.
+- D1VT-C makes `D_VT` nonempty proper and opens D1VT1. A disclosed
+  `CONCORD-BOUND`, Open Covenant, or Communion family may change on an actual
+  allow bit while ordinary Relics use that bit only as a gate. It is the
+  guarded thematic alternative, viable only if visible, independently fun,
+  non-dominated, and not merely a premium extra-evolution caste.
+
+For a concrete boundary, Guardian Vow P and Returning Vow Q may select ledgers
+that share `Heat h`; Stone Witness then returns true. Under A, both continue
+together and no VT proposal exists; a later authored P edge may still propose
+`CONCORDANT`. Under B/C, the true bit may instead create
+`CONCORD-MARKED PROPOSED` before K completes, while later K/P facts stay unable
+to redefine the VT cause. Under A/B, D1VT1 prunes and D1VF opens. Under C,
+D1VT1 opens. No option selects exact definitions, triggers, targets, rates,
+copy, surface, power, persistence, approval, collision, or implementation.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

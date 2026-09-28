@@ -140,6 +140,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [actual true/allow permission-verdict cause is next](2026-09-28-0529--relic-true-verdict-cause-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D1T-A keeps actual tuple selection authoritative but noncausal; two audits uphold the realized true/allow bit as one atomic reachable cause locus and D1VT as the sole presented choice. |
 | [authoritative ledger-tuple-selection cause is next](2026-09-28-0517--relic-tuple-selection-cause-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D1I-A makes invocation listen without transforming; a focused reachability audit derives the registered no-candidate row empty under selected readiness and tuple rules, leaving D1T as the sole presented choice. |
 | [canonical evaluator invocation cause is next](2026-09-28-0439--relic-invocation-cause-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | Superseded checkpoint: D1C-A kept claim writes as proof expenditure and a lifecycle audit exposed the registered cause loci; its asserted no-candidate route was later disproved before presentation. |
 | [evidence-claim-write transformation cause is next](2026-09-28-0410--relic-claim-write-cause-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D1P-B gives every transforming definition a positive-result cause path and prunes P1; two audits preserve the later actual claim write as an independent cause choice and recommend keeping proof expenditure distinct from biography. |

@@ -1,81 +1,72 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 invocation listens; false no-candidate branch removed; tuple selection is next
+## 2026-09-28 tuple selection routes proof; true permission verdict is next
 
-Zanzagar selected `RCS-03D1I-A`. The one actual canonical evaluator invocation
-listens but never itself proposes a persistent transformation. A later positive
-receipt retains its independent D1P-B path. D1I is `DIR-SELECTED`, and D1I1 is
-`PRUNED`. The authoritative decision record remains unchanged.
+Zanzagar selected `RCS-03D1T-A`. An actual nontrivial authoritative selection
+among multiple complete ledger tuples still chooses the one operative
+proof-weave and can thereby change downstream permission, settlement, and
+claim consequences. The selection occurrence itself never directly proposes
+persistent transformation. D1T is `DIR-SELECTED`; D1T1 is `PRUNED`; D1VT is
+the sole frontier. The authoritative decision record remains unchanged.
 
-Before presenting D1N, two independent read-only derivations broke its premise.
-One fixed tag enters readiness only when its relationship and tag-specific
-occurrence/recurrence inputs are sufficient. C1-A makes that same cut eligible;
-C2A-A invokes there; C3A reads coherent evidence at that cut. The ready tag has
-at least one valid complete ledger. A unique tuple is derived directly, while
-C3C3B1-A resolves a multiple-tuple product to exactly one tuple, never none.
-G1-A leaves at most two contenders. A denied pair's prospectively fixed
-disposition is either positive and continues through K/P or is the ledger-
-bearing `{}` settlement Z. Every invocation therefore reaches K/P or Z, not a
-true zero-contender/no-tuple terminal.
+The 141-row register now contains 36 `SCREEN`, 1 `OWNER-OPEN` at D1VT, 36
+`PRUNED`, 61 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`. Fourteen cause parent/child slots remain from VT through M.
+Closing them returns D2 at 23; D2-D5 still lead to RCS-03E at 19.
 
-The old “candidate or no candidate” sentences were wrong and are corrected at
-their instructions. `RCS-03D1N` remains in the frozen 141-row register for
-audit continuity but is `DERIVED` with empty reachable domain; D1N1 is
-`PRUNED`. Current prose calls the hypothetical terminal `NC`, because `N`
-already names an earlier successful no-response class. The register has eleven
-reachable cause families plus one derived-empty placeholder—not twelve
-reachable families. This removes no gameplay; it removes a fake owner choice.
+`RCS-03D1VT` asks whether one actual authoritative `true`/allow permission
+verdict may itself directly propose a Relic transformation. This is the real
+verdict reached after exactly two contender tags have one selected complete
+tuple and their unordered pair reaches permission. A singleton has no
+permission verdict. A probability above zero, an always-allow declaration, a
+raw random draw, contemplated branching, or a later successful result is not
+the VT occurrence.
 
-The current register contains 38 `SCREEN`, 1 `OWNER-OPEN` at D1T, 35
-`PRUNED`, 60 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 39`. Closing the sixteen still-open cause parent/child slots returns
-D2 at 23; D2-D5 still lead to RCS-03E at 19.
+The row is atomic. Exact-shared, distinct-related, and hybrid proof forms feed
+the same semantic permission bit; a hybrid does not get an exact vote and a
+related vote. Deterministic Witness and stochastic Oracle laws likewise differ
+in how the bit is produced, not in the authority of the realized bit. With at
+most two contenders, one evaluation has at most one unordered pair and one VT
+occurrence. True verdicts are already reachable under selected exact-law
+requirements, but no prior choice gives them a direct transformation edge.
 
-`RCS-03D1T` asks whether the one actual authoritative selection among two or
-more valid complete ledger tuples may itself directly propose transformation.
-A unique forced tuple has no T occurrence. Structural multiplicity, stance
-binding, rejected alternatives, per-tag comparison steps, and later verdicts
-cannot masquerade as T. One evaluation has at most one T occurrence, even when
-its selected complete tuple spans two contender tags.
+- **A — permission allows coexistence but never transforms. Recommended.** The
+  true bit retains its full mechanical consequence: it decides that the two
+  distinct manifestations may continue together. It simply creates no extra
+  biography proposal. D1P-B already guarantees every transforming definition
+  a positive-manifestation path. This gives the readable rule **“the covenant
+  permits coexistence; what manifests may shape the Relic.”** It is the
+  cleanest protective Achintya Bheda Abheda fit: permission preserves unity and
+  difference in play without making the gate's “yes” a second transformation
+  event. It also avoids farming safe always-allow pairs, ally-steered access,
+  and stacked VT/K/P proposals. Cost: no Relic can change merely because its
+  covenant allowed two manifestations to coexist.
+- **B — every transforming Relic has a true-verdict-shaped path.** Every
+  state- and boundary-supporting transforming definition must have at least one
+  reachable genuine two-contender allow occurrence whose true bit directly
+  proposes change. Not every allow verdict must transform. A singleton success
+  path cannot satisfy B. This universalizes “permission itself changes every
+  Relic,” but forces pair-capable, allow-capable content throughout the catalog,
+  pressures singleton and steadfast-refusal identities, encourages safe-pair
+  farming, and may stack a VT proposal with later result proposals.
+- **C — a disclosed proper subset is concord-bound.** A named
+  `CONCORD-BOUND`, Open Covenant, or Communion family may change on its actual
+  allow bit; ordinary Relics use the same bit only as a gate. This makes the
+  theme explicit without universalizing it, but creates another causal dialect
+  and risks a premium “extra evolution route” caste or a trap caste. It is
+  viable only if the distinction is prospectively visible, independently fun,
+  non-dominated, and cannot be expressed honestly through the later positive
+  manifestation.
 
-- **A — selection routes proof but never transforms. Recommended.** The bound
-  stance still makes a mechanically consequential choice: it fixes each
-  contender tag's complete proof ledger, which can alter downstream permission,
-  result, and proof-claim consequences. Later closure gates must still prove the
-  stance menu is strategically worthwhile and fun; T-biography cannot rescue a
-  hollow menu. D1P-B may let the resulting positive manifestation shape the
-  Relic, but the act of choosing a truthful proof-weave creates no extra proposal. This is
-  the cleanest readable and protective Achintya Bheda Abheda fit: distinct
-  truths remain real, one coherent tuple becomes operative, and neither side is
-  collapsed into the other. Cost: no Relic can remember interpretation itself
-  as the direct cause of its change.
-- **B — every transforming definition has a selection-shaped path.** Every
-  state- and boundary-supporting transforming definition needs at least one
-  reachable multi-ledger evaluation whose actual tuple selection directly
-  proposes change. Not every selection transforms. This makes “every Relic can
-  be changed by how it interprets plural truths” universal, but is much stronger
-  than the existing existential alternate-ledger guarantee. It forces
-  multiplicity-capable content across the catalog, rewards engineering
-  ambiguity, and can coexist with a later P proposal.
-- **C — a disclosed proper subset is interpreter-bound.** A named
-  `INTERPRETER-BOUND`, Forked Memory, or Simulacrum family may be changed when
-  one equally valid proof-weave becomes operative; ordinary Relics route proof
-  without a T proposal. Remembering the exact route may be authored but is not
-  guaranteed by this row. This is the strongest explicit thematic reading, but
-  risks a premium subtype, trap subtype, and second causal language. D1T1 then
-  chooses state-only, boundary-only, or both dialects.
+Example: Guardian Vow P and Returning Vow Q select complete ledgers sharing
+`Heat h`; Stone Witness returns true. Under A, both continue together, but the
+verdict creates no transformation proposal. If their later positive commit has
+an authored P edge, it may independently propose `CONCORDANT`. Under B/C, the
+true bit may instead create `CONCORD-MARKED PROPOSED` before the result
+completes; later outcome facts cannot retroactively define that VT cause.
 
-Example: fixed contender set `{P,Q}` admits
-`X={(L_v,L_q),(L_h,L_q)}`, where `L_v={Guard g,Vow v}`,
-`L_h={Guard g,Heat h}`, and `L_q={Return t,Heat h}`. Bound Dissonance selects
-`(L_v,L_q)` while Chorus would select `(L_h,L_q)`. Under A, the chosen complete
-tuple governs normal downstream mechanics but creates no T proposal; a later
-positive P may independently propose `DEFIANCE`. Under B/C, an authored direct
-edge from the completed selection may instead create `FORK-MARKED PROPOSED`
-before permission is realized. It cannot inspect or influence the later verdict
-or settlement.
-
-Ask only for D1T A, B, or C. Under A/B, D1T1 prunes; under C, D1T1 opens.
+Ask only for D1VT A, B, or C. Under A/B, D1VT1 prunes and D1VF opens. Under C,
+D1VT1 opens next.
 
 ## 2026-09-28 success shapes every Relic; claim-write cause selected — superseded frontier
 
@@ -137,8 +128,9 @@ intended claim, or one trigger per claimed child. Replay, reload, callbacks,
 rendering, duplicate delivery, and idempotent re-claim cannot mint another
 cause occurrence. Ally proof retains ownership/payment and grants no approval.
 This section records the prior D1C frontier. D1C-A is now selected; do not ask
-it again. **Corrected 2026-09-28:** D1I-A is also selected and must not be asked
-again; D1N is derived empty, and the current single choice is D1T above.
+it again. **Corrected 2026-09-28:** D1I-A and D1T-A are also selected and must
+not be asked again; D1N is derived empty, and the current single choice is
+D1VT above.
 
 ## 2026-09-28 claimed proof is Relic-wide spent; positive-settlement cause is next
 
@@ -11305,7 +11297,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 05:17 UTC — authoritative ledger-tuple-selection cause is next](docs/handoffs/2026-09-28-0517--relic-tuple-selection-cause-next.md)**
+[2026-09-28 05:29 UTC — actual true/allow permission-verdict cause is next](docs/handoffs/2026-09-28-0529--relic-true-verdict-cause-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
