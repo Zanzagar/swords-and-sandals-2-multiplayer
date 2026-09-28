@@ -24770,7 +24770,7 @@ target recurrence, fresh post-claim co-proof, propagation topology, and
 separate positive-substitute and empty-settlement authorization dispositions.
 C3F itself remains the exhaustive support question.
 
-### RCS-03C3F — later non-attributed-incidence reuse of claimed evidence — active owner choice
+### RCS-03C3F — later non-attributed-incidence reuse of claimed evidence — A selected
 
 For a claimed canonical occurrence `x`, let `z0(x)` be the first positive
 settlement that created its still-operative claim state in this ruleset version,
@@ -24905,6 +24905,149 @@ and F2 opens: 23 `SCREEN`, 1 `OWNER-OPEN`, 27 `PRUNED`, 57 `DIR-SELECTED`, 4
 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`. After every applicable
 B-only child closes, RCS-03D opens at `Phi_SR = 20`. The authoritative decision
 record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, claimed proof
+is spent across this active Relic.** Thus `R^{new-inc}_v=emptyset`. From the
+immutable first operative claim epoch `z0(x)` until that claim episode ends,
+the same claimed canonical occurrence cannot acquire a later causal incidence
+to any exact target tag outside `A^-_e(x)` in the same active persistent Relic.
+Together with C3E-A, it is unavailable to every later result incidence of that
+Relic. A genuinely new occurrence remains eligible. Pre-`z0` history remains
+canonical but lies outside this claim episode; same-cut use remains C3C and
+another Relic/root/combatant remains RCS-08.
+
+C3F moves to `DIR-SELECTED`. `RCS-03C3F1`, `RCS-03C3F2`,
+`RCS-03C3F3`, `RCS-03C3F4A`, and `RCS-03C3F4B` move to `PRUNED` because
+their qualifying B-only relay domain is empty. At the pre-amendment checkpoint,
+the 114-row register therefore contained 19 `SCREEN`, 1 `OWNER-OPEN` at old
+RCS-03D, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 20`. The authoritative decision record remains
+unchanged.
+
+> **Thirty-sixth prerequisite correction, 2026-09-28 — old RCS-03D was
+> overcompressed.** Three independent read-only audits agreed that its register
+> label named only transformation-cause eligibility even though RCS-03A's
+> preserved scope expressly assigned cause, direction, adjacency, clearing,
+> and reversibility to it. A final cause-order audit then broke the proposed
+> five-family partition: an actual Relic-local claim write follows the positive
+> receipt commit and is an independently authoritative possible cause. A
+> separate dialect audit broke the proposal to leave a proper-subset cause
+> mapping wholly to authoring: state-supporting and boundary-supporting Relics
+> transform different persistent coordinates, so excluding either entire
+> dialect changes legal proposals and state transitions.
+>
+> Old `RCS-03D` is therefore a non-counting parent for sixteen registered rows:
+> six cause-prevalence rows, one proper-branch dialect-incidence child for each,
+> and four transition-topology rows. This is the minimum repaired boundary used
+> by the current pass:
+>
+> | Row | Atomic boundary | Dependency |
+> | --- | --- | --- |
+> | `RCS-03D1P` | Positive committed-settlement transformation-cause prevalence | follows C3F-A; first active row |
+> | `RCS-03D1P1` | State/boundary transformation-dialect incidence for proper positive-settlement support | only D1P-C; otherwise pruned |
+> | `RCS-03D1C` | Actual Relic-local evidence-claim-write transformation-cause prevalence | follows D1P and applicable P1 |
+> | `RCS-03D1C1` | State/boundary dialect incidence for proper claim-write support | only D1C-C; otherwise pruned |
+> | `RCS-03D1Z` | Ledger-bearing `{}` cancellation-settlement transformation-cause prevalence | follows D1C and applicable C1 |
+> | `RCS-03D1Z1` | State/boundary dialect incidence for proper cancellation support | only D1Z-C; otherwise pruned |
+> | `RCS-03D1N` | True-no-candidate invocation transformation-cause prevalence | follows D1Z and applicable Z1 |
+> | `RCS-03D1N1` | State/boundary dialect incidence for proper no-candidate support | only D1N-C; otherwise pruned |
+> | `RCS-03D1X` | Independent non-evaluation combat-semantic event transformation-cause prevalence | follows D1N and applicable N1 |
+> | `RCS-03D1X1` | State/boundary dialect incidence for proper independent-event support | only D1X-C; otherwise pruned |
+> | `RCS-03D1M` | Dedicated evolution/reconfiguration-operation transformation-cause prevalence | follows D1X and applicable X1 |
+> | `RCS-03D1M1` | State/boundary dialect incidence for proper operation support | only D1M-C; otherwise pruned |
+> | `RCS-03D2` | Direct-versus-staged nonclear assignment adjacency topology | follows all applicable D1 rows |
+> | `RCS-03D3` | Direct reverse-edge support among nonclear adjacent assignments | follows D2 |
+> | `RCS-03D4` | Explicit clear-to-unassigned support | follows D3 |
+> | `RCS-03D5` | Eventual nonclear return/reversibility topology | follows D4 and all cause rows |
+>
+> For every cause family `F`, its parent classifies the subset `D_F` of all
+> transforming definitions `D_mut`: empty, the whole domain, or nonempty
+> proper. A proper branch then separately chooses state-dialect only,
+> boundary-dialect only, or nonempty support in both dialects. Exact definition
+> identities, trigger catalogs, edge maps, durations, counts, and within-dialect
+> prevalence remain AUTHOR/SPEC/TUNE. The six cause subsets must jointly cover
+> `D_mut`; an otherwise selectable branch with no total versioned assignment is
+> pruned rather than interpreted as an uncaused transformation.
+>
+> P, C, Z, and N are distinct ordered semantic loci: the actual positive receipt
+> set commits; any selected evidence claim then writes; a ledger-bearing `{}`
+> commits no receipt and no claim under D2-A; and a true no-candidate invocation
+> has neither selected contender tuple nor causal union. X covers an already
+> meaningful independent combat/source/relationship event rather than an
+> evaluation result. M covers the existence of a dedicated semantic evolution
+> or reconfiguration operation; RCS-03E still owns its authority, while RCS-13
+> owns its initiation and lock horizon. A semantic expiry is X when it is an
+> independently existing event and M when it initiates such an operation; it
+> is not a seventh cause family. Bare encounter/Circuit cuts remain inert under
+> C131-A/C132-A. Reward/acquisition, cross-root/team force, migration/repair,
+> collision, and committed identity remain RCS-09/RCS-08/RCS-15-16/RCS-04A/
+> RCS-04B respectively.
+>
+> Replacing one counted row with sixteen adds fifteen. After C3F-A, the repaired
+> register contains 129 rows: 34 `SCREEN`, 1 `OWNER-OPEN` at D1P, 31 `PRUNED`,
+> 57 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+> Closing each cause parent plus its child, by selection or pruning, opens D2 at
+> `Phi_SR = 23`; D2-D5 then open one at a time, and RCS-03E opens at
+> `Phi_SR = 19`. The added slots expose decisions already promised by old D;
+> they add no result, source, payoff, Relic slot, or implementation mechanic.
+
+### RCS-03D1P — positive committed-settlement transformation cause — active owner choice
+
+Let `D_mut` be the completed fixed-version transforming Relic definitions under
+RCS-03A-C, partitioned into nonempty state-supporting `D_S` and boundary-
+supporting `D_B`. A **positive-settlement transformation-cause witness** for
+definition `d` contains the same active persistent Relic instance in current
+operative assignment `a`, one authoritative cut-atomic evaluation `z`, and one
+prospectively authored persistent-transition proposal such that:
+
+1. `z` commits a nonempty final receipt set after all selected permission and
+   treatment rules—actual original tag(s) `P/Q` or actual substitute tag(s)
+   `S/S1/S2`;
+2. the complete actual settlement identity, not a provisional candidate,
+   intended tag, partial contender, animation, callback, or later payoff,
+   satisfies the versioned cause contract;
+3. projecting out that committed positive settlement projects out this
+   proposal, so a merely coincident transition is not a witness;
+4. the proposal names a materially distinct legal assignment `a'` of the same
+   RCS-03A dialect and same Relic instance; and
+5. the current assignment remains authoritative. D1P creates a proposal only;
+   RCS-03E, RCS-04A, and RCS-04B still decide authority, collision, and the
+   identity of any committed output.
+
+Let `D_P` contain definitions with at least one such reachable witness.
+
+| Choice | Positive-result cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — successful manifestations never cause persistent transformation** | `D_P=emptyset`. Positive Relic results may still pay off, claim evidence, and recur under the selected rules, but the result commit itself never proposes a remembered-condition or remembered-attunement change. | A gives the sharpest separation between combat payoff and artifact biography. It avoids success-farming and automatic proposal spam, and leaves scars, silence, lived events, or deliberate operations available through later cause rows. The cost is that a Relic's own successful relationship never directly shapes what that Relic becomes; biography may feel menu-driven or externally imposed. The marginal ideal fit is neutral/protective. | Ashen in `Mercy` commits Covenant receipt P. P resolves normally, but no `Defiance` proposal can cite that commit as its cause. A later claim, cancellation, combat event, or operation may still qualify if its own row permits it. |
+| **B — every transforming Relic has at least one positive-result cause path** | `D_P=D_mut`. Every state-supporting and boundary-supporting definition has at least one reachable prospectively authored positive settlement that proposes a materially distinct assignment. This does **not** mean every result transforms, every edge uses this cause, or the proposal commits automatically. | **Recommended.** B gives one learnable rule across the system: **a Relic can be changed by what it successfully manifests**. At the exact cause/proposal boundary, the same Relic, its current relationship, its actual result, and a distinct proposed memory participate **directly**; the eventual across-time transformation remains **partial**, and universal definition prevalence is **aggregate**. B avoids C's hidden “truly evolving” caste while retaining authored variety. Risks are cheapest-recipe farming, success snowball, ally steering, proposal spam, and opaque substitute causation; later agency, adjacency, power, lock, and evaluation gates must reject those failures. | Ashen's actual `P` from Guard `g` plus ally Heat `h` may show `P -> DEFIANCE PROPOSED`. Dreamglass in `Oath` may have an authored denied-pair substitute `S` whose **actual** commit shows `S -> ECHO ATTUNEMENT PROPOSED`. Neither assignment changes until later authority resolves it. |
+| **C — positive-result-shaped and otherwise-shaped Relics coexist** | `D_P` is a nonempty proper subset of `D_mut`. At least one transforming definition has a qualifying positive cause and at least one has none. D1P1 then decides whether positive support occurs only in the state dialect, only in the boundary dialect, or in both. | C can give distinct archetypes genuinely different biographies: some learn from manifestation while others change only through rupture, silence, world events, or deliberate rites. Its local positive witnesses retain B's direct fit, but coexistence is only aggregate. The cost is a second causal language and a hidden premium taxonomy unless the distinction is disclosed, strategically meaningful, and non-dominated. | Ashen may learn from P while another named Relic never can. D1P alone may not silently decide that all remembered-condition Relics behave one way and all remembered-attunement Relics another; C's child owns that dialect boundary. |
+
+A/B/C are exhaustive because `D_P` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. A positive substitute counts through its
+actual fixed substitute tag only; no `P->S1`, `Q->S2`, or intended-output
+inheritance is inferred. `{}` and true no-candidate invocations belong to Z and
+N, not P. An actual evidence claim is a later ordered authoritative write and
+belongs to C even when the same settlement also creates a P proposal; any two
+proposals remain distinct inputs to RCS-04A.
+
+The cause law is bound prospectively and every proposal identity is atomic and
+idempotent. Reload, replay, duplicate delivery, callbacks, or a second rendering
+cannot mint another copy. An ally may supply proof while retaining ownership
+and payment; that grants no transformation approval. C3F-A spends claimed
+occurrences across this active Relic but does not prevent fresh-proof farming or
+nonclaiming positive settlements, so it is not a D1P balance proof.
+
+At the semantic/proof level, eventual presentation must distinguish an actual
+result from a merely proposed transformation and make the old assignment,
+proposed assignment, actual committed tag(s), and causal contributors
+reconstructable without implying that state already changed. Exact copy,
+layout, timing, and surface contract remain RCS-02/SR-10 work. Simulator/RL
+traces must preserve settlement ID, actual final tag set, pre-state,
+cause-contract identity/version, proposal ID/target, source contributors, and
+later approval/collision/disposition. Exact trigger and target catalogs,
+frequency, caps, claim predicates, payoff, balance, UI realization,
+persistence schema, and release content remain later work. The authoritative
+decision record remains unchanged.
 
 ## Session protocol and evidence
 

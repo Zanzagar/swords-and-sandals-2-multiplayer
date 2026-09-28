@@ -1,5 +1,70 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-28 claimed proof is Relic-wide spent; positive-settlement cause is next
+
+Zanzagar selected `RCS-03C3F-A`. From the immutable first operative claim
+epoch `z0(x)` until that claim episode ends, the same claimed canonical
+occurrence cannot acquire any later causal result incidence in the same active
+persistent Relic. Together with C3E-A, it is spent across that Relic. A
+genuinely new occurrence remains eligible; pre-`z0` history remains canonical
+but lies outside the episode; same-cut and other-root/Relic/combatant use retain
+their prior owners. The player-facing state can remain one grey `CLAIMED BY
+THIS RELIC` treatment.
+
+C3F moves to `DIR-SELECTED`; C3F1-C3F4B prune because their B-only domain is
+empty. At the pre-amendment checkpoint, the 114-row register contained 19
+`SCREEN`, 1 `OWNER-OPEN` at old RCS-03D, 31 `PRUNED`, 57 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`. The authoritative
+decision record remains unchanged.
+
+Three independent read-only audits agreed that old RCS-03D overcompressed its
+inherited promise: it named cause eligibility but also owned transformation
+direction, adjacency, clearing, and reversibility. A named cause-order audit
+then separated the later actual evidence-claim write from the earlier positive
+receipt commit. A dialect countermodel established that proper-subset cause
+support cannot be left wholly to authoring because excluding all
+remembered-condition or all remembered-attunement Relics changes legal state
+transitions.
+
+The thirty-sixth correction therefore makes old RCS-03D a non-counting parent
+for sixteen rows: six cause-prevalence parents (positive receipt P, actual claim
+write C, ledger-bearing cancellation Z, true no-candidate N, independent
+combat-semantic event X, and dedicated operation M), one conditional
+state/boundary incidence child for each proper branch, and four transition-
+topology rows (nonclear adjacency, direct reversal, clearing, and eventual
+return). This is rigor, not sixteen added gameplay systems: it adds no source,
+result, payoff, Relic slot, or implementation mechanic.
+
+The repaired 129-row register contains 34 `SCREEN`, 1 `OWNER-OPEN` at
+`RCS-03D1P`, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 35`. A/B on any cause parent prunes its conditional child;
+C opens it. After all six parent/child pairs close, D2 opens at `Phi_SR = 23`;
+D2-D5 then close one at a time and RCS-03E opens at 19.
+
+`RCS-03D1P` asks whether an authoritative nonempty result committed by this
+active Relic may be the actual cause of a prospectively authored persistent-
+transformation proposal:
+
+- **A — empty:** successful manifestations never cause persistent
+  transformation. They may still pay off and claim evidence.
+- **B — universal:** every transforming definition has at least one reachable
+  positive-result cause path. **Recommended.** This means “a Relic can be
+  changed by what it successfully manifests,” not that every success
+  transforms, every transition uses success, or a proposal commits itself.
+- **C — nonempty proper:** some transforming definitions can learn from a
+  successful manifestation and some never can; D1P1 then decides whether that
+  support occurs in the state dialect, boundary dialect, or both.
+
+Example: Ashen in `Mercy` commits actual Covenant P from Guard plus ally Heat
+and shows `P -> DEFIANCE PROPOSED`; Dreamglass in `Oath` commits an actual
+denied-pair substitute S and shows `S -> ECHO ATTUNEMENT PROPOSED`. Neither
+state changes yet—RCS-03E owns agency, RCS-04A collision, and RCS-04B identity.
+Only actual final tags count; intended outputs do not inherit substitute
+identity. `{}` and no-candidate invocations have later rows. Proposal identity
+is prospective, atomic, and idempotent. Later gates must control cheapest-
+recipe farming, success snowball, ally steering, proposal spam, and opaque
+substitute causation. Ask only for D1P A, B, or C.
+
 ## 2026-09-28 fresh proof after rearm selected; new-incidence reuse is next
 
 Zanzagar selected `RCS-03C3E-A`. Once a positive settlement has actually
@@ -88,7 +153,9 @@ catalog, and anti-alias/replay/same-cut/cross-root/reset rules remain derived.
 
 Under A, RCS-03D opens at `Phi_SR = 20`. Under B, applicable F1 opens at
 `Phi_SR = 25`; if F1's domain is empty it prunes and F2 opens at
-`Phi_SR = 24`. RCS-03D waits until F1-F4B close. Ask for A or B.
+`Phi_SR = 24`. RCS-03D waits until F1-F4B close. At that checkpoint, the next
+action was to ask for A or B; C3F-A is now selected, so the newer section above
+supersedes that ask.
 
 ## 2026-09-26 fixed denied outputs selected; three-plus contenders are next
 
@@ -11094,7 +11161,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 02:45 UTC — later new-incidence evidence reuse is next](docs/handoffs/2026-09-28-0245--relic-new-incidence-evidence-reuse-next.md)**
+[2026-09-28 03:53 UTC — positive-settlement transformation cause is next](docs/handoffs/2026-09-28-0353--relic-positive-settlement-cause-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

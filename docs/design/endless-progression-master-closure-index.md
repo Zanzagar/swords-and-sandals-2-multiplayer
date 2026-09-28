@@ -1355,7 +1355,7 @@ worksheet history. They primarily populate `SR-01` through `SR-05` and parts of
 | `SR-01` | Fantasy, purpose, and topology | One vocabulary/relationship map distinguishes Soul, simulacrum/combatant, Bound Soul, Relic root, input/payoff Charms, sources, and results; each has a unique job and no slot duplicates another system's theme or UI role. | `PARTIAL`: standalone root/customizer and cross-source-weaver directions exist; normative map/replay remains. |
 | `SR-02` | Access, ownership, slots, custody, and loss | A state machine covers disabled/eligible/enabled states, one-root/two-Charm occupancy, personal ownership, duplicates, transfer, destruction/loss, retirement, and every illegal transition for Relics and Charms separately. | `PARTIAL`: personal Relic/Charm access, one root, two Charms, and permanent nontransferable Relics are selected; Charm custody/loss remains open. |
 | `SR-03` | Source and input grammar | A total matrix names eligible bearer/ally/source evidence, temporal and basis cells, Charm modifications, participation requirements, and legal/illegal examples; every selected cell has a gameplay use. | `PARTIAL`: extensive grammar directions, nonempty irreducible multi-root current-state support, repeated same-provenance cross-root support, exact-`Pi`-universal build identity, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, and nonempty within-evaluation cross-receipt overlap support exist; nontrivial within-parent site support is derived, while overlap form/treatment, cross-opportunity behavior, and total authored examples/exclusions remain open. |
-| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, universal continuity-root preservation across those revisions, nonempty irreducible multi-root current-state support, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, and nonempty within-evaluation cross-receipt overlap support are selected; coherent same-cut evidence acquisition, exact `{D,E,O}` material phase support, and nontrivial within-parent application-site support are derived, while overlap form/treatment, cross-opportunity behavior, claims/reuse, cause, agency, precedence, and lineage ownership remain open. |
+| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, universal continuity-root preservation across those revisions, nonempty irreducible multi-root current-state support, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, nonempty within-evaluation cross-receipt overlap support, full-union positive-result claims, one listen per uninterrupted cancelled-pair bond, and Relic-wide spending of claimed proof are selected; coherent same-cut evidence acquisition, exact `{D,E,O}` material phase support, and nontrivial within-parent application-site support are derived, while transformation cause, agency, precedence, and lineage ownership remain open. |
 | `SR-05` | Relational archetypes and Achintya boundary | Every required archetype maps to an operative player choice or state transition where continuity and distinction are mechanically legible; no mandatory class exists only to satisfy a graph, coverage, or symmetry token. | `PARTIAL`: structural/archetype directions through C170 exist; concrete player-visible proof does not. |
 | `SR-06` | Representative and release catalog | A finite versioned release catalog (or explicit launch minimum plus deferred catalog boundary) supplies source/relationship/payoff definitions, counterexamples, and at least one viable build purpose for every required family. | `OPEN` |
 | `SR-07` | Configuration and evolution horizons | Equip, Charm socketing, reconfiguration, rebinding, learning/evolution, encounter/Circuit locks, preview, and rollback rules name every clean boundary and cannot be shopped through reload or route information. | `OPEN` |
@@ -3109,12 +3109,34 @@ one-hop/first-admission rule; a second caught the first repair treating every
 successful incidence as a claim and leaving fresh co-proof unrouted. The
 amended register therefore has five B-only boundaries and **114 slots: 25
 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 56 `DIR-SELECTED`, 4 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. C3F is the sole presented Relic
-card.
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. At that checkpoint, C3F was the sole
+presented Relic card.
+
+Zanzagar selected C3F-A. Claimed canonical proof is now spent across the same
+active Relic for every later result incidence throughout the immutable claim
+episode rooted at `z0`; a genuinely new occurrence remains eligible. C3F moves
+to `DIR-SELECTED`, and F1-F4B prune because their B-only reuse domain is empty.
+At that pre-amendment checkpoint, the 114-row register contained 19 `SCREEN`,
+1 `OWNER-OPEN` at old RCS-03D, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`.
+
+Three read-only prerequisite audits then agreed that old RCS-03D named only
+cause eligibility while its inherited scope also promised direction,
+adjacency, clearing, and reversibility. A cause-order audit separated the
+actual Relic-local evidence-claim write from its earlier positive receipt
+commit. A dialect countermodel then showed that leaving a proper-subset cause
+mapping wholly to authoring could silently exclude either remembered-condition
+or remembered-attunement Relics. The thirty-sixth correction therefore makes
+old RCS-03D a non-counting parent and replaces it with six cause-prevalence
+rows, one conditional state/boundary incidence child for each proper branch,
+and four transition-topology rows. Replacing one counted row with sixteen adds
+fifteen slots. The repaired register has **129 slots: 34 `SCREEN`, 1
+`OWNER-OPEN`, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 35`**. RCS-03D1P is the sole presented Relic card.
 
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has 114
+To make that route genuinely finite, the remaining C3c pass has 129
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -3215,14 +3237,29 @@ overcompression.
 | `RCS-03C3D3` | Claimed-proof footprint inside the authoritative selected contender-ledger tuple | `DIR-SELECTED`; A makes every actual claim take the complete deduplicated selected-ledger final-child union, counting exact shared occurrences once; D1-B still leaves exact claim prevalence and assignments open |
 | `RCS-03C3D4` | Ledger-bearing empty-settlement held-pair reattempt support while canonical contender-pair relationship sufficiency remains uninterrupted | `DIR-SELECTED`; A permits one listen per unbroken canonical pair bond; B is only a guarded reopening fallback if human tests expose dominant reset-flicker or intolerably stranded formations and a material retry event passes every documented guard |
 | `RCS-03C3E` | Later reuse, after valid break/renew/rearm, of an otherwise-admissible claimed canonical occurrence through the same exact fixed C135 context/receipt tag | `DIR-SELECTED`; A makes qualifying same-incidence reuse empty, so a claimed occurrence remains ineligible for every later post-rearm commit of any exact tag through which a settlement actually claimed it; fresh occurrences, later non-attributed incidences, and successful nonclaiming-incidence recurrence remain separate |
-| `RCS-03C3F` | Later-cut reuse of a claimed canonical occurrence through a target incidence not previously attributed to that occurrence inside the same active Relic | `OWNER-OPEN`; choose empty or nonempty qualifying new-incidence reuse support inside the immutable claim episode rooted at first still-operative claim `z0(x)`; a target may have co-committed at `z0` yet remain non-attributed for this occurrence, while claimed prior incidences stay governed by C3E-A and same-cut/other-root use stays in C3C/RCS-08; A prunes F1-F4B and B opens them |
-| `RCS-03C3F1` | Successful nonclaiming-target recurrence after an actual C3F incidence and valid target rearm | `SCREEN`; B-only choice among incidence-latches-target, claim-only latch, or disclosed coexistence; C3E-A requires an actual claiming settlement and therefore does not decide recurrence through an attributed-but-nonclaimed target; prune vacuously when no reachable C3F success is nonclaiming |
-| `RCS-03C3F2` | Fresh independently eligible post-claim co-proof requirement across B-enabled reuse admissions | `SCREEN`; B-only choice between requiring at least one separate canonical occurrence originated after immutable `z0` for every first-incidence attempt and F1-permitted repeat, and supporting at least one such admission without one; normal target-ledger validity does not decide this relative-time rule |
-| `RCS-03C3F3` | Claimed-occurrence first-attribution propagation topology across later settlements after nonempty new-incidence support | `SCREEN`; B-only choice among terminal single transition, finite nonbranching successor path, and finite branch-capable DAG over monotone per-`z0` attribution states; each edge is one positive settlement adding its nonempty atomic set of new target incidences, so inherited one/two-tag same-settlement treatment is not re-decided, reciprocal tag labels cannot create a realized cycle, an initially unattributed occurrence roots at empty `A_z0(x)`, and same-target recurrence stays in F1 |
-| `RCS-03C3F4A` | Positive-substitute relay-attempt authorization-consumption prevalence | `SCREEN`; follows C3F-B and the existence of a reachable admitted attempt whose intended tag does not commit while positive substitute tag(s) do; choose preserve-all, consume-all, or disclosed coexistence, otherwise close vacuously; a prospective substitute incidence routes by pre-state to possible F3 commit when new, C3E-A refusal when already claimed-attributed, or F1 treatment when attributed but nonclaimed, while this row owns only unused intended authorization |
-| `RCS-03C3F4B` | Empty-settlement relay-attempt authorization-consumption prevalence | `SCREEN`; follows C3F-B and the existence of a reachable admitted attempt ending in `{}`; choose preserve-all, consume-all, or disclosed coexistence, otherwise close vacuously; `{}` contributes no committed incidence and D2-A does not decide separate relay authorization |
-| `RCS-03D` | Transformation-cause eligibility: which authored events may propose a persistent transition | `SCREEN`; follows `RCS-03A`–`RCS-03C3F` and every applicable C3F B-only child under `SR-04` |
-| `RCS-03E` | Transformation agency and approval: discretionary, precommitted, or deterministic authority under the selected cause | `SCREEN`; follows `RCS-03D` under `SR-04` |
+| `RCS-03C3F` | Later-cut reuse of a claimed canonical occurrence through a target incidence not previously attributed to that occurrence inside the same active Relic | `DIR-SELECTED`; A makes qualifying new-incidence reuse empty throughout the immutable claim episode rooted at first still-operative claim `z0(x)`, so together with C3E-A one claimed occurrence is spent across every later result incidence of this active Relic; a genuinely new occurrence remains eligible, pre-`z0` history remains canonical but outside the episode, and same-cut/other-root use stays in C3C/RCS-08 |
+| `RCS-03C3F1` | Successful nonclaiming-target recurrence after an actual C3F incidence and valid target rearm | `PRUNED`; C3F-A leaves no successful later new-incidence reuse whose nonclaiming recurrence could be classified |
+| `RCS-03C3F2` | Fresh independently eligible post-claim co-proof requirement across B-enabled reuse admissions | `PRUNED`; C3F-A leaves no B-enabled admission or repeat requiring a fresh post-claim co-proof rule |
+| `RCS-03C3F3` | Claimed-occurrence first-attribution propagation topology across later settlements after nonempty new-incidence support | `PRUNED`; C3F-A leaves no later first-attribution transition to form a terminal edge, path, or branch-capable DAG |
+| `RCS-03C3F4A` | Positive-substitute relay-attempt authorization-consumption prevalence | `PRUNED`; C3F-A admits no new-incidence relay attempt whose unused intended authorization needs disposition after positive substitution |
+| `RCS-03C3F4B` | Empty-settlement relay-attempt authorization-consumption prevalence | `PRUNED`; C3F-A admits no new-incidence relay attempt whose unused intended authorization needs disposition after `{}` |
+| `RCS-03D1P` | Positive committed-settlement transformation-cause prevalence across transforming Relic definitions | `OWNER-OPEN`; choose empty, universal, or nonempty proper support for at least one reachable prospective transition proposal caused by the same active Relic's authoritative nonempty final receipt commit; recommendation B makes support universal across definitions without making every result transform or any proposal self-authorizing |
+| `RCS-03D1P1` | State/boundary transformation-dialect incidence for proper positive-settlement cause support | `SCREEN`; opens only under D1P-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1P-A/B |
+| `RCS-03D1C` | Actual Relic-local evidence-claim-write transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1P and applicable P1; the authoritative claim write is later than the receipt commit and therefore an independent possible cause locus |
+| `RCS-03D1C1` | State/boundary transformation-dialect incidence for proper claim-write cause support | `SCREEN`; opens only under D1C-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1C-A/B |
+| `RCS-03D1Z` | Ledger-bearing `{}` cancellation-settlement transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1C and applicable C1; cancellation commits no positive receipt and no evidence claim under C3D2-A |
+| `RCS-03D1Z1` | State/boundary transformation-dialect incidence for proper cancellation cause support | `SCREEN`; opens only under D1Z-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1Z-A/B |
+| `RCS-03D1N` | True-no-candidate invocation transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1Z and applicable Z1; true no-candidate invocation has neither a selected contender tuple nor a causal union |
+| `RCS-03D1N1` | State/boundary transformation-dialect incidence for proper no-candidate cause support | `SCREEN`; opens only under D1N-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1N-A/B |
+| `RCS-03D1X` | Independent non-evaluation combat-semantic-event transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1N and applicable N1; the cause must already be a meaningful combat, source, or relationship event rather than an evaluation-result alias |
+| `RCS-03D1X1` | State/boundary transformation-dialect incidence for proper independent-event cause support | `SCREEN`; opens only under D1X-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1X-A/B |
+| `RCS-03D1M` | Dedicated evolution/reconfiguration-operation transformation-cause prevalence across transforming definitions | `SCREEN`; follows D1X and applicable X1; this row decides cause eligibility, RCS-03E retains operation authority, and RCS-13 retains initiation and lock horizon |
+| `RCS-03D1M1` | State/boundary transformation-dialect incidence for proper dedicated-operation cause support | `SCREEN`; opens only under D1M-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1M-A/B |
+| `RCS-03D2` | Direct-versus-staged nonclear assignment adjacency topology | `SCREEN`; follows all six cause parents and applicable proper-branch dialect children; decides whether a legal nonclear transformation proposal targets an adjacent assignment directly or must traverse authored intermediate assignment states |
+| `RCS-03D3` | Direct reverse-edge support among nonclear adjacent assignments | `SCREEN`; follows D2 and classifies whether a legal nonclear adjacent transition may have a direct reverse edge rather than requiring another route |
+| `RCS-03D4` | Explicit clear-to-unassigned transition support | `SCREEN`; follows D3 and decides whether a persistent Relic may legally clear its current assignment rather than move only among nonclear assignments |
+| `RCS-03D5` | Eventual nonclear return and reversibility topology | `SCREEN`; follows D4 and all cause rows; distinguishes irreversible reachability from legal eventual return without deciding exact graphs or durations |
+| `RCS-03E` | Transformation agency and approval: discretionary, precommitted, or deterministic authority under the selected cause | `SCREEN`; follows every applicable RCS-03D1 row and RCS-03D2-D5 under `SR-04` |
 | `RCS-04A` | Collision precedence and settlement when multiple already-legal transformation proposals coexist | `SCREEN`; follows `RCS-03E` and any applicable `RCS-03B4`/`RCS-03B7` under `SR-04` |
 | `RCS-04B` | Committed-output identity across artifact, definition, and lineage | `SCREEN`; follows `RCS-04A` under `SR-04`; persistence realization stays in `RCS-15` |
 | `RCS-05` | Qualitative Relic/Charm payoff and power envelope | `SCREEN` under `SR-09` |
@@ -3563,16 +3600,25 @@ occurrence's prior-attribution set. A final verifier broke the first draft's
 attempt to derive one-hop propagation and first-admission consumption from
 mere nonempty support. A second final verifier then broke the first repair's
 claim/attribution conflation and found fresh co-proof still unrouted. The
-thirty-fifth prerequisite correction now adds F1, F2, F3, F4A, and F4B as
-counted B-only rows. The current register has **114 slots**: 25 `SCREEN`, 1
+thirty-fifth prerequisite correction then added F1, F2, F3, F4A, and F4B as
+counted B-only rows. The then-current register had **114 slots**: 25 `SCREEN`, 1
 `OWNER-OPEN`, 26 `PRUNED`, 56 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 26`. C3F is the current presented Relic card.
+`EVALUATE`; `Phi_SR = 26`. Zanzagar selected C3F-A, spending claimed proof
+Relic-wide and pruning F1-F4B. The thirty-sixth correction then replaced old
+RCS-03D's bundled cause/direction/adjacency/clearing/reversibility promise with
+six cause-prevalence rows, their six conditional proper-branch dialect
+children, and four transition-topology rows. The current register has **129
+slots**: 34 `SCREEN`, 1 `OWNER-OPEN`, 31 `PRUNED`, 57 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. RCS-03D1P is the current
+presented Relic card. Closing each cause parent plus its conditional child by
+selection or pruning opens D2 at `Phi_SR = 23`; closing D2-D5 one at a time
+opens RCS-03E at `Phi_SR = 19`.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-twenty-six owner cards under this thirty-five-times-corrected charter and will
+thirty-five owner cards under this thirty-six-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3580,7 +3626,7 @@ usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS
 `RCS-03C3C3B3`, `RCS-03C3C3B3B`, `RCS-03C3C3B4`, `RCS-03C3C3C`,
 `RCS-03C3C3C2`, `RCS-03C3C3C2E`, `RCS-03C3C3D`, `RCS-03C3C3D2`,
 `RCS-03C3C3D2E`, `RCS-03C3C3E`, `RCS-03C3C3F`,
-`RCS-03C3C3G`, `RCS-03C3F4`, and `RCS-04`
+`RCS-03C3C3G`, `RCS-03C3F4`, `RCS-03D`, and `RCS-04`
 remain readable parent aliases only; `RCS-03C3C3` is now also a non-counting
 parent alias. They are not additional counted slots.
 
@@ -3596,7 +3642,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 114 frozen candidate slots; current `Phi_SR = 26` after G1-A caps each evaluation at two contender tags, C4 derives one canonical same-cut product evaluator, old C3D splits into four evidence-use boundaries, D1-B selects positive-result claim support, D2-A preserves evidence on empty settlement, D3-A gives every claim its complete selected-ledger union, D4-A permits one listen per unbroken cancelled pair, C3E-A requires fresh proof after rearm for every incidence that actually claimed it, and the C3F audit registers five conditional relay-control boundaries | At most 26 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; C3F-A immediately prunes all five new conditional rows, while B resolves them one at a time; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 129 frozen candidate slots; current `Phi_SR = 35` after C3F-A spends claimed proof across its active Relic and prunes five conditional relay rows, while the old transformation row is repaired into six cause-prevalence decisions, six conditional dialect-incidence children, and four transition-topology decisions | At most 35 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; each cause child prunes unless its parent selects proper support, so the cause pass closes at `Phi_SR = 23`, and D2-D5 close before agency opens at 19; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
