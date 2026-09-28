@@ -398,9 +398,11 @@ that proper subset has nonempty incidence in both transformation dialects while
 remaining globally proper; the proposed D1Z1-A scope fallback was not selected.
 Zanzagar then selected D1L-A, so the later persistent “this pair has already
 been heard” latch keeps its full recurrence force but never itself proposes
-transformation; D1L1 prunes. **RCS-03D1X is now the sole owner-facing choice
-under SR-03:** whether an independently meaningful combat, source, or
-relationship event may itself directly propose transformation.
+transformation; D1L1 prunes. Zanzagar then selected D1X-C with D1X-A as the
+explicit system fallback, so a disclosed proper Event-bound subset may be
+shaped by independently meaningful lived events unless the complete mechanic
+fails its gates. **RCS-03D1X1 is now the sole owner-facing choice under
+SR-03:** which transformation dialects contain Event-bound definitions.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -25974,7 +25976,7 @@ below. The words “combat event” alone are insufficient: an event invented on
 to carry a Relic proposal, an evaluator result renamed as an event, or a bare
 clock cut is not X.
 
-### RCS-03D1X — independently meaningful combat/source/relationship event as transformation cause — active owner choice
+### RCS-03D1X — independently meaningful combat/source/relationship event as transformation cause — C selected with A system fallback
 
 Let `E^{ind}_v` be the prospectively versioned set of qualifying independent-
 event occurrences. An actual occurrence `x` belongs to `E^{ind}_v` only when:
@@ -26043,8 +26045,10 @@ A/B/C are exhaustive because `D_X` is a subset of nonempty `D_mut`: empty,
 the whole domain, or nonempty proper. Selected D1P-B guarantees every
 transforming definition a positive-result path, so A leaves no definition
 uncaused. C does not select an exact family, event catalog, actor or target
-scope, trigger, target assignment, frequency, rate, cap, power, or overlap
-with `D_P`/`D_Z`; D1X1 alone owns dialect incidence if C is selected.
+scope, trigger, target assignment, frequency, rate, cap, power, definition-level
+overlap with `D_Z`, or same-trace/target coexistence among X, P, and Z.
+Selected D1P-B already fixes `D_P=D_mut`, so definition-level
+`D_X ∩ D_P = D_X`; D1X1 alone owns dialect incidence if C is selected.
 
 The recommendation is C only if later RCS-17/RCS-18 human and policy tests
 show that players can distinguish the native event, proposal, and eventual
@@ -26062,6 +26066,95 @@ assignments, rates, caps, power, presentation, approval, collision, committed
 identity, M support, persistence realization, and implementation remain
 AUTHOR/SPEC/TUNE or later registered decisions. This card authorizes no
 implementation, and the authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **C, a disclosed
+Event-bound proper subset, with A as the explicit system fallback.** Thus
+`D_X` is nonempty and proper in `D_mut`: at least one transforming definition
+has a qualifying independent-event cause path and at least one has none. This
+does not make every native event causal, approve a proposal, or select exact
+definitions, events, edges, targets, rates, or power.
+
+C is the active worksheet direction. The selected A fallback is a replacement,
+not a simultaneous rule: if the documented comprehension, policy,
+non-dominance, anti-exploit, or attribution gates fail, `D_X=emptyset`, D1X1
+prunes, and no lived event directly proposes transformation. The fallback has
+not fired. B is not selected. The parent's A fallback also does not silently
+select D1X1-A; state-only incidence is the newly opened child choice below.
+
+> **Agent correction, 2026-09-28 — the first D1X card deferred one overlap
+> that was already derived.** D1P-B fixes `D_P=D_mut`, so every Event-bound
+> definition necessarily also has at least one positive-result cause path and
+> `D_X ∩ D_P = D_X`. What remains deferred is definition-level overlap with
+> the proper `D_Z`, plus whether X and P/Z proposals occur on the same trace or
+> target the same assignment. The incorrect blanket “overlap with
+> `D_P`/`D_Z`” sentence is corrected at its source above. No owner answer,
+> fallback, dependency, or count changes.
+
+D1X moves to `DIR-SELECTED`, and `RCS-03D1X1` becomes the sole
+`OWNER-OPEN` row. The 141-row register now contains **25 `SCREEN`, 1
+`OWNER-OPEN` at D1X1, 40 `PRUNED`, 68 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. Three cause parent/child slots
+remain—X1, M, and M1—so closing them returns D2 as the sole frontier at
+`Phi_SR = 23`. The authoritative decision record remains unchanged.
+
+### RCS-03D1X1 — transformation-dialect incidence of Event-bound support — active owner choice
+
+RCS-03A-C partitions nonempty `D_mut` into nonempty disjoint state-supporting
+`D_S` and boundary-supporting `D_B`. State definitions transform what
+lineage-carried remembered condition the Relic bears while their authored
+evaluation boundary stays fixed. Boundary definitions transform how the Relic
+is persistently attuned to listen while state stays fixed. One definition never
+gains both axes.
+
+Selected D1X-C fixes only a nonempty proper Event-bound subset
+`D_X ⊊ D_mut`. Define its dialect incidences:
+
+- `D_X^S = D_X ∩ D_S`; and
+- `D_X^B = D_X ∩ D_B`.
+
+Membership means at least one definition in that dialect has a qualifying X
+witness. It does not mean every definition in an included dialect, every native
+event for a qualifying definition, or every legal transition uses X. Every
+proposal remains in its definition's selected RCS-03A dialect. D1X1 cannot
+create a hybrid axis, alter native-event identity, widen actor scope, approve a
+proposal, or weaken the selected parent fallback.
+
+| Choice | Dialect incidence of the selected proper X support | Recommendation, ideal fit, and gameplay tradeoff | Concrete design example |
+| --- | --- | --- | --- |
+| **A — Event-bound support occurs only in the state dialect** | `D_X^S` is nonempty and `D_X^B` is empty. Because `D_B` is nonempty, `D_X` remains globally proper even if later authoring puts every state definition in `D_X`. | **Recommended child scope fallback.** The rule is **“what this Relic lives through can change what it bears.”** It is the clearest, most scar-like form and avoids event-driven attunement timing, expiry cycling, and best-listening-point opacity. One native event retaining its ordinary consequence while participating in distinct remembered condition is a direct local Achintya Bheda Abheda fit; the dialect restriction is aggregate. Cost: only condition Relics receive organic lived-event biography, making the state dialect structurally richer. | A state-supporting Event-bound Vowscar in `Mercy` experiences its bearer's paid native `Heat I -> Heat II` revision; Temper retains every ordinary effect while its X edge proposes `TEMPERED CONDITION`. A boundary Hourglass can undergo the same native revision without an X proposal. |
+| **B — Event-bound support occurs only in the boundary dialect** | `D_X^S` is empty and `D_X^B` is nonempty. Because `D_S` is nonempty, `D_X` remains globally proper even if later authoring puts every boundary definition in `D_X`. | The rule is **“what this Relic lives through can change how it listens.”** This is the strangest and potentially most relational expression, but also the least legible. Native expiries can encourage preservation-versus-expiration play, yet invite expiry cycling, self-retune loops, snapshot arbitrage, and one optimized listening point. Choose B alone only if that narrower identity justifies excluding intuitive state-side scars entirely. | A boundary-supporting Event-bound Hourglass in `Oath` has a material bearer-owned Ward genuinely expire. The Ward ends and ordinary continuations change regardless of X; its edge separately proposes `AFTER-ECHO ATTUNEMENT` while state stays fixed. A state Vowscar receives no X proposal from that expiry. |
+| **C — disclosed Event-bound support occurs in both dialects** | Both `D_X^S` and `D_X^B` are nonempty while inherited `D_X ⊊ D_mut` remains mandatory. C does not decide whether either intersection is universal or proper within its dialect. | **Recommended higher-ceiling direction, with D1X1-A as a separately selectable scope fallback.** One shared rule—**“this Relic can be shaped by what its bearer truly lives through”**—has two already-selected expressions: lived events may change what one Relic bears and how another listens. Each honest witness has direct local ideal fit; merely occupying both catalog dialects is aggregate. C avoids reserving organic biography for one dialect, but requires two independently legible, non-token, non-dominated policy surfaces and carries the greatest authoring, simulation, and comprehension burden. | Event-bound Vowscar may propose `TEMPERED CONDITION` from the paid Heat revision, and Event-bound Hourglass may propose `AFTER-ECHO ATTUNEMENT` from genuine Ward expiry. Neither event needs X to retain its native consequences, and at least one transforming definition remains outside `D_X`. |
+
+A/B/C are exhaustive. Parent C makes `D_X` nonempty, so both intersections
+cannot be empty; `D_S` and `D_B` partition `D_mut`, leaving state only,
+boundary only, or both. In C, global properness remains explicit: support in
+both dialects does not imply `D_X=D_mut`, every event transforms, or one Relic
+has two transformation axes.
+
+The recommendation has a three-level production ladder, but only the parent
+system fallback is currently selected. Select D1X1-C only if both dialects can
+produce legible, policy-changing, non-dominated play. If boundary-attunement
+play proves opaque, cyclical, or dominated while state-side play survives, the
+newly offered D1X1-A scope fallback would retain state-condition event
+biography; it is not selected unless the owner says so. The already selected
+parent D1X-A system fallback removes every X edge if even state-side event
+biography fails. No fallback has fired.
+
+For every included dialect, RCS-17/RCS-18 must later establish non-token native
+events, optimized reasons both to seek and avoid them, clear separation among
+event/proposal/commit, resistance to self-trigger and event churn, and no pure-
+upside Event-bound caste. `D_X ∩ D_P = D_X` remains derived, but this does not
+require X and P on one trace, one target, or one edge. Exact definitions,
+within-dialect prevalence, `D_X ∩ D_Z`, event catalogs, actor scope, edge maps,
+targets, rates, caps, power, presentation, approval, collision, identity,
+persistence, M support, and implementation remain AUTHOR/SPEC/TUNE or later
+registered decisions.
+
+Under every D1X1 answer, D1M opens next. D1X1 then moves to `DIR-SELECTED`;
+D1M becomes the sole `OWNER-OPEN` row; and the register contains 24 `SCREEN`,
+1 `OWNER-OPEN`, 40 `PRUNED`, 69 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and
+1 `EVALUATE`, with `Phi_SR = 25`. This card authorizes no implementation, and
+the authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

@@ -1,6 +1,72 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 spent-bond memory stays noncausal; independent lived-event cause is next
+## 2026-09-28 Event-bound Relics selected; their transformation dialects are next
+
+Zanzagar selected `RCS-03D1X-C` with `RCS-03D1X-A` as the explicit system
+fallback. A disclosed nonempty proper Event-bound subset may receive persistent-
+transformation proposals from independently meaningful native combat, source,
+or relationship events. At least one transforming definition has a qualifying
+X path and at least one does not. Not every native event transforms.
+
+C is active. A replaces the whole X mechanic if later comprehension, policy,
+non-dominance, anti-exploit, or attribution gates fail; it is not simultaneous
+and has not fired. B is unselected. The parent fallback does not answer the
+new child incidence question.
+
+D1X is `DIR-SELECTED`; D1X1 is the sole frontier. The 141-row register now
+contains 25 `SCREEN`, 1 `OWNER-OPEN` at D1X1, 40 `PRUNED`, 68
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`.
+Three cause slots remain—X1, M, and M1. Closing them returns D2 at 23; D2-D5
+still lead to RCS-03E at 19. The authoritative decision record remains
+unchanged.
+
+**Agent correction:** the first D1X card incorrectly deferred definition-level
+overlap with both `D_P` and `D_Z`. D1P-B already fixes `D_P=D_mut`, so every
+Event-bound definition also has a positive-result path and
+`D_X ∩ D_P = D_X`. Only definition-level overlap with proper `D_Z`, plus
+same-trace/target cause coexistence, remains deferred. The source sentence is
+corrected; no answer or count changed.
+
+`RCS-03D1X1` asks which already-selected transformation dialects contain at
+least one Event-bound definition. Let `D_X^S=D_X ∩ D_S` and
+`D_X^B=D_X ∩ D_B`. State definitions transform what condition they bear;
+boundary definitions transform how they listen. One definition never gains
+both axes. Parent C makes X nonempty, so the exhaustive cases are state only,
+boundary only, or both.
+
+- **A — Event-bound support occurs only in the state dialect. Recommended
+  child scope fallback.** `D_X^S` is nonempty; `D_X^B` is empty. A paid native
+  `Heat I -> Heat II` revision may separately propose `TEMPERED CONDITION` for
+  an Event-bound Vowscar. This is the clearest “what it lives through changes
+  what it bears” form and avoids attunement loops, but makes state Relics the
+  only organic-event-biography dialect.
+- **B — Event-bound support occurs only in the boundary dialect.** `D_X^S` is
+  empty; `D_X^B` is nonempty. A material bearer-owned Ward expiry may retain
+  its ordinary consequences while separately proposing
+  `AFTER-ECHO ATTUNEMENT` for an Event-bound Hourglass. This is relationally
+  striking but the most opaque and vulnerable to expiry cycling, snapshot
+  arbitrage, and one best listening point.
+- **C — disclosed Event-bound support occurs in both dialects. Recommended
+  higher-ceiling direction, with D1X1-A offered separately as a scope
+  fallback.** Both intersections are nonempty while `D_X ⊊ D_mut` remains
+  mandatory. One shared rule—**“this Relic can be shaped by what its bearer
+  truly lives through”**—may change what one Relic bears and how another
+  listens. Each honest witness can directly express unity-with-difference;
+  both-dialect catalog presence alone is aggregate. The cost is two policy
+  surfaces that must each be legible, material, non-token, and non-dominated.
+
+The fallback ladder has three distinct levels. D1X1-C is the recommended
+primary direction if selected. D1X1-A is a newly offered scope fallback if
+boundary-attunement event play fails while state-side play survives; it is not
+yet selected. The already selected parent D1X-A removes all X support if even
+state-side event biography fails.
+These are production gates, not additional player-facing mechanics.
+
+Ask only for D1X1 A, B, or C. If the child scope fallback is wanted, require
+the explicit answer **“C with D1X1-A scope fallback.”** Under every answer,
+D1M opens next at `Phi_SR = 25`.
+
+## 2026-09-28 spent-bond memory stays noncausal; independent lived-event cause is next — superseded frontier
 
 Zanzagar selected `RCS-03D1L-A`. The first persistent
 `LISTENED—SEVERED` write for a canonical pair keeps its complete spent-bond and
@@ -11675,7 +11741,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 18:34 UTC — independent lived-event transformation cause is next](docs/handoffs/2026-09-28-1834--relic-independent-lived-event-cause-next.md)**
+[2026-09-28 19:58 UTC — Event-bound transformation dialect incidence is next](docs/handoffs/2026-09-28-1958--relic-lived-event-dialect-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

@@ -7246,6 +7246,83 @@ owner includes it in the answer. Under A/B, X1 prunes and M opens; under C, X1
 opens. Exact family, event catalog, dialect incidence, overlap, targets, rates,
 power, authority, collision, persistence, and implementation remain later.
 
+Zanzagar selected D1X-C with D1X-A as the explicit system fallback. Thus
+`D_X` is nonempty proper in `D_mut`; A replaces the whole lived-event cause
+mechanic only if its documented gates fail, is not simultaneous, and has not
+fired. B is unselected. This answer does not select the newly opened D1X1-A
+state-only scope branch.
+
+D1X moves to `DIR-SELECTED`, and D1X1 becomes the sole `OWNER-OPEN` row. The
+141-row register contains 25 `SCREEN`, 1 `OWNER-OPEN`, 40 `PRUNED`, 68
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`.
+Three cause parent/child slots remain—X1, M, and M1—so closing them returns D2
+at 23. No authoritative-record text changed.
+
+**Agent correction — definition-level P overlap was already forced.** The
+first D1X card incorrectly said overlap with both `D_P` and `D_Z` remained
+open. D1P-B fixes `D_P=D_mut`, so necessarily `D_X ∩ D_P = D_X`: every
+Event-bound definition also has some positive-result cause path. Same-trace
+and same-target coexistence remain unselected, as does definition-level
+`D_X ∩ D_Z`. Same-event and same-edge identity are already excluded by the
+distinct X/P/Z locus boundaries; they are not deferred choices. The owner
+packet is corrected at the original sentence. The error changes no direction,
+fallback, dependency, or count.
+
+**D1X1 prerequisite and atomicity audit — one exhaustive dialect-incidence
+card.** RCS-03A-C supplies nonempty disjoint `D_S` and `D_B` partitioning
+`D_mut`; selected D1X-C supplies nonempty proper `D_X`. Define
+`D_X^S=D_X ∩ D_S` and `D_X^B=D_X ∩ D_B`. Exactly three incidence vectors
+remain: state only, boundary only, or both nonempty. Neither is impossible
+because `D_X` is nonempty. Both does not make X universal because inherited
+`D_X ⊊ D_mut` remains mandatory.
+
+D1X1 selects only whether each already-modeled transformation dialect contains
+at least one qualifying Event-bound definition. It cannot give one definition
+two axes, alter native-event identity, widen actor scope, change parent
+fallback authority, select exact definitions or event classes, or decide
+within-dialect all-versus-some prevalence. Combat/source/relationship are
+native owners, not three additional incidence choices. No split is needed.
+
+The three exhaustive D1X1 directions are:
+
+- D1X1-A makes `D_X^S` nonempty and `D_X^B` empty. It is the recommended
+  child scope fallback: “what this Relic lives through changes what it bears.”
+  A paid native Heat revision may propose a distinct remembered condition while
+  retaining every ordinary consequence. This is clearest and resists
+  attunement loops, but makes state Relics the sole organic-event-biography
+  dialect.
+- D1X1-B makes `D_X^S` empty and `D_X^B` nonempty. A material Ward expiry may
+  propose a new listening attunement while ending the Ward normally. This is
+  the strangest and most relational expression, but has the greatest expiry-
+  cycle, snapshot, best-attunement, and explanation risk; it is not the
+  recommendation alone.
+- D1X1-C makes both intersections nonempty while `D_X` stays globally proper.
+  **Recommend C for the higher ceiling, with D1X1-A offered separately as the
+  scope fallback.** One disclosed Event-bound grammar gains two already-
+  selected expressions—changing what a state Relic bears and how a boundary
+  Relic listens—without creating a third axis. Each valid event/proposal
+  witness has direct local ideal fit; both-dialect prevalence is only
+  aggregate. C requires two independently legible and strategically material
+  policy surfaces.
+
+The fallback ladder is explicit. D1X1-C is the recommended primary direction
+if selected.
+D1X1-A would be the narrower child fallback if boundary-attunement event play
+fails while state-side play survives; it remains unselected until the owner
+says so. The already selected parent D1X-A removes all X support if state-side
+event biography also fails.
+Fallback ordering is production governance, not another player-facing
+mechanic.
+
+Every included dialect must later pass its own human and policy tests for
+non-token native stakes, seek/avoid optimization, event/proposal/commit
+comprehension, anti-churn, non-dominance, and attribution. Exact families,
+within-dialect prevalence, `D_X ∩ D_Z`, same-trace cause coexistence, events,
+actors, targets, rates, power, approval, collision, persistence, M support, and
+implementation remain later. Any D1X1 answer makes D1M the sole frontier and
+produces 24 `SCREEN`, 1 `OWNER-OPEN`, 40 `PRUNED`, 69 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or
