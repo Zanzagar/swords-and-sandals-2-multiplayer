@@ -6178,6 +6178,134 @@ Either C3E answer would move C3E to `DIR-SELECTED` and C3F to `OWNER-OPEN`,
 producing 20 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 56 `DIR-SELECTED`, 4
 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`.
 
+Zanzagar selected C3E-A. `R^{same-reuse}_v` is empty: after a claimed
+occurrence is causally attributed to exact fixed tag `k`, that occurrence stays
+ineligible for every otherwise-admissible later post-rearm commit of `k`.
+Fresh occurrences remain eligible. C3E moves to `DIR-SELECTED`, C3F becomes
+`OWNER-OPEN`, and at that checkpoint the 109-row register contained 20
+`SCREEN`, 1 `OWNER-OPEN`,
+26 `PRUNED`, 56 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 21`.
+
+Two read-only C3F audits broke the registered “different-tag” shorthand. For
+claimed `x`, let immutable `z0(x)` be the first settlement creating its still-
+operative claim state and define
+`A_z0(x)={k in K(z0):(k,x) in I(z0)}`. Idempotent later claims do not move the
+epoch. C3E controls later target incidences whose
+exact tag belongs to the occurrence's accumulated **claimed-incidence** subset.
+C3F must control a later exact target `ℓ` outside the broader accumulated
+claim-episode attribution set, which starts at `A_z0(x)` and excludes older
+pre-claim attribution. This includes a tag that co-committed at `z0` but lacked
+`(ℓ,x)` then; requiring `ℓ` to be absent from `K(z0)` would leave a real gap.
+
+A qualifying C3F witness `(z0,x,ℓ,e2)` has a strictly later authoritative
+positive settlement in the same fixed-version combatant and active persistent
+Relic instance/root; identical canonical `x` persists with the same root,
+accounting identity, and complete lineage; `ℓ` lies outside the accumulated
+prior-attribution set immediately before `e2`; and the fresh target tuple both
+contains `x` and prospectively authors `(ℓ,x) in I(e2)`. Projecting out only
+this active Relic's prior claim state, every freshness, source-validity,
+addressability, treatment, and target recurrence rule must still pass. Same-cut
+use remains C3C; another active Relic/root/combatant remains RCS-08.
+
+Let `R^{new-inc}_v` contain these witnesses. C3F-A makes it empty; C3F-B makes
+it nonempty. The split is exhaustive. Universal/mixed support and exact edge
+assignments remain AUTHOR/SPEC; claim clearing is forbidden rather than a
+third choice. With `P={g,h}` and `Q={t,h}`, natural attribution gives
+`A_z0(g)={P}`, `A_z0(h)={P,Q}`, and `A_z0(t)={Q}`. After P/Q co-commit, later
+`(Q,g)` is C3F while `(P,g)` and either P/Q use of shared `h` remain C3E-A.
+
+The gameplay audit recommends C3F-A. Together with C3E-A it gives one legible
+Relic-local claimed state and preserves D3-A's full causal cost instead of
+letting persistent hubs travel through cheap fresh leaves. The original
+weave/claim remains direct standing-ideal fit; later exclusion is neutral/
+protective and universal prevalence aggregate. Its cost is suppressing
+sequential builds that reuse one enduring truthful deed in a different
+manifestation.
+
+C3F-B's strongest countermodel is a named one-hop Echo Thread: old `g`, first
+attributed to P, joins Vow `v` in genuinely distinct R. Identical proof and
+different manifestation participate directly at the later cut, while
+continuity across settlements is partial. This is the more vivid Souls and
+Simulacra countercase, but C3E-A does not bound B: a nonclaiming R settlement
+can repeat, distinct targets permit `P->R->T->...`, and an initially
+unattributed claimed occurrence has no predecessor incidence to name.
+
+**First final pre-commit recheck: BROKEN first draft.** The
+first draft made the one-hop Echo Thread, fresh independent co-proof, and
+first-admission consumption mandatory while still claiming that B meant every
+nonempty `R^{new-inc}_v`. Those propositions are not equivalent. A multi-
+target or successor policy is nonempty but violated the hidden one-hop rule.
+The draft also added an intended target to `A^-` after substitute or `{}`
+output even though only an actual committed `(k,x)` incidence may enter that
+set. `{}` has none. The rejected draft therefore overreached beyond the
+owner-facing support choice and contradicted its own accounting model.
+
+**Second independent final recheck: BROKEN first repair.** C3E-A's witness
+requires an actual claiming settlement. The first repair instead put every
+successful C3F incidence into one attribution set and asserted that C3E-A
+blocked its reuse, silently making attribution equivalent to claim. A
+nonclaiming R settlement remains possible under D1-B; after valid R rearm its
+same-target recurrence is neither C3E nor another first-incidence C3F witness.
+The first repair also correctly removed universal fresh co-proof from C3F but
+failed to give that player-material “old deed plus new act” requirement its own
+row.
+
+The corrected minimal amendment therefore adds five counted B-only rows.
+`RCS-03C3F1` owns recurrence after a successful C3F incidence that did not
+claim `x` and prunes vacuously if that domain is empty. `RCS-03C3F2` owns
+universal fresh independently eligible post-claim co-proof across every
+B-enabled admission—including any F1 repeat—versus support without it.
+`RCS-03C3F3` owns terminal single-transition,
+finite nonbranching successor-path, or finite branch-capable first-attribution
+DAG topology over monotone per-`z0` attribution states. Each edge is one
+positive settlement adding its nonempty atomic set of new target incidences,
+so inherited same-settlement one/two-tag treatment is not re-decided. Non-counting parent
+`RCS-03C3F4` groups two independent
+authorization-disposition rows: F4A for an admitted attempt ending in positive
+substitute tag(s), and F4B for one ending in `{}`. Each later chooses preserve-
+all, consume-all, or disclosed coexistence, and closes vacuously if its
+reachable domain is empty. Combining F4A/F4B would repeat D1/D2's
+overcompression. A prospective substitute incidence routes by pre-state to a
+possible F3 commit when new, C3E-A refusal when already claimed-attributed, or
+F1 treatment when attributed but nonclaimed; F4A owns only unused intended
+authorization.
+
+**Third final recheck: PARTIALLY BROKEN precision, repaired without another
+row.** The second repair did not canonically anchor its claim episode, so an
+idempotent later claim could appear to reset the fresh-proof clock and pre-
+claim nonclaiming attribution had no route. It also scoped F2 only to first-
+incidence witnesses, stated F1 opened even when no nonclaiming success exists,
+and described F3 as a tag DAG even though reciprocal catalog labels can exist.
+The wording above fixes one immutable `z0`, starts episode attribution there,
+applies F2 at admission to both first and permitted repeat uses, makes F1
+vacuous when its domain is empty, and defines F3 vertices as monotone
+attribution states rather than tag labels.
+
+The repaired model keeps two monotone per-`z0` sets. `A^-_e(x)` records every
+actual committed `(k,x)` incidence in the claim episode. Its subset
+`A^{claim,-}_e(x)` records only those whose settlements actually claimed `x`.
+C3E-A blocks the latter; F1 owns recurrence through the former-minus-latter.
+Disposition of separate intended/unused relay authorization is not causal
+attribution. Derived guards remain
+exact identity/lineage, finite fixed-version first-attribution support,
+atomic/idempotent updates, and no alias/replay/same-cut/cross-root laundering,
+claim reset, age refresh, source resurrection, post-outcome edge selection, or
+selected-recurrence bypass. One-hop topology, fresh post-claim co-proof, and
+noncommitting-attempt consumption are not derived.
+
+The amendment produces 114 rows: 25 `SCREEN`, 1 `OWNER-OPEN` at C3F, 26
+`PRUNED`, 56 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 26`. C3F-A selects C3F, prunes all five children, and opens RCS-03D
+at 19 `SCREEN`, 1 `OWNER-OPEN`, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`. C3F-B selects C3F and opens F1 at
+24 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`. If F1's domain is empty, it prunes and
+F2 opens instead at 23 `SCREEN`, 1 `OWNER-OPEN`, 27 `PRUNED`, 57
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`.
+RCS-03D opens only after all applicable B-only children close, again at
+`Phi_SR = 20`.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

@@ -3100,14 +3100,21 @@ true no-candidate recurrence would require a new identity boundary. Zanzagar
 then selected D4-A with B as a guarded reopening fallback: one listen per
 unbroken bond. A C3E scope audit established that same-tag evidence reuse keys
 to the receipt tag that actually committed, including substitute tags, rather
-than automatically to original contenders. The current register has **109
-slots: 21 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 55 `DIR-SELECTED`, 4
-`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**. C3E is the sole
-presented Relic card.
+than automatically to original contenders. Zanzagar then selected C3E-A, so
+claimed proof cannot return through a previously attributed exact tag after
+rearm. A C3F audit corrected old “different-tag” shorthand to later
+non-attributed-incidence reuse, including a co-committed tag that lacked the
+occurrence's incidence. One final pre-commit verifier broke the draft's hidden
+one-hop/first-admission rule; a second caught the first repair treating every
+successful incidence as a claim and leaving fresh co-proof unrouted. The
+amended register therefore has five B-only boundaries and **114 slots: 25
+`SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 56 `DIR-SELECTED`, 4 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. C3F is the sole presented Relic
+card.
 
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has 109
+To make that route genuinely finite, the remaining C3c pass has 114
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -3207,9 +3214,14 @@ overcompression.
 | `RCS-03C3D2` | Ledger-bearing empty-result Relic-local evidence-claim support | `DIR-SELECTED`; A makes empty-settlement claim support empty, so cancellation preserves every occurrence in its selected causal union; a true no-candidate invocation remains outside the claim domain, and D4 still owns recurrence |
 | `RCS-03C3D3` | Claimed-proof footprint inside the authoritative selected contender-ledger tuple | `DIR-SELECTED`; A makes every actual claim take the complete deduplicated selected-ledger final-child union, counting exact shared occurrences once; D1-B still leaves exact claim prevalence and assignments open |
 | `RCS-03C3D4` | Ledger-bearing empty-settlement held-pair reattempt support while canonical contender-pair relationship sufficiency remains uninterrupted | `DIR-SELECTED`; A permits one listen per unbroken canonical pair bond; B is only a guarded reopening fallback if human tests expose dominant reset-flicker or intolerably stranded formations and a material retry event passes every documented guard |
-| `RCS-03C3E` | Later reuse, after valid break/renew/rearm, of an otherwise-admissible claimed canonical occurrence through the same exact fixed C135 context/receipt tag | `OWNER-OPEN`; choose empty or nonempty qualifying exact-incidence reuse support; the committed P/Q or substitute tag owns recurrence, the identical `(k,x)` incidence must hold at both commits under one versioned treatment contract, D3-A's full claim does not imply output incidence or bulk claim reset, and new occurrences/freshness/source validity remain separate |
-| `RCS-03C3F` | Later-cut different-tag evidence reuse within the same active Relic | `SCREEN`; follows `RCS-03C3D1`–`RCS-03C3E` and may close `DERIVED` if D1-A/D2-A leave no Relic-local claim branch |
-| `RCS-03D` | Transformation-cause eligibility: which authored events may propose a persistent transition | `SCREEN`; follows `RCS-03A`–`RCS-03C3F` under `SR-04` |
+| `RCS-03C3E` | Later reuse, after valid break/renew/rearm, of an otherwise-admissible claimed canonical occurrence through the same exact fixed C135 context/receipt tag | `DIR-SELECTED`; A makes qualifying same-incidence reuse empty, so a claimed occurrence remains ineligible for every later post-rearm commit of any exact tag through which a settlement actually claimed it; fresh occurrences, later non-attributed incidences, and successful nonclaiming-incidence recurrence remain separate |
+| `RCS-03C3F` | Later-cut reuse of a claimed canonical occurrence through a target incidence not previously attributed to that occurrence inside the same active Relic | `OWNER-OPEN`; choose empty or nonempty qualifying new-incidence reuse support inside the immutable claim episode rooted at first still-operative claim `z0(x)`; a target may have co-committed at `z0` yet remain non-attributed for this occurrence, while claimed prior incidences stay governed by C3E-A and same-cut/other-root use stays in C3C/RCS-08; A prunes F1-F4B and B opens them |
+| `RCS-03C3F1` | Successful nonclaiming-target recurrence after an actual C3F incidence and valid target rearm | `SCREEN`; B-only choice among incidence-latches-target, claim-only latch, or disclosed coexistence; C3E-A requires an actual claiming settlement and therefore does not decide recurrence through an attributed-but-nonclaimed target; prune vacuously when no reachable C3F success is nonclaiming |
+| `RCS-03C3F2` | Fresh independently eligible post-claim co-proof requirement across B-enabled reuse admissions | `SCREEN`; B-only choice between requiring at least one separate canonical occurrence originated after immutable `z0` for every first-incidence attempt and F1-permitted repeat, and supporting at least one such admission without one; normal target-ledger validity does not decide this relative-time rule |
+| `RCS-03C3F3` | Claimed-occurrence first-attribution propagation topology across later settlements after nonempty new-incidence support | `SCREEN`; B-only choice among terminal single transition, finite nonbranching successor path, and finite branch-capable DAG over monotone per-`z0` attribution states; each edge is one positive settlement adding its nonempty atomic set of new target incidences, so inherited one/two-tag same-settlement treatment is not re-decided, reciprocal tag labels cannot create a realized cycle, an initially unattributed occurrence roots at empty `A_z0(x)`, and same-target recurrence stays in F1 |
+| `RCS-03C3F4A` | Positive-substitute relay-attempt authorization-consumption prevalence | `SCREEN`; follows C3F-B and the existence of a reachable admitted attempt whose intended tag does not commit while positive substitute tag(s) do; choose preserve-all, consume-all, or disclosed coexistence, otherwise close vacuously; a prospective substitute incidence routes by pre-state to possible F3 commit when new, C3E-A refusal when already claimed-attributed, or F1 treatment when attributed but nonclaimed, while this row owns only unused intended authorization |
+| `RCS-03C3F4B` | Empty-settlement relay-attempt authorization-consumption prevalence | `SCREEN`; follows C3F-B and the existence of a reachable admitted attempt ending in `{}`; choose preserve-all, consume-all, or disclosed coexistence, otherwise close vacuously; `{}` contributes no committed incidence and D2-A does not decide separate relay authorization |
+| `RCS-03D` | Transformation-cause eligibility: which authored events may propose a persistent transition | `SCREEN`; follows `RCS-03A`–`RCS-03C3F` and every applicable C3F B-only child under `SR-04` |
 | `RCS-03E` | Transformation agency and approval: discretionary, precommitted, or deterministic authority under the selected cause | `SCREEN`; follows `RCS-03D` under `SR-04` |
 | `RCS-04A` | Collision precedence and settlement when multiple already-legal transformation proposals coexist | `SCREEN`; follows `RCS-03E` and any applicable `RCS-03B4`/`RCS-03B7` under `SR-04` |
 | `RCS-04B` | Committed-output identity across artifact, definition, and lineage | `SCREEN`; follows `RCS-04A` under `SR-04`; persistence realization stays in `RCS-15` |
@@ -3545,16 +3557,22 @@ deduplicated selected-ledger union. A scope audit narrowed D4 from unkeyed
 the canonical contender pair; no row split was needed. Zanzagar then selected
 D4-A with B as a guarded reopening fallback. A C3E audit fixed same-tag reuse
 to the receipt tag that actually committed, including substitute tags, rather
-than a vanished original contender. The current register has **109 slots**: 21
-`SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 55 `DIR-SELECTED`, 4 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`. C3E is the current presented Relic
-card.
+than a vanished original contender. Zanzagar then selected C3E-A. A C3F audit
+corrected “different tag” to any later target incidence outside the claimed
+occurrence's prior-attribution set. A final verifier broke the first draft's
+attempt to derive one-hop propagation and first-admission consumption from
+mere nonempty support. A second final verifier then broke the first repair's
+claim/attribution conflation and found fresh co-proof still unrouted. The
+thirty-fifth prerequisite correction now adds F1, F2, F3, F4A, and F4B as
+counted B-only rows. The current register has **114 slots**: 25 `SCREEN`, 1
+`OWNER-OPEN`, 26 `PRUNED`, 56 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 26`. C3F is the current presented Relic card.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-twenty-two owner cards under this thirty-four-times-corrected charter and will
+twenty-six owner cards under this thirty-five-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3562,7 +3580,7 @@ usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS
 `RCS-03C3C3B3`, `RCS-03C3C3B3B`, `RCS-03C3C3B4`, `RCS-03C3C3C`,
 `RCS-03C3C3C2`, `RCS-03C3C3C2E`, `RCS-03C3C3D`, `RCS-03C3C3D2`,
 `RCS-03C3C3D2E`, `RCS-03C3C3E`, `RCS-03C3C3F`,
-`RCS-03C3C3G`, and `RCS-04`
+`RCS-03C3C3G`, `RCS-03C3F4`, and `RCS-04`
 remain readable parent aliases only; `RCS-03C3C3` is now also a non-counting
 parent alias. They are not additional counted slots.
 
@@ -3578,7 +3596,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 109 frozen candidate slots; current `Phi_SR = 22` after G1-A caps each evaluation at two contender tags, C4 derives one canonical same-cut product evaluator, old C3D splits into four evidence-use boundaries, D1-B selects positive-result claim support, D2-A preserves evidence on empty settlement, D3-A gives every claim its complete selected-ledger union, and D4-A permits one listen per unbroken cancelled pair | At most 22 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 114 frozen candidate slots; current `Phi_SR = 26` after G1-A caps each evaluation at two contender tags, C4 derives one canonical same-cut product evaluator, old C3D splits into four evidence-use boundaries, D1-B selects positive-result claim support, D2-A preserves evidence on empty settlement, D3-A gives every claim its complete selected-ledger union, D4-A permits one listen per unbroken cancelled pair, C3E-A requires fresh proof after rearm for every incidence that actually claimed it, and the C3F audit registers five conditional relay-control boundaries | At most 26 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; C3F-A immediately prunes all five new conditional rows, while B resolves them one at a time; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

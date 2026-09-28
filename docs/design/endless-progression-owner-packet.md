@@ -371,10 +371,12 @@ independent evidence-use rows. Zanzagar selected RCS-03C3D1-B, requiring
 positive-result claim support, then selected RCS-03C3D2-A so ledger-bearing
 empty results never claim evidence, then selected RCS-03C3D3-A so every claim
 takes its complete selected-ledger union, then selected RCS-03C3D4-A with B as
-a guarded reopening fallback: one listen per unbroken bond. RCS-03C3E is now
-the current owner-facing choice under SR-03, keyed by the receipt tag that
-actually committed rather than by an original contender that treatment may
-have replaced.
+a guarded reopening fallback: one listen per unbroken bond. Zanzagar then
+selected RCS-03C3E-A, so a claimed occurrence cannot return through any exact
+tag to which it was causally attributed before that tag's rearm. RCS-03C3F is
+now the current owner-facing choice under SR-03: whether that claimed
+occurrence may later acquire a new causal incidence inside the same active
+Relic.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -24645,7 +24647,7 @@ actually committed at the claiming settlement. If treatment produced `{S}` or
 initial receipt commit and therefore cannot own C135's `c1`. No row split or
 count amendment is required.
 
-### RCS-03C3E — same-committed-tag reuse of claimed evidence after valid rearm — active owner choice
+### RCS-03C3E — same-committed-tag reuse of claimed evidence after valid rearm — direction selected
 
 For any positive settlement `y`, let `K(y)` be its nonempty set of committed
 fixed C135 context/receipt tags `k=(h,j)`; its receipt-label projection is
@@ -24731,6 +24733,178 @@ Under A or B, C3E moves to `DIR-SELECTED` and C3F becomes `OWNER-OPEN`. The
 register then contains 20 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 56
 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`. The
 authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, rearmed
+results still need fresh proof.** Thus `R^{same-reuse}_v=∅`. In every
+otherwise-admissible later post-rearm commit of the same exact fixed tag `k`,
+a canonical occurrence previously claimed through `k` remains ineligible for
+`k`. A genuinely new occurrence remains eligible normally. This selects no
+later non-attributed-incidence rule, clears no claim state, and changes no
+freshness, source-validity, or target recurrence rule.
+
+C3E moves to `DIR-SELECTED`; C3F becomes `OWNER-OPEN`. At that selection
+checkpoint, the 109-row register contained 20 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 56 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested C3F. Both broke the old
+“different-tag” shorthand: C3E partitions by a canonical occurrence's prior
+causal incidences, not merely by receipt-label inequality. A tag may have
+co-committed earlier without that occurrence causing it. C3F must therefore
+own every later **new incidence** inside the same active Relic.
+
+**Pre-commit corrections — two final verifiers broke two successive C3F
+drafts.** The first draft correctly made support empty/nonempty, then silently
+required every B
+realization to be one disclosed, one-use hop consumed on first admission even
+when treatment produced a substitute or `{}`. Those are additional product
+choices, not consequences of nonempty support. Worse, `{}` commits no target
+incidence and a substitute may commit a tag other than the intended target, so
+the draft could not lawfully add that intended target to attribution history.
+The first repair then made two more silent choices: it treated every successful
+new incidence as a claim even though D1-B does not make claiming universal, and
+it removed the fresh-co-proof requirement without routing it. The register is
+therefore amended by five counted, B-only follow-ups: successful nonclaiming-
+target recurrence, fresh post-claim co-proof, propagation topology, and
+separate positive-substitute and empty-settlement authorization dispositions.
+C3F itself remains the exhaustive support question.
+
+### RCS-03C3F — later non-attributed-incidence reuse of claimed evidence — active owner choice
+
+For a claimed canonical occurrence `x`, let `z0(x)` be the first positive
+settlement that created its still-operative claim state in this ruleset version,
+combatant, and active persistent Relic instance/root. Later idempotent claims
+of `x` do not move this epoch. Claim clearing is forbidden, so `z0(x)` is
+immutable for this claim episode. For `x in C(z0)=U(z0)`, define its initial
+episode attributed-tag set
+
+`A_z0(x)={k in K(z0):(k,x) in I(z0)}`.
+
+More generally, `A^-_e(x)` is the monotone set of exact fixed C135
+context/receipt tags to which this already-claimed `x` has been causally
+attributed by the same active Relic from `z0(x)` through the cut before later
+event `e`; it starts at `A_z0(x)`. Older pre-`z0` attribution remains in
+canonical history but not in this claim episode. Let
+`A^{claim,-}_e(x)` be its subset whose incidences occurred in settlements that
+actually claimed `x`. Immediately after `z0`, both contain `A_z0(x)`.
+C3E-A controls later use of a target in `A^{claim,-}_e(x)`. C3F controls the
+first incidence to a target outside `A^-_e(x)`. Later recurrence through a
+successful but nonclaiming target in
+`A^-_e(x) setminus A^{claim,-}_e(x)` belongs to F1 rather than being silently
+treated as C3E-A.
+
+A **later non-attributed-incidence reuse witness** is a tuple
+`(z0,x,ℓ,e2)` satisfying all of the following:
+
+1. `z0=z0(x)` is the immutable claim-episode anchor and `x in C(z0)`;
+2. `e2` is a strictly later authoritative positive settlement in the same
+   ruleset version, combatant, and active persistent Relic instance/root;
+3. `ℓ` is an exact fixed C135 context/receipt tag committed at `e2`, with
+   `ℓ∉A^-_{e2}(x)` immediately before that settlement;
+4. the freshly read selected tuple at `e2` contains the identical canonical
+   occurrence `x`, and `(ℓ,x) in I(e2)` is prospectively authored by the
+   target treatment contract; and
+5. if only this active Relic's prior claim state were projected out, `x` would
+   still pass freshness, source validity, addressability, canonical identity,
+   complete-lineage/accounting identity, treatment, and target-tag recurrence.
+
+Let `R^{new-inc}_v` contain those witnesses. “New incidence” does not require
+that `ℓ` was absent from `K(z0)`. With `P={Guard g, Heat h}` and
+`Q={Return t, the same Heat h}`, natural attribution gives
+`A_z0(g)={P}`, `A_z0(h)={P,Q}`, and `A_z0(t)={Q}`. If P and Q co-commit, later
+`(Q,g)` is C3F because Q never received that incidence at `z0`; later `(P,g)`
+and either P/Q use of shared `h` remain blocked by C3E-A.
+
+| Choice | Later new-incidence rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — claimed proof is spent across this active Relic** | `R^{new-inc}_v=∅`. While this active Relic's claim remains operative, the claimed canonical occurrence cannot acquire any later causal incidence outside its prior attributed-tag set. Combined with C3E-A, it is unavailable to every later result incidence of this active Relic. | **Recommended.** A makes D3-A's complete-union claim one readable state—**claimed by this Relic**—rather than a tag-by-proof exception matrix. It prevents persistent hubs, cheap fresh leaves, ally-paid amplification, repeated Oracle probes, and outcome shopping from laundering the causal price. The original full weave/claim remains **direct** standing-ideal fit; this later exclusion is **neutral/protective**, and Relic-wide prevalence is **aggregate**. Cost: elaborate history is fully cashed by one claiming manifestation, which can suppress satisfying sequential builds and ask players to repeat a still-truthful deed. | P and Q claim `g,h,t`. Later distinct R would use old `g` plus fresh Vow `v`. A keeps `g` grey for the whole active Relic, so R needs a new Guard `g2`; another Relic's use remains RCS-08. |
+| **B — permit at least one later new incidence** | `R^{new-inc}_v` is nonempty. At least one claimed canonical occurrence later supplies one prospectively authored incidence to an exact target tag outside its prior attributed-tag set. The claim remains; B is a scoped eligibility exception, never a bulk reset. Universal/mixed prevalence, exact directed edges, and catalog assignments remain AUTHOR/SPEC. | B's strongest candidate is a named, visible **Echo Thread**: the same remembered deed truthfully causes a genuinely different later manifestation. At `e2`, identical `x` and distinct target `ℓ` participate **directly**; continuity across settlements is **partial**; support existence is **aggregate**. This is the more vivid Souls and Simulacra countercase, but B alone does **not** decide fresh co-proof, propagation, successful nonclaiming recurrence, or unsuccessful/substitute attempt disposition. Those are not smuggled in as safety rules. | P claims `g`. B says at least one later target—perhaps R—may receive an authored `(R,g)` incidence. It does not yet say whether R's success claims or independently latches g, whether fresh Vow `v` is required, whether g may also reach T or propagate onward, or what an R attempt ending in a substitute or `{}` consumes. Five B-only follow-ups resolve those questions before C3D. |
+
+A/B are mutually exclusive and exhaustive because `R^{new-inc}_v` is empty
+or nonempty. A target that co-committed at `z0` but lacked `(ℓ,x)` belongs to B's
+domain; choosing some different source tag cannot relabel an incidence already
+in `A^-_e(x)`. A new occurrence `x2`, alias, sibling, ancestor, hidden compound
+member, new root, changed configuration/version, or equivalent semantic label
+is not identical `x`. Mere presence in a later ledger is insufficient without
+the prospectively authored `(ℓ,x)` output incidence.
+
+If B is selected, resolve these counted rows one at a time before C3D:
+
+| Row | B-only boundary | Why it is not already decided |
+| --- | --- | --- |
+| `RCS-03C3F1` | **Successful nonclaiming-target recurrence:** after an actual C3F incidence commits without claiming `x`, does that incidence itself latch the target against later post-rearm reuse, does claim remain the only latch, or may disclosed families coexist? | C3E-A requires a claiming settlement. Attribution without claim cannot inherit its exclusion silently; later same-target use is no longer a new-incidence C3F witness. If no reachable C3F success is nonclaiming, this row prunes vacuously. |
+| `RCS-03C3F2` | **Fresh post-claim co-proof requirement across reuse admissions:** must every B-enabled admission—both a first-incidence C3F attempt and any F1-permitted same-target repeat—include at least one independently eligible canonical occurrence originated after `z0`, or may at least one supported admission proceed without one? | Normal target-ledger validity does not decide this relative-time requirement. It materially separates “old deed plus new act” from autonomous persistent-hub play; exact first/repeat prevalence remains AUTHOR/SPEC after the support choice. |
+| `RCS-03C3F3` | **Claimed-occurrence first-attribution propagation topology across later settlements:** terminal single transition, finite nonbranching successor path, or finite branch-capable DAG. | Vertices are the monotone per-`z0` attribution states `A^-_e(x)`. Each edge is one authoritative positive settlement and adds its nonempty atomic set of newly committed target incidences; within-settlement one/two-tag treatment remains inherited rather than being re-decided here. Realized paths are acyclic even if catalog tag labels have reciprocal routes. The root is `A_z0(x)`, including an empty set for an initially unattributed `x`; same-target recurrence stays in F1. |
+| `RCS-03C3F4A` | **Positive-substitute relay-attempt authorization disposition:** preserve all applicable authorization, consume all, or support disclosed coexistence when `x` is admitted but the intended tag does not commit and positive substitute tag(s) do. | Only actual authored substitute incidences enter `A^-`; disposition of separate unused/intended authorization is independent. If this reachable domain is empty, the row closes vacuously. |
+| `RCS-03C3F4B` | **Empty-settlement relay-attempt authorization disposition:** preserve all applicable authorization, consume all, or support disclosed coexistence when `x` is admitted and final output is `{}`. | `{}` contributes no committed tag or incidence, and D2-A's no-claim rule does not decide separate relay authorization. If this reachable domain is empty, the row closes vacuously. |
+
+`RCS-03C3F4` is only a non-counting grouping label for F4A/F4B. The two
+dispositions stay separate for the same reason positive and empty claim support
+were separated at D1/D2. Exact authorization storage and authored catalog edges
+remain SPEC/AUTHOR only after these player-facing choices are fixed.
+
+Several constraints are already derived and do not need more owner cards. An
+actual committed `(k,x)` adds only `k` to the atomic, idempotent post-settlement
+attribution state and therefore to `A^-_{e'}(x)` at every later cut `e'`; it
+enters `A^{claim,-}_{e'}(x)` only when that settlement actually claims `x`.
+C3E-A forbids successful post-rearm reuse only for the latter set; F1 owns the
+former set's recurrence rule. The fixed-version tag catalog makes the first-
+attribution graph finite. Alias, replay, same-cut, and cross-root laundering;
+claim clearing; age refresh; source resurrection; post-outcome edge selection;
+and bypass of whatever recurrence rule is selected remain forbidden. By
+contrast, fresh post-claim co-proof, a one-hop cap, and consumption on a
+noncommitting attempt are **not** derived and are not selected by C3F-B.
+
+A prospective positive substitute `(S,x)` is classified from its pre-
+settlement state. If `S∉A^-_e(x)`, an allowed commit is a first-attribution
+transition for F3. If `S∈A^{claim,-}_e(x)`, C3E-A bars it; if
+`S∈A^-_e(x) setminus A^{claim,-}_e(x)`, F1 decides it. Every incidence that
+actually commits enters the post-settlement attribution state and thus every
+later `A^-_{e'}(x)`; it enters every later `A^{claim,-}_{e'}(x)` only if that
+settlement claims `x`. F4A separately controls only the unused/intended
+authorization whose target did not commit.
+
+For fused `{S}`, if `(S,g)` was authored at `z0`, later P/Q/R use of `g` is
+C3F; B may support an authored later incidence but may not silently restore
+P/Q. For `{S1,S2}`, if `g` was attributed only to S1, later `(S2,g)` is
+C3F even though S2 co-committed, while later `(S1,g)` remains C3E-A. No
+`P->S1`, `Q->S2`, or one-substitute-per-original mapping is inferred.
+Cancellation `{}` originates no C3F claim because D2-A claims nothing.
+
+Ally-origin evidence may remain inside C3F when the consuming active Relic is
+unchanged; ownership and payment stay with the ally. Any other active Relic
+instance/root or combatant, or any cross-root amplification, remains RCS-08.
+C3F cannot refresh C3A age, resurrect cleared evidence, bypass target
+recurrence, alter canonical truth or source custody, create payoff, or turn
+contract rebinding/migration into reuse. Subsequent claiming settlements still
+take D3-A's complete union.
+
+Presentation under A greys the occurrence once as `CLAIMED BY THIS RELIC`.
+B cannot receive a final UI promise until F1-F4B close; an Echo Thread with
+one occurrence, arrow, target, and use is an illustrative candidate, not a
+silently selected topology. Every B UI must preserve the original
+`P/Q proof weave -> treatment -> committed P/Q, S, or S1/S2` provenance.
+Simulator/RL traces must preserve canonical occurrence/root/source owner,
+immutable `z0`, `U(z0)`, claim link, `K(z0)`, `I(z0)`, `A^-_e(x)`,
+`A^{claim,-}_e(x)`, actual target incidence, fresh-co-proof identity/time/payer,
+separate relay-
+authorization state, admission, outcome, disposition, and denial reason. Human
+prediction and attribution remain the fun/comprehension test; agent performance
+cannot establish them.
+
+The corrected register contains 114 rows: 25 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 56 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 26`. Under A, all five B-only rows prune and RCS-03D opens, yielding
+19 `SCREEN`, 1 `OWNER-OPEN`, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`. Immediately under B, applicable F1
+opens while the other four rows wait: 24 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 25`. If no reachable C3F success is nonclaiming, F1 instead prunes
+and F2 opens: 23 `SCREEN`, 1 `OWNER-OPEN`, 27 `PRUNED`, 57 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`. After every applicable
+B-only child closes, RCS-03D opens at `Phi_SR = 20`. The authoritative decision
+record remains unchanged.
 
 ## Session protocol and evidence
 
