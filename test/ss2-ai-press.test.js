@@ -27,6 +27,7 @@ import { applyAction, combatantById, createTeamBattle, currentCombatant, legalAc
 import {
   createSs2TeamRules,
   ss2Combatant,
+  ss2PressMove,
   ss2PressTarget,
   ss2TeamRules,
   SS2_ARENA,
@@ -322,4 +323,63 @@ test("the arena's own bouts where the press alone shuttled a fighter between lan
     assert.ok(host.battle.result, `${aiPress} ${kit} seed ${seed} must still settle`);
   }
   assert.deepEqual(shuttles, [], "a fighter alternated rank steps on four of his own turns running");
+});
+
+/**
+ * ► **ONLY A MELEE FIGHTER HOLDS A SIDE OF THE TARGET — a write-nothing
+ *   verifier's finding, 2026-09-27, against 74c0014.** "Fighting" read
+ *   `ss2Reach`, which with a bow drawn is the BOW's reach (4,485 on the demo
+ *   archer), so an ally shooting from far down the target's lane counted as
+ *   holding the far side: the free member queued behind a melee ally judged
+ *   the pincer shut and taunted from the queue for 27 turns running, and one
+ *   in the next lane was judged already round and stepped into the queue. The
+ *   press target is still the foe any ally fights, the bow included (P1: the
+ *   free member helps rather than dances); which SIDE is taken is melee only.
+ */
+function withShooter(free) {
+  const battle = twoOnOne({ free });
+  const shooter = ss2Combatant(gladiator({ gladiator_dir: "left", secondary_weapon: 61, equipped_weapon: 2 }),
+    { id: "red-3", name: "red-3", controller: "local", x: 1500, y: FRONT });
+  return createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [...battle.teams[0].combatants.map((one) => ss2Combatant(gladiator({ gladiator_dir: "right" }),
+        { id: one.id, name: one.id, controller: "local", x: one.x, y: one.y })), shooter] },
+      { id: "blue", combatants: [ss2Combatant(gladiator({ gladiator_dir: "left" }), { id: "blue-1", name: "blue-1", controller: "local", x: 100, y: FRONT })] }
+    ]
+  });
+}
+
+test("an ally shooting from the far end of the lane does not hold the far side: the queued member still goes round", () => {
+  const battle = withShooter({ x: -86, y: FRONT });
+  assert.equal(combatantById(battle, "red-3").resources.equipped_weapon.value, 2, "the rig's shooter has the bow drawn");
+  assert.equal(ss2PressTarget(viewFor(battle, "red-2"))?.id, "blue-1");
+  const move = ss2PressMove(viewFor(battle, "red-2"), legalActions(battle, "red-2"), combatantById(battle, "blue-1"));
+  assert.equal(move?.type, Ss2ActionType.RANK_BACK, "out of the queue, as without the shooter");
+});
+
+test("and a member in the next lane is not judged already round because a shooter stands beyond the target", () => {
+  const battle = withShooter({ x: -400, y: SECOND });
+  const move = ss2PressMove(viewFor(battle, "red-2"), legalActions(battle, "red-2"), combatantById(battle, "blue-1"));
+  assert.equal(move?.type, Ss2ActionType.WALK_RIGHT, "walk toward and past, as without the shooter");
+});
+
+test("with only a shooter on the target, the free member steps into his lane and closes, rather than going round", () => {
+  // No melee fighter at all: no side is taken, so there is nothing to go round.
+  const place = (fields, id, where) => ss2Combatant(gladiator(fields), { id, name: id, controller: "local", ...where });
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      { id: "red", combatants: [
+        place({ gladiator_dir: "left", secondary_weapon: 61, equipped_weapon: 2 }, "red-1", { x: 1500, y: FRONT }),
+        place({ gladiator_dir: "right" }, "red-2", { x: -400, y: SECOND })
+      ] },
+      { id: "blue", combatants: [place({ gladiator_dir: "left" }, "blue-1", { x: 100, y: FRONT })] }
+    ]
+  });
+  assert.equal(ss2PressTarget(viewFor(battle, "red-2"))?.id, "blue-1", "a foe an ally is shooting at is one to help against (P1)");
+  const move = ss2PressMove(viewFor(battle, "red-2"), legalActions(battle, "red-2"), combatantById(battle, "blue-1"));
+  assert.equal(move?.type, Ss2ActionType.RANK_FRONT);
 });

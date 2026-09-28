@@ -4423,8 +4423,11 @@ const SS2_RANK_DIRECTION = Object.freeze({
  * that were never about the pincer.
  *
  * **The press target is the foe an ally is FIGHTING** — in the ally's lane and
- * inside the ally's own reach, the melee reading of "engaged" the facing and
- * lane rules use — nearest to the actor, ties by id. `null`:
+ * inside the ally's own reach (`ss2Reach`: ~~the melee reading of "engaged"
+ * the facing and lane rules use~~ **a drawn bow's reach included, corrected
+ * 2026-09-27 — so a foe an ally is shooting in his lane is one to help
+ * against; which SIDE of him is taken is melee only, in `ss2PressMove`**) —
+ * nearest to the actor, ties by id. `null`:
  *
  * - **with no depth** (`y` absent — every battle the host builds at
  *   `rankStride` 0; a hand-built one that states `y` has lanes whatever the
@@ -4500,7 +4503,9 @@ export function ss2PressTarget(view) {
  *   default). So arms 1 and 3 go round only while the spot one body-width past
  *   the target, on the side away from the actor, is open — inside the wall, no
  *   fighting ally already there, no body on it — and arm 4 steps in only where
- *   `ss2RankArrivalX` lands the actor with no ally between him and the target.
+ *   `ss2RankArrivalX` lands the actor with no ally between him and the target
+ *   — in the TARGET's lane, a look-ahead: from two lanes away the step lands
+ *   in the middle lane, and the test is where the next step would put him.
  *   When the far side is shut the press has nothing to add, returns `null`, and
  *   the fighter does what the AI did before the press (test/ss2-ai-press.test.js).
  */
@@ -4515,8 +4520,18 @@ export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankS
   const foes = view.foes ?? [];
   const bodies = [...foes, ...allies];
 
-  const fighting = allies.filter((ally) =>
-    ss2SameLane(ally, target) && ss2FightDistance(ally, target) < ss2Reach(ally));
+  // ► **WHO HOLDS A SIDE OF THE TARGET: an ally fighting him IN MELEE —
+  //   corrected 2026-09-27 after a write-nothing verifier's finding.** This
+  //   read `ss2Reach`, which with a bow drawn is the bow's reach (4,485 on the
+  //   demo archer), so an ally shooting from the far end of the lane "held"
+  //   the far side: a queued member judged the pincer shut and taunted from
+  //   the queue for 27 turns, and one in the next lane was judged already
+  //   round and stepped into the queue. A drawn bow is in melee only when
+  //   closed on (`ss2ArcherMinimumRange`, where it bashes). The press TARGET
+  //   still counts the bow (`ss2PressTarget`): a foe an ally is shooting is
+  //   one to help against.
+  const fighting = allies.filter((ally) => ss2SameLane(ally, target)
+    && ss2FightDistance(ally, target) < (ss2InBowMode(ally) ? ss2ArcherMinimumRange(ally) : ss2Reach(ally)));
   // Which side of the target the actor is on; level with him counts as the
   // side he would walk in from.
   const side = Math.sign(actor.x - target.x) || -toward;
@@ -4556,7 +4571,10 @@ export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankS
     return clear ?? open[0] ?? null;
   }
 
-  const onFarSide = actor.x === target.x || fighting.some((ally) => Math.sign(ally.x - target.x) !== side);
+  // With nobody on him in melee no side is taken, and there is nothing to go
+  // round: step into his lane and close, as from the far side.
+  const onFarSide = actor.x === target.x || fighting.length === 0
+    || fighting.some((ally) => Math.sign(ally.x - target.x) !== side);
   if (!onFarSide) return farSideOpen() ? find(towardWalk) : null;
   const arrival = ss2RankArrivalX(actor.x, bodies, target.y);
   if (arrival === null || queuedAt(arrival)) return null;

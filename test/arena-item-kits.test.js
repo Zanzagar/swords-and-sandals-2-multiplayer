@@ -337,15 +337,25 @@ test("a typo is refused loudly, and 1 (the EMPTY marker) is not an item", () => 
  *   - doom: NEW — the old `blasts` pin exactly, now that 49 stands alone.
  */
 const KIT_BOUTS = Object.freeze({
+  // ► **MOVED 2026-09-27 BY THE PRESS'S MELEE-ONLY SIDES (a write-nothing
+  //   verifier's finding against 74c0014), AND BY NOTHING ELSE:** with
+  //   `aiPress: "off"` this loop still gives the old pin exactly (39 actions,
+  //   elimination, 18 casts). Once a drawn bow no longer "holds" a side of
+  //   the target, blue-2 — queued behind blue-1 in red-2's lane — steps out to
+  //   go round (action 43) instead of waiting, blue-1 falls while he walks,
+  //   and the 1v1 that follows runs past 60 (it settles at 94, blue still the
+  //   winner). The same bout under `pincer-first` casts one more rejuvenate.
+  //   Was: 39 actions, elimination, and the list ending … regenerate, colossus.
   buffs: {
-    actions: 39,
-    result: "elimination",
+    actions: 60,
+    result: null,
     casts: [
       "cast-boundless-energy", "cast-boundless-energy", "cast-boundless-energy", "cast-boundless-energy",
       "cast-swiftsandals", "cast-swiftsandals", "cast-swiftsandals", "cast-swiftsandals",
       "cast-colossus", "cast-colossus", "cast-colossus",
       "cast-bloodlust", "cast-bloodlust", "cast-bloodlust",
-      "cast-rejuvinate", "cast-rejuvinate", "cast-regenerate", "cast-colossus"
+      "cast-rejuvinate", "cast-rejuvinate", "cast-regenerate", "cast-colossus",
+      "cast-rejuvinate", "cast-bloodlust", "cast-regenerate"
     ]
   },
   // Each fighter opens with its lightning bolt (priced at its mean, 150, above
