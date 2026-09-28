@@ -1,73 +1,81 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 complete claims selected; held-pair cancellation recurrence is next
+## 2026-09-28 one listen selected; same-tag claimed-evidence reuse is next
 
-Zanzagar selected `RCS-03C3D3-A`. Whenever a positive settlement actually
-claims evidence, it claims the complete deduplicated union of final child
-occurrences in its selected authoritative causal ledgers. Exact shared children
-count once, distinct related children remain distinct, and positive substitutes
-retain both original ledgers. D1-B still leaves exact claim prevalence and
-assignments open.
+Zanzagar selected `RCS-03C3D4-A` with B retained only as a guarded reopening
+fallback. A ledger-bearing cancelled canonical pair gets one listen per
+unbroken relationship-sufficiency interval. Its evidence remains available
+under D2-A, but continued truth cannot generate another evaluation. Reopen B
+only if human tests expose dominant reset-flicker or intolerably stranded
+formations and a material retry event passes every documented guard; B support
+does not coexist in the selected rule.
 
-D3 moves to `DIR-SELECTED`; D4 becomes the sole `OWNER-OPEN` row. The 109-row
-register now contains 22 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 54
-`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`. The
+D4 moves to `DIR-SELECTED`; C3E becomes the sole `OWNER-OPEN` row. The 109-row
+register now contains 21 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 55
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`. The
 authoritative decision record remains unchanged.
 
-Two read-only audits found that D4's old “failed-result recurrence” shorthand
-was too broad. A true no-candidate invocation has no selected complete pair or
-failed-proof identity. D4 is therefore the recurrence choice only for a
-ledger-bearing `P/Q` evaluation that settled `{}`. No row split or count change
-was needed.
+Two read-only audits uphold one binary C3E card and clarify its identity. “Same
+tag” means the output tag that actually committed at the claiming settlement.
+For `{P,Q}`, that means P or Q. For fused `{S}`, only S committed. For
+reconstituted `{S1,S2}`, S1 and S2 committed separately; neither silently
+inherits one original contender.
 
-Key each cancellation by the fixed version, combatant, active Relic, context,
-treatment contract, and unordered original contender pair `{P,Q}`—not by one
-selected ledger. Alternate proof routes, pair ordering, aliases, callbacks, or
-internal evaluator channels cannot manufacture a new pair. Its continuous-
-sufficiency interval lasts while that canonical pair relationship remains
-operative after each authoritative semantic transition, ignoring bookkeeping
-whose only job is claim/retry/cooldown suppression.
+For any positive settlement `y`, preserve both its original selected `P/Q`
+ledgers and a prospectively authored causal-incidence relation `(k,x)` between
+exact committed fixed C135 context/receipt tag `k=(h,j)` and canonical
+occurrence `x`. For claiming `z`, `x` comes from `C(z)=U(z)`. D3-A's full-union
+claim does not imply that every `x` maps to every output. A qualifying C3E
+witness requires exact `k` to undergo the genuine C135-C155 break/renew/rearm
+path, then commit again with the identical still-fresh, source-valid `x`
+supplying `(k,x)` under the same versioned treatment-contract identity.
+Finding `x` elsewhere in the later selected tuple is insufficient. Projecting
+claim state alone out, every other eligibility rule must still pass.
 
-A distinct re-evaluation must be newly authorized at a later semantic cut with
-a fresh coherent evidence read. It is not a redraw, callback, reload, replay,
-duplicate settlement, hidden timer, ledger switch, or another product channel:
+- **A — rearmed results still need fresh proof:** in every otherwise-admissible
+  later post-rearm commit of the same exact fixed tag, a previously claimed
+  occurrence remains ineligible for that tag. **Recommended.** This preserves
+  D3-A's complete causal cost instead of turning claims into cooldowns.
+  Relationship recurrence and evidence cost stay distinct: the bond may rearm,
+  but its previous manifestation already
+  cashed that proof. Fresh canonical occurrences remain usable normally. Teach
+  **“claimed proof stays claimed when its manifested result rearms.”** The
+  original weave-and-claim retains direct ideal fit; A is neutral/protective
+  and preserves meaningful distinction between manifestations. Cost: enduring
+  historical proof can feel like disposable ammunition, and the player may
+  repeat an action only to restate a truthful relation.
+- **B — require same-committed-tag reuse support:** at least one claimed
+  canonical occurrence later supplies the same authored `(k,x)` incidence to
+  the same exact fixed committed tag after genuine valid rearm. This is a
+  tag/occurrence-scoped eligibility exception, never a global clearing of the
+  old claim union. Its strongest case is a named **Remembered Vow**: one
+  enduring history witness participates
+  again while newly paid present-state proof changes. This is partial ideal fit
+  across time, but risks permanent hubs, cheap-leaf reset loops, ally-paid
+  amplification, and an unreadable tag-by-proof matrix. First reduce claim
+  prevalence or improve fresh-proof flow; use B only if a named persistent-
+  manifestation family remains legible, attributable, non-dominant, and
+  independently fun.
 
-- **A — one listen per unbroken bond:** after `{}`, the same canonical pair
-  cannot evaluate again until its relationship genuinely becomes insufficient
-  and later sufficient. **Recommended.** D2-A keeps its evidence available but
-  does not turn Oracle denial into a free reroll. The UI can leave evidence lit,
-  mark the pair `LISTENED — SEVERED`, and show `Already heard` while the bond
-  remains held. A matches C135-A's break-before-rearm success grammar and is
-  neutral/protective ideal fit while the initial causal relation remains
-  direct. Costs: a maintained expensive formation may become inert, and a
-  cheap false/true reset could become dominant unless authoring and playtests
-  reject it.
-- **B — require held-pair reattempt support:** at least one cancelled canonical
-  pair can receive a genuinely distinct later evaluation while its relationship
-  remains continuously sufficient. The strongest form is a named **Echoing
-  Covenant**: a visible, independently meaningful act such as `Temper the Vow`
-  changes a law-relevant fact and authorizes another hearing without breaking
-  `P/Q`. This can reward maintaining difficult formations and is at most
-  partial ideal fit across distinct evaluations of one continuing relation.
-  A timer, Rest, poll, unchanged-context draw, or ledger switch does not count.
-  Unguarded B makes chance `p` approach eventual success `1-(1-p)^n`, creates
-  automatic proc spam, weakens deterministic refusal, and enables teammate-
-  forced repeats.
+Example: `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` commit and
+claim `g,h,t`. Heat later breaks, and a material Rekindle creates new `h2` and
+validly rearms P. Under A, old `(P,g)` remains claimed, so P needs new Guard
+`g2`; `h2` is already new. Under guarded B, a named P-family might explicitly
+allow old `g` for P again without unlocking Q. Shared `h` remains one occurrence
+with two causal incidences.
 
-Example: `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` settle `{}`.
-D2-A leaves `g,h,t` available. Under A, held `P/Q` produces no later attempt;
-Heat must become authoritatively false and later rebuild. Under B, a disclosed
-material event may authorize `e2` while `P/Q` remains true; `e2` may fail or
-succeed.
+For `{S}`, later S reuse is C3E only when the treatment contract authored
+`x->S` and S itself rearms; later P/Q use belongs to C3F. For `{S1,S2}`, each
+tag needs its own incidence and rearm, and S1 never unlocks S2. No `P->S1`,
+`Q->S2` preferred-heir mapping is inferred.
 
-A/B are exhaustive because held-pair reattempt support is empty or nonempty.
-B includes universal and mixed catalogs; exact prevalence, triggers, cadence,
-and caps remain AUTHOR/SPEC. True no-candidate events, different pairs,
-post-break renewal, positive settlements, payoff, evidence reuse, and cross-
-root/Relic/combatant behavior stay outside D4. Use B only if human playtests
-show A causes dominant reset-flicker or intolerably stranded formations and a
-material retry act remains forecastable, attributable, bounded, anti-coercive,
-and independently fun; otherwise fall back to A. Ask for A or B.
+A/B are exhaustive because qualifying same-tag reuse support is empty or
+nonempty. Existing claim and rearm requirements do not themselves prove an
+overlapping same-occurrence witness; B must author one. New occurrences,
+freshness, source clearing, different-tag use, persistent payoff, caps, cadence,
+and implementation remain separate. If B needs bulk claim clearing, hidden
+incidence matrices, or alias/ledger churn to explain itself, fall back to A.
+Ask for A or B.
 
 ## 2026-09-26 fixed denied outputs selected; three-plus contenders are next
 
@@ -11073,7 +11081,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 01:38 UTC — held-pair cancellation reattempt support is next](docs/handoffs/2026-09-28-0138--relic-held-cancellation-reattempt-next.md)**
+[2026-09-28 02:09 UTC — same-committed-tag claimed-evidence reuse is next](docs/handoffs/2026-09-28-0209--relic-same-tag-evidence-reuse-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

@@ -140,6 +140,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [same-committed-tag claimed-evidence reuse is next](2026-09-28-0209--relic-same-tag-evidence-reuse-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D4-A selects one listen per unbroken cancelled-pair bond with guarded B reopening fallback; two audits key C3E to the tag that actually committed and recommend fresh proof after rearm. |
 | [held-pair cancellation reattempt support is next](2026-09-28-0138--relic-held-cancellation-reattempt-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D3-A makes every actual claim take its full causal union; two audits narrow D4 to canonical pair-keyed ledger-bearing cancellation recurrence and recommend one listen per unbroken bond. |
 | [positive-result claim footprint is next](2026-09-28-0120--relic-claim-footprint-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D2-A preserves causal evidence on empty settlement; two audits uphold D3's full-union/proper-subset footprint topology and recommend full-union claiming. |
 | [ledger-bearing empty-result evidence-claim support is next](2026-09-27-1748--relic-empty-evidence-claim-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | D1-B requires positive-result claim support; two audits uphold D2's empty/nonempty cancellation-claim topology and recommend preserving evidence on empty settlement. |

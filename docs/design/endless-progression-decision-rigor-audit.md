@@ -6095,6 +6095,89 @@ new opportunity can exist. Under B, an authored material event may authorize
 register would then have 21 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 55
 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`.
 
+Zanzagar selected D4-A with B retained only as the guarded reopening fallback.
+`R^{fail-hold}_v` is empty: one canonical ledger-bearing cancelled pair gets
+one listen per continuous-sufficiency interval. Its evidence remains available
+under D2-A, but no later evaluation occurs until genuine pair insufficiency and
+renewal. This selects no B support now. B may be reopened only if human tests
+show dominant reset-flicker or intolerably stranded maintained formations and
+a visible material retry event passes the forecastability, attribution,
+boundedness, anti-coercion, and independent-fun guards. D4 moves to
+`DIR-SELECTED`, C3E becomes `OWNER-OPEN`, and the 109-row register has 21
+`SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 55 `DIR-SELECTED`, 4 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`.
+
+Two named-claim audits then tested C3E. They upheld one binary support card but
+corrected “same tag” to mean the receipt tag that actually committed at the
+claiming settlement. If treatment commits `{S}` or `{S1,S2}`, original `P/Q`
+ledgers remain causal provenance but do not supply C135's initial commit.
+Silently keying recurrence to P/Q would omit substitute settlements and create
+false preferred-heir mappings.
+
+For any positive settlement `y`, let `K(y)` be its exact committed fixed C135
+context/receipt tags `k=(h,j)` and let `I(y)` contain prospectively authored
+causal incidences `(k,x)` between `k in K(y)` and a canonical occurrence
+`x in U(y)`. For claiming `z`, those occurrences come from `C(z)=U(z)`.
+D3-A's complete claim footprint does not imply that every `x` maps to every
+`k`. Holding the fixed context implicit, original `P={g,h}` and `Q={t,h}` have
+the natural incidences `(P,g)`, `(P,h)`, `(Q,t)`, and `(Q,h)`; shared `h`
+remains one occurrence claimed once. Fusion and reconstitution contracts must
+author substitute incidences without assuming `P->S1`, `Q->S2`, or one
+substitute per original.
+
+A qualifying witness `(z,k,x,e2)` requires an earlier claiming settlement and
+incidence `(k,x)`, then a genuine C135-C155 insufficiency/renewal/authorization
+path for that same exact fixed tag, followed by a distinct later same-`k`
+commit. Its freshly read selected tuple must contain the identical `x`, and
+`(k,x) in I(e2)` must hold under the same versioned treatment-contract
+identity; finding `x` elsewhere in that tuple is insufficient. Projecting only
+the active Relic's claim state out, `x` must still satisfy freshness, source
+validity, addressability, lineage, and every other eligibility rule. D1-B's
+claim support and C136-A's per-tag rearm support do not prove this intersection
+nonempty; expiry, source clearing, substitutes, or fresh replacement may keep
+the witnesses disjoint.
+
+Let `R^{same-reuse}_v` contain those witnesses. C3E-A makes it empty; C3E-B
+makes it nonempty. This is exhaustive. Universal and mixed support both lie in
+B, with exact incidence assignments, families, and caps AUTHOR/SPEC. No
+footprint child is needed because reuse is tested at the actual later incidence.
+Bulk clearing of all or part of the prior `C(z)` claim would be a distinct
+unselected reset semantic and is forbidden. Incomplete reachable-domain
+analysis is unresolved, not A.
+
+The gameplay audit recommends C3E-A: **claimed proof stays claimed when its
+manifested result rearms**. This preserves D3-A's complete causal price rather
+than converting claim into a cooldown. Relationship recurrence and evidence
+economy remain distinct: a bond can validly rearm, but the last manifestation
+already cashed those canonical occurrences. Fresh occurrences with the same
+semantic kind remain usable. In every otherwise-admissible later post-rearm
+commit of the same exact fixed tag, however, the previously claimed occurrence
+remains ineligible for that tag. D3-A's original complete weave/claim remains
+direct standing-ideal fit; A's continued exclusion is neutral/protective, and
+new proof preserves meaningful distinction. Costs are treating persistent
+history like ammunition and potentially forcing a repeated action to restate
+an otherwise truthful relation.
+
+C3E-B's strongest countermodel is a named history-centered Remembered Vow. The
+same truthful occurrence participates again in the same committed manifested
+tag after a meaningful reset while newly paid present-state evidence changes.
+That is partial standing-ideal fit across time and locally direct at the later
+evaluation. Guarded B is the fallback only after reducing claim prevalence or
+improving fresh-proof flow fails, and only if the family stays forecastable,
+incidence-attributable, non-dominant, bounded by later rules, and teachable
+without a tag-by-proof matrix. Otherwise A remains required.
+
+For original `{P,Q}`, a valid P rearm may not unlock Q; shared `h` has two
+incidences but one identity. For `{S}`, only S's own rearm can create a C3E
+witness when the contract authored `x->S`; later P/Q use is C3F. For
+`{S1,S2}`, rearming S1 never unlocks S2 and no original-to-substitute partition
+is inferred. New/aliased/sibling/ancestor occurrences, expired or source-
+cleared proof, callbacks/replay, route churn, other tags, roots, Relics,
+combatants, persistent payoff, cadence, and implementation remain outside.
+Either C3E answer would move C3E to `DIR-SELECTED` and C3F to `OWNER-OPEN`,
+producing 20 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 56 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or
