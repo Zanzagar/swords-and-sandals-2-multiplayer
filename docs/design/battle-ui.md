@@ -991,38 +991,40 @@ decision: `ss2BodyBlocks`, `57b2209`.)*
 
   | roster | 2v1 converted (pair wins whole): off / ranged / pincer | both pair members on the lone foe | pair turns spent dancing | mean bout length |
   |---|---|---|---|---|
-  | plain 2v2 | 8.3% / 15.6% / 9.4% | 0.0 / 4.0 / 1.9% | 18.3 / 14.0 / 6.9% | 50.9 / 51.4 / 50.5 |
-  | plain 3v3 | 53.3 / 73.0 / 72.8% | 6.4 / 28.8 / 30.5% | 37.3 / 1.4 / 1.0% | 85.5 / 79.6 / 79.6 |
-  | buffs 2v2 | 54.2 / 54.2 / 39.6% | 7.9 / 21.4 / 11.5% | 1.7 / 0.5 / 0.4% | 49.1 / 51.3 / 61.6 |
-  | buffs 3v3 | 50.0 / 80.0 / 78.3% | 9.7 / 30.9 / 29.1% | 28.4 / 2.2 / 1.5% | 95.0 / 67.6 / 79.2 |
-  | tricks 3v3 | 47.2 / 57.4 / 60.0% | 0.4 / 1.5 / 2.0% | 23.5 / 8.4 / 8.9% | 205.9 / 203.2 / 204.6 |
-  | crowd 3v3 | 53.3 / 68.1 / 68.1% | 4.3 / 29.7 / 31.7% | 41.3 / 2.4 / 0.9% | 203.4 / 193.7 / 193.8 |
-  | champions 2v2 | 97.9 / 97.9 / 96.9% | 19.0 / 19.8 / 16.3% | 2.8 / 1.4 / 0.7% | 36.2 / 36.3 / 38.9 |
-  | champions 3v3 | 78.8 / 81.8 / 78.4% | 3.4 / 3.2 / 13.6% | 6.0 / 3.0 / 3.2% | 61.6 / 61.5 / 66.4 |
+  | plain 2v2 | 8.3% / 9.4% / 9.4% | 0.0 / 1.3 / 1.3% | 18.3 / 4.2 / 4.2% | 50.9 / 50.4 / 50.4 |
+  | plain 3v3 | 53.3 / 75.3 / 76.1% | 6.4 / 28.4 / 30.0% | 37.3 / 2.3 / 1.3% | 85.5 / 79.0 / 78.9 |
+  | buffs 2v2 | 54.2 / 57.3 / 34.4% | 7.9 / 23.2 / 12.7% | 1.7 / 0.5 / 0.7% | 49.1 / 49.9 / 68.3 |
+  | buffs 3v3 | 50.0 / 84.8 / 76.6% | 9.7 / 32.0 / 29.9% | 28.4 / 1.4 / 2.5% | 95.0 / 67.4 / 84.2 |
+  | tricks 3v3 | 47.2 / 52.1 / 56.1% | 0.4 / 2.9 / 3.0% | 23.5 / 9.0 / 9.2% | 205.9 / 198.4 / 203.0 |
+  | crowd 3v3 | 53.3 / 75.9 / 75.9% | 4.3 / 29.2 / 31.3% | 41.3 / 2.7 / 1.4% | 203.4 / 192.7 / 192.9 |
+  | champions 2v2 | 97.9 / 97.9 / 96.9% | 19.0 / 21.2 / 17.9% | 2.8 / 1.0 / 0.7% | 36.2 / 36.2 / 39.6 |
+  | champions 3v3 | 78.8 / 82.4 / 79.4% | 3.4 / 3.8 / 21.5% | 6.0 / 2.0 / 3.2% | 61.6 / 62.2 / 69.0 |
 
-  *Measured at `92f9701`, the third measurement. Two write-nothing verifiers moved the code under it:
-  `74c0014` (the press shuttled a fighter between lanes when the target's far side was already
-  taken) and `92f9701` (a drawn bow far down the lane counted as holding a side of the target). The
-  first two measurements, at `5cb6977` and `74c0014`, gave 770 : 766 and 773 : 763 head to head.
-  "Dancing" counts every crowd-pleaser in a 2v1 phase: on plain 2v2 all 134 under ranged-first are
-  turns where nobody is fighting yet (the lone foe still walking in), which P1 leaves to the
-  2026-09-23 crowd rule.*
+  *Measured at `ab56337`, the fifth measurement; five write-nothing verifiers moved the code under
+  it (`74c0014`, `92f9701`, `06beab0`, `463fe3f`, `ab56337`: a lane shuttle when the far side was
+  taken, a distant bow holding a side, early lane entry opening long-range taunts, the older arms
+  re-queueing a fighter the press had stepped out, and the `off` baseline drifting). Head to head
+  over the five measurements: 770 : 766, 773 : 763, 784 : 752, 774 : 762, 774 : 762. "Dancing" counts
+  every crowd-pleaser in a 2v1 phase; P1 stops it only while an ally fights, so what is left is before
+  anyone engages, or a foe of the dancer's own still coming (P4).*
 
   - **P1 + going round, against `off` (ranged-first, the shipped variant):** in 3v3 the pair
-    converts a 2v1 far more often (plain +19.7 points, buffs +30.0, crowd +14.8, tricks +10.2), both
-    members are on the lone foe 3-7x as often on the demo rosters, the dance while an ally fights a
-    foe this gladiator could help against is gone (P1, pinned by `test/ss2-ai-press.test.js`; the
-    remaining 1-9% in 3v3 is crowd play P1 leaves to the 2026-09-23 rule: nobody fighting yet, or a
-    foe of his own still coming, P4), and demo-roster bouts get shorter
-    (buffs 3v3 95 -> 68 turns). Champion bouts are within 1%. 2v2 moves less: the 2v1 there is
-    usually over before a 5-6-walk detour arrives. No bout failed to settle in any cell; no AI walk
-    went nowhere.
+    converts a 2v1 far more often (plain +22.0 points, buffs +34.8, crowd +22.6, tricks +4.9,
+    champions +3.6), both members are on the lone foe 3-7x as often on the demo rosters, the dance
+    while an ally fights a foe this gladiator could help against is gone (P1, pinned by
+    `test/ss2-ai-press.test.js`), and demo-roster bouts get shorter (buffs 3v3 95 -> 67 turns).
+    Champion bouts are within 1%. 2v2 moves less: the 2v1 there is usually over before a detour
+    arrives. No bout failed to settle in any cell; no AI walk went nowhere; no lane shuttle of four
+    or more in seeds 1-96 of champions 2/3v3, tricks 3v3 and buffs 2/3v3, either variant.
   - **Ranged-first against pincer-first: ranged-first is at least as strong.** Head to head (each
-    side a different variant, both colour assignments, 96 seeds, all eight rosters): **784 wins to
-    752 over 1,536 bouts**, with pincer-first losing clearly only on buffs 2v2 (39.6% converted
-    against 54.2%, bouts 62 against 51 turns). Pincer-first still corners more VISIBLY on champions
-    (the pair on both sides of the lone foe 32% of 2v1 turns against 14% in 2v2, back attacks 13.5%
-    of the pair's blows against 4.2%) and makes champion 3v3 bouts ~8% longer.
+    side a different variant, both colour assignments, 96 seeds, all eight rosters): **774 wins to
+    762 over 1,536 bouts**, pincer-first clearly weaker on buffs 2v2 (34.4% converted against 57.3%,
+    bouts 68 against 50 turns) and buffs 3v3 (76.6 against 84.8). Pincer-first still corners more
+    VISIBLY on champions (the pair on both sides of the lone foe 32% of 2v1 turns against 20% in 2v2,
+    back attacks 14.6% of the pair's blows against 7.4%) and makes champion 3v3 bouts ~11% longer.
+    **Known pincer-first defect, to fix before choosing it:** a fighter can sheathe and redraw his bow
+    on consecutive turns when his press target flickers (4+ in a row in 8-10 of 96 champion 3v3
+    bouts; ranged-first: none).
   - **Shipped: `ranged-first`**, today's order, at least as strong and with the shorter bouts. The owner
     may flip it for the more visible cornering; the option is one word (`aiPress`).
 - **P3 — A walk that goes nowhere because of a body in your own lane is not offered; the ring shows
