@@ -101,26 +101,25 @@ function advanceTo(host, turnNumber, actorId) {
 }
 
 test("A WALK THE STANCE DOES NOT WIRE — toward a foe inside reach — stands BESIDE the build's walk slot on its side, and its slot keeps its own verb", () => {
-  // 3v3 plain seed 2, turn 19: blue-2 with red-3 selected, close, facing right. `closerange_warrior`
+  // 3v3 plain seed 21, turn 20: red-2 with blue-1 selected, close, facing right. `closerange_warrior`
   // facing right wires walkleft at optionB and NO walkright: optionE is normal_attack
-  // (SS2_BUTTON_WIRING). He stands at x 1 with red-2 at x -84 in his own rank, 85 away, and red-3 at
-  // x 30 one rank back, 101 away — inside his reach by the build's stance selector, which reads no
-  // lane (`ss2UnavailableActions`). red-2 on his LEFT is the nearest, the one he retreats from, and
-  // walk-right is offered — a whole step, since a body in another lane is scenery — while optionE
-  // holds normal_attack, greyed at red-3 for `other-rank`, so it cannot hold the walk too.
+  // (SS2_BUTTON_WIRING). He stands at x -207 with blue-1 at x -93 in his own rank, 114 away and in
+  // reach, and blue-2 at x -247 one rank back, 105 away — the nearest, on his LEFT, the one he
+  // retreats from — so walk-right is offered (it moves him to -179), AND the normal attack at
+  // blue-1, so optionE cannot hold both.
   //
-  // ► **RE-STAGED 2026-09-27 from turn 20 of the same bout**, by the owner's decision P3
-  //   (`ss2WalkBlocked`): at turn 20 red-3 has stepped into blue-2's rank at x 86, size 85, so the walk
-  //   right lands on red-3's clamp line, 1, where it starts — it always went nowhere, and a walk that
-  //   goes nowhere against a body in the walker's lane is no longer offered. Turn 19 is the same
-  //   stance and the same ring under the AI with and without the press (`aiPress: "off"`), measured.
-  const host = advanceTo(demoHost({ perSide: 3, seed: 2 }), 19, "blue-2");
-  const model = modelOf(host, "red-3");
+  // ► **RE-STAGED 2026-09-28 (twice that day).** ~~3v3 plain seed 2, turn 20: blue-2 with red-3~~ —
+  //   there the walk right landed on red-3's clamp line and always went nowhere, so the owner's P3
+  //   (`ss2WalkBlocked`) withheld it; ~~turn 19 of the same bout~~ held until the AI's press and its
+  //   queue guards changed that bout's trajectory (the fifth verifier's fixes). This turn has the
+  //   original geometry — the selected foe in his own lane, in reach — and survived two AI changes.
+  const host = advanceTo(demoHost({ perSide: 3, seed: 21 }), 20, "red-2");
+  const model = modelOf(host, "blue-1");
   assert.deepEqual(model.stance, { frame: "closerange_warrior", range: "close", weapon: "warrior", facing: "right" });
   assert.equal(model.slots.find((slot) => slot.slot === "optionE").verb, "normal_attack");
   const walk = model.moves.find((move) => move.move === "walk-right");
   assert.deepEqual([walk.key, walk.place, walk.slot, walk.verb], ["ArrowRight", "beside", null, "walkright"]);
-  assert.deepEqual(walk.action, { type: "walk-right", targetId: "blue-2", actorId: "blue-2" });
+  assert.deepEqual(walk.action, { type: "walk-right", targetId: "red-2", actorId: "red-2" });
   assert.ok(!model.offRing.some((entry) => entry.action.type === "walk-right"), "on the ring, so not listed");
 });
 
@@ -129,7 +128,7 @@ test("a stance that wires a walk the engine WITHHOLDS for a team rule GREYS it i
   // to the right) for `in-reach`, a team rule. ~~It shows it nowhere~~ before S9: the slot was empty.
   // Neither rank arrow is withheld here, so both stand, and nothing is listed: ~~the swap is only
   // listed~~ — S6 put the swap on the ring's ninth button (`model.swap`).
-  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 2 }), 19, "blue-2"), "red-3");
+  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 21 }), 20, "red-2"), "blue-1");
   const walkSlot = model.slots.find((slot) => slot.slot === "optionB");
   assert.equal(walkSlot.verb, "walkleft");
   assert.equal(walkSlot.action, null, "greyed: it sends nothing");
@@ -143,6 +142,7 @@ test("a stance that wires a walk the engine WITHHOLDS for a team rule GREYS it i
   assert.deepEqual(model.offRing.map((entry) => line(entry.action)), []);
   // ~~`model.swap.action` is blue-2's swap~~ — **RE-PINNED 2026-09-24 (night2/engine2 swap-ammo)**: blue-2
   // spent his five arrows and the forced swap put the bow away, so he holds the sword with `ammo_left` 0,
+  // (re-staged 2026-09-28: red-2 here is the same — the bow in the second slot, `ammo_left` 0),
   // and the build hides its swap button on `!(ammo_left > 0)` (overlay frame 1 body 0x2378d2
   // +0x0e0a-+0x0e9d). The engine no longer offers it, so the ring has no ninth button here.
   assert.equal(model.swap, null);
@@ -169,8 +169,8 @@ test("with no ring — the engine has no menu to ask — no move is placed, and 
 /* ------------------------------------------------------------------ */
 
 test("a move is sent by its arrow key or its name wherever it stands; a withheld one sends nothing", () => {
-  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 2 }), 19, "blue-2"), "red-3");
-  const self = (type) => ({ type, targetId: "blue-2", actorId: "blue-2" });
+  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 21 }), 20, "red-2"), "blue-1");
+  const self = (type) => ({ type, targetId: "red-2", actorId: "red-2" });
   assert.deepEqual(ringActionFor(model, "ArrowRight"), self("walk-right"), "beside the ring");
   assert.deepEqual(ringActionFor(model, "walk-right"), self("walk-right"));
   assert.deepEqual(ringActionFor(model, "ArrowUp"), self("rank-back"));
@@ -187,8 +187,8 @@ test("a move is sent by its arrow key or its name wherever it stands; a withheld
 });
 
 test("the arrow keys move from the stage or a strip button: one press, one move; a withheld move or a held key is swallowed, not sent", () => {
-  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 2 }), 19, "blue-2"), "red-3");
-  const self = (type) => ({ kind: "act", action: { type, targetId: "blue-2", actorId: "blue-2" } });
+  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 21 }), 20, "red-2"), "blue-1");
+  const self = (type) => ({ kind: "act", action: { type, targetId: "red-2", actorId: "red-2" } });
   for (const focus of ["stage", "control"]) {
     assert.deepEqual(ringKeyCommand(model, { key: "ArrowRight", focus }), self("walk-right"), focus);
     assert.deepEqual(ringKeyCommand(model, { key: "ArrowUp", focus }), self("rank-back"), focus);
@@ -295,8 +295,8 @@ test("a rank arrow that would leave the canvas stays on it, whatever the fighter
 });
 
 test("a click on a move's button hits that move, and sends it; a hover names it — and a GREYED one (S9) is hit, named and sends nothing", () => {
-  const host = advanceTo(demoHost({ perSide: 3, seed: 2 }), 19, "blue-2");
-  const model = modelOf(host, "red-3");
+  const host = advanceTo(demoHost({ perSide: 3, seed: 21 }), 20, "red-2");
+  const model = modelOf(host, "blue-1");
   const buttons = [
     ...ringButtonsAt(model, { centerX: 300, centerY: 200, unit: 1.2 }),
     ...ringMoveButtonsAt(model, { centerX: 300, centerY: 200, unit: 1.2, head: 190, feet: 330 })

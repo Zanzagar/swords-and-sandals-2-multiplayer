@@ -560,3 +560,60 @@ test("aiPress \"off\" stays the AI before the press: the rank-arm queue guard (0
     assert.notEqual(suggestAction(stage(aiPress), "red-2").type, Ss2ActionType.RANK_FRONT, `${aiPress} skips the step into the queue`);
   }
 });
+
+/**
+ * ► **THE OLDER ARMS STEP INTO A QUEUE ONLY WHEN THERE IS NO WAY ROUND — a
+ *   fifth write-nothing verifier's findings, 2026-09-28, against 06beab0.**
+ *   (1) The join arm counts an ally "engaged" when the FOE's reach covers him,
+ *   and a drawn bow's reach is ~4,500: it stepped the free member into the
+ *   queue behind that ally whenever the press target flickered off, the arm
+ *   that reversed the press in every shuttle found. (2) 06beab0's rank-arm
+ *   guard skipped a queue even with no way round — both flanks held, or the
+ *   target at the wall — and left the fighter pacing under the target or
+ *   walking into the wall, 0 attacks in 50 turns, where the older AI queued
+ *   and waited.
+ */
+test("the join arm does not step into a queue behind an ally while the press has a way round; aiPress off still does", () => {
+  const stage = (aiPress) => {
+    const place = (fields, id, where) => ss2Combatant(gladiator(fields), { id, name: id, controller: "local", ...where });
+    return createTeamBattle({
+      seed: 1,
+      rules: createSs2TeamRules({ aiPress, aiPlaysToCrowd: false }),
+      teams: [
+        { id: "red", combatants: [place({ gladiator_dir: "right" }, "red-1", { x: 0, y: FRONT }), place({ gladiator_dir: "right" }, "red-2", { x: -300, y: SECOND })] },
+        { id: "blue", combatants: [place({ gladiator_dir: "left", secondary_weapon: 61, equipped_weapon: 2 }, "blue-1", { x: 800, y: FRONT })] }
+      ]
+    });
+  };
+  const old = stage("off");
+  assert.equal(ss2PressTarget(viewFor(old, "red-2")), null, "no press target: red-1 is far out of his own reach of blue-1");
+  assert.equal(suggestAction(old, "red-2").type, Ss2ActionType.RANK_FRONT, "the old AI joins, into the queue behind red-1");
+  for (const aiPress of ["ranged-first", "pincer-first"]) {
+    assert.notEqual(suggestAction(stage(aiPress), "red-2").type, Ss2ActionType.RANK_FRONT, `${aiPress}: no step into the queue`);
+  }
+});
+
+for (const aiPress of ["ranged-first", "pincer-first"]) {
+  test(`${aiPress}: with both flanks held, a free member two lanes back queues in the target's lane rather than pace under him`, () => {
+    const run = stagedRun([
+      { id: "red-1", team: "red", x: -120, y: FRONT, sturdy: true },
+      { id: "red-2", team: "red", x: 120, y: FRONT, sturdy: true },
+      { id: "red-3", team: "red", x: -400, y: FRONT - 2 * SS2_ARENA.rankStride },
+      { id: "blue-1", team: "blue", x: 0, y: FRONT, sturdy: true }
+    ], { aiPress, actions: 90 });
+    const first = run.turnsOf("red-3").slice(0, 12);
+    assert.ok(first.filter((entry) => /^rank-/.test(entry.type)).length >= 2, "two steps bring him into the target's lane early");
+  });
+
+  test(`${aiPress}: with the lone foe pinned at the wall and his near side held, the free member does not walk into the wall`, () => {
+    const wall = SS2_ARENA.clamp.min;
+    const run = stagedRun([
+      { id: "red-1", team: "red", x: wall + 120, y: FRONT, sturdy: true },
+      { id: "red-2", team: "red", x: -1200, y: FRONT - 2 * SS2_ARENA.rankStride },
+      { id: "blue-1", team: "blue", x: wall, y: FRONT, sturdy: true }
+    ], { aiPress, actions: 150 });
+    assert.ok(run.longestRun("red-2", (entry) => entry.type === Ss2ActionType.WALK_LEFT) < 12,
+      "he stops walking toward the wall once there is nowhere to go round to");
+    assert.ok(run.turnsOf("red-2").some((entry) => /^rank-/.test(entry.type)), "and steps into the lanes toward the fight");
+  });
+}
