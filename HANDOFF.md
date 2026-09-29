@@ -1,6 +1,69 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-29 absence asks; lived-event approval source is next
+## 2026-09-29 lived events bind; participant timing is next
+
+Zanzagar selected `RCS-03E1X-A` with `RCS-03E1X-B` as the qualified
+cause-local agency fallback. Every reachable proposal caused by a qualifying
+independently meaningful X event is system-deterministic. The event and all of
+its native combat/source/relationship consequences remain final; one fixed
+versioned law admits or withholds only the distinct persistent-assignment
+proposal. Prospective agency lies in disclosed equip and event exposure.
+
+E1X-B is armed and unfired. It may replace A only if prospective exposure
+control leaves cause-wide material involuntary-build regret while assent
+remains strategic. Firing B adds X to the participant-timing domain and
+reopens E2. Definition-local failure reopens E1X toward C; a stable
+authorization-subcause split requires an owner-visible amendment; intrinsic X
+tokenism, farming, coercion, opacity, or dominance fires D1X-A directly.
+E1XA/E1XA1 prune.
+
+The E2 prerequisite audit caught one more hidden choice. On the active branch,
+P and Z are participant-contingent while X and M are deterministic. Generic
+timing “coexistence” allowed opposite worlds—P live/Z advance and P advance/Z
+live—even within one definition. Those worlds change information, prompts,
+failure audition, and access to live authority. The forty-sixth correction
+therefore makes E2-C cause-uniform and adds conditional E2C to choose its
+orientation one card later. The register now has **157 rows: 19 `SCREEN`, 1
+`OWNER-OPEN` at E2, 51 `PRUNED`, 79 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 20`**. The authoritative decision record remains
+byte-unchanged.
+
+`RCS-03E2` now decides when the owning combatant's custodian exercises the
+already selected material approve/withhold authority:
+
+- **A — every P/Z approval is advance-bound.** The disposition becomes
+  irrevocable before the exact opportunity-specific proposal facts are
+  available to the custodian. It remains participant agency because changing
+  the earlier binding changes the eventual proposal's disposition, but there
+  is no live grant, veto, or confirmation. This
+  is the qualified production fallback: no post-result shopping, prompts, or
+  stalls, at the cost of loadout bureaucracy and weaker assent at the moment.
+- **B — every P/Z approval is live-capable.** The custodian can still change
+  approve versus withhold after the exact proposal is known and before
+  collision settlement. A standing default plus live veto is still B. This is
+  the strongest direct Soul/Relic/proposal relation, but also the largest
+  upside-only option, prompt, stall, disconnect, and failure-audition surface.
+- **C — P and Z use opposite cause-uniform timings. Recommended.** Every P
+  proposal uses one timing and every Z proposal the other. E2C next chooses
+  P-live/Z-advance or its mirror; no definition, dialect, target, favorability,
+  context, owner, instance, or opportunity may switch within one cause.
+
+Recommend **C, then E2C's P-live/Z-advance orientation, with E2-A as the
+qualified production fallback**. Live P puts direct Soul assent at positive
+manifestation and is universally available across transforming definitions.
+Advance Z carries participant will partially across time without turning
+actual absence into a post-result lottery. Fire A only if both orientations or
+the two-grammar system fail while advance bindings remain materially strategic
+rather than one dominant fixed policy or opaque loadout work.
+
+E2 selects no exact commitment boundary, information packet, policy language,
+default/recovery rule, collision winner, persistence mechanism, or power.
+RCS-02, RCS-13, RCS-04A, RCS-15/16, and RCS-17/18 retain those questions.
+Every route must preserve a real D5-B compatible return witness and may not
+inspect a rival proposal's later collision result. Ask only for E2 A, B, C, or
+an explicit replacement. If C is selected, present E2C separately next.
+
+## 2026-09-29 absence asks; lived-event approval source is next — superseded frontier
 
 Zanzagar selected `RCS-03E1Z-B` with `RCS-03E1Z-A` as the qualified
 cause-local system fallback. Every reachable proposal caused by an actual
@@ -113,10 +176,12 @@ opportunity require a later owner-visible stable-subcause amendment.
 
 The repaired register has **156 rows**: 24 `SCREEN`, 1 `OWNER-OPEN` at E1Z,
 47 `PRUNED`, 77 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 25`. The four added rows select nothing. Although the repaired E1-C
-subtree contains 243 finite Z/X/timing combinations, only one prerequisite-ready
-card is shown at a time; the recommended uniform Z-B/X-A route prunes all four
-incidence children and still asks only Z, X, then timing.
+`Phi_SR = 25`. The four added rows select nothing. That checkpoint appeared to
+contain 243 finite Z/X/timing combinations, but the later E2 audit invalidated
+the total because generic timing coexistence hid cause orientation. Only one
+prerequisite-ready card is shown at a time; the selected uniform Z-B/X-A route
+prunes all four incidence children and asks only Z, X, then timing, with E2C
+conditional on timing coexistence.
 
 `RCS-03E1Z` now asks how approval source is distributed across actual
 empty-settlement Z proposals. The `{}` settlement has already committed. Any
@@ -12473,7 +12538,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-29 19:56 UTC — lived-event proposal approval is next](docs/handoffs/2026-09-29-1956--relic-lived-event-approval-next.md)**
+[2026-09-29 21:10 UTC — participant approval timing is next](docs/handoffs/2026-09-29-2110--relic-participant-timing-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

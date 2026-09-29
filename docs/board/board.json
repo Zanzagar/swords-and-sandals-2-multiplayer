@@ -1,6 +1,6 @@
 {
  "updatedAt": "2026-09-29",
- "head": "191fe71",
+ "head": "5f9a625",
  "lede": "Every system in the Swords and Sandals II team-arena project — the engine behind Swords and Sandals II: Souls and Simulacra (working title) — and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -855,10 +855,10 @@
    "order": 63,
    "title": "Endless progression design (integrated recovery branch)",
    "summary": "The recovered design lane is integrated with current main on draft PR #4. EP-D01 and EP-D02 are accepted replacements and EP-D07 is accepted; the larger owner-guided pass continues without implementation authorization. No Endless code exists.",
-   "gaps": "EP-D03 through D06 and EP-A01 through A03 remain open. The Soul Relic/Charm pass has 12 closure gates and a 156-row finite register; its active direction frontier is E1X, approval source for lived-event transformation proposals. Readiness blockers still include pacing, retry/seed shopping, post-completion economy, combat-kernel budgets, Pressure termination, and u64 encoding.",
+   "gaps": "EP-D03 through D06 and EP-A01 through A03 remain open. The Soul Relic/Charm pass has 12 closure gates and a 157-row finite register; its active direction frontier is E2, timing for participant-contingent P/Z transformation approvals. Readiness blockers still include pacing, retry/seed shopping, post-completion economy, combat-kernel budgets, Pressure termination, and u64 encoding.",
    "next": "Continue one owner card at a time from HANDOFF.md's LATEST link; do not implement until the complete normative replay is explicitly accepted and implementation is separately authorized.",
-   "evidence": "docs/design/endless-progression-decisions.md (authoritative accepted EP-D01/02/07); docs/design/endless-progression-owner-packet.md RCS-03E1X; docs/design/endless-progression-master-closure-index.md sections 7.3 and 8; draft PR #4.",
-   "ownerDecision": "Current worksheet direction: E1-C with B/A fallbacks, then E1Z-B with E1Z-A fallback. E1X remains open; these directions are not yet authoritative record text.",
+   "evidence": "docs/design/endless-progression-decisions.md (authoritative accepted EP-D01/02/07); docs/design/endless-progression-owner-packet.md RCS-03E2; docs/design/endless-progression-master-closure-index.md sections 7.3 and 8; draft PR #4.",
+   "ownerDecision": "Current worksheet direction: E1-C with B/A fallbacks, E1Z-B with E1Z-A fallback, and E1X-A with E1X-B fallback. E2 remains open; these directions are not yet authoritative record text.",
    "updated": "2026-09-29"
   },
   {
@@ -870,7 +870,7 @@
    "summary": "The formerly local progression work is committed and pushed on design/endless-progression-gate-recovery, synchronized with main, and tracked by clean draft PR #4. Gate-invalid open PR #3 remains preserved history and must not merge.",
    "gaps": "PR #4 is intentionally draft and only a human may merge it. Worksheet directions remain distinct from authoritative accepted decisions, and implementation remains blocked. The private Artifact copy of this board must be republished after this source update.",
    "next": "Keep the recovery branch synchronized and reviewable while the owner closes the finite Relic frontier; merge only after the owner requests it and the normative replay is ready.",
-   "evidence": "branch design/endless-progression-gate-recovery; draft PR #4; HANDOFF.md LATEST; docs/handoffs/2026-09-29-1956--relic-lived-event-approval-next.md.",
+   "evidence": "branch design/endless-progression-gate-recovery; draft PR #4; HANDOFF.md LATEST; docs/handoffs/2026-09-29-2110--relic-participant-timing-next.md.",
    "ownerDecision": "Use Souls and Simulacra as the standalone north star and Achintya Bheda Abheda as the standing ideal; finish the full design-framework pass before the later expansion/audit/adaptation pass.",
    "updated": "2026-09-29"
   },
@@ -1356,7 +1356,11 @@
    "updated": "2026-09-27"
   }
  ],
- "changes": [
+  "changes": [
+  {
+   "date": "2026-09-29",
+   "text": "E1X-A makes lived-event transformation proposals system-deterministic with E1X-B as fallback. A timing audit adds conditional E2C so P-live/Z-advance and its mirror cannot hide inside generic coexistence; E2 is next."
+  },
   {
    "date": "2026-09-29",
    "text": "The recovered progression lane is committed, synchronized with main, and tracked by draft PR #4. E1Z-B makes empty-settlement transformation proposals participant-contingent with E1Z-A as fallback; E1X is the next one-at-a-time owner card."

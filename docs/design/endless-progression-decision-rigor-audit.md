@@ -11285,9 +11285,12 @@ Before recording E1-C the corrected register would have contained 25
 `SCREEN`, 1 `OWNER-OPEN` at E1Z, 47 `PRUNED`, 77 `DIR-SELECTED`, 5 `DERIVED`,
 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`**. E1-A prunes all six Z/X rows and
 E2, opening RCS-04A at 18. E1-B prunes all six Z/X rows and opens E2 at 19.
-E1-C yields 243 finite child patterns—nine Z maps, nine X maps, and three E2
-timings—but exposes them one card at a time. The recommended uniform Z-B/X-A
-route prunes all four incidence children and asks only Z, X, then timing.
+E1-C initially appeared to yield 243 finite child patterns—nine Z maps, nine X
+maps, and three E2 timings—but exposed them one card at a time. The later E2
+audit invalidates that exact total because generic timing coexistence hid cause
+orientation. The recommended uniform Z-B/X-A route still prunes all four
+incidence children and asks only Z, X, then timing, with E2C conditional on
+timing coexistence.
 
 E1Z is now the sole frontier. A makes every Z proposal system-deterministic;
 B makes every Z proposal participant-contingent; C creates disclosed
@@ -11389,3 +11392,65 @@ E1X becomes the sole `OWNER-OPEN` row. The 156-row register contains **21
 two incidence children prune and E2 opens at 19. Under E1X-C, E1XA opens at
 21, E1XA1 at 20, and E2 at 19. The authoritative decision record remains
 unchanged.
+
+### RCS-03E1X disposition and E2 atomicity audit — 2026-09-29
+
+Zanzagar selected **E1X-A with E1X-B as the qualified cause-local agency
+fallback**. Every reachable X proposal is system-deterministic. Once its
+qualifying independently meaningful event, native consequences, and disclosed
+proposal-local facts are fixed, one versioned total law admits or withholds
+the persistent-assignment proposal. No participant coordinate changes that
+disposition. The event remains real under either result: approval cannot
+refund, replay, reinterpret, or erase it; restore expired state; alter native
+combat/source/relationship consequences; or remove its evidence.
+
+E1X-B is armed and unfired. It may replace A only if prospective equip and
+exposure control still leave cause-wide material involuntary-build regret
+across viable event catalogs and timing models while assent remains strategic.
+Firing B adds X to the participant timing domain and necessarily reopens E2.
+Definition-local failure reopens E1X toward C; a stable authorization-subcause
+failure requires an owner-visible replacement. Intrinsic X tokenism, farming,
+coercion, opacity, or dominance fires D1X-A directly. A D1X1-A scope fallback
+also reopens E1X. E1XA/E1XA1 therefore prune on the active branch.
+
+The next frontier is E2. Re-derivation under active E1-C/E1Z-B/E1X-A proves
+that the participant-contingent domain is exactly P plus Z: P asks universally,
+Z asks in its selected proper both-dialect subset, and X/M use system law.
+Let `L_v` contain participant-contingent opportunities whose custodian
+coordinate remains operative after the exact proposal is known at its live
+approval cut. Universal advance timing (`L_v` empty) and universal live timing
+(`L_v` equal to the whole P/Z domain) are atomic.
+
+Bare coexistence was not atomic. A single Absence-bound definition may have
+both its universal P opportunity and a Z opportunity. P-live/Z-advance and
+P-advance/Z-live both satisfy a generic nonempty proper `L_v`, yet reverse the
+definition's prompt burden, information advantage, direct assent boundary,
+and exposure to selective-failure audition. Mere disclosure leaves that owner
+choice hidden, repeating the structural defect previously caught in E1-C.
+
+The forty-sixth prerequisite correction therefore narrows E2-C to opposite
+**cause-uniform** P/Z timings and adds conditional E2C to choose orientation.
+Definition, dialect, target, favorability, context, owner, instance, and
+individual opportunity cannot change timing inside one cause. A finer split
+requires another owner-visible amendment and no-caste review. Any upstream
+source change invalidates and re-screens the timing labels. E1-A prunes them
+because no participant authority remains; a changed but nonempty participant
+domain reopens applicable timing rows rather than inheriting a P/Z label.
+
+Recommend **E2-C, then P-live/Z-advance at E2C, with E2-A as the qualified
+production fallback**. Live P places direct Soul assent at positive
+manifestation and is available to every transforming definition through
+universal P support. Advance Z carries participant will partially across time
+without turning actual absence into a post-result transformation lottery.
+All-live B gives the strongest direct local assent but maximizes option value,
+prompts, stalls, unavailable-custodian burden, and failure audition. Fire A
+only if both orientations or the two-grammar system fail while advance
+bindings remain materially strategic rather than dominant fixed policy or
+loadout bureaucracy.
+
+The amendment raises the register from 156 to 157 rows. It now contains **19
+`SCREEN`, 1 `OWNER-OPEN` at E2, 51 `PRUNED`, 79 `DIR-SELECTED`, 5 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`**. E2-A/B prune E2C and open RCS-04A
+at 18. E2-C opens E2C at 19; either orientation then opens RCS-04A at 18. The
+old 247/243 path count is superseded. The authoritative decision record
+remains unchanged.
