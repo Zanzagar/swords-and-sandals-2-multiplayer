@@ -1,6 +1,66 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-29 universal reverse seams selected; explicit clearing is next
+## 2026-09-29 no active blank-state route selected; compatible lived return is next
+
+Zanzagar selected `RCS-03D4-A` with `RCS-03D4-C` as the explicit qualified
+fallback. No direct proposal originating from an authoritative nonclear
+assignment targets its typed unassigned value, and no active fixed-version
+transformation history can enter that value. Relics remain in meaningful named
+forms while active; unequip, replacement, acquisition initialization, and later
+configuration work remain outside D4. C is armed and unfired. It may replace A
+only if human play proves a disclosed, material, non-dominated Release-bound
+policy that no honest named form can express and that survives anti-reset,
+anti-stage-bypass, counterpick, re-entry, and boundary-snapshot gates. Firing C
+opens D4A/D4A1 and reopens dependent D5. D4A/D4A1 are pruned on the active
+branch. The authoritative decision record remains byte-unchanged.
+
+The pre-D5 audit corrected one overstatement in the prior rationale: D3-B gives
+every definition one bidirectional nonclear **proposal** seam, not a committed
+or executable roundtrip. Two reciprocal edges may require mutually
+incompatible histories—for example, each direction may require the same unused
+Vow, which the first leg consumes. D5 is therefore a real remaining decision.
+
+The forty-third prerequisite correction adds conditional D5A and D5A1. The
+149-row register now contains 21 `SCREEN`, 1 `OWNER-OPEN` at D5, 45 `PRUNED`,
+75 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`.
+D5 asks how compatible lived nonclear-return support is distributed across
+completed transforming definitions. A return witness must be one legal history
+of the same active Relic instance, owner, root, definition, and version that
+lives `a ... b ... a`, with `a != b`; every later leg starts from the exact
+state left by the earlier one. Separately legal histories cannot be stitched.
+Returning restores only the current assignment coordinate—never spent proof,
+receipts, claims, latches, costs, cooldowns, chronology, combat state, or
+revealed information.
+
+- **A — none. Whole-system fallback.** No transforming definition has a
+  compatible lived return. It may move through several forms, but no legal
+  active history revisits one after departure. This makes each departure
+  biography-permanent, but risks experimentation paralysis, guide/save
+  pressure, terminal-form chasing, and making D3's reverse seams feel token.
+- **B — universal. Recommended guarded direction.** Every transforming
+  definition has at least one prospectively legible, policy-material
+  `a ... b ... a` history. This is existential per definition: irreversible
+  limbs and terminal forms remain legal, and it is not free respec. Vowscar
+  may live `Mercy -> Tempered -> Mercy` while Defiance remains terminal;
+  Dreamglass may live `Oath -> Resonant -> Oath` only across a later lawful
+  pre-information boundary while Echo remains one-way.
+- **C — proper coexistence.** Returning and wholly return-free definitions
+  coexist. This supports Returning Relics beside Fate-bound scars and vows,
+  but risks a premium flexibility caste and opens D5A then D5A1 to decide the
+  dialect incidence of both classes.
+
+Recommend **B with D5-A system fallback**. B turns each Relic's structural
+reverse potential into at least one lived possibility while preserving
+consequences: the same artifact returns to a form without erasing what happened
+between. That local temporal unity-through-real-difference is a partial
+Achintya Bheda Abheda fit; universal prevalence is aggregate. Reject authored
+returns that enable traversal profit, on-enter/cooldown laundering, claim or
+latch reset, cheapest-cause oscillation, post-preview counterpicking, boundary
+snapshot shopping, or token cycles. Fire A only if compatible lived return
+fails as a system while irreversible biographies remain fun; definition-local
+failure reopens toward C instead. Ask only for D5 A, B, or C.
+
+## 2026-09-29 universal reverse seams selected; explicit clearing is next — superseded frontier
 
 Zanzagar selected `RCS-03D3-B` with `RCS-03D3-A` as the explicit
 whole-system fallback. Every transforming state and boundary definition has at
@@ -32,8 +92,9 @@ value outside nonclear `A_d`, let `C_d` contain lawful direct
 `D_clear={d in D_mut:C_d is nonempty}`:
 
 - **A — none. Recommended.** `D_clear` is empty. Every persistent
-  transformation stays between named nonclear forms; D4A/D4A1 prune. D3-B
-  already supplies one bidirectional seam per definition, so A retains
+  transformation originating from a nonclear form stays between named nonclear
+  forms, and no active history enters `bottom_d`; D4A/D4A1 prune. D3-B
+  already supplies one bidirectional proposal seam per definition, so A retains
   structural flexibility without adding a generic blank/reset lane. A quiet
   form must be an honest, material named assignment rather than a null-state
   disguise.
@@ -12176,7 +12237,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-29 04:37 UTC — explicit clear-to-unassigned prevalence is next](docs/handoffs/2026-09-29-0437--relic-explicit-clear-prevalence-next.md)**
+[2026-09-29 04:55 UTC — compatible lived nonclear-return prevalence is next](docs/handoffs/2026-09-29-0455--relic-compatible-return-prevalence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

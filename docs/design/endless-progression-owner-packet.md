@@ -413,10 +413,18 @@ required staging fails its comprehension, material-intermediate,
 non-dominance, anti-bypass, or anti-lottery gates. Zanzagar then selected
 D2A-C with D2A-A as the explicit child scope fallback: required-stage support
 occurs in both transformation dialects unless boundary-attunement staging fails
-while state-condition staging survives. **RCS-03D2A1 is now the sole owner-
-facing choice under SR-04:** whether the shortcut-complete complement occurs
-only in state Relics, only in boundary Relics, or in both transformation
-dialects. The current register has 143 rows and `Phi_SR = 23`.
+while state-condition staging survives. Zanzagar then selected D2A1-C with
+D2A1-B as the qualified fallback, so staged and shortcut-complete definitions
+occur in both dialects unless its narrow state-shortcut/four-cell trigger
+fires. Zanzagar then selected D3-B with D3-A as the explicit whole-system
+fallback, giving every transforming definition one material direct-reverse
+proposal pair without granting an executable roundtrip. Zanzagar then selected
+D4-A with D4-C as the qualified Release-bound fallback, so no active
+fixed-version transformation history can enter its typed unassigned value.
+**RCS-03D5 is now the sole owner-facing choice under SR-04:** whether no
+transforming definition, every transforming definition, or a nonempty proper
+subset has one compatible lived nonclear-return history. The current register
+has 149 rows and `Phi_SR = 22`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -26852,7 +26860,7 @@ boundary snapshot shopping. D3A and D3A1 move to `PRUNED`.
 > `Phi_SR = 23`**. No selected cause, graph edge, assignment, result, or
 > authoritative-record text changes.
 
-### RCS-03D4 — explicit clear-to-unassigned transition support — active owner choice
+### RCS-03D4 — explicit clear-to-unassigned transition support — A selected with C qualified fallback
 
 For each completed fixed-version transforming definition `d`, extend the typed
 assignment space only for this question with one distinguished unassigned
@@ -26880,7 +26888,7 @@ tests whether any resulting play is viable.
 
 | Choice | Definition-level explicit-clear prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete topology example |
 | --- | --- | --- | --- |
-| **A — no transforming definition can clear to unassigned** | `D_clear` is empty. Every persistent transformation edge remains between named nonclear assignments. D4A/D4A1 prune. Unequip or replacement may still exist later under RCS-13, but neither is a D4 clear. | **Recommended clearest direction, with D4-C available only as a qualified release-archetype fallback if explicitly selected.** D3-B already gives every definition one material bidirectional nonclear seam, so A preserves structural flexibility without adding a generic blank/reset lane. Named manifestations keep the same-artifact/across-difference relation legible; forbidding blankness is protective rather than itself a stronger theological claim. The cost is that “withdraw this manifestation while the Relic remains active” must be represented by a material named form or not exist. | Vowscar retains `Mercy <-> Tempered -> Defiance`, with no edge to `bottom_V`. A desired quiet form must be an honest named assignment such as `Veiled`, participate in D2/D3/D5 topology, and change optimized play rather than hiding in a null value. |
+| **A — no transforming definition can clear to unassigned** | `D_clear` is empty. Every persistent transformation edge originating from an authoritative nonclear assignment remains between named nonclear assignments; no active fixed-version transformation history can enter `bottom_d`. D4A/D4A1 prune. Unequip or replacement may still exist later under RCS-13, but neither is a D4 clear. | **Recommended clearest direction, with D4-C available only as a qualified release-archetype fallback if explicitly selected.** D3-B already gives every definition one material bidirectional nonclear proposal seam, so A preserves structural flexibility without adding a generic blank/reset lane. Named manifestations keep the same-artifact/across-difference relation legible; forbidding blankness is protective rather than itself a stronger theological claim. The cost is that “withdraw this manifestation while the Relic remains active” must be represented by a material named form or not exist. | Vowscar retains `Mercy <-> Tempered -> Defiance`, with no edge to `bottom_V`. A desired quiet form must be an honest named assignment such as `Veiled`, participate in D2/D3/D5 topology, and change optimized play rather than hiding in a null value. |
 | **B — every transforming definition has at least one clear edge** | `D_clear=D_mut`. Every state and boundary definition has at least one material nonclear source from which a selected cause may propose `bottom_d`. This does **not** require every assignment to clear. D4A/D4A1 prune. | B creates a universal “the Soul remains while this simulacrum is withdrawn” grammar and a consistent escape valve. That formless-continuity motif is at most a partial ideal fit: no distinct current manifestation remains in relation. Universal support has the largest UI and exploit burden—bad-state cleansing, downside shutoff, trigger/lock resets, stage bypass, counterpick, and boundary snapshot shopping—and can make blanking feel safer than inhabiting authored forms. | Vowscar may permit `Defiance -> bottom_V`; Dreamglass may permit `Echo -> bottom_D`. Neither edge says who chooses it or whether `bottom -> Mercy/Oath/Echo` is ever legal. Every definition still needs only one witness source, not an all-state clear button. |
 | **C — clear-capable and clear-free definitions coexist** | `D_clear` is a nonempty proper subset of `D_mut`. At least one definition has a material clear edge and at least one has none. C opens D4A then D4A1; it does not select either dialect incidence. | C is the credible higher-ceiling exception: disclosed Release-bound Relics can make withdrawal part of their biography while assignment-continuous peers never go blank. It also creates a flexibility caste, trap/premium risk, two extra incidence choices, and token-null temptation. Coexistence is aggregate, not a direct realization of the standing ideal. C is justified only if release play remains material, legible, non-dominated, and cannot become a cheap universal reset through later re-entry. | Illustratively, Emberseal may permit `Kindled -> bottom_E` while Vowscar stays clear-free; Clear Lens may permit `Chorus -> bottom_C` while Dreamglass stays clear-free. D4A/D4A1, not this example, decide whether both dialects actually contain each class. |
 
@@ -26891,9 +26899,9 @@ cause-to-edge maps, and whether clear-capable definitions also contain many
 clear-free sources remain AUTHOR/EVALUATE unless a later concrete consequence
 passes the reopening test.
 
-The recommendation is D4-A. Selected D3-B already prevents a definition from
-having only one-way nonclear commitment, while A keeps `bottom` from becoming
-an off switch that bypasses the authored biography. If human play later proves
+The recommendation is D4-A. Selected D3-B already gives every definition one
+bidirectional nonclear proposal seam, while A keeps `bottom` from becoming an
+off switch that bypasses the authored biography. If human play later proves
 that a specifically disclosed release/silence archetype supplies a material,
 non-dominated policy that no honest named assignment can express, D4 may reopen
 toward C; that fallback must then resolve D4A/D4A1 and pass anti-reset,
@@ -26919,6 +26927,146 @@ D5 opens with **19 `SCREEN`, 1 `OWNER-OPEN`, 45 `PRUNED`, 75
 `SCREEN`, 1 `OWNER-OPEN`, 43 `PRUNED`, 75 `DIR-SELECTED`, and `Phi_SR =
 22`**; D4A then opens D4A1 at 21, and closing D4A1 opens D5 at 20. The
 authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-29:** **A, no
+transforming definition can clear to unassigned, with D4-C as the explicit
+qualified release-archetype fallback.** Thus `D_clear` is empty. No direct
+proposal edge originating from an authoritative nonclear assignment targets
+`bottom_d`, and no active fixed-version transformation history can enter that
+value. Persistent assignment changes remain among named nonclear forms.
+Unequip, active-root replacement, acquisition initialization, and later
+configuration work remain outside D4.
+
+A is active. D4-C is armed and unfired: it reopens D4 toward a nonempty proper
+Release-bound subset only if human play demonstrates a disclosed, material,
+non-dominated release/silence policy that no honest named nonclear assignment
+can express and that can survive the anti-reset, anti-stage-bypass,
+anti-counterpick, re-entry, and boundary-snapshot gates. Firing C must resolve
+D4A/D4A1 and reopen every downstream conclusion that assumed `D_clear` empty.
+D4-B is unselected. D4A and D4A1 move to `PRUNED` on the active branch.
+
+At the pre-amendment checkpoint, D4 moved to `DIR-SELECTED` and D5 became the
+sole `OWNER-OPEN` row. The 147-row register then contained **19 `SCREEN`, 1
+`OWNER-OPEN` at D5, 45 `PRUNED`, 75 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 20`**. The authoritative decision record remains
+unchanged.
+
+> **Forty-third prerequisite correction, 2026-09-29 — proper lived-return
+> support hides two dialect-incidence choices, and one D4 rationale overstated
+> D3.** The first D4 recommendation text incorrectly said D3-B prevented
+> “one-way nonclear commitment.” D3 grants proposal topology only; it neither
+> commits an edge nor proves that reciprocal edges coexist sequentially. The
+> sentence is corrected in place above to say that D3-B gives each definition
+> one bidirectional nonclear **proposal** seam. That distinction is exactly why
+> D5 remains an owner choice.
+>
+> D5's atomic prevalence unit is the completed transforming definition. A
+> definition is return-capable when one legal canonical history of the same
+> active Relic instance and fixed version leaves one material nonclear
+> assignment, occupies at least one distinct nonclear assignment, and later
+> occupies the first assignment again. Both legs must coexist in that one
+> history; separately legal forward and reverse histories may not be stitched.
+>
+> If return-capable and wholly return-free definitions coexist, return support
+> may occur only in state, only in boundary, or in both dialects. Its nonempty
+> return-free complement has an independently player-material residual
+> incidence. `RCS-03D5A` therefore classifies proper return support's dialect
+> incidence and `RCS-03D5A1` classifies the complement. Their seven terminal
+> patterns decide whether a player can stay within a chosen transformation
+> dialect while selecting a lived-return versus ratcheting biography. Both
+> prune under D5-A/B and open in sequence only under D5-C.
+>
+> No further split passes admission now. Requiring every edge, pair, source,
+> or history to return would be all-pairs saturation; direct versus staged
+> adjacency is already D2/D3; exact cycles, lengths, causes, and alignment with
+> the D3 witness pair remain AUTHOR/SPEC/EVALUATE. Active D4-A also makes every
+> clear-mediated return route unreachable. A raw `bottom_d -> A_d` declaration
+> may matter to later acquisition/equip work, but it is not a D5 return unless
+> one active history first enters `bottom_d`. If D4-C fires, reopen D5 rather
+> than carrying this reduced domain forward.
+>
+> Adding D5A/D5A1 raises the register from 147 to **149 rows**. After selected
+> D4-A, it contains **21 `SCREEN`, 1 `OWNER-OPEN` at D5, 45 `PRUNED`, 75
+> `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**.
+> No selected cause, assignment, edge, result, or authoritative-record text
+> changes.
+
+### RCS-03D5 — compatible lived nonclear return support — active owner choice
+
+For each completed fixed-version transforming definition `d`, retain D2's
+material nonclear assignment set `A_d` and direct-proposal relation `E_d`.
+Define `Q_d` to contain ordered pairs `(a,b)`, with `a != b`, for which one
+legal canonical history of the same active Relic instance, owner, root,
+definition, and version has indices `i<j<k` such that:
+
+1. assignment `a` is authoritative at `i` and again at `k`, while distinct
+   assignment `b` is authoritative at `j`;
+2. every assignment from `i` through `k` belongs to `A_d` and every successive
+   assignment change uses an `E_d` edge; and
+3. every later leg begins from exactly the authoritative state left by the
+   earlier leg. No edge or context from another possible history is stitched
+   into this one.
+
+Define `D_ret={d in D_mut : Q_d is nonempty}`. Membership is a structural
+compatible-history capability, not an on-demand undo. Returning to assignment
+value `a` changes only the current assignment coordinate: it does **not**
+rewind evidence, receipts, claims, recurrence latches, costs, cooldowns,
+causal occurrences, lineage chronology, combat state, or information already
+revealed. Reload, migration, repair, duplicate replacement, unequip/re-equip,
+or snapshot restoration cannot serve as a witness.
+
+| Choice | Definition-level compatible return prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete compatible-history example |
+| --- | --- | --- | --- |
+| **A — no transforming definition has a lived nonclear return** | `D_ret` is empty. A Relic may traverse several distinct assignments, but after it leaves one, no compatible active history ever occupies that earlier assignment again. D5A/D5A1 prune. D3-B's direct-reverse proposal edges remain lawful only in mutually incompatible histories or starting conditions. | **Strong whole-system fallback if selected.** A makes every departure biography-permanent and supports scars, vows, and consequential becoming. The same artifact persists across irreversible difference, a partial ideal fit; forbidding return is protective rather than stronger. Costs are experiment paralysis, guide/save pressure, terminal-form chasing, and making D3-B's paired seams feel counterfactual or token. | `Mercy -> Tempered` consumes an unused Vow. A separately lawful `Tempered -> Mercy` proposal also requires an unused Vow, so D3-B sees both edges but one artifact cannot exercise them in sequence. `Tempered -> Defiance` may remain legal; no later state revisits Mercy or Tempered. |
+| **B — every transforming definition has at least one lived nonclear return** | `D_ret=D_mut`. Every state and boundary definition has at least one prospectively legible, policy-material compatible history `a ... b ... a`. This does **not** require every assignment, edge, pair, departure, or history to return; irreversible limbs and terminal forms remain legal. D5A/D5A1 prune. | **Recommended guarded direction, with D5-A offered separately as a whole-system fallback.** B cashes out structural bidirectionality as at least one lived possibility per Relic without turning the graph into free respec. At a qualifying history, one artifact persists through real difference and returns without erasing what happened; that temporal relationship is a partial standing-ideal fit, while universal prevalence is aggregate. Risks are ping-pong profit, on-enter or cooldown reset laundering, cheapest-M oscillation, post-preview counterpicking, boundary best-listener shopping, and obscure token cycles. | State Vowscar may genuinely live `Mercy -> Tempered -> Mercy` after a new material condition, while `Defiance` remains terminal. Boundary Dreamglass may live `Oath -> Resonant -> Oath` only across a later lawful pre-information epoch, while `Echo` remains one-way. Neither return restores spent proof or earlier world state. |
+| **C — return-capable and return-free definitions coexist** | `D_ret` is a nonempty proper subset of `D_mut`. At least one definition has a material compatible return history and at least one has none. C opens D5A then D5A1; it does not select either dialect incidence. | C supports Returning Relics beside Fate-bound scars and vows, but creates a high-option-value taxonomy: return-capable names may feel premium while return-free names become traps or demand compensation. Local return witnesses retain B's partial fit; coexistence is only aggregate. C is legitimate only if both biographies are disclosed, non-token, non-dominated, and understandable before consequential commitments. | Illustratively, Emberseal may live `Ash -> Kindled -> Ash` while Vowscar never revisits a departed condition; Clear Lens may revisit `Hush` while Dreamglass ratchets permanently. D5A/D5A1, not the example, decide which dialects actually contain each class. |
+
+A/B/C are exhaustive because `D_ret` is a subset of nonempty `D_mut`: it is
+empty, universal, or nonempty proper. B is existential per definition, not
+all-pairs reversibility. A return-capable definition may still contain
+unreachable pairs, one-way branches, and terminal assignments. Exact positive
+cycle counts, lengths, definitions, causes per leg, and within-dialect
+placement remain AUTHOR/SPEC/EVALUATE unless later evidence passes the
+reopening test.
+
+The recommendation is guarded D5-B with D5-A offered for explicit selection
+as a whole-system fallback. Every qualifying witness must be prospectively
+legible and materially change optimized policy on its outward and return legs;
+an obscure never-chosen cycle cannot satisfy the acceptance gate. Every
+authored return must reject net-positive traversal rewards, on-enter or
+cooldown refresh laundering, claim/latch reset, cheapest-cause oscillation,
+post-preview counterpicking, and boundary snapshot or best-listening-point
+shopping. Those are RCS-17/RCS-18 gates, not hidden cost, lock, or authority
+rules.
+
+Fire A only if compatible lived return as a **system** fails those
+anti-profit, state-integrity, commitment, comprehension, counterpick, or
+boundary-snapshot gates while irreversible directed biographies remain fun.
+If failure is definition-local, reopen D5 toward C and resolve D5A/D5A1 rather
+than erasing return globally. A bare B selects no fallback; selecting the
+recommended ladder requires **“B with D5-A system fallback.”**
+
+D5 remains structural topology. It grants no current availability,
+participant selection, proposal approval, collision victory, payment, lock,
+or commit; RCS-03E, RCS-04A, and RCS-13 retain those authorities. RCS-04B
+retains committed identity across artifact, definition, and lineage, while
+RCS-15/16 retain its persistent realization, save/schema/migration,
+transaction, and fault repair. Returning to an assignment is never
+restoration of an old snapshot.
+
+Every D5 branch is evaluated under the active P/Z/X/M cause configuration and
+selected D2-D4 topology. Removing edges through a cause fallback rebuilds
+`Q_d` and `D_ret`. If D3-A fires, selected shortcut-complete definitions
+become compatible-cycle-free, so D5-B cannot silently survive; reopen D5 and
+dependent rows. If D4-C fires, resolve D4A/D4A1 and reopen D5 to include
+clear-mediated topology. No fallback preserves a downstream label by name.
+
+Under A/B, D5 becomes `DIR-SELECTED`, D5A/D5A1 prune, and RCS-03E opens with
+**18 `SCREEN`, 1 `OWNER-OPEN`, 47 `PRUNED`, 76 `DIR-SELECTED`, and
+`Phi_SR = 19`**. Under C, D5A opens next with **20 `SCREEN`, 1 `OWNER-OPEN`, 45
+`PRUNED`, 76 `DIR-SELECTED`, and `Phi_SR = 21`**; D5A then opens D5A1 at 20,
+and closing D5A1 opens RCS-03E at 19. The authoritative decision record
+remains unchanged.
 
 ## Session protocol and evidence
 

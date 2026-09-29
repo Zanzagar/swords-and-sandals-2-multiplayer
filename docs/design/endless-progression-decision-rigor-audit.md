@@ -7872,7 +7872,7 @@ are later D5/RCS-13/RCS-17/RCS-18 rejection tests, not permissions supplied by
 D4.
 
 Recommend D4-A, no explicit clear support. Selected D3-B already gives every
-definition one material bidirectional nonclear seam, so a universal blank
+definition one material bidirectional nonclear proposal seam, so a universal blank
 adds reset power rather than necessary structural flexibility. Named forms
 preserve the most legible same-artifact/across-difference relationship; a
 form-free interval is at most a partial continuity motif, not a stronger
@@ -7887,6 +7887,75 @@ rows. After selected D3-B it contains 22 `SCREEN`, 1 `OWNER-OPEN` at D4, 43
 `PRUNED`, 74 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 23`. D4-A/B prunes both children and opens D5 at 20. D4-C opens D4A
 at 22, D4A1 at 21, and D5 at 20. Closing D5 still opens RCS-03E at 19.
+
+**D4 disposition and D5 atomicity audit.** Zanzagar selected D4-A with D4-C
+as the explicit qualified release-archetype fallback. `D_clear` is empty: no
+direct proposal originating from an authoritative nonclear assignment targets
+`bottom_d`, and no active fixed-version transformation history can enter it.
+D4A/D4A1 prune. C is armed and unfired; it may reopen only for a disclosed,
+material, non-dominated release policy that no honest named assignment can
+express and that survives every documented exploit gate.
+
+The pre-D5 audit found one concrete error in the D4 rationale: it said D3-B
+prevented one-way nonclear **commitment**. D3-B grants only one bidirectional
+proposal seam per definition and expressly grants no commitment or executable
+roundtrip. The live instruction is corrected in place. That error did not
+change D4's options or answer; it demonstrates why D5 remains unresolved.
+
+Three independent read-only D5 attacks converged on completed-definition
+existential prevalence. For each `d`, `Q_d` contains `(a,b)` only when one
+legal canonical same-active-Relic fixed-version history has
+`a ... b ... a`, with `a!=b`, every vertex in nonclear `A_d`, every successive
+assignment change using `E_d`, and each later leg beginning from the exact
+state left by the earlier leg. Separately lawful `a -> b` and `b -> a`
+histories cannot be stitched. Let `D_ret={d in D_mut:Q_d is nonempty}`.
+
+D5-A makes `D_ret` empty, D5-B makes it universal, and D5-C makes it nonempty
+proper. This is exhaustive. B is not all-edge, all-pair, or all-history
+reversibility: a qualifying definition may still contain terminal forms and
+irreversible limbs. Returning to assignment value `a` never rewinds proof,
+receipts, claims, latches, costs, cooldowns, causal occurrences, information,
+combat state, or lineage chronology.
+
+D3-B does not derive D5-B. For example, `Mercy -> Tempered` and
+`Tempered -> Mercy` may each require the same unused Vow; the first consumes
+it, so both edges exist structurally but no one artifact can exercise them in
+sequence. Active D4-A also makes every clear-mediated return route unreachable.
+A raw `bottom_d -> A_d` declaration may belong to later acquisition/equip work,
+but it cannot witness return without a preceding active entry into `bottom_d`.
+
+Proper D5-C again hides two admitted choices. D5A classifies return support as
+state-only, boundary-only, or both; D5A1 classifies the nonempty return-free
+complement's residual incidence, producing seven terminal patterns. They
+change whether a player can keep one transformation dialect while selecting a
+returning versus ratcheting biography. Exact cycles, lengths, cause maps,
+alignment with D3's witness pair, and all-pairs saturation remain
+AUTHOR/SPEC/EVALUATE under the anti-recursion rule.
+
+Recommend guarded D5-B with D5-A as the separately selectable whole-system
+fallback. A material state witness may live
+`Mercy -> Tempered -> Mercy` while Defiance stays terminal; a boundary witness
+may live `Oath -> Resonant -> Oath` only across a lawful pre-information epoch.
+B cashes out structural reverse potential as one lived possibility per Relic
+without creating free respec. Its local same-artifact/different-form/returned-
+form history is a partial temporal standing-ideal fit; universal prevalence is
+aggregate. Risks are traversal profit, reset laundering, cheapest-M
+oscillation, post-preview counterpick, best-listener shopping, and token
+cycles.
+
+Every B witness must be prospectively legible and policy-material. Fire A only
+if lived return fails as a system while irreversible directed biographies
+remain fun; definition-local failure reopens C instead. D5 grants no
+availability, selection, approval, collision result, cost, lock, or commit.
+RCS-03E/RCS-04A/RCS-13 retain those authorities, RCS-04B retains committed
+identity, and RCS-15/16 retain persistence and fault realization. Firing D3-A
+or D4-C necessarily reopens D5 rather than preserving its label.
+
+The forty-third correction adds D5A/D5A1 and raises the register to 149 rows.
+After selected D4-A it contains 21 `SCREEN`, 1 `OWNER-OPEN` at D5, 45
+`PRUNED`, 75 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 22`. D5-A/B prunes both children and opens RCS-03E at 19. D5-C
+opens D5A at 21, D5A1 at 20, and RCS-03E at 19.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
