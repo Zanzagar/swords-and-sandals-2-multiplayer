@@ -8,8 +8,13 @@
  * whether it is on offer and — when it is not — one reason code with a hide or
  * grey flag (`host.unavailableActions`, `SS2_UNAVAILABLE_REASONS`). The ring
  * shows a GREY one where it stands, dimmed, with the engine's words for the
- * reason, and it can never act; a HIDE one is not drawn at all. Jump and
- * charge stay hidden whatever the engine flags them (the owner's Q8).
+ * reason, and it can never act; a HIDE one is not drawn at all. ~~Jump and
+ * charge stay hidden whatever the engine flags them (the owner's Q8).~~ Jump
+ * and charge are SHOWN GREYED, "Not built yet" — the engine's own `not-built`
+ * — by the owner's decision 9 of 2026-09-24
+ * (`docs/design/battle-ui.md#decided-hud-2026-09-24`), reversing Q8; re-pinned
+ * here 2026-09-28 (slice "jumpcharge"), and swept whole in
+ * `test/arena-ring-jumpcharge.test.js`.
  *
  * The staged turns are REAL hosts at a named seed and turn; the reasons and
  * their words are the engine's, written here as literals read off the engine's
@@ -73,21 +78,29 @@ test("2v2 seed 1, the opening, red-1 with blue-2 (a rank back) selected: the tau
   // `longrange_warrior` facing right: A jumpleft, B walkleft, C taunt|rest (taunt: he is rested), D jumpright,
   // E walkright, F chargeright, G wincrowd, H psyche_up. The engine offers the taunt only at blue-1, in red-1's
   // own rank (`other-rank`, grey); the jumps and the charge are not built (`not-built`, flagged grey by the
-  // engine, HIDDEN by the owner's Q8); psyche up needs level 7 (`level`, hide).
+  // engine, ~~HIDDEN by the owner's Q8~~ SHOWN GREYED by his decision 9); psyche up needs level 7 (`level`, hide).
+  // 2026-09-28, slice "jumpcharge" (decision 9, `docs/design/battle-ui.md#decided-hud-2026-09-24`): ~~"1 optionA -",
+  // "5 optionD -", "7 optionF -"~~ — S9 hid them (`RING_HIDDEN_VERBS`) before the owner reversed Q8.
   assert.deepEqual(model.slots.map(slotLine), [
-    "1 optionA -",
+    "1 optionA jumpleft grey:not-built",
     "2 optionB walkleft acts",
     "3 optionC taunt grey:other-rank",
     "4 optionG wincrowd acts",
-    "5 optionD -",
+    "5 optionD jumpright grey:not-built",
     "6 optionE walkright acts",
-    "7 optionF -",
+    "7 optionF chargeright grey:not-built",
     "8 optionH -"
   ]);
   const taunt = model.slots.find((slot) => slot.slot === "optionC");
   assert.equal(taunt.action, null, "a greyed button sends nothing");
   assert.deepEqual(taunt.reason, { code: "other-rank", words: "That foe is in another rank; you can only reach your own." });
   assert.deepEqual(taunt.withheld, { type: "taunt", targetId: "blue-2", actorId: "red-1" });
+  // The jump the engine has not built: greyed with the engine's words, and it would send nothing at all — the
+  // engine's entry has no action type and no target (`ss2UnavailableActions`, `SS2_RING_VERB_TYPE`).
+  const jump = model.slots.find((slot) => slot.slot === "optionA");
+  assert.equal(jump.action, null);
+  assert.deepEqual(jump.reason, { code: "not-built", words: "Not built yet." });
+  assert.deepEqual(jump.withheld, { type: null, targetId: null, actorId: "red-1" });
 });
 
 /** A move as one line: `move place slot`, then `acts` or the grey code. */
@@ -100,14 +113,16 @@ test("2v2 seed 1, 8 AI turns in, red-1 with blue-2 selected: blue-1 in reach put
   // blue-2 is 354 away, so the RING is the long frame; blue-1, 86 away in red-1's own rank, puts the turn
   // on the close frame, which offers only the retreat and no taunt (the engine's `in-reach`).
   assert.deepEqual(model.stance, { frame: "longrange_warrior", range: "long", weapon: "warrior", facing: "right" });
+  // 2026-09-28, slice "jumpcharge" (decision 9): ~~"1 optionA -", "5 optionD -", "7 optionF -"~~ — the jumps and
+  // the charge are shown greyed `not-built`, where S9 hid them.
   assert.deepEqual(model.slots.map(slotLine), [
-    "1 optionA -",
+    "1 optionA jumpleft grey:not-built",
     "2 optionB walkleft acts",
     "3 optionC taunt grey:in-reach",
     "4 optionG wincrowd acts",
-    "5 optionD -",
+    "5 optionD jumpright grey:not-built",
     "6 optionE walkright grey:in-reach",
-    "7 optionF -",
+    "7 optionF chargeright grey:not-built",
     "8 optionH -"
   ]);
   // The moves: the retreat in its slot, the walk toward him GREYED in its slot (its arrow key is that
@@ -182,9 +197,14 @@ test("a greyed button's key, arrow or letter sends NOTHING — with or without c
   for (const name of ["3", "optionC", "6", "optionE", "ArrowRight", "walk-right", "ArrowDown", "rank-front"]) {
     assert.equal(ringActionFor(model, name), null, name);
   }
-  // A hidden slot is neither: nothing to act on and nothing to explain.
-  assert.equal(ringKeyCommand(model, { key: "1", focus: "stage" }), null, "optionA holds the hidden jump");
-  assert.equal(ringGreyFor(model, "optionA"), null);
+  // A hidden slot is neither: nothing to act on and nothing to explain. 2026-09-28, slice "jumpcharge" (decision
+  // 9): ~~`ringKeyCommand(model, { key: "1" })` null, "optionA holds the hidden jump"; `ringGreyFor(model,
+  // "optionA")` null~~ — the jump in optionA is GREYED now, so its key is swallowed and says why, as every grey
+  // code's; the hidden slot is optionH (psyche up, below level 7: `level`, a hide).
+  assert.equal(said(ringKeyCommand(model, { key: "1", focus: "stage" })), "ignore:greyed:optionA:not-built", "the greyed jump");
+  assert.equal(ringGreyFor(model, "optionA")?.reason.code, "not-built");
+  assert.equal(ringKeyCommand(model, { key: "8", focus: "stage" }), null, "optionH holds the hidden psyche up");
+  assert.equal(ringGreyFor(model, "optionH"), null);
   // The acting buttons still act.
   assert.equal(ringKeyCommand(model, { key: "2", focus: "stage" })?.kind, "act");
   assert.equal(ringKeyCommand(model, { key: "ArrowUp", focus: "stage", confirm: true })?.kind, "choose");
@@ -228,11 +248,16 @@ test("a greyed button is DRAWN where it stands — its slot, its rank arrow's pl
   const model = modelOf(stagedHost({ perSide: 2, seed: 1, turns: 8 }), "blue-2");
   const at = { centerX: 100, centerY: 200, unit: 1 };
   const slots = ringButtonsAt(model, at);
+  // 2026-09-28, slice "jumpcharge" (decision 9): the jumps (optionA, optionD) and the charge (optionF) are drawn
+  // greyed `not-built` in their slots, where S9 drew nothing.
   assert.deepEqual(slots.map((button) => `${button.slot} ${button.verb} ${button.reason?.code ?? "acts"}`), [
+    "optionA jumpleft not-built",
     "optionB walkleft acts",
     "optionC taunt in-reach",
     "optionG wincrowd acts",
-    "optionE walkright in-reach"
+    "optionD jumpright not-built",
+    "optionE walkright in-reach",
+    "optionF chargeright not-built"
   ]);
   // optionC is at (-64.2, 23.4) of the overlay, 0.8 scale: the fallback radius 18 * 0.8.
   const taunt = slots.find((button) => button.slot === "optionC");
@@ -301,11 +326,15 @@ test("a greyed button is DIMMED — the build's own art through the build's grey
 test("the strip's order with the greyed buttons in their places — asked for; what sends, previews or confirms never sees them", () => {
   const model = modelOf(stagedHost({ perSide: 2, seed: 1, turns: 8 }), "blue-2");
   const line = (entry) => `${entry.place} ${entry.key ?? "-"} ${entry.slot ?? "-"} ${entry.action ? "acts" : `grey:${entry.reason.code}`}`;
+  // 2026-09-28, slice "jumpcharge" (decision 9): the greyed jumps and charge are listed in their key places.
   assert.deepEqual(ringEntries(model, { greyed: true }).map(line), [
+    "slot 1 optionA grey:not-built",
     "slot 2 optionB acts",
     "slot 3 optionC grey:in-reach",
     "slot 4 optionG acts",
+    "slot 5 optionD grey:not-built",
     "slot 6 optionE grey:in-reach",
+    "slot 7 optionF grey:not-built",
     "move ArrowUp rank-back acts",
     "move ArrowDown rank-front grey:no-rank"
   ]);
@@ -333,8 +362,11 @@ test("a CLICK on a drawn button, named as `ringSlotAt` names it: an acting one a
     assert.equal(said(ringClickCommand(model, "optionE", { confirm })), "ignore:greyed:optionE:in-reach");
     assert.equal(said(ringClickCommand(model, "rank-front", { confirm })), "ignore:greyed:rank-front:no-rank");
   }
-  // Hidden (a jump) or nothing under the pointer: nothing at all.
-  assert.equal(ringClickCommand(model, "optionA"), null);
+  // Hidden or nothing under the pointer: nothing at all. 2026-09-28, slice "jumpcharge" (decision 9): ~~"Hidden (a
+  // jump)": `ringClickCommand(model, "optionA")` null~~ — the jump is greyed now, and says why; the hidden slot is
+  // optionH (psyche up, `level`).
+  assert.equal(said(ringClickCommand(model, "optionA")), "ignore:greyed:optionA:not-built");
+  assert.equal(ringClickCommand(model, "optionH"), null);
   assert.equal(ringClickCommand(model, null), null);
   // The key route is the same road: a digit on the greyed taunt says the same.
   assert.deepEqual(ringKeyCommand(model, { key: "3", focus: "stage" }), ringClickCommand(model, "optionC"));
@@ -349,7 +381,10 @@ test("WHAT A POINTER ON A DRAWN BUTTON SHOWS (`ringShownFor`): an acting button'
   assert.equal(greyTaunt.action, null);
   assert.deepEqual(greyTaunt.reason, { code: "in-reach", words: "A foe is within reach, so this turn is fought at close range." });
   assert.equal(ringShownFor(model, "rank-front").reason.code, "no-rank");
-  assert.equal(ringShownFor(model, "optionA"), null, "a hidden jump shows nothing");
+  // 2026-09-28, slice "jumpcharge" (decision 9): ~~`ringShownFor(model, "optionA")` null, "a hidden jump shows
+  // nothing"~~ — the greyed jump shows its entry; a hidden slot (optionH, psyche up below level 7) shows nothing.
+  assert.equal(ringShownFor(model, "optionA")?.reason.code, "not-built", "the greyed jump shows why");
+  assert.equal(ringShownFor(model, "optionH"), null, "a hidden slot shows nothing");
   assert.equal(ringShownFor(model, null), null);
   // The words: a greyed button's reason; an action's own preview words, whatever the caller previews it with.
   const previewTextOf = (action) => `PREVIEW ${action.type}`;
@@ -383,9 +418,12 @@ const GREY_CODES = Object.values(SS2_UNAVAILABLE_REASONS).filter((reason) => rea
 const HIDE_CODES = Object.values(SS2_UNAVAILABLE_REASONS).filter((reason) => reason.display === "hide").map((reason) => reason.code);
 
 test("EVERY CODE IN THE ENGINE'S TABLE: a grey one shows its button greyed with the engine's words; a hide one renders nothing — staged on the step-forward arrow, whose own reason no bout can make `rank-full`", () => {
-  // The engine's table has ~~19 codes: 9 grey, 10 hide~~ **20 codes: 9 grey, 11 hide** (`SS2_UNAVAILABLE_REASONS`)
-  // — `no-arrows` (hide, the build's own rule) joined in 39da762, after this slice's base; re-pinned at merge.
-  assert.deepEqual([GREY_CODES.length, HIDE_CODES.length], [9, 11]);
+  // The engine's table has ~~19 codes: 9 grey, 10 hide~~ ~~20 codes: 9 grey, 11 hide~~ **21 codes: 10 grey, 11
+  // hide** (`SS2_UNAVAILABLE_REASONS`) — `no-arrows` (hide, the build's own rule) joined in 39da762, after this
+  // slice's base; re-pinned at merge. `blocked` (grey, a team rule: a walk that would go nowhere against a body
+  // in the walker's lane, the owner's decision P3 of 2026-09-27) joined after it, and the loop below draws it.
+  assert.deepEqual([GREY_CODES.length, HIDE_CODES.length], [10, 11]);
+  assert.ok(GREY_CODES.includes("blocked"), "the P3 code is one of the grey ones this loop draws");
   // 2v2 seed 1, 8 AI turns in: red-1's step forward is withheld (`no-rank`). Its entry is re-stamped with each
   // code in turn — as the engine stamps one, with that code's display — so every code reaches the ring.
   const host = stagedHost({ perSide: 2, seed: 1, turns: 8 });
@@ -422,7 +460,7 @@ test("EVERY CODE IN THE ENGINE'S TABLE: a grey one shows its button greyed with 
   }
 });
 
-test("ACCEPTANCE, over whole bouts with every foe selected in turn: every button the engine withholds for a GREY code is drawn once, greyed, where it stands, says the engine's words under the pointer, sends nothing when clicked and is listed once; every HIDE code — and jump and charge — renders nothing", (t) => {
+test("ACCEPTANCE, over whole bouts with every foe selected in turn: every button the engine withholds for a GREY code — jump and charge's `not-built` among them (decision 9) — is drawn once, greyed, where it stands, says the engine's words under the pointer, sends nothing when clicked and is listed once; every HIDE code ~~— and jump and charge —~~ renders nothing", (t) => {
   const grey = {};
   const hidden = {};
   const drawnHidden = {};
@@ -446,8 +484,14 @@ test("ACCEPTANCE, over whole bouts with every foe selected in turn: every button
               tally.entries += 1;
               const place = placeOf(entry);
               const at = buttons.filter((button) => button.slot === place);
-              if (entry.display === "grey" && !JUMP_OR_CHARGE.test(entry.verb)) {
+              // 2026-09-28, slice "jumpcharge" (decision 9): ~~`entry.display === "grey" && !JUMP_OR_CHARGE.test(entry.verb)`~~
+              // — a jump or a charge the engine greys takes the grey road like every other; tallied by its verb too.
+              if (entry.display === "grey") {
                 grey[entry.reason] = (grey[entry.reason] ?? 0) + 1;
+                if (JUMP_OR_CHARGE.test(entry.verb)) {
+                  const kind = `${entry.reason} (${entry.verb.replace(/(left|right)$/, "")})`;
+                  grey[kind] = (grey[kind] ?? 0) + 1;
+                }
                 const says = SS2_UNAVAILABLE_REASONS[entry.reason].says;
                 assert.equal(at.length, 1, `${where}: ${place} (${entry.reason}) drawn ${at.length} times`);
                 assert.equal(at[0].reason?.code, entry.reason, `${where}: ${place} greyed for the engine's reason`);
@@ -461,7 +505,9 @@ test("ACCEPTANCE, over whole bouts with every foe selected in turn: every button
                 assert.equal(ringClickCommand(model, hit, { confirm: taken % 2 === 0 })?.why, "greyed", `${where}: a click on ${place}`);
                 assert.equal(listed.filter((one) => one.slot === place && one.reason.code === entry.reason).length, 1, `${where}: ${place} listed once`);
               } else {
-                const code = JUMP_OR_CHARGE.test(entry.verb) ? `${entry.reason} (${entry.verb.replace(/(left|right)$/, "")})` : entry.reason;
+                // ~~A jump or a charge was tallied here as `not-built (jump)` / `not-built (charge)`, hidden~~ (until
+                // 2026-09-28, decision 9); one here now is under a forced phase's HIDE code, as every slot then is.
+                const code = entry.reason;
                 hidden[code] = (hidden[code] ?? 0) + 1;
                 if (at.length > 0) drawnHidden[code] = (drawnHidden[code] ?? 0) + 1;
                 assert.equal(at.length, 0, `${where}: ${place} withheld for ${entry.reason} (${entry.display}) is drawn`);
@@ -478,11 +524,13 @@ test("ACCEPTANCE, over whole bouts with every foe selected in turn: every button
   }
   // Every team rule the bouts can reach, and the engine's own `not-built` (the `?items=10` kit), was shown.
   // `rank-full` is the offer's gate no bout reaches (the engine's docblock); it and the engine's other two are
-  // staged above. Jump and charge were HIDDEN every time the engine flagged them `not-built`.
-  for (const code of ["other-rank", "in-reach", "body-blocks", "duel", "no-rank", "not-built"]) {
+  // staged above. ~~Jump and charge were HIDDEN every time the engine flagged them `not-built`.~~ 2026-09-28, slice
+  // "jumpcharge" (decision 9): jump and charge were SHOWN greyed every time the engine flagged them `not-built`, and
+  // "not-built (jump)" / "not-built (charge)" moved from the hidden list to the shown one.
+  for (const code of ["other-rank", "in-reach", "body-blocks", "duel", "no-rank", "not-built", "not-built (jump)", "not-built (charge)"]) {
     assert.ok((grey[code] ?? 0) > 0, `${code} never shown: ${JSON.stringify(grey)}`);
   }
-  for (const code of ["slot-empty", "no-secondary", "level", "bow-drawn", "no-ammo", "not-built (jump)", "not-built (charge)"]) {
+  for (const code of ["slot-empty", "no-secondary", "level", "bow-drawn", "no-ammo"]) {
     assert.ok((hidden[code] ?? 0) > 0, `${code} never hidden: ${JSON.stringify(hidden)}`);
   }
   assert.deepEqual(drawnHidden, {});

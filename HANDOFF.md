@@ -11969,9 +11969,23 @@ progression frontier, then use this living head for the integrated project
 state.
 
 **ENGINE-LANE LATEST:**
-[2026-09-24 14:50 — the team HUD is built, and the gate waits](docs/handoffs/2026-09-24-1450--the-team-hud-is-built-and-the-gate-waits.md)
-(the END of session `e75af16c`, which continued `b64d8f55`).
-*(The engine-lane pointer supersedes
+[2026-09-28 19:39 — the press holds under ranged-first, and ring3 is running](docs/handoffs/2026-09-28-1939--the-press-holds-under-ranged-first-and-ring3-is-running.md)**
+(session `f4d2f69f`). Start there: **two background runs may have been cut by a restart (ring3 slices
+2-4, a sixth press verifier); the file says how to pick them up.** *(It supersedes
+[2026-09-28 17:50 — the press heads for a spot, and ring3 is paused](docs/handoffs/2026-09-28-1750--the-press-heads-for-a-spot-and-ring3-is-paused.md),
+whose not-done items are DONE.)* *(That one supersedes
+[2026-09-28 14:18 — big fighters walk again, and the AI presses a 2v1](docs/handoffs/2026-09-28-1418--big-fighters-walk-and-the-ai-presses-a-2v1.md),
+whose owner calls still stand.)* **The owner's two playtest defects are fixed; P2 (ranged-first or
+pincer-first) and a pre-engagement crowd-play question wait on the owner.** *(It supersedes
+[2026-09-26 03:05 — the gate is adopted, and main is current](docs/handoffs/2026-09-26-0305--the-gate-is-adopted-and-main-is-current.md),
+**whose defects 1 and 2 are DONE and whose items 1, 2 and 4 carry forward.** EVERY COMMIT NEEDS A
+`Decided:` OR `Fix:`/`Docs:`/`Chore:`/`Test:` TRAILER, and `main` is kept equal to `arena` by the
+agent.)* *(That one supersedes
+[2026-09-25 23:40 — the HUD is in the frame](docs/handoffs/2026-09-25-2340--the-hud-is-in-the-frame.md),
+**whose item 2 (the gate) is DONE and whose items 1, 3 and 4 carry forward.**)* *(That one supersedes
+[2026-09-24 14:50 — the team HUD is built, and the gate waits](docs/handoffs/2026-09-24-1450--the-team-hud-is-built-and-the-gate-waits.md),
+**whose item 1 (the gate) is on harness main but NOT adopted by SS2 — two new Codex findings must land
+first — and whose item 2 (ring3) is not started.**)* *(That one supersedes
 [2026-09-24 11:48 — the night merged, and the HUD is decided](docs/handoffs/2026-09-24-1148--the-night-merged-and-the-hud-is-decided.md),
 **whose in-flight items 1-2 are MERGED, item 3 (the gate) is BUILT BUT NOT
 ADOPTED, and item 4 (ring3) is not started.**)* *(That one supersedes
@@ -14463,8 +14477,11 @@ shapes rendering as the blood in the death animations, and a 2v1 that pincers.
 ► **FLANKING: a 2v1 now pincers.** The owner watched one and said the survivors
   stood behind each other rather than going round. Measured: **208 outnumbered
   turns, 100% same-side, 0 crossings in 3,424 turns.** It was never geometry —
-  `ss2BodyBlocks` is `|dy| < physical_size`, so at stride 97 a foe one rank away
-  never blocked. **Pincered 0% -> 17.8%, simultaneous fights 273 -> 413 turns,
+  `ss2BodyBlocks` ~~is `|dy| < physical_size`, so at stride 97 a foe one rank
+  away never blocked~~ **— CORRECTED 2026-09-27: it was `|dy| < physical_size`,
+  and at stride 97 a foe one rank away DID block from strength 27 (a colossus,
+  8 of the 18 decodable champions); the owner saw big fighters walk in place.
+  It is the lane rule since `57b2209`, so the sentence is true now.** **Pincered 0% -> 17.8%, simultaneous fights 273 -> 413 turns,
   24/24 still settle, and the pile-up tell is absent** (97 and 150 return
   clearly different censuses). No golden moved: with the axis off every `y` is
   null and the arm is inert.
@@ -15328,8 +15345,9 @@ exploit.
   `git fetch github && git log --oneline github/arena/champion-capture..HEAD | wc -l`
   ~~`Bash(git push *)` stays in `ask`, so ask before every push regardless.~~
   ► **NO LONGER TRUE (owner, 2026-09-12): it is in `permissions.allow` and a
-    push does not prompt.** `main`, `master` and every force form stay DENIED,
-    which is where the safety actually lived.
+    push does not prompt.** ~~`main`, `master` and~~ every force form stays
+    DENIED, which is where the safety actually lived. *(Corrected 2026-09-26:
+    the owner dropped the main/master push denies; see AGENTS.md.)*
 
   ► **AND THE REWRITE STILL LEFT A DECAYING CLAUSE IN, WHICH IS THE WHOLE
     LESSON REPEATING ITSELF INSIDE THE PARAGRAPH ABOUT IT.** The version that

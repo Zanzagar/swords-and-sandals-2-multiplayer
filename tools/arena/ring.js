@@ -138,12 +138,22 @@ export const RING_ITEM_WORDS = Object.freeze({
  *   dimmed, says why in the engine's own words, and can never act; a HIDE one
  *   is not drawn at all.
  *
- *   **Jump and charge stay HIDDEN whatever the engine flags them** — the
- *   owner's Q8 ("Jump and charge stay hidden and get their own design pass").
- *   The engine flags them `not-built`, a grey code, and on the long warrior
- *   frames they are three of the eight slots on every turn.
+ *   ~~**Jump and charge stay HIDDEN whatever the engine flags them** — the
+ *   owner's Q8 ("Jump and charge stay hidden and get their own design
+ *   pass").~~ (`RING_HIDDEN_VERBS`, the list that hid them, is gone.)
+ *
+ *   **Jump and charge are SHOWN GREYED, "Not built yet"** — the owner's
+ *   decision 9 of 2026-09-24 (`docs/design/battle-ui.md#decided-hud-2026-09-24`),
+ *   reversing Q8; built 2026-09-28 (slice "jumpcharge"). The engine flags
+ *   them `not-built`, a grey code, so they take this road like every other
+ *   grey code: in the slot the build's controller frame wires them to, dimmed,
+ *   saying the engine's "Not built yet.", never acting. On the long warrior
+ *   frames they are three of the eight slots on every turn. Under a forced
+ *   phase the engine gives them the phase's HIDE code, and they are not drawn,
+ *   as nothing is. Key labels do not give way to them (`ringLabelAt`). Their
+ *   own design pass — lane changes, the build's sideways leap, the mid-charge
+ *   attack — is still to come.
  */
-export const RING_HIDDEN_VERBS = Object.freeze(["jumpleft", "jumpright", "chargeleft", "chargeright"]);
 
 /**
  * The reason a menu entry is GREYED — `{code, words}`, the engine's code and
@@ -151,7 +161,6 @@ export const RING_HIDDEN_VERBS = Object.freeze(["jumpleft", "jumpright", "charge
  */
 export function ringGreyReasonOf(entry) {
   if (!entry || entry.available !== false || entry.display !== "grey") return null;
-  if (RING_HIDDEN_VERBS.includes(entry.verb)) return null;
   const known = Object.hasOwn(SS2_UNAVAILABLE_REASONS, entry.reason) ? SS2_UNAVAILABLE_REASONS[entry.reason] : null;
   return Object.freeze({ code: entry.reason, words: known?.says ?? SS2_UNAVAILABLE_REASONS["not-offered"].says });
 }
@@ -737,7 +746,17 @@ export const RING_VERB_LABELS = Object.freeze(Object.fromEntries([
   ["sniperight", "Snipe", "Snipe"],
   // S6: the swap's long words are the build's own and change with the weapon
   // in hand (`model.swap.words`); this pair is the stage label and the fallback.
-  ["swap_weapons", "Swap", "Swap weapons"]
+  ["swap_weapons", "Swap", "Swap weapons"],
+  // Decision 9 (slice "jumpcharge", 2026-09-28): jump and charge are SHOWN
+  // greyed and never act. The engine's entry for one has no action type, so
+  // these long words are its only name wherever a greyed button is said — the
+  // caption, the preview line, the strip, the live region ("Jump left — not
+  // now: Not built yet."). No greyed button carries a stage label; the short
+  // words are for the day they act.
+  ["jumpleft", "Jump", "Jump left"],
+  ["jumpright", "Jump", "Jump right"],
+  ["chargeleft", "Charge", "Charge left"],
+  ["chargeright", "Charge", "Charge right"]
 ].map(([verb, short, long]) => [verb, Object.freeze({ short, long })])));
 
 /** The engine tokens whose words are not simply the token's. */

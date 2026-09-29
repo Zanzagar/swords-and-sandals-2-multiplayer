@@ -205,15 +205,15 @@ and the path is unreachable from Linux anyway.
   line above read as though any session directory sufficed.)
 - A working tree with `assets/` but no probe session: **1 skipped**, the
   raw-trace archive existence check. EXPECTED, not a defect.
-- **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS ~~9~~ ~~10~~ ~~11~~ 15 —
-  measured 2026-09-25 at `194cae1` after the four real-pack action-button
-  checks landed** (11 on 2026-09-23; 10 at b51ad05; 9 on 2026-09-15, where this
-  line used to say 1 and mean the tree above). Besides the archive check, 8 are
-  gated on the extracted TEXT pack, 1 on the extracted PROPS pack (the boulder
-  test), 1 on the ICONS and TEXT packs together (`test/render-popups.test.js`),
-  and 4 on the ICONS pack (`test/render-action-buttons.test.js`), all gitignored
-  like every other asset. A cloner who measures 15 against a documented 1 has a
-  correct tree and a wrong document.
+- **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS ~~9~~ ~~10~~ ~~11~~
+  ~~15~~ ~~16~~ 18 — measured 2026-09-29 on the integrated recovery tree.**
+  Besides the raw-trace archive check, 8 are gated on the extracted TEXT pack,
+  1 on the PROPS pack (the boulder test), 1 on ICONS and TEXT together
+  (`test/render-popups.test.js`), 4 on ICONS for action buttons, 1 on ICONS for
+  the combat-panel gauges, 1 on ICONS for the crowd bar, and 1 on the CHAMPIONS
+  pack for the press regression. All are gitignored like every other asset.
+  A cloner who measures 18 against an older documented count has a correct tree
+  and a stale document.
 
 **Otherwise a skipped test is a real finding, not noise.** Expect the exact count
 the `LATEST`-linked handoff states; if you measure a different number, say so
@@ -231,3 +231,4 @@ a broken path derivation FAILS and names itself rather than skipping silently.
   quietly fixing them. Commit messages here name which errors were whose.
 - End a working session by writing a date-stamped brief to `docs/handoffs/`
   carrying its `sessionId`, so the next session starts from one sentence.
+- **Grilling gate:** every commit ends with a `Decided: <path>#<anchor>` trailer (the recorded decision it implements) or a `Fix:`/`Docs:`/`Chore:`/`Test:` trailer saying why; rule 14 of claude-harness `docs/git-hygiene.md`. `.githooks/commit-msg` refuses anything else once a clone has run `git config core.hooksPath .githooks` (once per clone), and `.github/workflows/grill-gate.yml` re-checks every new commit, and a pull request's description, in CI. <!-- grill-gate:pointer -->

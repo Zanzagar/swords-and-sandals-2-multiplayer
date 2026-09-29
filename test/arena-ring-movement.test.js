@@ -101,19 +101,25 @@ function advanceTo(host, turnNumber, actorId) {
 }
 
 test("A WALK THE STANCE DOES NOT WIRE — toward a foe inside reach — stands BESIDE the build's walk slot on its side, and its slot keeps its own verb", () => {
-  // 3v3 plain seed 2, turn 20: blue-2 with red-3 selected, close, facing right. `closerange_warrior`
+  // 3v3 plain seed 21, turn 20: red-2 with blue-1 selected, close, facing right. `closerange_warrior`
   // facing right wires walkleft at optionB and NO walkright: optionE is normal_attack
-  // (SS2_BUTTON_WIRING). He stands at x 1 between red-2 (x -84) and red-3 (x 86), both 85 away in
-  // his own rank; the engine's nearest foe breaks the tie by id, so red-2 on his LEFT is the one he
-  // retreats from, and walk-right is offered — AND the normal attack at red-3, so optionE cannot
-  // hold both.
-  const host = advanceTo(demoHost({ perSide: 3, seed: 2 }), 20, "blue-2");
-  const model = modelOf(host, "red-3");
+  // (SS2_BUTTON_WIRING). He stands at x -207 with blue-1 at x -93 in his own rank, 114 away and in
+  // reach, and blue-2 at x -247 one rank back, 105 away — the nearest, on his LEFT, the one he
+  // retreats from — so walk-right is offered (it moves him to -179), AND the normal attack at
+  // blue-1, so optionE cannot hold both.
+  //
+  // ► **RE-STAGED 2026-09-28 (twice that day).** ~~3v3 plain seed 2, turn 20: blue-2 with red-3~~ —
+  //   there the walk right landed on red-3's clamp line and always went nowhere, so the owner's P3
+  //   (`ss2WalkBlocked`) withheld it; ~~turn 19 of the same bout~~ held until the AI's press and its
+  //   queue guards changed that bout's trajectory (the fifth verifier's fixes). This turn has the
+  //   original geometry — the selected foe in his own lane, in reach — and survived two AI changes.
+  const host = advanceTo(demoHost({ perSide: 3, seed: 21 }), 20, "red-2");
+  const model = modelOf(host, "blue-1");
   assert.deepEqual(model.stance, { frame: "closerange_warrior", range: "close", weapon: "warrior", facing: "right" });
   assert.equal(model.slots.find((slot) => slot.slot === "optionE").verb, "normal_attack");
   const walk = model.moves.find((move) => move.move === "walk-right");
   assert.deepEqual([walk.key, walk.place, walk.slot, walk.verb], ["ArrowRight", "beside", null, "walkright"]);
-  assert.deepEqual(walk.action, { type: "walk-right", targetId: "blue-2", actorId: "blue-2" });
+  assert.deepEqual(walk.action, { type: "walk-right", targetId: "red-2", actorId: "red-2" });
   assert.ok(!model.offRing.some((entry) => entry.action.type === "walk-right"), "on the ring, so not listed");
 });
 
@@ -122,7 +128,7 @@ test("a stance that wires a walk the engine WITHHOLDS for a team rule GREYS it i
   // to the right) for `in-reach`, a team rule. ~~It shows it nowhere~~ before S9: the slot was empty.
   // Neither rank arrow is withheld here, so both stand, and nothing is listed: ~~the swap is only
   // listed~~ — S6 put the swap on the ring's ninth button (`model.swap`).
-  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 2 }), 20, "blue-2"), "red-3");
+  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 21 }), 20, "red-2"), "blue-1");
   const walkSlot = model.slots.find((slot) => slot.slot === "optionB");
   assert.equal(walkSlot.verb, "walkleft");
   assert.equal(walkSlot.action, null, "greyed: it sends nothing");
@@ -136,6 +142,7 @@ test("a stance that wires a walk the engine WITHHOLDS for a team rule GREYS it i
   assert.deepEqual(model.offRing.map((entry) => line(entry.action)), []);
   // ~~`model.swap.action` is blue-2's swap~~ — **RE-PINNED 2026-09-24 (night2/engine2 swap-ammo)**: blue-2
   // spent his five arrows and the forced swap put the bow away, so he holds the sword with `ammo_left` 0,
+  // (re-staged 2026-09-28: red-2 here is the same — the bow in the second slot, `ammo_left` 0),
   // and the build hides its swap button on `!(ammo_left > 0)` (overlay frame 1 body 0x2378d2
   // +0x0e0a-+0x0e9d). The engine no longer offers it, so the ring has no ninth button here.
   assert.equal(model.swap, null);
@@ -162,8 +169,8 @@ test("with no ring — the engine has no menu to ask — no move is placed, and 
 /* ------------------------------------------------------------------ */
 
 test("a move is sent by its arrow key or its name wherever it stands; a withheld one sends nothing", () => {
-  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 2 }), 20, "blue-2"), "red-3");
-  const self = (type) => ({ type, targetId: "blue-2", actorId: "blue-2" });
+  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 21 }), 20, "red-2"), "blue-1");
+  const self = (type) => ({ type, targetId: "red-2", actorId: "red-2" });
   assert.deepEqual(ringActionFor(model, "ArrowRight"), self("walk-right"), "beside the ring");
   assert.deepEqual(ringActionFor(model, "walk-right"), self("walk-right"));
   assert.deepEqual(ringActionFor(model, "ArrowUp"), self("rank-back"));
@@ -180,8 +187,8 @@ test("a move is sent by its arrow key or its name wherever it stands; a withheld
 });
 
 test("the arrow keys move from the stage or a strip button: one press, one move; a withheld move or a held key is swallowed, not sent", () => {
-  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 2 }), 20, "blue-2"), "red-3");
-  const self = (type) => ({ kind: "act", action: { type, targetId: "blue-2", actorId: "blue-2" } });
+  const model = modelOf(advanceTo(demoHost({ perSide: 3, seed: 21 }), 20, "red-2"), "blue-1");
+  const self = (type) => ({ kind: "act", action: { type, targetId: "red-2", actorId: "red-2" } });
   for (const focus of ["stage", "control"]) {
     assert.deepEqual(ringKeyCommand(model, { key: "ArrowRight", focus }), self("walk-right"), focus);
     assert.deepEqual(ringKeyCommand(model, { key: "ArrowUp", focus }), self("rank-back"), focus);
@@ -288,8 +295,8 @@ test("a rank arrow that would leave the canvas stays on it, whatever the fighter
 });
 
 test("a click on a move's button hits that move, and sends it; a hover names it — and a GREYED one (S9) is hit, named and sends nothing", () => {
-  const host = advanceTo(demoHost({ perSide: 3, seed: 2 }), 20, "blue-2");
-  const model = modelOf(host, "red-3");
+  const host = advanceTo(demoHost({ perSide: 3, seed: 21 }), 20, "red-2");
+  const model = modelOf(host, "blue-1");
   const buttons = [
     ...ringButtonsAt(model, { centerX: 300, centerY: 200, unit: 1.2 }),
     ...ringMoveButtonsAt(model, { centerX: 300, centerY: 200, unit: 1.2, head: 190, feet: 330 })
@@ -578,8 +585,11 @@ test("the shell draws the moves with the ring, off the acting fighter's DRAWN he
   assert.match(stage, /ringOrigins\.actor = \{ x: origin\.x, y: origin\.y, head: box\.y0, below: nameY \+ namePx \* 0\.5 \};/);
   const paint = functionBody("paintRing");
   assert.match(paint, /ringMoveButtonsAt\(ringView\.model, \{[^}]*centerX: placement\.x,[^}]*centerY: placement\.y,[^}]*unit: placement\.unit,[^}]*layout: ringButtonPack\?\.layout \?\? null,[^}]*head: ringOrigins\.actor\.head,[^}]*feet: ringOrigins\.actor\.below,[^}]*bounds: \{ top: stage\.y, bottom: stage\.y \+ stage\.height \}/);
-  // CODEX PASS 2: the whole ring, moves included, kept on the visible stage — the rectangle the frame is clipped to.
-  assert.match(paint, /const stage = stageClipRectFor\(fit\);/);
+  // CODEX PASS 2: the whole ring, moves included, kept on the visible stage — ~~the rectangle the frame is
+  // clipped to (`stageClipRectFor(fit)`)~~ RE-PINNED FOR D4 of the in-frame team HUD (2026-09-25): the stage
+  // left visible above the build's UI bar, where the bar is drawn (`ringBoundsFor`,
+  // `test/arena-combat-hud.test.js`) — the whole clipped stage let the rank-front arrow sit under the bar.
+  assert.match(paint, /const stage = ringBoundsFor\(fit, \{ barred: arenaScreenAvailable\(\) \}\);/);
   assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\(/, "the eight first, all kept on the stage");
   // ring2 "edge": with the fighter's drawn centre, so a walk the move would carry across him stays on his side.
   assert.match(paint, /\.\.\.ringMoveButtonsAt\([\s\S]*?\}\)\s*\], stage, \{ fighterX: placement\.x \}\);/);

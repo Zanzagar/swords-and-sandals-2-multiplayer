@@ -6,7 +6,7 @@ sessionId:    01a074ac-c9e7-7303-8538-c8e392199ac2
 agentRuns:    targeted read-only D2-boundary, gate-recovery, and recovery-narrative audits plus earlier atomicity/final-diff checks
 branch:       design/endless-progression-gate-recovery
 commits:      eac3347..HEAD (one gate recovery squash plus current-main integration)
-suite:        proportional serial checks 10/10 passed; register reparses 143/143 with Phi_SR 24; decision-record hash unchanged
+suite:        full serial suite 3,817 passed / 18 expected asset-or-archive skips / 0 failed; focused 10/10 passed; register 143/143 with Phi_SR 24; decision-record hash unchanged
 supersedes:   2026-09-29-0153--relic-nonclear-topology-next
 ---
 

@@ -95,6 +95,19 @@
  *   facing, where the overlay stands relative to the acting fighter, and one
  *   button's draw operations (up, over, or an authored disabled) from the
  *   player's icon pack, with an authored round fallback for a fresh clone.
+ * - `combat-panel.js` is the build's own 1v1 GAUGES (`combat_panel`, sprite
+ *   751) in the stage — the health and energy vials and the armour gauge, the
+ *   name banner, driven as the build drives them — laid out one cluster per
+ *   fighter for a team bout, with `hudTop` for the camera, and an authored
+ *   fallback for a fresh clone. `pack-ops.js` holds the matrix and glow helpers
+ *   it shares with `popups.js` and `action-buttons.js`. *(Added to this list
+ *   by the main session 2026-09-24: the slice's implementer was killed by a
+ *   reboot before its final suite run, which is where the barrel test that
+ *   caught the omission lives.)*
+ * - `crowd-bar.js` is the build's own CROWD BAR (`combat_panel`'s `crowd_bar`
+ *   over `crowd_bar_bg`, and its `crowd_text` label) at the stage's top right,
+ *   driven as the build drives it (`_xscale = round(crowd)`, the label from the
+ *   build's moods), with an authored fallback for a fresh clone (D8, 2026-09-25).
  */
 
 export * from "./scene.js";
@@ -125,3 +138,6 @@ export * from "./clip-effects.js";
 export * from "./arena-shell.js";
 export * from "./popups.js";
 export * from "./action-buttons.js";
+export * from "./pack-ops.js";
+export * from "./combat-panel.js";
+export * from "./crowd-bar.js";

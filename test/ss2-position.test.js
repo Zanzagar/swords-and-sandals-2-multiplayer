@@ -326,6 +326,96 @@ test("a foe standing in another rank does not block a walk, which is what makes 
   assert.ok(unobstructed > 150, `the walk must pass the ranked foe's x, got ${unobstructed}`);
 });
 
+/**
+ * ► **AND A BIG BODY ONE RANK OVER DID BLOCK, until 2026-09-27 — the owner's
+ *   playtest: *"in some cases (larger character models) a character in a
+ *   different lane behind another cant advance. it just walks in place when
+ *   attempting to proceed."***
+ *
+ * The test above stands its foe TWO ranks away (194 in depth), where no
+ * strength a gladiator reaches in practice blocks, and so it never tried the
+ * NEIGHBOURING rank, 97 away. `ss2BodyBlocks` read `|dy| < physical_size(body)`
+ * and `physical_size = 80 + round(strength / 1.5)` passes 97 at strength 27 —
+ * a colossus cast on the demo roster's strength 9, and 8 of the 18 decodable
+ * champions as they are built. So a strong gladiator stopped every walker in the lanes beside it,
+ * while every sentence this engine had written about it said across ranks no
+ * body blocks. Measured before the fix on the arena's own host
+ * (`createVanillaBattleHost`, the build's champions, seeds 1-48): **77 of the
+ * 123 walks the AI chose that went nowhere in 3v3 were parked by a body in
+ * ANOTHER lane**, and at strength 111 (`physical_size` 154) the clamp line sits
+ * behind the walker, so a walk forward carried him BACKWARD, 0 to -4.
+ *
+ * The lane is the unit (`docs/design/battle-ui.md` decision 10, soft lanes):
+ * a body in your own lane is in your way, and a rank you are not standing in
+ * is scenery, whatever its size. The clamp inside the lane is the build's own
+ * and is unchanged, which the second half pins.
+ */
+test("a body in ANOTHER rank never blocks a walk, however strong: physical_size can exceed the rank stride", () => {
+  const walker = { id: "a", x: 0, y: 200, alive: true, stats: { strength: 9, agility: 10 } };
+  const unobstructed = ss2WalkDestination(walker, [], 1);
+  const otherRanks = [200 - SS2_ARENA.rankStride, 200 - 2 * SS2_ARENA.rankStride];
+  let widerThanTheStride = 0;
+  let clampedInLane = 0;
+  for (let strength = 0; strength <= 300; strength += 1) {
+    const size = ss2PhysicalSize({ stats: { strength } });
+    if (size > SS2_ARENA.rankStride) widerThanTheStride += 1;
+    for (const y of otherRanks) {
+      const body = [{ id: "b", x: 150, y, alive: true, stats: { strength } }];
+      assert.equal(ss2WalkDestination(walker, body, 1), unobstructed,
+        `a strength-${strength} body (physical_size ${size}) at depth ${y} must be scenery to a walker at 200`);
+    }
+    // In the walker's OWN rank the same body still clamps, at the build's line.
+    const level = [{ id: "b", x: 400, y: 200, alive: true, stats: { strength } }];
+    const line = 400 - size;
+    if (line < unobstructed) clampedInLane += 1;
+    assert.equal(ss2WalkDestination(walker, level, 1), Math.min(unobstructed, line),
+      `a strength-${strength} body in the walker's own rank must still clamp at 400 - ${size}`);
+  }
+  assert.ok(widerThanTheStride > 0, "the sweep must reach a body wider than the stride, or it proves nothing");
+  assert.ok(clampedInLane > 0, "and must reach an own-rank body that actually clamps");
+});
+
+test("the owner's case through the resolver: a walker one lane over from a big ally walks PAST him", () => {
+  // red-2 in the second rank, parked exactly on the old clamp line of red-1 —
+  // a champion-strength ally in the front rank — walking toward a foe in its
+  // own lane. Before the fix this walk went nowhere, every time it was chosen.
+  const side = (prefix, dir, members) => ({
+    id: prefix,
+    name: prefix,
+    combatants: members.map((overrides, index) =>
+      ss2Combatant(gladiator({ gladiator_dir: dir, ...overrides }), {
+        id: `${prefix}-${index + 1}`, name: `${prefix} ${index + 1}`, controller: "local"
+      }))
+  });
+  const battle = createTeamBattle({
+    seed: 1,
+    rules: ss2TeamRules,
+    teams: [
+      side("red", "right", [{ strength: 111, speed: 5 }, { strength: 9, speed: 9 }]),
+      side("blue", "left", [{ strength: 9, speed: 5 }, { strength: 9, speed: 5 }])
+    ]
+  });
+  const walker = combatantById(battle, "red-2");
+  const big = combatantById(battle, "red-1");
+  const foe = combatantById(battle, "blue-2");
+  assert.equal(actorId(battle), "red-2", "the rig must give the walker the first turn");
+  assert.equal(big.y - walker.y, SS2_ARENA.rankStride, "the big ally stands one rank in front");
+  assert.ok(ss2PhysicalSize(big) > SS2_ARENA.rankStride, "and is wider than the stride, or this proves nothing");
+  assert.equal(foe.y, walker.y, "the foe is in the walker's own lane");
+  big.x = 0;
+  walker.x = big.x - ss2PhysicalSize(big);
+  foe.x = 1200;
+
+  const walk = legalActions(battle, "red-2").find((option) => option.type === Ss2ActionType.WALK_RIGHT);
+  assert.ok(walk, "the walk toward the foe is offered");
+  const from = walker.x;
+  applyAction(battle, { actorId: "red-2", ...walk });
+  const to = combatantById(battle, "red-2").x;
+  assert.equal(to - from, ss2WalkDestination({ ...walker, x: from }, [], 1) - from,
+    "the walk covers its whole step, as if the ally one lane over were not there");
+  assert.ok(to > big.x, "and carries the walker past the big ally's x");
+});
+
 test("with every gladiator level the depth predicate is constantly true, so 1v1 is untouched", () => {
   // Vanilla has one gladiator a side and both stand at _y = 200, so `|dy|` is 0
   // for every pair the build can make. This is the parity case on the new axis.
@@ -1311,7 +1401,17 @@ test("and OUTSIDE 65 the build's own gate shuts, which is a fidelity gap and not
     if (battle.result) settled += 1;
   }
   assert.equal(settled, 8, "every bout must still settle — a shut gate on one side is not a hung bout");
-  assert.equal(weakAttackTurns, 0, "the smaller gladiator is never offered a swing, which is the gap named above");
+  // ~~The smaller gladiator is never offered a swing.~~ **MOVED 2026-09-27 by
+  // the owner's decision P3 (`ss2WalkBlocked`): the walk that parked him on the
+  // bigger one's clamp line, out of his own reach, went NOWHERE, so it is no
+  // longer offered.** Before, he walked in place there every turn (20 walks,
+  // 0 swings over these 8 seeds); now he taunts from the line instead (16
+  // walks, 4 taunts), and twice the bigger one's own approach lands inside the
+  // small one's reach and he is offered a swing. The gap named above is the
+  // same arithmetic; he is just no longer stuck walking into it. Blue still
+  // wins all 8.
+  assert.ok(weakAttackTurns < strongAttackTurns,
+    `the smaller gladiator must still be the one the gap shuts out (${weakAttackTurns} against ${strongAttackTurns})`);
   assert.ok(strongAttackTurns > 0, "and the bigger one is, or this proves nothing about the cause");
   assert.ok(WALKS.size === 2);
 });
@@ -1381,6 +1481,15 @@ test("with two foes ahead the walk stops at the nearest CLAMP LINE, not the near
   // picks this reading over "nearest by position": with unequal
   // `physical_size` the two orders differ, and a bigger foe standing slightly
   // FURTHER off is the one that stops you first.
+  //
+  // ► **ALL THREE ARE STATED INTO ONE LANE SINCE 2026-09-27, and until then
+  //   this test passed on the defect it now helps pin.** `big` is blue's slot
+  //   1, which the shipped rule set stands in the SECOND rank (y 103), so it
+  //   was never in the hero's way — it clamped the walk only because its
+  //   `physical_size` (127) was wider than the 97 between ranks, the
+  //   cross-lane block the owner found in play (`ss2BodyBlocks`). The
+  //   multi-foe clamp this test is about is a rule INSIDE a lane.
+  const lane = SS2_ARENA.frontY;
   const battle = createTeamBattle({
     seed: 1,
     rules: ss2TeamRules,
@@ -1388,20 +1497,23 @@ test("with two foes ahead the walk stops at the nearest CLAMP LINE, not the near
       // movement_speed 60, so an uncut step of 940 overshoots BOTH clamp lines
       // from here — which is what makes this a test of the minimum and not of
       // the displacement.
-      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 40 }), { id: "hero", x: -100 })] },
+      { id: "red", combatants: [ss2Combatant(gladiator({ speed: 40 }), { id: "hero", x: -100, y: lane })] },
       {
         id: "blue",
         combatants: [
           // Nearer by position (500), smaller: its clamp line is 500 - 81 = 419.
-          ss2Combatant(gladiator({ strength: 1, gladiator_dir: "left" }), { id: "small", x: 500 }),
+          ss2Combatant(gladiator({ strength: 1, gladiator_dir: "left" }), { id: "small", x: 500, y: lane }),
           // Further by position (520), much bigger: its line is 520 - 127 = 393.
-          ss2Combatant(gladiator({ strength: 70, gladiator_dir: "left" }), { id: "big", x: 520 })
+          ss2Combatant(gladiator({ strength: 70, gladiator_dir: "left" }), { id: "big", x: 520, y: lane })
         ]
       }
     ]
   });
   assert.equal(ss2PhysicalSize(combatantById(battle, "small")), 81);
   assert.equal(ss2PhysicalSize(combatantById(battle, "big")), 127);
+  for (const id of ["hero", "small", "big"]) {
+    assert.equal(combatantById(battle, id).y, lane, `${id} must stand in the one lane, or this is not a clamp test`);
+  }
   assert.ok(
     combatantById(battle, "small").x < combatantById(battle, "big").x,
     "the smaller foe must be the NEARER one, or this test is not about the two orders"
@@ -1486,14 +1598,28 @@ test("a walk may never carry a gladiator past a foe — including when the CLAMP
       }
     ]
   });
-  // The case only exists because the retreat is offered while a foe stands the
-  // other way — assert that, or the test proves nothing about the clamp.
+  // ~~The case only exists because the retreat is offered while a foe stands
+  // the other way — assert that, or the test proves nothing about the clamp.~~
+  // **Since 2026-09-27 the retreat is NOT offered, and that is this guard's own
+  // answer reaching the offer:** the reversal goes nowhere, and a walk that
+  // goes nowhere because of a body in the walker's lane is withheld (the
+  // owner's decision P3, `ss2WalkBlocked`). The guard still governs the
+  // resolution, so the walk is forced straight at `resolveAction`, past
+  // `legalActions`, the way the 1v1 reversal test above reaches its case.
   const offered = typesOf(battle, "actor");
-  assert.equal(offered.includes(Ss2ActionType.WALK_RIGHT), true, "the retreat must be on offer");
+  assert.equal(offered.includes(Ss2ActionType.WALK_RIGHT), false, "the retreat that goes nowhere is not on offer");
   assert.equal(ss2PhysicalSize(combatantById(battle, "right-foe")), 86);
 
-  applyAction(battle, { actorId: "actor", type: Ss2ActionType.WALK_RIGHT, targetId: "actor" });
-  const landed = combatantById(battle, "actor").x;
+  const forced = battle.rules.resolveAction({
+    type: Ss2ActionType.WALK_RIGHT,
+    actorId: "actor",
+    targetId: "actor",
+    actor: combatantById(battle, "actor"),
+    target: combatantById(battle, "actor"),
+    foes: [combatantById(battle, "left-foe"), combatantById(battle, "right-foe")],
+    turnNumber: 1
+  }, { randomBetween: () => 0, randomNumber: () => 0 });
+  const landed = forced.effects.find((effect) => effect.kind === EffectKind.POSITION).to;
   assert.ok(landed >= -10, `a walk must never end past the foe at -10; it ended at ${landed}`);
   assert.equal(landed, 0, "and the reversal that would cross it goes NOWHERE, not part-way");
 

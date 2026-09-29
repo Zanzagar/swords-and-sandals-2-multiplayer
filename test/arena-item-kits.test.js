@@ -337,15 +337,25 @@ test("a typo is refused loudly, and 1 (the EMPTY marker) is not an item", () => 
  *   - doom: NEW — the old `blasts` pin exactly, now that 49 stands alone.
  */
 const KIT_BOUTS = Object.freeze({
+  // ► **MOVED 2026-09-27 BY THE PRESS'S MELEE-ONLY SIDES (a write-nothing
+  //   verifier's finding against 74c0014), AND BY NOTHING ELSE:** with
+  //   `aiPress: "off"` this loop still gives the old pin exactly (39 actions,
+  //   elimination, 18 casts). Once a drawn bow no longer "holds" a side of
+  //   the target, blue-2 — queued behind blue-1 in red-2's lane — steps out to
+  //   go round (action 43) instead of waiting, blue-1 falls while he walks,
+  //   and the 1v1 that follows runs past 60 (it settles at 94, blue still the
+  //   winner). The same bout under `pincer-first` casts one more rejuvenate.
+  //   Was: 39 actions, elimination, and the list ending … regenerate, colossus.
   buffs: {
-    actions: 39,
-    result: "elimination",
+    actions: 60,
+    result: null,
     casts: [
       "cast-boundless-energy", "cast-boundless-energy", "cast-boundless-energy", "cast-boundless-energy",
       "cast-swiftsandals", "cast-swiftsandals", "cast-swiftsandals", "cast-swiftsandals",
       "cast-colossus", "cast-colossus", "cast-colossus",
       "cast-bloodlust", "cast-bloodlust", "cast-bloodlust",
-      "cast-rejuvinate", "cast-rejuvinate", "cast-regenerate", "cast-colossus"
+      "cast-rejuvinate", "cast-rejuvinate", "cast-regenerate", "cast-colossus",
+      "cast-rejuvinate", "cast-bloodlust", "cast-regenerate"
     ]
   },
   // Each fighter opens with its lightning bolt (priced at its mean, 150, above
@@ -444,15 +454,24 @@ const KIT_BOUTS = Object.freeze({
   //   red-2 puts the bow away where it walked right. The first 10 casts are
   //   unchanged; ~~gale, ghost strike, command, whirlwind, teleport, ghost
   //   strike, wincrowd, wincrowd~~ is the tail it replaces.
+  // ► **MOVED 2026-09-27 BY THE OWNER'S P1/P2 (help first, going round;
+  //   `docs/design/battle-ui.md#decided-ai-press-2026-09-27`), AND BY NOTHING
+  //   ELSE:** with `aiPress: "off"` this loop reproduces the old pin exactly
+  //   (60 actions, no result, 26 casts), so the blocked-walk rule (P3), which
+  //   has no switch, moves nothing here. With the press in, the crowd-pleaser
+  //   at the 17th cast — a free member playing to the crowd while his ally
+  //   fought — is gone, the pair finishes the fight, and the bout ends by
+  //   elimination at 45 actions. The same list under `ranged-first` and
+  //   `pincer-first`. Was: 60 actions, no result, and … command, wincrowd,
+  //   teleport, weaken, wincrowd, whirlwind, wincrowd x3, gale, wincrowd.
   tricks: {
-    actions: 60,
-    result: null,
+    actions: 45,
+    result: "elimination",
     casts: [
       "cast-command", "cast-weaken-armour", "cast-weaken-armour", "cast-ghost-strike", "cast-weaken-armour",
       "cast-whirlwind", "cast-command", "cast-gale", "cast-command", "cast-ghost-strike",
       "cast-whirlwind", "cast-teleport", "cast-gale", "cast-ghost-strike", "cast-ghost-strike", "cast-command",
-      "wincrowd", "cast-teleport", "cast-weaken-armour", "wincrowd", "cast-whirlwind", "wincrowd", "wincrowd",
-      "wincrowd", "cast-gale", "wincrowd"
+      "cast-teleport", "cast-weaken-armour", "wincrowd", "cast-whirlwind", "wincrowd"
     ]
   },
   crowd: {

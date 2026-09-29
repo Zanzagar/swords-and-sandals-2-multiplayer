@@ -127,11 +127,10 @@
 import {
   applyColourMatrix,
   applyColourTransformAlpha,
-  canvasFilterFor,
   colourTransformFrom,
-  concatColourTransforms,
-  glowAmplificationFor
+  concatColourTransforms
 } from "./filters.js";
+import { IDENTITY, compose, glowGroupFor, matrixOf } from "./pack-ops.js";
 import { propOpsFor } from "./props.js";
 import { fieldOpsFor, staticTextOpsFor } from "./text.js";
 
@@ -764,26 +763,11 @@ export const SS2_GREYSCALE_MATRIX = Object.freeze([
 ]);
 const DISABLED_ALPHA = 0.55;
 
-const IDENTITY = Object.freeze([1, 0, 0, 1, 0, 0]);
 /** A disc centred on its clip's origin: 860's and the authored button's. */
 const ORIGIN = Object.freeze({ x: 0, y: 0 });
 
-/** `outer` then `inner`, both `[a, b, c, d, tx, ty]` with tx/ty in TWIPS. */
-function compose(outer, inner) {
-  const [a, b, c, d, tx, ty] = outer;
-  const [e, f, g, h, ux, uy] = inner;
-  return [
-    a * e + c * f, b * e + d * f,
-    a * g + c * h, b * g + d * h,
-    a * ux + c * uy + tx, b * ux + d * uy + ty
-  ];
-}
-
-function matrixOf(value) {
-  return Array.isArray(value) && value.length >= 6 && value.slice(0, 6).every(Number.isFinite)
-    ? value.slice(0, 6)
-    : null;
-}
+// `compose`, `matrixOf`, `IDENTITY` and `glowGroupFor` are `./pack-ops.js`'s,
+// shared with `popups.js` and `combat-panel.js` rather than copied.
 
 function isBackground(placement, child) {
   return placement.name === SS2_ACTION_BUTTON.background.instance ||
@@ -850,22 +834,9 @@ function flattenEntryFrame(pack, entry, frame, ctx, out) {
   }
 }
 
-/**
- * The group one text placement's glyphs share when the placement carries its
- * own glow, built at the draw scale — `popups.js`'s rule for the pop-ups'
- * glowing numbers, which this is the same case of. Null when it has none.
- */
-function glowGroupFor(filters, scale) {
-  if (!Array.isArray(filters) || filters.length === 0) return null;
-  const built = canvasFilterFor(filters, { scale });
-  const amplify = glowAmplificationFor(filters, { scale });
-  if (!built.filter && !amplify) return null;
-  return Object.freeze({
-    id: null, path: Object.freeze([]), character: null, enclosedBy: null,
-    filter: built.filter, amplify, composite: null, blendModeRefused: null,
-    colourMatricesFolded: 0, ops: 0, placements: 0, counts: built.counts
-  });
-}
+// The group one text placement's glyphs share when the placement carries its
+// own glow is `glowGroupFor` (`./pack-ops.js`) — `popups.js`'s rule for the
+// pop-ups' glowing numbers, which this is the same case of.
 
 /**
  * One text placement's ops, or none: the ammo count on a bow frame, or the

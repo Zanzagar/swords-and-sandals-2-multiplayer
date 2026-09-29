@@ -78,7 +78,7 @@ export const ARENA_VISUAL_PACKS = Object.freeze([
   Object.freeze({ name: "props", label: "the props and the arena screen", files: "assets/props/props.json" }),
   Object.freeze({ name: "clipEffects", label: "the blood-and-sparks table", files: "assets/props/clip-effects.json" }),
   Object.freeze({ name: "text", label: "the UI bar's glyphs", files: "assets/text/text.json" }),
-  Object.freeze({ name: "icons", label: "the face and the pop-ups", files: "assets/icons/icons.json" }),
+  Object.freeze({ name: "icons", label: "the face, the pop-ups, the ring's buttons, the gauges and the crowd bar", files: "assets/icons/icons.json" }),
   Object.freeze({ name: "bitmaps", label: "the arena's raster walls and crowds", files: "assets/bitmaps/" })
 ]);
 

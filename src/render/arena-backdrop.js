@@ -402,7 +402,12 @@ export const SS2_GROUND_LINE = SS2_ARENA_ORIGIN.y + 200;
  * ► **WHY 0.5 AND NOT MORE.** With the team framing (`SS2_TEAM_FRAMING`), the
  *   back rank's clearance above the foot of the wall is smallest in arena 5 at
  *   zoom 80, the tightest band: 0.56 puts its feet ON the line, and 0.5 leaves
- *   9.3px. Pinned for every arena at every zoom a camera reaches.
+ *   9.3px. ~~"Pinned for every arena at every zoom a camera reaches"~~ — **it
+ *   was pinned for zooms 5..80, and the survivors' close-up reaches 100**: a
+ *   back-ranker there stood 17.39px inside arena 5's wall at 97 (found
+ *   2026-09-24). Past 80 the wall is now part of the close-up's own fit
+ *   (`fitsVerticallyAt`), which holds the team framing's back rank to 82, and
+ *   the pin covers every zoom the close-up can take each rank to.
  *
  * `1.7` remains in the authored-bowl path in the shell, where the "ground" is
  * a rectangle from the horizon down and any factor lands on it.
@@ -747,7 +752,13 @@ export const SS2_CAMERA = Object.freeze({
  *   with `RANK_DEPTH_FACTOR` 0.5 every rank clears every arena's wall at every
  *   zoom from 5 to 80 — least in arena 5 at zoom 80, by 9.3px. A per-arena band
  *   would need the dressing inside the projection and buys nothing the test
- *   does not already guarantee.
+ *   does not already guarantee. **Past 80 only the survivors' close-up goes,
+ *   and it checks the wall itself** — the back rank to 82 (`SS2_CLOSE_UP`).
+ *
+ * ► **UNDER THE IN-FRAME TEAM HUD THE LINE IS LIFTED, NEVER LOWERED**, until
+ *   the lowest ink of its front rank clears the HUD's top — see
+ *   `SS2_TEAM_HUD`, which also caps the zoom where the lift would cost a
+ *   framed back-ranker the floor.
  *
  * ► **A 1v1 NEVER READS THIS.** `team` is false for two placed actors, and
  *   `arenaToStage` then pivots about the arena origin exactly as the build
@@ -787,6 +798,21 @@ function teamFrontLineAt(zoomscale) {
   // `crowd._y = -200 + ceil(zoomscale)`, exactly as `cameraStep` writes it.
   const floorTop = SS2_ARENA_ORIGIN.y + SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale) + wall.crowdY;
   return floorTop + SS2_TEAM_FRAMING.frontFraction * (floorBottom - floorTop);
+}
+
+/**
+ * The team line a camera actually stands its front rank on: the framing's
+ * own, lifted — only ever lifted — until the lowest ink a front-ranker of the
+ * camera's `inkSize` puts on the stage (`inkDepthAt`: his plate or his shadow)
+ * is no lower than `camera.hudTop`. See `SS2_TEAM_HUD`. A camera carrying no
+ * `hudTop` — every camera without a HUD — stands where it always has.
+ */
+function teamLineOf(camera) {
+  const zoomscale = camera?.zoomscale ?? 100;
+  const line = teamFrontLineAt(zoomscale);
+  if (!Number.isFinite(camera?.hudTop)) return line;
+  const size = Number.isFinite(camera.inkSize) ? camera.inkSize : 1;
+  return Math.min(line, camera.hudTop - inkDepthAt(zoomscale / 100, size));
 }
 
 /**
@@ -1080,9 +1106,11 @@ export function targetZoomFor(midwaypoint, input) {
  * asked for.
  *
  * ► **`targetFor` REPLACES ONLY THE TARGET**, and only for the authored team
- *   close-up (`stepFramedCamera`). It is handed this frame's pan, so a target
- *   can respect where the camera actually is; the order, the ease, the snap
- *   and the crowd stay the build's. Absent, this is `combatscale` unchanged.
+ *   close-up and, under the in-frame team HUD, the cap that keeps a team bout's
+ *   cameras above it (`stepFramedCamera`, `SS2_TEAM_HUD`). It is handed this
+ *   frame's pan and `midwaypoint`, so a target can respect where the camera
+ *   actually is; the order, the ease, the snap and the crowd stay the build's.
+ *   Absent, this is `combatscale` unchanged.
  *
  * @param {object}   camera  the previous frame's camera, from `cameraFor`
  * @param {number[]} xs      arena x of every placed actor
@@ -1229,6 +1257,12 @@ function rosterKeyOf(roster) {
  *        than the worse of its two ends — it is the one place the rule can crop
  *        more than the old camera, for the length of the blend. Measured, not
  *        guessed: cutting instead roughly halves those frames, and is a jump.
+ *        ► **STAGE y IS NOT LINEAR IN IT**: the zoom and the framing weight are
+ *          lerped separately, so a foot's y is bilinear in the blend's weight,
+ *          and a blend between two cameras that each kept a back-ranker off the
+ *          wall stood him 1.59px from it (the verifier, verify:camera-r1,
+ *          2026-09-24; in 808f6da too). Every blend is now brought down onto
+ *          the floor at its own weight (`groundedBlend`).
  *   5. **Never looser than the old camera is right now** — its zoom, not only
  *      its target: this camera must not settle on its own target while the old
  *      one is still easing down from above it.
@@ -1269,7 +1303,11 @@ function rosterKeyOf(roster) {
  *   perspective (which only shrinks him), so the margin is a ceiling.
  *   - **The name plate** is drawn `namePlateDrop` (22) units BELOW the feet
  *     (`tools/arena/main.js`, `view.toY(origin.y, -22)`) at
- *     `max(10, 15 * zoom/100)` px, centred; its descent is allowed for below.
+ *     `max(10, 15 * zoom/100)` px, centred; its descent and its outline are
+ *     allowed for below (`namePlateDepthAt`).
+ *   - **The feet stay on the floor**: `wallMargin` (5) px below the foot of
+ *     the lowest arena's painted wall, `SS2_ARENA_WALL_BASE` (2026-09-24; until
+ *     then a back-ranker could be framed inside it — see `fitsVerticallyAt`).
  *     Horizontally the swing margin covers it — 172 units at the demo roster's
  *     `_yscale` 86 is a name of about 38 characters at 0.6 em a character, and
  *     the demo names are 5.
@@ -1347,11 +1385,58 @@ export const SS2_CLOSE_UP = Object.freeze({
   lunge: 74,
   /** The name plate's baseline, in arena units below the feet (`main.js`). */
   namePlateDrop: 22,
-  /** The name plate's font: `max(10, 15 * zoom / 100)` px; its descent as a fraction of it. */
-  namePlateFont: Object.freeze({ units: 15, minimumPx: 10, descent: 0.3 }),
+  /**
+   * The name plate's font: `max(10, 15 * zoom / 100)` px; the glyph's descent
+   * budgeted as a fraction of it; and the stroke the name is outlined with,
+   * `max(2, 0.24 * px)` wide (`namePlateLayout` in `tools/arena/team-hud.js`),
+   * half of which lies outside the glyph. See `namePlateDepthAt`, the ONE place
+   * these are added up.
+   */
+  namePlateFont: Object.freeze({ units: 15, minimumPx: 10, descent: 0.3, outline: 0.24, outlineMinimumPx: 2 }),
+  /**
+   * The authored shadow's lowest point below the feet, in arena units at
+   * `_yscale` 100: `paintShadow`'s `ry` at the widest build (bulk 1.19) and the
+   * widest stance a pose declares (`legSpread` 1) is 33.79. Every fighter is
+   * drawn with it, the extracted rig included.
+   */
+  shadowDepth: 33.8,
+  /** How far above the foot of the painted wall a framed fighter's feet must stay, stage px. */
+  wallMargin: 5,
   /** What the border and the UI bar leave visible, in stage px. Measured; see above. */
   visible: Object.freeze({ left: 0, right: 639, top: 1, bottom: 398 })
 });
+
+/**
+ * HOW FAR BELOW A FIGHTER'S FEET HIS NAME PLATE'S INK REACHES, in px, at `k` px
+ * per arena unit (`zoomscale / 100` on the stage; the fitted view's `scale`).
+ * **The one place the plate's depth is added up**: the drop to the baseline,
+ * the glyph's descent and the half of the outline stroke outside the glyph.
+ *
+ * ► ~~`descent: 0.3`, and nothing else~~ UNDER-BUDGETED THE PLATE IT MEASURED
+ *   (found 2026-09-24 by the HUD's camera study): the underline the plate then
+ *   carried reached 0.34..0.41 px below the baseline. D1 took the underline
+ *   away and kept the stroke, which alone adds 0.12 px to the glyph.
+ * ► **THE FONT'S 10px FLOOR IS IN CANVAS PIXELS** (`tools/arena/main.js`
+ *   draws `max(10, view.scale * 15)`), so in stage pixels this is exact at a
+ *   fit scale of 1 and generous above it — every canvas at least 640x420. A
+ *   smaller canvas draws the plate a little deeper than this says.
+ */
+export function namePlateDepthAt(k) {
+  const { namePlateDrop, namePlateFont } = SS2_CLOSE_UP;
+  const px = Math.max(namePlateFont.minimumPx, namePlateFont.units * k);
+  const outside = Math.max(namePlateFont.outlineMinimumPx, namePlateFont.outline * px) / 2;
+  return namePlateDrop * k + namePlateFont.descent * px + outside;
+}
+
+/**
+ * HOW FAR BELOW A FIGHTER'S FEET ANYTHING OF HIS IS DRAWN, at `k` px per unit
+ * and his `size` (`|_yscale| / 100`): his plate or his shadow, whichever
+ * reaches lower. A rank's own perspective only shrinks the shadow, so `size`
+ * unshrunk is a ceiling.
+ */
+export function inkDepthAt(k, size = 1) {
+  return Math.max(namePlateDepthAt(k), SS2_CLOSE_UP.shadowDepth * size * k);
+}
 
 /**
  * Where a fighter is drawn during his current clip, as a span: his resting x
@@ -1388,18 +1473,133 @@ function closeUpGeometryOf(entry) {
   };
 }
 
-/** Whether every framed fighter's crown and name plate fit, at this zoom and every framing weight. */
-function fitsVerticallyAt(geometry, zoomscale, teamWeights) {
-  const { visible, crown, namePlateDrop, namePlateFont } = SS2_CLOSE_UP;
-  const descent = namePlateFont.descent * Math.max(namePlateFont.minimumPx, namePlateFont.units * zoomscale / 100);
+/**
+ * The stage y of the LOWEST foot of any arena's painted wall at this zoom —
+ * the line every framed fighter's feet must stay `wallMargin` below, whichever
+ * of the six arenas is dressed. Reached the painter's way: the crowd layer's
+ * placement, which the camera lowers by `ceil(zoomscale)`, plus the deepest
+ * measured foot (`SS2_ARENA_WALL_BASE`, arena 5's).
+ */
+function lowestWallFootAt(zoomscale) {
+  const crowd = SS2_ARENA_SCREEN_LAYERS.find((layer) => layer.prop === "crowd");
+  const deepest = Math.max(...SS2_ARENA_WALL_BASE.map((wall) => wall.crowdY));
+  return layerPlacementFor(crowd, { crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale) }).y + deepest;
+}
+
+/**
+ * Whether every framed fighter's crown, name plate and feet fit, at this zoom
+ * and every framing weight: the crown below the top of the visible stage, the
+ * plate above its bottom, and the feet on the floor — `wallMargin` below the
+ * foot of the painted wall in every arena.
+ *
+ * ► **THE FEET WERE NOT CHECKED UNTIL 2026-09-24, AND THE CLOSE-UP WALKED A
+ *   BACK-RANKER INTO THE WALL.** `RANK_DEPTH_FACTOR` was pinned against the
+ *   wall for zooms 5..80, the build's bands; the close-up goes to 100. On the
+ *   team framing the back rank (y 6) clears arena 5's wall by 5px only to zoom
+ *   82, and a back-ranker small enough that his crown did not bind (little fat
+ *   kid's `_yscale` 50) was framed at 97, 17.39px inside it. A pair's framing
+ *   never reaches the wall: its back rank gains on the wall at every zoom.
+ */
+function fitsVerticallyAt(geometry, zoomscale, teamWeights, hud = null, wallWeights = teamWeights) {
+  const { visible, crown } = SS2_CLOSE_UP;
   for (const teamWeight of teamWeights) {
-    const camera = { zoomscale, teamWeight };
+    const camera = fitCameraAt(zoomscale, teamWeight, hud);
     for (const actor of geometry) {
       if (arenaToStage(camera, { x: 0, y: actor.yMin, lift: crown * actor.size }).y < visible.top) return false;
-      if (arenaToStage(camera, { x: 0, y: actor.yMax, lift: -namePlateDrop }).y + descent > visible.bottom) return false;
     }
   }
+  return standsFitAt(geometry, zoomscale, teamWeights, hud, wallWeights);
+}
+
+/**
+ * THE GROUND HALF OF THE FIT: every fighter's feet on the floor, `wallMargin`
+ * below the lowest arena's wall foot, and everything he draws below them (his
+ * plate — and under a HUD, his shadow too: `inkDepthAt`) no lower than the
+ * visible stage's bottom, or the HUD's top where that is higher. The
+ * survivors' close-up asks it with the crowns (`fitsVerticallyAt`); under a
+ * HUD, every other camera of a team bout asks it alone (`hudZoomCapFor`); and
+ * every BLEND between two cameras asks it at its own weight (`groundedBlend`).
+ *
+ * ► **THE INK IS CHECKED AT `teamWeights`, THE WALL AT `wallWeights`** (by
+ *   default the same). A stage y is linear in the framing weight, so the ink
+ *   checked at both ends of a hand-over bounds every frame of it. The wall
+ *   does not need that: it is a fact about the frame a fighter IS drawn in,
+ *   so the survivors' close-up checks it at the weight it will SETTLE at (its
+ *   target) and at the weight it is DRAWN at (rule 6), never at the one it is
+ *   leaving. ~~Both ends~~ — the verifier (verify:camera-r1, 2026-09-24) found
+ *   the first version held a team-to-pair hand-over's target to the team
+ *   line's 82 for the frames it took the weight to leave 1, zooming in slower
+ *   than 808f6da with nobody near the wall.
+ *
+ * ► **WITH NO HUD THE BOTTOM IS THE PLATE ALONE, AS IT WAS**: the UI bar paints
+ *   over a shadow exactly as the build's does, and the plate never reaches 398
+ *   at a zoom the camera can take (395.05 at the pair's line at 100).
+ *
+ * `hud` is the HUD the camera is standing to THIS frame — `{hudTop, inkSize}`,
+ * eased (`hudStateFor`), or null. A fighter's shadow is budgeted at his own
+ * size, and at no more than the camera's `inkSize`: while a size eases, the
+ * fit moves with the line rather than ahead of it.
+ */
+function standsFitAt(geometry, zoomscale, teamWeights, hud = null, wallWeights = teamWeights) {
+  // A tolerance for doubles only: under a HUD the team line is set so the
+  // largest fighter's ink lands EXACTLY on the HUD's top.
+  for (const teamWeight of teamWeights) {
+    if (inkOverAt(geometry, fitCameraAt(zoomscale, teamWeight, hud), hud) > 1e-9) return false;
+  }
+  for (const teamWeight of wallWeights) {
+    if (wallRoomAt(geometry, fitCameraAt(zoomscale, teamWeight, hud)) < 0) return false;
+  }
   return true;
+}
+
+/**
+ * How far the lowest ink any fighter in `geometry` draws at this camera — his
+ * plate at his front-most depth, and under a HUD his shadow too, budgeted at
+ * no more than the HUD's `inkSize` — lies BELOW the bottom it must stay above:
+ * the visible stage's, or the HUD's top where that is higher. Zero or less
+ * when it all fits. The ink half of `standsFitAt`, and what a blend is lifted
+ * by (`groundedBlend`).
+ */
+function inkOverAt(geometry, camera, hud) {
+  const { visible } = SS2_CLOSE_UP;
+  const k = camera.zoomscale / 100;
+  const bottom = hud === null ? visible.bottom : Math.min(visible.bottom, hud.hudTop);
+  let over = -Infinity;
+  for (const actor of geometry) {
+    const below = hud === null ? namePlateDepthAt(k) : inkDepthAt(k, Math.min(actor.size, hud.inkSize));
+    over = Math.max(over, arenaToStage(camera, { x: 0, y: actor.yMax }).y + below - bottom);
+  }
+  return over;
+}
+
+/**
+ * How far the highest foot of any fighter in `geometry` — his back-most depth
+ * — stands BELOW the line `wallMargin` under the lowest arena's wall foot at
+ * this camera. Negative when somebody is framed on the wall. The wall half of
+ * `standsFitAt`.
+ */
+function wallRoomAt(geometry, camera) {
+  const floor = lowestWallFootAt(camera.zoomscale) + SS2_CLOSE_UP.wallMargin;
+  let room = Infinity;
+  for (const actor of geometry) room = Math.min(room, arenaToStage(camera, { x: 0, y: actor.yMin }).y - floor);
+  return room;
+}
+
+/** The camera a fit is checked at: this zoom and framing, and — under a HUD — the line that HUD lifts it to. */
+function fitCameraAt(zoomscale, teamWeight, hud) {
+  if (hud === null) return { zoomscale, teamWeight };
+  return { zoomscale, teamWeight, hudTop: hud.hudTop, inkSize: hud.inkSize };
+}
+
+/** A caller's `hudTop` and `inkSize` as a fit's HUD: null without a top; the set's largest size by default. */
+function fitHudOf(geometry, hudTop, inkSize) {
+  if (!Number.isFinite(hudTop)) return null;
+  return { hudTop, inkSize: Number.isFinite(inkSize) ? inkSize : largestSizeOf(geometry) };
+}
+
+/** The largest fighter's size (`|_yscale| / 100`) in a close-up geometry; 1 for nobody. */
+function largestSizeOf(geometry) {
+  return geometry.length > 0 ? Math.max(...geometry.map((actor) => actor.size)) : 1;
 }
 
 /**
@@ -1408,11 +1608,19 @@ function fitsVerticallyAt(geometry, zoomscale, teamWeights) {
  *
  * With `gladiatorsX` it is the fit at THAT pan; without, the fit for any pan
  * that puts the focus inside the build's dead zone, which is where the pan
- * settles. `teamWeights` are the framings to check the crowns against — the
- * camera's current weight and its target, which bound the whole hand-over,
- * because a stage y is linear in the weight.
+ * settles. `teamWeights` are the framings to check the crowns and the name
+ * plates against — the camera's current weight and its target, which bound
+ * the whole hand-over, because a stage y is linear in the weight.
+ * `wallWeights` (by default `teamWeights`) are the framings to check the feet
+ * against the wall at: the weight the camera will be DRAWN at, not the one it
+ * is leaving (see `standsFitAt`).
  *
  * Never below the build's `zoomMinimum`; an integer, as the build's zoom is.
+ *
+ * `hudTop`, when there is a HUD in the frame (`SS2_TEAM_HUD`): the stage y
+ * nothing a framed fighter draws may reach below, in place of the visible
+ * stage's bottom where it is higher; `inkSize`, the size the team line is
+ * lifted for (by default the largest framed fighter's).
  *
  * ► **AT A PAN IT IS A CEILING, NOT A GUARANTEE** — the most the zoom may rise
  *   to while the pan brings the fighters in, which is what the close-up's
@@ -1420,7 +1628,9 @@ function fitsVerticallyAt(geometry, zoomscale, teamWeights) {
  *   the stage; where the pan has put it off, zooming out can crop too, and
  *   what the DRAWN camera is checked against is `closeUpZoomRangeAt`.
  */
-export function closeUpZoomFor(framed, { gladiatorsX = null, teamWeights = [0, 1] } = {}) {
+export function closeUpZoomFor(framed, {
+  gladiatorsX = null, teamWeights = [0, 1], wallWeights = teamWeights, hudTop = null, inkSize = null
+} = {}) {
   const geometry = placedIn(framed).map(closeUpGeometryOf);
   const { visible, reach, lunge, zoomCap } = SS2_CLOSE_UP;
   if (geometry.length === 0) return zoomCap;
@@ -1441,7 +1651,8 @@ export function closeUpZoomFor(framed, { gladiatorsX = null, teamWeights = [0, 1
     }
   }
   zoom = Math.floor(zoom);
-  while (zoom > SS2_CAMERA.zoomMinimum && !fitsVerticallyAt(geometry, zoom, teamWeights)) zoom -= 1;
+  const hud = fitHudOf(geometry, hudTop, inkSize);
+  while (zoom > SS2_CAMERA.zoomMinimum && !fitsVerticallyAt(geometry, zoom, teamWeights, hud, wallWeights)) zoom -= 1;
   return Math.max(SS2_CAMERA.zoomMinimum, zoom);
 }
 
@@ -1461,7 +1672,9 @@ export function closeUpZoomFor(framed, { gladiatorsX = null, teamWeights = [0, 1
  *   2026-09-24, after Codex's pass 3). The crowns and name plates stay
  *   ceilings: their pivot, 166.75 or the team's front line, is on the stage.
  */
-export function closeUpZoomRangeAt(framed, { gladiatorsX, teamWeights = [0, 1] }) {
+export function closeUpZoomRangeAt(framed, {
+  gladiatorsX, teamWeights = [0, 1], wallWeights = teamWeights, hudTop = null, inkSize = null
+}) {
   const geometry = placedIn(framed).map(closeUpGeometryOf);
   const { visible, reach, lunge, zoomCap } = SS2_CLOSE_UP;
   const origin = SS2_ARENA_ORIGIN.x + gladiatorsX;
@@ -1481,7 +1694,8 @@ export function closeUpZoomRangeAt(framed, { gladiatorsX, teamWeights = [0, 1] }
   }
   const min = Math.ceil(lowest);
   let max = Math.floor(highest);
-  while (max >= min && !fitsVerticallyAt(geometry, max, teamWeights)) max -= 1;
+  const hud = fitHudOf(geometry, hudTop, inkSize);
+  while (max >= min && !fitsVerticallyAt(geometry, max, teamWeights, hud, wallWeights)) max -= 1;
   return max >= min ? Object.freeze({ min, max }) : null;
 }
 
@@ -1494,9 +1708,207 @@ function closeUpActive(placed) {
 }
 
 /**
+ * THE CAMERA UNDER THE IN-FRAME TEAM HUD — **AUTHORED (D3, 2026-09-24)**, at
+ * the owner's request: *"the team health, energy, and aramor should be in the
+ * game frame as UI elements ... Make camera adjustments necessary to fit these
+ * assets."* In a team bout the HUD is drawn across the bottom of the stage and
+ * `hudTop` is the stage y of its highest ink. A 1v1 is the build's own panel
+ * under the build's own camera and never passes one.
+ *
+ * ► **WHAT IT PROMISES: at a settled frame, no framed fighter's feet, shadow
+ *   or name-plate ink lies below the HUD the camera stands to, and every
+ *   framed rank's feet stay `wallMargin` below the foot of every arena's
+ *   painted wall. At every frame drawn as a BLEND between two cameras the
+ *   wall half holds too, and the ink half as far as the wall allows**
+ *   (`groundedBlend`: where a lane change's span is taller than the band
+ *   between the two, its back end stands exactly on the margin). Three
+ *   levers, all the team bout's own, none of them the build's:
+ *   1. **The team line is lifted, only as far as it must be**: to
+ *      `min(the framing's line, hudTop - inkDepthAt(zoom, inkSize))`, where
+ *      `inkSize` is the largest framed fighter's size — his shadow is the
+ *      lowest ink he draws above zoom ~60 (at `_yscale` 86: 29.07k against
+ *      22k + 4.2), his plate below. At zoom 80 the 3v3's HUD (~352) lifts
+ *      nothing for fighters up to `_yscale` 98 (27.04 x 0.98 <= 352 - 325.48);
+ *      the 2v2's (~326) lifts the line 22.73px at `_yscale` 86.
+ *   2. **The zoom is capped where that costs the floor**: every camera of a
+ *      team bout — the build's bands and fit, the old camera the floor holds
+ *      to, the close-up — targets at most the highest zoom at which every
+ *      fighter it frames keeps his ink above the HUD and his feet 5px under the
+ *      wall (`standsFitAt`). A lifted line takes the back rank toward the
+ *      crowd, which does not follow it; only a fighter actually standing back
+ *      costs zoom. So rule 1's floor, the old camera's target, is capped by the
+ *      same fit, and a held frame cannot sit below the HUD.
+ *   3. **The close-up's bottom becomes the HUD's top** where it is higher than
+ *      the visible stage's 398, with the shadow counted: a pair's line is the
+ *      build's and is never lifted, so a pair framed in a team bout is held
+ *      above the HUD by its zoom.
+ *
+ * ► **NO JUMPS.** The camera carries the HUD it is standing to (`hudTop`, a
+ *   stage y) and the size it budgets for (`inkSize`), and both EASE, by the
+ *   zoom's fifth, snapping inside `snapPx`/`snapSize`. The eased HUD is worked
+ *   out BEFORE the camera steps (`hudStateFor`) and EVERY fit that frame uses
+ *   it — the target, the close-up's, the zoom drawn — as does the line:
+ *   - **the frame a bout starts** (a fresh roster) opens ON the HUD, as it
+ *     opens on its framing — at zoom 5 the HUD binds nothing, and the rush-in
+ *     is already aimed at the capped target;
+ *   - **a HUD that appears mid-bout** starts at the top that binds nothing for
+ *     the camera as it stands (its team line's ink, or on a pair's line its
+ *     fighters' own), so its first frame moves nothing, then eases down to the
+ *     requested top, the fits relaxing with it;
+ *   - **a HUD that changes** eases from the old top to the new;
+ *   - **a HUD withdrawn** (`hudTop` null after a number) eases back out — never
+ *     in — until it binds nothing, then the camera drops it and is the camera
+ *     without one; on a pair's line, which a HUD holds by its zoom alone, that
+ *     is at once, and the zoom rises by the build's own ease;
+ *   - **a size that changes** — a colossus, a death — eases the same way; a
+ *     fighter's shadow is budgeted at no more than the eased size meanwhile.
+ *   While either eases, the promise is the settled frame's, not this one's.
+ *   MEASURED (fix-round verifier, 2026-09-25): after a colossus GROWS a
+ *   fighter his shadow sits under the HUD's top for ~24-27 frames, worst
+ *   ~11-18px — under the HUD, which is drawn over the fighters as the build's
+ *   panel is. Snapping the size up at once would cost a ~17px one-frame jump
+ *   of the line on every cast; the main session kept the ease. The drawn
+ *   size's overshoot (175% on the way to 150%) is the caller's to feed.
+ *
+ * ► **`hudTop` NULL OR ABSENT IS THE CAMERA BEFORE THE HUD, TO THE BYTE**: no
+ *   cap, no lift, and no new field on any camera. Pinned frame by frame against
+ *   808f6da's module over the demo bouts.
+ *
+ * ► **WHAT IT DOES NOT PROMISE.** A body the close-up does not frame can stand
+ *   anywhere, as before. The crowns of a lifted team framing are not fitted
+ *   outside the close-up, as they were not before. ~~A blend between two
+ *   cameras (a hold engaging or releasing) keeps each end's promise at its
+ *   ends, not in between~~ — the verifier (verify:camera-r1) measured a blend
+ *   under 326 standing a back-ranker 1.68px INSIDE arena 5's wall; blends are
+ *   grounded now (`groundedBlend`). A blend's crowns are not fitted, as they
+ *   were not before, and its lift can raise one further off the top (3,000
+ *   random bouts under 326: 5 more such blend frames on one seed, 3 fewer on
+ *   the other, the worst crop unchanged). **A camera that is not a blend and is still
+ *   EASING keeps the promise only once it settles**: the held old camera, or
+ *   the team camera before any fall, whose target drops the moment a lane
+ *   change's span takes in the back rank, eases down to it by a fifth a frame
+ *   rather than cutting — so for those first frames the SPAN's back end is
+ *   framed past the wall under a lifted line (measured under 326 ~~, never under
+ *   352 or with no HUD~~ — and under 352 too: the fix-round verifier found 10
+ *   such span frames, worst 2.263px past the margin), while the figure, drawn
+ *   walking back through that span, is not. The plate's 10px floor is in canvas pixels
+ *   (`namePlateDepthAt`).
+ */
+export const SS2_TEAM_HUD = Object.freeze({
+  /** The HUD's top and the ink size ease by this fraction of the gap a frame: the zoom's own. */
+  ease: SS2_CAMERA.zoomEase,
+  /** Inside this many stage px of its target, the eased HUD top snaps to it. */
+  snapPx: 0.1,
+  /** Inside this much of its target, the eased ink size snaps to it. */
+  snapSize: 0.002
+});
+
+/** One frame of an ease toward `target`, by `SS2_TEAM_HUD.ease`, snapping inside `snap`. */
+function easeHudValue(value, target, snap) {
+  if (!Number.isFinite(value)) return target;
+  const next = value + (target - value) / SS2_TEAM_HUD.ease;
+  return Math.abs(target - next) < snap ? target : next;
+}
+
+/**
+ * The HUD top that binds NOTHING for this camera as it stands: the lowest ink
+ * its fighters put on the stage with no HUD — on a team framing, the line's own
+ * front rank at `inkSize`; on any framing, each fighter at his front-most depth
+ * with his shadow at no more than `inkSize`.
+ */
+function unboundHudTopFor(camera, set, inkSize) {
+  const zoomscale = camera.zoomscale;
+  const k = zoomscale / 100;
+  const teamWeight = teamWeightOf(camera);
+  const bare = { zoomscale, teamWeight };
+  let lowest = teamWeight > 0 ? teamFrontLineAt(zoomscale) + inkDepthAt(k, inkSize) : -Infinity;
+  for (const actor of placedIn(set).map(closeUpGeometryOf)) {
+    lowest = Math.max(lowest, arenaToStage(bare, { x: 0, y: actor.yMax }).y + inkDepthAt(k, Math.min(actor.size, inkSize)));
+  }
+  return lowest;
+}
+
+/**
+ * The zoom a camera over `set` may target under a HUD: `target`, lowered one
+ * zoom at a time until every fighter in the set stands on the floor with his
+ * ink above the HUD at every framing weight given (`standsFitAt`). Never below
+ * the build's `zoomMinimum`.
+ */
+function hudZoomCapFor(target, set, teamWeights, hud) {
+  const geometry = placedIn(set).map(closeUpGeometryOf);
+  let zoom = Math.floor(target);
+  while (zoom > SS2_CAMERA.zoomMinimum && !standsFitAt(geometry, zoom, teamWeights, hud)) zoom -= 1;
+  return Math.max(SS2_CAMERA.zoomMinimum, zoom);
+}
+
+/** The framing weights a camera stepping over `set` is checked at: where it is and where it is going. */
+function stepWeightsOf(camera, set) {
+  return [teamWeightOf(camera), isTeamFight(set) ? 1 : 0];
+}
+
+/** `cameraStep`'s options for a camera over `set`: under a HUD, its target capped by the ground fit. */
+function hudStepOptions(before, set, hud) {
+  if (hud === null) return {};
+  const weights = stepWeightsOf(before, set);
+  return { targetFor: ({ midwaypoint }) => hudZoomCapFor(targetZoomFor(midwaypoint, set), set, weights, hud) };
+}
+
+/** A fresh camera's opening target, capped the same way. */
+function hudOpening(camera, set, hud) {
+  if (hud === null) return camera;
+  return Object.freeze({ ...camera, maxscale: hudZoomCapFor(camera.maxscale, set, [teamWeightOf(camera)], hud) });
+}
+
+/**
+ * THE HUD A CAMERA OVER `set` STANDS TO THIS FRAME — `{hudTop, inkSize}`, or
+ * null — worked out BEFORE the camera steps, so that every fit this frame (its
+ * target, the close-up's, the zoom drawn) and the line it draws agree on one
+ * HUD. `before` is the same tween's last frame, null on a fresh roster.
+ *
+ * ► ~~Worked out AFTER the step, and every fit given the REQUESTED top~~ —
+ *   Codex's review, pass 1 (2026-09-24): the line eased, but the close-up's
+ *   draw-time fit bound at once, and a HUD appearing over a lone survivor
+ *   framed at 100 cut the frame to 69, 62px of line, in one frame. Now the
+ *   HUD that first appears starts at the top that binds nothing for the
+ *   camera AS IT STANDS — its pair's line included, not only the team's — and
+ *   every fit relaxes with the ease.
+ */
+function hudStateFor(before, set, hudTop) {
+  const had = Number.isFinite(before?.hudTop);
+  if (hudTop === null && !had) return null;
+  const size = largestSizeOf(placedIn(set).map(closeUpGeometryOf));
+  if (!had) {
+    // A new bout opens ON the HUD; one that appears mid-bout starts where it binds nothing.
+    if (before === null) return { hudTop, inkSize: size };
+    return { hudTop: Math.max(hudTop, unboundHudTopFor(before, set, size)), inkSize: size };
+  }
+  const inkSize = easeHudValue(before.inkSize, size, SS2_TEAM_HUD.snapSize);
+  if (hudTop === null) {
+    // Withdrawn: ease OUT, never in — toward the top that binds nothing, or
+    // stay put where the top already binds nothing (a pair's line, which a HUD
+    // holds by its zoom alone); `withHud` drops it once it binds nothing.
+    const unbound = Math.max(before.hudTop, unboundHudTopFor(before, set, inkSize));
+    return { hudTop: easeHudValue(before.hudTop, unbound, SS2_TEAM_HUD.snapPx), inkSize, releasing: true };
+  }
+  return { hudTop: easeHudValue(before.hudTop, hudTop, SS2_TEAM_HUD.snapPx), inkSize };
+}
+
+/**
+ * The stepped camera, carrying the HUD it stands to as `hudTop` and `inkSize`
+ * — or neither: no HUD, or one withdrawn that no longer binds anything at the
+ * zoom the camera has now reached, which is dropped.
+ */
+function withHud(camera, hud, set) {
+  if (hud === null) return camera;
+  if (hud.releasing && hud.hudTop >= unboundHudTopFor(camera, set, hud.inkSize)) return camera;
+  return Object.freeze({ ...camera, hudTop: hud.hudTop, inkSize: hud.inkSize });
+}
+
+/**
  * One frame of the arena's camera from the whole roster: `framedActors`, then
  * the build's camera over whoever it frames — and, in a team bout once a fall
- * has finished, the survivors' close-up (`SS2_CLOSE_UP`) as its target.
+ * has finished, the survivors' close-up (`SS2_CLOSE_UP`) as its target — kept
+ * above the in-frame HUD when there is one (`SS2_TEAM_HUD`).
  *
  * ► **A DEATH EASES THE CAMERA; IT NEVER RE-SEEDS IT.** `cameraFor` is the
  *   build's opening shot — zoom 5, rushing in — and it is taken only when the
@@ -1507,13 +1919,17 @@ function closeUpActive(placed) {
  *
  * @param {{camera: object, rosterKey: string}|null} previous  the last frame's result, or null
  * @param {Array<object>} roster  every PLACED actor — see `framedActors` and `actorSpanFor`
- * @param {{result?: object|null}} [options]  the bout's result, once it has one
+ * @param {{result?: object|null, hudTop?: number|null}} [options]  the bout's result, once it has one;
+ *   and the stage y of the in-frame HUD's highest ink in a TEAM bout (null or absent: no HUD — a 1v1)
  * @returns {{camera: object, own: object, old: object, hold: number, rosterKey: string, framed: object[],
  *   closeUp: boolean, heldByFloor: boolean}}  `camera` is what to draw; `own`, `old` and `hold` are
  *   the two tweens and the blend between them, carried to the next frame. `own` is the close-up's
  *   tween BEFORE rule 6 brings its zoom inside what fits, so it can differ from an unheld `camera`.
+ *   Under a HUD every camera also carries `hudTop` and `inkSize` (see `SS2_TEAM_HUD`); a `camera`
+ *   drawn as a blend whose ink would pass its bottom carries `inkLift` (see `groundedBlend`).
  */
-export function stepFramedCamera(previous, roster, { result = null } = {}) {
+export function stepFramedCamera(previous, roster, { result = null, hudTop = null } = {}) {
+  const hud = Number.isFinite(hudTop) ? hudTop : null;
   const rosterKey = rosterKeyOf(roster);
   const placed = placedIn(roster);
   const framed = framedActors(roster, { result });
@@ -1521,31 +1937,44 @@ export function stepFramedCamera(previous, roster, { result = null } = {}) {
   // THE OLD CAMERA, stepped beside this one every frame: 2c075df's, exactly —
   // the build's camera over every placed actor, bodies included. It is what a
   // held frame IS, and what "never looser" and "never cropped more" are
-  // measured against.
-  const old = fresh || !previous.old ? cameraFor(placed) : cameraStep(previous.old, placed);
+  // measured against. Under a HUD it is capped by the same ground fit.
+  const oldBefore = fresh || !previous.old ? null : previous.old;
+  const oldHud = hudStateFor(oldBefore, placed, hud);
+  const old = withHud(oldBefore === null
+    ? hudOpening(cameraFor(placed), placed, oldHud)
+    : cameraStep(oldBefore, placed, hudStepOptions(oldBefore, placed, oldHud)), oldHud, placed);
   const done = (camera, own, hold, closeUp, heldByFloor) => Object.freeze({
     camera, own, old, hold, rosterKey, framed: Object.freeze(framed), closeUp, heldByFloor
   });
   if (fresh) {
-    const camera = cameraFor(framed);
+    const opening = hudStateFor(null, framed, hud);
+    const camera = withHud(hudOpening(cameraFor(framed), framed, opening), opening, framed);
     return done(camera, camera, 0, false, false);
   }
   const ownBefore = previous.own ?? previous.camera;
+  const ownHud = hudStateFor(ownBefore, framed, hud);
   if (!closeUpActive(placed)) {
-    const own = cameraStep(ownBefore, framed);
+    const own = withHud(cameraStep(ownBefore, framed, hudStepOptions(ownBefore, framed, ownHud)), ownHud, framed);
     return done(own, own, 0, false, false);
   }
-  // (1) The floor: the old camera's own target, bodies included.
-  const floor = targetZoomFor(midwaypointFor(placed), placed);
-  // (2) The close-up, checked against both ends of any framing hand-over.
-  const teamWeights = [teamWeightOf(ownBefore), isTeamFight(framed) ? 1 : 0];
-  const settled = closeUpZoomFor(framed, { teamWeights });
+  // (1) The floor: the old camera's own target, bodies included — which, under
+  //     a HUD, is already capped by the same ground fit. (`old.maxscale` IS
+  //     `targetZoomFor(midwaypointFor(placed), placed)` when there is none.)
+  const floor = old.maxscale;
+  // (2) The close-up: its crowns and plates checked against both ends of any
+  //     framing hand-over; its feet against the wall at the weight it
+  //     SETTLES at, the target's (see `standsFitAt`).
+  const toward = isTeamFight(framed) ? 1 : 0;
+  const teamWeights = [teamWeightOf(ownBefore), toward];
+  const fit = ownHud === null ? {} : { hudTop: ownHud.hudTop, inkSize: ownHud.inkSize };
+  const settled = closeUpZoomFor(framed, { teamWeights, wallWeights: [toward], ...fit });
   // No `max(floor, …)` here: when the frame is not held, what fits at this pan
   // is at least the floor by the definition of `held` below, and when it is
   // held this camera is not the one drawn — the clamp keeps it from lagging.
-  let own = cameraStep(ownBefore, framed, {
-    targetFor: ({ gladiatorsX }) => Math.min(settled, closeUpZoomFor(framed, { gladiatorsX, teamWeights }))
-  });
+  let own = withHud(cameraStep(ownBefore, framed, {
+    targetFor: ({ gladiatorsX }) => Math.min(settled,
+      closeUpZoomFor(framed, { gladiatorsX, teamWeights, wallWeights: [toward], ...fit }))
+  }), ownHud, framed);
   // Never looser than the old camera is RIGHT NOW — its zoom, not only its target.
   if (own.zoomscale < old.zoomscale) {
     own = Object.freeze({ ...own, zoomscale: old.zoomscale, crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(old.zoomscale) });
@@ -1555,8 +1984,9 @@ export function stepFramedCamera(previous, roster, { result = null } = {}) {
   //     no looser than the old camera: the drawn zoom is this camera's own,
   //     brought inside that. `own` itself is carried on UNCHANGED, so its
   //     ease and its pan run exactly as they did — the check is on what is
-  //     drawn and feeds nothing back.
-  const here = closeUpZoomRangeAt(framed, { gladiatorsX: own.gladiatorsX, teamWeights });
+  //     drawn and feeds nothing back. The wall is checked at the weight
+  //     this frame is DRAWN at.
+  const here = closeUpZoomRangeAt(framed, { gladiatorsX: own.gladiatorsX, teamWeights, wallWeights: [teamWeightOf(own)], ...fit });
   const lowest = here === null ? Infinity : Math.max(old.zoomscale, here.min);
   const fits = here !== null && lowest <= here.max;
   const drawn = fits ? withZoom(own, Math.min(here.max, Math.max(lowest, own.zoomscale))) : own;
@@ -1569,7 +1999,7 @@ export function stepFramedCamera(previous, roster, { result = null } = {}) {
   // eases, by the zoom's fifth, so neither switch is a jump.
   const wasEngaged = previous.closeUp === true || previous.heldByFloor === true;
   const hold = wasEngaged ? easeTeamWeight(previous.hold ?? 0, held ? 1 : 0) : (held ? 1 : 0);
-  const camera = hold === 0 ? drawn : hold === 1 ? old : blendCameras(drawn, old, hold);
+  const camera = hold === 0 ? drawn : hold === 1 ? old : groundedBlend(blendCameras(drawn, old, hold), framed);
   return done(camera, own, hold, !held, held);
 }
 
@@ -1583,6 +2013,7 @@ function withZoom(camera, zoomscale) {
  * A camera `weight` of the way from `from` to `to`. Stage x is linear in the
  * pan and the zoom, so every edge a blend draws lies between where the two
  * cameras draw it — a blended frame crops nobody more than the worse of them.
+ * Stage y is NOT: see `groundedBlend`, which every blend drawn goes through.
  */
 function blendCameras(from, to, weight) {
   const lerp = (a, b) => a + (b - a) * weight;
@@ -1596,8 +2027,106 @@ function blendCameras(from, to, weight) {
     gladiatorsX: lerp(from.gladiatorsX, to.gladiatorsX),
     crowdY: SS2_CAMERA.crowdBaseY + Math.ceil(zoomscale),
     team: nearer.team,
-    teamWeight: lerp(teamWeightOf(from), teamWeightOf(to))
+    teamWeight: lerp(teamWeightOf(from), teamWeightOf(to)),
+    ...blendHud(from, to, lerp)
   });
+}
+
+/**
+ * A BLEND BROUGHT DOWN ONTO THE FLOOR: the blended camera, kept to the promise
+ * its two ends keep, at the blend's OWN framing weight and HUD — and the blend
+ * itself, to the byte, wherever it already keeps it. Two levers, one for each
+ * half, and THE WALL COMES FIRST:
+ * - **THE WALL, always: the zoom is LOWERED**, one whole zoom at a time, at
+ *   the blend's own pan, as rule 6 brings a drawn zoom inside what fits
+ *   (`withZoom`), until every framed fighter's back-most depth stands
+ *   `wallMargin` under the lowest arena's wall foot (`wallRoomAt`). A lower
+ *   zoom takes the back rank away from a wall that climbs with it.
+ * - **THE INK, as far as the wall allows: the whole framing is LIFTED**
+ *   (`inkLift`, stage px, which `arenaToStage` subtracts from every depth) by
+ *   as much as its lowest ink lies under the bottom — the visible stage's, or
+ *   the HUD's top (`inkOverAt`) — the team line's own lever under a HUD
+ *   (`SS2_TEAM_HUD`), "only as far as it must be" the same way, and never
+ *   past the room the wall leaves. **So a blend's ink clears the HUD unless
+ *   its framed spans are taller than the band between the wall and the HUD
+ *   at its zoom, and then its back-most depth stands exactly on the margin.**
+ *   That happens where a lane change starts a hold's blend: the span runs
+ *   from where the fighter stands to where he is going, and its two ends are
+ *   held to the wall and the HUD at once. Measured over 3,000 random bouts
+ *   (seeds 11 and 5) with the lane change drawn linearly over 10, 20 or 40
+ *   frames — the game's is 10 beats, 1.2s: no frame of any camera, under no
+ *   HUD, 326 or 352, drew a fighter's ink under the HUD or his feet within
+ *   the margin WHERE HE WAS DRAWN.
+ *
+ * ► **WHY THE ENDS DO NOT BOUND IT.** `blendCameras` lerps the zoom and the
+ *   framing weight separately, so a foot's stage y — the pair's line
+ *   `166.75 + d·z/100` blended by the weight into the team's — is BILINEAR in
+ *   the blend's weight, and a frame between two cameras that each keep the
+ *   floor can leave it. Found by the verifier (verify:camera-r1, 2026-09-24):
+ *   a lone `_yscale` 50 winner at the back rank, released from a hold, stood
+ *   1.59px from arena 5's wall foot at zoom 94.02, framing weight 0.36 — in
+ *   808f6da too — and under the 2v2's HUD (326), where the old camera's line
+ *   is lifted for a colossus's body, 1.68px INSIDE it.
+ * ► **WHY THE INK IS LIFTED, NOT ZOOMED OUT** — Codex's review of this fix,
+ *   pass 1 (2026-09-24). ~~Lower the zoom until the whole ground fit holds~~:
+ *   under a HUD the team end's largest fighter inks EXACTLY onto the HUD's
+ *   top, so any pair weight left in a blend puts ink under it unless the PAIR
+ *   part fits by itself — the zoom was held at the pair's fit (68) for the
+ *   whole blend and jumped to the held camera's 80 the frame the hold reached
+ *   1. The lift needed goes to nothing at both ends of the blend with the
+ *   weight it comes from, so the blend reaches either end without a jump.
+ * ► **WHY THE WALL COMES FIRST** — Codex's review of this fix, pass 2.
+ *   ~~Lift for all the ink, then lower the zoom until the lifted back rank
+ *   clears the wall~~: a lone winner at the back rank at 100 steps up to the
+ *   front as he walks, and the blend's first frame, raw at 85.6 with his feet
+ *   3.10px from arena 5's wall, had the ink of the span's FRONT end — where
+ *   he will arrive, not where he is — 28.94px under the HUD. Lifting all of
+ *   it put his feet in the wall, so the zoom fell until the lift fitted: 72,
+ *   13.6 zooms more than the raw blend. Wall first, it is 82, his feet exactly
+ *   on the margin, the span's front end 22.33px under. Over the 3,000 bouts no grounded
+ *   blend's one-frame zoom move is more than 7.6 zooms larger than the raw
+ *   blend's (it was 17.6), and the count of one-frame moves over 10 zooms is
+ *   the raw blend's to within one.
+ * ► **AT THE BLEND'S OWN PAN** the zoom only moves stage x toward the arena's
+ *   origin, which can push a swing off an edge only while that origin is off
+ *   the stage; the lift moves no stage x at all. Measured over 3,000 random
+ *   bouts (seeds 11 and 5, no HUD, 326 and 352): 341 blend frames zoomed out,
+ *   and against the same blend left where it was a framed swing cropped MORE
+ *   in 2, by 1.04px at most, and LESS in 129. Zooming out about the framed
+ *   group's middle instead was tried while the zoom was still the ink's lever
+ *   too (718 frames zoomed out): it cropped more in none and less in 399
+ *   against this one's 397, but by less than this in 309 of them; it was not
+ *   kept — a pixel in two frames, and nothing outside this function could
+ *   pin it.
+ * ► **IT FEEDS NOTHING BACK**: the two tweens (`own`, `old`) and the hold are
+ *   carried unchanged, as rule 6's check is — only what is drawn moves.
+ */
+function groundedBlend(blend, framed) {
+  const geometry = placedIn(framed).map(closeUpGeometryOf);
+  const hud = Number.isFinite(blend.hudTop) ? { hudTop: blend.hudTop, inkSize: blend.inkSize } : null;
+  let camera = blend;
+  while (wallRoomAt(geometry, camera) < 0 && camera.zoomscale > SS2_CAMERA.zoomMinimum) {
+    camera = withZoom(blend, Math.max(SS2_CAMERA.zoomMinimum, Math.ceil(camera.zoomscale) - 1));
+  }
+  const over = inkOverAt(geometry, camera, hud);
+  if (!(over > 1e-9)) return camera;
+  const lift = Math.min(over, Math.max(0, wallRoomAt(geometry, camera)));
+  return lift > 0 ? Object.freeze({ ...camera, inkLift: lift }) : camera;
+}
+
+/**
+ * The HUD a blended camera stands to: both ends' eased, or the one end's that
+ * has one (a HUD easing out on one tween before the other) — or none.
+ */
+function blendHud(from, to, lerp) {
+  const hasFrom = Number.isFinite(from.hudTop);
+  const hasTo = Number.isFinite(to.hudTop);
+  if (hasFrom && hasTo) return { hudTop: lerp(from.hudTop, to.hudTop), inkSize: lerp(from.inkSize, to.inkSize) };
+  if (hasFrom || hasTo) {
+    const end = hasFrom ? from : to;
+    return { hudTop: end.hudTop, inkSize: end.inkSize };
+  }
+  return {};
 }
 
 /**
@@ -1636,6 +2165,17 @@ function blendCameras(from, to, weight) {
  *   `src/team/ss2-rules.js`), so a 1v1 that opens with both at 200 has no rank
  *   move to make; one that opens split does, and is squashed.
  *
+ * ► **UNDER THE IN-FRAME TEAM HUD THE TEAM LINE IS LIFTED** (`teamLineOf`,
+ *   `SS2_TEAM_HUD`): a camera carrying `hudTop` and `inkSize` stands its team
+ *   front line no lower than `hudTop - inkDepthAt(zoom, inkSize)`. Every depth
+ *   moves with it; a pair's line never does.
+ *
+ * ► **A BLEND BROUGHT DOWN ONTO THE FLOOR CARRIES `inkLift`** (stage px,
+ *   `groundedBlend`): every depth of it is drawn that much higher, pair and
+ *   team parts alike, so its lowest ink clears the bottom it must. Only a
+ *   blend drawn between the survivors' close-up and the held camera ever
+ *   carries it, and only on a frame that needs it; stage x is untouched.
+ *
  * ► **ONLY THE FRAMING IS TEAM-ONLY.** The second `stage y` line — the pivot
  *   of `SS2_TEAM_FRAMING` — is taken only when `camera.team === true`. See it
  *   and `RANK_DEPTH_FACTOR`, both authored. **A camera that carries a
@@ -1668,10 +2208,13 @@ export function arenaToStage(camera, { x = 0, y = 200, lift = 0 } = {}) {
     : y;
   const weight = teamWeightOf(camera);
   const pairY = () => SS2_ARENA_ORIGIN.y + (depth - lift) * zoom;
-  const teamY = () => teamFrontLineAt(camera.zoomscale ?? 100) + (depth - FRONT_RANK_Y - lift) * zoom;
+  const teamY = () => teamLineOf(camera) + (depth - FRONT_RANK_Y - lift) * zoom;
+  const stageY = weight === 0 ? pairY() : weight === 1 ? teamY() : pairY() + weight * (teamY() - pairY());
   return {
     x: SS2_ARENA_ORIGIN.x + pan + x * zoom,
-    y: weight === 0 ? pairY() : weight === 1 ? teamY() : pairY() + weight * (teamY() - pairY())
+    // A blend brought down onto the floor stands its whole framing up this
+    // far (`groundedBlend`); no other camera carries it.
+    y: Number.isFinite(camera?.inkLift) ? stageY - camera.inkLift : stageY
   };
 }
 
@@ -1681,7 +2224,8 @@ export function arenaToStage(camera, { x = 0, y = 200, lift = 0 } = {}) {
  *
  * For a pair it is the build's `166.75 + 200 × zoom/100`; for a team camera it is
  * the authored front line of `SS2_TEAM_FRAMING`, which does not climb toward
- * the wall as the camera pulls back.
+ * the wall as the camera pulls back — lifted, under the in-frame team HUD,
+ * until its ink clears it (`SS2_TEAM_HUD`).
  */
 export function groundLineAt(camera) {
   return arenaToStage(camera, { x: 0, y: 200, lift: 0 }).y;

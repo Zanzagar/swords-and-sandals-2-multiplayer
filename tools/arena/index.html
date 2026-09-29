@@ -58,7 +58,10 @@
      strip below, so the stage is the same size on every turn — and it never
      SCROLLS: a classic scrollbar would eat that height (Codex review of H3,
      pass 1), so on a narrow stage the chips shrink and the names end in an
-     ellipsis, each chip carrying the whole name as its title. */
+     ellipsis, each chip carrying the whole name as its title. A chip names
+     its side by its name's colour ALONE (D1, 2026-09-24: ~~an initial on a
+     disc, and a bottom border in the side's colour~~ — "Colors suffice");
+     the chip whose turn it is is ringed in --warn, never underlined. */
   .turn-strip {
     flex: 0 0 auto; height: 30px; margin: 0; padding: 0 10px; list-style: none;
     display: flex; gap: 4px; align-items: center;
@@ -66,16 +69,15 @@
     border-bottom: 1px solid var(--edge); background: var(--panel);
   }
   .turn-chip {
-    flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 0; padding: 1px 7px 1px 3px;
-    border: 1px solid var(--edge); border-bottom: 2px solid var(--team, var(--edge)); border-radius: 999px;
+    flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 0; padding: 1px 7px;
+    border: 1px solid var(--edge); border-radius: 999px;
     background: var(--ground); font-size: 12px; line-height: 1.4;
   }
-  .turn-chip .team-initial { flex: 0 0 auto; }
   .turn-chip .turn-name {
     color: var(--team, var(--ink)); font-weight: 600;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
   }
-  .turn-chip.current { border-color: var(--warn); border-bottom-color: var(--team, var(--warn)); box-shadow: 0 0 0 1px var(--warn); }
+  .turn-chip.current { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); }
   .turn-chip.down { opacity: .45; }
   .turn-chip.down .turn-name { text-decoration: line-through; }
   #stage { flex: 1 1 auto; min-height: 0; position: relative; }
@@ -134,22 +136,16 @@
     overflow-y: auto;
   }
   h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-dim); margin: 0 0 6px; }
-  /* H2: the crowd meter, at the top of the side panel — the build's own label
-     ("crowd: <mood>"), the number, and the bar with the lines under 20 and over
-     70 where the build's boos and cheers can start. */
-  .crowd { display: flex; flex-direction: column; gap: 4px; }
+  /* D8 (2026-09-25): the crowd is the build's own crowd bar IN THE FRAME now;
+     at the top of the side panel it is only a visually hidden meter for a
+     screen reader (.visually-hidden), ~~the build's label, the number, and the
+     bar with the lines under 20 and over 70 (H2)~~. */
   .crowd[hidden] { display: none; }
-  .crowd-line { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 600; }
-  .crowd-line output { color: var(--ink-dim); font-weight: 400; font-variant-numeric: tabular-nums; }
-  .crowd-bar { position: relative; height: 8px; border-radius: 4px; background: #000; }
-  .crowd-bar > i { display: block; height: 100%; border-radius: 4px; background: var(--warn); }
-  .crowd-bar[data-band="boo"] > i { background: #8a7f73; }
-  .crowd-bar[data-band="cheer"] > i { background: #f2c14e; }
-  .crowd-bar > b { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--ink-dim); }
   /* H2: the two team panels, red then blue. Each carries its side's colour
      (--team, set from tools/arena/team-hud.js) on its top edge, its heading,
-     each row's left edge and each name, and its initial in a disc: a cue that
-     is not colour alone. The rows sit on --ground: the side panel's own --panel
+     each row's left edge and each name — and that colour is the side's only
+     cue (D1, 2026-09-24: ~~and its initial in a disc: a cue that is not
+     colour alone~~). The rows sit on --ground: the side panel's own --panel
      gives red only 4.44 : 1, --ground 4.90 (blue 5.45). */
   .roster { display: flex; flex-direction: column; gap: 12px; }
   .team-panel { border-top: 3px solid var(--team, var(--edge)); padding-top: 6px; display: flex; flex-direction: column; gap: 6px; }
@@ -167,12 +163,6 @@
   .fighter.down { opacity: .45; }
   .fighter .row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
   .fighter .name { font-weight: 600; color: var(--team, var(--ink)); }
-  .team-initial {
-    display: inline-block; min-width: 1.5em; margin-right: 6px; padding: 0 .3em; border-radius: 999px;
-    background: var(--team, var(--ink-dim)); color: #0b0a0d;
-    font-size: 10.5px; font-weight: 800; line-height: 1.5; text-align: center; vertical-align: 1px;
-    letter-spacing: 0;
-  }
   .fighter .tags { display: inline-flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
   .tag, .seat {
     font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
@@ -182,17 +172,9 @@
   .seat.you { border-color: #f2c14e; color: #f2c14e; }
   .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
   .chip { font-size: 11px; padding: 0 7px; border-radius: 999px; border: 1px solid #6b4f2a; background: #2e2417; color: #f3d9a8; cursor: help; }
-  .reading {
-    display: grid; grid-template-columns: 4.3em 1fr auto; gap: 6px; align-items: center;
-    margin-top: 3px; font-size: 11px; color: var(--ink-dim);
-  }
-  .reading .meter { height: 6px; border-radius: 3px; background: #000; overflow: hidden; }
-  .reading .meter > i { display: block; height: 100%; }
-  .reading.health .meter > i { background: #6ea84f; }
-  .reading.health.hurt .meter > i { background: #b8562f; }
-  .reading.energy .meter > i { background: #d8a13a; }
-  .reading.armour .meter > i { background: #9aa7b8; }
-  .reading .num { min-width: 5.5em; text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+  /* D5 (2026-09-25): a row's three readings are the build's own gauges IN THE
+     FRAME now; here each is only a visually hidden meter for a screen reader
+     (.visually-hidden), ~~a label, a bar and its number~~. */
   .actions { display: flex; flex-direction: column; gap: 5px; }
   button {
     font: inherit; text-align: left; cursor: pointer;
@@ -264,9 +246,8 @@
       <div class="visually-hidden" id="ring-live" aria-live="polite"></div>
     </div>
     <aside>
-      <section class="crowd" id="crowd" aria-label="The crowd" hidden>
-        <div class="crowd-line"><span id="crowd-text"></span><output id="crowd-value" aria-hidden="true"></output></div>
-        <div class="crowd-bar" id="crowd-bar" role="meter" aria-label="Crowd" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="crowd-fill"></i><b id="crowd-boo" title="Below this the crowd may boo"></b><b id="crowd-cheer" title="Above this the crowd may cheer"></b></div>
+      <section class="crowd visually-hidden" id="crowd" aria-label="The crowd" hidden>
+        <div id="crowd-bar" role="meter" aria-label="Crowd" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
       </section>
       <section>
         <h2>Teams</h2>

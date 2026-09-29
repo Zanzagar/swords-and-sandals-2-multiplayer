@@ -35,9 +35,11 @@ import {
   ringLabelBoxOf,
   ringLabelSizeFor,
   ringMoveButtonsAt,
+  ringPaintOrder,
   ringPlacementFor,
   ringSlotAt,
-  ringSwapButtonAt
+  ringSwapButtonAt,
+  ringUnderLabels
 } from "../tools/arena/ring-layout.js";
 import { actorSpanFor, stageClipRectFor, stageFitFor, stageProjectorFor, stepFramedCamera } from "../src/render/arena-backdrop.js";
 import { rankOfDepth } from "../src/render/arena-shell.js";
@@ -137,17 +139,27 @@ function demoHost({ perSide = 1, seed = 7, kit = "" } = {}) {
     seed
   });
 }
-/** The model for whoever is due, read off the host exactly as the shell reads it. */
-function modelOf(host, previous = null) {
+/**
+ * The model for whoever is due, read off the host exactly as the shell reads it. `hideJumpAndCharge` re-stamps
+ * every jump and charge the engine greys as HIDDEN — the ring before decision 9 (slice "jumpcharge", 2026-09-28),
+ * which is what everything else on it is held to.
+ */
+function modelOf(host, previous = null, { hideJumpAndCharge = false } = {}) {
   const actorId = host.currentCombatantId();
   return ringModelFor({
     actorId,
     combatants: host.wire().teams.flatMap((team) => team.combatants),
     legal: host.legalActions(),
     previous,
-    menuFor: (targetId) => host.unavailableActions(actorId, targetId)
+    menuFor: (targetId) => {
+      const menu = host.unavailableActions(actorId, targetId);
+      return hideJumpAndCharge
+        ? { ...menu, ring: menu.ring.map((entry) => (JUMP_OR_CHARGE.test(entry.verb ?? "") && entry.display === "grey" ? { ...entry, display: "hide" } : entry)) }
+        : menu;
+    }
   });
 }
+const JUMP_OR_CHARGE = /^(jump|charge)(left|right)$/;
 /** The `_yscale` a fighter is built at, his colossus or little-fat-kid spell applied (S5's reading). */
 function yscaleOf(host, id) {
   const record = host.combatant(id);
@@ -229,7 +241,7 @@ test("THE ARENA'S OWN CASE: 2v2 tricks seed 3, red-2 drawn 19.16 px from the sta
   assert.deepEqual(ringActionFor(model, ringSlotAt(buttons, walk.x, walk.y)), { type: "walk-left", targetId: "red-2", actorId: "red-2" });
 });
 
-test("CODEX PASS 1: the walk held flush with the edge keeps its key label on the stage — ~~under it~~ over it (S9), slid onto the stage, clear of every button", () => {
+test("CODEX PASS 1: the walk held flush with the edge keeps its key label on the stage — ~~under it~~ over it (S9), slid onto the stage, ~~clear of every button~~ clear of every button but the greyed jump it is painted over (decision 9)", () => {
   // The same turn. Held at x 13.82 (its radius), optionB's label on the ring's outer side would end at
   // 13.82 - 13.82 - 3 = -3: wholly off the stage, "2 Walk" and all (Codex, pass 1; before this slice it
   // ended at 11.07, its digit already cut). ~~Nothing is drawn under it — optionG and the swap are 57 px
@@ -250,10 +262,20 @@ test("CODEX PASS 1: the walk held flush with the edge keeps its key label on the
   assert.deepEqual([label.align, round(label.x), round(label.y)], ["center", 15, 200.29]);
   const box = { x0: label.x - 15, x1: label.x + 15, y0: label.y - px / 2, y1: label.y + px / 2 };
   assert.ok(box.x0 >= stage.x && box.x1 <= stage.x + stage.width && box.y0 >= stage.y && box.y1 <= stage.y + stage.height, JSON.stringify(box));
+  // 2026-09-28, slice "jumpcharge" (decision 9, `docs/design/battle-ui.md#decided-hud-2026-09-24`): ~~clear of
+  // EVERY button~~ — the jump over the walk (optionA, `closerange_warrior` facing right) is drawn now, greyed
+  // `not-built`, and the label, placed as if it were not there, runs across it — the same place, and on the
+  // stage, where it would have gone off it had the jump pushed it (`ringLabelAt`). It is painted under the
+  // label (`ringPaintOrder`: first). Clear of every other button.
+  const jump = buttons.find((button) => button.slot === "optionA");
+  assert.deepEqual([jump.verb, jump.reason?.code, ringUnderLabels(jump)], ["jumpleft", "not-built", true]);
+  const painted = ringPaintOrder(buttons);
+  assert.ok(painted.indexOf(jump) < painted.indexOf(walk), "the jump is painted before the walk and its label");
   for (const other of buttons) {
     const nx = Math.min(Math.max(other.x, box.x0), box.x1);
     const ny = Math.min(Math.max(other.y, box.y0), box.y1);
-    assert.ok(Math.hypot(other.x - nx, other.y - ny) >= other.r, `the label crosses ${other.slot}`);
+    const crosses = Math.hypot(other.x - nx, other.y - ny) < other.r;
+    assert.equal(crosses, other === jump, `the label ${crosses ? "crosses" : "misses"} ${other.slot}`);
   }
 });
 
@@ -288,8 +310,8 @@ test("CODEX PASS 1, what bringing labels on stage risks: a place on a label alre
     { x: 100, y: 412, align: "center" });
 });
 
-test("ACCEPTANCE, over whole bouts with every foe selected in turn, under the arena's own camera: every walk on offer stands on the side it moves toward — its centre wherever the stage has room for it, its whole disc wherever there is room for that, else flush with the stage's edge on his side — every button stays on the stage, clear of every other, and a walk's key label stays on it too", (t) => {
-  const tally = { selections: 0, walks: 0, wholeDisc: 0, centreOnly: 0, noRoom: 0, teamCamera: 0, walkLabels: 0 };
+test("ACCEPTANCE, over whole bouts with every foe selected in turn, under the arena's own camera: every walk on offer stands on the side it moves toward — its centre wherever the stage has room for it, its whole disc wherever there is room for that, else flush with the stage's edge on his side — every button stays on the stage, clear of every other, and a walk's key label stays on it too — and (decision 9) the greyed jumps and charges move no other button and no label", (t) => {
+  const tally = { selections: 0, walks: 0, wholeDisc: 0, centreOnly: 0, noRoom: 0, teamCamera: 0, walkLabels: 0, labelsOverJumpOrCharge: 0 };
   const EPS = 1e-9;
   for (const perSide of [1, 2, 3]) {
     for (const kit of ["", "tricks"]) {
@@ -341,12 +363,27 @@ test("ACCEPTANCE, over whole bouts with every foe selected in turn, under the ar
             // old one, past the edge, as before this slice: a column within a label's width of the
             // edge but not moved, e.g. 3v3 tricks seed 1 turn 104, red-2's optionE.) S9: a GREYED button
             // carries no label either, as `paintRing` draws none for it — ~~every button but a move~~ —
-            // but it is drawn, so no label may cross it.
-            const labelled = [];
-            for (const button of buttons.filter((candidate) => !candidate.move && !candidate.reason)) {
-              const { px, gap } = ringLabelSizeFor(button.r);
-              const size = { width: button.verb === "item" ? px * 0.6 : px * 0.55 * 7, height: px, gap };
-              const box = ringLabelBoxOf(ringLabelAt(button, buttons, size, { stage, taken: labelled }), size);
+            // but it is drawn, so no label may cross it. 2026-09-28, slice "jumpcharge" (decision 9,
+            // `docs/design/battle-ui.md#decided-hud-2026-09-24`): ~~no label may cross it~~ — no label may
+            // cross it unless it is a greyed JUMP OR CHARGE, which a label is placed as if it were not there
+            // (`ringLabelAt`), and which is painted under every label (`ringPaintOrder`, the order here).
+            const labelsOf = (drawn) => {
+              const labelled = [];
+              const boxes = {};
+              for (const button of ringPaintOrder(drawn).filter((candidate) => !candidate.move && !candidate.reason)) {
+                const { px, gap } = ringLabelSizeFor(button.r);
+                const size = { width: button.verb === "item" ? px * 0.6 : px * 0.55 * 7, height: px, gap };
+                const box = ringLabelBoxOf(ringLabelAt(button, drawn, size, { stage, taken: labelled }), size);
+                labelled.push(box);
+                boxes[button.slot] = { ...box };
+              }
+              return boxes;
+            };
+            const labels = labelsOf(buttons);
+            const painted = ringPaintOrder(buttons);
+            const seen = [];
+            for (const button of painted.filter((candidate) => !candidate.move && !candidate.reason)) {
+              const box = labels[button.slot];
               if (held.has(button.slot) && (button.verb === "walkleft" || button.verb === "walkright")) {
                 assert.ok(box.x0 >= stage.x - EPS && box.x1 <= stage.x + stage.width + EPS && box.y0 >= stage.y - EPS && box.y1 <= stage.y + stage.height + EPS,
                   `${where}: ${button.slot}'s label ${JSON.stringify(box)} leaves the stage`);
@@ -356,14 +393,23 @@ test("ACCEPTANCE, over whole bouts with every foe selected in turn, under the ar
                 if (other === button) continue;
                 const nx = Math.min(Math.max(other.x, box.x0), box.x1);
                 const ny = Math.min(Math.max(other.y, box.y0), box.y1);
-                assert.ok(Math.hypot(other.x - nx, other.y - ny) >= other.r - EPS, `${where}: ${button.slot}'s label crosses ${other.slot}`);
+                if (Math.hypot(other.x - nx, other.y - ny) >= other.r - EPS) continue;
+                assert.ok(ringUnderLabels(other), `${where}: ${button.slot}'s label crosses ${other.slot}`);
+                assert.ok(painted.indexOf(other) < painted.indexOf(button), `${where}: ${button.slot}'s label is painted under ${other.slot}`);
+                tally.labelsOverJumpOrCharge += 1;
               }
-              for (const other of labelled) {
+              for (const other of seen) {
                 assert.ok(box.x1 <= other.x0 + EPS || other.x1 <= box.x0 + EPS || box.y1 <= other.y0 + EPS || other.y1 <= box.y0 + EPS,
                   `${where}: ${button.slot}'s label overlaps another`);
               }
-              labelled.push(box);
+              seen.push(box);
             }
+            // DECISION 9 MOVES NOTHING ELSE: with the jumps and charges hidden, as the ring was before, every other
+            // button stands where it stands here, and every key label too.
+            const before = arenaButtons(host, modelOf(host, foeId, { hideJumpAndCharge: true }), camera);
+            assert.deepEqual(buttons.filter((button) => !JUMP_OR_CHARGE.test(button.verb)).map((button) => ({ ...button })),
+              before.buttons.map((button) => ({ ...button })), `${where}: the other buttons`);
+            assert.deepEqual(labels, labelsOf(before.buttons), `${where}: the key labels`);
             tally.selections += 1;
           }
           host.submit({ ...host.suggestAction(actorId), actorId });
@@ -374,7 +420,9 @@ test("ACCEPTANCE, over whole bouts with every foe selected in turn, under the ar
   }
   // The sweep reached the cases it is about: walks at an edge with room for their centre only, and fighters
   // drawn so near the edge that no place on the stage is on their side.
-  assert.ok(tally.centreOnly > 0 && tally.noRoom > 0 && tally.wholeDisc > tally.centreOnly && tally.teamCamera > 0 && tally.walkLabels > 0, JSON.stringify(tally));
+  // And (decision 9) labels that run across a greyed jump or charge, which is what keeps them where they stood.
+  assert.ok(tally.centreOnly > 0 && tally.noRoom > 0 && tally.wholeDisc > tally.centreOnly && tally.teamCamera > 0 && tally.walkLabels > 0
+    && tally.labelsOverJumpOrCharge > 0, JSON.stringify(tally));
   t.diagnostic(JSON.stringify(tally));
 });
 

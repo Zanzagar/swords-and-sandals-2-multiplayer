@@ -439,9 +439,19 @@ function greyOf(entry) {
 export function ringButtonsInside(buttons, stage, { fighterX = null } = {}) {
   if (!Array.isArray(buttons) || buttons.length === 0 || !stage) return buttons;
   const into = (low, high, from, to) => (high - low > to - from ? from - low : Math.max(from - low, Math.min(0, to - high)));
-  const dx = into(Math.min(...buttons.map((b) => b.x - b.r)), Math.max(...buttons.map((b) => b.x + b.r)), stage.x, stage.x + stage.width);
+  // ► **THE SHIFT IS TAKEN FROM THE BUTTONS THAT ACT OR SAY SOMETHING, NOT
+  //   FROM THE GREYED JUMPS AND CHARGES (2026-09-28, a write-nothing
+  //   verifier's finding on slice "jumpcharge").** Taken from every button,
+  //   a back-ranker's greyed optionA/optionD sticking out above the stage in
+  //   the fitted view pushed the whole ring down ~10 px in 730 of 23,652
+  //   rings, and a click where "walk left" stood hit nothing. They move with
+  //   the rest (`ringUnderLabels`, the same exclusion `ringLabelAt` makes) and
+  //   may stand partly off the stage, inert.
+  const span = buttons.filter((b) => !ringUnderLabels(b));
+  const from = span.length > 0 ? span : buttons;
+  const dx = into(Math.min(...from.map((b) => b.x - b.r)), Math.max(...from.map((b) => b.x + b.r)), stage.x, stage.x + stage.width);
   // A place of the items row (S5) keeps its letter's room above it on the stage too.
-  const dy = into(Math.min(...buttons.map((b) => b.y - b.r - (b.labelRoom ?? 0))), Math.max(...buttons.map((b) => b.y + b.r)), stage.y, stage.y + stage.height);
+  const dy = into(Math.min(...from.map((b) => b.y - b.r - (b.labelRoom ?? 0))), Math.max(...from.map((b) => b.y + b.r)), stage.y, stage.y + stage.height);
   if (dx === 0 && dy === 0) return buttons;
   // The walks the shift would carry across the fighter, and where each is kept instead.
   const kept = new Map();
@@ -503,6 +513,22 @@ const WALK_TOWARD = Object.freeze({ walkleft: -1, walkright: 1 });
  *   first clear and free one, then the first clear one, then the outer side,
  *   as before.
  *
+ * ► **A LABEL DOES NOT GIVE WAY TO A GREYED JUMP OR CHARGE (slice
+ *   "jumpcharge", 2026-09-28) — AUTHORED.** The owner's decision 9
+ *   (`docs/design/battle-ui.md#decided-hud-2026-09-24`) shows them greyed,
+ *   "Not built yet", in the slots the build wires them to — and optionA and
+ *   optionD stand right over the two walks, optionC and optionF under them. A
+ *   walk at the stage's side, its outer side off the stage and a button under
+ *   it, had its label over it; the greyed jump took that place, and the label
+ *   went off the stage — 1,707 of 4,126 rings under the arena's own camera
+ *   (the edge slice's 24 bouts, every foe selected; a scratch sweep against
+ *   3183c26's own ring modules, in the slice's report). So a label is placed
+ *   as if they were not there (`ringUnderLabels`): every label stands exactly
+ *   where it stood before they were shown, and one that crosses them is drawn
+ *   over them (`ringPaintOrder`). Every other button — S9's greyed team
+ *   rules, the item the engine has not built, and a jump the day one acts —
+ *   still keeps a label off itself.
+ *
  * @param {object} button   a drawn button: `{slot, x, y, r, side}`
  * @param {object[]} buttons  every button drawn this frame
  * @param {{width: number, height: number, gap: number}} size  the label's
@@ -527,6 +553,8 @@ export function ringLabelAt(button, buttons, { width, height, gap }, { stage = n
   const boxOf = (candidate) => ringLabelBoxOf(candidate, { width, height });
   const clear = (box) => (buttons ?? []).every((other) => {
     if (other === button || other.slot === button.slot) return true;
+    // Decision 9 (2026-09-28): a greyed jump or charge moves no label.
+    if (ringUnderLabels(other)) return true;
     const dx = other.x - Math.min(Math.max(other.x, box.x0), box.x1);
     const dy = other.y - Math.min(Math.max(other.y, box.y0), box.y1);
     return Math.hypot(dx, dy) >= other.r;
@@ -549,6 +577,44 @@ export function ringLabelAt(button, buttons, { width, height, gap }, { stage = n
     ?? placed.find(fits)
     ?? placed.find((candidate) => clear(boxOf(candidate)))
     ?? placed[0]);
+}
+
+/**
+ * THE VERBS WHOSE GREYED BUTTON STANDS UNDER THE KEY LABELS (decision 9,
+ * slice "jumpcharge", 2026-09-28): the jumps and the charges the build's
+ * controller frames wire and the engine has not built. Their menu entries
+ * carry no action type, so they are greyed `not-built` on every turn a slot
+ * wires one — or hidden with every slot under a forced phase.
+ */
+export const RING_UNDER_LABEL_VERBS = Object.freeze(["jumpleft", "jumpright", "chargeleft", "chargeright"]);
+
+/**
+ * Whether a drawn button stands UNDER the key labels: a GREYED jump or charge
+ * (it carries a `reason`, `greyOf`). A label is placed as if it were not there
+ * (`ringLabelAt`), and it is painted before every other button, so a label
+ * across it is drawn over it (`ringPaintOrder`). One that acts would not be.
+ */
+export function ringUnderLabels(button) {
+  return Boolean(button?.reason) && RING_UNDER_LABEL_VERBS.includes(button.verb);
+}
+
+/**
+ * THE ORDER THE PAGE PAINTS THE RING'S BUTTONS (decision 9, slice
+ * "jumpcharge", 2026-09-28): every button under the labels first
+ * (`ringUnderLabels`), then the rest in their own order — so a key label that
+ * crosses a greyed jump or charge is drawn over it, whichever button's label it
+ * is, and every other button, and every label, is painted in the order it was
+ * before they were shown. (`paintRing` paints each button and then its label:
+ * a charge in optionC or optionF, painted after the walk over it, would have
+ * covered that walk's label — 62 of the 1,707 labels across them in the
+ * slice's sweep.) The buttons themselves are unchanged.
+ *
+ * @param {object[]} buttons  as `ringButtonArt` returns them
+ * @returns {object[]} the same buttons, frozen array
+ */
+export function ringPaintOrder(buttons) {
+  const all = buttons ?? [];
+  return Object.freeze([...all.filter(ringUnderLabels), ...all.filter((button) => !ringUnderLabels(button))]);
 }
 
 /**

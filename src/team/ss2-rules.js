@@ -2581,22 +2581,47 @@ export const SS2_MOVEMENT_STEP_FACTOR = Object.freeze({
  * `round(sqrt(85^2 + 97^2)) = 129` against a reach of 129 and a STRICT `<`.
  * Neither number is wrong; they were answering different questions.
  *
- * **So a foe blocks only when it is close enough in DEPTH to actually be in
+ * ~~**So a foe blocks only when it is close enough in DEPTH to actually be in
  * the way**, which is what "overlap" already meant: `physical_size` is the
  * body's own extent, so two gladiators separated by more than that in y are
- * not touching and never were. A rank you are not standing in is scenery.
+ * not touching and never were.~~ A rank you are not standing in is scenery.
+ *
+ * ► **CORRECTED 2026-09-27 — the struck test did not say the sentence after
+ *   it, and the owner found the difference in play:** *"in some cases (larger
+ *   character models) a character in a different lane behind another cant
+ *   advance. it just walks in place when attempting to proceed."* The ranks
+ *   are `rankStride` (97) apart and `physical_size = 80 + round(strength /
+ *   1.5)` passes 97 at strength 27 — a colossus cast on the demo roster's
+ *   strength 9, 8 of the 18 decodable champions as they are built, and any of
+ *   them once colossus triples it — so from strength 27 a body blocked every
+ *   walker in the NEIGHBOURING lane, and from 172 two lanes off. *(This
+ *   block's commit, `57b2209`, said "most of the build's own champions" and
+ *   "171"; a write-nothing verifier re-derived both. At 171 `physical_size`
+ *   is 194, and 194 < 194 is false.)* Measured on the arena's own host with the build's champions, seeds
+ *   1-48: **77 of the 123 walks the AI chose that went nowhere in 3v3 (22 of
+ *   29 in 2v2) were parked by a body in another lane**, and at strength 111
+ *   the clamp line sits behind the walker, so a walk forward carried him
+ *   BACKWARD. The test that pinned this rule (`test/ss2-position.test.js`)
+ *   stood its body two ranks away and never tried one. The 2026-09-12 fix
+ *   this predicate made (the parked-one-unit-out-of-reach deadlock) holds
+ *   either way: that walker was blocked by a foe in ANOTHER rank.
+ *
+ * **So a body blocks a walk exactly when it stands in the walker's LANE**
+ * (`ss2SameLane`), which is what every other sentence here and every reader
+ * of this rule already said: the lane is the unit (`docs/design/battle-ui.md`
+ * decision 10, soft lanes — melee needs the same band, and so does being in
+ * somebody's way). One definition of a lane, so the soft-lanes band changes
+ * one function and not two. Inside the lane the clamp is the build's own.
  *
  * AUTHORED, and inside the silence that already covers it
  * (`MAP_SILENCE.multi-slot-arena-geometry`): vanilla has one gladiator a side
- * and both stand at `_y = 200`, so `|dy|` is 0 for every pair the build can
- * make and this predicate is CONSTANTLY TRUE there. **1v1 is therefore
+ * and both stand at `_y = 200`, so every pair the build can make shares the
+ * lane and this predicate is CONSTANTLY TRUE there. **1v1 is therefore
  * byte-identical, and so is every bout with the second axis switched off** —
- * a `null` y reads as 0 on both sides.
+ * `ss2SameLane` is true whenever either `y` is absent.
  */
 function ss2BodyBlocks(actor, foe) {
-  const actorY = Number.isFinite(actor?.y) ? actor.y : 0;
-  const foeY = Number.isFinite(foe?.y) ? foe.y : 0;
-  return Math.abs(actorY - foeY) < ss2PhysicalSize(foe);
+  return ss2SameLane(actor, foe);
 }
 
 /**
@@ -2654,12 +2679,21 @@ export function ss2SameLane(actor, target) {
  * inside `MAP_SILENCE.multi-slot-arena-geometry`, which already covers
  * "positions, depths, and clip names for slots beyond the first".
  *
- * **`ss2BodyBlocks` is the precedent and this is deliberately the same shape.**
- * That predicate asks whether a body is close enough IN DEPTH to be in the way
- * of a walk, and answers with `|dy| < physical_size(body)` — the body's own
- * extent. This asks the same question of a straight line between two points
- * and answers it the same way: the blocker's perpendicular distance from the
- * shot line, against its own `physical_size`.
+ * ~~**`ss2BodyBlocks` is the precedent and this is deliberately the same
+ * shape.** That predicate asks whether a body is close enough IN DEPTH to be in
+ * the way of a walk, and answers with `|dy| < physical_size(body)` — the body's
+ * own extent.~~ This asks whether a body stands in the way of a straight line
+ * between two points, and answers with the blocker's perpendicular distance
+ * from the shot line, against its own `physical_size`.
+ *
+ * ► **CORRECTED 2026-09-27: `ss2BodyBlocks` is no longer that shape — it is the
+ *   lane rule** (`ss2SameLane`, since `57b2209`: the depth test let a body
+ *   stronger than 26 block walkers in the next lane, the owner's playtest).
+ *   This rule keeps the body's extent ON PURPOSE: a flat shot is a line
+ *   through the arena, not a walk along a lane, and the owner's decision of
+ *   2026-09-13 is that a front rank body-blocks for its archers. So a body
+ *   wider than the 97 between ranks (strength 27 and up) does screen a snipe
+ *   along the next lane. That consequence is recorded rather than decided.
  *
  * Three properties it was built to have, each of which a simpler rule loses:
  *
@@ -2704,7 +2738,8 @@ export function ss2ShotBlocked(actor, target, bodies) {
     if (t <= 0 || t >= 1) continue;
     const offX = actor.x + t * dx - body.x;
     const offY = actor.y + t * dy - body.y;
-    // `<` and not `<=`, matching `ss2BodyBlocks`, so a body exactly its own
+    // `<` and not `<=`, ~~matching `ss2BodyBlocks`~~ as `ss2BodyBlocks` did
+    // before it became the lane rule, so a body exactly its own
     // extent away is clear. Squared on both sides to keep it integer-exact and
     // free of a square root whose rounding would decide edge cases.
     const size = ss2PhysicalSize(body);
@@ -2767,6 +2802,38 @@ export function ss2WalkDestination(actor, foes, direction) {
     }
   }
   return clamp(to, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max);
+}
+
+/**
+ * ► **A WALK THAT GOES NOWHERE BECAUSE OF A BODY IN THE WALKER'S OWN LANE —
+ *   withheld from the offer, and greyed "blocked" on the ring. The owner's
+ *   decision P3, 2026-09-27 (`docs/design/battle-ui.md#decided-ai-press-2026-09-27`).**
+ *
+ * The build offers every walk its controller frame wires and lets the overlap
+ * clamp (`+0x3de6`) decide where it lands, so a walk into a body you already
+ * stand against costs its stamina and leaves you where you were. With teams
+ * that became a queue: a gladiator behind his own ally chose the walk toward
+ * the fight turn after turn, the walk playing on the spot (the owner's
+ * playtest, 2026-09-26; 66 such walks on the `buffs` kit's 3v3, seeds 1-48,
+ * one gladiator 13 running). AUTHORED — vanilla has no ally to stand behind
+ * (`MAP_SILENCE.multi-slot-arena-geometry`).
+ *
+ * **"Nowhere" is exact**: a walk the clamp cuts to one unit is a walk and is
+ * offered. **"Because of a body" is tested by removing the bodies**: a walk
+ * that would go nowhere with nobody there is standing at the ARENA WALL,
+ * which the decision does not cover, so it is still offered as the build
+ * offers it. The bodies are every other living one, as the walk's own
+ * resolution reads them; `ss2BodyBlocks` keeps it to the walker's lane.
+ *
+ * In 1v1 it cannot fire on a warrior's toward-walk: that is a `closerange`
+ * frame the moment a foe is in reach, and `closerange_warrior` wires no
+ * toward-walk. It fires wherever a body at the clamp line is OUT of reach —
+ * a foe bigger than the walker's reach, or an ally.
+ */
+export function ss2WalkBlocked(actor, bodies, direction) {
+  if (!Number.isFinite(actor?.x)) return false;
+  if (ss2WalkDestination(actor, bodies, direction) !== actor.x) return false;
+  return ss2WalkDestination(actor, [], direction) !== actor.x;
 }
 
 /**
@@ -4148,7 +4215,9 @@ export function ss2SafelyOutOfRange(view) {
  * the foe's side — `ss2FightDistance`, ties by id) from ANOTHER RANK.
  *
  * ► **WHY: THE OWNER SAW IT ON SCREEN.** Across ranks no body blocks a walk
- *   (`ss2BodyBlocks` gates on `|dy| < physical_size`), so a foe heading for a
+ *   (`ss2BodyBlocks`, ~~which gates on `|dy| < physical_size`~~ the lane rule
+ *   since 2026-09-27 — the depth test let a body stronger than 26 block the
+ *   next lane, see its docstring), so a foe heading for a
  *   gladiator standing still in the next rank walks straight past it, and the
  *   arena shows a fighter strolling through the enemy line. Measured on the
  *   demo roster, 96 seeds: 2v2 crossings (`tools/engagement-census.mjs`'s
@@ -4338,6 +4407,243 @@ const SS2_RANK_DIRECTION = Object.freeze({
   [Ss2ActionType.RANK_BACK]: -1,
   [Ss2ActionType.RANK_FRONT]: 1
 });
+
+/**
+ * ► **THE AI PRESSES A NUMBERS ADVANTAGE — the owner's decisions P1, P2 and P4,
+ *   2026-09-27 (`docs/design/battle-ui.md#decided-ai-press-2026-09-27`).**
+ *
+ * The owner, after playtesting: *"the ai on the team of 2 never makes a
+ * concerted effort to corner the single gladiator oftentimes it just dances or
+ * waits for the 1v1 to finish"*. Measured on the arena's own host (`demoSide`
+ * plain 2v2, seeds 1-96, every turn of a 2v1 phase): the free member's turns
+ * were 18% crowd-pleasers, both pair members stood in reach of the lone foe on
+ * 0% of turns, and the pair finished him before losing somebody in 8 of 96
+ * phases. Nothing in the AI looked at a fight an ally was already in except
+ * the flank walk, which only fired from another lane and handed over to arms
+ * that were never about the pincer.
+ *
+ * **The press target is the foe an ally is FIGHTING** — in the ally's lane and
+ * inside the ally's own reach (`ss2Reach`: ~~the melee reading of "engaged"
+ * the facing and lane rules use~~ **a drawn bow's reach included, corrected
+ * 2026-09-27 — so a foe an ally is shooting in his lane is one to help
+ * against; which SIDE of him is taken is melee only, in `ss2PressMove`**) —
+ * nearest to the actor, ties by id. `null`:
+ *
+ * - **with no depth** (`y` absent — every battle the host builds at
+ *   `rankStride` 0; a hand-built one that states `y` has lanes whatever the
+ *   stride, as it does for every other lane rule): going round is a lane
+ *   tactic, and in one lane a walk can never pass a foe, so there is nothing
+ *   to press toward. Every 1v1 (no ally), golden and host-built 1-D bout
+ *   plays exactly as under `aiPress: "off"` — the rule-set id, and so the
+ *   hash, still names the difference;
+ * - **P4, finish your own fight**: when a foe in the actor's own lane is one
+ *   no ally is fighting — that one is the actor's fight already
+ *   (`rankJoinSurplus` 0, "fight who is in front of you");
+ * - when no ally is fighting anybody.
+ *
+ * AUTHORED: vanilla has one gladiator a side and nobody to help
+ * (`MAP_SILENCE.multi-slot-arena-geometry`).
+ */
+export function ss2PressTarget(view) {
+  const actor = view.actor;
+  if (!Number.isFinite(actor?.x) || !Number.isFinite(actor?.y)) return null;
+  // `?? []`: `chooseAiAction` is called directly by tests with a view that
+  // carries only the list they care about, and the press must not throw
+  // before the checks that are the point of such a test.
+  const allies = (view.allies ?? []).filter((ally) =>
+    ally.id !== actor.id && ally.alive !== false && Number.isFinite(ally.x));
+  const fought = (foe) => allies.some((ally) =>
+    ss2SameLane(ally, foe) && ss2FightDistance(ally, foe) < ss2Reach(ally));
+  const living = (view.foes ?? []).filter((foe) => foe.alive !== false && Number.isFinite(foe.x));
+  if (living.some((foe) => ss2SameLane(actor, foe) && !fought(foe))) return null;
+  let best = null;
+  let bestDistance = Infinity;
+  for (const foe of living) {
+    if (!fought(foe)) continue;
+    const distance = ss2FightDistance(actor, foe);
+    if (distance < bestDistance || (distance === bestDistance && best && foe.id < best.id)) {
+      best = foe;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+/**
+ * ► **THE PRESS'S GOAL AGAINST `target`: the open spot beside him it heads for,
+ *   `{ side, x }`, or `null` when there is none** (2026-09-28). One body-width
+ *   from the target on the actor's own side if that spot is open, else on the
+ *   far side if that one is — open meaning inside `SS2_ARENA.clamp`, not held
+ *   by an ally fighting him IN MELEE (a drawn bow only when closed on,
+ *   `ss2ArcherMinimumRange`), and clear of bodies in his lane. `null` means
+ *   the press has nothing to add: both flanks held, or the far side shut and
+ *   the near one held. Shared by `ss2PressMove` and by the older arms' queue
+ *   guards in `chooseAiAction`, so the two cannot disagree about whether
+ *   going round is possible.
+ */
+export function ss2PressGoal(view, target) {
+  const actor = view.actor;
+  if (!target || ![actor.x, actor.y, target.x, target.y].every(Number.isFinite)) return null;
+  const allies = (view.allies ?? []).filter((ally) =>
+    ally.id !== actor.id && ally.alive !== false && Number.isFinite(ally.x));
+  const bodies = [...(view.foes ?? []), ...allies];
+  const fighting = allies.filter((ally) => ss2SameLane(ally, target)
+    && ss2FightDistance(ally, target) < (ss2InBowMode(ally) ? ss2ArcherMinimumRange(ally) : ss2Reach(ally)));
+  const side = Math.sign(actor.x - target.x) || (target.x > actor.x ? -1 : 1);
+  const spotOf = (sd) => target.x + sd * ss2PhysicalSize(target);
+  const spotOpen = (sd) => {
+    const spot = spotOf(sd);
+    if (clamp(spot, SS2_ARENA.clamp.min, SS2_ARENA.clamp.max) !== spot) return false;
+    if (fighting.some((ally) => Math.sign(ally.x - target.x) === sd)) return false;
+    return bodies.every((body) => body.alive === false || body.y !== target.y || body.id === target.id
+      || Math.abs(body.x - spot) >= ss2PhysicalSize(body));
+  };
+  const goal = spotOpen(side) ? side : spotOpen(-side) ? -side : null;
+  return goal === null ? null : { side: goal, x: spotOf(goal) };
+}
+
+/**
+ * ► **A RANK STEP INTO A QUEUE: landing in `destY` puts an ally between the
+ *   actor and `foe`** (who stands in `destY`). Read with `ss2RankArrivalX`, the
+ *   step's own landing. For the older arms' guards (2026-09-28).
+ */
+function ss2StepQueues(view, destY, foe) {
+  const actor = view.actor;
+  if (!foe || !Number.isFinite(destY) || foe.y !== destY) return false;
+  const others = [...(view.foes ?? []), ...(view.allies ?? []).filter((ally) => ally.id !== actor.id)];
+  const landX = ss2RankArrivalX(actor.x, others, destY);
+  if (landX === null) return false;
+  const way = foe.x > landX ? 1 : -1;
+  return (view.allies ?? []).some((ally) => ally.id !== actor.id && ally.alive !== false
+    && ally.y === destY && (ally.x - landX) * way > 0 && (foe.x - ally.x) * way > 0);
+}
+
+/**
+ * ► **GOING ROUND — the move that presses `target`, or `null` (P2).** The same
+ *   under both `aiPress` variants; they differ only in what it outranks (the
+ *   ranged choices and the taunt; see `pincerFirst` in `chooseAiAction`).
+ *
+ * 1. **In the target's lane with an ally between** (the queue the owner saw:
+ *    the walk toward is blocked by the ally's body, `ss2WalkBlocked`): step
+ *    OUT, to a neighbouring lane with no foe in it first, the front before the
+ *    back — **but only to a lane whose walk toward the target is not blocked
+ *    where the step lands**, or the actor would step out, find no way past,
+ *    and be sent back into the queue by the arms below, forever.
+ * 2. **In the target's lane with the way clear**: the walk toward.
+ * 3. **In another lane, every fighting ally on the actor's side of him**: walk
+ *    toward — and, turn by turn, PAST him, since a body in another lane is
+ *    scenery (`ss2BodyBlocks`). The arm `ss2FlankingWalk` was, re-asked from
+ *    the lane he is in.
+ * 4. **In another lane, on the far side from a fighting ally** (or level with
+ *    him): step into his lane. `ss2RankArrivalX` lands the actor at the free
+ *    spot nearest where he stands, which from the far side is the far side —
+ *    the pincer, and the back attack's +50% (`ss2IsBackAttack`).
+ *
+ * Every step is an offered option or nothing: a walk the offer withholds, or a
+ * rank with no free ground, returns `null` and the arms below decide.
+ *
+ * ► **ONLY WHEN THERE IS A FAR SIDE TO REACH — added 2026-09-27 after a
+ *   write-nothing verifier REFUTED "the press cannot oscillate".** Without
+ *   this, a free member whose target already had both flanks held (a 3v1), or
+ *   stood against the arena wall, went round, stepped in BEHIND an ally — the
+ *   queue — and was stepped out again by arm 1, forever: 99 rank steps and 0
+ *   attacks in 100 of his turns in the verifier's 3v1, and the same on the
+ *   arena's own host (buffs 3v3 seed 34, champions 3v3 seed 23, the shipped
+ *   default). So arms 1 and 3 go round only while the spot one body-width past
+ *   the target, on the side away from the actor, is open — inside the wall, no
+ *   fighting ally already there, no body on it — and arm 4 steps in only where
+ *   `ss2RankArrivalX` lands the actor with no ally between him and the target
+ *   — in the TARGET's lane, a look-ahead: from two lanes away the step lands
+ *   in the middle lane, and the test is where the next step would put him.
+ *   When the far side is shut the press has nothing to add, returns `null`, and
+ *   the fighter does what the AI did before the press (test/ss2-ai-press.test.js).
+ */
+export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankStride) {
+  const actor = view.actor;
+  if (!target || ![actor.x, actor.y, target.x, target.y].every(Number.isFinite)) return null;
+  const find = (type) => options.find((option) => option.type === type) ?? null;
+  const toward = target.x > actor.x ? 1 : -1;
+  const towardWalk = toward > 0 ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
+  const allies = (view.allies ?? []).filter((ally) =>
+    ally.id !== actor.id && ally.alive !== false && Number.isFinite(ally.x));
+  const foes = view.foes ?? [];
+  const bodies = [...foes, ...allies];
+
+  // ► **WHO HOLDS A SIDE OF THE TARGET: an ally fighting him IN MELEE —
+  //   corrected 2026-09-27 after a write-nothing verifier's finding.** This
+  //   read `ss2Reach`, which with a bow drawn is the bow's reach (4,485 on the
+  //   demo archer), so an ally shooting from the far end of the lane "held"
+  //   the far side: a queued member judged the pincer shut and taunted from
+  //   the queue for 27 turns, and one in the next lane was judged already
+  //   round and stepped into the queue. A drawn bow is in melee only when
+  //   closed on (`ss2ArcherMinimumRange`, where it bashes). The press TARGET
+  //   still counts the bow (`ss2PressTarget`): a foe an ally is shooting is
+  //   one to help against.
+  //   *(The melee-only reading now lives in `ss2PressGoal`, 2026-09-28.)*
+  // An ally in the target's lane strictly between `x` and the target: the queue.
+  const queuedAt = (x) => {
+    const way = target.x > x ? 1 : -1;
+    return allies.some((ally) => ally.y === target.y
+      && (ally.x - x) * way > 0 && (target.x - ally.x) * way > 0);
+  };
+  // ► **THE GOAL: AN OPEN SPOT BESIDE THE TARGET — rebuilt 2026-09-28 after a
+  //   fourth write-nothing verifier REFUTED 92f9701.** With only a drawn bow on
+  //   the target, 92f9701 stepped the free member into his lane from wherever
+  //   he stood: from ~1,800 away that opened the priced taunt, which
+  //   ranged-first ranks above the press, and he taunted 8 turns running
+  //   (champions 3v3 seed 28); queued behind the archer in the target's lane,
+  //   he was stepped out, his landing was still behind the archer, and the
+  //   older join arm stepped him back in, turn after turn (tricks 3v3 seed 46,
+  //   buffs 2v2 seeds 6 and 11). So the press now heads for a SPOT: one
+  //   body-width from the target on the actor's own side if that is open,
+  //   else on the far side if that is — open meaning inside the wall, not held
+  //   by a melee fighter, and clear of bodies — and returns null only when
+  //   neither is (both flanks held, or the far side shut and the near one
+  //   held: the 3v1 and the wall of 74c0014).
+  const aim = ss2PressGoal(view, target);
+  if (aim === null) return null;
+  const { side: goal, x: goalX } = aim;
+  const toGoal = goalX > actor.x ? Ss2ActionType.WALK_RIGHT : Ss2ActionType.WALK_LEFT;
+
+  if (ss2SameLane(actor, target)) {
+    if (!queuedAt(actor.x)) return find(towardWalk);
+    // Queued: out of the lane, to one whose walk toward the goal is not
+    // blocked where the step lands — or the arms below would step him back.
+    const steps = [Ss2ActionType.RANK_FRONT, Ss2ActionType.RANK_BACK].map(find).filter(Boolean);
+    const open = steps.filter((step) => {
+      const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
+      const x = ss2RankArrivalX(actor.x, bodies, y);
+      if (x === null) return false;
+      return !ss2WalkBlocked({ ...actor, x, y }, bodies, goalX > x ? 1 : -1);
+    });
+    const clear = open.find((step) => {
+      const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
+      return !foes.some((foe) => foe.alive !== false && foe.y === y);
+    });
+    return clear ?? open[0] ?? null;
+  }
+
+  // Another lane: walk to within one walk of the goal in his own lane (a body
+  // in another lane is scenery, `ss2BodyBlocks`), and only then step into the
+  // target's lane, where `ss2RankArrivalX` lands him with nobody between him
+  // and the target, on the goal's side. The landing is read in the TARGET's
+  // lane, a look-ahead: from two lanes away the step lands in the middle one.
+  if (Math.abs(actor.x - goalX) > ss2WalkDisplacement(ss2MovementSpeed(actor))) return find(toGoal);
+  const arrival = ss2RankArrivalX(actor.x, bodies, target.y);
+  if (arrival !== null && !queuedAt(arrival) && Math.sign(arrival - target.x) === goal) {
+    return find(target.y > actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK);
+  }
+  return actor.x !== goalX ? find(toGoal) : null;
+}
+
+/** The `aiPress` values `createSs2TeamRules` takes; see `ss2PressMove`. */
+export const SS2_AI_PRESS = Object.freeze(["off", "ranged-first", "pincer-first"]);
+/**
+ * The shipped `aiPress`. **"ranged-first" UNTIL THE EVIDENCE DECIDES** — it is
+ * today's order (shoot and cast when something reaches, then go round), so
+ * shipping it changes least while P2 is measured. See the decision's P2.
+ */
+export const SS2_AI_PRESS_DEFAULT = "ranged-first";
 
 /**
  * Each attacking verb's `attack_direction` and its `staminacost` factor.
@@ -10097,8 +10403,21 @@ export function createSs2TeamRules({
    *   before it — the CODE VERSION, not the id, tells a peer running this
    *   policy from one running the last.
    */
-  aiPlaysToCrowd = true
+  aiPlaysToCrowd = true,
+  /**
+   * How an AI gladiator presses a numbers advantage (the owner's decisions P1,
+   * P2, P4, 2026-09-27; `ss2PressTarget`, `ss2PressMove`). `"off"` is the AI
+   * before them — no help-first gate on the crowd-pleaser, no going round —
+   * kept as the measurement baseline. `"ranged-first"` goes round when nothing
+   * reaches (after arming the bow, shooting, casting and the priced taunt);
+   * `"pincer-first"` goes round ahead of all four whenever no melee verb is on
+   * offer. Named in the id when not the shipped default, the `aiTaunts` rule.
+   */
+  aiPress = SS2_AI_PRESS_DEFAULT
 } = {}) {
+  if (!SS2_AI_PRESS.includes(aiPress)) {
+    throw new TeamRuleSetError(`aiPress must be one of: ${SS2_AI_PRESS.join(", ")}; got ${String(aiPress)}.`);
+  }
   if (!FIGHT_MODES.includes(fightMode)) {
     throw new TeamRuleSetError(`fightMode must be one of: ${FIGHT_MODES.join(", ")}.`);
   }
@@ -10171,8 +10490,10 @@ export function createSs2TeamRules({
   // Same rule as the taunt's, and the same spelling: shipped ON, so the suffix
   // appears when it is OFF.
   const crowdPlaySuffix = aiPlaysToCrowd ? "" : "-no-crowd-play";
+  // Same rule once more: the suffix names the press when it is not the default.
+  const pressSuffix = aiPress === SS2_AI_PRESS_DEFAULT ? "" : `-press-${aiPress}`;
   const ruleSetId =
-    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}${joinSuffix}${crowdPlaySuffix}`;
+    `ss2-map-derived-${fightMode}${patienceSuffix}${strideSuffix}${backSuffix}${chargeSuffix}${tauntSuffix}${joinSuffix}${crowdPlaySuffix}${pressSuffix}`;
 
   // Named rather than returned directly so `chooseAiAction` can read the
   // rule set's own offer for a FOE (`ss2ReturnBlows`) without leaning on
@@ -11190,7 +11511,15 @@ export function createSs2TeamRules({
         //   build orders the two buttons by direction and never by their
         //   relationship to the opponent — which it cannot do, because the
         //   slots are wired once per frame and the opponent moves.
-        for (const type of offered) actions.push({ type, targetId: actorId });
+        //
+        // ► **A WALK THAT WOULD GO NOWHERE AGAINST A BODY IN THE WALKER'S LANE
+        //   IS WITHHELD** (the owner's decision P3, 2026-09-27;
+        //   `ss2WalkBlocked`). The ring greys it "blocked"; the AI, which
+        //   picks only from this list, can never pick it.
+        for (const type of offered) {
+          if (ss2WalkBlocked(view.actor, snipeBodies, SS2_WALK_DIRECTION[type])) continue;
+          actions.push({ type, targetId: actorId });
+        }
       }
 
       // ► **THE TAUNT, AND WHICH CONTROLLER WIRES IT IS THE WHOLE GATE.**
@@ -15486,6 +15815,30 @@ export function createSs2TeamRules({
       const closedOnBow = boltOnOffer ? null : ss2ClosedOnBowMove(view, options);
       if (attackOnOffer && closedOnBow) return closedOnBow;
 
+      // ► **THE PRESS (the owner's P1/P2/P4, 2026-09-27; `ss2PressTarget`).**
+      //   Read once: the crowd arm's help-first gate and both press arms use
+      //   it. `pincerFirst` is the P2 variant that goes round AHEAD of every
+      //   ranged choice — a shot or a bolt on offer, arming the bow, and the
+      //   taunt (the build's long-range verb) — whenever no MELEE verb is on
+      //   offer, which is the one thing the press is for; it puts a drawn bow
+      //   away to do it, since the far side is fought with the sword.
+      //   `ranged-first` reaches its press arm below the bow swap and the
+      //   taunt, inside the out-of-range block.
+      const pressTarget = aiPress === "off" ? null : ss2PressTarget(view);
+      const pincerFirst = pressTarget !== null && aiPress === "pincer-first"
+        && !options.some((option) => MELEE_ATTACKS.includes(option.type));
+      if (pincerFirst) {
+        // The bow is put away only when there is a way round to take — else
+        // a press target that flickers off would have the bow-arming arm draw
+        // it again next turn (a write-nothing verifier saw sheathe, draw,
+        // sheathe on three turns running, 2026-09-27).
+        const round = ss2PressMove(view, options, pressTarget, rankStride);
+        const sheathe = round && ss2InBowMode(actor)
+          ? options.find((option) => option.type === Ss2ActionType.SWAP_WEAPONS)
+          : null;
+        if (sheathe ?? round) return sheathe ?? round;
+      }
+
       if (!attackOnOffer) {
         const nearest = nearestFoe(view);
 
@@ -15536,7 +15889,8 @@ export function createSs2TeamRules({
         //     the floor or beyond, that one the nearest foe inside the floor.
         //     Running out of arrows still swaps
         //     it back — that one is forced, in `legalActions`.
-        if (!ss2InBowMode(actor) && resourceValue(actor, "ammo_left", 0) > 0) {
+        // `!pincerFirst`: that variant goes round rather than arm the bow.
+        if (!pincerFirst && !ss2InBowMode(actor) && resourceValue(actor, "ammo_left", 0) > 0) {
           const swap = options.find((option) => option.type === Ss2ActionType.SWAP_WEAPONS);
           const range = nearest ? ss2FightDistance(actor, nearest) : null;
           if (swap && range !== null && range >= ss2ArcherMinimumRange(actor)) return swap;
@@ -15567,7 +15921,12 @@ export function createSs2TeamRules({
         //
         //   ► **ADULATION IS NOT PRICED HERE**: ladder arm 28 above casts it on
         //     possession beyond 300, the build's rule, and returns first.
-        if (aiPlaysToCrowd && nearest && ss2CanBePriced(actor)) {
+        // ► **P1, HELP FIRST (2026-09-27): never while an ally is fighting a
+        //   foe this gladiator could go and help against (`pressTarget`).**
+        //   A 2v1 makes the free member safe and ahead, which is exactly when
+        //   the gates below opened — the "dance" the owner saw while the other
+        //   two fought. The other gates stand for every other case.
+        if (aiPlaysToCrowd && !pressTarget && nearest && ss2CanBePriced(actor)) {
           const pleaser = options.find((option) => option.type === Ss2ActionType.WINCROWD);
           if (pleaser
             && resourceValue(actor, "staminaleft", 0) > SS2_WINCROWD.staminaCost
@@ -15648,9 +16007,16 @@ export function createSs2TeamRules({
         //   side, so a numbers advantage bought a queue rather than a pincer.
         //
         //   **It was never a geometry problem.** `ss2BodyBlocks` gates the walk
-        //   clamp on `|dy| < physical_size`, so at the shipped stride of 97 a
-        //   foe one rank away does NOT block: the far side is already legal to
-        //   walk to. What was missing is any reason to want it.
+        //   clamp on ~~`|dy| < physical_size`~~ the lane, so ~~at the shipped
+        //   stride of 97~~ a foe one rank away does NOT block: the far side is
+        //   already legal to walk to. What was missing is any reason to want it.
+        //   ► **CORRECTED 2026-09-27: until that day it was a geometry problem
+        //     for every target stronger than 26** — `physical_size` passes the
+        //     97 between ranks at strength 27, so a flanker walking past a
+        //     colossus or 8 of the 18 decodable champions was clamped by the
+        //     target itself and walked in place (the owner's playtest; see
+        //     `ss2BodyBlocks`). The census above was the demo roster, strength
+        //     9, where the sentence held.
         //
         //   ► **AND THIS IS NOT THE RULE THAT CAUSED THE PILE-UP.** That one
         //     was "move toward the nearest foe's rank", which fires at the
@@ -15735,6 +16101,14 @@ export function createSs2TeamRules({
           }
         }
 
+        // ► **GOING ROUND (P2, `ss2PressMove`)**, below the taunt in both
+        //   variants and above the older flank arm, which it subsumes when
+        //   there is a fight to press and which still answers when there is not.
+        if (pressTarget) {
+          const round = ss2PressMove(view, options, pressTarget, rankStride);
+          if (round) return round;
+        }
+
         const flank = positionedInDepth && nearest && Number.isFinite(nearest.y)
           ? ss2FlankingWalk(view, nearest, options)
           : null;
@@ -15750,18 +16124,51 @@ export function createSs2TeamRules({
         //   reason to walk INTO one rather than toward the nearest enemy. See
         //   `ss2RankToJoin` for the sweep that set the value and
         //   `SS2_RANK_JOIN_SURPLUS` for what it costs.
+        // ► **NOT INTO A QUEUE WHILE THERE IS A WAY ROUND (2026-09-28, a fifth
+        //   verifier's finding against 06beab0).** This arm's "engaged" reads
+        //   the FOE's reach too, and a drawn bow's is ~4,500, so a foe drawing
+        //   his bow made every ally in his lane "engaged": the arm stepped the
+        //   free member into the queue behind that ally whenever the press
+        //   target flickered off, and the press stepped him out again — the
+        //   press-reversing arm in every shuttle that verifier found. With the
+        //   press on, a join that lands behind an ally is skipped while
+        //   `ss2PressGoal` has an open spot; with none (both flanks held, the
+        //   wall) queueing and waiting is still the answer, as before.
         if (positionedInDepth) {
           const join = ss2RankToJoin(view, rankJoinSurplus, rankStride);
-          if (join) {
-            const step = options.find((option) => option.type === join);
-            if (step) return step;
+          const step = join ? options.find((option) => option.type === join) : null;
+          if (step) {
+            const destY = actor.y + SS2_RANK_DIRECTION[join] * rankStride;
+            const there = nearestFoe({ ...view, foes: view.foes.filter((foe) => foe.y === destY) });
+            const queues = aiPress !== "off" && there && ss2StepQueues(view, destY, there)
+              && ss2PressGoal(view, there) !== null;
+            if (!queues) return step;
           }
         }
 
+        // ► **NOT INTO A QUEUE (2026-09-28, a fourth verifier's finding against
+        //   92f9701): a step whose landing puts an ally between the actor and
+        //   the foe is skipped, and the toward-walk below closes in the
+        //   actor's own lane instead.** When a melee ally was knocked out of
+        //   reach the press target vanished for a turn, this arm stepped the
+        //   free member into the queue behind that ally, and the press stepped
+        //   him out again when the ally re-engaged — a shuttle on the arena's
+        //   own host (buffs 2v2 seeds 6 and 11). Read in the foe's lane, the
+        //   press's own look-ahead.
         if (positionedInDepth && !ownRankHasFoe && nearest && Number.isFinite(nearest.y)) {
           const towardRank = nearest.y > view.actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK;
           const step = options.find((option) => option.type === towardRank);
-          if (step) return step;
+          // Only with the press on (`aiPress: "off"` is the AI before the
+          // press, kept exact as the measurement baseline), and ~~always~~
+          // only while `ss2PressGoal` has an open spot to go round to
+          // (corrected 2026-09-28, a fifth verifier: with both flanks held or
+          // the target at the wall, skipping left the fighter pacing under
+          // the target or walking into the wall with 0 attacks, where
+          // queueing and waiting was the old and better answer).
+          const destY = step ? actor.y + SS2_RANK_DIRECTION[towardRank] * rankStride : null;
+          const queued = aiPress !== "off" && step && destY === nearest.y && ss2StepQueues(view, destY, nearest)
+            && ss2PressGoal(view, nearest) !== null;
+          if (step && !queued) return step;
         }
 
         // ► **A DRAWN BOW CLOSED ON WITH NOTHING TO BASH ~~BACKS AWAY~~ TAKES THE
@@ -16834,6 +17241,7 @@ export const SS2_UNAVAILABLE_REASONS = Object.freeze(Object.fromEntries([
   ["duel", "grey", "team", "Two left standing: you may only close the gap."],
   ["no-rank", "grey", "team", "There is no rank that way."],
   ["rank-full", "grey", "team", "There is no free ground in that rank."],
+  ["blocked", "grey", "team", "Blocked: someone in your lane is in the way, so this walk would go nowhere."],
   ["not-built", "grey", "engine", "Not built yet."],
   ["undeclared", "grey", "engine", "This fighter cannot hold what this writes."],
   ["not-offered", "grey", "engine", "Not on offer."]
@@ -17025,7 +17433,8 @@ export function ss2UnavailableActions(view, targetId, legal, { rankStride = SS2_
       case Ss2ActionType.WALK_LEFT:
       case Ss2ActionType.WALK_RIGHT:
         if (!positioned) return "unpositioned";
-        return onCloseFrame && type !== retreat ? "in-reach" : null;
+        if (onCloseFrame && type !== retreat) return "in-reach";
+        return ss2WalkBlocked(actor, snipeBodies, SS2_WALK_DIRECTION[type]) ? "blocked" : null;
       case Ss2ActionType.REST:
         // Inferred, not derived — see the docblock.
         if (offered(Ss2ActionType.REST, actor.id)) return null;

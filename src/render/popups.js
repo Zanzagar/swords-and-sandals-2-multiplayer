@@ -142,7 +142,8 @@
  */
 
 import { fnv1a } from "../common/fnv1a.js";
-import { applyColourTransformAlpha, canvasFilterFor, glowAmplificationFor } from "./filters.js";
+import { applyColourTransformAlpha } from "./filters.js";
+import { IDENTITY, compose, glowGroupFor, matrixOf } from "./pack-ops.js";
 import { fieldOpsFor, staticTextOpsFor } from "./text.js";
 
 export class PopupError extends Error {
@@ -634,24 +635,8 @@ export function hasPopupArt(pack) {
   return Boolean(pack && pack.icons && pack.icons.damage_icon && pack.shapes);
 }
 
-/** `outer` then `inner`, both `[a, b, c, d, tx, ty]` with tx/ty in TWIPS. */
-function compose(outer, inner) {
-  const [a, b, c, d, tx, ty] = outer;
-  const [e, f, g, h, ux, uy] = inner;
-  return [
-    a * e + c * f, b * e + d * f,
-    a * g + c * h, b * g + d * h,
-    a * ux + c * uy + tx, b * ux + d * uy + ty
-  ];
-}
-
-const IDENTITY = Object.freeze([1, 0, 0, 1, 0, 0]);
-
-function matrixOf(value) {
-  return Array.isArray(value) && value.length >= 6 && value.slice(0, 6).every(Number.isFinite)
-    ? value.slice(0, 6)
-    : null;
-}
+// `compose`, `matrixOf`, `IDENTITY` and `glowGroupFor` are `./pack-ops.js`'s,
+// shared with `action-buttons.js` and `combat-panel.js` rather than copied.
 
 /** A shape's paths as ops, with the placement's matrix and fade folded in. */
 function shapeOps(pack, character, matrix, alpha) {
@@ -683,19 +668,6 @@ function shapeOps(pack, character, matrix, alpha) {
     }));
   }
   return ops;
-}
-
-/** The group a glowing text placement's ops share, built at the draw scale. */
-function glowGroupFor(filters, scale) {
-  if (!Array.isArray(filters) || filters.length === 0) return null;
-  const built = canvasFilterFor(filters, { scale });
-  const amplify = glowAmplificationFor(filters, { scale });
-  if (!built.filter && !amplify) return null;
-  return Object.freeze({
-    id: null, path: Object.freeze([]), character: null, enclosedBy: null,
-    filter: built.filter, amplify, composite: null, blendModeRefused: null,
-    colourMatricesFolded: 0, ops: 0, placements: 0, counts: built.counts
-  });
 }
 
 function withFade(ops, alpha, group) {

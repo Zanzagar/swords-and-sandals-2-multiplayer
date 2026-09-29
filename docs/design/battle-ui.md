@@ -795,7 +795,10 @@ and the ring is squeezed onto the stage after it.
    and dims the rest; the hover text names the target ("Fireball → Nym · click another lit foe to
    change"); one click still fires at the SELECTED foe (the who-first decision stands).
 2. **Team HUD (Q1a, Q2, Q3c):** the right-hand roster becomes TWO TEAM PANELS, red then blue; each
-   fighter's row shows **health, energy and armour** bars with numbers (the build's three readings;
+   fighter's row shows **health, energy and armour** bars with numbers *(**superseded for the
+   three readings, 2026-09-24 evening**: they are drawn IN THE GAME FRAME with the build's own
+   gauges — [the in-frame HUD](#decided-inframe-hud-2026-09-24), D2 and D5; the rows keep them only
+   as visually-hidden meters for screen readers)* (the build's three readings;
    SS2 has no mana — spells are paid from energy; magicka appears only in spell previews), a
    highlight on the fighter whose turn it is, condition chips in plain words (Burning, Frozen,
    Poisoned…), and a "you" marker on seats a person controls.
@@ -834,14 +837,19 @@ and the ring is squeezed onto the stage after it.
    name. `test/arena-team-hud-bouts.test.js` holds it to `host.battle.initiative` after every
    action.
 5. **Team colours (Q4, Q12):** red team `#e0584f`, blue team `#4c8fe0`; each name plate on the stage
-   is tinted with a dark outline PLUS a coloured underline and a team initial (a cue that does not
-   rely on colour alone); the panels and the strip use the same colours. The demo fighters' SKIN
+   is tinted with a dark outline ~~PLUS a coloured underline and a team initial (a cue that does not
+   rely on colour alone)~~ **— and nothing else: COLOUR IS THE ONLY SIDE CUE (the owner, 2026-09-24
+   evening: "the team names dont need the R and B icons next to them and underlined. Colors
+   suffice"; see [the in-frame HUD](#decided-inframe-hud-2026-09-24), D1). No disc, initial or
+   underline on the stage, the roster heading and rows, or the turn-strip chips.** The panels and
+   the strip use the same colours. The demo fighters' SKIN
    colours are random across both teams, which is why the name cue matters.
    **Built 2026-09-24 (H1):** `tools/arena/team-hud.js` (`teamStyleFor`, `namePlateFor`,
    `namePlateLayout`), drawn by `renderStage`'s name plate and `renderRoster`;
    `test/arena-team-hud.test.js`, `test/arena-team-hud-wiring.test.js`. The plate is the name in
-   the side's colour stroked in `#0b0a0d`, a coloured underline over the same outline, and the
-   side's initial (R, B) on a disc to the left; nothing reaches under the ring's `below` line.
+   the side's colour stroked in `#0b0a0d`~~, a coloured underline over the same outline, and the
+   side's initial (R, B) on a disc to the left~~ *(the underline and the disc are removed, D1
+   below)*; nothing reaches under the ring's `below` line.
    Contrast, WCAG 2.1: on the sand the colours alone reach only 1.4–3.4 : 1 (the build's sand shape
    667 `#602d18`; the authored bowl `#4a3a2b`–`#836b4b`), so the OUTLINE carries them — red 5.34,
    blue 5.94 against it — so a LIVING plate is drawn opaque (the light plate's 0.85 let the sand
@@ -852,7 +860,10 @@ and the ring is squeezed onto the stage after it.
    ring (buttons, items row, rank arrows) with a margin, and every lit target while a reach preview
    shows; the ring is drawn at a FIXED on-screen size, capped at what the build shows at zoom 80,
    instead of growing with the survivors' close-up. AI and spectate turns stay byte-identical — the
-   close-up and 1v1 untouched.
+   close-up and 1v1 untouched. *(**Amended 2026-09-24 evening** by the owner's "make camera
+   adjustments necessary to fit these assets": in a TEAM bout every camera — AI and spectate turns
+   and the close-up included — keeps the fighters above the in-frame HUD, and the close-up keeps
+   every rank off the painted wall; a 1v1 stays the build's own camera. See D3 below.)*
 7. **The spell row never covers the bow buttons' words** ("Bombard", "Snipe", the arrow count).
 8. **The grilling gate (Q6a, Q8a, Q9b)** — how the harness enforces this front end rather than
    invoking it on judgment: every commit carries a trailer, `Decided: <doc#section>` (a recorded
@@ -878,6 +889,59 @@ and the ring is squeezed onto the stage after it.
     and escape routes, but in a turn-based side-on game it invites kiting, tape-measure micro, turtling and
     AI exploitation, reads poorly in depth, and costs a spatial AI.
 
+<a id="decided-inframe-hud-2026-09-24"></a>
+
+### The in-frame team HUD: DECIDED 2026-09-24 (evening)
+
+The owner, after playing the team HUD: *"First, the team names dont need the R and B icons next to
+them and underlined. Colors suffice. Secondly, the team health, energy, and aramor should be in the
+game frame as UI elements, using the same ui elements that are used in 1v1 in the original game.
+Pull these assets. Make camera adjustments necessary tofit these assets."* He delegated the shape;
+the main session decided D1–D7 on a read-only wave's measurements (session `5bb96879`, wave
+`wf_dca6f0e1-503`: 4 questions, 4 verifiers).
+
+- **D1 — colour is the only side cue.** The name plate is the name in team colour stroked in
+  `#0b0a0d`; no disc, initial or underline anywhere (stage, roster, turn strip). The contrast
+  figures of item 5 stand (they never depended on the initial). *Cost, stated:* red and blue are
+  1.11 : 1 in luminance, so the side is not readable in greyscale; they stay far apart under the
+  common colour-vision deficiencies.
+- **D2 — the HUD is the build's own `combat_panel` gauges (sprite 751), drawn in the stage.** The
+  health vial (733), the energy vial (742) and the armour gauge (749), each with its `blood_health`
+  liquid moved as the build moves it (`_y = Math.round(-30 + (101 - pct) * 0.7)`,
+  `pct = Math.round(value / max * 100)`), the number `value + " / " + max`, the labels, and the
+  name banner (sprite 52). The extractor PULLS them into the icons pack as their own `gauges`
+  section, derived from the bytes. **A 1v1 is the build's own panel at its own place** (stage
+  origin (-0.05, 288.75)); **a team bout gives each fighter one cluster** — the build's hero
+  cluster for red, the villain cluster for blue — scaled `min(1, 316 / (N * 215))` for N a side,
+  bottom-anchored where the build's banners end. The name is in the fighter's team colour; the
+  acting fighter's cluster is marked in the target ring's gold; a fallen fighter's fades to 0.4; the
+  armour gauge hides at 0, as the build's does. A clone without the pack draws an authored fallback
+  of the same layout.
+- **D3 — the camera keeps every framed fighter above the HUD in a team bout** (`hudTop`, the HUD's
+  highest ink): the team line lifts to `min(line, hudTop − ink)`, the zoom is capped so the back
+  rank stays 5 px off the painted wall in every arena, and the close-up's bottom is the HUD's top.
+  **The close-up also keeps every rank off the wall** with or without a HUD (a pre-existing defect:
+  a back-ranker could stand 17 px inside arena 5's wall at z97). A 1v1 keeps the build's camera.
+- **D4 — the ring is drawn over the HUD** and kept inside the visible stage (above the UI bar),
+  not the whole 0..420 rect (a pre-existing defect: the rank-front arrow sat under the bar).
+- **D5 — the side panel loses its three visible bars**; they stay as visually-hidden meters, the
+  only screen-reader form of the readings.
+- **D6 — the gauges do not drain before the blow lands**: a fighter's readings hold their
+  pre-step values until that step's first pop-up on him starts, or the step settles.
+- **D8 — the crowd bar is the build's own, in the frame too** (the owner, 2026-09-25: "use actual in
+  game crowd bar asset?"). `combat_panel`'s `crowd_bar` (sprite 725 over its background 723, and the
+  `crowd_text` field 750) at the build's own place — the top right of the stage, panel-local
+  x 482..640, y -260..-237, i.e. stage y ~28..51 — at scale 1 in every bout size, driven as the build
+  drives it: `_xscale = Math.round(crowd_interest)` and `crowd_text = "crowd: " +
+  crowd_interest_array[Math.ceil(crowd_interest / 10)]` (clip-actions on `crowd_bar`, blocks
+  0x225e5d load / 0x226086 enterFrame), hidden as the build hides it (`crowdHeardFor`). The side
+  panel's DOM meter becomes visually hidden, as the readings did (D5). Above 100 (an opening level
+  sum) the bar stays full and the mood the top one, as the DOM meter already does (authored).
+- **D7 — masks really clip.** `paintLayerOperation` set its clip inside its own save/restore, so
+  every masked op was drawn UNCLIPPED (the night sky's moon since `df49dc3`, now the gauges'
+  liquid); fixed there and in the screens page, whose `clipsApplied` tally had counted clips that
+  never applied.
+
 ### Slices (tracked on the board)
 
 - **HUD track** (starts now): **H1** team colours on the stage and the roster · **H2** the team panels
@@ -889,6 +953,85 @@ and the ring is squeezed onto the stage after it.
 - **Gate track:** **G1** the harness: `githooks/commit-msg`, the CI template, `adopt.sh`, git-hygiene
   rule 14 and the ADR amendment · **G2** this repository adopts it, and the workflow template checks
   the `decided` pointer.
+
+<a id="decided-ai-press-2026-09-27"></a>
+
+### The AI presses a numbers advantage: DECIDED 2026-09-27
+
+The owner, after playtesting (2026-09-26): *"some ai is bad when 2 are in same lane one behind other
+or 2v1 where 2 are in separate lanes, the ai on the team of 2 never makes a concerted effort to corner
+the single gladiator oftentimes it just dances or waits for the 1v1 to finish instead of taking
+decisive maneuvers"*. Asked in chat with costed options (session `f4d2f69f`), on this measurement
+(the arena's own host, `demoSide` plain 2v2, seeds 1-96, every turn of a 2v1 phase, scratch census):
+the free pair member's turns were 18% crowd-pleasers (`wincrowd`, the "dance"), both pair members were
+in reach of the lone foe on **0%** of turns, and the pair killed the lone foe before losing a member in
+**8 of 96** phases. Traces: seed 3, blue-2 plays to the crowd ten turns running at x 380 while blue-1
+duels; seed 2, blue-2 walks up behind blue-1 in one lane and then walks in place on the clamp line.
+*(The owner's other defect, a big fighter walking in place beside another lane, was a Fix, not a
+decision: `ss2BodyBlocks`, `57b2209`.)*
+
+- **P1 — Help first.** No crowd-pleaser while an ally is fighting a foe this gladiator could go and
+  help against; it commits until that foe is down, then may play to the crowd. This narrows the
+  owner's crowd-play decision of 2026-09-23 (`SS2_AI_CROWD`) for this one case; the other gates stand.
+- **P2 — How the free member closes: DECIDED BY EVIDENCE, not yet decided.** The owner: *"I dont
+  have preference i just want evidence on way or the other."* Found while building it: shooting and
+  casting when something reaches is ALREADY the AI's order (a ranged option on offer goes to the
+  swing table before any move, and a bow owner at range arms the bow first), so the two variants are
+  **ranged first** (today's order, then go round when nothing reaches) against **pincer first**
+  (go round even while holding a shot). Going round is the same in both: out of a lane blocked by an
+  ally, past the foe in the next lane, back in on the far side (the back attack's +50% and the foe
+  caught between). Both are built behind a rule-set option and measured on seeded bouts (2v1
+  conversion, pair turns to kill, idle share, stalls, overall balance); the result is recorded here
+  and the owner picks.
+
+  **THE EVIDENCE (2026-09-27, session `f4d2f69f`; `node tools/ai-press-census.mjs <kit> <perSide>
+  96 [h2h]` on the arena's own host, `createVanillaBattleHost` + `demoSide` or the build's champions,
+  96 seeds a cell — re-run, it reproduces this table).** `aiPress` is the rule-set option: `off`
+  (the AI before P1/P2), `ranged-first`, `pincer-first`.
+
+  | roster | 2v1 converted (pair wins whole): off / ranged / pincer | both pair members on the lone foe | pair turns spent dancing | mean bout length |
+  |---|---|---|---|---|
+  | plain 2v2 | 8.3% / 9.4% / 9.4% | 0.0 / 1.3 / 1.3% | 18.3 / 4.2 / 4.2% | 50.9 / 50.4 / 50.4 |
+  | plain 3v3 | 53.3 / 75.3 / 76.1% | 6.4 / 28.4 / 30.0% | 37.3 / 2.3 / 1.3% | 85.5 / 79.0 / 78.9 |
+  | buffs 2v2 | 54.2 / 57.3 / 34.4% | 7.9 / 23.2 / 12.7% | 1.7 / 0.5 / 0.7% | 49.1 / 49.9 / 68.3 |
+  | buffs 3v3 | 50.0 / 84.8 / 76.6% | 9.7 / 32.0 / 29.9% | 28.4 / 1.4 / 2.5% | 95.0 / 67.4 / 84.2 |
+  | tricks 3v3 | 47.2 / 52.1 / 56.1% | 0.4 / 2.9 / 3.0% | 23.5 / 9.0 / 9.2% | 205.9 / 198.4 / 203.0 |
+  | crowd 3v3 | 53.3 / 75.9 / 75.9% | 4.3 / 29.2 / 31.3% | 41.3 / 2.7 / 1.4% | 203.4 / 192.7 / 192.9 |
+  | champions 2v2 | 97.9 / 97.9 / 96.9% | 19.0 / 21.2 / 17.9% | 2.8 / 1.0 / 0.7% | 36.2 / 36.2 / 39.6 |
+  | champions 3v3 | 78.8 / 82.4 / 79.4% | 3.4 / 3.8 / 21.5% | 6.0 / 2.0 / 3.2% | 61.6 / 62.2 / 69.0 |
+
+  *Measured at `ab56337`, the fifth measurement; five write-nothing verifiers moved the code under
+  it (`74c0014`, `92f9701`, `06beab0`, `463fe3f`, `ab56337`: a lane shuttle when the far side was
+  taken, a distant bow holding a side, early lane entry opening long-range taunts, the older arms
+  re-queueing a fighter the press had stepped out, and the `off` baseline drifting). Head to head
+  over the five measurements: 770 : 766, 773 : 763, 784 : 752, 774 : 762, 774 : 762. "Dancing" counts
+  every crowd-pleaser in a 2v1 phase; P1 stops it only while an ally fights, so what is left is before
+  anyone engages, or a foe of the dancer's own still coming (P4).*
+
+  - **P1 + going round, against `off` (ranged-first, the shipped variant):** in 3v3 the pair
+    converts a 2v1 far more often (plain +22.0 points, buffs +34.8, crowd +22.6, tricks +4.9,
+    champions +3.6), both members are on the lone foe 3-7x as often on the demo rosters, the dance
+    while an ally fights a foe this gladiator could help against is gone (P1, pinned by
+    `test/ss2-ai-press.test.js`), and demo-roster bouts get shorter (buffs 3v3 95 -> 67 turns).
+    Champion bouts are within 1%. 2v2 moves less: the 2v1 there is usually over before a detour
+    arrives. No bout failed to settle in any cell; no AI walk went nowhere; no lane shuttle of four
+    or more in seeds 1-96 of champions 2/3v3, tricks 3v3 and buffs 2/3v3, either variant.
+  - **Ranged-first against pincer-first: ranged-first is at least as strong.** Head to head (each
+    side a different variant, both colour assignments, 96 seeds, all eight rosters): **774 wins to
+    762 over 1,536 bouts**, pincer-first clearly weaker on buffs 2v2 (34.4% converted against 57.3%,
+    bouts 68 against 50 turns) and buffs 3v3 (76.6 against 84.8). Pincer-first still corners more
+    VISIBLY on champions (the pair on both sides of the lone foe 32% of 2v1 turns against 20% in 2v2,
+    back attacks 14.6% of the pair's blows against 7.4%) and makes champion 3v3 bouts ~11% longer.
+    **Known pincer-first defect, to fix before choosing it:** a fighter can sheathe and redraw his bow
+    on consecutive turns when his press target flickers (4+ in a row in 8-10 of 96 champion 3v3
+    bouts; ranged-first: none).
+  - **Shipped: `ranged-first`**, today's order, at least as strong and with the shorter bouts. The owner
+    may flip it for the more visible cornering; the option is one word (`aiPress`).
+- **P3 — A walk that goes nowhere because of a body in your own lane is not offered; the ring shows
+  it greyed, "Blocked",** the way "Not built yet" is shown, and the AI can never pick it. (A walk
+  into the arena wall is not covered by this decision.)
+- **P4 — Finish your own fight.** `rankJoinSurplus` stays 0: only a gladiator with no foe in its own
+  lane leaves to help.
 
 ## Delivery order
 

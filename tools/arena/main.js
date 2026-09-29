@@ -73,7 +73,6 @@ import {
   figureProvenance,
   perSideFrom,
   rankOfDepth,
-  viewportFor,
   poseAt,
   idleFrameFor,
   timelineFor,
@@ -195,12 +194,30 @@ import {
   ringLabelBoxOf,
   ringLabelSizeFor,
   ringMoveButtonsAt,
+  ringPaintOrder,
   ringPlacementFor,
   ringSlotAt,
   ringSwapButtonAt
 } from "/tools/arena/ring-layout.js";
 import { ringButtonArt } from "/tools/arena/ring-art.js";
 import { namePlateFor, namePlateLayout, teamHudFor } from "/tools/arena/team-hud.js";
+import {
+  cameraYscaleFor,
+  combatHudArtFor,
+  combatHudFrameFor,
+  combatHudInvoiceFor,
+  combatHudProvenanceFor,
+  createCombatHudOps,
+  createCrowdBarOps,
+  crowdBarArtFor,
+  crowdBarInvoiceOf,
+  crowdBarProvenanceFor,
+  crowdBarReadingFor,
+  fittedViewFor,
+  gaugeHoldFor,
+  heldHudFor,
+  ringBoundsFor
+} from "/tools/arena/combat-hud.js";
 import {
   RING_PACE_HELD_RATE,
   RING_PACE_START,
@@ -839,6 +856,43 @@ let drops = [];
  *   `src/render/popups.js`'s.
  */
 let popups = [];
+
+/**
+ * ► **THE IN-FRAME TEAM HUD (wave 3 of the in-frame HUD, 2026-09-25): THE
+ *   BUILD'S OWN GAUGES, IN THE STAGE.** The owner: *"the team health, energy,
+ *   and aramor should be in the game frame as UI elements, using the same ui
+ *   elements that are used in 1v1 in the original game. Pull these assets.
+ *   Make camera adjustments necessary tofit these assets."* Each fighter's
+ *   name banner, energy and health vials and armour gauge — `combat_panel`,
+ *   sprite 751 — painted over the fighters and under the rain, the UI bar and
+ *   the border, as the build paints its panel (arena depth 200000, over
+ *   `gladiators` at depth 5, under root depths 80, 438 and 1193). Every
+ *   decision is `tools/arena/combat-hud.js`'s and `src/render/combat-panel.js`'s,
+ *   under the suite; this file holds the state they are handed and paints.
+ *
+ * - `gaugeArt` — which art is drawn and why (`combatHudArtFor`): the build's
+ *   own from the icons pack, or the authored fallback. `undefined` until the
+ *   asset gate hands the pack over — a late or failed pack never is.
+ * - `hudAtStep` — the HUD model as the last step LEFT it (the opening wire
+ *   before the first), and `hudHold` — what the step being drawn holds back
+ *   (D6: a gauge drains when the blow's pop-up starts, not at submit).
+ * - `hudFrame` — THIS frame's clusters and the band's top, worked out once
+ *   before the camera steps (`combatHudNow`), read by the camera, the fitted
+ *   view and the painter.
+ * - `combatHudOps` — each cluster's ops, kept while nothing they read changes.
+ * - `crowdArt`, `crowdBarOps` — D8, the build's own crowd bar at the stage's
+ *   top right, in the same layer: which art (`crowdBarArtFor`) and its kept
+ *   ops. Its reading is the frame's (`hudFrame.crowd`, `crowdBarReadingFor`).
+ * - `hudFailures` — the causes of a HUD that could not be drawn, said once each.
+ */
+let gaugeArt = combatHudArtFor(undefined);
+let crowdArt = crowdBarArtFor(undefined);
+let hudAtStep = teamHudFor({ wire: host.wire(), seats });
+let hudHold = null;
+let hudFrame = null;
+const combatHudOps = createCombatHudOps();
+const crowdBarOps = createCrowdBarOps();
+const hudFailures = new Set();
 
 /**
  * WHAT THE RIG'S OWN PACK SAYS ABOUT EFFECT GROUPS, counted from the raw
@@ -1543,7 +1597,15 @@ function beginStep(step, byAi = false) {
 
   // The fight pop-ups, each starting WITH its fighter's reaction clip — the
   // build attaches it in the same action (`defender_hurt` +0x211e/+0x2120).
-  spawnPopups(step, started, delays);
+  const spawned = spawnPopups(step, started, delays);
+
+  // ► **THE GAUGES WAIT FOR THE BLOW (D6, 2026-09-25).** The wire already holds
+  //   every post-action reading; each fighter this step changed keeps his
+  //   pre-step readings on the in-frame HUD until his first pop-up of it starts,
+  //   or the step settles (`gaugeHoldFor`). The side panel's meters read the wire.
+  const hudAfter = teamHudFor({ wire: host.wire(), seats });
+  hudHold = gaugeHoldFor({ before: hudAtStep, after: hudAfter, popups: spawned, tokens: step.actionTokens });
+  hudAtStep = hudAfter;
 
   // The crowd this step leaves, and the result it may decide, for the arena's
   // own sounds — played from the draw loop, never here (`stepArenaSounds`).
@@ -1581,20 +1643,27 @@ function beginStep(step, byAi = false) {
  * or an arrow's victim at impact, via `reactionDelaysFor`), a molten-death rock's on its own
  * landing frame. `maxscale` is the camera's TARGET zoom now, because the build
  * scales the icon once, at attach (+0x16cf).
+ *
+ * Returns the entries it added, which the in-frame HUD's hold reads (D6).
  */
 function spawnPopups(step, started, delays) {
   const strikes = strikeLedger.take();
   const boundary = step.actionBoundary;
-  if (!Number.isFinite(boundary)) return;
+  if (!Number.isFinite(boundary)) return [];
   const events = host.wire().events.filter((event) => event.sequence >= boundary);
   const now = arenaNow();
+  // What this step put on the stage, handed back for the gauges' hold (D6).
+  const spawned = [];
   for (const popup of popupsForEvents(events, { strikes, seed: boundary })) {
     const clipStart = started.get(popup.combatantId)?.startedAt;
     const startedAt = Number.isFinite(popup.delayFrames)
       ? now + popup.delayFrames * PROJECTILE_FRAME_MS
       : (Number.isFinite(clipStart) ? clipStart : now + (delays.get(popup.combatantId) ?? 0));
-    popups.push({ popup, startedAt, maxscale: camera?.maxscale ?? null });
+    const entry = { popup, startedAt, maxscale: camera?.maxscale ?? null };
+    spawned.push(entry);
+    popups.push(entry);
   }
+  return spawned;
 }
 
 /**
@@ -1918,7 +1987,7 @@ let cameraFrame = null;
  *   (`SS2_CLOSE_UP`): it fits each fighter's crown and swing on the stage, and
  *   `actorSpanFor` widens him to everywhere his running clip draws him.
  */
-function placedActors() {
+function placedActors(now = arenaNow()) {
   const living = combatantsById();
   return scene.drawOrder
     .map((combatantId) => ({ id: combatantId, actor: scene.actors[combatantId] }))
@@ -1929,7 +1998,13 @@ function placedActors() {
         id,
         x: actor.x,
         y: actor.y,
-        yscale: actor.yscale,
+        // ► **THE SIZE ON SCREEN, not the scene's alone** (the camera slice's
+        //   verifiers, 2026-09-24): the fold takes a colossus's post-cast or
+        //   post-expiry `_yscale` at once while the figure keeps drawing the old
+        //   size, and a growth overshoots on screen — so the camera, which fits
+        //   shadows and plates above the in-frame HUD from this, is handed the
+        //   larger of the two (`cameraYscaleFor`). A 1v1's camera reads no size.
+        yscale: cameraYscaleFor(actor.yscale, drawnYscaleOf(id, now)),
         ...actorSpanFor(actor, playing.get(id) ?? null),
         side: placement?.side ?? null,
         teamId: placement?.teamId ?? null,
@@ -1939,8 +2014,19 @@ function placedActors() {
     });
 }
 
-function stepCamera() {
-  cameraFrame = stepFramedCamera(cameraFrame, placedActors(), { result: host?.battle?.result ?? null });
+/**
+ * ► **UNDER THE IN-FRAME TEAM HUD (D3, 2026-09-25)** the camera is handed the
+ *   band's top — `hudFrame.cameraHudTop`, this frame's, worked out before this
+ *   runs — so it keeps every framed fighter's feet, shadow and name above it.
+ *   In a 1v1 that is null: the build's own panel stands over the build's own
+ *   camera, as it does in the build. `camera` is the frame's camera WHOLE — its
+ *   `hudTop`, `inkSize` and a blend's `inkLift` are what the projector reads.
+ */
+function stepCamera(now = arenaNow()) {
+  // ► **THE FRAME'S OWN CLOCK** (the wave-3 verifier): the figures are drawn at
+  //   `render`'s `now`, so the drawn size the camera is fed is read at it too —
+  //   a later `arenaNow()` read a colossus a few ms further on than he is drawn.
+  cameraFrame = stepFramedCamera(cameraFrame, placedActors(now), { result: host?.battle?.result ?? null, hudTop: hudFrame?.cameraHudTop ?? null });
   camera = cameraFrame.camera;
 }
 
@@ -1957,14 +2043,17 @@ function stepCamera() {
  *   fitted to the roster — a 1v1 and a 3v3 get the same frame and differ in how
  *   far the camera has pulled back inside it. **That is what "the backdrop sets
  *   the scale" means** (owner, 2026-09-13).
- * - **The FITTED view** is the authored fallback, unchanged. `viewportFor` fits
- *   the roster because the authored bowl has no fixed size to be faithful to.
+ * - **The FITTED view** is the authored fallback. `viewportFor` fits the
+ *   roster because the authored bowl has no fixed size to be faithful to —
+ *   through `fittedViewFor` (`tools/arena/combat-hud.js`), which lays it out
+ *   above the in-frame HUD's band in a team bout.
  *
- * All the arithmetic in both now lives in `src/render/`, under the suite. This
+ * All the arithmetic in both now lives in `src/render/` and
+ * `tools/arena/combat-hud.js`, under the suite. This
  * function chooses between them and holds no numbers of its own — which is the
  * standing lesson about this file, arriving for the sixth time.
  */
-function viewport() {
+function viewport(now = arenaNow()) {
   const width = canvas.width;
   const height = canvas.height;
 
@@ -1975,31 +2064,43 @@ function viewport() {
   // WHICH scale and horizon fit this roster is decided in
   // `src/render/arena-shell.js`, under the suite — two live defects lived in
   // that arithmetic and both were found by screenshotting, because nothing
-  // could test this file. What stays here is `toX`/`toY`, which close over the
-  // canvas and are the mapping rather than the decision.
-  const { scale, horizon } = viewportFor({
+  // could test this file. ~~What stays here is `toX`/`toY`, which close over
+  // the canvas and are the mapping rather than the decision~~ — they moved to
+  // `fittedViewFor` (`tools/arena/combat-hud.js`) on 2026-09-25, because the
+  // in-frame HUD made the mapping a decision: in a team bout the view is laid
+  // out above the HUD's band (D3), INSIDE the stage the frame is clipped to
+  // (Codex review of wave 3, pass 1: laid out from the canvas's top, a tall
+  // canvas stood the back rank's crowns above the clip), and pulled back until
+  // the back ranks' crowns are on that stage too (pass 2: `viewportFor` fits
+  // the front rank's only). With no band — a 1v1, or no HUD — it is the
+  // fitted view it always was.
+  // ► The `1.7` in its `toY` is the AUTHORED depth factor and stays with the
+  //   authored bowl, where the ground is a rectangle from the horizon down. The
+  //   extracted arena draws depth behind the front rank at 0.5, and frames a
+  //   team on the visible floor, because the build's crowd wall paints over
+  //   the top of its sand: ~~"uses 1, because the build's sand is painted
+  //   for the build's own `_y` range"~~ was measured against the sand and
+  //   put the back rank in the wall. See `RANK_DEPTH_FACTOR` and
+  //   `SS2_TEAM_FRAMING` in `src/render/arena-backdrop.js`.
+  // ► **EACH FIGHTER AT THE SIZE HE IS DRAWN AT** (Codex review of wave 3,
+  //   pass 3), as the camera is fed in `placedActors`: the crown fit reads
+  //   `yscale`, and while a colossus's expiry is pending the scene already
+  //   holds the smaller size the figure is not yet drawn at. `viewportFor`
+  //   itself reads no size, so a view with no band is what it was.
+  const actors = scene.drawOrder.map((combatantId) => {
+    const actor = scene.actors[combatantId];
+    return actor ? { ...actor, yscale: cameraYscaleFor(actor.yscale, drawnYscaleOf(combatantId, now)) } : actor;
+  });
+  return fittedViewFor({
     width,
     height,
+    fit: stageFitFor({ width, height }),
+    frame: hudFrame,
+    actors,
     frontY: ARENA_FRONT_Y,
-    actors: scene.drawOrder.map((combatantId) => scene.actors[combatantId])
+    rankStride: SS2_ARENA.rankStride,
+    clipped: STAGE_CLIP
   });
-
-  return {
-    scale,
-    horizon,
-    toX: (x) => width / 2 + x * scale,
-    // Arena y is 200 at the front rank and DECREASES further back, so a bigger
-    // y is nearer the viewer and further down the canvas.
-    // ► The `1.7` here is the AUTHORED depth factor and stays with the authored
-    //   bowl, where the ground is a rectangle from the horizon down. The
-    //   extracted arena draws depth behind the front rank at 0.5, and frames a
-    //   team on the visible floor, because the build's crowd wall paints over
-    //   the top of its sand: ~~"uses 1, because the build's sand is painted
-    //   for the build's own `_y` range"~~ was measured against the sand and
-    //   put the back rank in the wall. See `RANK_DEPTH_FACTOR` and
-    //   `SS2_TEAM_FRAMING` in `src/render/arena-backdrop.js`.
-    toY: (y, lift) => horizon + (height - horizon) * 0.62 - (ARENA_FRONT_Y - y) * scale * 1.7 - lift * scale
-  };
 }
 
 /**
@@ -2485,6 +2586,15 @@ function useIconPack(data) {
   // section, the authored ones otherwise — `ring-art.js` decides per button.
   ringButtonPack = actionButtonPackFrom(data);
   if (ringButtonPack?.button) log("ring: the build's own action buttons from your install.");
+  // THE GAUGES IN THE FRAME: the build's own when the pack has a `gauges`
+  // section the renderer accepts; otherwise the authored ones, and the log
+  // says which case it is — no pack, a stale one, or one it refused.
+  gaugeArt = combatHudArtFor(data);
+  log(gaugeArt.log.message, { warn: gaugeArt.log.warn });
+  // THE CROWD BAR IN THE FRAME (D8): the build's own when the pack has a
+  // `crowd` section the renderer accepts; otherwise the authored one, and why.
+  crowdArt = crowdBarArtFor(data);
+  log(crowdArt.log.message, { warn: crowdArt.log.warn });
 }
 
 assetGate.track("bitmaps", fetch("/assets/bitmaps/manifest.json")
@@ -4071,12 +4181,20 @@ function paintLayerOperation(operation) {
   //   while the build's blur spills past it. 4,312 of the 5,810 `sky`
   //   operations under a filtered group carry one of these, so that is not a
   //   corner case — it is most of the sky.
+  //
+  // ► **ONLY THE TRANSFORM IS PUT BACK AFTER `clip()`, NEVER THE DRAWING
+  //   STATE.** ~~`save()`, transform, `clip()`, `restore()`~~ until 2026-09-24:
+  //   the clipping region IS drawing state, `restore()` pops it, and so every
+  //   masked operation — the moon's 56 from sky frame 112 — was filled
+  //   UNCLIPPED (found by the in-frame HUD's wave 1; D7). The clip now lives in
+  //   the outer `save()` above and ends at its `restore()` below;
+  //   `test/arena-layer-clip.test.js` runs this body against the spec's stack.
   if (operation.clip) {
     const c = operation.clip.matrix;
-    context.save();
+    const layerSpace = context.getTransform();
     context.transform(c[0], c[1], c[2], c[3], c[4] / TWIPS_PER_PIXEL, c[5] / TWIPS_PER_PIXEL);
     context.clip(path2dFor(operation.clip.d), "evenodd");
-    context.restore();
+    context.setTransform(layerSpace);
   }
   context.transform(m[0], m[1], m[2], m[3], m[4] / TWIPS_PER_PIXEL, m[5] / TWIPS_PER_PIXEL);
   const path = path2dFor(operation.d);
@@ -4268,14 +4386,19 @@ function render(now = performance.now()) {
   canvas.width = Math.max(1, Math.floor(rect.width * ratio));
   canvas.height = Math.max(1, Math.floor(rect.height * ratio));
 
+  // ► **THE IN-FRAME HUD, BEFORE THE CAMERA** (D3): the band this frame will
+  //   paint, whose top the camera stands its fighters above and the fitted
+  //   view reserves — worked out once, so the three read one answer.
+  hudFrame = combatHudNow(now);
+
   // ► **THE CAMERA IS STEPPED ONCE A FRAME, BEFORE THE VIEW IS BUILT.** It is
   //   a tween — the zoom eases by a fifth and the pan by a sixteenth — so
   //   stepping it twice would run it at double speed, and stepping it after
   //   `viewport()` would draw a frame behind the positions it was computed
   //   from. Both are the class of defect this file keeps producing.
-  stepCamera();
+  stepCamera(now);
 
-  const view = viewport();
+  const view = viewport(now);
   context.clearRect(0, 0, canvas.width, canvas.height);
 
   // The BUILD'S OWN arena when the player has extracted it, this repository's
@@ -4775,13 +4898,14 @@ function renderStage(view, fit, now) {
     //   drawn this frame, and the two are the same only when nothing is moving.
     //   Both values were already in scope eleven lines apart.
     //
-    // ► **IN HIS SIDE'S COLOUR, OUTLINED, UNDERLINED AND WITH HIS SIDE'S
-    //   INITIAL (H1, the owner's Q4 and Q12, 2026-09-24)**: the demo fighters'
-    //   skins are random across both teams, so the plate says whose side he is
-    //   on — and says it with a letter too, not colour alone. The colours, the
-    //   outline and where each part goes are `tools/arena/team-hud.js`'s
-    //   (`namePlateFor`, `namePlateLayout`), under the suite; nothing it draws
-    //   reaches under `nameY + namePx * 0.5`, the ring's `below` just after.
+    // ► **IN HIS SIDE'S COLOUR, OUTLINED (H1, the owner's Q4 and Q12,
+    //   2026-09-24)**: the demo fighters' skins are random across both teams,
+    //   so the plate says whose side he is on — by its colour, and by nothing
+    //   else (D1, the owner, 2026-09-24: "Colors suffice."; ~~underlined, and
+    //   with his side's initial on a disc~~). The colours and the outline are
+    //   `tools/arena/team-hud.js`'s (`namePlateFor`, `namePlateLayout`), under
+    //   the suite; nothing it draws reaches under `nameY + namePx * 0.5`, the
+    //   ring's `below` just after.
     const plate = namePlateFor(combatant);
     const nameX = view.toX(origin.x);
     const nameY = view.toY(origin.y, -22);
@@ -4792,27 +4916,12 @@ function renderStage(view, fit, now) {
     context.textAlign = "center";
     context.textBaseline = "alphabetic";
     context.lineJoin = "round";
-    const plateShape = namePlateLayout({ x: nameX, baseline: nameY, px: namePx, nameWidth: context.measureText(combatant.name).width });
+    const plateShape = namePlateLayout({ px: namePx });
     context.strokeStyle = plate.outline;
     context.lineWidth = plateShape.outlineWidth;
     context.strokeText(combatant.name, nameX, nameY);
     context.fillStyle = plate.fill;
     context.fillText(combatant.name, view.toX(origin.x), nameY);
-    const { line, lineOutline, disc } = plateShape;
-    context.fillStyle = plate.outline;
-    context.fillRect(lineOutline.x, lineOutline.y, lineOutline.width, lineOutline.height);
-    context.fillStyle = plate.underline;
-    context.fillRect(line.x, line.y, line.width, line.height);
-    context.beginPath();
-    context.arc(disc.x, disc.y, disc.r, 0, Math.PI * 2);
-    context.fillStyle = plate.fill;
-    context.fill();
-    context.lineWidth = disc.outlineWidth;
-    context.stroke();
-    context.fillStyle = plate.outline;
-    context.font = `800 ${disc.letterPx}px ui-sans-serif, system-ui, sans-serif`;
-    context.textBaseline = "middle";
-    context.fillText(plate.initial, disc.x, disc.y);
     context.restore();
 
     // Where he was drawn, for a click on him and — for the acting fighter and
@@ -4837,11 +4946,19 @@ function renderStage(view, fit, now) {
   // fighters, falling past them.
   drawBoulders(view, now);
   drawDrops(view, now);
+  // ► **THE IN-FRAME TEAM HUD (D2)**, over the fighters and everything drawn
+  //   with them — the build's `combat_panel` is arena depth 200000, over
+  //   `gladiators` at 5, which holds the fighters, the arrows, the bolts, the
+  //   rocks and the blood — and under the rain, the UI bar and the border
+  //   (root depths 80, 438, 1193), drawn after the ring below.
+  paintCombatHud(fit);
   // THE RING, over every fighter and under the build's own bar and border
   // (drawn next): the overlay is `gladiators`' child at depth 40000, above the
   // bodies, and the bar and border are root layers above the whole arena. The
   // build's arrows (45000) would pass over it; the ring is drawn only once
   // nothing is in flight, so the order between them never shows.
+  // ► **AND OVER THE IN-FRAME HUD (D4, 2026-09-25)**, which the build's own
+  //   depths would put over it: a person's buttons are never under a gauge.
   paintRing(view, fit);
 
   // ► **THE RAIN, THE UI BAR AND THE BORDER GO ON TOP, and the build's own
@@ -4882,6 +4999,161 @@ function renderStage(view, fit, now) {
   // printed mid-frame would report a third of it.
   reportGroupPaint();
   reportFigureGroups();
+}
+
+/* ------------------------------------------------------------------ */
+/* The in-frame team HUD (D2-D6)                                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * THIS FRAME'S HUD: the wire's HUD model with the step's hold applied (D6: a
+ * gauge drains when the blow's pop-up starts), laid out with the art it is
+ * drawn with (`combatHudFrameFor`) — or null, said in the log, when it cannot
+ * be laid out, and then the camera frames as if there were no HUD. With it,
+ * the crowd bar's reading (D8): the crowd as HEARD at `now` — each step's
+ * value from the moment its drawing ends, the moment the build's `nextphase`
+ * moves it and the crowd's roar follows (`crowdBarReadingFor`) — shown while
+ * the crowd is heard (`crowdHeard`).
+ */
+function combatHudNow(now) {
+  try {
+    const shown = heldHudFor(teamHudFor({ wire: host.wire(), seats }), hudHold, { now, pendingTokens });
+    return combatHudFrameFor({
+      hud: shown,
+      pack: gaugeArt.pack,
+      crowd: crowdBarReadingFor({ presenter: crowdPresenter, now, heard: crowdHeard })
+    });
+  } catch (error) {
+    hudFailed("the gauges could not be laid out", error);
+    return null;
+  }
+}
+
+/**
+ * ► **A HUD THAT CANNOT BE DRAWN IS SAID, NEVER SILENT** — once per cause, as
+ *   a warning in the log panel a screenshot catches. The frame loop's own
+ *   catch would stop the frame and say it once for everything; this keeps the
+ *   ring, the bar and the rest of the frame drawn, and names what failed.
+ */
+function hudFailed(what, error) {
+  const message = String(error?.message ?? error).slice(0, 160);
+  const key = `${what}: ${message}`;
+  if (hudFailures.has(key)) return;
+  hudFailures.add(key);
+  log(`gauges: ${what} (${message}) — not drawn.`, { warn: true });
+}
+
+/**
+ * THE BUILD'S OWN GAUGES, IN THE FRAME (D2): one cluster per fighter, each in
+ * STAGE space under the stage fit — the way `paintArenaLayer` places a layer
+ * — so the same band stands at the foot of the stage in the stage view and at
+ * the foot of the fitted view (whose band `viewport()` reserves). Each
+ * cluster's ops are the pack's, or the authored fallback's
+ * (`combatHudOps`), painted in their own order: a run of paths through the
+ * group compositor (twips translations, a mask in force — D7 — and every glow
+ * composited), a page-font word where it falls between them.
+ *
+ * `window.__combatHud` is the frame's HUD as a VALUE, for the reason
+ * `window.__stageFit` is one: a headless run reads it with one evaluate.
+ */
+function paintCombatHud(fit) {
+  const frame = hudFrame;
+  let drawn = 0;
+  let failed = 0;
+  for (const { cluster, reading } of frame?.clusters ?? []) {
+    context.save();
+    try {
+      context.translate(fit.offsetX, fit.offsetY);
+      context.scale(fit.scale, fit.scale);
+      const ops = combatHudOps({ art: gaugeArt, textPack, cluster, reading, stageScale: fit.scale });
+      paintHudOps(ops);
+      drawn += 1;
+    } catch (error) {
+      failed += 1;
+      hudFailed(`${cluster.id}'s cluster could not be drawn`, error);
+    } finally {
+      context.restore();
+    }
+  }
+  // ► **THE CROWD BAR (D8), IN THE SAME LAYER**: `combat_panel`'s own
+  //   `crowd_bar` at the stage's top right, at scale 1 in every bout, driven by
+  //   the frame's crowd — or nothing while the crowd is not heard, as the build
+  //   hides it. Its own try: a bar that cannot be drawn costs the bar, never
+  //   the gauges or the frame.
+  let crowdDrawn = 0;
+  context.save();
+  try {
+    context.translate(fit.offsetX, fit.offsetY);
+    context.scale(fit.scale, fit.scale);
+    const ops = crowdBarOps({ art: crowdArt, textPack, reading: frame?.crowd ?? null, stageScale: fit.scale });
+    paintHudOps(ops);
+    crowdDrawn = ops.length > 0 ? 1 : 0;
+  } catch (error) {
+    hudFailed("the crowd bar could not be drawn", error);
+  } finally {
+    context.restore();
+  }
+  context.globalAlpha = 1;
+  window.__combatHud = {
+    art: gaugeArt.state,
+    mode: frame?.layout.mode ?? null,
+    hudTop: frame?.layout.hudTop ?? null,
+    cameraHudTop: frame?.cameraHudTop ?? null,
+    clusters: frame?.clusters.length ?? 0,
+    drawn,
+    failed,
+    crowd: {
+      art: crowdArt.state,
+      shown: frame?.crowd?.shown === true,
+      value: frame?.crowd?.value ?? null,
+      drawn: crowdDrawn
+    }
+  };
+}
+
+/**
+ * ONE PAINTER FOR THE HUD'S OPS — a cluster's or the crowd bar's, in their
+ * own order: a run of paths through the group compositor (twips
+ * translations, a mask in force — D7 — and every glow composited), a
+ * page-font word where it falls between runs, so it keeps its depth.
+ */
+function paintHudOps(ops) {
+  let run = [];
+  const flush = () => {
+    if (run.length > 0) paintGroupRuns(run, { translationDivisor: TWIPS_PER_PIXEL, filtersScaled: true }, paintLayerOperation);
+    run = [];
+  };
+  for (const op of ops) {
+    if (op.kind === "path") {
+      run.push(op);
+      continue;
+    }
+    flush();
+    paintHudWord(op);
+  }
+  flush();
+}
+
+/**
+ * ONE PAGE-FONT WORD OF A CLUSTER, in stage px: as `paintPopup` paints its
+ * words — a bold word on a middle baseline, under a `max(1, size / 7)`
+ * outline, which is exactly the ink `combat-panel.js` measures the band's top
+ * with — but anchored at its OWN alignment: a name stands at its field's inner
+ * left (red) or right (blue) edge, a number and a label at their box's centre.
+ */
+function paintHudWord(word) {
+  context.globalAlpha = word.alpha ?? 1;
+  context.font = `bold ${word.size}px ui-sans-serif, system-ui, sans-serif`;
+  context.textAlign = word.align ?? "center";
+  context.textBaseline = "middle";
+  context.lineJoin = "round";
+  if (word.outline) {
+    context.strokeStyle = word.outline;
+    context.lineWidth = Math.max(1, word.size / 7);
+    context.strokeText(word.text, word.x, word.y);
+  }
+  context.fillStyle = word.fill ?? "#ffffff";
+  context.fillText(word.text, word.x, word.y);
 }
 
 /* ------------------------------------------------------------------ */
@@ -4959,7 +5231,12 @@ function paintRing(view, fit) {
   // a walk on offer was off the stage) — except a walk that move would carry
   // across him: it stays on the side it moves toward, and the rest moves on
   // past it (ring2 "edge"). `placement.x` is where he was DRAWN this frame.
-  const stage = stageClipRectFor(fit);
+  // ► **THE VISIBLE STAGE, ABOVE THE UI BAR (D4, 2026-09-25)** — ~~the whole
+  //   0..420 stage the frame is clipped to (`stageClipRectFor`)~~, which let
+  //   the rank-front arrow stand under the build's bar at pair zooms of 84 and
+  //   over. `ringBoundsFor` decides; the fitted view, with no bar, keeps the
+  //   whole stage.
+  const stage = ringBoundsFor(fit, { barred: arenaScreenAvailable() });
   const buttons = ringButtonsInside([
     ...ringButtonsAt(ringView.model, {
       centerX: placement.x,
@@ -5007,7 +5284,12 @@ function paintRing(view, fit) {
   });
   // The boxes of the labels drawn so far this frame, which the next keeps off.
   const labelled = [];
-  for (const button of drawn) {
+  // ~~`for (const button of drawn)`~~ — decision 9 (slice "jumpcharge",
+  // 2026-09-28): the greyed jumps and charges are painted FIRST, under every
+  // label, and everything else in its own order, as before
+  // (`ringPaintOrder`): a label is placed as if they were not there
+  // (`ringLabelAt`), so it may cross one, and must be drawn over it.
+  for (const button of ringPaintOrder(drawn)) {
     paintRingButton(button);
     // A move no slot holds carries no label: its glyph is its arrow, and its
     // key is that arrow (the strip says both).
@@ -5017,6 +5299,8 @@ function paintRing(view, fit) {
     // BEFORE a label is placed, so no label lands on it. Measured: labelled,
     // a greyed swing's label had no free place beside a walk (2v2 tricks
     // seed 2, 14 AI submissions in, blue-2's optionB) and ran across it.
+    // (A greyed jump or charge, decision 9, is the one a label may cross:
+    // `ringUnderLabels`.)
     if (button.reason) continue;
     // A place of the items row (S5) is labelled with its letter alone, above
     // it; the build's own name for its item is the strip's.
@@ -5679,8 +5963,10 @@ function drawProjectiles(view, now) {
  *   `docs/design/battle-ui.md`, "Team HUD, reach preview and the camera:
  *   DECIDED", items 2 and 3).** The one list of fighters this panel always
  *   had became two team panels, red then blue: a row per fighter with the
- *   build's three readings — health, energy and armour, bars and numbers — a
- *   highlight on whoever's turn it is, his conditions in plain words (never
+ *   build's three readings — health, energy and armour, ~~bars and numbers~~
+ *   since D5 (2026-09-25) visually hidden meters for a screen reader only,
+ *   the build's own gauges being in the frame — a highlight on whoever's
+ *   turn it is, his conditions in plain words (never
  *   the raw status tokens the list printed, `facing-left` among them), "you"
  *   on a seat a person plays, and the fallen dimmed. Above them, the ONE crowd
  *   meter, in the build's own words. Every value, word and order is
@@ -5708,19 +5994,19 @@ function hudNode(tag, className, text = null) {
   return node;
 }
 
-/** The crowd meter at the top of the side panel: the build's label, the number, the bar and its boo and cheer lines. */
+/**
+ * The crowd meter at the top of the side panel — since D8 (2026-09-25) a
+ * VISUALLY HIDDEN meter, as D5 made the readings: the build's own crowd bar is
+ * in the frame now (`paintCombatHud`), and this is its screen-reader form, the
+ * build's label and the number in words. ~~The label, the number, the bar and
+ * its boo and cheer lines, seen.~~
+ */
 function renderCrowdMeter(crowd) {
   el("crowd").hidden = !crowd.shown;
   if (!crowd.shown) return;
-  el("crowd-text").textContent = crowd.text;
-  el("crowd-value").textContent = String(crowd.value);
   const bar = el("crowd-bar");
   bar.setAttribute("aria-valuenow", String(crowd.percent));
-  bar.setAttribute("aria-valuetext", `${crowd.value}: ${crowd.mood}`);
-  bar.dataset.band = crowd.band ?? "";
-  el("crowd-fill").style.width = `${crowd.percent}%`;
-  el("crowd-boo").style.left = `${crowd.booBelow}%`;
-  el("crowd-cheer").style.left = `${crowd.cheerAbove}%`;
+  bar.setAttribute("aria-valuetext", `${crowd.text} (${crowd.value})`);
 }
 
 /** One side's panel: its colour, its name and how many still stand, and a row per fighter. */
@@ -5729,19 +6015,18 @@ function teamPanelNode(team) {
   panel.style.setProperty("--team", team.colour);
   panel.setAttribute("aria-label", `${team.name} team`);
   const heading = hudNode("h3", "team-heading");
-  heading.append(teamInitialNode(team), `${team.name} team`, hudNode("span", "team-standing", `${team.standing} of ${team.rows.length} standing`));
+  heading.append(`${team.name} team`, hudNode("span", "team-standing", `${team.standing} of ${team.rows.length} standing`));
   const rows = hudNode("ol", "team-rows");
   rows.append(...team.rows.map(fighterRowNode));
   panel.append(heading, rows);
   return panel;
 }
 
-/** A side's initial on its disc: a cue that is not colour alone. */
-function teamInitialNode(style) {
-  const initial = hudNode("span", "team-initial", style.initial);
-  initial.setAttribute("aria-hidden", "true");
-  return initial;
-}
+/*
+ * ~~`teamInitialNode` — a side's initial on its disc, "a cue that is not colour
+ * alone", before the heading, every row's name and every strip chip's~~ until
+ * 2026-09-24: the side's colour is its only cue (D1; `tools/arena/team-hud.js`).
+ */
 
 /** One fighter's row: his name, his tags (turn, down, you or AI), his conditions and his three readings. */
 function fighterRowNode(row) {
@@ -5749,8 +6034,7 @@ function fighterRowNode(row) {
   node.style.setProperty("--team", row.colour);
   if (row.acting) node.setAttribute("aria-current", "true");
   const head = hudNode("div", "row");
-  const name = hudNode("span", "name");
-  name.append(teamInitialNode(row), row.name);
+  const name = hudNode("span", "name", row.name);
   const tags = hudNode("span", "tags");
   if (row.acting) tags.append(hudNode("span", "tag turn", "turn"));
   if (!row.alive) tags.append(hudNode("span", "tag down", "down"));
@@ -5775,24 +6059,26 @@ function fighterRowNode(row) {
 }
 
 /**
- * One of the build's three readings: a label, a bar and `value / max` — or a
- * dash when there is none to show (the build hides its armour gauge at 0).
- * The health bar turns at 35%, as the roster's always did.
+ * One of the build's three readings, FOR A SCREEN READER ONLY: a meter with
+ * its value in words — `value of max`, or "none" when the build hides the
+ * gauge (its armour at 0).
+ *
+ * ► **NOT SEEN ANY MORE (D5 of the in-frame team HUD, 2026-09-25).** ~~A
+ *   label, a bar and `value / max`, the health bar turning at 35%~~: the
+ *   readings are the build's own gauges IN THE FRAME now, so the panel's
+ *   three bars would only repeat them beside the stage. The meter stays,
+ *   visually hidden with the page's own class, because it is the only form of
+ *   the readings a screen reader has; it reads the wire, at once.
  */
 function readingNode(label, reading, kind) {
-  const node = hudNode("div", `reading ${kind}${kind === "health" && reading.shown && reading.percent < 35 ? " hurt" : ""}`);
-  const meter = hudNode("span", "meter");
+  const meter = hudNode("span", `visually-hidden reading-${kind}`);
   meter.setAttribute("role", "meter");
   meter.setAttribute("aria-label", label);
   meter.setAttribute("aria-valuemin", "0");
   meter.setAttribute("aria-valuemax", "100");
   meter.setAttribute("aria-valuenow", String(reading.percent));
   meter.setAttribute("aria-valuetext", reading.shown ? `${reading.value} of ${reading.max}` : "none");
-  const fill = document.createElement("i");
-  fill.style.width = `${reading.shown ? reading.percent : 0}%`;
-  meter.append(fill);
-  node.append(hudNode("span", "label", label), meter, hudNode("span", "num", reading.shown ? `${reading.value} / ${reading.max}` : "—"));
-  return node;
+  return meter;
 }
 
 /**
@@ -5814,7 +6100,7 @@ function renderTurnStrip(order) {
     item.style.setProperty("--team", entry.colour);
     item.title = entry.name;
     if (entry.current) item.setAttribute("aria-current", "step");
-    item.append(teamInitialNode(entry), hudNode("span", "turn-name", entry.name));
+    item.append(hudNode("span", "turn-name", entry.name));
     if (!entry.alive) item.append(hudNode("span", "visually-hidden", " (down)"));
     return item;
   }));
@@ -6588,7 +6874,10 @@ function ringProvenance() {
     "A hovered or focused button's preview — its hit chance, damage and stamina — and the target's odds in the " +
     "strip are the engine's own numbers (the hit chance is the build's rollover percentage); their words and " +
     "places are authored, and so is \"confirm every move\", off unless you turn it on. " +
-    "A dimmed button is one the team rules forbid this turn: the engine's reason, in its own words, shows when you " +
+    // ~~"A dimmed button is one the team rules forbid this turn: …"~~ —
+    // decision 9 (2026-09-28) dims the jumps and charges, which no team rule forbids.
+    "A dimmed button is one the team rules forbid this turn, or one the engine has not built yet — the jumps and " +
+    "charges the build wires, and an item it has no spell or potion for: the engine's reason, in its own words, shows when you " +
     "point at it or focus it; the dimmed look and the words' places are authored (the build hides, never greys). " +
     `The AI's pace — Shift held draws its turns at ${RING_PACE_HELD_RATE}×, and Skip to my turn as fast as a frame may — is authored ` +
     "too, and changes only how fast the arena is drawn: every step, and its order, is the same at any pace."];
@@ -6610,6 +6899,14 @@ function renderProvenance() {
     : 0;
   // Before the asset gate opens NO figure is drawn, of either kind, and the
   // line says so rather than naming the authored art the loading frame is not.
+  // The gauges' line is derived from what they are drawn with, too: the
+  // build's own art and its invoice over the clusters on the stage, or the
+  // authored fallback and why (`combatHudProvenanceFor`).
+  const hudInvoice = assetGateOpen ? combatHudInvoiceFor(gaugeArt, textPack, combatHudNow(arenaNow())) : null;
+  // And the crowd bar's (D8), over the crowd as it is heard now.
+  const crowdInvoice = assetGateOpen
+    ? crowdBarInvoiceOf(crowdArt, textPack, crowdBarReadingFor({ presenter: crowdPresenter, now: arenaNow(), heard: crowdHeard }))
+    : null;
   const figureLine = ["The figures", assetGateOpen
     ? figureProvenance({ hasExtractedArt: hasExtractedArt(figurePack), wardrobePieces })
     : "are not drawn yet: the stage waits for your extracted packs to settle."];
@@ -6622,6 +6919,8 @@ function renderProvenance() {
       "extracted and as a plain number when not. A hit shows the build's GROSS roll, before armour — read off the " +
       "rule set's unhashed observer, because the event log does not carry it."],
     ringProvenance(),
+    combatHudProvenanceFor({ art: gaugeArt, invoice: hudInvoice, open: assetGateOpen }),
+    crowdBarProvenanceFor({ art: crowdArt, invoice: crowdInvoice, open: assetGateOpen, heard: crowdHeard }),
     ["Slot 0 of each side", "reuses the battle map's own instance names, depths and positions. Everything past it is authored mod surface no capture can settle."]
   ];
   if (championsBySlot.size > 0) {
@@ -6767,6 +7066,10 @@ function openArena(now) {
   if (!verdict.open) return false;
   assetGateOpen = true;
   useArenaPacks(verdict);
+  // A late or failed icons pack never reaches `useIconPack`: say what the
+  // gauges are drawn with instead, beside the gate's own line about the pack.
+  if (gaugeArt.state === "unused") log(gaugeArt.log.message, { warn: gaugeArt.log.warn });
+  if (crowdArt.state === "unused") log(crowdArt.log.message, { warn: crowdArt.log.warn });
   for (const line of assetGateReport(verdict)) log(line.message, { warn: line.warn });
   boutStartedAt = now;
   renderProvenance();

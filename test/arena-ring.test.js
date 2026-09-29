@@ -122,19 +122,25 @@ test("the 1v1 opening: the long-range warrior frame facing right, keys 1-4 down 
   assert.equal(model.selectedId, "blue-1");
   assert.deepEqual(model.stance, { frame: "longrange_warrior", range: "long", weapon: "warrior", facing: "right" });
   // `longrange_warrior` facing right in `SS2_BUTTON_WIRING` (action-buttons.js): A jumpleft, B walkleft,
-  // C taunt|rest, D jumpright, E walkright, F chargeright, G wincrowd, H psyche_up. The jumps and the
+  // C taunt|rest, D jumpright, E walkright, F chargeright, G wincrowd, H psyche_up. ~~The jumps and the
   // charge are not built and psyche up needs level 7, so those four slots are EMPTY: in S2 a slot shows
-  // only what the engine offers.
+  // only what the engine offers.~~ Psyche up needs level 7, so its slot is EMPTY; the jumps and the charge
+  // are not built, and are SHOWN GREYED `not-built` in their slots — the owner's decision 9 of 2026-09-24
+  // (`docs/design/battle-ui.md#decided-hud-2026-09-24`), re-pinned 2026-09-28 (slice "jumpcharge"; the
+  // greyed look is test/arena-ring-reasons.test.js's and test/arena-ring-jumpcharge.test.js's). ~~"1 optionA -",
+  // "5 optionD -", "7 optionF -"~~
   assert.deepEqual(slotLines(model), [
-    "1 optionA -",
+    "1 optionA jumpleft",
     "2 optionB walkleft",
     "3 optionC taunt",
     "4 optionG wincrowd",
-    "5 optionD -",
+    "5 optionD jumpright",
     "6 optionE walkright",
-    "7 optionF -",
+    "7 optionF chargeright",
     "8 optionH -"
   ]);
+  assert.deepEqual(model.slots.filter((slot) => !slot.action && slot.verb).map((slot) => `${slot.slot} ${slot.reason.code}`),
+    ["optionA not-built", "optionD not-built", "optionF not-built"], "greyed, never acting");
 });
 
 /** Plays the rule set's own AI until `wanted(model)` holds for whoever is due, or fails. */
@@ -154,8 +160,9 @@ test("closed on, red faces right on the close-range warrior frame: the three swi
   assert.deepEqual(model.stance, { frame: "closerange_warrior", range: "close", weapon: "warrior", facing: "right" });
   // `closerange_warrior` facing right: A jumpleft, B walkleft, C shove, D power, E normal, F quick,
   // G wincrowd, H psyche_up — only the retreat walk is offered in reach, and no rest (the owner's Q7).
+  // 2026-09-28 (decision 9): ~~"1 optionA -"~~ — the jump is shown greyed `not-built`.
   assert.deepEqual(slotLines(model), [
-    "1 optionA -",
+    "1 optionA jumpleft",
     "2 optionB walkleft",
     "3 optionC shove",
     "4 optionG wincrowd",
@@ -173,13 +180,13 @@ test("blue faces LEFT on the same frame, and the build moves the swings to the l
   const model = advanceUntil(host, (candidate) => candidate.actorId === "blue-1" && candidate.stance.range === "close");
   assert.deepEqual(model.stance, { frame: "closerange_warrior", range: "close", weapon: "warrior", facing: "left" });
   // `closerange_warrior` facing left: A power, B normal, C quick, D jumpright, E walkright, F shove,
-  // G psyche_up, H wincrowd.
+  // G psyche_up, H wincrowd. 2026-09-28 (decision 9): ~~"5 optionD -"~~ — the jump is shown greyed `not-built`.
   assert.deepEqual(slotLines(model), [
     "1 optionA power_attack",
     "2 optionB normal_attack",
     "3 optionC quick_attack",
     "4 optionG -",
-    "5 optionD -",
+    "5 optionD jumpright",
     "6 optionE walkright",
     "7 optionF shove",
     "8 optionH wincrowd"
@@ -200,8 +207,12 @@ test("off the ring: every action the engine offers against the selected foe or t
   // rest. The long frame holds the two walks, the taunt (he is rested) and wincrowd; the rest shares
   // the taunt's slot and loses it above half stamina. ~~the rank verb has no slot until S4~~ — S4
   // put the rank change on the ring, above his head (`model.moves`, test/arena-ring-movement.test.js).
+  // 2026-09-28 (decision 9): the jumps and the charge are shown greyed `not-built` in their slots, and hold no
+  // offered action. ~~["2 optionB walkleft", "3 optionC taunt", "4 optionG wincrowd", "6 optionE walkright"]~~
   assert.deepEqual(slotLines(model).filter((text) => !text.endsWith(" -")),
-    ["2 optionB walkleft", "3 optionC taunt", "4 optionG wincrowd", "6 optionE walkright"]);
+    ["1 optionA jumpleft", "2 optionB walkleft", "3 optionC taunt", "4 optionG wincrowd", "5 optionD jumpright",
+      "6 optionE walkright", "7 optionF chargeright"]);
+  assert.deepEqual(model.slots.filter((slot) => slot.action).map((slot) => slot.slot), ["optionB", "optionC", "optionG", "optionE"]);
   assert.deepEqual(model.offRing.map((entry) => line(entry.action)), ["rest -> red-1"]);
   assert.deepEqual(model.offRing[0].action, { type: "rest", targetId: "red-1", actorId: "red-1" });
 });
@@ -289,7 +300,11 @@ test("keys 1-8 press the slots from anywhere but a text field; a held, modified 
     assert.equal(ringKeyCommand(model, { key: "5", focus: "stage", [modifier]: true }), null, modifier);
   }
   assert.equal(ringKeyCommand(model, { key: "5", focus: "stage", repeat: true }), null, "holding a key acts once");
-  assert.equal(ringKeyCommand(model, { key: "1", focus: "stage" }), null, "slot 1 is empty");
+  // 2026-09-28 (decision 9): ~~`ringKeyCommand(model, { key: "1" })` null, "slot 1 is empty"~~ — slot 1 holds
+  // the jump, greyed: its key is the ring's and sends nothing. Slot 8 (psyche up, below level 7) is empty.
+  const one = ringKeyCommand(model, { key: "1", focus: "stage" });
+  assert.deepEqual([one?.kind, one?.why, one?.entry?.slot, one?.entry?.reason?.code], ["ignore", "greyed", "optionA", "not-built"]);
+  assert.equal(ringKeyCommand(model, { key: "8", focus: "stage" }), null, "slot 8 is empty");
   for (const other of ["9", "0", "a", "Enter", " "]) assert.equal(ringKeyCommand(model, { key: other, focus: "stage" }), null, other);
 });
 
@@ -342,7 +357,8 @@ test("every verb the build wires on its four frames and the engine builds has a 
       for (const wires of Object.values(record[facing])) for (const one of wires) wired.add(one.verb);
     }
   }
-  // Jump and charge are wired and not built (the owner's Q8 keeps them hidden).
+  // Jump and charge are wired and not built (~~the owner's Q8 keeps them hidden~~ — shown greyed since the
+  // owner's decision 9; their labels are held in test/arena-ring-jumpcharge.test.js).
   const built = [...wired].filter((verb) => !/^(jump|charge)/.test(verb)).sort();
   assert.equal(built.length, 15);
   for (const verb of built) {
