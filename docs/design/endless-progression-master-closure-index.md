@@ -1355,7 +1355,7 @@ worksheet history. They primarily populate `SR-01` through `SR-05` and parts of
 | `SR-01` | Fantasy, purpose, and topology | One vocabulary/relationship map distinguishes Soul, simulacrum/combatant, Bound Soul, Relic root, input/payoff Charms, sources, and results; each has a unique job and no slot duplicates another system's theme or UI role. | `PARTIAL`: standalone root/customizer and cross-source-weaver directions exist; normative map/replay remains. |
 | `SR-02` | Access, ownership, slots, custody, and loss | A state machine covers disabled/eligible/enabled states, one-root/two-Charm occupancy, personal ownership, duplicates, transfer, destruction/loss, retirement, and every illegal transition for Relics and Charms separately. | `PARTIAL`: personal Relic/Charm access, one root, two Charms, and permanent nontransferable Relics are selected; Charm custody/loss remains open. |
 | `SR-03` | Source and input grammar | A total matrix names eligible bearer/ally/source evidence, temporal and basis cells, Charm modifications, participation requirements, and legal/illegal examples; every selected cell has a gameplay use. | `PARTIAL`: extensive grammar directions, nonempty irreducible multi-root current-state support, repeated same-provenance cross-root support, exact-`Pi`-universal build identity, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, and nonempty within-evaluation cross-receipt overlap support exist; nontrivial within-parent site support is derived, while overlap form/treatment, cross-opportunity behavior, and total authored examples/exclusions remain open. |
-| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, universal continuity-root preservation across those revisions, nonempty irreducible multi-root current-state support, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, nonempty within-evaluation cross-receipt overlap support, full-union positive-result claims, one listen per uninterrupted cancelled-pair bond, Relic-wide spending of claimed proof, universal positive-result transformation-cause support, empty direct invocation/tuple-selection/true-verdict/false-verdict/provisional-sealing/claim-write/latch-write cause support, derived-empty true-zero-contender support, and proper both-dialect Absence-bound and Event-bound support with their selected fallbacks are selected; coherent same-cut evidence acquisition, exact `{D,E,O}` material phase support, and nontrivial within-parent application-site support are derived; dedicated-operation cause is the sole open cause locus, followed by D2-D5 topology, agency, precedence, and lineage ownership. |
+| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, universal continuity-root preservation across those revisions, nonempty irreducible multi-root current-state support, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, nonempty within-evaluation cross-receipt overlap support, full-union positive-result claims, one listen per uninterrupted cancelled-pair bond, Relic-wide spending of claimed proof, universal positive-result and dedicated-operation transformation-cause support, empty direct invocation/tuple-selection/true-verdict/false-verdict/provisional-sealing/claim-write/latch-write cause support, derived-empty true-zero-contender support, and proper both-dialect Absence-bound and Event-bound support with their selected fallbacks are selected; D1M-A is the selected system fallback if universal dedicated-operation support fails its gates; coherent same-cut evidence acquisition, exact `{D,E,O}` material phase support, and nontrivial within-parent application-site support are derived; all reachable cause loci are closed at direction granularity, and D2 nonclear adjacency is the sole frontier, with conditional D2A dialect incidence restored before D3-D5 topology, agency, precedence, and lineage ownership. |
 | `SR-05` | Relational archetypes and Achintya boundary | Every required archetype maps to an operative player choice or state transition where continuity and distinction are mechanically legible; no mandatory class exists only to satisfy a graph, coverage, or symmetry token. | `PARTIAL`: structural/archetype directions through C170 exist; concrete player-visible proof does not. |
 | `SR-06` | Representative and release catalog | A finite versioned release catalog (or explicit launch minimum plus deferred catalog boundary) supplies source/relationship/payoff definitions, counterexamples, and at least one viable build purpose for every required family. | `OPEN` |
 | `SR-07` | Configuration and evolution horizons | Equip, Charm socketing, reconfiguration, rebinding, learning/evolution, encounter/Circuit locks, preview, and rollback rules name every clean boundary and cannot be shopped through reload or route information. | `OPEN` |
@@ -3226,20 +3226,25 @@ qualifying independent lived event unless the whole mechanic fails its gates.
 D1X is `DIR-SELECTED`. Zanzagar then selected D1X1-C with D1X1-A as the
 explicit child scope fallback: the proper Event-bound subset has nonempty
 support in both transformation dialects unless boundary-attunement event play
-fails while state-side play survives. D1X1 is `DIR-SELECTED`, and D1M is the
-sole frontier.
+fails while state-side play survives. D1X1 is `DIR-SELECTED`. Zanzagar then
+selected D1M-B with D1M-A as the explicit system fallback: every transforming
+definition has at least one dedicated-operation cause path unless the complete
+M system fails its gates. D1M is `DIR-SELECTED`, D1M1 is `PRUNED`, and D2 is
+the sole frontier.
 
-The current 141-row register contains **24 `SCREEN`, 1 `OWNER-OPEN` at D1M,
-40 `PRUNED`, 69 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 25`**. Two still-open cause parent/child slots remain, M and M1;
-closing them returns D2 as the sole frontier at `Phi_SR = 23`.
-D2-D5 still lead to RCS-03E at 19. The register now describes eleven reachable
-cause families plus one derived-empty audit placeholder, not twelve reachable
-families.
+The thirty-ninth prerequisite correction adds conditional D2A because proper
+staged-topology support may occur only in the state dialect, only in the
+boundary dialect, or in both. The current 142-row register therefore contains
+**23 `SCREEN`, 1 `OWNER-OPEN` at D2, 41 `PRUNED`, 70 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`**. Every reachable cause
+parent and applicable cause-dialect child is closed at worksheet-direction
+granularity. D2, applicable D2A, and D3-D5 still lead to RCS-03E at 19. The
+register describes eleven reachable cause families plus one derived-empty audit
+placeholder, not twelve reachable families.
 
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has 141
+To make that route genuinely finite, the remaining C3c pass has 142
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -3368,13 +3373,14 @@ overcompression.
 | `RCS-03D1L1` | State/boundary transformation-dialect incidence for proper latch-write cause support | `PRUNED`; D1L-A leaves no proper latch-write support whose dialect incidence could be chosen |
 | `RCS-03D1X` | Independently meaningful non-evaluation combat/source/relationship-event transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; C admits a disclosed nonempty proper Event-bound subset with A selected as the whole-system failure fallback; A is a replacement and has not fired, while the later D1X1 selection separately governs child incidence |
 | `RCS-03D1X1` | State/boundary transformation-dialect incidence for proper independent-event cause support | `DIR-SELECTED`; C gives the globally proper Event-bound subset nonempty state- and boundary-dialect incidence, with A selected as the child state-only scope fallback if boundary-attunement play fails while state-side play survives; the parent D1X-A system fallback remains deeper, and neither fallback has fired |
-| `RCS-03D1M` | Dedicated evolution/reconfiguration-operation transformation-cause prevalence across transforming definitions | `OWNER-OPEN`; choose empty, universal, or nonempty proper operation-cause support; recommendation B gives every transforming definition at least one operation path with A as an explicitly selectable system fallback, while RCS-03E retains transformation agency/approval and RCS-13 retains operation initiation/admission and lock horizon |
-| `RCS-03D1M1` | State/boundary transformation-dialect incidence for proper dedicated-operation cause support | `SCREEN`; opens only under D1M-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D1M-A/B |
-| `RCS-03D2` | Direct-versus-staged nonclear assignment adjacency topology | `SCREEN`; follows all twelve cause parents and applicable proper-branch dialect children; decides whether a legal nonclear transformation proposal targets an adjacent assignment directly or must traverse authored intermediate assignment states |
-| `RCS-03D3` | Direct reverse-edge support among nonclear adjacent assignments | `SCREEN`; follows D2 and classifies whether a legal nonclear adjacent transition may have a direct reverse edge rather than requiring another route |
+| `RCS-03D1M` | Dedicated evolution/reconfiguration-operation transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; B makes operation-cause support universal across `D_mut`, with A selected as a whole-system replacement fallback if the M mechanic fails its purpose, policy, comprehension, anti-duplication, commitment, or anti-loop gates; RCS-03E still retains transformation agency/approval and RCS-13 retains operation initiation/admission and lock horizon |
+| `RCS-03D1M1` | State/boundary transformation-dialect incidence for proper dedicated-operation cause support | `PRUNED`; D1M-B's universal definition support necessarily reaches both nonempty dialects and leaves no proper-subset incidence to choose |
+| `RCS-03D2` | Direct shortcut versus required staged nonclear assignment topology | `OWNER-OPEN`; all cause parents and applicable cause-dialect children are closed; choose whether definitions with a nonempty distinct-endpoint nonclear transitive-gap set are empty, universal across `D_mut`, or nonempty proper without deciding direct reverse edges, clearing, eventual return, or authority; any later parent-cause fallback must revalidate or explicitly reopen this topology rather than inherit a class from removed edges |
+| `RCS-03D2A` | State/boundary transformation-dialect incidence for proper required-stage support | `SCREEN`; opens only under D2-C to choose state-only, boundary-only, or nonempty support in both dialects; prunes under D2-A/B |
+| `RCS-03D3` | Direct reverse-edge support among nonclear adjacent assignments | `SCREEN`; follows D2 and applicable D2A and classifies whether a legal nonclear adjacent transition may have a direct reverse edge rather than requiring another route |
 | `RCS-03D4` | Explicit clear-to-unassigned transition support | `SCREEN`; follows D3 and decides whether a persistent Relic may legally clear its current assignment rather than move only among nonclear assignments |
 | `RCS-03D5` | Eventual nonclear return and reversibility topology | `SCREEN`; follows D4 and all cause rows; distinguishes irreversible reachability from legal eventual return without deciding exact graphs or durations |
-| `RCS-03E` | Transformation agency and approval: discretionary, precommitted, or deterministic authority under the selected cause | `SCREEN`; follows every applicable RCS-03D1 row and RCS-03D2-D5 under `SR-04` |
+| `RCS-03E` | Transformation agency and approval: discretionary, precommitted, or deterministic authority under the selected cause | `SCREEN`; follows every applicable RCS-03D1 row, RCS-03D2, applicable D2A, and RCS-03D3-D5 under `SR-04` |
 | `RCS-04A` | Collision precedence and settlement when multiple already-legal transformation proposals coexist | `SCREEN`; follows `RCS-03E` and any applicable `RCS-03B4`/`RCS-03B7` under `SR-04` |
 | `RCS-04B` | Committed-output identity across artifact, definition, and lineage | `SCREEN`; follows `RCS-04A` under `SR-04`; persistence realization stays in `RCS-15` |
 | `RCS-05` | Qualitative Relic/Charm payoff and power envelope | `SCREEN` under `SR-09` |
@@ -3761,19 +3767,21 @@ recurrence-significant but is noncausal. Zanzagar then selected D1X-C with
 D1X-A as the explicit system fallback: a disclosed proper Event-bound subset
 may change on a qualifying lived event unless the mechanic fails its gates.
 D1X1-C then gives that proper subset nonempty incidence in both transformation
-dialects, with D1X1-A selected as the child scope fallback. D1M is the sole
-frontier. The current register has **141 slots**: 24 `SCREEN`, 1
-`OWNER-OPEN`, 40 `PRUNED`, 69 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 25`. Closing the two still-open cause parent/child slots
-M and M1 returns D2 as the sole frontier at
-`Phi_SR = 23`;
-closing D2-D5 one at a time opens RCS-03E at `Phi_SR = 19`.
+dialects, with D1X1-A selected as the child scope fallback. D1M-B then gives
+every transforming definition a dedicated-operation cause path, with D1M-A
+selected as the whole-system fallback; D1M1 prunes. D2 is the sole frontier.
+The thirty-ninth correction adds conditional D2A for the state-only,
+boundary-only, or both-dialect incidence of proper staged-topology support. The
+current register has **142 slots**: 23 `SCREEN`, 1 `OWNER-OPEN`, 41 `PRUNED`,
+70 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`.
+All reachable cause slots are closed. Closing D2, any applicable D2A, and
+D3-D5 one at a time opens RCS-03E at `Phi_SR = 19`.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-twenty-five owner cards under this thirty-eight-times-corrected charter and will
+twenty-four owner cards under this thirty-nine-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3797,7 +3805,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 141 frozen candidate slots; current `Phi_SR = 25` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, D1N is derived empty, D1T-A keeps tuple selection authoritative but noncausal, D1VT-A lets permission govern coexistence without itself transforming, D1VF-A lets refusal route disposition without itself transforming, D1K-A keeps sealing meaningful but noncausal, D1Z-C reserves disclosed proper Absence-bound support with A as failure fallback, D1Z1-C gives that proper subset nonempty incidence in both transformation dialects, D1L-A keeps the spent-bond latch recurrence-significant but noncausal, D1X-C reserves disclosed proper Event-bound support with A as the selected system fallback, and D1X1-C gives it both-dialect incidence with A as the selected child scope fallback | At most 25 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children; closing M and its conditional M1 child returns D2 at `Phi_SR = 23`, and D2-D5 close before agency opens at 19; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 142 frozen candidate slots; current `Phi_SR = 24` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, D1N is derived empty, D1T-A keeps tuple selection authoritative but noncausal, D1VT-A lets permission govern coexistence without itself transforming, D1VF-A lets refusal route disposition without itself transforming, D1K-A keeps sealing meaningful but noncausal, D1Z-C reserves disclosed proper Absence-bound support with A as failure fallback, D1Z1-C gives that proper subset nonempty incidence in both transformation dialects, D1L-A keeps the spent-bond latch recurrence-significant but noncausal, D1X-C reserves disclosed proper Event-bound support with A as the selected system fallback, D1X1-C gives it both-dialect incidence with A as the selected child scope fallback, and D1M-B gives every transforming definition a dedicated-operation cause path with A as the selected system fallback | At most 24 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children, all closed at direction granularity; D2 and conditional D2A close before D3-D5, then agency opens at 19; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

@@ -1,6 +1,71 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-28 Event-bound support spans both dialects; dedicated operation cause is next
+## 2026-09-29 universal dedicated-operation support selected; nonclear topology is next
+
+Zanzagar selected `RCS-03D1M-B` with `RCS-03D1M-A` as the explicit
+whole-system fallback. `D_M=D_mut`: every transforming definition has at least
+one reachable actual dedicated evolution/reconfiguration operation whose direct
+M edge may originate a materially distinct same-dialect proposal. B is active.
+A is an armed replacement—not simultaneous and not fired—if the complete M
+system fails its purpose, non-dominance, comprehension, anti-duplication,
+commitment, anti-counterpick, or anti-loop gates. D1M-C is unselected.
+
+Universal M support forces definition-level `D_M ∩ D_P=D_M`,
+`D_M ∩ D_Z=D_Z`, and `D_M ∩ D_X=D_X`. It does not force the distinct causes
+onto one trace or target. D1M is `DIR-SELECTED`; D1M1 is `PRUNED`; all reachable
+cause loci are closed at worksheet-direction granularity. The authoritative
+decision record remains byte-unchanged.
+
+The D2 prerequisite audit found one missing player-facing consequence before
+the card was presented. A proper subset of definitions with required staged
+routes may occur in state Relics only, boundary Relics only, or both; those
+grammars change what a Relic bears versus how it listens and cannot be buried
+in authoring. The thirty-ninth correction therefore adds conditional D2A.
+The register now has 142 rows: 23 `SCREEN`, 1 `OWNER-OPEN` at D2, 41
+`PRUNED`, 70 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 24`. D2A opens only under D2-C and otherwise prunes.
+
+`RCS-03D2` uses each definition's directed nonclear proposal graph. A genuine
+staged gap is a reachable **distinct** ordered endpoint that needs at least two material
+assignment transitions because no P/Z/X/M cause can propose it directly from
+the source. “Shortcut-complete” means every **already-reachable** endpoint has
+some direct edge; it does not mean an all-to-all graph, free respec, reverse
+travel, or automatic approval.
+
+- **A — every transforming definition is shortcut-complete.** No intermediate
+  assignment is topologically indispensable. This is the practical system
+  fallback and clearest grammar; optional multi-step routes, conditional
+  causes, locks, costs, and one-way edges remain legal.
+- **B — every transforming definition has at least one genuine staged gap.**
+  Every state and boundary definition needs at least three nonclear assignments
+  and one nonskippable material route. It gives every Relic a pilgrimage, but
+  risks universal ladder friction, rushed-through middle forms, and grind
+  disguised as biography.
+- **C — staged and shortcut-complete definitions coexist. Recommended guarded
+  higher-ceiling direction, with D2-A offered as a system fallback.** Some
+  Relics require a materially played intermediate while others retain a direct
+  clarity baseline. C fails if staged names become premium or punitive,
+  intermediates are speed bumps, universal M bypasses the route, topology is
+  hidden, or the extra grammar is not worth learning. Selecting C opens D2A.
+
+Example: `Mercy -> Tempered -> Defiance` is genuinely staged only if no P, Z,
+X, or M edge permits `Mercy -> Defiance`; `Tempered` must materially alter play
+before a later cause can propose the endpoint. Any legal direct shortcut makes
+that ordered pair shortcut-complete even if the organic two-step route remains.
+
+D2 is evaluated against the active cause set. If a selected Z/X/M fallback
+later removes edges, rebuild the graph and either reauthor it to satisfy the
+chosen D2/D2A branch or explicitly reopen D2 and every dependent answer. A
+topology classification may never survive silently after its supporting edges
+change.
+
+D2 leaves D3 reverse edges, D4 clear-to-unassigned, D5 eventual return,
+RCS-03E agency/approval, exact graphs, actors, costs, locks, power, UI,
+persistence, and implementation open. Ask only for D2 A, B, or C. Require
+**“C with D2-A system fallback”** if the recommended replacement path is
+wanted; a bare C does not select it.
+
+## 2026-09-28 Event-bound support spans both dialects; dedicated operation cause is next — superseded frontier
 
 Zanzagar selected `RCS-03D1X1-C` with `RCS-03D1X1-A` as the explicit child
 scope fallback. The globally proper Event-bound subset now has nonempty support
@@ -11820,7 +11885,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 22:26 UTC — dedicated evolution/reconfiguration operation cause is next](docs/handoffs/2026-09-28-2226--relic-dedicated-operation-cause-next.md)**
+[2026-09-29 01:53 UTC — direct shortcut versus required staged nonclear topology is next](docs/handoffs/2026-09-29-0153--relic-nonclear-topology-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

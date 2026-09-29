@@ -404,9 +404,15 @@ shaped by independently meaningful lived events unless the complete mechanic
 fails its gates. Zanzagar then selected D1X1-C with D1X1-A as the explicit
 scope fallback, so the proper Event-bound subset has nonempty incidence in both
 transformation dialects unless boundary-attunement event play fails while
-state-side play survives. **RCS-03D1M is now the sole owner-facing choice under
-SR-04:** whether a dedicated Relic evolution or reconfiguration operation may
-itself directly propose persistent transformation.
+state-side play survives. Zanzagar then selected D1M-B with D1M-A as the
+explicit system fallback, so every transforming Relic
+has at least one dedicated-operation proposal path unless the complete M
+system fails its gates. **RCS-03D2 is now the sole owner-facing choice under
+SR-04:** whether nonclear assignment topology is wholly shortcut-complete,
+universally includes a genuine staged gap, or mixes those definition classes.
+The thirty-ninth prerequisite correction adds one conditional D2A dialect-
+incidence child if the mixed branch is selected; the current register therefore
+has 142 rows and `Phi_SR = 24`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -26184,7 +26190,7 @@ D1X1 moves to `DIR-SELECTED`, and `RCS-03D1M` becomes the sole
 remain—M and M1—so closing them returns D2 as the sole frontier at
 `Phi_SR = 23`. The authoritative decision record remains unchanged.
 
-### RCS-03D1M — dedicated evolution/reconfiguration operation as transformation cause — active owner choice
+### RCS-03D1M — dedicated evolution/reconfiguration operation as transformation cause — B selected with A system fallback
 
 Let `O^M_v` be the prospectively versioned set of authoritative dedicated
 Relic evolution or reconfiguration operations. An actual occurrence `m`
@@ -26272,6 +26278,146 @@ locks, targets, rates, power, presentation, agency, approval, collision,
 persistence, fault handling, and implementation remain later registered work.
 This card authorizes no implementation, and the authoritative decision record
 remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **B, every
+transforming Relic has a dedicated-operation path, with D1M-A as the explicit
+whole-system fallback.** Thus `D_M=D_mut`: every state-supporting and every
+boundary-supporting transforming definition has at least one reachable actual
+dedicated evolution/reconfiguration operation whose direct M edge may
+originate a materially distinct same-dialect assignment proposal. This does
+not make every target, direction, or operation selectable; guarantee player
+initiation or equal practical access; or approve or commit any proposal.
+
+B is active. D1M-A is an armed replacement, not a simultaneous rule: if the M
+system fails its non-token purpose, policy non-dominance, comprehension,
+anti-duplication, anti-counterpick, commitment, or anti-loop gates, A replaces
+B and removes every M edge. Deliberate cultivation and approval of proposals
+caused by P/Z/X remain available under their later rules. D1M-C is unselected,
+and the fallback has not fired.
+
+Selected D1P-B forces `D_M ∩ D_P=D_M`; selected universal M support also
+forces `D_M ∩ D_Z=D_Z` and `D_M ∩ D_X=D_X` at the
+definition level. These equalities do not require M and P/Z/X to occur on one
+trace, propose the same target, or share an edge. Their occurrences and direct
+causal edges remain distinct.
+
+D1M moves to `DIR-SELECTED`; D1M1 moves to `PRUNED` because universal support
+necessarily reaches both nonempty transformation dialects; and RCS-03D2
+becomes the sole `OWNER-OPEN` row. The 141-row register now contains **22
+`SCREEN`, 1 `OWNER-OPEN` at D2, 41 `PRUNED`, 70 `DIR-SELECTED`, 5 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`**. All reachable cause loci are now
+closed at worksheet-direction granularity. Exact operations, edges, rates,
+actors, initiation/admission, costs, locks, targets, power, presentation,
+agency, approval, collision, committed identity, persistence, fault handling,
+and implementation remain later work. The authoritative decision record
+remains unchanged.
+
+> **Thirty-ninth prerequisite correction, 2026-09-28 — proper staged topology
+> hid a dialect-incidence choice.** The first repaired register gave D2 one row
+> for direct-versus-staged nonclear adjacency. A named-claim topology audit
+> found that D2's proper-subset branch can put genuinely staged transition
+> grammar only in state-supporting definitions, only in boundary-supporting
+> definitions, or in both. Those alternatives determine whether mandatory
+> biography changes what a Relic bears, how it listens, or both. Treating them
+> as authoring would repeat the exact whole-dialect omission that required the
+> D1 cause-incidence children.
+>
+> D2 therefore remains the parent prevalence card and one conditional
+> `RCS-03D2A` row is added. D2A opens only under D2-C and chooses state-only,
+> boundary-only, or nonempty support in both dialects; it prunes under D2-A/B.
+> D3 follows D2 and any applicable D2A answer. Exact within-dialect prevalence,
+> assignments, edges, causes per edge, and availability contexts remain later
+> authoring/specification work.
+>
+> Adding one `SCREEN` row raises the frozen register from 141 to **142 rows**:
+> **23 `SCREEN`, 1 `OWNER-OPEN` at D2, 41 `PRUNED`, 70 `DIR-SELECTED`, 5
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`**. No owner answer,
+> cause rule, receipt, result, assignment, edge, or authoritative-record text
+> changes. The correction exposes one already-player-material consequence
+> before D2 is presented.
+
+### RCS-03D2 — direct shortcut versus required staged nonclear assignment topology — active owner choice
+
+For each completed fixed-version transforming definition `d`, let `A_d` be
+its materially distinct legal **nonclear** assignments in its one selected
+RCS-03A dialect. Define the directed proposal-adjacency relation `E_d` so
+`(a,b)` belongs to `E_d` exactly when, while assignment `a` is authoritative,
+at least one selected D1 cause family can legally originate a direct proposal
+naming distinct assignment `b` without another assignment committing first.
+`E_d` is the union across P, Z, X, and M support actually available to `d`;
+an organic two-step route is not required staging if a dedicated M operation
+or any other cause supplies a direct shortcut.
+
+The graph is evaluated under the **active** parent-cause configuration. If any
+selected D1 fallback later removes or narrows Z, X, or M support, rebuild
+`E_d`, `R_d`, and `G_d`. The completed catalog must either be reauthored within
+the surviving cause rules to satisfy the exact selected D2/D2A branch again or
+explicitly reopen D2 and every topology-dependent descendant before release.
+A parent fallback may not silently change a definition's staged/shortcut class.
+
+An edge records legal proposal capability only. It does not make the proposal
+available in every context, player-selectable, approved, collision-winning, or
+committed. Those authorities remain with later RCS-03E/RCS-04A/RCS-13 work.
+
+Let `R_d` contain the **distinct-endpoint** ordered pairs `(a,b)`, with `a != b`,
+whose directed reachability is witnessed by one legal canonical same-artifact
+fixed-version history whose successive assignment transitions use one or more
+`E_d` edges and whose vertices all remain nonclear. Edges from mutually
+incompatible histories cannot be stitched into reachability. Let
+`G_d=R_d \setminus E_d` be its **transitive-gap set**. Thus `(a,b)` belongs to
+`G_d` only when `b` is reachable after at least two successive nonclear
+assignment transitions but no selected cause can propose `b` directly while
+`a` is current. The intermediate assignments must be material played states,
+not animations, currencies, receipts, progress bars, or aliases. Define
+
+`D_stage={d in D_mut : G_d is nonempty}`.
+
+A definition outside `D_stage` is **shortcut-complete**, not all-pairs
+complete: every endpoint that is already reachable from a source has some
+direct edge from that source. The definition may still have unreachable
+ordered pairs, conditional edges, long optional routes, and one-way travel.
+This narrower term prevents D2 from silently deciding D3 reverse edges or D5
+return reachability.
+
+| Choice | Required-stage prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete topology example |
+| --- | --- | --- | --- |
+| **A — every transforming definition is shortcut-complete** | `D_stage` is empty. Whenever a nonclear assignment `b` is reachable from nonclear `a`, some legal cause can propose `b` directly from `a`; a player may still take an optional multi-step route. | **Practical system fallback and clearest grammar.** A prevents mandatory filler states, progression tolls, and hidden route puzzles. Each honest direct edge may put one continuing artifact and one materially different assignment in a direct local relation; the catalog-wide exclusion of required staging is protective/aggregate. A does not mean free respec, target-any M, immediate availability, reverse travel, or automatic approval. Its cost is less authored becoming: a Relic cannot make an intermediate condition semantically indispensable to a later reachable form. | Vowscar may have `Mercy -> Tempered -> Defiance`, but if `Defiance` is reachable from `Mercy`, some P/Z/X/M edge also permits `Mercy -> Defiance`. The shortcut may require a different lawful cause or context and need not be chosen. |
+| **B — every transforming definition has at least one genuine staged gap** | `D_stage=D_mut`. Every state- and boundary-supporting definition has some reachable ordered nonclear endpoint that requires at least one material intermediate assignment. This guarantees one staged gap per definition, not that every transition or endpoint is staged. | B gives every Relic at least one real pilgrimage and prevents its complete biography from collapsing to only direct destination changes. Each adjacent edge may realize the ideal directly; the same continuing artifact across an indispensable temporal sequence is partial, while universal prevalence is aggregate. The price is a minimum of three nonclear assignments and one nonskippable route for every definition, plus universal UI, authoring, pacing, balance, and proof burden. It risks compulsory ladders, rushed-through middle states, and grind disguised as biography. | Every definition needs some analogue of `Mercy -> Tempered -> Defiance` with no legal `Mercy -> Defiance` edge from P, Z, X, **or M**. `Tempered` must change actual play before a later cause can propose `Defiance`. The reverse directions remain D3/D5 work. |
+| **C — staged and shortcut-complete definitions coexist** | `D_stage` is a nonempty proper subset of `D_mut`; D2A then chooses state-only, boundary-only, or nonempty support in both dialects. At least one definition has a genuine transitive gap and at least one has none. | **Recommended guarded higher-ceiling direction, with D2-A as the practical system fallback if selected.** C permits disclosed pilgrimage Relics beside more directly responsive Relics without forcing a filler third state onto every name. An indispensable intermediate can make one artifact's biography mechanically real; a shortcut-complete peer supplies the clarity baseline. Local edges and staged histories inherit A/B's direct/partial ratings, while class coexistence is only aggregate. C fails if staged names become a premium caste or a trap, intermediate forms are speed bumps, universal M bypasses the advertised journey, topology is hidden, or the extra grammar is not worth learning. | Vowscar may require `Mercy -> Tempered -> Defiance`, with no direct shortcut from any cause. Dreamglass may let every already-reachable attunement endpoint be proposed directly from its source. Both topology classes must later pass the prospective legibility gate before any consequential commitment; this card selects neither the exact information surface nor irreversibility. The names and assignments are illustrative. |
+
+A/B/C are exhaustive because `D_stage` is a subset of nonempty `D_mut`: it is
+empty, the whole domain, or nonempty proper. The test is reachability-relative,
+not an all-to-all graph requirement. An unreachable `a,b` pair is not a staged
+gap; a two-step route with any legal direct `a -> b` shortcut is not a staged
+gap; and a context-specific inconvenience cannot masquerade as authored staged
+topology if another legal cause supplies the shortcut.
+
+The recommendation is guarded C with D2-A offered as an explicit whole-system
+fallback, not universal B. C earns its extra grammar only if the transition map
+is prospectively legible, each required intermediate changes optimized policy
+for a material duration, staged and shortcut-complete definitions are both
+non-dominated, no acquired copy is a hidden topology-quality roll, and the
+universal D1M-B operation respects rather than bypasses every advertised gap.
+If those gates fail, A removes required gaps while retaining cause-specific,
+locked, costly, and approval-dependent direct edges. A fallback is not selected
+unless the owner includes it in the answer. Firing D2-A or any upstream cause
+fallback triggers the same downstream graph revalidation rule rather than
+silently inheriting topology conclusions derived from removed edges.
+
+D2 decides no direct reverse edge: `(a,b)` in `E_d` says nothing about
+`(b,a)`, which remains D3. It excludes the unassigned vertex, so explicit
+clearing remains D4. It requires neither a cycle nor a route back from a later
+assignment, so eventual return remains D5. It selects no exact graph, stage
+count beyond one witness, target availability, cause-to-edge assignment,
+agency, approval, collision, operation actor/cost/lock, committed identity,
+power, presentation, migration, or implementation.
+
+Under D2-A/B, D2A prunes and D3 opens, producing 21 `SCREEN`, 1
+`OWNER-OPEN`, 42 `PRUNED`, 71 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`, with `Phi_SR = 22`. Under D2-C, D2A opens next with 22 `SCREEN`,
+1 `OWNER-OPEN`, 41 `PRUNED`, 71 `DIR-SELECTED`, and `Phi_SR = 23`; closing
+D2A then opens D3 at 22. This card authorizes no implementation, and the
+authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

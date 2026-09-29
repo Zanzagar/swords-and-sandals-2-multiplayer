@@ -7428,6 +7428,104 @@ Under D1M-A/B, D1M1 prunes and D2 opens with 22 `SCREEN`, 1 `OWNER-OPEN`,
 `Phi_SR = 23`. Under D1M-C, D1M1 opens at `Phi_SR = 24`; its closure then
 opens D2 at 23.
 
+Zanzagar selected D1M-B with D1M-A as the explicit whole-system fallback.
+Thus `D_M=D_mut`: every transforming definition has at least one reachable
+actual dedicated-operation cause path. B is active. If the complete M system
+later fails its non-token-purpose, policy-nondominance, comprehension,
+anti-duplication, anti-counterpick, commitment, or anti-loop gates, D1M-A
+replaces B and removes every M edge. A is not concurrent and has not fired;
+D1M-C is unselected.
+
+Universal M support forces `D_M ∩ D_P=D_M`, `D_M ∩ D_Z=D_Z`, and
+`D_M ∩ D_X=D_X` at definition level. It does not force same-trace occurrence,
+same-target proposals, or shared causal edges. D1M moves to `DIR-SELECTED`,
+D1M1 prunes, and D2 becomes the sole `OWNER-OPEN` row. The 141-row register
+contains 22 `SCREEN`, 1 `OWNER-OPEN`, 41 `PRUNED`, 70 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`. All reachable cause
+parents are now closed at worksheet-direction granularity. No authoritative-
+record text changed.
+
+**Thirty-ninth prerequisite correction — D2 proper prevalence hides one
+dialect-incidence consequence.** A named-claim topology audit modeled each
+definition's directed nonclear proposal graph using the union of every selected
+cause edge. For definition `d`, `E_d` contains legal direct proposal
+adjacencies, `R_d` contains distinct-endpoint (`a != b`) nonclear directed
+reachability witnessed inside one legal canonical same-artifact fixed-version
+history rather than stitched from incompatible histories, and
+`G_d=R_d \setminus E_d` contains the genuine transitive gaps: reachable
+ordered endpoints requiring at least two assignment transitions because no
+cause supplies a direct shortcut. `D_stage` contains definitions with
+nonempty `G_d`.
+
+Empty, universal, and nonempty proper `D_stage` are independent player-facing
+topologies. Empty makes every already-reachable endpoint shortcut-complete;
+universal requires at least one material intermediate route in every
+transforming definition; proper makes staged and shortcut-complete definitions
+coexist. Shortcut-complete does not mean an all-pairs complete graph. An
+unreachable ordered pair stays outside the test, and D2 says nothing about the
+reverse direction.
+
+The proper branch can put required staging only in `D_S`, only in `D_B`, or in
+both. That changes whether mandatory biography belongs to remembered-condition
+or remembered-attunement play. Leaving this to authoring would repeat the
+dialect omission that forced every proper D1 cause subset to receive a child.
+The register therefore adds conditional D2A for this three-way incidence
+choice. A/B prune it; C opens it; D3 follows D2 and any applicable child.
+
+Adding one `SCREEN` row makes the register 142 rows: 23 `SCREEN`, 1
+`OWNER-OPEN` at D2, 41 `PRUNED`, 70 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 24`. No selected rule changes. Under D2-A/B, D2A
+prunes and D3 opens at `Phi_SR = 22`; under D2-C, D2A opens at 23 and its
+closure opens D3 at 22.
+
+**D2 atomicity and gameplay audit — one exhaustive prevalence card after the
+repair.** `E_d` is cause-union topology: after D1M-B, an M shortcut defeats a
+purported P/X-staged gap even when the organic route still uses an intermediate.
+An intermediate must be a material assignment that changes play, not an
+animation, currency, receipt, meter, or alias. Edge existence supplies proposal
+capability only; context availability, initiation, approval, collision, and
+commit remain later authorities.
+
+`E_d` is evaluated under the active D1 cause configuration. A later D1Z,
+D1X/D1X1, or D1M fallback may remove edges and thereby create a gap, destroy a
+route, or move a definition between topology classes. Such a fallback must
+rebuild `E_d/R_d/G_d` and either reauthor the surviving graph to satisfy the
+selected D2/D2A branch or explicitly reopen D2 and every dependent topology
+answer before release. Downstream classifications cannot silently survive a
+parent-edge deletion.
+
+- D2-A makes `D_stage` empty. It is the practical low-complexity fallback:
+  every already-reachable endpoint has some direct edge, without granting free
+  respec, target-any M, reverse travel, or automatic approval. It forbids an
+  intermediate assignment from being topologically indispensable.
+- D2-B makes `D_stage=D_mut`. Every state and boundary definition needs at
+  least one genuine gap, therefore at least three nonclear assignments and one
+  nonskippable material route. It gives every Relic a pilgrimage but risks
+  universal ladder friction, rushed-through middle forms, and biography as
+  grind.
+- D2-C makes `D_stage` nonempty proper and opens D2A. **Recommend guarded C
+  with D2-A as an explicitly selectable whole-system fallback.** C permits
+  disclosed staged-biography definitions beside shortcut-complete clarity
+  baselines without forcing filler onto every name. It fails if staged names
+  are premium or punitive, intermediate forms do not change optimized policy,
+  M bypasses the route, topology is hidden, or the extra grammar is not worth
+  learning. Its legibility obligation is a later pre-commit gate, not a D2
+  selection of exact information or irreversibility.
+
+For example, `Mercy -> Tempered -> Defiance` is genuinely staged only when no
+P/Z/X/M edge directly permits `Mercy -> Defiance`; `Tempered` must matter in
+play before a later cause may propose the endpoint. Adding any direct shortcut
+removes that ordered pair from `G_d` even if the two-step route remains legal.
+A distinct shortcut-complete Dreamglass may still have conditional, one-way,
+or unreachable pairs.
+
+A/B/C exhaust empty, universal, and nonempty proper `D_stage`. D3 remains open
+because every `E_d` edge is directed; D4 remains open because the graph excludes
+unassigned; D5 remains open because no branch requires cycles or return; and
+RCS-03E remains open because proposals are not approval or commit. Exact graphs,
+assignment identities, edges, cause-to-edge assignments, contexts, counts,
+actors, costs, locks, power, UI, and implementation remain later work.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or
