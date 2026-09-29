@@ -11147,8 +11147,9 @@ A makes every proposal system-deterministic. B makes every proposal
 participant-contingent. C fixes every P proposal as participant-contingent and
 every M proposal as system-deterministic; universal P/M support therefore
 gives every definition in both dialects both modes. Conditional
-**RCS-03E1Z** and **RCS-03E1X** then decide the source uniformly within their
-still-independent proper-subset causes. Conditional **RCS-03E2** owns timing:
+**RCS-03E1Z** and **RCS-03E1X** then decide source prevalence within their
+still-independent proper-subset causes, with definition-class incidence
+children under either proper-coexistence branch. Conditional **RCS-03E2** owns timing:
 advance-only, live-capable universal, or disclosed coexistence.
 
 The first uncommitted E1-C draft was broken. It required only global
@@ -11161,16 +11162,15 @@ test. Leaving it implicit would have created the very controllable-definition
 caste the prose warned against. This was the drafting agent's error; it was
 caught before commit or push.
 
-The smallest rigorous repair is not to freeze Z and X together. Whether the
-custodian may reject an absence-shaped Z proposal after actual `{}` and
-whether a disclosed lived X event binds a persistent scar are independent
-authority choices. E1Z and E1X therefore each expose system-deterministic
-versus participant-contingent authority. Mixed authority within one cause is
-excluded unless a later genuinely distinct semantic subcause passes reopening.
-E1-A prunes E1Z/E1X/E2. E1-B prunes E1Z/E1X and opens E2. E1-C opens E1Z,
-then E1X, then E2. The repaired tree has sixteen terminal patterns and prevents
-automatic evaluator invocation from being mistaken for automatic proposal
-approval.
+At this checkpoint, the smallest known repair was not to freeze Z and X
+together. Whether the custodian may reject an absence-shaped Z proposal after
+actual `{}` and whether a disclosed lived X event binds a persistent scar are
+independent authority choices. E1Z and E1X therefore first exposed
+system-deterministic versus participant-contingent authority. The post-E1
+audit below supersedes their assumed cause-wide uniformity by admitting
+definition-uniform proper coexistence and explicit incidence children. That
+later repair preserves the independent Z/X split and the rule that automatic
+evaluator invocation does not imply automatic proposal approval.
 
 A/B/C are the three admitted systemic E1 directions rather than an assertion
 that every mathematical subset deserves authoring. System-deterministic P plus
@@ -11186,9 +11186,9 @@ absent-authority recovery/default policy. RCS-13 retains operation initiation,
 bind/rebind, and lock horizons. RCS-04A retains choice and precedence among
 colliding approved proposals; RCS-04B retains committed identity; RCS-15/16
 retain persistence, migration, transaction, and repair realization.
-E1/E1Z/E1X/E2 admit one binary disposition for one concrete proposal, not
-participant-authored conditional programs, proposal banking, or hidden target
-selection.
+Every E1-family row ultimately yields one binary disposition for one concrete
+proposal, not participant-authored conditional programs, proposal banking, or
+hidden target selection.
 
 The recommendation audit rejected unconditional E1-B. Universal dedicated
 operation support supplies the countermodel: if a custodian knowingly
@@ -11215,11 +11215,100 @@ participant approval fails system-wide across viable timings while
 deterministic laws remain legible and fun. Live-prompt failure alone belongs
 to E2.
 
-Replacing one counted E row with E1/E1Z/E1X/E2 raises the register from 149 to
-152 rows. After selected D5-B it contains 21 `SCREEN`, 1 `OWNER-OPEN` at E1,
+At the forty-fourth-correction checkpoint, replacing one counted E row with
+E1/E1Z/E1X/E2 raised the register from 149 to 152 rows. After selected D5-B it
+contained 21 `SCREEN`, 1 `OWNER-OPEN` at E1,
 47 `PRUNED`, 76 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 22`. Under E1-A the three children prune and RCS-04A opens at 18.
 Under E1-B, E1Z/E1X prune and E2 opens at 19. Under E1-C, E1Z opens at 21,
-E1X at 20, and E2 at 19; closing E2 opens RCS-04A at 18. A D1M-A fallback or
-later loss of universal P/M support reopens E1. The authoritative decision
-record remains unchanged.
+E1X at 20, and E2 at 19; closing E2 opened RCS-04A at 18. The post-E1
+forty-fifth correction below supersedes those child counts and paths. A D1M-A
+fallback or later loss of universal P/M support reopens E1. The authoritative
+decision record remains unchanged.
+
+### RCS-03E1 disposition and proper-subset source audit — 2026-09-29
+
+Zanzagar selected **E1-C with E1-B as the qualified agency fallback and E1-A
+as the deeper system fallback**. Every reachable P proposal is
+participant-contingent and every reachable M proposal is system-deterministic.
+Selected universal P/M cause support gives every transforming definition at
+least one reachable proposal opportunity of each mode, so C cannot create a
+controllable-definition or dialect caste. The choice does not set Z/X source
+or participant timing.
+
+E1-B is armed but unfired. It may replace C only if even a knowingly
+initiated, admitted, target-constrained M operation still needs distinct
+material custodian assent rather than a token second confirmation, prompt tax,
+stall, or counterpick. X-specific involuntary-change failure belongs first to
+E1X. E1-A is the deeper armed but unfired replacement only if participant
+approval fails system-wide across viable timing models while deterministic
+proposal laws remain legible and fun. A live-prompt failure alone belongs to
+E2. Loss of universal P/M support reopens E1.
+
+The immediate post-answer audit broke the registered binary E1Z card. Selected
+D1Z-C/D1Z1-C make `D_Z` a proper Absence-bound definition subset with nonempty
+state and boundary incidence, but neither selection gives every member the
+same approval source. A state Hollow Ashen may use participant assent while a
+distinct state Iron Vow uses deterministic law; a state/boundary-only split
+would still hide that material equip and transformation policy. The identical
+countermodel applies to proper both-dialect Event-bound `D_X`.
+
+The forty-fifth prerequisite correction retains E1Z/E1X as prevalence cards
+and adds two conditional incidence children to each. For Z, the admitted
+definition-uniform rule partitions `D_Z` under coexistence into nonempty
+participant class `D_Z^P` and system-deterministic complement `D_Z^D`.
+E1ZA classifies `D_Z^P` as state-only, boundary-only, or both; E1ZA1 then
+classifies `D_Z^D`, omitting impossible same-single-dialect pairs. The seven
+valid pairs are `(S,B)`, `(S,SB)`, `(B,S)`, `(B,SB)`, `(SB,S)`, `(SB,B)`, and
+`(SB,SB)`. E1XA/E1XA1 perform the same finite classification for `D_X`.
+
+Definition-uniformity is an explicit constraint inside each proper-coexistence
+branch, not a hidden authoring default. Target, favorability, proof form,
+context, owner, instance, and individual opportunity cannot switch one fixed
+definition/version's source. A concrete design needing within-definition
+mixture must first name a genuinely stable semantic subcause and pass another
+owner-visible register amendment and no-caste review.
+
+For X, “self-authored events bind while suffered events ask” is a concrete
+stable semantic-subcause countermodel, so event family, actor, authorization,
+target, and opportunity are explicitly covered by the definition/version-wide
+uniformity constraint. If such a split later proves desirable, it reopens E1X
+through a new registered subcause; it is not derived or silently forbidden by
+D1X. Firing selected D1X1-A also reopens E1X and prunes/rederives E1XA/E1XA1:
+state-only `D_X` can collapse four of the seven both-dialect coexistence maps
+to uniform A or B, so their old labels cannot survive by name.
+
+Adding E1ZA/E1ZA1/E1XA/E1XA1 raises the register from 152 to **156 rows**.
+Before recording E1-C the corrected register would have contained 25
+`SCREEN`, 1 `OWNER-OPEN` at E1, 47 `PRUNED`, 76 `DIR-SELECTED`, 5 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`. After E1-C it contains **24
+`SCREEN`, 1 `OWNER-OPEN` at E1Z, 47 `PRUNED`, 77 `DIR-SELECTED`, 5 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`**. E1-A prunes all six Z/X rows and
+E2, opening RCS-04A at 18. E1-B prunes all six Z/X rows and opens E2 at 19.
+E1-C yields 243 finite child patterns—nine Z maps, nine X maps, and three E2
+timings—but exposes them one card at a time. The recommended uniform Z-B/X-A
+route prunes all four incidence children and asks only Z, X, then timing.
+
+E1Z is now the sole frontier. A makes every Z proposal system-deterministic;
+B makes every Z proposal participant-contingent; C creates disclosed
+definition-uniform Soul-Answered and Fate-Bound definition classes and opens
+E1ZA/E1ZA1. Recommend **E1Z-B with E1Z-A as the qualified cause-local system
+fallback**. Actual `{}` remains final: approval cannot create a receipt,
+restore proof or combat state, clear the later latch, or grant a reattempt.
+Participant assent controls only whether the persistent assignment proposal
+advances. This makes absence, continuing Relic, and distinct Soul/custodian
+jointly operative at one local boundary without allowing assent to erase the
+event.
+
+The attack on B is selective failure audition. Live authority could accept a
+favorable Mourning target and reject a scar; advance authority could become
+loadout bureaucracy; either could become always-accept/reject or stall on an
+unavailable custodian. Those are E2/RCS-02 tests before a Z-wide fallback.
+Fire E1Z-A only if participant authority fails across viable timing and
+recovery models while deterministic Z remains prospectively legible and
+preserves real seek/avoid policy. If absence biography itself remains farming
+or punishment under deterministic approval, the already armed D1Z-A parent
+fallback removes Z causes instead. If any selected source/timing law erases a
+definition's only legal D5 return witness, reopen D5 rather than stitching
+separate approval histories. The authoritative decision record remains
+unchanged.

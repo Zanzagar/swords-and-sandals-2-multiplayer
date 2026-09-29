@@ -1,6 +1,80 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-29 universal lived return selected; proposal approval source is next
+## 2026-09-29 P asks and an initiated Rite executes; Z approval source is next
+
+Zanzagar selected `RCS-03E1-C` with `RCS-03E1-B` as the qualified agency
+fallback and `RCS-03E1-A` as the deeper system fallback. Every reachable
+positive-settlement P proposal is participant-contingent; every reachable
+dedicated-operation M proposal is system-deterministic. Because P and M cause
+support are both universal across transforming definitions, every state and
+boundary definition has at least one reachable opportunity of each mode.
+Organic manifestation therefore asks the owning combatant's persistent
+custodian for meaningful assent, while a knowingly initiated, admitted,
+target-constrained Rite follows its fixed proposal-local law without a second
+“are you sure?” decision.
+
+E1-B is armed and unfired. It may replace C only if even those informed M
+proposals cause material involuntary-build regret and separate assent remains
+strategic rather than a token confirmation, prompt tax, stall, or counterpick.
+X-specific involuntary-change failure belongs first to E1X. E1-A is armed and
+unfired beneath B; it may replace participant approval only after that mechanic
+fails system-wide across viable timing models while deterministic laws remain
+legible and fun. A live-prompt failure alone belongs to E2. Neither fallback is
+concurrent with C. Loss of universal P/M support reopens E1.
+
+The post-answer audit broke the still-binary E1Z/E1X rows before either reached
+the owner. D1Z1-C and D1X1-C place proper cause subsets in both transformation
+dialects, but do not force all definitions in one subset to share an approval
+source. A state Hollow Ashen may ask about Z while another state Iron Vow bears
+Z deterministically; splitting only by dialect would still hide that material
+policy. The forty-fifth prerequisite correction therefore makes each cause
+parent three-way—system-deterministic universal, participant-contingent
+universal, or disclosed definition-uniform proper coexistence—and adds two
+conditional incidence children for each proper branch. Within-definition
+source changes by target, favorability, context, event actor, or individual
+opportunity require a later owner-visible stable-subcause amendment.
+
+The repaired register has **156 rows**: 24 `SCREEN`, 1 `OWNER-OPEN` at E1Z,
+47 `PRUNED`, 77 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 25`. The four added rows select nothing. Although the repaired E1-C
+subtree contains 243 finite Z/X/timing combinations, only one prerequisite-ready
+card is shown at a time; the recommended uniform Z-B/X-A route prunes all four
+incidence children and still asks only Z, X, then timing.
+
+`RCS-03E1Z` now asks how approval source is distributed across actual
+empty-settlement Z proposals. The `{}` settlement has already committed. Any
+approval answer leaves the lost receipt, preserved proof, later
+`LISTENED—SEVERED` latch, recurrence consequences, and combat history intact:
+
+- **A — every Z proposal is system-deterministic.** Fixed proposal-local law
+  admits or withholds it. This is the qualified cause-local system fallback:
+  clean, stall-free, and resistant to favorable-outcome filtering, but it can
+  inflict a second involuntary persistent mutation after an already costly or
+  teammate-influenced cancellation.
+- **B — every Z proposal is participant-contingent. Recommended.** The
+  custodian can materially approve or withhold every Z proposal, while E2
+  later decides whether that disposition is bound in advance or remains live.
+  Absence remains real; the Relic proposes how to bear it; the distinct Soul
+  assents without undoing the event. That is the strongest direct local
+  standing-ideal fit. Risks are upside-only acceptance, failure audition,
+  policy burden, stalls, and post-result shopping if E2 is poorly chosen.
+- **C — participant and deterministic Z definitions coexist.** Each fixed
+  definition/version uses one source for all its Z proposals, forming disclosed
+  Soul-Answered and Fate-Bound definition classes. C opens E1ZA then E1ZA1 to
+  decide their dialect incidences. It supports two coherent identities but
+  risks an agency-premium caste and spends two more owner cards.
+
+Recommend **B with E1Z-A qualified cause-local system fallback**. Fire A only
+if participant assent fails across viable E2 timing/default models—becoming
+always-accept/reject, selective failure farming, counterpick pressure, or
+unacceptable bureaucracy/stalls—and deterministic Z remains prospectively
+legible and preserves real seek/avoid play. If absence biography remains
+farming or punishment even under A, the already selected parent D1Z-A fallback
+removes Z instead. E1Z sets no timing, default/recovery rule, target, collision
+winner, persistence mechanism, or D5 return reset. Ask only for E1Z A, B, or C
+and preserve any explicitly selected fallback.
+
+## 2026-09-29 universal lived return selected; proposal approval source is next — superseded frontier
 
 Zanzagar selected `RCS-03D5-B` with `RCS-03D5-A` as the explicit system
 fallback. Every completed state- and boundary-supporting transforming
@@ -12322,7 +12396,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-29 06:21 UTC — transformation-proposal approval source is next](docs/handoffs/2026-09-29-0621--relic-approval-source-next.md)**
+[2026-09-29 16:46 UTC — actual empty-settlement proposal approval is next](docs/handoffs/2026-09-29-1646--relic-empty-settlement-approval-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
