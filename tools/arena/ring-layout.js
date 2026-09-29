@@ -3,7 +3,8 @@
  * S3, S4 (the moves no slot holds, `ringMoveButtonsAt`), S5 (the items row,
  * `ringItemButtonsAt` — since decision 7, 2026-09-28, clear of the words the
  * eight paint) and S6 (the swap, `ringSwapButtonAt`) of
- * `docs/design/battle-ui.md`. Pure canvas geometry for
+ * `docs/design/battle-ui.md` — and, for the reach preview (decision 1,
+ * 2026-09-28), where a lit foe's number stands (`ringReachNumberAt`). Pure canvas geometry for
  * `tools/arena/main.js`, which only paints what this places and asks this what
  * a point landed on.
  *
@@ -745,6 +746,53 @@ export function ringCaptionLines(text, { maxWidth, measure }) {
   }
   if (line !== "") lines.push(line);
   return lines;
+}
+
+/**
+ * ► **WHERE A LIT FOE'S NUMBER STANDS (the owner's decision 1: "a numbered
+ *   gold ring (1–3, left to right)") — AUTHORED.** The ring itself is on the
+ *   sand under his feet, where his name plate already stands, so the number
+ *   is a disc over his HEAD: centred on his drawn box, `gap` above its top,
+ *   at the stage fit's size (9 stage px, its figure 12), and kept on the
+ *   visible stage. Nobody's feet and no key label stand there, and the ring
+ *   is painted after it, so a button is never under a number.
+ *
+ * @param {{x0: number, x1: number, y0: number}} box  the foe's drawn box (`fighterBoxFor`), canvas px
+ * @param {{scale: number, stage: {x: number, y: number, width: number, height: number}}} at
+ *   `scale`, canvas px per stage px (the stage fit's); `stage`, the visible stage (`ringBoundsFor`)
+ * @returns {{x: number, y: number, r: number, px: number}} the disc's centre and radius and the figure's size, canvas px
+ */
+export function ringReachNumberAt(box, { scale, stage }) {
+  const r = RING_REACH_NUMBER.radius * scale;
+  const gap = RING_REACH_NUMBER.gap * scale;
+  const x = Math.min(Math.max((box.x0 + box.x1) / 2, stage.x + r), stage.x + stage.width - r);
+  const y = Math.min(Math.max(box.y0 - gap - r, stage.y + r), stage.y + stage.height - r);
+  return Object.freeze({ x, y, r, px: RING_REACH_NUMBER.px * scale });
+}
+
+/** The number's disc, its gap over the head and its figure, stage px (AUTHORED). */
+const RING_REACH_NUMBER = Object.freeze({ radius: 9, gap: 4, px: 12 });
+
+/**
+ * THE LIT FOE WHOSE NUMBER A POINT IS ON (decision 1): the number is his to
+ * click as his body is — it stands over his head, outside the box `foeAt`
+ * tests, and a click there was the bare stage (found on this slice's
+ * self-review). Rim included; of two discs that overlap, the nearer.
+ *
+ * @param {{foeId: string, x: number, y: number, r: number}[]} numbers  where the frame drew them
+ * @returns {string|null}
+ */
+export function ringReachNumberHit(numbers, x, y) {
+  let best = null;
+  let bestDistance = Infinity;
+  for (const number of numbers ?? []) {
+    const distance = Math.hypot(x - number.x, y - number.y);
+    if (distance <= number.r && distance < bestDistance) {
+      best = number.foeId;
+      bestDistance = distance;
+    }
+  }
+  return best;
 }
 
 /** The slot of the drawn button a point is on (rim included), or null. */
