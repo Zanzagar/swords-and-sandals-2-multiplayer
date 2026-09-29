@@ -1905,10 +1905,176 @@ function withHud(camera, hud, set) {
 }
 
 /**
- * One frame of the arena's camera from the whole roster: `framedActors`, then
+ * THE CAMERA ON A PERSON'S TURN — **AUTHORED, the owner's decision 6
+ * (`docs/design/battle-ui.md#decided-hud-2026-09-24`): "on a PERSON's turn
+ * only, the camera eases to also frame the acting fighter's ring (buttons,
+ * items row, rank arrows) with a margin, and every lit target while a reach
+ * preview shows ... AI and spectate turns stay byte-identical — the close-up
+ * and 1v1 untouched."** The build frames its two fighters and puts its overlay
+ * on the hero wherever that lands; a team camera frames six, and the ring of
+ * one of them was measured off the visible stage in 2,458 of 6,499 person's
+ * rings (30 team bouts, every foe selected; up to 90px off its top), to be
+ * squeezed back on by `ringButtonsInside`, off its fighter.
+ *
+ * ► **WHAT IT DOES: the least change to the camera that frames the ring too.**
+ *   The shell hands `stepFramedCamera` a `framing` — for any camera, the stage-px
+ *   boxes of everything the person must see there (`ringFramingFor` in
+ *   `tools/arena/ring-layout.js`). The target is the fighters' own camera (the
+ *   build's, the close-up, the HUD's — everything above, stepped exactly as
+ *   before) at the HIGHEST zoom no higher than its own, and the pan nearest its
+ *   own, at which every box stands `margin` inside the visible stage
+ *   (`SS2_CLOSE_UP.visible`) and every framed fighter's fit margin
+ *   (`FIGURE_HALF_WIDTH` either side of his span) is no less on the stage than
+ *   the fighters' camera has it. Only the zoom and the pan change: the framing
+ *   weight, the HUD, a blend's lift and the crowd's rule are the fighters'
+ *   camera's, so a lower zoom only takes a back rank further from the wall and
+ *   a front rank's ink further above the HUD (D3 kept; measured in the slice's
+ *   sweep). No zoom fits — a box taller than the stage — and nothing changes.
+ * ► **EASED BY THE ZOOM'S FIFTH, both ways.** The camera carries how far it
+ *   stands from the fighters' camera (`person`: `dz`, `dg`), eased toward the
+ *   target's by `1/ease` of the gap a frame, the zoom's own fifth, as the
+ *   hand-over, the HUD and the hold are — and the zoom and the pan by the SAME
+ *   fraction, so the frame travels the straight line between the two cameras,
+ *   along which a stage x is linear. On the turn's first frame the camera moves
+ *   a fifth of the way; when the turn ends (no `framing`) it gives a fifth back
+ *   a frame, and once both are inside `snapZoom`/`snapPan` of nothing it drops
+ *   them and IS the fighters' camera — the result `stepFramedCamera` returned
+ *   before this slice, to the byte.
+ * ► **ONE EXCEPTION, AND IT IS A CHOICE: A FIGHTER IS NEVER FRAMED WORSE THAN
+ *   THE FIGHTERS' CAMERA FRAMES HIM, on any frame (`framedCameraAt`).** Easing
+ *   out, the offset measures against a fighters' camera that is already
+ *   following the next move; when a flank fighter whose ring took a wide pan
+ *   steps in, that camera zooms in by its own ease and the offset left would
+ *   push the far flank off. There the pan returns toward the fighters' camera
+ *   faster than the ease. Measured over 20 team bouts (2,139 person turns, each
+ *   action drawn over its span): more than the ease on 69 of 295,254 frames —
+ *   over 5px on 35, over 30px on 2, 54.9px at most — every one while a turn's
+ *   framing eased out, 26 of the 35 on the first frame of the action that ended
+ *   it, the frame the ring vanishes. Easing through instead cropped a
+ *   fighter's body by up to 55.9px (826 frames). An owner's call to reverse.
+ * ► **NEVER IN A 1v1**, whose camera is the build's (D3): two placed fighters
+ *   or fewer, and the framing is not even read. A new roster opens on its own
+ *   shot, as always, with no framing carried over.
+ */
+export const SS2_RING_FRAMING = Object.freeze({
+  /** How far inside the visible stage every framed box stands, stage px. */
+  margin: 8,
+  /** The framing eases by this fraction of the gap a frame: the zoom's own fifth. */
+  ease: SS2_CAMERA.zoomEase,
+  /** Inside this much of its target, the zoom's offset snaps to it. */
+  snapZoom: 0.01,
+  /** Inside this many stage px of its target, the pan's offset snaps to it. */
+  snapPan: 0.01
+});
+
+/**
+ * One frame of the arena's camera from the whole roster: the fighters' camera
+ * (`stepFightersCamera`) — and, on a person's turn in a team bout, the ring
+ * framed as well (`SS2_RING_FRAMING`).
+ *
+ * @param {object|null} previous  the last frame's result, or null
+ * @param {Array<object>} roster  every PLACED actor — see `framedActors` and `actorSpanFor`
+ * @param {{result?: object|null, hudTop?: number|null, framing?: function(object): Array<{x0: number, x1: number,
+ *   y0: number, y1: number}>|null}} [options]  as `stepFightersCamera`'s; and `framing`, on a person's turn: for a
+ *   camera, the stage-px boxes to keep on the visible stage there — anchored to arena points, so the boxes at any
+ *   pan are those at pan 0 moved by the pan. Null or absent: nobody's ring (an AI or spectated turn).
+ * @returns {object} `stepFightersCamera`'s result — with `camera` the framed camera, and `person` (`base`, the
+ *   fighters' camera; `dz`, `dg`, how far from it the framed one stands) — while a person's framing is on or
+ *   still easing out.
+ */
+export function stepFramedCamera(previous, roster, { result = null, hudTop = null, framing = null } = {}) {
+  const person = previous?.person ?? null;
+  // The fighters' camera is stepped from ITS OWN last frame: the one a framing moved is not it.
+  const base = stepFightersCamera(person ? { ...previous, camera: person.base } : previous, roster, { result, hudTop });
+  const asked = typeof framing === "function";
+  if (!person && !asked) return base;
+  // A new bout opens on its own shot, and a 1v1 is the build's: no framing read, none carried.
+  if (!previous?.camera || previous.rosterKey !== base.rosterKey || placedIn(roster).length <= 2) return base;
+  const target = asked ? ringFramingTarget(base.camera, base.framed, framing) : { dz: 0, dg: 0 };
+  const dz = easeFraming(person?.dz ?? 0, target.dz, SS2_RING_FRAMING.snapZoom);
+  const dg = easeFraming(person?.dg ?? 0, target.dg, SS2_RING_FRAMING.snapPan);
+  if (!asked && dz === 0 && dg === 0) return base;
+  const camera = dz === 0 && dg === 0 ? base.camera : framedCameraAt(base.camera, base.framed, dz, dg);
+  return Object.freeze({ ...base, camera, person: Object.freeze({ base: base.camera, dz, dg }) });
+}
+
+/** One frame of the framing's ease toward `target`, by `SS2_RING_FRAMING.ease`, snapping inside `snap`. */
+function easeFraming(value, target, snap) {
+  const next = value + (target - value) / SS2_RING_FRAMING.ease;
+  return Math.abs(target - next) < snap ? target : next;
+}
+
+/**
+ * THE FRAME DRAWN: the fighters' camera `base`, `dz` zooms and `dg` px of pan from it — the pan kept inside what
+ * keeps every framed fighter's fit margin no further off the stage than `base` has it (`fightersPanRange`).
+ *
+ * ► **THE FIGHTERS ARE CHECKED ON THE DRAWN FRAME, NOT ONLY AT THE TARGET** (found by this slice's own sweep before
+ *   Codex saw it: 2,254 frames of 20 team bouts cropped a fighter more than the fighters' camera, by up to 54.9px).
+ *   A target keeps them; the offsets EASING to it need not, when they were left by the last turn, or are easing out
+ *   while the fighters' camera follows the next move — both measure against a camera that has since moved. So each
+ *   frame the pan drawn is brought inside the range; the offsets run on as eased, and it feeds nothing back, as
+ *   rule 6's check does in the close-up. The range is never empty at a zoom no higher than `base`'s, and every
+ *   offset's zoom is (each target's is, and the ease only mixes them).
+ */
+function framedCameraAt(base, framed, dz, dg) {
+  const zoomscale = base.zoomscale + dz;
+  const { low, high } = fightersPanRange(base, framed, zoomscale);
+  const pan = base.gladiatorsX + dg;
+  return Object.freeze({ ...withZoom(base, zoomscale), gladiatorsX: low <= high ? Math.min(high, Math.max(low, pan)) : base.gladiatorsX });
+}
+
+/**
+ * The pans at which, at `zoomscale`, every framed fighter's fit margin (`FIGURE_HALF_WIDTH` either side of his
+ * span) is no further off the visible stage than the fighters' camera `base` draws it — on it wherever `base` has
+ * it on — as `{low, high}` (empty when `low > high`).
+ */
+function fightersPanRange(base, framed, zoomscale) {
+  const { visible } = SS2_CLOSE_UP;
+  const origin = SS2_ARENA_ORIGIN.x;
+  const k0 = base.zoomscale / 100;
+  const k = zoomscale / 100;
+  let low = -Infinity;
+  let high = Infinity;
+  for (const actor of placedIn(framed).map(closeUpGeometryOf)) {
+    const lo = actor.xMin - FIGURE_HALF_WIDTH;
+    const hi = actor.xMax + FIGURE_HALF_WIDTH;
+    low = Math.max(low, Math.min(visible.left, origin + base.gladiatorsX + lo * k0) - origin - lo * k);
+    high = Math.min(high, Math.max(visible.right, origin + base.gladiatorsX + hi * k0) - origin - hi * k);
+  }
+  return { low, high };
+}
+
+/**
+ * WHERE A PERSON'S FRAMING WANTS THE CAMERA, as offsets from the fighters' camera `base`: the highest zoom no
+ * higher than its own — its own, then each whole zoom below it down to the build's `zoomMinimum` — at which the
+ * framing's every box stands `margin` inside the visible stage and some pan keeps every framed fighter's fit
+ * margin no less on the stage than `base` does; and of those pans, the one nearest `base`'s. None: no offset.
+ */
+function ringFramingTarget(base, framed, framing) {
+  const { visible } = SS2_CLOSE_UP;
+  const { margin } = SS2_RING_FRAMING;
+  const zooms = [base.zoomscale];
+  for (let zoom = Math.ceil(base.zoomscale) - 1; zoom >= SS2_CAMERA.zoomMinimum; zoom -= 1) zooms.push(zoom);
+  for (const zoom of zooms) {
+    const boxes = framing(Object.freeze({ ...withZoom(base, zoom), gladiatorsX: 0 }));
+    if (!boxes.every((box) => box.y0 >= visible.top + margin && box.y1 <= visible.bottom - margin)) continue;
+    let { low, high } = fightersPanRange(base, framed, zoom);
+    for (const box of boxes) {
+      low = Math.max(low, visible.left + margin - box.x0);
+      high = Math.min(high, visible.right - margin - box.x1);
+    }
+    if (low <= high) return { dz: zoom - base.zoomscale, dg: Math.min(high, Math.max(low, base.gladiatorsX)) - base.gladiatorsX };
+  }
+  return { dz: 0, dg: 0 };
+}
+
+/**
+ * The FIGHTERS' camera, one frame, from the whole roster: `framedActors`, then
  * the build's camera over whoever it frames — and, in a team bout once a fall
  * has finished, the survivors' close-up (`SS2_CLOSE_UP`) as its target — kept
- * above the in-frame HUD when there is one (`SS2_TEAM_HUD`).
+ * above the in-frame HUD when there is one (`SS2_TEAM_HUD`). Until decision 6
+ * this was `stepFramedCamera` itself, and it is still exactly what that returns
+ * with no person's framing on.
  *
  * ► **A DEATH EASES THE CAMERA; IT NEVER RE-SEEDS IT.** `cameraFor` is the
  *   build's opening shot — zoom 5, rushing in — and it is taken only when the
@@ -1928,7 +2094,7 @@ function withHud(camera, hud, set) {
  *   Under a HUD every camera also carries `hudTop` and `inkSize` (see `SS2_TEAM_HUD`); a `camera`
  *   drawn as a blend whose ink would pass its bottom carries `inkLift` (see `groundedBlend`).
  */
-export function stepFramedCamera(previous, roster, { result = null, hudTop = null } = {}) {
+function stepFightersCamera(previous, roster, { result = null, hudTop = null } = {}) {
   const hud = Number.isFinite(hudTop) ? hudTop : null;
   const rosterKey = rosterKeyOf(roster);
   const placed = placedIn(roster);

@@ -183,12 +183,14 @@ import {
   ringShownFor
 } from "/tools/arena/ring.js";
 import {
+  RING_TEAM_STAGE_SCALE,
   fighterBoxFor,
   foeAt,
   ringButtonsAt,
   ringButtonsInside,
   ringCaptionAt,
   ringCaptionLines,
+  ringFramingFor,
   ringItemButtonsAt,
   ringLabelAt,
   ringLabelBoxOf,
@@ -199,7 +201,8 @@ import {
   ringReachNumberAt,
   ringReachNumberHit,
   ringSlotAt,
-  ringSwapButtonAt
+  ringSwapButtonAt,
+  ringTargetRingAt
 } from "/tools/arena/ring-layout.js";
 import { ringButtonArt, ringWordBoxesOf } from "/tools/arena/ring-art.js";
 import { namePlateFor, namePlateLayout, teamHudFor } from "/tools/arena/team-hud.js";
@@ -2056,8 +2059,126 @@ function stepCamera(now = arenaNow()) {
   // ► **THE FRAME'S OWN CLOCK** (the wave-3 verifier): the figures are drawn at
   //   `render`'s `now`, so the drawn size the camera is fed is read at it too —
   //   a later `arenaNow()` read a colossus a few ms further on than he is drawn.
-  cameraFrame = stepFramedCamera(cameraFrame, placedActors(now), { result: host?.battle?.result ?? null, hudTop: hudFrame?.cameraHudTop ?? null });
+  // ► **AND A PERSON'S RING (decision 6, ring3 slice "camera", 2026-09-28)**:
+  //   on a person's turn in a team bout the camera eases to frame it and the
+  //   lit targets too (`ringFramingNow`, `SS2_RING_FRAMING`); on any other
+  //   turn it is handed none, and is the camera it was, to the byte.
+  cameraFrame = stepFramedCamera(cameraFrame, placedActors(now), {
+    result: host?.battle?.result ?? null,
+    hudTop: hudFrame?.cameraHudTop ?? null,
+    framing: ringFramingNow(now)
+  });
   camera = cameraFrame.camera;
+}
+
+/**
+ * A TEAM BOUT: more than two fighters placed, as `placedActors` filters them —
+ * the camera's own test (`framedActors`, the close-up). Its ring is drawn at
+ * one size (`RING_TEAM_STAGE_SCALE`) and framed on a person's turn; a 1v1's is
+ * the build's own, under the build's own camera (decision 6: "the close-up and
+ * 1v1 untouched").
+ */
+function teamBout() {
+  return scene.drawOrder.filter((combatantId) => {
+    const actor = scene.actors[combatantId];
+    return actor && actor.placed !== false && Number.isFinite(actor.x);
+  }).length > 2;
+}
+
+/**
+ * ► **WHAT THE CAMERA FRAMES ON A PERSON'S TURN (the owner's decision 6,
+ *   `docs/design/battle-ui.md#decided-hud-2026-09-24`): "the acting fighter's
+ *   ring (buttons, items row, rank arrows) with a margin, and every lit target
+ *   while a reach preview shows".** A person's turn is the ring on the stage
+ *   (`ringShown`: a person's seat is due and the arena ready for it) — on the
+ *   build's stage only, where there is a camera to move, and in a team bout
+ *   only. Otherwise null, and `stepFramedCamera` is the camera before this
+ *   slice. The ring is laid out at each camera the camera tries exactly as
+ *   `paintRing` lays it out (`ringFramingFor`); the lit foes are the reach
+ *   `renderStage` draws this frame (decision 1).
+ */
+function ringFramingNow(now) {
+  if (!ringShown() || !arenaScreenAvailable() || !teamBout()) return null;
+  const byId = combatantsById();
+  const actor = ringAnchorOf(ringView.actorId, now, byId);
+  if (!actor) return null;
+  const fit = stageFitFor({ width: canvas.width, height: canvas.height });
+  const reach = ringReachFor(ringView.model, ringReachShown, { legal: ringView.legal });
+  const lit = (reach?.lit ?? []).map((one) => ringAnchorOf(one.foeId, now, byId)).filter(Boolean);
+  return ringFramingFor({
+    model: ringView.model,
+    actor,
+    lit,
+    fit,
+    layout: ringButtonPack?.layout ?? null,
+    rowLayout: ringButtonPack?.inventory?.layout ?? null,
+    words: ringFrameWords(fit),
+    labelWidth: ringFrameLabelWidth
+  });
+}
+
+/**
+ * Where a fighter is drawn, and how big, while the ring is up — nothing of his
+ * playing (`ringView.ready`), so at his resting place (every idle and charged
+ * pose has an `advance` of 0, so `figureXAt` draws him there) and at the size
+ * `renderStage` draws him at: his drawn `_yscale` and the rank his depth puts
+ * him in. Null for a fighter who is not placed.
+ */
+function ringAnchorOf(combatantId, now, byId) {
+  const actor = scene.actors[combatantId];
+  const combatant = byId.get(combatantId);
+  if (!actor || actor.placed === false || !Number.isFinite(actor.x) || !Number.isFinite(actor.y) || !combatant) return null;
+  return { x: actor.x, y: actor.y, size: figureScaleFor({
+    yscale: drawnYscaleOf(combatantId, now),
+    rank: rankOf(actor.y, combatant.slotIndex),
+    slotIndex: combatant.slotIndex
+  }) };
+}
+
+/**
+ * The words the eight paint (decision 7: BOMBARD, which the items row keeps
+ * clear of), at a team bout's one size, off the ring's centre — the art
+ * `paintRing` builds, but for the pointer, which moves no word — kept while
+ * the ring, the stage's size, the actor's counters and the packs are the same.
+ * The framing moves them to each camera's centre (`ringFramingFor`).
+ */
+let ringFrameWordsKept = null;
+function ringFrameWords(fit) {
+  const actor = host.combatant(ringView.actorId);
+  const art = {
+    pack: ringButtonPack,
+    facing: ringView.model.stance?.facing ?? "right",
+    psyche: resourceValue(actor, "psyche_up", 1),
+    ammo: resourceValue(actor, "ammo_left", 0),
+    textPack
+  };
+  const unit = fit.scale * RING_TEAM_STAGE_SCALE;
+  const kept = ringFrameWordsKept;
+  if (kept && kept.model === ringView.model && kept.unit === unit && kept.psyche === art.psyche && kept.ammo === art.ammo
+    && kept.pack === art.pack && kept.textPack === art.textPack) return kept.words;
+  const words = ringWordBoxesOf(ringButtonArt(ringButtonsAt(ringView.model, { centerX: 0, centerY: 0, unit, layout: ringButtonPack?.layout ?? null }), art));
+  ringFrameWordsKept = { model: ringView.model, unit, psyche: art.psyche, ammo: art.ammo, pack: art.pack, textPack: art.textPack, words };
+  return words;
+}
+
+/**
+ * A key label's width, canvas px, measured as `paintRing` draws it — the same
+ * words in the same font — kept by words and size.
+ */
+const ringFrameLabelWidths = new Map();
+function ringFrameLabelWidth(button, px) {
+  const label = button.verb === "item" ? button.key : `${button.key} ${RING_VERB_LABELS[button.verb]?.short ?? button.verb}`;
+  const key = `${px}|${label}`;
+  if (!ringFrameLabelWidths.has(key)) {
+    context.save();
+    try {
+      context.font = `600 ${px}px ui-sans-serif, system-ui, sans-serif`;
+      ringFrameLabelWidths.set(key, context.measureText(label).width);
+    } finally {
+      context.restore();
+    }
+  }
+  return ringFrameLabelWidths.get(key);
 }
 
 /**
@@ -5221,18 +5342,18 @@ function ringShown() {
  * stays the one solid ring.
  */
 function paintTargetRing(view, origin, { dashed = false } = {}) {
-  const x = view.toX(origin.x);
-  const y = view.toY(origin.y, 0);
-  const rx = 70 * (origin.size ?? 1) * view.scale;
-  if (!(rx > 0)) return;
+  // Its geometry is `ringTargetRingAt`'s (decision 6, ring3 slice "camera", 2026-09-28), which a person's
+  // framing keeps a lit foe's on the stage by: the same numbers as ever, in one place.
+  const ring = ringTargetRingAt({ footX: view.toX(origin.x), footY: view.toY(origin.y, 0), size: origin.size ?? 1, scale: view.scale });
+  if (!(ring.rx > 0)) return;
   context.save();
   try {
     context.globalAlpha = 0.95;
     context.strokeStyle = "#f2c14e";
-    context.lineWidth = Math.max(2, rx * 0.07);
-    if (dashed) context.setLineDash([rx * 0.24, rx * 0.14]);
+    context.lineWidth = ring.lineWidth;
+    if (dashed) context.setLineDash([ring.rx * 0.24, ring.rx * 0.14]);
     context.beginPath();
-    context.ellipse(x, y, rx, rx * 0.3, 0, 0, Math.PI * 2);
+    context.ellipse(ring.x, ring.y, ring.rx, ring.ry, 0, 0, Math.PI * 2);
     context.stroke();
   } finally {
     context.restore();
@@ -5311,13 +5432,16 @@ function paintRing(view, fit) {
   ringButtons = [];
   if (!ringShown() || !ringOrigins.actor) return;
   // The build's placement needs the build's camera; the FITTED view (no
-  // extracted arena) has none, and takes the authored size.
+  // extracted arena) has none, and takes the authored size. ► A TEAM BOUT's
+  // ring is one size on the build's stage (decision 6, ring3 slice "camera",
+  // 2026-09-28: `RING_TEAM_STAGE_SCALE`), and a 1v1's the build's own.
   const placement = ringPlacementFor({
     actor: ringOrigins.actor,
     foe: ringOrigins.foe,
     camera: arenaScreenAvailable() ? camera : null,
     view,
-    fit
+    fit,
+    teamBout: teamBout()
   });
   // The eight, the weapon swap when it is on offer (S6: the build's ninth
   // button, over the eight as its depth 101 is), then the moves no slot holds

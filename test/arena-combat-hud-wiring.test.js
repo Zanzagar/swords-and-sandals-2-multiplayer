@@ -74,8 +74,13 @@ test("D2 + D3: the frame is worked out BEFORE the camera steps — from the wire
   //   carries the crowd bar's reading too (pinned in full by "D8 FRAME" below).
   assert.match(now, /return combatHudFrameFor\(\{\s*hud: shown,\s*pack: gaugeArt\.pack,/, "laid out with the art it is drawn with");
   assert.match(now, /catch \(error\) \{\s*hudFailed\(/, "a layout that throws is said, not silent");
+  // ► RE-PINNED 2026-09-28 (ring3 slice "camera", decision 6, `docs/design/battle-ui.md#decided-hud-2026-09-24`):
+  //   ~~`/stepFramedCamera\(cameraFrame, placedActors\(now\), \{ result: host\?\.battle\?\.result \?\? null, hudTop:
+  //   hudFrame\?\.cameraHudTop \?\? null \}\)/`~~ — the call also hands the camera a person's ring to frame
+  //   (`framing: ringFramingNow(now)`, pinned in `test/arena-ring-camera.test.js`); the result and the band's top
+  //   are the same two expressions.
   assert.match(functionBody("stepCamera"),
-    /stepFramedCamera\(cameraFrame, placedActors\(now\), \{ result: host\?\.battle\?\.result \?\? null, hudTop: hudFrame\?\.cameraHudTop \?\? null \}\)/,
+    /stepFramedCamera\(cameraFrame, placedActors\(now\), \{\s*result: host\?\.battle\?\.result \?\? null,\s*hudTop: hudFrame\?\.cameraHudTop \?\? null,\s*framing: ringFramingNow\(now\)\s*\}\)/,
     "the frame's cameraHudTop — null in a 1v1 (combatHudFrameFor)");
   assert.match(functionBody("stepCamera"), /camera = cameraFrame\.camera;/, "never stripped of hudTop, inkSize or inkLift");
 });

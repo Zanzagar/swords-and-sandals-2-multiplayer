@@ -4,7 +4,10 @@
  * `ringItemButtonsAt` — since decision 7, 2026-09-28, clear of the words the
  * eight paint) and S6 (the swap, `ringSwapButtonAt`) of
  * `docs/design/battle-ui.md` — and, for the reach preview (decision 1,
- * 2026-09-28), where a lit foe's number stands (`ringReachNumberAt`). Pure canvas geometry for
+ * 2026-09-28), where a lit foe's number stands (`ringReachNumberAt`); and, for
+ * decision 6 (2026-09-28), a team bout's ring at one size
+ * (`RING_TEAM_STAGE_SCALE`) and what of it the camera frames on a person's
+ * turn (`ringFramingFor`). Pure canvas geometry for
  * `tools/arena/main.js`, which only paints what this places and asks this what
  * a point landed on.
  *
@@ -31,6 +34,7 @@ import {
   ss2FlipOverlayFor,
   ss2OverlayPlacement
 } from "../../src/render/action-buttons.js";
+import { SS2_CAMERA, stageProjectorFor } from "../../src/render/arena-backdrop.js";
 
 /**
  * STAGE PIXELS PER OVERLAY PIXEL, AUTHORED: 1.2. The build's own is
@@ -42,6 +46,25 @@ import {
  * the extracted arena draws has no build camera to cancel.
  */
 export const RING_STAGE_SCALE = 1.2;
+
+/**
+ * ► **A TEAM BOUT'S RING IS DRAWN AT ONE SIZE: 1.28 STAGE PIXELS PER OVERLAY
+ *   PIXEL (the owner's decision 6, `docs/design/battle-ui.md#decided-hud-2026-09-24`:
+ *   "the ring is drawn at a FIXED on-screen size, capped at what the build
+ *   shows at zoom 80, instead of growing with the survivors' close-up").**
+ *   The build's own size at its tightest band, `combatscale`'s 80
+ *   (`SS2_CAMERA.bands[0]`, `+0x083c`), where `flipoverlay` is 160
+ *   (`+0x109d`..`+0x1180`): 0.8 x 1.6. It is the largest ring the build ever
+ *   settles on — its 70 and 60 arms are dead in `combatscale`, and its 50, 30,
+ *   20 and 15 bands settle at 1.2, 0.96, 1.0 and 0.9 — so the cap IS the size.
+ *   Measured before this (the camera slice's report: 30 team bouts, every turn
+ *   a person's, every foe selected): a team camera drew the ring at 0.96, 1.0,
+ *   1.2, 1.28, 1.32 and 1.4, and 1,837 of 6,499 rings over this cap.
+ *
+ *   A team bout only, on the build's stage: a 1v1 keeps the build's own
+ *   (`ringFlipOverlayFor`), and the fitted view its authored `RING_STAGE_SCALE`.
+ */
+export const RING_TEAM_STAGE_SCALE = (SS2_CAMERA.bands[0].scale / 100) * (ss2FlipOverlayFor(SS2_CAMERA.bands[0].scale) / 100);
 
 /**
  * ► **WHERE THE OVERLAY STANDS AND HOW BIG IT IS DRAWN — the build's own
@@ -70,20 +93,130 @@ export const RING_STAGE_SCALE = 1.2;
  *   in the FITTED view, where the authored `RING_STAGE_SCALE` applies
  * @param {object} at.view  `toX`/`toY`/`scale`, the projection the fighters were drawn with
  * @param {{scale: number}} at.fit  the stage letterbox (`stageFitFor`)
+ * @param {boolean} [at.teamBout=false]  more than two fighters placed: under the
+ *   build's camera the ring is then drawn at `RING_TEAM_STAGE_SCALE` (decision 6)
  * @returns {{x: number, y: number, unit: number, source: string, buildClosesUp: boolean}}
  *   the ring's centre and canvas pixels per overlay pixel; `source` is
- *   `build`, `team` or `authored`
+ *   `build`, `team`, `fixed` or `authored`
  */
-export function ringPlacementFor({ actor, foe = null, camera = null, view, fit }) {
+export function ringPlacementFor({ actor, foe = null, camera = null, view, fit, teamBout = false }) {
   const x = view.toX(actor.x);
   const y = view.toY(actor.y, SS2_OVERLAY_PLACEMENT.aboveFeet);
   const buildClosesUp = Boolean(foe) && [actor.x, actor.y, foe.x].every(Number.isFinite)
     && ss2OverlayPlacement({ actorX: actor.x, actorY: actor.y, foeX: foe.x, maxscale: camera?.maxscale ?? null }).closeUp;
+  // Decision 6: a team bout's ring is one size on the build's stage, whatever the camera is doing.
+  if (camera && teamBout) return Object.freeze({ x, y, unit: fit.scale * RING_TEAM_STAGE_SCALE, source: "fixed", buildClosesUp });
   const flip = camera ? ringFlipOverlayFor(camera.maxscale) : null;
   if (flip !== null) {
     return Object.freeze({ x, y, unit: (view.scale * flip.percent) / 100, source: flip.source, buildClosesUp });
   }
   return Object.freeze({ x, y, unit: fit.scale * RING_STAGE_SCALE, source: "authored", buildClosesUp });
+}
+
+/**
+ * ► **WHAT A PERSON MUST SEE ON HIS TURN, FOR THE CAMERA TO FRAME (the owner's
+ *   decision 6, `docs/design/battle-ui.md#decided-hud-2026-09-24`: "the camera
+ *   eases to also frame the acting fighter's ring (buttons, items row, rank
+ *   arrows) with a margin, and every lit target while a reach preview
+ *   shows").** `stepFramedCamera` (`src/render/arena-backdrop.js`) asks this
+ *   where those stand at the cameras it tries, and keeps them on the visible
+ *   stage with its margin (`SS2_RING_FRAMING`).
+ *
+ * The ring is laid out at a camera exactly as `paintRing` lays it out there —
+ * a team bout's size (`RING_TEAM_STAGE_SCALE`), the eight, the items row (over
+ * the step-back arrow's place and the words the eight paint), the swap, the
+ * moves off the drawn head and the bottom of the name — where each stands
+ * BEFORE `ringButtonsInside` would squeeze it onto the stage: that is what the
+ * camera is to make unnecessary. Each is framed with what it draws round it:
+ * a place of the items row its letter's room (`labelRoom`); a button the page
+ * labels, its key label where `ringLabelAt` puts it with no stage to keep to;
+ * the words the eight paint. A GREYED jump or charge is not framed, nor its
+ * word: `ringButtonsInside` lets it stand off the stage, inert (decision 9), and
+ * it costs no zoom here either. A lit foe (decision 1) is framed whole: his
+ * drawn box, his number where the page puts it over his head (unclamped), and
+ * the gold ring round his feet (`ringTargetRingAt`).
+ *
+ * Every point is anchored to an arena point through the camera's projection,
+ * so the boxes at a pan are those at pan 0 moved by the pan — the contract
+ * `stepFramedCamera` relies on.
+ *
+ * @param {object} input
+ * @param {object} input.model  the ring's model (`ringModelFor`), as `paintRing` draws it
+ * @param {{x: number, y: number, size: number}} input.actor  where the acting fighter is drawn (arena units)
+ *   and at what size (`origin.size`: his `_yscale` and his rank)
+ * @param {{x: number, y: number, size: number}[]} [input.lit]  each foe the reach preview lights, likewise
+ * @param {{scale: number, offsetX: number, offsetY: number}} input.fit  the stage letterbox (`stageFitFor`)
+ * @param {object|null} [input.layout]  the pack's `buttons.layout`
+ * @param {object|null} [input.rowLayout]  the pack's `buttons.inventory.layout`
+ * @param {object[]} [input.words]  the words the eight paint (`ringWordBoxesOf`), canvas px RELATIVE to the
+ *   ring's centre: at one size they stand the same off it at every camera
+ * @param {((button: object, px: number) => number)|null} [input.labelWidth]  a labelled button's key label's
+ *   width in canvas px at `px`, as the page measures it; null frames no label
+ * @returns {(camera: object) => {x0: number, x1: number, y0: number, y1: number}[]} the boxes, STAGE px
+ */
+export function ringFramingFor({ model, actor, lit = [], fit, layout = null, rowLayout = null, words = [], labelWidth = null }) {
+  const toStage = ({ x0, x1, y0, y1 }) => Object.freeze({
+    x0: (x0 - fit.offsetX) / fit.scale, x1: (x1 - fit.offsetX) / fit.scale,
+    y0: (y0 - fit.offsetY) / fit.scale, y1: (y1 - fit.offsetY) / fit.scale
+  });
+  return (camera) => {
+    const view = stageProjectorFor(camera, fit);
+    const placement = ringPlacementFor({ actor, camera, view, fit, teamBout: true });
+    // As `renderStage` records them for `paintRing`: his drawn box's top, and the bottom of his name.
+    const head = fighterBoxFor({ footX: placement.x, footY: view.toY(actor.y, 0), pxPerUnit: view.scale, size: actor.size }).y0;
+    const below = view.toY(actor.y, -22) + Math.max(10, view.scale * 15) * 0.5;
+    const at = { centerX: placement.x, centerY: placement.y, unit: placement.unit, layout };
+    const drawnWords = (words ?? []).map((word) => ({
+      ...word, x0: word.x0 + placement.x, x1: word.x1 + placement.x, y0: word.y0 + placement.y, y1: word.y1 + placement.y
+    }));
+    const eight = ringButtonsAt(model, at);
+    const buttons = [
+      ...eight,
+      ...ringItemButtonsAt(model, { ...at, rowLayout, head, words: drawnWords }),
+      ...ringSwapButtonAt(model, at),
+      ...ringMoveButtonsAt(model, { ...at, head, feet: below })
+    ];
+    const boxes = [];
+    for (const button of buttons) {
+      if (ringUnderLabels(button)) continue;
+      boxes.push({ x0: button.x - button.r, x1: button.x + button.r, y0: button.y - button.r - (button.labelRoom ?? 0), y1: button.y + button.r });
+      // `paintRing` labels every button but a move and a greyed one.
+      if (button.move || button.reason || typeof labelWidth !== "function") continue;
+      const { px, gap } = ringLabelSizeFor(button.r);
+      const size = { width: labelWidth(button, px), height: px, gap };
+      boxes.push(ringLabelBoxOf(ringLabelAt(button, buttons, size), size));
+    }
+    const inert = new Set(eight.filter(ringUnderLabels).map((button) => button.slot));
+    for (const word of drawnWords) if (!inert.has(word.slot)) boxes.push(word);
+    for (const foe of lit ?? []) {
+      const footX = view.toX(foe.x);
+      const footY = view.toY(foe.y, 0);
+      const body = fighterBoxFor({ footX, footY, pxPerUnit: view.scale, size: foe.size });
+      const number = ringReachNumberAt(body, { scale: fit.scale, stage: null });
+      const ring = ringTargetRingAt({ footX, footY, size: foe.size, scale: view.scale });
+      const rim = ring.lineWidth / 2;
+      boxes.push(body,
+        { x0: number.x - number.r, x1: number.x + number.r, y0: number.y - number.r, y1: number.y + number.r },
+        { x0: ring.x - ring.rx - rim, x1: ring.x + ring.rx + rim, y0: ring.y - ring.ry - rim, y1: ring.y + ring.ry + rim });
+    }
+    return boxes.map(toStage);
+  };
+}
+
+/**
+ * THE GOLD RING ON THE SAND round a target's feet — AUTHORED (the owner's design
+ * canvas; S2): an ellipse `70` arena units across each way at his size, a
+ * third as tall, stroked `max(2, 0.07 rx)` wide. `paintTargetRing` draws it
+ * (solid on the selected foe, dashed on every other lit one, decision 1), and
+ * a person's framing keeps a lit foe's on the stage (`ringFramingFor`).
+ *
+ * @param {{footX: number, footY: number, size: number, scale: number}} at  his feet, canvas px;
+ *   his drawn size; canvas px per arena unit
+ * @returns {{x: number, y: number, rx: number, ry: number, lineWidth: number}} canvas px
+ */
+export function ringTargetRingAt({ footX, footY, size, scale }) {
+  const rx = 70 * (size ?? 1) * scale;
+  return Object.freeze({ x: footX, y: footY, rx, ry: rx * 0.3, lineWidth: Math.max(2, rx * 0.07) });
 }
 
 /** The `maxscale` values the build's `flipoverlay` table writes an arm for, from 20 up (below 20 is one arm). */
@@ -470,6 +603,16 @@ function greyOf(entry) {
  *   the fighter at the arena wall (a scratch matrix, in the edge slice's
  *   report).
  *
+ * ► **SINCE DECISION 6 (ring3 slice "camera", 2026-09-28) THIS IS A TEAM
+ *   BOUT'S FALLBACK, NOT ITS RULE.** On a person's turn the camera eases to
+ *   frame the whole ring, the margin in (`ringFramingFor`,
+ *   `SS2_RING_FRAMING`), so once it has settled nothing here moves: in the
+ *   slice's sweep (7 team bouts, 976 settled person's rings) no ring needed
+ *   moving and no walk stood on the wrong side of its fighter, where the
+ *   camera before it squeezed 305 rings of the same turns and put 16 walks
+ *   there. While the camera is still easing in — and always in a 1v1, whose
+ *   camera and ring are the build's own — this keeps the ring on the stage.
+ *
  * @param {object[]} buttons  from `ringButtonsAt` and `ringMoveButtonsAt`: `{x, y, r, ...}`
  * @param {{x: number, y: number, width: number, height: number}} stage  the visible
  *   stage in canvas pixels (`stageClipRectFor`)
@@ -758,15 +901,18 @@ export function ringCaptionLines(text, { maxWidth, measure }) {
  *   is painted after it, so a button is never under a number.
  *
  * @param {{x0: number, x1: number, y0: number}} box  the foe's drawn box (`fighterBoxFor`), canvas px
- * @param {{scale: number, stage: {x: number, y: number, width: number, height: number}}} at
- *   `scale`, canvas px per stage px (the stage fit's); `stage`, the visible stage (`ringBoundsFor`)
+ * @param {{scale: number, stage: {x: number, y: number, width: number, height: number}|null}} at
+ *   `scale`, canvas px per stage px (the stage fit's); `stage`, the visible stage (`ringBoundsFor`) — null
+ *   for where the number stands unclamped, which a person's framing keeps on the stage (decision 6)
  * @returns {{x: number, y: number, r: number, px: number}} the disc's centre and radius and the figure's size, canvas px
  */
 export function ringReachNumberAt(box, { scale, stage }) {
   const r = RING_REACH_NUMBER.radius * scale;
   const gap = RING_REACH_NUMBER.gap * scale;
-  const x = Math.min(Math.max((box.x0 + box.x1) / 2, stage.x + r), stage.x + stage.width - r);
-  const y = Math.min(Math.max(box.y0 - gap - r, stage.y + r), stage.y + stage.height - r);
+  const cx = (box.x0 + box.x1) / 2;
+  const cy = box.y0 - gap - r;
+  const x = stage ? Math.min(Math.max(cx, stage.x + r), stage.x + stage.width - r) : cx;
+  const y = stage ? Math.min(Math.max(cy, stage.y + r), stage.y + stage.height - r) : cy;
   return Object.freeze({ x, y, r, px: RING_REACH_NUMBER.px * scale });
 }
 
