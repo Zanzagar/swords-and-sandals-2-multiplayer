@@ -296,8 +296,126 @@ intrinsic to every applicable Relic/relationship contract and pruning the
 participant permission-coordinate and language rows. A twenty-sixth
 prerequisite audit corrected the traversal graph: distinct-related exposure is
 already independently decidable from the selected tuple, although the one-card
-protocol queues it while RCS-03C3C3C2D is the current owner-facing choice under
-SR-03.
+protocol queues it behind the exact lane. The owner selected
+RCS-03C3C3C2D-A, making every intrinsic exact-permission law deterministic on
+each fixed opportunity. A twenty-seventh prerequisite audit then split old C2E
+into responsive-law prevalence, conditional player-actionable response, and
+conditional constant-law polarity. The owner selected RCS-03C3C3C2E1-C:
+responsive and context-invariant law families coexist. A twenty-eighth post-
+answer audit repaired the conditional actionability witness around one
+independently revisable lawful decision and its complete causal closure rather
+than one immediate action or an arbitrary whole-policy contrast. The owner
+selected RCS-03C3C3C2E2-B, requiring at least one qualifying causal play-or-
+counterplay witness. A twenty-ninth post-answer audit upheld E3's three stable-
+polarity branches while making their domain-relative, gate-local meaning and
+non-token viability obligations explicit. The owner selected
+RCS-03C3C3C2E3-C: responsive, steadfast-allow, and steadfast-deny law families
+must coexist under that viability obligation. A post-answer audit upheld D1's
+empty/nonempty post-routing related-exposure boundary while preventing a
+related-only witness or actionability promise from being smuggled into it.
+The owner selected RCS-03C3C3D1-B, requiring at least one authoritative
+distinct-related route. A thirtieth prerequisite correction separates the
+remaining related-only permission authority, coordinate, language, branching,
+randomness, and final form-wide incidence boundaries while preserving one-bit
+hybrid inheritance. The owner then selected RCS-03C3C3D2A-A: no participant
+setting changes permission on a matched related-only opportunity, so D2B,
+D2C1, and D2C2 prune. A three-angle prerequisite audit upheld D2D as one
+empty-aware residual stochastic-support card. The owner selected
+RCS-03C3C3D2D-C: deterministic Witness and stochastic-capable Oracle related-
+only law families coexist under the documented hard viability obligation. A
+thirty-first prerequisite correction then split old D2E into six response,
+causal-control, stable-polarity, and missing-certainty-endpoint rows.
+The owner selected RCS-03C3C3D2E1-B: every Oracle law has at least two
+reachable probabilities, without yet requiring a player-causal lever. A
+two-angle post-answer audit upheld one binary matched causal-response card.
+The owner selected RCS-03C3C3D2E2-B: at least one Oracle law must have a
+qualifying matched player/counterplayer-causal odds-response witness. A
+two-angle post-answer audit upheld the tagged deterministic related-response
+prevalence boundary. The owner selected RCS-03C3C3D2E3-C: responsive and
+steadfast deterministic related-form projections coexist under the hard
+viability obligation. A two-angle post-answer audit upheld one binary matched
+causal certain-bit-response card. The owner selected
+RCS-03C3C3D2E4-B with its stated conditional fallback: at least one responsive
+deterministic related projection must have a qualifying causal play-or-
+counterplay witness, or E4 reopens with A. A two-angle post-answer audit then
+upheld E5's three stable-polarity branches while strengthening their marginal
+related-form-purpose and anti-inheritance-laundering obligations. The owner
+selected guarded RCS-03C3C3D2E5-C: steadfast compatibility and steadfast
+refusal coexist, with B/A/upstream reopening exactly as the card's viability
+failures require. A thirty-second prerequisite correction then split the
+overcompressed denied-pair result row into four finite support-topology rows.
+Under Zanzagar's explicit delegation, a three-angle deep audit selected
+guarded RCS-03C3C3E1-C: cancellation and positive denied-pair dispositions
+coexist, with strengthened last-reversible-commitment, attribution, and anti-
+grief obligations. Zanzagar then selected guarded RCS-03C3C3E2-C: singleton
+and double positive denied outputs coexist, while cancellation, singleton,
+and double policies must remain independently chosen rather than forming a
+zero-to-two power ladder. Zanzagar then selected guarded RCS-03C3C3E3-B with
+E3-A as the substitute-specific viable fallback: every singleton positive
+denial is one genuine substitute unless honest substitute authoring fails
+while retained-original singleton play survives. Zanzagar then selected
+guarded RCS-03C3C3E4-B with E4-A as the practical fallback: every two-receipt
+positive denial uses two genuinely distinct substitutes unless that
+composition fails while anchored transformation survives. A thirty-third
+prerequisite correction separates same-opportunity output multiplicity from
+participant configurability, policy language, and stochastic realization.
+Zanzagar selected RCS-03C3C3F1-A: every fixed denied opportunity is
+single-valued, pruning all four conditional output-resolution children.
+Zanzagar then selected RCS-03C3C3G1-A: no fixed evaluation may contain three
+or more pre-treatment contender tags. A strict representation-invariance audit
+then derived C4: under the already-selected cut-atomic automatic semantics,
+several same-cut evaluators are exactly one product evaluator with labeled
+internal channels, not another player-material topology. C5-C7/G2/H/I prune,
+and a thirty-fourth prerequisite correction splits old RCS-03C3D into four
+independent evidence-use rows. Zanzagar selected RCS-03C3D1-B, requiring
+positive-result claim support, then selected RCS-03C3D2-A so ledger-bearing
+empty results never claim evidence, then selected RCS-03C3D3-A so every claim
+takes its complete selected-ledger union, then selected RCS-03C3D4-A with B as
+a guarded reopening fallback: one listen per unbroken bond. Zanzagar then
+selected RCS-03C3E-A, so a claimed occurrence cannot return through any exact
+tag to which it was causally attributed before that tag's rearm. Zanzagar then
+selected RCS-03C3F-A, spending claimed proof across every later result
+incidence of the same active Relic and pruning its five B-only children. The
+thirty-sixth and thirty-seventh prerequisite corrections decomposed Relic
+transformation causes into registered direct semantic loci and graph-topology
+rows. Zanzagar selected D1P-B, giving every transforming definition a positive-
+result cause path; D1C-A, keeping claim writes noncausal; and D1I-A, making
+invocation listen without transforming. The thirty-eighth correction then
+proved the registered D1N true-zero-contender domain empty under the selected
+readiness/evidence/tuple rules and pruned D1N1. Zanzagar then selected D1T-A,
+so actual joint tuple selection routes proof but never directly proposes
+transformation; D1T1 prunes. Zanzagar then selected D1VT-A, so an actual
+true/allow permission verdict governs coexistence but never directly proposes
+transformation; D1VT1 prunes. Zanzagar then selected D1VF-A, so an actual
+false/not-both permission verdict routes the deterministic denied disposition
+but never directly proposes transformation; D1VF1 prunes. Zanzagar then
+selected D1K-A, so one complete positive provisional output becomes sealed
+without that completion itself proposing transformation; D1K1 prunes.
+Zanzagar then selected D1Z-C with D1Z-A retained as the explicit failure
+fallback, so a disclosed nonempty proper Absence-bound subset may be shaped by
+an actual ledger-bearing `{}` settlement. Zanzagar then selected D1Z1-C, so
+that proper subset has nonempty incidence in both transformation dialects while
+remaining globally proper; the proposed D1Z1-A scope fallback was not selected.
+Zanzagar then selected D1L-A, so the later persistent “this pair has already
+been heard” latch keeps its full recurrence force but never itself proposes
+transformation; D1L1 prunes. Zanzagar then selected D1X-C with D1X-A as the
+explicit system fallback, so a disclosed proper Event-bound subset may be
+shaped by independently meaningful lived events unless the complete mechanic
+fails its gates. Zanzagar then selected D1X1-C with D1X1-A as the explicit
+scope fallback, so the proper Event-bound subset has nonempty incidence in both
+transformation dialects unless boundary-attunement event play fails while
+state-side play survives. Zanzagar then selected D1M-B with D1M-A as the
+explicit system fallback, so every transforming Relic
+has at least one dedicated-operation proposal path unless the complete M
+system fails its gates. Zanzagar then selected D2-C with D2-A as the explicit
+whole-system fallback: staged and shortcut-complete definitions coexist unless
+required staging fails its comprehension, material-intermediate,
+non-dominance, anti-bypass, or anti-lottery gates. **RCS-03D2A is now the sole
+owner-facing choice under SR-04:** whether proper required-stage support occurs
+only in state Relics, only in boundary Relics, or in both transformation
+dialects. A fortieth prerequisite correction restores the shortcut-complete
+complement's dialect incidence as dependent D2A1. The current register has 143
+rows and `Phi_SR = 24`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -18328,7 +18446,7 @@ Several boundaries are already fixed and are not choices on this card:
 
 | Choice | Evaluation-lifetime rule | Recommendation, ideal fit, and gameplay tradeoff | Boundary example |
 | --- | --- | --- | --- |
-| **A — cut-atomic evaluations only** | `K^{pending}_v` is empty. No player-semantic Relic evaluation persists across pre-completion semantic cuts. Whenever an evaluation is invoked at a cut that later choices make eligible, one atomic Relic-side tuple is combined with the combat evidence selected later by `RCS-03C3`; the evaluation reaches provisional completion or yields no candidate at that cut. Earlier actions and `H` facts may still be essential inputs, but they do not create a dormant attempt. | **Recommended.** A keeps the drama in assembling the relationship rather than adding a second queue of half-open rituals. At the decisive cut, Soul, Relic, Charm, and qualifying combat evidence can participate in one **direct** result relation; continuity supplied by earlier `H` facts remains **partial** across time; excluding a separate pending object is **neutral/protective**; catalog-wide atomicity is **aggregate**. The benefits are crisp causality, readable counterplay through the facts themselves, no snapshot hoard, no cancellation grief, and no expiry/concurrency subgame competing with other systems. The cost is real: Relics may feel more like uncanny reactive instruments than visible rituals being woven over several actions, and the eventual eligible cut and presentation must prevent results from feeling like opaque procs. | Aster guarded earlier, so `Guard` exists in `H`; Borel now creates `Heat` in `S`. Whenever the later-selected cadence and authority permit invocation, Ashen's current `Defiance` assignment, Soul resonance, Charms, and later-selected evidence sample either produce receipt P or do not at that same cut. There was no older `Mercy` evaluation waiting in the background merely because Guard happened earlier. |
+| **A — cut-atomic evaluations only** | `K^{pending}_v` is empty. No player-semantic Relic evaluation persists across pre-completion semantic cuts. Whenever an evaluation is invoked at a cut that later choices make eligible, one atomic Relic-side tuple is combined with the combat evidence selected later by `RCS-03C3`; the evaluation reaches its provisional output at that cut. The old alternative “or yields no candidate” was later disproved by the selected readiness/evidence/tuple contract and is corrected in the thirty-eighth prerequisite note below. Earlier actions and `H` facts may still be essential inputs, but they do not create a dormant attempt. | **Recommended.** A keeps the drama in assembling the relationship rather than adding a second queue of half-open rituals. At the decisive cut, Soul, Relic, Charm, and qualifying combat evidence can participate in one **direct** result relation; continuity supplied by earlier `H` facts remains **partial** across time; excluding a separate pending object is **neutral/protective**; catalog-wide atomicity is **aggregate**. The benefits are crisp causality, readable counterplay through the facts themselves, no snapshot hoard, no cancellation grief, and no expiry/concurrency subgame competing with other systems. The cost is real: Relics may feel more like uncanny reactive instruments than visible rituals being woven over several actions, and the eventual eligible cut and presentation must prevent results from feeling like opaque procs. | Aster guarded earlier, so `Guard` exists in `H`; Borel now creates `Heat` in `S`. Whenever the later-selected cadence and authority permit invocation, Ashen's current `Defiance` assignment, Soul resonance, Charms, and later-selected evidence sample produce either a positive provisional output or, after pair treatment, ledger-bearing `{}` at that same cut. There was no older `Mercy` evaluation waiting in the background merely because Guard happened earlier. |
 | **B — every supported tag is pending-capable** | `K^{pending}_v = K^{candidate}_v`. Every supported relationship tag has at least one legal occurrence in which a real evaluation begins before completion, persists across a later meaningful cut or decision, and then completes or terminates. This is a universal capability witness, not a demand that every occurrence be delayed. | **Most ritualistic countercase.** B can make Relics feel like relationships players visibly begin, sustain, protect, disrupt, or complete together. The same evaluation persists while genuinely distinct contributions arrive over time, giving a **partial** realization at the one-attempt/across-changing-contributions boundary; universal tag support is **aggregate**. It offers strong anticipation, cooperation, bluffing, and enemy disruption. It also creates a second combat state machine: pending-attempt UI, opening and expiry rules, stale-attunement questions, pre-open hoarding, cancellation grief, orphaned attempts after death/disconnect, reload persistence, and burst queues. Those are not implementation trivia; they materially shape play and require the later conditional cards. | Ashen visibly opens a `Covenant` attempt while attuned to `Mercy`. Another participant then receives and takes a meaningful action while that same attempt remains open; a later contribution brings it to `q`. This card does not decide whether the attempt is bound to old Mercy, follows Ashen into Defiance, or dies on that change. |
 | **C — atomic and pending-capable tags coexist** | `K^{pending}_v` is a nonempty proper subset of `K^{candidate}_v`. At least one supported tag has a cross-cut pending witness, and at least one other tag is proved cut-atomic in every legal occurrence. | C supports deliberate Vows beside instantaneous Echoes and therefore the richest cadence vocabulary. Each pending-positive tag has B's **partial** temporal fit; each atomic-only tag has A's **direct-at-cut** inherited relation; their coexistence is only **aggregate**. This can make different Relics feel radically distinct, but it teaches two temporal languages on top of the already-selected state/boundary transformation dialects. Pending tags are also likely to read as premium or more sophisticated unless acquisition, power, UI, and non-dominance rules compensate. | One authored Ashen tag may open a visible Vow that survives another meaningful action before completion, while a Dreamglass tag can only listen and resolve at the exact cut where its complete relationship exists. These names are illustrative; C selects the coexistence rule, not those assignments. |
 
@@ -18399,8 +18517,10 @@ No player-semantic Soul Relic evaluation begins before its decisive semantic
 cut or remains authoritative across a later meaningful cut before provisional
 completion. Whenever later cadence and authority choices permit an evaluation
 to be invoked, one co-temporal Relic-side tuple is combined with the applicable
-contingent combat evidence; the evaluation reaches provisional completion or
-yields no candidate at that cut. Earlier
+contingent combat evidence; the evaluation reaches its provisional output at
+that cut. The earlier “or yields no candidate” clause was later disproved by
+the selected readiness/evidence/tuple contract and is corrected in the thirty-
+eighth prerequisite note below. Earlier
 actions and bounded `H` facts may remain essential, but neither they nor an
 animation, callback, delayed payoff, cache, or stored identifier create a
 dormant attempt. C133-A/C134-A still seal and promptly commit a successful
@@ -18439,11 +18559,15 @@ and authorizes no implementation.
 ### RCS-03C1 — cut-atomic evaluation-eligibility cadence — A selected
 
 RCS-03B1-A says an evaluation exists only at the cut where it atomically
-produces a provisional candidate or no candidate. It does not say **which
-canonical semantic cut first permits that evaluation**. RCS-03C1 resolves only
-that cadence. RCS-03C2A will separately decide system-versus-participant
-invocation control, RCS-03C2B will conditionally decide participant-
-authorization timing, and RCS-03C3 will separately screen evidence acquisition.
+produces its provisional output. Later-selected readiness, evidence, and tuple
+rules now prove that every actual invocation has at least one valid selected
+contender-ledger tuple; the earlier worksheet phrase “or no candidate” was
+wrong and is superseded by the thirty-eighth prerequisite correction below. It
+does not say **which canonical semantic cut first permits that evaluation**.
+RCS-03C1 resolves only that cadence. RCS-03C2A will separately decide system-
+versus-participant invocation control, RCS-03C2B will conditionally decide
+participant-authorization timing, and RCS-03C3 will separately screen evidence
+acquisition.
 
 For one fixed tag and legal history, a **non-cadence-readiness episode** is a
 maximal uninterrupted interval during which all inputs other than evaluation-
@@ -18683,9 +18807,13 @@ but they are not invocation authority unless their authored semantics carry
 that still-operative role—and no such role is legal under this selection.
 
 This selects invocation, not successful output. The coherent evidence
-projection screened in RCS-03C3 may still produce a provisional candidate or
-no candidate, C134-A still seals a completed candidate, and C135-A still
-prevents repeated same-tag commitment while sufficiency remains continuous.
+projection screened in RCS-03C3 may produce a positive provisional candidate
+or a ledger-bearing `{}` cancellation after pair treatment. Later-selected
+readiness, evidence, and tuple rules prove that it cannot produce a true
+zero-contender/no-tuple conclusion; the earlier “no candidate” wording here was
+wrong and is superseded by the thirty-eighth prerequisite correction below.
+C134-A still seals a completed positive candidate, and C135-A still prevents
+repeated same-tag commitment while sufficiency remains continuous.
 At the manifestation cut, distinct Soul, Relic, Charm, and relationship facts
 participate **directly**; deliberate agency across their formation history is
 **partial**; excluding a redundant invoke command is **neutral/protective**;
@@ -22230,9 +22358,9 @@ decision record remains unchanged.
 > No new row is needed. After the ordinary C2A-A transition, the eighty-seven-
 > row register contains 36 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 33
 > `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`.
-> C2D is the current presented card, while D1 is ready but queued.
+> At that checkpoint C2D was the presented card, while D1 was ready but queued.
 
-### RCS-03C3C3C2D — stochastic support across intrinsic exact-permission laws — active owner choice
+### RCS-03C3C3C2D — stochastic support across intrinsic exact-permission laws — direction selected
 
 C2D asks whether an intrinsic complete exact-overlap permission law may require
 a genuine allow/deny draw after everything that can already authoritatively
@@ -22283,6 +22411,4149 @@ is another owner-facing topology or AUTHOR/SPEC/TUNE work. D1 remains
 independently ready but queued under the one-card protocol. Any answer moves
 C2D to `DIR-SELECTED` and sends C2E through that audit. The authoritative
 decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **A, deterministic
+intrinsic laws only.** `G^{exact-perm-stoch}_v` is empty. For every canonical
+complete intrinsic exact-permission law and every reachable fixed opportunity,
+`pi_w(o)` is either zero or one. Replaying the same authoritative opportunity
+cannot change the permission bit through chance. A law may still return
+different certain bits in different reachable contexts.
+
+The permission result therefore remains attributable to the authored
+Relic/relationship covenant rather than a third chance arbiter. This protects
+causal explanation, team planning, replay trust, and later player-policy
+comparison while leaving combat RNG, acquisition randomness, and earlier
+committed random state untouched. The cost is less oracular suspense and easier
+solving, so deterministic response and stable law identities must provide the
+gameplay texture.
+
+C2D moves to `DIR-SELECTED`. It selects no exact permission incidence,
+responsive-law prevalence, player-actionable condition, constant-law polarity,
+survivor, candidate, commitment, payoff, or implementation. The authoritative
+decision record remains unchanged.
+
+> **Twenty-seventh prerequisite correction, 2026-09-26:** two bounded
+> read-only audits, cross-challenged against each other's countermodels, found
+> that old C2E's one global empty/universal/mixed card remained
+> overcompressed even after C2D-A removed stochastic laws.
+>
+> For each `w` in nonempty `W^{exact-perm-law}_v`, let `O_w` be its nonempty
+> domain of reachable authoritative resolved-exact opportunities after all
+> bindings and earlier committed state are fixed, and let
+> `b_w(o)=pi_w(o)` in `{0,1}`. Dormant branches, unreachable contexts,
+> unselected ledgers, aliases, callbacks, and replay copies are excluded. A
+> hybrid exact-related pair occurs once. The canonical semantic law key fixes
+> the versioned Relic/relationship contract; refactoring one switch into many
+> functions cannot change classification.
+>
+> Let `R^{exact-resp}_v` contain laws whose reachable image is `{0,1}`. These
+> are responsive laws: they certainly allow some reachable exact opportunities
+> and certainly deny others. Let `K_v=W^{exact-perm-law}_v setminus
+> R^{exact-resp}_v`; every member of `K_v` is context-invariant and therefore
+> either always-deny or always-allow. A catalog containing only responsive laws
+> and an otherwise identical catalog that adds an always-allow Stone Witness
+> agree on global mixed incidence but expose different legal builds: only the
+> latter offers guaranteed exact compatibility. Stable law-family support
+> therefore cannot be hidden in AUTHOR work.
+>
+> Responsiveness also does not prove actionability. A law may vary only with an
+> immutable or externally fixed fact. A matched player-causal witness compares
+> two lawful non-oracular policies from one common authoritative upstream
+> decision state. They are identical at every independently revisable decision
+> coordinate except one materially operative participant or counterplayer
+> choice. Neither arm may be forced or compared with illegal inaction. Later
+> actions, reactions, delays, costs, and stochastic effects may differ only as
+> causal descendants of that intervention, and their complete authoritative
+> factual closure belongs to the comparison.
+>
+> Hold fixed one positive-support causal background, every non-descendant
+> exogenous variable and other actor decision rule, and the version/law, Relic
+> and relationship identities, bound stance, law-defining committed variant,
+> eventual selected exact pair, and proof structure. Every permission input
+> outside the causal closure stays fixed, and the two reachable permission
+> bits must differ. At least one changed permission-read fact must have
+> authoritative upstream truth conditions and a lifecycle independent of the
+> desired permission result; a costed or delayed `allow doubles` flag is still
+> forbidden participant permission control. The causal relation is versioned
+> and audit-traceable, not inferred after a favorable outcome. Field layout,
+> callback shape, or eager versus delayed derivation cannot change
+> classification. If unobserved stochastic consequences mediate the witness,
+> the decision must change the bit's reachable support or conditional
+> distribution under the lawful observation history; one favorable crossover
+> with an unchanged policy distribution is insufficient. Invocation still has
+> no live permission prompt.
+>
+> Old `RCS-03C3C3C2E` therefore becomes a non-counting parent for three rows:
+>
+> 1. `RCS-03C3C3C2E1` — responsive-law prevalence across complete intrinsic
+>    exact-permission laws;
+> 2. conditional `RCS-03C3C3C2E2` — matched player-causal factual-response
+>    support among responsive laws; and
+> 3. conditional `RCS-03C3C3C2E3` — always-deny versus always-allow polarity
+>    among context-invariant laws.
+>
+> E1-A prunes E2 and activates E3. E1-B activates E2 and prunes E3. E1-C makes
+> E2 and E3 independent siblings; queue E2 first because it decides whether a
+> material player/counterplay decision can cause a response, then E3. E2 is an
+> empty/nonempty support boundary;
+> requiring actionability on every responsive law is a stronger authoring
+> minimum unless a distinct nonactionable-responsive build purpose later earns
+> reopening. E3 classifies the always-allow subset of nonempty `K_v` as empty,
+> all, or nonempty proper. The E1/E3 class-support projections enumerate the
+> seven possible nonempty combinations of responsive, always-deny, and always-
+> allow law classes. E2 is orthogonal wherever the responsive class is
+> nonempty, producing eleven terminal decision paths across the three rows.
+> Overall exact permission incidence is then derived, not a fourth owner card.
+>
+> Replacing one counted C2E row with three adds two slots and two potential
+> cards. After recording C2D-A and opening E1, the amended register has
+> **eighty-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 34
+> `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+> At that checkpoint E1 was the presented card; D1 remained prerequisite-ready
+> but queued.
+
+### RCS-03C3C3C2E1 — responsive intrinsic exact-permission law prevalence — direction selected
+
+C2D-A makes every fixed opportunity certain, but it does not decide whether a
+complete law gives the same bit everywhere in its reachable exact domain. E1
+asks whether the completed catalog must support responsive laws, context-
+invariant laws, or both. “Responsive” here means only that one law takes both
+certain values somewhere; E2 later decides whether an independently revisable
+legal player/counterplay decision can causally produce any such change.
+
+| Choice | Responsive-law prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every law is context-invariant** | `R^{exact-resp}_v` is empty, so `K_v=W^{exact-perm-law}_v`. Each complete law either always permits or always denies every reachable exact opportunity in its domain. E2 prunes and E3 decides which constant polarity classes exist. | A gives every Relic/relationship covenant a steadfast compatibility identity. It is easiest to explain, compare, and plan around, and supports reliable build selection. Its fit is **neutral/protective**: any always-allow law may realize one-deed/two-relationship unity, but no law expresses both unity and distinction through changing circumstances. Costs are less in-battle covenant play and strong pressure for always-allow laws to become obvious premiums unless always-deny laws receive another real purpose. | Ashen's complete law returns the same bit in every reachable exact context. Stone Witness may have the opposite constant bit, but E1 does not decide that; E3 does. |
+| **B — every law is responsive** | `R^{exact-resp}_v=W^{exact-perm-law}_v`. Every complete law certainly allows at least one reachable exact opportunity and certainly denies at least one other. No context-invariant exact-permission build exists. E2 opens and E3 prunes. | B makes conditional covenant behavior universal. Every exact-capable law carries both union and refusal somewhere in its domain, which can give each relationship a direct unity-with-difference expression when authored legibly. It prevents a permanent guaranteed-compatibility or guaranteed-conflict build. Costs are universal prediction burden, loss of iconic steadfast Relics, and the possibility that “responsive” is merely descriptive rather than player-actionable until E2 is answered. | Ashen, Stone Witness, and every other law each have at least one certain-allow and one certain-deny reachable context. E1 does not yet promise that players can intentionally move between them. |
+| **C — responsive and context-invariant laws coexist** | `R^{exact-resp}_v` is a nonempty proper subset of `W^{exact-perm-law}_v`. At least one complete law takes both bits across its domain and at least one distinct law is always-deny or always-allow. E2 and E3 both remain applicable. | **Recommended.** C preserves lived conditional covenants beside steadfast witness Relics, supporting both context-solving and reliable build identities. A responsive law can directly express *Achintya Bheda Abheda*: one unchanged deed participates in two distinct relationships under some real conditions and not others. The catalog coexistence itself is only aggregate. Costs are two prediction dialects, more explanation and balance work, and premium/trap risks around the constant classes that E3 must later constrain. | Ashen certainly permits the shared-Heat pair in one reachable context and denies it in another, while Stone Witness applies one constant bit throughout its domain. E2 later asks whether Ashen's change is player-causal; E3 later decides Stone Witness's polarity class. |
+
+A/B/C are mutually exclusive and exhaustive because
+`R^{exact-resp}_v` is empty, all of nonempty
+`W^{exact-perm-law}_v`, or a nonempty proper subset. One unreachable deny branch
+does not make an always-allow law responsive, and differing outputs from two
+canonical law identities do not make either law responsive. Deterministic
+response supplies no nonconstant stochastic marginal and cannot by itself
+activate G2.
+
+E1 chooses no exact law identity, trigger, count, distribution, actionability,
+constant polarity, information promise, binding horizon, survivor, candidate,
+commitment, payoff, or implementation. A stronger guarantee that every Relic
+definition contains both responsive and context-invariant contracts is a
+replacement path, not hidden inside C. Any answer moves E1 to
+`DIR-SELECTED`. A prunes E2 and activates E3; B activates E2 and prunes E3; C
+activates both independent siblings, with E2 presented first. D1 remains ready
+but queued. The authoritative decision record remains unchanged.
+
+The owner selected **C**. Therefore
+`∅ ⊊ R^{exact-resp}_v ⊊ W^{exact-perm-law}_v`: the completed
+catalog contains at least one responsive complete intrinsic exact-permission
+law and at least one distinct context-invariant law. The responsive witness may
+directly express unity-with-difference at one operative relationship boundary;
+catalog coexistence itself remains aggregate. This answer selects no exact law,
+causal lever, constant polarity, actor, disclosure, payoff, or implementation.
+E1 moves to `DIR-SELECTED`; both E2 and E3 remain applicable, with E2 presented
+first and E3 queued. D1 remains independently ready but queued.
+
+> **Post-answer screen and twenty-eighth prerequisite correction,
+> 2026-09-26:** two distinct bounded read-only audits attacked whether E2's
+> empty/nonempty boundary was complete and whether its claimed actionability
+> produced real play. Their first formulations disagreed over one action versus
+> a finite policy sequence and over semantic auditability versus player-facing
+> disclosure. Mutual cross-challenge preserved the binary owner boundary but
+> broke the old witness definition.
+>
+> A single-action test falsely rejects a prospectively bound multi-step episode
+> or delayed consequence. Mere action availability falsely admits a forced
+> move, illegal inaction, unrelated lucky trace, or permission-only flag. The
+> repaired unit is one independently revisable lawful decision intervention.
+> Two non-oracular policies share one reachable authoritative upstream decision
+> state and are identical at every independently revisable decision coordinate
+> except that choice. A prospectively versioned finite episode may be the one
+> choice only when its later member decisions are already bound; independently
+> revisable later choices cannot be bundled after the fact. Later realized
+> actions and facts may differ through the intervention's complete direct,
+> indirect, delayed, reactive, inseparable, and stochastic causal closure.
+>
+> Fix one positive-support semantic causal background, all non-descendant
+> exogenous variables, and every other actor's decision rule. Both continuations
+> must preserve the same canonical law/version, Relic and relationship
+> identities, bound stance, law-defining committed variant, eventual selected
+> exact pair, and proof structure. Every permission input outside the causal
+> closure stays fixed, while the deterministic bits differ. A changed
+> permission-read fact must have upstream truth conditions and lifecycle
+> independent of the desired bit and exist semantically whether or not the
+> exact opportunity is selected. A material cost cannot cleanse a disguised
+> permission grant. Different unrelated random histories are correlation, not
+> causation. Under unobserved stochastic mediation, the decision must change
+> reachable bit support or its conditional distribution under the lawful
+> observation history; a single crossover with the same policy distribution
+> is not a playable lever. Any stochastic witness carries a later semantic-
+> coupling SPEC/EVALUATE obligation.
+>
+> Versioned audit-traceable causality is required now; exact player disclosure
+> is not silently selected. If E2-B is later chosen, RCS-02/SR-10 must make the
+> operative factor understandable to the correct actor before the first
+> irreversible divergence and attributable afterward, without preselecting the
+> exact actor, UI, forecast, or communication contract. Actor distribution,
+> immediacy, sequence length, success rate, exact triggers, and universal
+> saturation remain AUTHOR/SPEC/TUNE unless a distinct product purpose passes
+> reopening. No row is added.
+>
+> After E1-C and E2's activation, the eighty-nine-row register contains **36
+> `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 35 `DIR-SELECTED`, 2 `DERIVED`, 1
+> `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`**. At that checkpoint E2 was the
+> presented card; E3 and D1 were ready but queued. The authoritative decision
+> record remains unchanged.
+
+### RCS-03C3C3C2E2 — matched player/counterplay-causal exact-permission response — direction selected
+
+E1-C guarantees at least one responsive law, but not that any legal player
+decision can cause or contest its change. Let `M^{exact-causal}_v` contain the
+responsive laws with at least one witness satisfying the repaired definition
+above. E2 asks whether `M^{exact-causal}_v` is empty or nonempty. It does not
+ask whether every responsive law is actionable.
+
+| Choice | Matched causal-response support | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no matched player/counterplay-causal response** | `M^{exact-causal}_v` is empty. Every responsive-law bit difference depends on immutable, externally determined, automatic, forced, structurally different, or otherwise nonqualifying context. Players may observe and adapt around those contexts, but no lawful independently revisable decision supplies a qualifying playable bit change under the matched test while the same intrinsic law and selected exact pair remain fixed. | A minimizes causal-state tracking, denial loops, allied griefing, quarterbacking, and explanation burden. Its fit at this action/result boundary is **neutral**: it neither erases nor strengthens the relational fit already supplied by a responsive law, but adds no qualifying player-enacted expression. The cost is that E1-C's responsive family can become a descriptive lookup table or an opaque gotcha rather than lived covenant play. | Ashen allows the same shared-Heat pair before Dusk and denies it after an automatic round-five transition. No legal timing, preservation, acceleration, or disruption policy can affect that boundary. |
+| **B — require nonempty matched player/counterplay-causal response** | `M^{exact-causal}_v` is nonempty. At least one responsive law has two lawful matched policies differing at one independently revisable participant or counterplayer decision whose complete causal closure produces opposite permission bits for the same intrinsic law and eventual selected exact pair. | **Recommended.** B guarantees at least one real causal play-or-counterplay lever instead of allowing every responsive law to vary only with exogenous facts. At the action/result boundary, preserving distinct covenant facts while one deed participates in two relationships is a **direct** *Achintya Bheda Abheda* fit. B creates that gameplay topology but does not itself specify presentation: RCS-02/SR-10 must later make the factor prospectively understandable and retrospectively attributable. Costs are causal/UI burden, cheap denial loops, allied griefing, teammate quarterbacking, and token witnesses that later evaluation must reject. | From the same decision state, with Ashen's law and eventual shared-Heat pair fixed, `Guard` preserves an independently meaningful Ember Seal while `Burst` consumes it for damage. Both choices are lawful and useful beyond permission; the complete continuations make Ashen certainly allow versus deny the pair. An opponent's costly `Sunder` versus `Strike` could instead supply the qualifying counterplay witness. |
+
+A/B are mutually exclusive and exhaustive because
+`M^{exact-causal}_v ⊆ R^{exact-resp}_v` is empty or nonempty. B does not
+require every responsive law or opportunity to qualify, bearer control, both
+allied agency and opponent counterplay, immediate effects, deterministic
+upstream success, or a full-bit preview. Requiring any of those is a replacement
+path, not hidden inside B. A policy that changes the law, stance, identities,
+selected pair, or proof structure is not an E2 witness. Neither is a costly,
+delayed, or multi-step `allow doubles` command whose only semantic role is
+permission control; that would contradict C2A-A.
+
+Any answer moves E2 to `DIR-SELECTED` and makes E3 the next presented sibling.
+The register would then contain 35 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 36
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. D1
+remains independently ready but queued. Deterministic factual response creates
+no stochastic permission marginal and cannot activate G2. Exact identities,
+facts, actors, information, triggers, horizons, success rates, distribution,
+payoff, and implementation remain unsettled.
+
+The owner selected **B**. Therefore `M^{exact-causal}_v≠∅`: at least one
+responsive complete intrinsic exact-permission law has one qualifying lawful
+decision intervention whose complete causal closure supplies a playable change
+in the certain bit while the same law and eventual exact pair/proof remain
+fixed. This is an existential support promise. It does not require every
+responsive law or opportunity to qualify, identify the controlling side,
+guarantee action success, or choose exact disclosure. E2 moves to
+`DIR-SELECTED`; the RCS-02/SR-10 legibility compatibility obligation remains,
+E3 becomes the presented sibling, and D1 remains independently ready but
+queued.
+
+> **Post-answer screen and twenty-ninth prerequisite correction,
+> 2026-09-26:** two distinct bounded read-only audits attacked E3 from
+> different directions. The incidence audit tested whether constant-law
+> polarity hid domain, hybrid, or downstream-result choices. The gameplay
+> audit tested whether an always-deny class could be a meaningful build identity
+> rather than a dominated symmetry token. Their first recommendations
+> disagreed—B for the safe two-dialect catalog versus C for three steadfast and
+> responsive philosophies—but mutual cross-challenge converged on conditional
+> C and preserved one three-way owner card.
+>
+> For nonempty context-invariant `K_v`, define
+> `K^+_v={w∈K_v : b_w(o)=1 for every o∈O_w}` and
+> `K^-_v=K_v setminus K^+_v`. Every `O_w` is nonempty. Because a member of
+> `K_v` cannot take both binary values, each complete law belongs to exactly one
+> polarity class. Thus `K^+_v` is empty, all of `K_v`, or nonempty proper; no
+> fourth branch exists. “Always” is relative to that law's own reachable
+> authoritative domain. A singleton domain is nonvacuous but proves no breadth;
+> dormant or unreachable branches cannot change polarity, and code/variant
+> splitting cannot manufacture a class.
+>
+> Polarity is gate-local. An always-allow law guarantees only passage through
+> the exact joint-survival permission coordinate; it does not guarantee
+> candidatehood, commitment, final co-survival, receipt count, or payoff. An
+> always-deny law guarantees only a false bit—“not both”—and entry into later
+> denied-pair treatment; it selects no survivor, substitute, benefit, reroute,
+> retry, or alternate proof. A hybrid exact-and-related opportunity still
+> occurs once and may remain subject to the later related-form restriction.
+> E1-C's responsive class already makes global exact-bit incidence mixed under
+> every E3 branch, so no global incidence card returns.
+>
+> Responsive denial cannot replace steadfast denial: every responsive law
+> allows somewhere in its reachable domain, whereas a constant-deny covenant
+> removes allowance throughout its own reachable domain. A participant,
+> counterplayer, or exogenous condition might reach a responsive allow context;
+> E2 selects none of those universally. The constant invariant can nevertheless
+> support a genuinely different context-robust precommitted build.
+> But formal class incidence alone is insufficient. Under C, each admitted
+> constant-polarity family must support at least one reachable, mechanically
+> legible, non-token legal build or policy purpose in the applicable release
+> catalog. Its polarity must be causally operative in material play and the
+> family must remain viable and not everywhere weakly dominated under the later
+> power/compatibility envelope. For always-deny, certain refusal must be used
+> instrumentally or function as an explicit play-shaping commitment or
+> exploitable liability within a package receiving commensurate value. Mere
+> coverage, an unreachable showcase, an unplannable forced branch, voluntary
+> self-handicap, or compensation that never changes a preferred build/action
+> does not qualify.
+>
+> This obligation excludes a trap but selects no exact law, rarity, actor,
+> trigger, survivor, substitute, compensation form or magnitude, payoff,
+> threshold, count, distribution, or launch placement. C3C3E/F and RCS-05/08
+> own the concrete result/value choices; SR-05/06 and RCS-17/18 validate
+> legibility, viable purpose, fun, and non-domination. SC-09's high-ceiling
+> Legendary direction does not make every E3 law Legendary or require every
+> deny family to be peak-power. If no always-deny family passes those gates,
+> E3 must reopen with B as the bounded replacement rather than shipping a token
+> C witness. No row is added.
+>
+> After E2-B and E3's activation, the eighty-nine-row register at that
+> checkpoint contained **35
+> `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1
+> `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**. E3 was the presented card;
+> D1 remained prerequisite-ready but queued. The authoritative decision record
+> remains unchanged.
+
+### RCS-03C3C3C2E3 — context-invariant exact-permission law polarity — direction selected
+
+E1-C guarantees that `K_v` is nonempty. E3 decides which steadfast polarity
+classes the completed catalog must contain. It classifies complete canonical
+laws, not isolated opportunities, whole Relics, or final rewards.
+
+| Choice | Context-invariant polarity support | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — steadfast refusal only** | `K^+_v=∅`. Every context-invariant law returns zero for every opportunity in its own reachable domain. Together with the required responsive class, complete-law support is `R+D`. | A makes reliable non-co-survival the sole steadfast philosophy. It can support precommitted severance or anti-manipulation identities, but supplies no guaranteed exact-gate compatibility class. Its fit at this gate is **neutral/protective**: it preserves real distinction and refuses automatic double entitlement, while unity must be expressed by responsive laws elsewhere. Costs are severe trap pressure, possible ally suppression, and dependence on later denied-pair/value design for every constant law. | `Severed Bell` always returns false for its selected exact pair. That means only “not both”; C3C3E/F still decides whether one result, a substitute, or another legal disposition follows. |
+| **B — steadfast compatibility only** | `K^+_v=K_v`. Every context-invariant law returns one for every opportunity in its own reachable domain. Together with the required responsive class, support is `R+A`. | B is the safest two-dialect catalog: actionable responsive covenants provide conditional refusal, while steadfast laws provide reliable exact-gate compatibility. An always-allow witness can be a **direct** ideal fit when one deed remains one and two distinct relationship receipts may pass this gate together. It minimizes trap and teaching burden. Costs are proof-compression and obvious-premium pressure, and it permanently excludes an invariant refusal/anti-manipulation covenant. | `Stone Witness` always passes the shared-Heat exact pair through this permission coordinate. Later candidacy, commitment, related-form restriction, multi-contender treatment, and payoff remain unsettled. |
+| **C — both steadfast polarities coexist** | `∅⊊K^+_v⊊K_v`. At least one context-invariant law always allows and at least one distinct law always denies. With the required responsive class, support is `R+D+A`. | **Recommended, with the hard viability obligation above.** C yields three readable covenant philosophies: steadfast compatibility, steadfast refusal, and actionable response. A constant-deny law adds a genuinely distinct invariant plan because no reachable context can make that law allow; opponent steering is only one possible realization. Individual allow/deny cases inherit A/B's local fit; catalog coexistence is only **aggregate**, not a direct theological analogue. Costs are a third prediction dialect, ally-grief and reduced-counterplay risks, trap versus overcompensation pressure, and the authoring/evaluation burden of proving a non-dominated refusal purpose. | `Stone Witness` always allows; `Severed Bell` always denies; responsive `Ashen` lets `Guard` versus `Burst` preserve or spend the Ember Seal and change its bit. Severed Bell qualifies only if its certain refusal materially supports a viable build or policy, not merely because the matrix needed a deny row. |
+
+A/B/C are mutually exclusive and exhaustive because the subset `K^+_v` of
+nonempty `K_v` is empty, all of `K_v`, or a nonempty proper subset. C derives
+at least two context-invariant laws and, with E1-C, at least three complete laws
+total; it does not require both polarities within every Relic, relationship, or
+committed variant. Every branch inherits SR-05/SR-06's non-token viable-purpose
+test; C must satisfy it for both polarity classes. Exact law identities, domain
+breadth, counts, distribution, prevalence, and release placement remain
+AUTHOR/SPEC under those gates.
+
+No E3 answer changes global exact-bit incidence: the responsive class already
+contains both values. No answer prunes denied-pair treatment, because responsive
+laws deny somewhere, or eliminates allowed opportunities, because responsive
+laws allow somewhere. Any answer moves E3 to `DIR-SELECTED` and makes D1 the
+next presented card. The register would then contain 34 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 37 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 35`. E3 selects no survivor, payoff, implementation, or
+stochastic permission behavior.
+
+The owner selected **C**. Therefore `∅⊊K^+_v⊊K_v`: the completed catalog must
+contain at least one context-invariant exact-permission law that always allows
+throughout its own nonempty reachable domain and at least one distinct law that
+always denies throughout its domain. Together with E1-C, complete-law support
+is `R+D+A`. This is catalog-level coexistence, not a requirement that every
+Relic, relationship, committed variant, or release slice contain all three
+philosophies.
+
+The hard viability obligation is part of the selected direction. Every
+required polarity family must eventually pass SR-05/SR-06's mechanically
+legible, non-token viable-purpose gates. In particular, steadfast refusal must
+be instrumentally useful or a play-shaping commitment or exploitable liability
+inside a package receiving commensurate value; a dominated symmetry witness
+does not satisfy C. Concrete permission laws, final disposition, compensation,
+payoff, rarity, prevalence, and launch placement remain downstream. If later
+authoring and evaluation cannot produce a qualifying steadfast-deny family,
+E3 must be reopened with B as the bounded replacement rather than silently
+weakening C.
+
+E3 moves to `DIR-SELECTED` and D1 becomes the presented card. The eighty-nine-
+row register now contains 34 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 37
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+The authoritative decision record remains unchanged.
+
+> **Post-answer D1 prerequisite screen, 2026-09-26:** two bounded read-only
+> audits independently tested whether post-routing distinct-related exposure
+> remained one owner decision. The topology audit re-derived the domain and
+> attacked hidden authority, randomness, prevalence, and hybrid branches. The
+> gameplay audit tested whether an exposed related form could add buildcraft
+> rather than decorative lineage. Both returned the same binary topology and
+> recommended nonempty exposure.
+>
+> For version `v`, retain the existing resolved-pair domain: one reachable
+> actual evaluation, one actually bound lawful complete stance/configuration,
+> its one deterministic selected authoritative tuple, and one unordered pair
+> of distinct contender tags in that tuple. `R^{resolved-related}_v` contains
+> exactly those pairs whose selected ledgers use two distinct final children
+> with intersecting complete lineages or one shared nonmultiplying
+> authorization/accounting parent. Therefore it is empty or nonempty. Selector
+> authority and determinism are already settled; contextual response does not
+> create a third state.
+>
+> Pre-selector C2-C related support does not imply D1-B. Every structurally
+> valid distinct-related ledger pair may remain counterfactual to authoritative
+> co-selection even though either constituent ledger can be selected with an
+> independent counterpart. Conversely, multiple related edges, aliases,
+> self-lineage, callback splits, or generated IDs do not multiply a pair or
+> establish support.
+>
+> A hybrid opportunity in
+> `E^{resolved-exact}_v∩R^{resolved-related}_v` is not a third branch. It is one
+> pair, counted once, and later receives one permission bit. D1-B may be
+> witnessed by a related-only or hybrid pair; requiring
+> `R^{resolved-related}_v setminus E^{resolved-exact}_v` to be nonempty would
+> be a stronger replacement, not hidden inside B. D1 selects no matched stance
+> toggle, actor, actionability, permission, survivor, retry, payoff, or separate
+> form vote.
+>
+> Cross-challenge narrowed an initially overstrong gameplay guard. D1-B itself
+> promises exposure only. The selected children and qualifying lineage or
+> accounting relation must be genuine and mechanically legible, while the
+> containing authored package must later pass SR-05/SR-06's operative-choice or
+> state-transition, viable-purpose, and non-token release gates. At that later
+> closure, the genuine related fact must matter to something players can
+> understand, plan around, or have treated. This deferred validation does not
+> require a related-only route, a separate downstream benefit, or dominance
+> over exact routes. If no authored witness can pass those existing gates,
+> reopen D1 with A rather than count inert incidence. No new row is warranted.
+
+### RCS-03C3C3D1 — authoritative distinct-related exposure after routing — active owner choice
+
+C2-C requires functional distinct-related overlap among valid pre-selector
+ledger pairs, but B1-A sends only one selected tuple downstream. D1 asks
+whether at least one distinct-related pair must remain operative after a lawful
+bound stance selects that authoritative tuple. It grants no permission for both
+tags to survive together.
+
+| Choice | Post-routing distinct-related exposure | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no authoritative distinct-related route** | `R^{resolved-related}_v=∅`. Across every reachable actual evaluation and actually bound lawful complete stance/configuration, no unordered tag pair in the selected tuple uses distinct final children with intersecting complete lineage or a shared nonmultiplying authorization/accounting parent. C2-C's structural related support remains, but every such pair is counterfactual to authoritative co-selection. | A gives the clearest lineage/accounting firewall at the exposure boundary and prevents shared-cause sibling proofs from reaching fan-out treatment. Its ideal fit is **neutral/protective**: it protects real proof distinction but leaves their causal unity in latent structure rather than one operative relationship. Costs are making the already-required related grammar permanently counterfactual, dead authored breadth, and selector-injection pressure without related-form treatment payoff. A does not guarantee that avoidance is deliberate or player-configurable. | `Twin Vow` supplies structurally valid related children `Guard Pulse a` and `Riposte Mark b`, while P also has independent ledger `L_v`. Whenever that related candidate pair is available, the selected tuple instead uses a non-related alternative such as `(L_v,L_q)`; `a` or `b` may appear with other counterparts, but never together as an authoritative related pair. The required exact shared-Heat route still exists separately. |
+| **B — require an authoritative distinct-related route** | `R^{resolved-related}_v≠∅`. At least one reachable actual evaluation under one actually bound lawful complete stance/configuration selects a tuple containing an unordered tag pair whose selected ledgers use two distinct qualifying related final children. The witness may be related-only or hybrid; exact identities, counts, coverage, and prevalence remain AUTHOR/SPEC. | **Recommended, under the existing SR-05/SR-06 gates.** B makes the selected distinct-related grammar playable exposure instead of permanently counterfactual. Two distinct manifestations and one retained causal/accounting unity coexist at the same selected proof boundary, a **potential direct** *Achintya Bheda Abheda* fit; D2 must still decide whether both may survive. Costs are one-payment compression, broad-lineage hubs, selector injection, explanation burden, and a token-hybrid risk. B guarantees exposure, not that a participant can cause, choose, prevent, or exploit it. | One bound `Chorus` stance selects P through `Twin Vow`'s `Guard Pulse a` and Q through its distinct `Riposte Mark b`; `a≠b` retain one nonmultiplying operation lineage/payment. Both ledgers are authoritative, but D2 later decides their pair's one permission bit and E/F later handles any denial. |
+
+A/B are mutually exclusive and exhaustive because
+`R^{resolved-related}_v` is empty or nonempty. B requires one reachable actual
+selected-tuple witness; an unselected alternate, unreachable showcase, alias,
+self-lineage, field/callback split, or decorative label does not qualify. A
+does not undo C2-C's structural related-support direction; it fixes that
+support as counterfactual to authoritative co-selection.
+
+D1 selects no permission-law authority, randomness, joint survival,
+provisional candidate, commitment, survivor, substitute, claim, consumption,
+payoff, retry, prevalence, release placement, or implementation. A moves D1 to
+`DIR-SELECTED`, prunes D2, and makes E the next presented card; the register
+would contain 32 `SCREEN`, 1 `OWNER-OPEN`, 14 `PRUNED`, 38 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 33`. B moves D1 to
+`DIR-SELECTED` and sends D2 through its mandated fresh prerequisite screen;
+absent another amendment, the register would contain 33 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 34`. Any B-admitted hybrid remains one pair with one
+permission bit.
+
+The owner selected **B**. Therefore `R^{resolved-related}_v≠∅`: at least one
+reachable actual evaluation under one actually bound lawful complete stance or
+configuration selects an authoritative tuple containing a genuine distinct-
+related unordered tag pair. This makes related proof structure operative after
+routing, but grants no joint survival, candidate, commitment, result, payoff,
+or participant actionability. The witness may be related-only or hybrid and
+remains subject to the deferred SR-05/SR-06 legibility, viable-purpose, and
+non-token release gates.
+
+D1 moves to `DIR-SELECTED`. Old D2 would ordinarily become `OWNER-OPEN`,
+yielding 89 rows: 33 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 38
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
+The prerequisite correction below replaces that still-bundled open row before
+presentation. The authoritative decision record remains unchanged.
+
+> **Thirtieth prerequisite correction, 2026-09-26:** three bounded read-only
+> audits independently tested permission authority inheritance, minimum
+> subtree size, and the gameplay value of the first related-permission card,
+> then cross-challenged their only domain disagreement. Old D2 is not one
+> prerequisite-ready incidence card. It hides five independently variable
+> prerequisites before form-wide incidence, but its domains cannot simply copy
+> the exact lane.
+>
+> Write `E_v=E^{resolved-exact}_v`,
+> `R_v=R^{resolved-related}_v`, `H_v=E_v∩R_v`, and
+> `Q_v=R_v setminus E_v`. `H_v` contains hybrid exact-and-related
+> opportunities; `Q_v` contains related-only opportunities. Every hybrid is
+> one opportunity with one permission probability and one realized bit. Exact
+> C2A-A therefore makes every hybrid participant-intrinsic, C2D-A makes it
+> deterministic once authoritative inputs are fixed, and E1/E2/E3 classify its
+> exact projection. D2 may constrain hybrid placement but may never add a
+> related grant, veto, draw, or precedence rule.
+>
+> The selected exact rules do not determine `Q_v`. A related-only pair can
+> still carry an intrinsic or prospectively participant-configurable law; a
+> permission force coupled to its routing stance or independently recombinable;
+> a closed authored menu or bounded constructive language; participant-composed
+> context branching or none; and a deterministic law or a fresh nondegenerate
+> draw after all bindings, facts, and earlier committed state are fixed. These
+> change legal configurations, actions, planning, replay, migration, and
+> exploit surfaces independently.
+>
+> Old `RCS-03C3C3D2` therefore becomes a non-counting parent for six registered
+> rows:
+>
+> 1. `RCS-03C3C3D2A` — participant configurability prevalence across
+>    related-only-capable permission contracts;
+> 2. conditional `RCS-03C3C3D2B` — independently recombinable related-
+>    permission-coordinate prevalence;
+> 3. conditional `RCS-03C3C3D2C1` — constructive related-permission-language
+>    prevalence;
+> 4. conditional `RCS-03C3C3D2C2` — participant-composed related context-
+>    branching prevalence;
+> 5. `RCS-03C3C3D2D` — stochastic support across complete bound related-only
+>    permission projections; and
+> 6. `RCS-03C3C3D2E` — final related-form permission topology over all of
+>    `R_v` after the complete-law and stochastic denominator is settled.
+>
+> D2A-A prunes D2B/D2C1/D2C2 and activates D2D. D2A-B/C activates D2B; every
+> D2B answer activates D2C1 because inseparable control does not imply a closed
+> permission language. D2C1-A prunes D2C2 and activates D2D; D2C1-B/C activates
+> D2C2, whose answer then activates D2D. D2D precedes D2E. D2E receives its own
+> fresh prerequisite audit rather than pre-minting incidence descendants.
+>
+> D2A through D2D use the residual `Q_v` domain. Otherwise already-intrinsic,
+> deterministic hybrid-only contracts would manufacture fake mixed classes.
+> D2E must return to all `R_v`: even if `Q_v` is empty, exact law-family support
+> does not determine whether the authored hybrid set is entirely allowed,
+> entirely denied, or mixed. A form-wide D2E restriction constrains which exact
+> opportunities may also be related; it never changes their inherited bit.
+>
+> No separate `Q_v≠∅` card passes admission. D1 deliberately left a related-
+> only witness unrequired; positive D2A or D2D branches openly entail whatever
+> `Q_v` support their new authority or randomness needs. Bare residual coverage
+> adds no independent player contract. No cross-form-uniformity or hybrid-
+> composition card is warranted either: disjoint exact-only and related-only
+> opportunities lack a representation-invariant matched comparator, while
+> hybrids already have one bit. Existing G2 already covers coupling only when
+> two distinct simultaneous pair opportunities have nonconstant marginals.
+>
+> Replacing one counted D2 row with six adds five slots and five unresolved
+> potentials. At that checkpoint the register contained **94 rows: 38 `SCREEN`, 1
+> `OWNER-OPEN`, 13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+> `EVALUATE`; `Phi_SR = 39`**. D2A was the sole presented card.
+
+### RCS-03C3C3D2A — participant configurability of related-only permission — direction selected
+
+D1-B guarantees some selected distinct-related pair. Hybrids already inherit
+participant-intrinsic exact permission, so D2A classifies only the remaining
+related-only domain `Q_v=R_v setminus E_v`.
+
+Let `S^{rel-only-perm}_v` contain the versioned treatment contracts for which
+some lawful configuration produces a reachable member of `Q_v`. This set may
+be empty. A contract belongs to `P^{rel-only-perm-config}_v` when two lawful
+prospectively bindable participant settings produce different complete
+permission laws on one matched reachable `q∈Q_v`: hold fixed the version,
+Relic, actual evaluation facts, selected authoritative tuple, and unordered
+tag pair while only a setting carrying authored permission-control force
+changes. Merely selecting a different tuple does not qualify.
+
+| Choice | Related-only participant-configurability rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no participant-configurable related-only permission** | `P^{rel-only-perm-config}_v=∅`. `Q_v` may be empty. If related-only opportunities exist, their permission authority is intrinsic; combined with exact C2A-A, every exposed related pair is participant-nonconfigurable. This imports no common cross-form law identity, determinism, or incidence. | **Recommended.** Participants already bind finite whole-policy routing orientations. A preserves the clean division: participants orient routing prospectively; the resolver determines the selected proof relation from lawful inputs; the Relic/relationship covenant determines compatibility. It does not promise that a participant can force one proof form in a matched case. Its fit at this authority boundary is **neutral/protective**, while an eventually allowed `a≠b` pair with one true causal parent can still be a direct local ideal expression. A improves prediction, UI economy, team trust, and artifact identity. Costs are less downstream control, frustration under intrinsic refusal, and a high disclosure burden. | `Chorus` selects one contender through `Twin Vow`'s `Guard Pulse a` and the other through distinct `Riposte Mark b`, with no exact shared child. Holding that same pair and all facts fixed, changing any participant setting cannot change its complete permission law. Another Relic or factual context may still carry a different intrinsic law. |
+| **B — every related-only-capable contract offers a configurable case** | `S^{rel-only-perm}_v≠∅` and `P^{rel-only-perm-config}_v=S^{rel-only-perm}_v`. Every contract with a reachable related-only opportunity has at least one matched `Q_v` pair whose complete law differs under two lawful prospective settings. This does not require every opportunity to differ, and hybrids remain intrinsic. | B lets participant orientation and the Relic jointly govern whether two sibling manifestations may remain together, a **potential direct** configuration-boundary fit. It adds mastery and precommitted risk postures, but duplicates routing agency and creates a difficult asymmetry: the setting must become irrelevant whenever the pair also shares an exact child. Costs include a second approval optimizer, quarterbacking, grief, configuration/migration burden, and obvious-allow dominance pressure. | The same related-only `a/b` tuple remains selected under prospectively bound `Concord` and `Severance`, but the two settings induce different complete permission laws. They may be inseparable clauses of whole routing stances or a separate coordinate; D2B decides that later. |
+| **C — configurable and intrinsic related-only-capable contracts coexist** | `∅⊊P^{rel-only-perm-config}_v⊊S^{rel-only-perm}_v`. At least one related-only-capable contract has a configurable matched witness and at least one other related-only-capable contract has none. Hybrid-only contracts lie outside `S^{rel-only-perm}_v` and cannot supply C's intrinsic comparator. | C supports configurable covenants beside immutable related-only witness Relics. Each local case inherits A or B's fit; coexistence is only **aggregate**. It broadens artifact personality but teaches another authority dialect, complicates comparison and migration, and risks making configurable contracts the premium class while intrinsic ones feel incomplete. | Ashen has the configurable `a/b` witness from B; Severed Bell has a reachable related-only `x/y` pair whose law no participant setting changes. A hybrid-only Stone Witness does not count as C's intrinsic family. |
+
+A/B/C are mutually exclusive and exhaustive. If
+`P^{rel-only-perm-config}_v` is empty—including when
+`S^{rel-only-perm}_v` is empty—A holds. Otherwise that subset is all of its
+nonempty denominator or a nonempty proper subset, producing B or C. Positive
+B/C openly entail related-only support; a separate coverage card would add no
+independent player authority. “Configurable” includes permission force bundled
+inside another participant setting, while representation or UI layout cannot
+erase or manufacture it.
+
+D2A chooses no holder, consent, information, default, binding horizon,
+coordinate independence, policy language, randomness, form-wide incidence,
+survivor, substitute, candidate, claim, payoff, prevalence, release placement,
+or implementation. RCS-02 retains holder/consent/information and RCS-13 retains
+binding/lock timing. A live proc-time `allow both?` prompt remains incompatible
+with cut-atomic automatic invocation. Cosmetic settings, result-aware
+rebinding, live or unbound permission-only delayed commands, and denial-
+triggered retry or rerouting do not qualify. A permission command that is
+lawfully and prospectively bound and satisfies the matched-law test does.
+
+Any answer moves D2A to `DIR-SELECTED`. A prunes D2B/D2C1/D2C2 and makes D2D
+the next presented card; the register would contain 34 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 39 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 35`. B/C makes D2B the next presented card; the register
+would contain 37 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 39 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. A stronger promise that
+every related-only opportunity is configurable is a replacement path, not
+hidden inside B.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **A, no
+participant-configurable related-only permission.**
+`P^{rel-only-perm-config}_v=∅`. There is no matched reachable `q∈Q_v` and pair
+of lawful prospectively bindable participant settings that change its complete
+permission law while the versioned Relic/relationship contract, actual
+evaluation facts, selected authoritative tuple, and unordered pair remain
+fixed. `Q_v` may be empty. Different Relics,
+relationships, and factual contexts may still carry different intrinsic laws,
+and this answer does not select determinism or incidence.
+
+Participants retain their selected ability to bind a finite whole-policy
+routing orientation; the resolver determines the proof relation from lawful
+inputs. D2A-A does not promise participant control over one matched form. It
+keeps related-only compatibility covenantal rather than adding a second
+approval optimizer. This is neutral/protective of the ideal at this boundary:
+an eventually permitted pair can still express distinct manifestations and one
+true causal unity directly. The costs are less downstream control, possible
+frustration under intrinsic refusal, and a heavier disclosure obligation.
+
+D2A moved to `DIR-SELECTED`; D2B, D2C1, and D2C2 moved to `PRUNED`; D2D became
+the sole `OWNER-OPEN` row at that checkpoint. The 94-row register then
+contained 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 39 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 35`. The authoritative decision record remains
+unchanged.
+
+The D2D prerequisite screen used three bounded read-only questions: the
+smallest representation-invariant stochastic topology, whether intrinsic
+chance could create fun rather than noise, and the exact timing/replay and
+downstream authority boundary. Two recommendation cross-challenges then
+attacked the only disagreement. The audits agreed that D2D is one
+prerequisite-ready card and needs no additional row.
+
+### RCS-03C3C3D2D — stochastic support across intrinsic related-only permission laws — direction selected
+
+Let `W^{Q-perm-law}_v` contain each canonical complete intrinsic permission-
+law projection whose reachable related-only domain
+`O^Q_w={q∈Q_v : q is reachable under w}` is nonempty. If `Q_v=∅`, then
+`W^{Q-perm-law}_v=∅`. One canonical law contributes one projection; factual
+contexts, object instances, generated identifiers, callbacks, helper
+functions, eager versus delayed calculation, reload copies, and separate
+allow/deny handlers cannot multiply it.
+
+For `w∈W^{Q-perm-law}_v` and `q∈O^Q_w`, hold fixed the version and canonical
+contract/law, Relic and relationship identities, every prospective binding,
+any genuinely law-defining committed variant, selected authoritative tuple,
+unordered pair and proof relation, complete factual evaluation context, and
+every earlier committed authoritative state regardless of random origin. Let
+`pi^Q_w(q)` be the allow probability immediately before the earliest semantic
+realization that commits this permission bit. Pre-sampling that same bit into a
+cache one callback earlier does not turn it into prior state; a genuinely
+earlier persistent acquisition or transformation variant does.
+
+Define
+`G^{Q-perm-stoch}_v={w∈W^{Q-perm-law}_v : some q∈O^Q_w has
+0<pi^Q_w(q)<1}`.
+
+| Choice | Related-only stochastic-support rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — deterministic-only related-only laws** | `G^{Q-perm-stoch}_v=∅`; `W^{Q-perm-law}_v` and `Q_v` may be empty. Every extant complete related-only law projection returns a certain zero or one on every reachable fixed opportunity, although one law may return different certain bits in different factual contexts. | A is the safest coherent rule and the mandatory fallback if guarded C cannot be authored. It gives all exact, hybrid, and related-only treatment one deterministic covenant vocabulary, protecting coordination, replay trust, causal explanation, and policy comparison. Its ideal fit is **neutral/protective**: certainty helps players read the distinct children and their shared cause, but is not itself the unity-in-difference. Costs are less oracular suspense, easier solving, and pressure on contextual laws to supply all the texture. | **Stone Choir:** Twin Vow's distinct `Guard Pulse a` and `Riposte Mark b` share one nonmultiplying parent and no exact child. The intrinsic law certainly allows while visible Vow Integrity remains intact and certainly denies after it breaks. Repeating the same fixed opportunity never changes the bit. |
+| **B — every extant related-only law is stochastic-capable** | `W^{Q-perm-law}_v≠∅` and `G^{Q-perm-stoch}_v=W^{Q-perm-law}_v`. Every complete related-only projection has at least one reachable fixed opportunity with a nondegenerate permission draw. This does not require every opportunity under the law to roll. | B makes numinous uncertainty part of every related-only covenant and prevents the entire lane from becoming a solved lookup. But variance becomes a universal tax: no fully reliable related-only family exists, correct team play can still receive a false bit, and trust, explanation, simulation, and balance burdens apply everywhere. Randomness is only a **partial/expressive** ideal fit; a coin does not explain unity or distinction. | **Dreamglass catalog:** every complete related-only law has some visible Unsettled Resonance region—for illustration, one fixed `a/b` opportunity resolves 70/30—although authored endpoint contexts may still be certain. A catalog containing one wholly deterministic related-only law would violate B. |
+| **C — deterministic-only and stochastic-capable related-only laws coexist** | `∅⊊G^{Q-perm-stoch}_v⊊W^{Q-perm-law}_v`. At least one complete related-only projection is deterministic throughout its reachable `Q_v` domain and at least one distinct complete projection has a reachable nondegenerate draw. C therefore entails at least two related-only projections. Hybrid laws are outside this denominator and cannot supply C's deterministic comparator. | **Conditionally recommended.** C preserves reliable Witness covenants while permitting distinct Oracle covenants, making variance an optional catalog/build identity rather than B's universal tax. Its coexistence fit is **aggregate**; any direct local ideal expression comes from the distinct children and their real shared parent, not from randomness. The costs are two prediction dialects, exact/hybrid-versus-related-only asymmetry, variance-insurance routing pressure, team grief, and a premium-gamble balance trap. C carries the hard deferred validation obligation below and reopens with A if it fails. | **Stone Choir** supplies A's deterministic family. **Veiled Chorus** has one intrinsic, visible nondegenerate related-only region and one committed draw. Choosing the Oracle, managing exposure, and hedging a possible denial may support a risk policy; D2D does not require direct odds control or decide its payoff. |
+
+A/B/C are mutually exclusive and exhaustive. If `G` is empty, A holds,
+including `W=∅`. Otherwise `W` is nonempty and `G` is either all of `W` or a
+nonempty proper subset, producing B or C. A singleton deterministic law yields
+A; a singleton stochastic-capable law yields B; C requires at least two laws.
+One law random in one context and certain in another is one stochastic-capable
+law, not C. One law mapping different fixed contexts deterministically to zero
+and one remains deterministic.
+
+This classification follows semantic behavior, not implementation shape. A
+seeded generator may realize the one declared draw; an opaque deterministic
+hash of fixed authoritative inputs remains deterministic. Earlier random
+acquisition, transformation, or persisted variant selection is fixed state and
+cannot be averaged into a permission draw. Each `q` receives one committed
+realization. Duplicate callbacks, serialization, reload, reconnect, replay,
+denial, or routing fallback may not redraw it, retry the selector, or substitute
+another ledger. Exact-and-related hybrids remain intrinsic and deterministic
+under C2A-A/C2D-A and receive no related draw.
+
+D2A-A forbids a matched-case permission setting, direct odds slider, or any
+participant command whose sole semantic force is to change permission odds. A
+reroll is separately barred by the one-commit replay invariant. D2D does not
+select seed authority; any later seed rule may not create an outcome-shopping
+or redraw channel that defeats intrinsic one-commit semantics. This does not
+forbid one immutable intrinsic law from responding to different independently
+meaningful factual contexts; whether any stochastic law does so is not required
+here and remains part of D2E's fresh audit. Choosing a different Relic changes
+the contract rather than reconfiguring one held-fixed law.
+
+**C's deferred hard validation obligation:** in the applicable release scope,
+the required deterministic-only and stochastic-capable related-only families
+must each furnish a reachable, mechanically legible, viable, non-token build or
+policy purpose. The stochastic identity must be causally operative and
+materially change at least one truthful disclosed legal build or play policy;
+neither required family may be everywhere weakly dominated within the actual
+lawful build/route policy space. Plan-relevant risk must be understandable
+before the relevant irreversible choice and attributable afterward. An
+epsilon-probability showcase, outcome-equivalent coin, opaque gotcha,
+voluntary handicap, or raw-power package whose stochastic identity never
+changes a preferred policy does not qualify. Existing SR-05/SR-06/SR-09,
+RCS-02/SR-10, SR-12, and RCS-17/RCS-18 author and evaluate those requirements;
+D2D adds no new row and chooses no threshold. If either required family or
+their coexistence fails this obligation during later authoring and evaluation,
+reopen D2D with A as the bounded replacement rather than shipping token chance.
+
+D2D chooses no exact odds, randomizing context, actor, action-responsive
+condition, entropy source, seed visibility, pair-pair coupling, disclosure
+surface, form-wide incidence, survivor, substitute, compensation, payoff,
+rarity, release placement, or implementation. D2E receives its already-required
+fresh prerequisite audit; G2 alone owns correlation across two distinct
+simultaneous nonconstant pair marginals; E/F own a false bit's result and
+selection authority; RCS-15/RCS-16 own persistence, migration, idempotence, and
+fault repair.
+
+Any answer moves D2D to `DIR-SELECTED` and sends D2E through its fresh audit.
+Before any D2E amendment, B/C would leave 33 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 40 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 34`. A also immediately prunes G2 because exact, hybrid, and
+related-only pair-permission marginals would all be deterministic, leaving 32
+`SCREEN`, 1 `OWNER-OPEN`, 17 `PRUNED`, 40 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 33`. B/C do not activate G2: they establish
+neither a three-plus contender state nor two simultaneous nonconstant
+marginals. A stronger requirement that every related-only opportunity roll is
+a replacement path, not hidden inside B.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **C,
+deterministic-only Witness and stochastic-capable Oracle related-only laws
+coexist.** Thus
+`∅⊊G^{Q-perm-stoch}_v⊊W^{Q-perm-law}_v`. At least one complete intrinsic
+related-only projection is deterministic throughout its reachable domain and
+at least one distinct projection has a reachable nondegenerate draw. `Q_v` is
+therefore nonempty and at least two complete related-only projections exist.
+Hybrids remain outside this denominator, inherit their deterministic exact bit,
+and cannot supply the Witness comparator.
+
+This makes variance an optional artifact/build identity rather than a universal
+tax. Stone Choir may support a reliable Witness policy while Veiled Chorus
+supports a distinct Oracle risk policy. Their coexistence is only an aggregate
+ideal fit: the direct *Achintya Bheda Abheda* expression remains the genuinely
+distinct children and their real shared nonmultiplying cause. Randomness does
+not create that unity.
+
+The hard validation obligation is part of the selection. Both families and
+their coexistence must furnish reachable, mechanically legible, viable,
+non-token, non-dominated build or policy purposes; the Oracle identity must
+materially change a truthful legal policy; and its risk must be prospectively
+understandable and retrospectively attributable. Failure reopens D2D with A as
+the bounded fallback. One opportunity still receives one committed realization
+with no retry, redraw, reroute, or hybrid second bit. C selects no odds,
+response rule, actor, endpoint, incidence, payoff, seed, disclosure surface,
+rarity, placement, or implementation.
+
+D2D moves to `DIR-SELECTED`. Before the correction below, the 94-row register
+would contain 33 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 40 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`. G2 remains conditional:
+C proves neither three-plus simultaneous contenders nor two simultaneous
+nonconstant pair marginals. The authoritative decision record remains
+unchanged.
+
+> **Thirty-first prerequisite correction, 2026-09-26:** three bounded read-only
+> audits independently tested D2E's minimum semantic topology, gameplay order,
+> and integration boundary. One two-question cross-challenge wave attacked the
+> only disagreements: whether the remaining all-related certainty boundary was
+> disguised hybrid-placement authoring and whether the deterministic lane had
+> to be presented first. The cross-challenges upheld six rows, required a
+> related-only witness for the final conditional endpoint row, rejected any
+> hybrid-composition quota, and put the independently ready Oracle question
+> first for player comprehension.
+>
+> Retain `W^{Q-perm-law}_v`, `O^Q_w`, and `pi^Q_w` from D2D. Write
+> `S^Q_v=G^{Q-perm-stoch}_v` for the nonempty Oracle family and
+> `D^Q_v=W^{Q-perm-law}_v setminus S^Q_v` for the nonempty deterministic
+> related-only Witness family. Let `W^H_v` contain tagged canonical
+> restrictions of exact laws to their nonempty reachable hybrid domains
+> `H_v`; each inherits the exact deterministic kernel. Define the deterministic
+> related projection family `D^R_v=D^Q_v disjoint-union W^H_v`. The tags are
+> load-bearing: one physical contract's `Q_v` and `H_v` restrictions may not be
+> merged to manufacture factual response. A fixed 50% Oracle plus an inherited
+> always-allow hybrid is not one responsive law.
+>
+> Old D2E becomes a non-counting parent for six registered rows:
+>
+> 1. `RCS-03C3C3D2E1` — Oracle distribution-response prevalence across `S^Q_v`;
+> 2. conditional `RCS-03C3C3D2E2` — matched causal odds-response support;
+> 3. `RCS-03C3C3D2E3` — deterministic related-projection response prevalence
+>    across `D^R_v`;
+> 4. conditional `RCS-03C3C3D2E4` — matched causal certain-bit response;
+> 5. conditional `RCS-03C3C3D2E5` — stable deterministic polarity; and
+> 6. conditional `RCS-03C3C3D2E6` — missing-certainty endpoint support in a
+>    responsive stochastic related-only law.
+>
+> E1-A prunes E2 and activates E3. E1-B/C activates E2, whose answer then
+> activates E3. E3-A prunes E4 and activates E5. E3-B activates E4, prunes E5,
+> and derives both certainty endpoints present. E3-C activates E4 then E5 and
+> also derives both endpoints present. E5-C likewise derives both present. If
+> E3-A and E5-A/B leave exactly one deterministic certainty endpoint, E1-A
+> derives the opposite endpoint absent because all Oracle laws are fixed at one
+> interior probability; E1-B/C instead leaves E6 open after the causal rows.
+> E6-B requires its missing endpoint witness on some `q∈Q_v` under a responsive
+> Oracle law. It may not be satisfied or activated merely by authoring an exact
+> opportunity into `H_v`. When the applicable rows settle, C3C3E opens.
+>
+> The six rows are independent and minimal. Deterministic bit response and
+> Oracle probability response yield different planning policies; their matched
+> causal witnesses can also vary independently. Stable deterministic laws have
+> a distinct deny/allow/both topology. Finally, catalogs with an invariant
+> always-allow Witness and an exogenously responsive Oracle image `{0.2,0.8}`
+> versus `{0.2,0}` agree on the first five rows, yet only the latter contains a
+> plan-relevant context with guaranteed denial. Zero versus every positive
+> probability is a qualitative robust-policy boundary, not odds tuning. The
+> required `Q_v` witness keeps that row from becoming disguised hybrid
+> placement.
+>
+> No separate hybrid-existence, hybrid-composition, stochastic endpoint-
+> prevalence, or exact-probability row passes admission. Concrete identities,
+> counts, contexts, kernels, thresholds, and hybrid membership remain
+> AUTHOR/SPEC/TUNE. E/F still own false-bit disposition and survivor authority;
+> G2 owns cross-pair draw coupling; RCS-02/SR-10 own information; RCS-13 owns
+> lock horizons; RCS-15/RCS-16 own persistence and migration; and
+> RCS-17/RCS-18 own simulation/RL, fun, balance, exploit, and playtest
+> acceptance.
+>
+> Replacing one counted D2E row with six added five slots and five unresolved
+> potentials. At that checkpoint the register contained **99 rows: 38 `SCREEN`, 1 `OWNER-OPEN`,
+> 16 `PRUNED`, 40 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 39`**. E1 was the sole presented card.
+
+### RCS-03C3C3D2E1 — Oracle distribution-response prevalence — direction selected
+
+D2D-C guarantees a nonempty family
+`S^Q_v=G^{Q-perm-stoch}_v` of intrinsic stochastic-capable related-only law
+projections. For each `w∈S^Q_v`, retain its nonempty reachable domain `O^Q_w`
+and kernel `pi^Q_w(q)`, and define its reachable probability image
+`I^Q_w={pi^Q_w(q):q∈O^Q_w}`. Because `w` is stochastic-capable, `I^Q_w`
+contains at least one probability strictly between zero and one.
+
+Let
+`X^{Q-odds-response}_v={w∈S^Q_v:|I^Q_w|>=2}`. Membership means the same
+complete intrinsic Oracle law assigns at least two probabilities across its
+reachable factual opportunities. It does not by itself mean that a player can
+cause the change, know the exact number, or choose the higher-odds context.
+
+| Choice | Oracle odds-response rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — constant-chance Oracles only** | `X^{Q-odds-response}_v=∅`. Every Oracle law uses one fixed nondegenerate probability throughout its reachable related-only domain. Different Oracle laws may use different fixed probabilities; that is catalog tuning, not response. | A gives a clean **Fate wager** identity: choose the artifact knowing its covenant always bears the same irreducible risk. It is easy to compare and simulate, but relationship facts never change the risk, so the Oracle can feel like a generic coin attached to otherwise relational content. Its ideal fit is partial/expressive at best. | **Veiled Die:** every reachable related-only opportunity under this law is illustratively 30% allow, whether Vow Integrity is whole, frayed, or restored. Another law may be 60%; neither is responsive. |
+| **B — every Oracle is odds-responsive** | `X^{Q-odds-response}_v=S^Q_v`. Every stochastic-capable related-only law has at least two reachable permission probabilities. This does not require an endpoint, exact odds disclosure, or player-causal control. | **Recommended.** Optional uncertainty earns its separate Oracle identity by expressing the condition of the actual relationship rather than remaining a generic tax. Players can learn that contexts matter even when E2 later finds the context immutable. This best supports meaningful distinction-with-continuity at the local law boundary, while the children/shared cause still supply the direct ideal. Costs are universal forecast/UI burden, threshold gaming, context gotchas, and harder robust policy comparison. | **Veiled Chorus:** while the two selected manifestations still arise through one living lineage, the law is illustratively 70%; after that lineage becomes scarred but unbroken, the same law is 25%. Those figures illustrate response only; E1 selects no numbers and E2 still decides whether play can cause the contrast. |
+| **C — constant-chance and responsive Oracles coexist** | `∅⊊X^{Q-odds-response}_v⊊S^Q_v`. At least one Oracle law keeps one fixed interior probability and at least one distinct Oracle law has two or more reachable probabilities. | C preserves a pure-Fate Oracle beside relationship-sensitive Oracles. That can make artifact personalities richer, but it adds a third prediction dialect beside deterministic Witnesses and responsive Oracles and risks making flat-chance artifacts feel like incomplete versions. Choose C if the pure-Fate build fantasy is independently valuable and can pass the same non-token, non-dominance, and legibility gates. | **Veiled Die** keeps A's fixed wager while **Veiled Chorus** uses B's context-sensitive law. One law containing both 25% and 75% contexts is only the responsive side; it does not establish C. |
+
+A/B/C are mutually exclusive and exhaustive because the nonempty responsive
+subset is empty, all of `S^Q_v`, or a nonempty proper subset. A probability
+image with two interior values is responsive; an image with an interior value
+and a certain endpoint is also responsive. Different realized allow/deny bits
+under one unchanged probability do not establish response. Different fixed
+probabilities on two complete laws do not establish response within either
+law.
+
+E1 chooses no odds, bands, thresholds, factual inputs, player/counterplayer
+control, endpoints, entropy, disclosure, payoff, rarity, or implementation.
+D2A-A still forbids a direct odds setting or permission-only command. E2 asks
+separately whether any responsive Oracle contrast is causally reachable through
+one independently meaningful lawful decision and its complete causal closure;
+mere immutable context response is legal under B/C.
+
+Any answer moves E1 to `DIR-SELECTED`. A prunes E2 and makes E3 the next
+presented card. B/C make E2 the next presented card. The exact post-answer
+register depends only on that pruning: A yields 36 `SCREEN`, 1 `OWNER-OPEN`,
+17 `PRUNED`, 41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`. B/C yield 37 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 41
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, every Oracle
+law is odds-responsive.** Thus
+`X^{Q-odds-response}_v=S^Q_v`. Every stochastic-capable related-only law has at
+least two reachable permission probabilities across its factual opportunity
+domain. One Oracle may vary only between interior probabilities; another may
+also reach a certain endpoint. The selection chooses neither certainty-endpoint
+support nor exact values.
+
+Oracle uncertainty must therefore express some changing condition of its
+relationship rather than remain one flat chance attached to every occurrence.
+The same complete law continues across its contexts while its probability
+differs, giving a direct continuity-and-distinction structure at the law
+boundary. The distinct children and their real shared cause—not randomness
+itself—remain the direct *Achintya Bheda Abheda* expression. Costs are universal
+Oracle forecast burden, threshold gaming, context gotchas, and harder robust
+policy comparison.
+
+E1-B does not make any contrast player-causal. Every probability change could
+still depend on an immutable, automatic, or externally fixed fact. It does not
+grant a direct odds setting, permission-only action, reroll, endpoint, exact
+preview, payoff, or result. E1 moves to `DIR-SELECTED`; E2 becomes the sole
+`OWNER-OPEN` row. The 99-row register now contains 37 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 38`. The authoritative decision record remains
+unchanged.
+
+The E2 post-answer screen used two bounded read-only questions. One attacked
+whether no-versus-some causal odds response hid universal prevalence, actor,
+control-mode, disclosure, or exact-odds decisions. The other tested whether a
+causal Oracle lever could be fun rather than a disguised odds command. A
+primary authority replay then checked the result against the repaired exact-
+permission causal test. All upheld one binary row with the material-policy and
+anti-laundering safeguards below. No prerequisite correction or new row is
+needed.
+
+### RCS-03C3C3D2E2 — matched player/counterplay-causal Oracle odds response — direction selected
+
+E1-B makes every Oracle distribution-responsive, but a law may vary only with
+facts that no lawful decision can affect. Let `M^{Q-odds-causal}_v` contain an
+Oracle projection `w∈S^Q_v` exactly when it has at least one qualifying matched
+causal witness.
+
+A witness begins at one positive-support authoritative upstream decision state
+and compares two lawful, non-oracular policies. They are identical at every
+independently revisable decision coordinate except one materially operative
+participant or counterplayer decision. Both arms must be lawful and meaningful
+apart from permission; illegal inaction, a forced move, or a token side effect
+cannot provide the comparator. Later actions, reactions, delays, costs, and
+stochastic consequences may differ only as causal descendants of that one
+intervention.
+
+Hold fixed the version and canonical intrinsic law, Relic and relationship
+identities, all prospective bindings, the law-defining committed variant, the
+eventual selected related-only pair and proof, every non-descendant exogenous
+fact, and other actors' decision rules. Carry each arm through its complete
+direct, indirect, delayed, reactive, inseparable, and stochastic causal
+closure. Immediately before the one semantic permission realization, the two
+conditional allow probabilities must differ. A different sampled bit under an
+unchanged distribution does not qualify. Any changed law-read fact must have
+authoritative upstream truth conditions and a lifecycle independent of the
+desired permission result, including meaningful operation when the Oracle
+effect is semantically ablated.
+
+| Choice | Matched causal odds-response rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no matched causal Oracle response** | `M^{Q-odds-causal}_v=∅`. Every Oracle probability contrast depends on immutable, automatic, forced, externally determined, structurally different, or otherwise nonqualifying context. Players may forecast, route, and hedge around those contexts, but no lawful independently revisable decision supplies a matched causal change under the same law and eventual pair/proof. | A gives Oracles a **fate/weather** identity. It minimizes causal-state tracking, teammate grief, quarterbacking, threshold optimization, and blame. Its fit at this boundary is neutral/partial: contextual distinction exists, but play does not participate in producing it. The cost is that every Oracle becomes something players only read and accommodate, which can turn universal E1-B response into a lookup table or opaque gotcha. | **Veiled Eclipse:** the same Oracle is illustratively 65% before an automatic Dusk transition and 30% afterward. Dusk is inevitable; no lawful action can preserve, hasten, delay, or disrupt it. Choosing when to accept exposure remains strategy, but it is not causal odds shaping. |
+| **B — require at least one matched causal Oracle response** | `M^{Q-odds-causal}_v≠∅`. At least one responsive Oracle law has one qualifying decision intervention whose complete causal closure changes the conditional permission distribution while the same intrinsic law and eventual related-only pair/proof remain fixed. This is existential, not universal. | **Conditionally recommended.** B guarantees one lived play-or-counterplay expression without turning every Oracle into an odds-control minigame. At this action/law boundary, one meaningful deed changes how the same continuing covenant receives the same distinct-related pair—a direct structural fit with the standing ideal. Costs are causal/UI burden, allied sabotage, quarterbacking, optimal stalling, opaque blame, and disguised `+odds` actions. If no material, legible, non-token witness survives the safeguards below, use A. | From one decision state, **Guard** preserves an Ember Seal and supplies real defense, while **Burst** consumes it for real damage. With Veiled Chorus and the eventual pair/proof fixed, their complete closures are illustratively 70% versus 30%. Both actions matter without the Oracle modifier. An opponent's costly **Sunder** versus **Strike** could instead furnish the witness. |
+
+A/B are mutually exclusive and exhaustive because
+`M^{Q-odds-causal}_v⊆S^Q_v` is empty or nonempty. B does not require every
+Oracle or context to be actionable, identify the controlling side, guarantee
+action success, provide bearer control, require both ally agency and opponent
+counterplay, make the effect immediate, disclose exact percentages, or reach a
+certain endpoint. Requiring universal causal coverage is a replacement path,
+not hidden inside B; it may return only if a distinct required product purpose
+passes the reopening rule.
+
+A direct `Invoke Favor: spend mana for +20% Oracle chance` action fails even if
+costly, because permission odds are its semantic purpose. A nominal shield or
+damage rider added only to launder that command also fails. Changing the Relic,
+law, committed variant, selected pair, or proof is routing/configuration rather
+than a matched E2 witness. Acting after the draw, rerolling, comparing two
+ordinary samples, or relying on unrelated RNG-call order also fails. If an
+unobserved stochastic descendant mediates the contrast, the intervention must
+change the conditional distribution or reachable support under the lawful
+observation history, not merely yield one favorable crossover.
+
+B's required exemplar must remain materially play-shaping under semantic
+ablation: the intervention and changed fact have independent gameplay meaning,
+and enabling the Oracle consequence must change at least one truthful legal
+play, hedge, or counterplay policy. The operative factor must be understandable
+to the correct actor before the first irreversible divergence and attributable
+afterward; RCS-02/SR-10 later choose the exact holder, forecast, UI, and
+communication contract. An epsilon shift, dominated arm, cheap grief button,
+or hidden causal gotcha does not satisfy the required viable-purpose promise.
+If later authoring and evaluation cannot produce a qualifying witness, reopen
+E2 with A rather than shipping a token lever.
+
+E2 chooses no exact actor, probability, band, threshold, endpoint, prevalence
+beyond one witness, action identity, sequence length, success rate, payoff,
+result, seed, cross-pair coupling, rarity, or implementation. RCS-13 retains
+binding/lock horizons; E/F retain false-bit results and survivor authority; G2
+retains cross-pair stochastic coupling; RCS-17/RCS-18 retain simulation/RL,
+balance, exploit, and playtest acceptance.
+
+Either answer moves E2 to `DIR-SELECTED` and makes D2E3 the next presented
+card. The register would then contain 36 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 42 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`. E2 alone neither decides nor activates D2E6.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, require at
+least one matched causal Oracle response.** Thus
+`M^{Q-odds-causal}_v≠∅`. At least one responsive Oracle law must have
+one qualifying intervention whose complete causal closure changes the
+conditional permission distribution while the intrinsic law and eventual
+related-only pair/proof remain fixed.
+
+This is an existential play-or-counterplay promise, not universal causal
+coverage. It does not make every Oracle or context actionable, identify the
+controlling side, give the bearer direct control, disclose exact odds, or
+require a certain endpoint. The qualifying decision and changed law-read fact
+must remain independently meaningful under semantic ablation; a direct or
+cosmetically laundered odds command, changed law/variant/pair/proof, post-draw
+action, reroll, unrelated RNG ordering, or lucky sample still fails. The
+witness must change a truthful play, hedge, or counterplay policy and remain
+prospectively understandable and retrospectively attributable. Failure to
+author a viable, legible, non-token witness reopens E2 with A.
+
+E2 moves to `DIR-SELECTED`; E3 becomes the sole `OWNER-OPEN` row. The 99-row
+register now contains 36 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 42
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. The
+authoritative decision record remains unchanged.
+
+The E3 post-answer screen used two bounded read-only questions. One re-derived
+the tagged projection topology, inheritance rules, downstream dependencies,
+and register arithmetic. The other attacked the player-policy value,
+prediction burden, ideal fit, and countermodels for all three branches. Both
+upheld one empty/all/nonempty-proper response-prevalence card. No prerequisite
+correction or new row is needed.
+
+### RCS-03C3C3D2E3 — deterministic related-projection response prevalence — direction selected
+
+D2D-C guarantees a nonempty deterministic-only related-only Witness family
+`D^Q_v`. Let `W^H_v` contain separately tagged canonical restrictions of exact
+laws to their nonempty reachable hybrid domains. Retain the tagged disjoint
+union `D^R_v=D^Q_v disjoint-union W^H_v`; hence `D^R_v` is nonempty even when
+there are no hybrids.
+
+For each `d in D^R_v`, use its complete nonempty reachable domain `O_d`. A
+`Q`-tagged Witness uses its deterministic related-only bit `b_d(q)`; an
+`H`-tagged projection uses the one deterministic bit inherited from its exact
+law. Define
+`I^D_d={b_d(o):o in O_d}` and
+`X^{R-det-response}_v={d in D^R_v:I^D_d={0,1}}`. Membership means that one
+complete tagged projection certainly allows in at least one reachable factual
+context and certainly denies in another. It does not mean that a player can
+cause the change; D2E4 owns that question.
+
+| Choice | Deterministic related-response rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every deterministic related projection is steadfast** | `X^{R-det-response}_v=∅`. Every related-only Witness law and every extant hybrid restriction keeps one certain bit throughout its own complete reachable domain. Different projections may keep different bits; D2E5 decides their stable-polarity support. | A creates the sharpest product promise: **Witnesses are reliable anchors; Oracles carry responsive risk.** It minimizes forecasting, hidden-condition gotchas, and hybrid-placement constraints. The cost is excluding any deterministic related permission whose certain result changes with factual context. Its ideal fit here is protective/partial rather than direct. **A is C's bounded fallback if the responsive deterministic dialect cannot earn a real build purpose.** | **Stone Choir/Q** always permits its Twin Vow pair throughout that projection's domain, whether the lineage is whole or scarred. A different projection may always deny. A broader exact law may be responsive outside a hybrid restriction while that separately tagged `H` restriction remains steadfast. |
+| **B — every deterministic related projection is responsive** | `X^{R-det-response}_v=D^R_v`. Every related-only Witness projection and every extant nonempty hybrid restriction reaches both certain bits within its own tagged domain. | B gives one universal grammar—relationship condition always matters—while preserving certainty as the Witness/hybrid distinction from Oracle risk. A responsive law directly expresses continuity and real difference at one operative boundary. But B removes every steadfast related anchor, universalizes forecast and gotcha burden, and heavily constrains hybrid placement: no context-invariant exact law may contribute a nonempty hybrid restriction. It is not recommended. | **Ashen Accord/Q** certainly permits Guard Pulse plus Riposte Mark while an independently useful Ember Seal is preserved and certainly denies when the Seal has been lawfully consumed; no draw occurs. E3 is agnostic about whether a decision can preserve or consume it—E4 owns that. Under B, every other `Q` Witness and every nonempty `H` restriction needs its own internally two-bit domain. |
+| **C — steadfast and responsive deterministic projections coexist** | `∅⊊X^{R-det-response}_v⊊D^R_v`. At least one tagged deterministic projection is responsive and at least one is steadfast. This is a projection-level promise, not a requirement for two physical Relics or for both classes inside both `Q` and `H`. | **Conditionally recommended.** C preserves a dependable **anchor** policy while adding **context-sensitive certainty**: forecast, route, or hedge around relationship facts without accepting Oracle variance. If E4 later finds causal support, that dialect can additionally become active statecraft through manipulating or protecting those facts. Beside the already-selected responsive Oracle lane, the catalog can support steadfast certainty, conditional certainty, and conditional probability. The responsive member can directly express same-law continuity with fact-sensitive difference; coexistence is only aggregate. Costs are another local prediction category, stable-allow dominance risk, Oracle comparison pressure, and UI burden. Require both classes and their coexistence to be legible, viable, non-token, and non-dominated; otherwise use A. | **Stone Choir/Q** supplies the steadfast anchor, **Ashen Accord/Q** supplies the certain preserved-Seal/consumed-Seal contrast, and **Veiled Chorus/Q** supplies responsive Oracle risk. Whether play can cause Ashen's contrast remains E4's question. These names illustrate three policies, but C can formally be witnessed by differently tagged projections of one physical contract if one projection is internally responsive and the other steadfast. |
+
+A/B/C are mutually exclusive and exhaustive because the nonempty family
+`D^R_v` has a responsive subset that is empty, all of `D^R_v`, or a nonempty
+proper subset. A responsive projection must have image exactly `{0,1}`.
+Multiple contexts with the same bit remain steadfast. A singleton reachable
+domain is legitimately steadfast, but cannot by itself prove a viable policy
+dialect.
+
+The tags and whole-domain rule are load-bearing. One canonical law contributes
+at most one complete projection per form tag; never split a projection by
+output, context component, instance, callback, helper, or generated identifier.
+A genuine law-defining committed variant may be a separate law, while code or
+refactor shape may not multiply laws. Never concatenate one contract's `Q` and
+`H` outputs: always-deny in `Q` plus always-allow in `H` is two steadfast
+tagged projections, not one responsive projection. Oracle contexts remain
+outside `D^Q_v` even when their probability reaches zero or one; D2E6 owns
+stochastic certainty-endpoint support.
+
+Exact E1-C does not settle E3. A responsive complete exact law may have no
+hybrid opportunity, or its nonempty hybrid restriction may contain only one of
+its exact-law bits. Conversely, any context-invariant exact law with a nonempty
+hybrid restriction contributes a steadfast `H` projection. C therefore adds a
+form-local gameplay promise, not a new system-wide prediction grammar.
+
+C's deferred viability obligation is hard. The steadfast and responsive
+deterministic classes and their coexistence must each furnish reachable,
+legible, non-token, non-dominated policy purposes. The responsive class must
+materially change truthful legal forecasting, routing, or hedging rather than
+survive only in an obscure, dominated, or artificially carved context.
+SR-05/SR-06/SR-09, RCS-02/SR-10, SR-12, and RCS-17/RCS-18 own authoring,
+comprehension, simulation/RL, balance, exploit, and playtest proof. Failure
+reopens E3 with A.
+
+E3 chooses no exact laws, forms, contexts, actor, causal control, disclosure,
+result, payoff, hybrid existence, hybrid composition, incidence, rarity, or
+implementation. Under A, E4 prunes and E5 opens. Under B, E4 opens, E5 prunes,
+and E6 derives because both certain endpoints are already present. Under C, E4
+opens, E5 remains queued behind it, and E6 likewise derives. The resulting
+registers would be:
+
+- A: 34 `SCREEN`, 1 `OWNER-OPEN` at E5, 17 `PRUNED`, 43 `DIR-SELECTED`, 2
+  `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`;
+- B: 33 `SCREEN`, 1 `OWNER-OPEN` at E4, 17 `PRUNED`, 43 `DIR-SELECTED`, 3
+  `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`; or
+- C: 34 `SCREEN`, 1 `OWNER-OPEN` at E4, 16 `PRUNED`, 43 `DIR-SELECTED`, 3
+  `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **C, steadfast and
+responsive deterministic related projections coexist.** Thus
+`∅⊊X^{R-det-response}_v⊊D^R_v`. At least one complete tagged deterministic
+projection is context-responsive and at least one is steadfast. This remains a
+projection-level requirement: it promises neither two physical Relics nor both
+classes inside both `Q` and `H`.
+
+C preserves three distinct related-form planning policies: steadfast certainty,
+context-sensitive deterministic certainty, and responsive Oracle probability.
+The responsive deterministic member can express one continuing law with
+genuinely different certain reception under meaningful relational facts; the
+catalog coexistence is only aggregate. C does not yet make any deterministic
+contrast player-causal. The selected hard obligation requires both deterministic
+classes and their coexistence to remain reachable, legible, viable, non-token,
+and non-dominated. If the responsive deterministic class cannot materially
+change truthful forecasting, routing, or hedging, reopen E3 with A.
+
+E3 moves to `DIR-SELECTED`; E4 becomes `OWNER-OPEN`; E5 remains screened and
+queued behind E4; and E6 becomes `DERIVED` because a responsive deterministic
+projection already supplies both certain endpoints. The 99-row register now
+contains 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 43 `DIR-SELECTED`, 3
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. The authoritative
+decision record remains unchanged.
+
+The E4 post-answer screen used two bounded read-only questions. One re-derived
+the causal witness, stochastic-mediation caveat, tagged hybrid inheritance,
+dependencies, and register arithmetic. The other tested whether causal
+deterministic related response adds a real policy purpose beyond the already-
+selected exact and Oracle causal witnesses. Both upheld one binary card with
+the materiality and marginal-nonredundancy safeguards below. No prerequisite
+correction or new row is needed.
+
+### RCS-03C3C3D2E4 — matched player/counterplay-causal deterministic related response — direction selected
+
+Let `M^{R-det-causal}_v⊆X^{R-det-response}_v` contain the responsive tagged
+deterministic projections having at least one qualifying matched causal
+witness. A witness starts from one reachable positive-support authoritative
+upstream decision state and compares two lawful non-oracular policies. They are
+identical at every independently revisable decision coordinate except one
+materially operative participant or counterplayer decision. Neither arm may be
+forced, illegal inaction, or a token choice. A prospectively bound finite
+episode may be the one intervention only when its later member decisions are
+already bound.
+
+Hold fixed every non-descendant exogenous variable, other actors' decision
+rules, the same canonical tagged projection and `Q`/`H` form, law/version,
+Relic and relationship identities, prospective bindings, law-defining
+committed variant, selected authoritative tuple, eventual unordered pair, and
+complete proof structure. Carry both arms through the intervention's complete
+direct, indirect, delayed, reactive, inseparable, and stochastic causal
+closure. Every permission input outside that closure stays fixed. In the clean
+deterministic exemplar the resulting certain bits differ.
+
+Ordinary upstream randomness does not automatically disqualify a witness. If
+an unobserved stochastic descendant mediates the factual context, the
+intervention must change reachable bit support or the conditional bit
+distribution under the lawful observation history. One lucky crossover under
+unchanged policy distributions fails. The permission law still returns one
+certain bit at each realized fixed opportunity; no Oracle permission draw is
+created and G2 is not activated. Any stochastic-mediation witness carries a
+later semantic-coupling SPEC/EVALUATE obligation.
+
+| Choice | Matched causal deterministic-response rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no matched causal deterministic related response** | `M^{R-det-causal}_v=∅`. Every responsive deterministic related projection changes its certain bit only with immutable, automatic, forced, externally determined, structurally different, or otherwise nonqualifying context. Players may forecast and route around that certainty, but no lawful independently revisable decision changes it under the same tag, law, and eventual pair/proof. | A is the strongest anti-saturation case. The exact lane already contains one causal deterministic witness and the Oracle lane one causal odds witness, so A gives related-form deterministic response a quieter **omen/external-condition** identity. It minimizes hard teammate vetoes, grief, quarterbacking, solved preservation loops, causal explanation, and attribution burden. Its fit at this action/law boundary is neutral: the responsive law's continuity-and-difference remains, but play does not enact it. The cost is that every responsive deterministic related covenant is something players only read and accommodate. | **Ashen Omen/Q** certainly permits before an automatic Dusk transition and denies afterward. Dusk is disclosed but inevitable: no legal timing, preservation, acceleration, or disruption decision affects it while the same Ashen projection and pair/proof remain fixed. |
+| **B — require at least one matched causal deterministic related response** | `M^{R-det-causal}_v≠∅`. At least one responsive tagged deterministic projection has one qualifying decision intervention whose complete causal closure changes its eventual certain-bit support or conditional distribution while the same form, law, and pair/proof remain fixed. This is existential, not universal, and does not guarantee that either action arm always succeeds. | **Conditionally recommended.** E3-C has already admitted context-sensitive deterministic certainty; B makes at least one related-form covenant lived play-or-counterplay rather than only a lookup table. It adds a robust form-local policy not guaranteed by exact E2-B, whose witness may be exact-only, or Oracle E2-B, which changes odds rather than a deterministic law. At the action/law boundary, one meaningful deed changing how the same continuing covenant receives the same distinct-related pair is a direct ideal fit. Costs are denial grief, quarterbacking, solved preservation loops, causal/UI burden, and token relabeling of an earlier witness. Use A if no independently valuable exemplar survives the guards below. | From one common state, **Guard** preserves an independently useful Ember Seal while **Burst** consumes it for real damage. With Ashen Accord/Q and the eventual pair/proof fixed, clean complete closures make the law certainly allow versus deny. If intervening combat makes Seal survival 70% versus 20%, that can still qualify through changed eventual-bit distributions; one favorable trace from identical distributions cannot. |
+
+A/B are mutually exclusive and exhaustive because the nonempty responsive
+family has an empty or nonempty matched-causal subset. B does not require every
+responsive projection or context to qualify, identify the controlling side,
+require both ally agency and opponent counterplay, choose a `Q` or `H` witness,
+guarantee action success, disclose the full bit, or make the effect immediate.
+Those are stronger authoring minima or later information/tuning questions, not
+hidden branches.
+
+The changed law-read fact must have authoritative upstream truth conditions
+and a lifecycle independent of the desired permission bit. Both intervention
+arms must remain lawful and materially meaningful when this permission
+consequence is semantically ablated. A direct or cosmetically laundered
+`Permit Pair`/`Deny Pair` command, changed law/variant/tag/pair/proof,
+`Q`-to-`H` movement, post-result action, reroute, retry, unrelated RNG ordering,
+or lucky crossover fails. For a hybrid, both arms must remain inside the same
+`H` projection and may change only its one inherited exact bit—never add a
+second related grant, veto, or draw.
+
+Because exact E2-B and Oracle E2-B already require causal exemplars, the E4
+witness must also earn a marginal related-form purpose. An `H` occurrence may
+legitimately share its action, fact, or even witness with an earlier channel,
+but its availability on deterministic related-form opportunities must itself
+change a truthful legal policy or build purpose. Merely relabeling the exact
+witness or letting one Ember Seal tick three formal boxes does not satisfy the
+non-token obligation. This is a viability guard, not a `Q`-only witness rule or
+a requirement for separate actions and laws.
+
+B's required exemplar must be prospectively understandable to the correct
+actor before the first irreversible divergence, retrospectively attributable,
+non-dominated, and resistant to cheap allied/opponent veto loops. If later
+authoring and evaluation cannot establish that purpose, reopen E4 with A.
+RCS-02/SR-10 own the exact holder, forecast, UI, and communication contract;
+RCS-17/RCS-18 own simulation/RL, balance, exploit, and playtest acceptance.
+
+E4 chooses no exact actor, form, action, fact, sequence length, success rate,
+disclosure, stable polarity, result, survivor, payoff, incidence beyond one
+witness, rarity, or implementation. Either answer moves E4 to `DIR-SELECTED`
+and makes D2E5 the next presented card. The register would then contain 33
+`SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 44 `DIR-SELECTED`, 3 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, require at
+least one matched causal deterministic related response, subject to the stated
+fallback.** Thus `M^{R-det-causal}_v≠∅`. At least one responsive tagged
+deterministic projection must have one qualifying participant or counterplayer
+intervention whose complete causal closure changes eventual certain-bit
+support or its conditional distribution while the same projection, form, law,
+pair, and proof remain fixed.
+
+The conditionality is part of the selected direction. Both arms and the
+changed fact must remain independently meaningful under permission-effect
+ablation; the related-form consequence must independently change a truthful
+policy or build purpose beyond the already-required exact and Oracle causal
+witnesses; and the exemplar must be prospectively understandable,
+retrospectively attributable, non-token, non-dominated, and resistant to cheap
+veto loops. Direct or laundered permission commands, changed
+law/variant/tag/pair/proof, cross-form movement, post-result action, rerouting,
+retry, unrelated RNG order, and lucky crossover remain invalid. If later
+authoring and evaluation cannot establish a qualifying exemplar, E4 reopens
+with A rather than silently weakening B.
+
+B is existential. It selects no universal coverage, actor, form, action,
+guaranteed success, disclosure, result, survivor, payoff, rarity, or
+implementation. E4 moves to `DIR-SELECTED`; E5 becomes `OWNER-OPEN`. The
+99-row register now contains 33 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 44
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`. The
+authoritative decision record remains unchanged.
+
+The E5 post-answer screen used two bounded read-only questions. One
+independently re-derived the steadfast complement, complete-domain binary
+topology, separate `Q`/`H` tags, dependencies, and register arithmetic. The
+other tested whether steadfast refusal could add fun and policy depth beyond
+the already-selected exact steadfast-deny family, responsive deterministic
+denial, and Oracle risk. The topology survived unchanged, but the gameplay
+audit broke a weaker viability test: an inherited `H` false bit could otherwise
+relabel the exact E3-C witness without adding any related-form policy. The
+repaired card below requires marginal related-form purpose and rejects tag
+inheritance alone. No prerequisite correction or new row is needed.
+
+### RCS-03C3C3D2E5 — context-invariant deterministic related-projection polarity — direction selected
+
+E3-C guarantees a nonempty steadfast complement
+`F^{R-det-steady}_v=D^R_v setminus X^{R-det-response}_v`. Define
+`F^{R-det,+}_v={d in F^{R-det-steady}_v:I^D_d={1}}` and
+`F^{R-det,-}_v=F^{R-det-steady}_v setminus F^{R-det,+}_v`. Every member uses its complete nonempty
+reachable domain under one fixed form tag. Because it is deterministic and not
+responsive, its complete image is exactly `{0}` or `{1}`.
+
+| Choice | Steadfast deterministic related polarity | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — steadfast refusal only** | `F^{R-det,+}_v=∅`. Every steadfast tagged deterministic related projection always returns zero throughout its own complete reachable domain. Responsive deterministic laws still allow in some contexts and deny in others. | A makes context-robust severance the only dependable related-form philosophy. It can support a hard anti-compression or single-heir commitment, but supplies no steadfast compatibility anchor. Its ideal fit is **neutral/protective**: it preserves distinction while participation must come from responsive laws. Costs are the greatest trap, ally-suppression, forced-overlap, and compensation pressure. | **Severed Chorus/Q** always refuses joint survival for its Twin Vow pair. The bit means only “not both”; E/F still decides the result and authority. The projection qualifies as gameplay only if players can deliberately build or route around that reliable refusal rather than merely suffer it. |
+| **B — steadfast compatibility only** | `F^{R-det,+}_v=F^{R-det-steady}_v`. Every steadfast tagged deterministic related projection always returns one throughout its own complete reachable domain. Responsive deterministic projections retain both certain bits, so B removes no global denial endpoint. | **Lower-risk production baseline and C's default fallback when compatibility remains viable.** B gives related Witnesses/hybrids a dependable compatibility anchor while E3-C/E4-B retain causal conditional certainty and the Oracle lane retains responsive risk. An always-allow law can directly express two genuinely distinct related manifestations participating together. It has the lowest trap and teaching burden, but excludes context-robust related-form refusal as its own policy identity. | **Stone Choir/Q** always permits its Twin Vow pair through this gate. A player can treat that relationship as a reliable anchor while **Ashen Accord/Q** remains causally responsive and **Veiled Chorus/Q** remains probabilistic. Later candidacy, commitment, payoff, and final survival are still unsettled. |
+| **C — both steadfast polarities coexist** | `∅⊊F^{R-det,+}_v⊊F^{R-det-steady}_v`. At least one steadfast tagged projection always allows and at least one always denies. This is projection-level support, not a requirement for two Relics or for both polarities inside both forms. | **Conditionally recommended as the higher-ceiling target.** Use B if the extra refusal/coexistence case fails while compatibility remains viable; use A if compatibility fails while refusal remains viable. C can add a fourth robust policy beside steadfast compatibility, causal conditional certainty, and Oracle risk: a player knowingly builds around context-proof refusal. Stable allow may directly express participation; stable deny protects distinction or rejects proof compression; their catalog coexistence is only **aggregate**, not a stronger theological analogue. Costs are another prediction dialect, automatic hard-veto and grief risk, trap-versus-overcompensation pressure, and substantial authoring/UI/evaluation burden. | **Stone Choir/Q** always allows while **Severed Chorus/Q** always denies. Severed Chorus qualifies only if its predictable false bit changes a real build or routing policy—for example a disclosed single-heir or anti-compression package—not because the matrix wanted a deny cell. Responsive Ashen and probabilistic Veiled remain separate policies. |
+
+A/B/C are mutually exclusive and exhaustive because nonempty
+`F^{R-det-steady}_v` has a stable-allow subset that is empty, all of
+`F^{R-det-steady}_v`, or a nonempty proper subset.
+A singleton reachable domain is formally steadfast but cannot by itself prove
+a viable policy. One physical contract may contribute opposite steadfast
+polarities under separately complete `Q` and `H` tags; those remain two
+projections, not one responsive projection. Never split a projection by bit,
+context, instance, callback, helper, generated identity, or code variant to
+manufacture a polarity.
+
+Polarity is gate-local. An allow bit passes only this joint-survival permission
+coordinate; it guarantees no candidate, commitment, final co-survival, receipt,
+or payoff. A deny bit means only “not both” and enters E/F; it chooses no
+survivor, substitute, benefit, reroute, retry, or alternate proof. E3-C's
+responsive deterministic projection already supplies both certain endpoints,
+so no E5 answer changes E6 or global related-form bit incidence.
+
+Exact E3-C does not decide E5. An exact steadfast law contributes here only if
+it has a nonempty hybrid restriction, and exact responsive laws may have no
+hybrid domain or a steadfast restriction. More importantly, formal inheritance
+is not gameplay proof. Each polarity required by the selected E5 branch—and,
+under C, their coexistence—must create a reachable, legible, non-token,
+non-dominated **marginal related-form policy purpose** beyond exact E3-C and
+responsive related laws. A `Q` Witness demonstrates that purpose cleanly, but E5 imposes no
+`Q`-only quota. An `H` witness qualifies only when its availability on hybrid
+opportunities independently changes truthful forecasting, routing, or build
+policy; merely tagging the exact Severed Bell false bit as `H` fails.
+
+Under C, steadfast refusal must be used instrumentally, function as an explicit
+play-shaping commitment, or remain an exploitable liability inside a package
+receiving commensurate value. Symmetry coverage, contrived or obscure domains,
+voluntary self-handicap, dominated traps, and compensation that changes no
+preferred policy fail. Steadfast compatibility must likewise not make the
+responsive Witness and Oracle policies dominated. Because invocation and
+related-only permission are intrinsic rather than a live permission toggle,
+affected actors need precommitment legibility; cheap forced overlap, unilateral
+receipt suppression, selector injection, grief, and optimized packages that
+erase the stated downside require adversarial evaluation. E/F must later prove
+that the false-bit result lets refusal remain fun rather than a trap or fake
+burden. If the added steadfast-refusal or coexistence purpose fails while
+steadfast compatibility remains viable, reopen E5 with B. If compatibility
+fails while refusal remains viable, reopen E5 with A. If neither polarity can
+furnish a viable purpose, D2E3-C's required steadfast class has failed and E3
+must reopen; E3-B is the remaining responsive-only topology if that class
+continues to pass its own guards.
+
+E5 chooses no exact law, Relic, tag placement, result, survivor, substitute,
+compensation, payoff, actor, disclosure surface, count, prevalence beyond the
+selected support topology, rarity, release placement, or implementation.
+RCS-02/SR-10 own exact information; E/F own denied-pair results and authority;
+SR-05/SR-06 and RCS-17/RCS-18 own authoring, simulation/RL, balance, exploit,
+and playtest proof. Before the post-answer audit, selecting any answer was
+expected to move E5 to `DIR-SELECTED`, open old C3C3E, and produce 32 `SCREEN`,
+1 `OWNER-OPEN`, 16 `PRUNED`, 45 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 33`. The thirty-second correction below supersedes that
+overcompressed forecast.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **C, both steadfast
+polarities coexist, with the full stated conditionality.** Thus
+`∅⊊F^{R-det,+}_v⊊F^{R-det-steady}_v`: at least one complete, separately tagged
+steadfast deterministic related projection always permits its pair and at
+least one always denies. This remains projection-level and creates no two-Relic
+or per-form quota. Each polarity and their coexistence must furnish reachable,
+legible, non-token, non-dominated marginal related-form policy value beyond
+exact E3-C and responsive related laws; inherited `H` tagging alone fails.
+
+Steadfast refusal must remain instrumental, explicitly play-shaping, or a
+commensurately valued exploitable liability, and later E/F plus adversarial
+evaluation must show that its false-bit result is fun rather than a trap, grief
+tool, or fake burden. Steadfast compatibility must not dominate responsive
+Witness or Oracle policies. If refusal or coexistence fails while compatibility
+remains viable, reopen E5 with B. If compatibility fails while refusal remains
+viable, reopen with A. If neither polarity remains viable, reopen E3-C's
+steadfast-class promise as already specified. C selects no concrete law,
+result, survivor, substitute, compensation, payoff, actor, count, rarity, or
+implementation. The authoritative decision record remains unchanged.
+
+The dependency audit independently confirmed that C supplies a **required
+reachable false-bit route**, not a runtime observation that a battle has
+already realized one. E6 stays `DERIVED`; the false bit still means only “not
+both.” A separate result-topology audit then broke old C3C3E as one card. The
+old label hid cancellation-versus-positive incidence, singleton-versus-double
+positive width, original-retention-versus-substitute identity, mixed double-
+result composition, and total output-selection authority.
+
+> **Thirty-second prerequisite correction, 2026-09-26:** for one canonical
+> denied resolved pair with original tags `T={P,Q}`, let `Y(o)` be only the
+> aligned positive receipts causally emitted by that pair's one prospective
+> completed disposition outcome `o`. Unrelated same-boundary receipts, later
+> payoff or compensation, retries, reroutes, callback splits, aliases, and the
+> aggregate settlement of a three-plus contender state do not enter `Y(o)`.
+> The false permission bit gives `|Y(o)∩T|<=1`; C3c.46-A gives
+> `|Y(o)|<=2`.
+>
+> Exactly five non-isomorphic pair-local shapes remain: empty cancellation
+> `{}`; one retained original `{P}` or `{Q}`; one genuine substitute `{S}`;
+> one retained original plus one substitute `{P,S}` or `{Q,S}`; and two
+> distinct genuine substitutes `{S1,S2}`. A one-receipt fusion or
+> transmutation is a substitute, not a sixth shape. A renamed receipt that
+> preserves both original consumer entitlements launders the false bit and is
+> invalid. Every substitute inherits C3c.44-A/C3c.45's truthful, reachable,
+> nonconstant, materially consumer-distinct receipt obligations. Persistent
+> Relic transformation remains downstream RCS-03D/RCS-03E.
+>
+> Old `RCS-03C3C3E` becomes a non-counting parent for four registered rows:
+>
+> 1. `RCS-03C3C3E1` — empty-versus-positive denied-pair disposition
+>    prevalence;
+> 2. `RCS-03C3C3E2` — conditional singleton-versus-double positive-width
+>    prevalence;
+> 3. `RCS-03C3C3E3` — conditional singleton identity-kind support: retained
+>    original, genuine substitute, or both; and
+> 4. `RCS-03C3C3E4` — conditional two-receipt composition support:
+>    original-plus-substitute, two substitutes, or both.
+>
+> E1-A prunes E2-E4 and the positive-output authority in F. E1-B/C activates
+> E2. E2-A activates E3 and prunes E4; E2-B prunes E3 and activates E4; E2-C
+> queues both, one at a time. E3 chooses no `P`-versus-`Q` survivor or exact
+> substitute. E4's two substitutes must be genuinely distinct. Exact receipt
+> identities and mappings remain AUTHOR/SPEC after the support families are
+> selected.
+>
+> These four rows encode every nonempty subset of the five shapes exactly once:
+> one cancellation-only terminal, then fifteen positive-support terminals for
+> each of positive-only and mixed cancellation/positive E1 branches. F is
+> retitled total denied-output resolution authority. It becomes an owner card
+> only if one fixed opportunity retains several lawful dispositions after
+> prospective binding; catalog-level mixed support alone does not manufacture
+> chooser authority. Three-plus aggregate cardinality and identity remain H/I.
+>
+> Replacing one counted E row with four adds three slots and unresolved
+> potentials. After E5-C, the corrected register contains **102 rows: 35
+> `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 45 `DIR-SELECTED`, 3 `DERIVED`, 1
+> `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**. E1 is the sole presented card.
+
+### RCS-03C3C3E1 — positive-incidence topology after a denied pair — direction selected
+
+Let `D^{deny}_v` be the nonempty complete domain of prospective pair-local
+disposition outcomes reached after one realized false joint-survival bit under
+the fixed versioned contract. E5-C guarantees a reachable route into this
+domain. Let
+`D^{deny,+}_v={o in D^{deny}_v:|Y(o)|>=1}`. E1 asks only whether a denied pair
+emits no aligned positive receipt or at least one; E2-E4 and F retain every
+identity, width, and authority question.
+
+| Choice | Denied-pair positive-incidence rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — cancellation only** | `D^{deny,+}_v=∅`. Every denied pair-local disposition emits `{}`: neither original tag nor any genuine substitute survives this settlement. | A is the crispest anti-compression and sacrifice grammar. It makes refusal a real cost, cannot hide a consolation proc, and is **neutral/protective** for the standing ideal because it preserves distinction without continuing participation at this boundary. Its burden is severe: erased mastery can make steadfast refusal a trap, grief tool, or overcompensated package tax. | Shared **Heat h** makes Guardian Vow `P` and Returning Vow `Q` individually valid. **Severed Chorus** returns false, and the pair settles `{}`. Neither tag creates an aligned input receipt; unrelated results elsewhere are unaffected. |
+| **B — every denied disposition remains positive** | `D^{deny,+}_v=D^{deny}_v`. Every false-bit settlement emits at least one and at most two aligned positive receipts. E1 does not say whether an original remains, a genuine substitute appears, or both; later children decide. | **Lower-risk fallback if cancellation cannot be made fun.** B turns denial into guaranteed heirship or transformation rather than total erasure, preserving player effort and making steadfast refusal easier to teach. It can become a direct ideal fit only when later identity rules preserve a legible continuing relation and real difference. The danger is denial laundering: a preferred heir or near-equivalent substitute can make “not both” economically fake or pure upside. | The same denied `P/Q` pair may never settle empty. A later E3 answer could retain one Vow; a substitute branch could instead emit **Fractured Concord**. E1-B promises only that some truthful aligned receipt remains. |
+| **C — cancellation and positive disposition coexist** | `∅⊊D^{deny,+}_v⊊D^{deny}_v`. At least one denied outcome cancels the pair and at least one emits a positive pair-local receipt. The witnesses may use different disclosed laws or contexts; hidden or contrived token cases fail. | **Conditionally recommended as the higher-ceiling Souls and Simulacra target.** C supports both sacrificial anti-compression and heir/transmutation build philosophies. Their coexistence is catalog-level **aggregate** fit, not itself a stronger realization of the standing ideal. It adds a prediction dialect and risks cancellation becoming the novice trap while positive laws become the premium. Choose C only if both outcome families are prospectively legible, independently policy-changing, non-token, and non-dominated. | **Severed Chorus** cancels its denied pair, while a distinct disclosed **Fractured Concord** treatment always leaves a continuing or transformed aligned result. Players can build around which refusal philosophy they accept; E2-E4 still decide the actual positive shapes. |
+
+A/B/C are mutually exclusive and exhaustive because the positive subset of the
+nonempty denied domain is empty, all of it, or a nonempty proper subset. A
+technical no-op, an unrelated same-cut receipt, later payoff, compensation,
+reload, retry, reroute, or a renamed reconstruction of both original
+entitlements cannot manufacture positivity.
+
+C is conditional. Cancellation must be instrumental, an explicit
+play-shaping commitment, or a commensurately valued exploitable liability;
+mere lost progress, obscure incidence, grief, and automatic overcompensation
+fail. Positive dispositions must irrecoverably remove or materially transform
+at least one original entitlement, remain truthful under player/consumer
+alignment, and not dominate allow/responsive laws. If cancellation or its
+coexistence fails while honest positive denial remains viable, reopen E1 with
+B. If positive settlement cannot avoid denial laundering while deliberate
+severance remains viable, reopen with A. If neither is viable, E5-C's required
+steadfast-refusal policy has failed and reopens through its recorded fallback.
+
+E1 selects no original survivor, substitute family, output width, exact law,
+context mapping, actor, randomness, choice timing, compensation, payoff,
+claim, later reuse, rarity, release placement, or implementation. Either B or
+C opens E2; A prunes E2-E4 and positive-output authority in F. Before the
+answer, any branch would move E1 to `DIR-SELECTED`. The authoritative decision
+record remains unchanged.
+
+**Direction answer — selected by Codex under Zanzagar's explicit 2026-09-26
+delegation (“your call pending deep thought”):** **C, cancellation and positive
+denied-pair dispositions coexist, with the complete conditionality below.**
+Thus `∅⊊D^{deny,+}_v⊊D^{deny}_v`. At least one reachable pair-local denied
+outcome emits no aligned receipt and at least one emits one or two truthful
+aligned receipts. The witnesses may be prospectively bound to different laws
+or contexts; C creates no live chooser, randomness, or same-opportunity
+ambiguity by itself.
+
+Three distinct read-only attacks tested gameplay value, information/anti-grief
+feasibility, and downstream E2-E4/F coherence. C survived only conditionally.
+Its clean existence witness is not “more variety”: **Severed Chorus** creates a
+separation policy in which players route independent proofs and an overlap
+burns both results, while **Fractured Concord** creates a transmutation policy
+in which players deliberately converge proofs into a genuinely different
+continuation. Each must own real favorable matchups after unrelated package
+value is equalized. A cancellation case used only as a novice tax, compensation
+bribe, voluntary self-handicap, or downside experts route away everywhere
+fails. A positive case that weakly dominates cancellation, reconstructs both
+original entitlements, or adds an ignorable consolation bit also fails.
+
+The information and agency conditions are semantic requirements on C, not a
+premature UI or actor selection. Before every affected player's **last informed
+reversible commitment**, the bound disposition family and every fact capable
+of switching cancellation versus positivity must be truthfully available to
+that player; after settlement, the pair, law, switching fact, and result class
+must be attributable. No cheap unilateral teammate act may force cancellation
+after another affected player passes that point. Later design may satisfy this
+through prospective avoidance, bilateral conditions, or meaningful contested
+cost; E1 chooses none. RCS-02/SR-10 still own decision holder, exact information
+surface, and presentation, while RCS-17/RCS-18 own novice-forecasting,
+causal-explanation, non-dominance, policy, solver/RL, exploit, and playtest
+thresholds. Compensation cannot repair failed agency or comprehension.
+
+If cancellation or coexistence fails those tests while an honest positive
+denial policy remains viable, reopen E1 with B. If every positive result
+launders denial while deliberate severance remains viable, reopen with A. If
+cheap false-bit coercion remains abusive even with positive settlement, or
+neither family remains viable, follow E5-C's recorded fallback rather than
+pretending E1-B solved the upstream problem.
+
+E1 moves to `DIR-SELECTED`; E2 becomes `OWNER-OPEN`. The 102-row register now
+contains 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 46 `DIR-SELECTED`, 3
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+
+Two further read-only audits tested E2 after C. The topology audit re-derived
+the nonempty positive domain, exact width-two cap, three exhaustive branches,
+E3/E4/F dependencies, and all register arithmetic. The gameplay audit found a
+strong asymmetry: ordinary Relic design already guarantees focused/co-result
+topology and broad dual-weave access, so denial need not duplicate that promise.
+No hidden width, identity, provenance, or authority card remains inside E2.
+
+### RCS-03C3C3E2 — positive denied-output width topology — direction selected
+
+E1-C makes `D^{deny,+}_v` nonempty. C3c.46-A gives every member width one or
+two. Define
+`D^{deny,2}_v={o in D^{deny,+}_v:|Y(o)|=2}`. E2 asks whether positive
+denial always compresses to one receipt, always produces a two-receipt
+transformation, or supports both. It does not choose original/substitute
+identity, exact mapping, value, payoff, or authority.
+
+| Choice | Positive denied-output width rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — singleton-only positive denial** | `D^{deny,2}_v=∅`. Every positive denied disposition emits exactly one aligned receipt. Combined with E1-C, the pair-local result grammar is `{}` or one receipt. E3 opens and E4 prunes. | **Recommended production direction.** A makes “not both” mechanically honest and immediately readable: refusal either sacrifices the collision or preserves/transmutes exactly one continuation. It distinguishes denial from the already-selected ordinary dual weave, limits receipt-count dominance and forced-overlap upside, and spends the next decision on the meaningful identity question. Width alone is **neutral/protective**; a later genuine singleton substitute may become a direct ideal fit if the denied relation materially continues in a truly different result. The remaining risk is a preferred singleton that economically launders denial and makes cancellation the novice trap. | Severed Chorus settles `{}`. A positive Fractured Concord settlement emits exactly one `X`; E3 later decides whether `X` is one original tag, a genuine substitute, or whether both singleton kinds exist in the catalog. |
+| **B — double-only positive denial** | `D^{deny,2}_v=D^{deny,+}_v`. Every positive denied disposition emits exactly two distinct aligned receipts. Because `{P,Q}` is forbidden, every such result contains at least one genuine substitute. E3 prunes and E4 opens. | B creates a dramatic **sever-or-refract** grammar: denial yields either nothing or a transformed dual weave. It may support a rich fracture/reconstitution archetype, but it is the hardest branch to keep honest. A false bit still yields the maximum two materially meaningful receipts, duplicates the system's flagship dual-weave promise, magnifies payoff-access and farming pressure, makes cancellation look catastrophically inferior, and is awkward to teach as “not both.” Any ideal fit must be earned later by identity/lineage; two outputs do not prove it. | A positive collision emits either one retained original plus a genuine scar/result `{P,S}` or two genuine transformed receipts `{S1,S2}`. E4, not E2, chooses which composition families exist. No positive denial may emit a singleton. |
+| **C — singleton and double positive denial coexist** | `∅⊊D^{deny,2}_v⊊D^{deny,+}_v`. At least one positive denied result is singleton and at least one is two-wide. With E1-C, all three widths `{0,1,2}` occur. E3 and E4 both remain applicable and are presented one at a time. | **Higher-complexity stretch, not the default fallback.** C can support sacrifice, heir/fusion, and fracture as three precommitted build philosophies, but it recreates the focused/co-result split inside the narrower denial lane. Because every extra receipt is materially real, the likely degeneration is a simple power ladder: cancellation as trap, singleton as consolation, double as premium. It carries the largest teaching, UI, balance, selector-injection, teammate-grief, and authoring burden. Coexistence is only aggregate ideal fit. Promote C only if a denied-double policy adds fun unavailable from ordinary dual weaving while optimized singleton and cancellation policies remain chosen. | Three prospectively disclosed treatments settle comparable denied pairs as `{}`, `{X}`, and `{U,V}`. Exact identities and contract mapping remain later; a hidden roll among the three is not implied. |
+
+A/B/C are mutually exclusive and exhaustive because `D^{deny,+}_v` is
+nonempty and its width-two subset is empty, all of it, or a nonempty proper
+subset. C3c.45-C's global focused/co-result witnesses do not settle this
+denied-pair restriction. Catalog-level width coexistence does not activate F;
+F opens only if one fixed prospectively bound opportunity retains several
+lawful outputs.
+
+Every counted receipt retains C3c.44-A/C3c.45's truthful player identity,
+nonconstant reachability, distinctness, and material consumer obligation.
+Therefore a second receipt cannot be dismissed as decoration when defending B
+or C. Any denied-double branch must establish a marginal build/policy purpose
+beyond ordinary dual weave, preserve honest loss or transformation of at least
+one original entitlement, and resist cheap forced-denial farming. Exact
+compensation, payoff magnitude, and identity remain later and cannot rescue a
+failed width policy.
+
+E2 selects no original/substitute family, exact receipt, survivor, mapping,
+actor, randomness, choice timing, value, payoff, claim, rarity, release slice,
+or implementation. A opens E3 and prunes E4; B prunes E3 and opens E4; C leaves
+both applicable, with E3 presented first and E4 queued. The authoritative
+decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **C, singleton and
+double positive denied outputs coexist, with the complete safeguards below.**
+Thus `∅⊊D^{deny,2}_v⊊D^{deny,+}_v`: the completed support must contain at
+least one positive singleton denied disposition and at least one positive
+two-receipt denied disposition. Together with E1-C, reachable pair-local
+denied support includes widths zero, one, and two. This is catalog/outcome
+support, not a random roll or live choice among widths at one fixed
+opportunity.
+
+C is not permission to author a `0 < 1 < 2` reward ladder. After unrelated
+package value is equalized, deliberate cancellation, optimized singleton, and
+optimized double-denial policies must each retain real matchups or strategies
+in which they are selected. The double family must add marginal policy value
+unavailable from ordinary allowed dual weave; receipt count, extra payoff
+access, or an easily forced collision cannot be its sole purpose. The
+singleton family may not survive merely as consolation beneath doubles. Every
+second receipt remains truthful, nonconstant, separately player-meaningful,
+and materially consumer-distinct under C3c.44-A/C3c.45-C; it cannot be called
+decorative to evade the comparison.
+
+E1-C's information and agency conditions carry through the width split. The
+bound disposition family and every fact that can switch the resulting width
+must be truthfully available before each affected player's last informed
+reversible commitment; the width-affecting pair, law, fact, and result must be
+attributable afterward. Cheap unilateral teammate steering after that point
+fails. Different prospectively bound laws may supply the singleton and double
+witnesses, so their coexistence alone creates no F authority.
+
+If the double family itself fails while singleton positive denial remains
+viable, reopen E2 with A. If singleton support itself fails while a distinct
+double-denial policy remains viable, reopen with B. If both width families
+remain individually viable but their coexistence fails, reopen E2 for a fresh
+A/B choice rather than selecting either silently. If neither positive width
+family remains viable, E1-C's positive-denial promise has failed and E1 must
+reopen through its recorded fallback. Identity-independent false-bit coercion
+still reopens E5-C rather than being disguised as a width problem. E2-C
+selects no receipt identity, mapping, actor, randomness, value, payoff, claim,
+rarity, release slice, or implementation.
+
+E2 moves to `DIR-SELECTED`; E3 becomes the sole presented `OWNER-OPEN` Relic
+row, while E4 remains queued at `SCREEN`. The 102-row register now contains 33
+`SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 47 `DIR-SELECTED`, 3 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
+
+Two read-only named-claim audits then tested E3. The topology audit re-derived
+the nonempty singleton domain, three exhaustive identity-kind branches,
+E3/E4/F boundaries, and register arithmetic. The gameplay audit found that
+E2-C creates a special burden: the singleton family needs an intrinsic policy
+identity so it does not become the consolation tier beneath two receipts.
+
+### RCS-03C3C3E3 — singleton denied-output identity-kind topology — direction selected
+
+Define the nonempty singleton domain
+`D^{deny,1}_v=D^{deny,+}_v setminus D^{deny,2}_v` and its genuine-substitute
+subset
+`D^{deny,1,S}_v={o in D^{deny,1}_v:Y(o)∩T=∅}`. Because every
+member has exactly one receipt, a member outside this subset retains exactly
+one original (`{P}` or `{Q}`), while a member inside it emits exactly one
+genuine substitute `{S}`. A fusion or transmutation is a substitute, not a
+third identity kind.
+
+| Choice | Singleton identity-kind rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — retained-original singleton only** | `D^{deny,1,S}_v=∅`. Every positive singleton denied result is `{P}` or `{Q}`. E3 does not require both original survivor identities and does not choose which one survives. | **Production fallback if honest substitutes fail.** A is the most literal and teachable reading of “not both”: one established result continues and the other is lost. Its fit is **partial/protective** at this boundary—continuity and selective loss are real, but the surviving result is not itself a genuinely different manifestation. The main degeneration is **preferred-heir filtering**: pair a valuable `P` with expendable `Q`, induce denial, and keep exactly what was wanted. If E4 later permits `{P,S}`, focused `{P}` also needs a real precision, reliability, tempo, or liability-avoidance policy rather than becoming its strict subset. | A disclosed **Last Testament** treatment denies Guardian Vow `P` plus Returning Vow `Q` and emits only `{P}` under one prospectively bound mapping. Another outcome may retain `Q`, but E3-A promises neither symmetry nor live survivor choice. |
+| **B — genuine-substitute singleton only** | `D^{deny,1,S}_v=D^{deny,1}_v`. Every positive singleton denied result is `{S}`: neither original tag survives, and the one receipt has a genuinely new player/consumer identity. | **Conditionally recommended.** B gives E2-C a coherent semantic grammar: zero **severs**, one **fuses/transmutes**, and two later **fractures/reconstitutes**. One indivisible consumer identity is horizontally different from two separately addressable receipts, so singleton need not mean “weaker double.” It also removes singleton survivor favoritism. The ideal fit is **potentially direct, never automatic**: the denied `P/Q` relation must materially participate in a continuing `S` that is genuinely different at the same settlement boundary. A generic consolation token, thematic name, or causal succession alone fails. Costs are a new result vocabulary and a real semantic/consumer witness for every supported singleton family. | **Fractured Concord** replaces the denied Vow identities with one indivisible **Concord Seal `S`** at this disposition. `S` is not `P` or `Q` and cannot reconstruct their joint entitlements; exact downstream consumer overlap with either original remains AUTHOR/SPEC. Exact `S` identity and payoff remain later. |
+| **C — retained-original and substitute singletons coexist** | `∅⊊D^{deny,1,S}_v⊊D^{deny,1}_v`. At least one singleton retains an original and at least one emits a genuine substitute. “Both” means support across dispositions, never two receipts in one singleton. | C supports two same-width policies: **heirship** preserves known synergy while **transmutation** enters a new consumer route. This is the highest local policy ceiling, but E1-C/E2-C already establish three widths; C now gives width one two dialects before E4 adds width-two composition. It carries both laundering surfaces, the greatest mapping/teaching burden, and a strong risk that known original synergy or premium substitute utility tokenizes the other family. Their coexistence is only **aggregate** ideal fit. Choose C only if both families independently win real optimized matchups after unrelated value is equalized and neither is dominated by queued E4 doubles. | A disclosed **Last Testament** outcome emits `{P}`, while a distinct disclosed **Fractured Concord** outcome emits `{S}`. Players must be able to build differently around continuity versus transformation before the relevant commitment; a hidden post-collision roll does not satisfy C. |
+
+A/B/C are mutually exclusive and exhaustive because the substitute subset of
+the nonempty singleton domain is empty, all of it, or a nonempty proper subset.
+Payoff, compensation, unrelated receipts, aliases, and renamed reconstructions
+of original entitlements cannot manufacture a substitute identity.
+
+B is conditional. Every `S` must replace both original tag identities and may
+not reconstruct the joint availability of both original consumer entitlements.
+Exact downstream consumer overlap with either original remains AUTHOR/SPEC.
+`S` must remain prospectively legible and retrospectively attributable under
+E1-C and change optimized policy beyond every applicable E4 double family. It
+cannot become fungible premium currency, a disguised `P+Q` bundle, a generic
+failure shard, or one fragment that every two-receipt outcome supplies plus
+something else. Cheap teammate-forced transformation fails even when `S` is
+valuable.
+
+If no honest, teachable, non-dominating substitute family survives while
+retained-original singleton play does, use A and subject it to the preferred-
+heir and later `{P,S}`-dominance attacks. Promote C only if A and B each pass
+independently and their coexistence changes real precommitted policy; support-
+count symmetry is insufficient. If both singleton kinds fail, E2-C's required
+singleton family is not viable and E2 must reopen; double-only remains possible
+only if E4 survives. Identity-independent forced-denial abuse follows E5-C's
+recorded fallback.
+
+E3 selects no `P`-versus-`Q` survivor, exact substitute, mapping, output actor,
+randomness, priority, live choice, value, compensation, payoff, claim, rarity,
+release slice, or implementation. Exact receipt identities and mappings remain
+AUTHOR/SPEC. E4 remains queued for original-plus-substitute versus two-
+substitute double composition. Catalog support creates no F authority; F opens
+only if one fixed prospectively bound opportunity retains several lawful
+outputs. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, every
+singleton positive denied result is one genuine substitute, with A as the
+explicit qualified fallback.** Thus
+`D^{deny,1,S}_v=D^{deny,1}_v`: neither original tag survives any singleton
+positive denial. Every result is one truthful, nonconstant, materially
+consumer-distinct `{S}` rather than `{P}` or `{Q}`. This selects identity kind,
+not the exact `S`, its downstream consumer mapping, or whether any identity is
+reused in a double result.
+
+B completes a selected semantic distinction rather than promising extra value:
+zero receipts sever, one receipt fuses or transmutes, and the queued double
+family will decide how two receipts refract or reconstitute. The denied pair
+must materially participate in the continuing substitute while `S` remains
+genuinely different at the same pair-local disposition boundary. That gives B
+a **potentially direct**, never automatic, standing-ideal fit. A thematic name,
+generic failure shard, fungible premium currency, or mere causal succession
+fails.
+
+Every `S` must replace both original tag identities and may not reconstruct
+the joint availability of both original consumer entitlements. Exact
+downstream consumer overlap with either original remains AUTHOR/SPEC. `S` must
+remain prospectively legible, retrospectively attributable, resistant to cheap
+teammate-forced transformation, and policy-distinct from cancellation,
+ordinary allowed dual weave, and every applicable E4 double family. If every
+lawful mapping makes singleton `{S}` merely one fragment that a double always
+supplies plus another receipt, B fails rather than becoming the consolation
+tier prohibited by E2-C.
+
+The selected A fallback is deliberately qualified. Use retained-original-only
+E3-A when B fails for substitute-specific authoring, reconstruction,
+comprehension, or cross-width-dominance reasons **and** retained-original
+singleton play still passes preferred-heir, coercion, and later `{P,S}`
+subset-dominance attacks. If A also fails, reopen E2-C because its required
+singleton family has no viable identity. Identity-independent forced-denial
+abuse still follows E5-C's upstream fallback. C is not a fallback and remains
+unselected.
+
+E3 moves to `DIR-SELECTED`; E4 becomes the sole presented `OWNER-OPEN` Relic
+row. The 102-row register now contains 32 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 48 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 33`.
+
+Two read-only named-claim audits then tested E4. The topology audit re-derived
+the two exhaustive double-composition families, transition arithmetic, and
+E4/F boundary. The gameplay audit found that selected E3-B makes original
+retention the decisive E4 question: a double can restore one familiar original
+beside a substitute, or keep denial wholly transformational through two
+substitutes.
+
+### RCS-03C3C3E4 — two-receipt denied-output composition topology — direction selected
+
+E2-C makes `D^{deny,2}_v` nonempty. Define its all-substitute subset
+`D^{deny,2,SS}_v={o in D^{deny,2}_v:Y(o)∩T=∅}`. Every member has exactly two
+distinct receipts and the false bit permits at most one original. A member
+outside the subset is therefore one retained original plus one genuine
+substitute (`{P,S}` or `{Q,S}`); a member inside it is two distinct genuine
+substitutes `{S1,S2}`. `{P,Q}` is forbidden, and aliases cannot manufacture
+two receipts.
+
+| Choice | Double denied-output composition rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — original plus substitute only** | `D^{deny,2,SS}_v=∅`. Every positive double denial emits `{P,S}` or `{Q,S}`. E4 does not require both survivor identities and does not choose which original remains. | **Production fallback if honest dual substitutes fail.** A is easiest to teach and author: one familiar result stays while one genuinely new result appears. It can be **potentially direct and especially legible** when both receipts remain materially joined by the denied pair's lineage rather than merely co-present. Its central degeneration is “best of both worlds”: pair valuable `P` with expendable `Q`, retain `P`, and gain `S`. That can dominate singleton `{S}` and even allowed `{P,Q}` when `S` is the preferred replacement. A needs real optimized policies where anchored continuity is useful without becoming universal premium denial. | A disclosed **Scarred Testament** outcome denies Guardian Vow `P` plus Returning Vow `Q` and emits `{P,S}`. `P` remains the original result; `S` is genuinely new and may not rename `Q` or jointly reconstruct `{P,Q}`. Exact survivor and mapping remain later. |
+| **B — two genuine substitutes only** | `D^{deny,2,SS}_v=D^{deny,2}_v`. Every positive double denial emits `{S1,S2}`. The receipts are extensionally distinct aligned identities, not duplicate instances, inseparable aliases, or necessarily one substitute per original. | **Conditionally recommended.** B completes a gameplay-first grammar: zero **severs**, one **fuses/transmutes**, and two **refracts/reconstitutes**. Original retention stays zero across singleton and double denial, avoiding preferred-heir filtering and preserving ordinary allowed `{P,Q}` as the route that keeps both originals. Singleton can own one integrated consumer identity while the double owns two separately addressable transformed routes, supporting concentration versus breadth rather than a count-only ladder. The fit is **potentially direct with a higher proof burden than A**: the denied relation must materially continue through two genuinely different manifestations. Two new prizes or labels prove nothing. | **Shattered Concord** replaces denied `P/Q` with `{S1,S2}`. Both receipts are truthful, separately meaningful, materially consumable, and genuinely distinct; together they may not reconstruct the joint original entitlements. Exact identities, cross-width reuse, and mapping remain later. |
+| **C — both double compositions coexist** | `∅⊊D^{deny,2,SS}_v⊊D^{deny,2}_v`. At least one double retains one original plus a substitute, and at least one emits two substitutes. “Both” is support across dispositions, never three receipts or a chooser at one opportunity. | C supports same-width **anchored adaptation** and **full reconstitution** policies. This is the highest local composition ceiling, but it enables nearly the whole denied-shape vocabulary—`{}`, `{S}`, `{O,S}`, `{S1,S2}`—and carries both laundering surfaces, two meanings for width two, and the greatest mapping, UI, authoring, balance, and steering burden. Local outcomes inherit A/B's possible fit; their catalog coexistence is only **aggregate**. Choose C only if A and B each independently win real optimized matchups and their coexistence changes precommitted policy. | A disclosed Scarred Testament outcome emits `{P,S}`, while a distinct Shattered Concord outcome emits `{S1,S2}`. The family must be knowable before the relevant commitment; a hidden post-denial composition roll does not satisfy C. |
+
+A/B/C are mutually exclusive and exhaustive because the all-substitute subset
+of the nonempty double domain is empty, all of it, or a nonempty proper subset.
+No third composition exists: two originals violate the false bit, three
+receipts violate C3c.46-A, and coextensive aliases canonicalize together.
+
+B is conditional. Both substitutes inherit C3c.44-A/C3c.45-C's truthful,
+reachable, nonconstant, separately player-meaningful, materially consumer-
+distinct obligations and must be genuinely distinct from one another. They
+may not jointly reconstruct both original consumer entitlements or become an
+economic rename of allowed `{P,Q}`; exact overlap with either one original
+remains AUTHOR/SPEC. After unrelated package value is equalized, double
+replacement must change optimized policy relative to cancellation, singleton
+fusion, and ordinary allowed dual weave, with each comparator retaining real
+matchups. Receipt count or extra payoff access alone fails.
+
+Composition-affecting facts inherit E1-C's last-informed-reversible-commitment
+disclosure, retrospective attribution, and anti-coercion obligations. Cheap
+teammate steering, forced-overlap farming, generic shards, renamed originals,
+and singleton-plus-free-bonus mappings fail. Exact substitute identities,
+cross-width reuse, mappings, actor, randomness, priority, value, compensation,
+payoff, claim, rarity, release slice, and implementation remain later.
+
+Use A if two honest substitutes fail for reconstruction, comprehension,
+authoring, or cross-width-dominance reasons while anchored transformation still
+passes preferred-heir and subset-dominance attacks. Promote C only if A and B
+pass independently and their coexistence changes real precommitted policy. If
+C is later selected but coexistence alone fails while A and B remain
+individually viable, reopen E4 for a fresh A/B choice. If both double
+compositions fail, E2-C's required double family fails and E2 reopens with
+singleton-only E2-A while E3-B remains viable. If E3 instead uses its retained-
+original A fallback, re-audit E4 rather than carrying this recommendation
+silently. Identity-independent coerced denial follows E5-C's upstream fallback.
+
+E4 selects no exact original survivor, substitute identity, cross-width reuse,
+mapping, actor, randomness, priority, live choice, value, compensation, payoff,
+claim, rarity, release slice, or implementation. Catalog composition support
+creates no F authority; F opens only if one fixed prospectively bound
+opportunity retains several lawful outputs. The authoritative decision record
+remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **B, every
+two-receipt positive denied result is two genuinely distinct substitutes, with
+A as the explicit practical fallback.** Thus
+`D^{deny,2,SS}_v=D^{deny,2}_v`: neither original tag survives a double denial,
+and every result is `{S1,S2}` rather than `{P,S}` or `{Q,S}`. This selects the
+composition family, not exact substitute identities, whether a singleton
+substitute is reused, or any output-resolution law.
+
+B completes the selected pair-local grammar: zero receipts sever, one
+substitute fuses or transmutes, and two substitutes refract or reconstitute.
+The double family must own two separately addressable transformed routes while
+the singleton owns one integrated consumer identity. Both substitutes remain
+truthful, reachable, nonconstant, separately player-meaningful, materially
+consumer-distinct, and genuinely distinct from each other. They may not be
+renamed originals, generic shards, a reconstruction of the joint `{P,Q}`
+entitlements, or singleton `{S}` plus free upside. After unrelated package
+value is equalized, cancellation, singleton fusion, double reconstitution, and
+ordinary allowed dual weave must each retain real optimized matchups.
+
+The standing-ideal fit is potentially direct, never automatic: the denied
+relationship must materially continue through two genuinely different
+manifestations at the same pair-local disposition boundary. Two new labels,
+items, or prizes do not establish that continuity. Composition-affecting facts
+retain E1-C's last-informed-reversible-commitment disclosure, retrospective
+attribution, and anti-coercion obligations.
+
+Use practical fallback E4-A only if two honest substitutes fail for
+reconstruction, comprehension, authoring, or cross-width-dominance reasons
+while `{O,S}` anchored transformation still survives preferred-heir and
+subset-dominance attacks. If both compositions fail, reopen E2-C with
+singleton-only E2-A while E3-B remains viable. If E3 uses its retained-original
+A fallback, re-audit E4 rather than carrying B or A silently. E4-C remains
+unselected. Identity-independent coerced denial follows E5-C's upstream
+fallback. The authoritative decision record remains unchanged.
+
+> **Thirty-third prerequisite correction, 2026-09-26:** two bounded
+> read-only named-claim audits broke old `RCS-03C3C3F` before presentation.
+> E1-E4 classify support across the catalog or across prospectively distinct
+> contexts; none decides whether one fixed opportunity retains several lawful
+> outputs. Both a total single-valued mapping and a same-opportunity
+> multi-output relation satisfy E1-C/E2-C/E3-B/E4-B. Marking old F
+> `OWNER-OPEN` would silently select multiplicity, while `PRUNED` would silently
+> select uniqueness; neither is derived.
+>
+> Old `RCS-03C3C3F` is now a non-counting parent for five registered rows:
+>
+> 1. `RCS-03C3C3F1` — support for several canonical lawful denied outputs at
+>    one fixed base opportunity;
+> 2. `RCS-03C3C3F2A` — conditional material participant-configurability
+>    prevalence across ambiguity-capable denied-output contracts;
+> 3. `RCS-03C3C3F2B1` — conditional closed whole-policy versus constructive
+>    participant output-policy language prevalence;
+> 4. `RCS-03C3C3F2B2` — conditional participant-composed context-branching
+>    prevalence among constructive-capable output policies; and
+> 5. `RCS-03C3C3F3` — conditional stochastic support across canonical complete
+>    bound denied-output laws.
+>
+> F1-A prunes F2A-F3. F1-B activates F2A; F2A-A prunes F2B1-F2B2, while
+> participant-configurable branches activate F2B1 and any constructive branch
+> may activate F2B2. F3 follows F2A and every applicable language row.
+> Participant leverage means a prospectively bound setting changes the
+> complete output law under held-fixed nonpolicy inputs; ordinary Relic/build
+> changes and upstream combat actions are not hidden F authority. A live
+> post-denial prompt remains incompatible with cut-atomic automatic invocation.
+> Exact output identities, maps, system priorities, setting vocabulary,
+> probabilities, seeds, and replay realization remain AUTHOR/SPEC/TUNE or
+> their already registered assurance owners after topology is selected. Each
+> child receives its own prerequisite audit before presentation.
+>
+> Replacing one counted F row with five adds four slots and four unresolved
+> potentials; selecting E4 consumes one. The corrected register contains
+> **106 rows: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 49 `DIR-SELECTED`, 3
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**. F1 is the sole
+> presented Relic card.
+
+### RCS-03C3C3F1 — same-opportunity denied-output multiplicity support — direction selected
+
+Let `X^{deny}_v` contain reachable fixed denied-pair base opportunities after
+the authoritative pair/proofs, false permission result, applicable Relic and
+relationship contract, upstream routing stance, factual context, and every
+non-F input are fixed, but before any F-owned participant output setting,
+completion rule, or random realization. For `x in X^{deny}_v`, let
+`L^{deny}_v(x)` be the complete nonempty finite set of canonical pair-local
+output identity sets still lawful under E1-E4. Define
+`M^{deny}_v={x in X^{deny}_v:|L^{deny}_v(x)|>=2}`.
+
+`L^{deny}_v(x)` counts extensionally distinct canonical identity sets, not
+payoff packages or aliases. Two different prospectively bound contracts,
+contexts, or opportunities never create one multiplicity witness. Same-shape
+alternatives such as `{S1,S2}` versus `{S3,S4}` do count when their receipt
+identities are genuinely distinct; renamed or consumer-equivalent aliases do
+not.
+
+| Choice | Fixed-opportunity output topology | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every fixed opportunity is single-valued** | `M^{deny}_v=emptyset`. Once the fixed base opportunity is known, exactly one canonical denied output is lawful. Different disclosed contracts or contexts may still map deterministically to `{}`, `{S}`, `{S1,S2}`, or different exact substitute identities; A does not collapse E1-E4's catalog support. F2A-F3 are pruned. | **Recommended.** E1-E4 already provide sever, fusion, and reconstitution policies across known laws and contexts. A keeps denial from becoming a conversion menu, protects causal explanation, team planning, replay trust, and eventual simulator/RL policy comparison, and avoids a second configuration dialect beside the existing routing stance. Context-responsive deterministic maps can remain deep but learnable. Its standing-ideal role is **neutral/protective**: it preserves the meaningful transformed relationship selected at E3/E4 but adds no new unity-with-difference claim. The cost is no same-opportunity output orientation or numinous manifestation variance. | With **Shattered Concord**, a fixed `P/Q` denial under one exact Relic realization, routing stance, proof pair, and visible context has exactly one lawful `{S1,S2}` result. A different disclosed context may deterministically sever or fuse, but repeating this same base opportunity cannot expose a second lawful output. |
+| **B — some fixed opportunity retains several lawful outputs** | `M^{deny}_v` is nonempty. At least one held-fixed base opportunity has two or more canonical lawful dispositions. B does not decide whether every ambiguity-capable contract behaves this way, who may configure its resolution, whether its policy language is closed or constructive, or whether the complete bound law is deterministic or stochastic; F2A-F3 own those questions. | B creates a genuine output-resolution surface rather than relying only on catalog/context diversity. Its strongest case is a small prospectively committed orientation that makes the same Relic relationship settle differently without a live prompt. But multiplicity itself is not agency or an ideal expression: only one output becomes operative, and unbounded choice risks a dominant “always take two” conversion shop, quarterbacking, grief, and weaker causal explanation. Choose B only if the held-fixed alternatives support nonredundant precommitment policies that cannot be authored as clearer distinct contracts or contexts. | One fixed **Prismatic Concord** base opportunity retains both `{S}` and `{S1,S2}` as lawful. B says only that both survive into the resolution domain. A later card must determine whether an intrinsic law, a prospectively bound setting, or a stochastic realization commits exactly one; the player may not choose after seeing the denial. |
+
+A/B are mutually exclusive and exhaustive because `M^{deny}_v` is either
+empty or nonempty. B's support is existential; universal-versus-mixed
+prevalence remains AUTHOR/SPEC unless a later prerequisite audit proves a
+separate player-material consequence boundary. Neither answer changes exact
+receipt identities, output value, compensation, payoff, rarity, claim,
+persistence, release slice, or implementation.
+
+Under A, the complete design must expose every resolution-relevant factual
+input before the affected players' last informed reversible commitment and
+must make the output reproducible from the bound law; a hidden priority, retry,
+or callback is not a second option. Under B, every later resolution policy must
+still preserve E1-E4's anti-ladder, non-dominance, attribution, and anti-
+coercion obligations. Stochastic mixing cannot rescue a dominated disposition,
+and participant configurability cannot become a backdoor preferred-heir
+selector. If E4 falls back to `{O,S}`, re-audit the F subtree against that
+specific survivor-selection risk.
+
+**Direction answer — selected by Zanzagar on 2026-09-26:** **A, every fixed
+denied opportunity is single-valued.** Thus `M^{deny}_v=∅`: once the complete
+base opportunity and every non-F input are fixed, exactly one canonical
+pair-local output is lawful. Different disclosed contracts or factual contexts
+may still map deterministically to cancellation `{}`, singleton substitute
+`{S}`, double substitutes `{S1,S2}`, or different exact substitute identities;
+A does not collapse the selected E1-E4 catalog support.
+
+No F-owned participant setting, priority ambiguity, or stochastic realization
+remains. Exact deterministic opportunity-to-output mappings stay AUTHOR/SPEC
+and must remain total, prospective, reproducible, attributable, and
+nonresponsive to later payoff, claim, retry, callback, or favorable combat
+outcome. A is **neutral/protective** under the standing ideal: it preserves the
+meaningful transformed relationship at E3/E4 without claiming that resolution
+determinism itself expresses unity-with-difference. If E4 later uses its
+`{O,S}` practical fallback, re-audit this subtree for preferred-heir selection
+rather than carrying A automatically.
+
+F1 moves to `DIR-SELECTED`; F2A, F2B1, F2B2, and F3 move to `PRUNED`; G1
+becomes the sole presented `OWNER-OPEN` Relic row. The 106-row register now
+contains 30 `SCREEN`, 1 `OWNER-OPEN`, 20 `PRUNED`, 50 `DIR-SELECTED`, 3
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested G1. The topology audit re-derived
+one empty/nonempty three-plus support boundary, the exact status transition,
+and the G2/H/I dependency split. The gameplay audit found that pair play is
+already unusually rich; additional fulfilled tags create value only when every
+tag in a supported three-plus constellation materially shapes competition for
+the exact-two final ceiling, rather than becoming free insurance or an opaque
+discarded success.
+
+### RCS-03C3C3G1 — three-plus pre-treatment contender support — direction selected
+
+For one reachable fixed actual evaluation `z`, hold the ruleset/catalog
+version, active Relic root and realization, semantic cut, operative context,
+prospectively bound routing stance/configuration, selected authoritative
+complete ledger tuple, and earlier committed state fixed. Let `J_v(z)` contain
+the distinct canonical receipt tags individually ledger-satisfied immediately
+before within-evaluation treatment. Define
+`G^{3+}_v={z:|J_v(z)|>=3}`.
+
+Count each canonical tag once. Alternate ledgers prove one tag rather than
+creating several; aliases, callbacks, serialization copies, unordered pair
+enumeration, exact-plus-related form membership, and E/F substitute outputs do
+not add contenders. Different cuts, contexts, Relics, routes, configurations,
+or evaluations cannot be unioned to create a witness. Individually satisfied
+tags are structural pre-treatment inputs, not provisional receipt candidates
+or committed results.
+
+| Choice | Three-plus support rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no three-plus contender state** | `G^{3+}_v=∅`. Every fixed evaluation has at most two distinct canonical individually ledger-satisfied tags before treatment. The selected catalog still contains real two-tag dual-weave states. G2, H, and I prune. | **Recommended.** Alternate ledgers, responsive routing, exact/related permission, Oracle risk, cancellation, singleton fusion, and double substitution already make pair play deep. A keeps one active Relic focused on a legible dual relationship, prevents a successfully fulfilled third tag from becoming mandatory free insurance or an unexplained discarded success, minimizes teammate selector injection, and gives the cleanest causal explanation and simulator/RL policy comparison. Its standing-ideal role is **neutral/protective**: it protects the direct pair relationships already selected rather than treating greater count as greater unity-with-difference. The cost is excluding a true over-cap constellation inside one evaluation. | One **Twin Concord** evaluation may individually satisfy canonical tags `P` and `Q`, and treatment may permit, sever, fuse, or reconstitute them under the selected rules. A distinct tag `R` may be satisfied at another cut, but no one fixed evaluation presents `{P,Q,R}` together. |
+| **B — at least one three-plus contender state** | `G^{3+}_v` is nonempty. At least one fixed evaluation contains three or more distinct canonical individually ledger-satisfied tags before treatment, although C3c.46-A still caps the final aligned receipt set at two. B is existential: it requires neither exact-three as the global maximum, universal prevalence, nor a pairwise-overlap clique. Exact positive counts, maxima, prevalence, and pair incidence remain AUTHOR/SPEC unless a later audit proves a distinct player-material boundary. | B creates a genuinely new scarce-capacity game only when one supported three-plus constellation jointly shapes which zero, one, or two results can survive. Its strongest case is routing proofs or hedging one Oracle refusal across one atomic compatibility graph. Its fit is **potentially direct**, never automatic: every tag in the qualifying constellation must materially participate in one permutation-invariant settlement while retaining its identity. “Take the highest two,” free breadth insurance, or any co-present irrelevant tag is merely numerical coexistence. Costs are quadratic pair-permission growth, compatibility-graph UI, discarded-success frustration, teammate grief, and harder policy attribution. Choose B only if a bounded teaching witness at the smallest supported three-plus cardinality passes the guards below and cannot be expressed as clearer pair-only or distinct-evaluation play. | One illustrative **Triune Concord** evaluation presents canonical `P`, `Q`, and `R`. `P/Q` has a deterministic exact conflict while `P/R` and `Q/R` expose related-form permission opportunities. All facts belong to one frozen evaluation. G2 later owns any joint stochastic pair-bit coupling, H owns feasible final cardinalities under the cap of two, and I owns identity authority if several outputs remain. |
+
+A/B are mutually exclusive and exhaustive because `G^{3+}_v` is empty or
+nonempty. B does not select pair permissions, independent/shared/correlated
+draws, output cardinality, survivor identity, substitute construction, actor,
+priority, merge, payoff, claim, persistence, release, or implementation. F1-A
+gives each denied pair one unique pair-local output; it does not determine the
+aggregate settlement when several simultaneous unordered pairs interact.
+
+Every B implementation must settle the complete canonical tag-and-relation
+graph atomically and permutation-invariantly. A left fold, callback order,
+storage order, generated ID, or “first pair wins” rule fails. `J_v(z)`
+contender membership and every fact capable of displacement must be
+prospectively legible and retrospectively attributable; a teammate may not
+cheaply inject a late tag that reroutes another player's committed result. A
+matched held-fixed extra-tag/constellation ablation must show that guarded
+three-plus and pair-only policies each retain optimized uses after unrelated
+cost is equalized. If downstream G2/H/I cannot resolve one bounded teaching
+witness at the smallest supported three-plus cardinality without order
+artifacts, opaque loss, or a dominant always-add-a-tag policy, fall back to A.
+
+Under A, G2/H/I prune and C4 receives the canonicality audit below. Under B,
+G2 would receive a fresh
+prerequisite audit: three tags supply three unordered pairs, but selected
+Oracle support does not itself prove that two nonconstant pair-permission
+marginals coexist in one reachable evaluation, and one exact/related hybrid
+pair remains one pair and one draw.
+
+**Direction answer — selected by Zanzagar on 2026-09-27:** **A, no
+three-plus contender state.** Thus `G^{3+}_v=∅`: every reachable fixed actual
+evaluation contains at most two distinct canonical receipt tags individually
+ledger-satisfied immediately before treatment under its selected complete
+ledger tuple. The rule does not cap the catalog's total tags, union different
+evaluations, or decide whether several semantic evaluations may coincide at
+one cut.
+
+A preserves the selected dual-weave focus while retaining alternate ledgers,
+responsive routing, exact/related permission, Oracle risk, cancellation,
+singleton fusion, and double reconstitution. It is **neutral/protective** under
+the standing ideal: it protects already meaningful distinct relationships
+without treating additional count as stronger unity-with-difference. G2's
+within-evaluation coupling route is pruned. The authoritative decision record
+remains unchanged.
+
+> **Post-answer canonicality correction, 2026-09-27:** one exploratory audit
+> briefly proposed separate C8/C9 rows and re-routed H/I through a supposed
+> several-evaluator C4 branch. A stricter semantic audit broke that proposal
+> before commit. Under already-selected B1-A, C1-A, and C2A-A, every same-cut
+> evaluation is automatic, immediate, cut-atomic, and reads the same frozen
+> authoritative state; the complete result settles atomically and
+> permutation-invariantly, with no evaluator observing another's result, claim,
+> consumption, or draw.
+>
+> Therefore any finite family of same-cut evaluators `f_1,...,f_n` is
+> observationally equivalent to one canonical product evaluator
+> `F=(f_1,...,f_n)`. `F` preserves every labeled internal channel, routing
+> choice, joint RNG law, tagged output, post-cut transition, attribution fact,
+> and player-visible continuation. Splitting or merging those functions changes
+> only representation. A distinct semantic evaluator would require another
+> commit, claim, response, lifetime, information, or authority boundary; those
+> are either already forbidden at this cut or explicitly owned later.
+>
+> The illustrative Echo/Mirror pair therefore does not witness C4-B. If its
+> product has at most two canonical contender tags, it is one lawful G1-A
+> evaluation with labeled channels. If it has three or more, splitting it only
+> launders the selected G1-A cap. Cross-channel correlated randomness remains
+> part of the one evaluator's complete joint law; it does not require a second
+> topology card.
+>
+> `RCS-03C3C4` is consequently **DERIVED** as one canonical product evaluation
+> transaction per active Relic per semantic cut. Internal labeled channels may
+> remain as authored structure, but cannot multiply invocation, retry, claim,
+> caps, or player-facing proc opportunities. C5-C7 and H/I prune with G2; the
+> proposed C8/C9 rows never enter the register. `RCS-03C3D` becomes the sole
+> `OWNER-OPEN` row.
+>
+> The frozen register remains **106 rows**: 22 `SCREEN`, 1 `OWNER-OPEN`, 26
+> `PRUNED`, 51 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 23`. This is a representation-invariance result and a material
+> complexity reduction, not an unchosen gameplay direction. The authoritative
+> decision record remains unchanged.
+
+> **Thirty-fourth prerequisite correction, 2026-09-27:** screening old C3D
+> found four independent player-material boundaries that one answer could not
+> safely settle: positive-result claim support, ledger-bearing empty-result
+> claim support, the claimed footprint inside the selected authoritative proof
+> tuple, and recurrence after a failed result while relationship sufficiency
+> remains uninterrupted.
+>
+> Positive and empty claims must be separate bits. No selected invariant
+> forbids a failure-only law that scars evidence on cancellation but preserves
+> it on success, however unattractive that policy may be; silently excluding it
+> would make a combined three-way card nonexhaustive. A true no-candidate
+> invocation is different from a ledger-bearing empty settlement: it has no
+> selected complete proof tuple and therefore no defined evidence footprint to
+> claim. Burning partial matches would require a new failed-proof identity
+> boundary and is not admitted here.
+>
+> Old `RCS-03C3D` becomes a non-counting parent for:
+>
+> 1. `RCS-03C3D1` — positive-result evidence-claim support;
+> 2. `RCS-03C3D2` — ledger-bearing empty-result evidence-claim support;
+> 3. `RCS-03C3D3` — complete-union versus proper-subset claimed footprint; and
+> 4. `RCS-03C3D4` — ledger-bearing empty-settlement recurrence under
+>    uninterrupted canonical pair-relationship sufficiency.
+>
+> D1 precedes D2. If both reject claim support, D3 prunes; otherwise D3 follows.
+> D4 follows in every branch because ledger-bearing cancellation recurrence is
+> not evidence claim.
+> C133/C134 seal positive candidates but leave failed scheduling open; C135
+> governs recommitment after success and explicitly projects consumption/retry
+> bookkeeping out of relationship sufficiency. Claim and recurrence state may
+> not be aliased. Cross-Relic, cross-root, or cross-combatant fan-out remains
+> RCS-08.
+>
+> Replacing one counted C3D row with four raises the frozen register from 106 to
+> **109 rows**: 25 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 51 `DIR-SELECTED`,
+> 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`. D1 is the sole
+> presented card. This correction exposes decisions that were already hidden;
+> it adds no player-facing mechanic by itself.
+
+### RCS-03C3D1 — positive-result evidence-claim support — direction selected
+
+For one fixed completed canonical product evaluation `z`, hold the version,
+combatant, active Relic, cut, operative context, selected routing and complete
+authoritative contender-ledger tuple, permission realization, treatment, and
+positive aligned receipt output fixed. “Positive” means the committed receipt
+set is nonempty; an original `{P,Q}`, singleton substitute `{S}`, and double
+substitute `{S1,S2}` all qualify. Let `U(z)` be the nonempty deduplicated union
+of final child occurrences in every selected authoritative causal ledger. An
+exact shared child appears once; distinct related proofs remain distinct.
+
+The evaluation **claims evidence** when, after its whole positive receipt set
+commits atomically, at least one member of `U(z)` becomes unavailable as
+evidence to this active Relic because of that use. The canonical occurrence,
+source ownership, battle history, and availability to other roots or Relics do
+not disappear. D3 later owns whether the claimed subset is all of `U(z)` or a
+prospectively fixed proper nonempty subset. Let `K^{claim+}_v` contain the
+positive settlements that claim evidence.
+
+| Choice | Positive-result claim rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — positive results never claim evidence** | `K^{claim+}_v=∅`. Every positive settlement reads canonical history without making any selected proof occurrence Relic-locally unavailable. D2 still independently asks whether an empty settlement may claim. | **Strong clarity fallback.** History remains truth rather than ammunition, producing the lowest UI and teammate-grief burden. Finite freshness and break-before-rearm still limit some reuse. The cost is cross-cut hub harvesting: a successful manifestation preserves every proof for other tags and later opportunities, so positive output can weakly dominate cancellation. A is **neutral/protective** at this boundary because it preserves inherited relationships without creating a new operative distinction. | `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` settle as `{P,Q}` or substitutes. `g,h,t` remain eligible for later otherwise-lawful readings by this Relic. |
+| **B — require positive-result claim support** | `K^{claim+}_v` is nonempty. At least one positive settlement makes a nonempty part of its selected causal proof union Relic-locally unavailable after the receipts commit. B selects neither universal prevalence nor the footprint; D2 and D3 remain separate. | **Recommended.** A successful weave visibly cashes in at least one causal proof and bounds hub-evidence harvesting. If D2 later excludes empty-result claims, this also gives cancellation retained-option value instead of making zero/one/two results a pure power ladder; D1 alone does not choose that consequence. The irreversible state change coincides with a visible receipt, so humans, logs, and simulator policies can attribute it. B is **potentially direct** here and becomes direct locally if D3 later selects the complete causal union: the occurrence remains truthful and source-owned while gaining a distinct claimed relation to this Relic. Costs are tracking, disclosure, and teammate-forced-use risk, which the guards below must contain. | The same `P/Q` proof tuple settles as `{S}`. Although neither original receipt survives, the substitute is a positive result caused by both selected ledgers, so the settlement claims some nonempty part of `U(z)={g,h,t}`; D3 decides whether all three must be claimed. |
+
+A/B are mutually exclusive and exhaustive because `K^{claim+}_v` is empty or
+nonempty. Exact positive prevalence, Relic assignments, receipt assignments,
+and claim footprint remain AUTHOR/SPEC or D3; a token B witness is not enough
+for final balance/comprehension acceptance. D1 does not decide empty-result
+claiming, failure retry, later same-tag/different-tag reuse, cross-root use,
+payoff, persistence, or implementation.
+
+Every claim writes only after the complete product evaluation settles. One tag
+cannot claim shared `h` early and invalidate another tag at the same cut.
+Claims are idempotent across callback, retry, reconnect, reload, replay, and
+duplicate delivery. Claim bookkeeping cannot manufacture C135 relationship
+insufficiency. Every claim-capable contract and affected occurrence must be
+legible before the affected players' last reversible commitment and
+attributable afterward; cheap teammate-forced consumption fails. No extra
+combat command or prompt is created: the intended readable realization is one
+ordinary Relic result followed by a visible local evidence-state change.
+
+**Direction answer — selected by Zanzagar on 2026-09-27:** **B, require
+positive-result claim support.** Thus `K^{claim+}_v` is nonempty. The completed
+catalog must contain at least one reachable positive original or substitute
+settlement that, after its whole aligned receipt set commits atomically, makes
+a nonempty part of its selected authoritative causal proof union unavailable
+as evidence to that active Relic.
+
+The canonical occurrences, source ownership, battle history, and availability
+to other roots or Relics remain intact. This is a support promise, not universal
+positive-result consumption: exact prevalence and assignments remain AUTHOR/
+SPEC, and D3 still owns the footprint. D1-B chooses neither empty-result
+claiming nor failed-result recurrence. It is **potentially direct** at this
+boundary because one truthful source occurrence acquires a distinct claimed
+relation to the manifesting Relic while continuing to exist; D3-A can make that
+relation direct locally by selecting the complete causal footprint.
+
+D1 moves to `DIR-SELECTED`; D2 becomes `OWNER-OPEN`. The 109-row register now
+contains 24 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 52 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested D2. The topology audit re-derived
+one empty/nonempty support card, its nonempty ledger-bearing cancellation
+domain, exclusion of the then-assumed true-no-candidate branch, downstream
+dependencies, and register arithmetic. The thirty-eighth prerequisite audit
+later proved that assumed branch unreachable. The gameplay audit recommends A:
+positive manifestations may cash
+proof under D1-B, while a cancellation preserves it. D4—not evidence claim—
+owns whether held relationship truth may receive another distinct evaluation.
+
+### RCS-03C3D2 — ledger-bearing empty-result evidence-claim support — direction selected
+
+Let `Z^0_v` contain the completed canonical product evaluations whose selected
+authoritative contender-ledger tuple is nonempty but whose fixed pair-local
+aligned receipt output is `{}`. Selected E1-C guarantees that this domain is
+nonempty, and F1-A makes each held-fixed denied opportunity single-valued.
+
+For one `z in Z^0_v`, hold the version, combatant, active Relic, cut,
+authoritative state and operative context, bound routing stance, selected
+complete contender-ledger tuple and pair, realized false permission bit,
+treatment law, every non-claim input, and final empty output fixed. Reuse
+`U(z)`, the nonempty deduplicated union of final child occurrences in the
+selected causal ledgers. A cancellation **claims evidence** when, after `{}`
+settles atomically, at least one member of `U(z)` becomes unavailable as
+evidence to this active Relic. Let `K^{claim0}_v` contain those cancellations.
+
+| Choice | Empty-result claim rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — ledger-bearing empty results never claim evidence** | `K^{claim0}_v=∅`. A cancellation settles `{}` without making any occurrence in its selected causal proof union Relic-locally unavailable. Freshness, source-owned clearing, and D4's later recurrence rule still apply. | **Recommended.** Combined with D1-B, A gives one teachable grammar: a visible positive manifestation may cash proof; a severed manifestation produces nothing and preserves the setup. Cancellation gains retained-option value without becoming a free reroll because the Oracle realization is already committed once and D4 separately governs another distinct evaluation. A avoids automatic failure or a teammate-forced false bit silently deleting another player's evidence. Its local standing-ideal role is **neutral/protective**: it preserves truthful distinct causes after no relationship result manifests. | `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` are individually ledger-satisfied, but **Severed Chorus** settles `{}`. `U(z)={g,h,t}` remains otherwise eligible to this Relic; D4 later decides whether unchanged relationship truth can be evaluated again. |
+| **B — require empty-result claim support** | `K^{claim0}_v` is nonempty. At least one ledger-bearing cancellation makes a nonempty part of `U(z)` Relic-locally unavailable despite committing no aligned receipt. B selects neither universal prevalence nor the footprint; D3 remains separate. | B's strongest case is an explicitly sacrificial **Severed Chorus** contract: “the Relic listened once and the refusal scarred what it heard.” This can make refusal consequential across later opportunities, but it is not needed to prevent redraw or retry farming. With automatic invocation it carries the highest opacity and grief risk: another participant may help create the second tag or false permission and burn a setup without producing a receipt. B is at most **partial** ideal fit when the severance relation is prospectively legible; otherwise it is merely punitive consumption. Use B only if a bounded sacrificial archetype remains fun after disclosure, anti-coercion, and matched-value tests. | The same selected `P/Q` tuple settles `{}` and a disclosed sacrificial policy claims a nonempty part of `{g,h,t}` afterward. D3 decides whether every claim must take all three. A true no-candidate invocation can never use this rule. |
+
+A/B are mutually exclusive and exhaustive because `K^{claim0}_v` is empty or
+nonempty. Universal versus mixed cancellation-claim prevalence and exact
+assignments remain AUTHOR/SPEC; complete-union versus proper-subset footprint is
+D3. A true no-candidate invocation has no selected complete contender-ledger
+tuple and no defined `U(z)`, so burning partial matches would require a new
+failed-proof identity boundary rather than a hidden D2 branch.
+
+D2 does not choose retry or reattempt. One Oracle opportunity already receives
+one committed realization with no redraw; callback, reload, reconnect, replay,
+or duplicate delivery cannot resample it. D4 later decides whether a genuinely
+distinct evaluation may occur while authored relationship sufficiency remains
+continuous. Under B, every empty-claim-capable contract and affected occurrence
+must be legible before each affected player's last reversible commitment and
+attributable after settlement; a cheap unilateral teammate action that forces
+the false bit or qualifying pair and thereby claims another player's evidence
+fails. Every claim remains atomic, idempotent, Relic-local, and unable to delete
+canonical occurrence truth or counterfeit C135 insufficiency.
+
+If D2-A later creates a dominant free-option policy under D4's completed
+recurrence rule, reopen guarded B only for a bounded prospectively named
+sacrificial archetype. If B cannot remain legible and independently desirable
+without compensation bribery, cheap coercion, or negative-proc clutter, fall
+back to A.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A,
+ledger-bearing empty results never claim evidence.** Thus
+`K^{claim0}_v=∅`. Every cancellation with a selected complete contender-ledger
+tuple settles `{}` without making any member of its causal union Relic-locally
+unavailable. Freshness, source-owned clearing, and D4's later recurrence rule
+remain operative.
+
+Together with D1-B, the selected rule is: a positive manifestation may cash
+proof; no manifestation preserves it. This does not grant a redraw or held-
+truth retry. The opportunity's committed Oracle realization and settlement are
+idempotent, while D4 separately owns whether another distinct evaluation may
+occur. D2-A is **neutral/protective** standing-ideal fit because it preserves
+the truthful distinct causes after no aligned relation manifests.
+
+D2 moves to `DIR-SELECTED`; D3 becomes `OWNER-OPEN`. The 109-row register now
+contains 23 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 53 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested D3. The topology audit proved that
+every nonempty claim footprint is either the complete deduplicated selected-
+ledger union or a proper nonempty subset; no third topology survives. The
+gameplay audit recommends A. Authoritative tuple routing already supplies
+proof-selection buildcraft, and full-union claiming makes the chosen tuple's
+entire causal cost honest without adding a second hidden cherry-pick surface.
+
+### RCS-03C3D3 — claimed-proof footprint — direction selected
+
+Under D1-B/D2-A, the claim domain is nonempty and positive-only:
+`K^{claim}_v=K^{claim+}_v` and `K^{claim0}_v=∅`. For each claiming settlement
+`z`, let `C(z)` be the nonempty set of final child occurrences that become
+unavailable as evidence to the active Relic. Existing boundaries require
+
+`∅ != C(z) subseteq U(z)`,
+
+where `U(z)` is the deduplicated union of final child occurrences in the
+selected authoritative causal ledgers. An exact shared occurrence counts once;
+distinct related occurrences remain distinct. For a positive substitute
+`{S}` or `{S1,S2}`, `U(z)` still comes from both original selected contender
+ledgers rather than invented substitute proofs.
+
+| Choice | Claim-footprint rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every claim takes the complete selected-ledger union** | For every claiming settlement `z`, `C(z)=U(z)`. This says full footprint whenever a claim occurs, not that every positive settlement claims; D1-B still leaves claim prevalence and assignments open. | **Recommended.** A makes the selected authoritative tuple the honest causal cost: choose the proof route whose whole consequence you accept. It preserves existing Dissonance/Chorus routing buildcraft without adding a second post-route proof-cost optimizer, blocks cheap-leaf and preserved-hub laundering, and is simplest to animate—highlight the causal inputs, commit the result, then grey all highlighted inputs once. A is **direct** ideal fit locally: the complete distinct causal weave participates in one result and acquires one Relic-local claimed relation while every occurrence retains identity, source ownership, and history. Cost: elaborate multi-source setups are fully cashed and may chain less often. | `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` give `U(z)={g,h,t}`. If `{P,Q}`, fused `{S}`, or reconstituted `{S1,S2}` is a claiming result, A claims `g,h,t` after the whole output commits; shared `h` is claimed once. |
+| **B — require proper-subset claim support** | At least one claiming settlement has `∅` strictly contained in `C(z)` strictly contained in `U(z)`, with the subset law fixed prospectively. B includes all-partial and mixed full/partial catalogs; it selects no exact prevalence or mapping. | B's strongest case is a named **fuel-versus-witness** law: shared `Heat h` is the consumable catalyst while `Guard g` and `Return t` remain historical witnesses. That can preserve combo continuity and become **potentially direct** when the differentiated causal role is intrinsic and legible. Unguarded B instead adds hidden footprint routing, preserves valuable hubs by burning cheap leaves, or selectively burns a teammate's rare contribution. Use B only with a tiny closed semantic-role vocabulary, no post-result chooser, and proof that the partial rule remains more readable and fun than reducing which positive contracts claim under D1-B. | The same claiming result prospectively claims only `{h}` while retaining `{g,t}`, or claims `{g,t}` while retaining `{h}`. It may not claim one ledger's “copy” of shared `h`, because only one canonical `h` occurrence exists. |
+
+A/B are mutually exclusive and exhaustive because the claim domain is nonempty:
+either every `C(z)` equals `U(z)`, or at least one `C(z)` is a proper nonempty
+subset. Universal proper-only support and mixed full/proper support both belong
+to B; exact prevalence and masks remain AUTHOR/SPEC. `C(z)=∅` is no claim, not
+a third footprint.
+
+Only final children in the selected authoritative tuple are claimable.
+Unselected alternate ledgers, lineage ancestors or siblings, hidden compound
+members, other roots, Relics, combatants, and owners remain outside `U(z)`.
+Shared occurrences deduplicate; a compound final child cannot be peeled into
+hidden member sites. Every claim writes after the whole receipt set commits,
+is atomic/idempotent/permutation-invariant, and changes only active-Relic
+eligibility—not canonical truth, source state, future occurrences, or custody.
+
+Any B subset law must be total under fixed inputs, prospectively disclosed,
+and unable to inspect payoff or choose the cheapest, freshest, or most valuable
+proof after settlement. Cheap teammate contender injection or positive-result
+coercion that forces another player's expensive proof into a claim mask fails.
+If full-union claims suppress satisfying chains in human playtests, first reduce
+which positive contracts claim under D1-B. Use guarded B only if a real fuel/
+witness archetype still needs partial treatment; if its role cannot be
+forecast, animated, and kept free of hub/cheap-proof exploits, fall back to A.
+
+Under A or B, D3 moves to `DIR-SELECTED` and D4 becomes `OWNER-OPEN`. The
+register then contains 22 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 54
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, every claim
+takes the complete selected-ledger union.** Thus `C(z)=U(z)` for every claiming
+settlement. The rule applies only when a positive settlement actually claims;
+D1-B still leaves exact claim prevalence and assignments to AUTHOR/SPEC.
+
+Every final child occurrence in the selected authoritative causal tuple becomes
+unavailable as evidence to that active Relic after the complete output commits.
+Exact shared children count once, distinct related children remain distinct,
+and a fused `{S}` or reconstituted `{S1,S2}` output retains both original
+selected causal ledgers. No ancestor, sibling, hidden compound member,
+unselected alternate ledger, other root, Relic, combatant, or owner enters the
+claim. This is **direct** local standing-ideal fit: one complete causal weave
+acquires one Relic-local claim relation while each occurrence preserves its
+distinct identity, source ownership, and history.
+
+D3 moves to `DIR-SELECTED`; D4 becomes `OWNER-OPEN`. The 109-row register now
+contains 22 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 54 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested D4. They found no need to split the
+registered row, but they did find that its old shorthand, “failed-result
+recurrence,” was overbroad. A true no-candidate invocation has no selected
+complete contender pair or failed-proof identity to key; silently including it
+would invent a new readiness-identity system. D4 therefore narrows to
+ledger-bearing `{}` cancellations and uses one canonical pair-level key. This
+scope correction changes no row count.
+
+### RCS-03C3D4 — ledger-bearing empty-settlement held-pair reattempt support — direction selected
+
+Reuse nonempty `Z^0_v`, the completed product evaluations with a nonempty
+selected authoritative contender-ledger tuple and final pair-local output `{}`.
+For `z in Z^0_v`, let `kappa(z)` canonically contain the fixed version,
+combatant, active Relic, operative context, treatment contract, and unordered
+original contender pair `{P,Q}`. Pair order, receipt aliases, internal product-
+evaluator channels, callbacks, and alternate selected ledgers do not create a
+new key. Exact-ledger scope would launder retries by switching proof routes;
+per-tag scope would wrongly suppress `P` in a genuinely different `P/R` pair.
+
+The canonical pair relationship is **continuously sufficient** while the fixed
+context and both contender relationships remain operatively supported after
+every authoritative semantic transition, projecting out bookkeeping whose only
+purpose is claim, cooldown, retry, or recurrence suppression. Alternate lawful
+proof routes may change without ending the interval. Genuine loss of either
+contender relationship, context termination/unavailability, or another
+authoritative state that makes the pair insufficient ends it. A frame, poll,
+callback, log entry, serialization step, duplicate delivery, or repeated
+observation does not.
+
+A **distinct re-evaluation** is one newly authorized product evaluation of the
+same `kappa(z)` at a strictly later semantic cut, with its own coherent current-
+cut evidence read. It is not a redraw of the settled opportunity, delayed or
+duplicate settlement, reload, replay, pair enumeration, routing/alias churn,
+or another internal channel. Let `R^{fail-hold}_v` contain exactly the canonical
+cancellation keys with a fully specified legal history containing initial
+empty settlement `e1` and a later distinct evaluation `e2` inside the same
+continuous-sufficiency interval.
+
+| Choice | Held-pair reattempt rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — one listen per unbroken bond** | `R^{fail-hold}_v=∅`. After a ledger-bearing `{}` settlement, the same canonical pair cannot receive another evaluation until its relationship genuinely becomes insufficient and later sufficient again. A does not guarantee that a post-break reattempt exists. | **Recommended.** A extends C135-A's success grammar to cancellation: one relationship episode produces at most one automatic listen. D2-A preserves the causal evidence, but it does not turn Oracle denial into a heads-win/tails-reroll option. The UI can leave evidence lit while marking the pair `LISTENED — SEVERED`, then explain `Already heard` until a real break. A's marginal recurrence exclusion is **neutral/protective**; the initial Soul–Relic–distinct-source relation may remain **direct**, and universal no-reattempt prevalence is **aggregate**. Costs: an expensive maintained formation may become inert after unavoidable denial, and players may seek a cheap false/true reset. Later authoring and human playtests must reject dominant blink-reset play. | `P={Guard g, Heat h}` and `Q={Return t, the same Heat h}` settle `{}`. D2-A leaves `g,h,t` available. While the same `P/Q` bond stays sufficient, later turns produce no new evaluation or proc flash. Heat becoming authoritatively false ends the interval; rebuilding it may create a later opportunity. |
+| **B — require held-pair reattempt support** | `R^{fail-hold}_v` is nonempty. At least one canonical cancellation key has a legal later distinct evaluation while the same pair relationship remains continuously sufficient. B selects neither universal prevalence, success, a periodic pulse, exact trigger, cadence, nor attempt cap. | B's strongest case is a named maintained-covenant family such as **Echoing Covenant**: after denial, a visible and independently meaningful action like `Temper the Vow` changes a law-relevant fact while the `P/Q` bond stays sufficient, authorizing a genuinely new hearing. That can reward maintaining an expensive formation and is at most **partial** ideal fit across two distinct evaluations of one continuing relation. An unchanged-context timer, Rest, poll, or new random draw is not unity-in-difference. Unguarded B converts probability `p` into eventual success `1-(1-p)^n`, undermines Witness denial, creates automatic proc spam, and lets allies force repeated attempts. Use B only if A produces dominant reset-flicker or intolerably stranded formations and the material retry event remains forecastable, attributable, bounded, and fun; otherwise fall back to A. | After `{}` leaves `g,h,t` intact, a disclosed `Temper the Vow` action spends a meaningful turn/resource while `P/Q` stays true and authorizes `e2`. `e2` may fail again or produce a positive result. Merely ending a turn, changing ledger route, reloading, or asking the same Oracle again cannot qualify. |
+
+A/B are mutually exclusive and exhaustive because `R^{fail-hold}_v` is empty
+or nonempty. Universal and mixed reattempt support both belong to B; exact
+assignments and prevalence remain AUTHOR/SPEC. Retry-until-success, one versus
+many reattempts, cooldown, interval length, and caps remain later cadence and
+specification work. Incomplete reachable-domain analysis is unresolved, not A.
+
+A true no-candidate invocation lies outside D4 because it has no selected
+complete pair/ledger relationship to key. Admitting its recurrence requires a
+new explicit failed-readiness identity boundary. A positive `{P,Q}`, `{S}`, or
+`{S1,S2}` settlement also lies outside D4: D1/D3 govern its claim and C135
+governs recurrence after a receipt commit. A genuinely different pair is not a
+D4 reattempt; later different-tag reuse remains C3F, and cross-root/Relic/
+combatant effects remain RCS-08.
+
+Claim state and the pair-recurrence latch are separate. The latch cannot claim
+evidence, counterfeit relationship insufficiency, or erase canonical truth.
+Every opportunity, evaluation, interval, and pair key must be stable under
+replay and permutation. No callback, reload, duplicate settlement, no-op,
+Rest, hidden timer, routing/ledger churn, or RNG-ordinal movement creates `e2`.
+Cheap teammate coercion after another affected player's last informed
+reversible commitment fails. D4 grants no compensation, side payoff, evidence
+reuse, exact cadence/cap, retry button, persistence scheme, or implementation.
+
+The teaching rule under A is **one listen per unbroken bond**: on `{}`, keep
+evidence icons lit but mark the pair `Listened—Severed`; show `Already heard`
+while truth remains held, `Bond broken` on genuine insufficiency, and `Ready`
+only after lawful renewal. B additionally requires its exact material retry
+trigger and whatever reattempt authorization or budget later authoring supplies
+to be visible before the last reversible commitment. Simulator/RL traces must
+expose the pair key, interval,
+opportunity/evaluation identity, attempt ordinal, selected causal union, Oracle
+coordinate/realization, output, latch/break/renewal, and claim mask; human
+comprehension and fun remain the acceptance test.
+
+Under A or B, D4 moves to `DIR-SELECTED` and C3E becomes `OWNER-OPEN`. D1-B
+guarantees a real positive claim branch, so C3E does not derive away. C3F
+remains `SCREEN` behind C3E. The register then contains 21 `SCREEN`, 1
+`OWNER-OPEN`, 26 `PRUNED`, 55 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 22`. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, one listen per
+unbroken bond, with B retained only as the documented guarded reopening
+fallback.** Thus `R^{fail-hold}_v=∅`. After a ledger-bearing `{}` settlement,
+the same canonical pair cannot receive another evaluation while its pair
+relationship remains continuously sufficient. D2-A leaves its causal evidence
+available, and a genuine insufficiency followed by renewal may create a later
+opportunity; A itself guarantees neither that opportunity nor its success.
+
+The B fallback is not coexistence and establishes no held-pair reattempt support
+in the selected direction. Reopen B only if human tests show A creates dominant
+reset-flicker or intolerably stranded maintained formations and a visible,
+independently meaningful retry event remains forecastable, attributable,
+bounded by later rules, anti-coercive, and independently fun. A timer, poll,
+Rest, no-op, unchanged-context draw, ledger/routing change, callback, or replay
+can never qualify.
+
+D4 moves to `DIR-SELECTED`; C3E becomes `OWNER-OPEN`. The 109-row register now
+contains 21 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 55 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested C3E. They upheld one binary support
+card but corrected an easy identity mistake: “same tag” is the receipt tag that
+actually committed at the claiming settlement. If treatment produced `{S}` or
+`{S1,S2}`, the vanished originals `P/Q` supplied causal provenance but no
+initial receipt commit and therefore cannot own C135's `c1`. No row split or
+count amendment is required.
+
+### RCS-03C3E — same-committed-tag reuse of claimed evidence after valid rearm — direction selected
+
+For any positive settlement `y`, let `K(y)` be its nonempty set of committed
+fixed C135 context/receipt tags `k=(h,j)`; its receipt-label projection is
+`{P,Q}`, `{S}`, or `{S1,S2}`. For claiming settlement `z`, D3-A claims the
+complete deduplicated original selected-ledger union `C(z)=U(z)`, but that
+footprint does not itself assign every claimed occurrence to every committed
+tag. Let `I(y)` be the prospectively authored causal-incidence relation
+containing `(k,x)` when exact committed tag `k in K(y)` is materially caused by
+canonical occurrence `x in U(y)` under the same versioned treatment contract.
+
+For an original `{P,Q}` output, holding the fixed C135 context implicit, the
+selected ledgers supply the natural incidences: with
+`P={Guard g, Heat h}` and `Q={Return t, the same Heat h}`, they are abbreviated
+`(P,g)`, `(P,h)`, `(Q,t)`, and `(Q,h)`. Shared `h` remains one canonical
+occurrence claimed once despite two incidences. For `{S}` or `{S1,S2}`, the
+versioned treatment contract must author the exact output incidences
+prospectively. Neither D3-A nor substitute identity implies `P->S1`, `Q->S2`,
+every `x->every k`, or any preferred-heir partition.
+
+A **same-committed-tag claimed-occurrence reuse witness** is a tuple
+`(z,k,x,e2)` satisfying all of the following:
+
+1. `z` is a claiming positive settlement, `k in K(z)`, and `(k,x) in I(z)`;
+2. after `k` commits at `z`, that exact fixed tag undergoes the selected
+   C135-C155 relationship-insufficiency, renewal, recurrence-authorization,
+   and new-occurrence rearm path;
+3. `e2` is a distinct later authoritative same-`k` commit whose freshly read
+   selected tuple contains the identical canonical occurrence `x`, and
+   `(k,x) in I(e2)` under the same versioned treatment-contract identity; and
+4. `x` would be admissible at `e2` if only this active Relic's prior claim state
+   were projected out: its freshness, source validity, addressability, lineage,
+   and every other selected eligibility rule still hold.
+
+Let `R^{same-reuse}_v` contain the qualifying witnesses. Existing selections do
+not prove this domain nonempty: D1-B proves some claim and C136-A proves each
+tag has some rearm witness, but expiry, source clearing, substitute identity,
+or replacement by fresh occurrences may keep those facts disjoint. Incomplete
+reachable-domain analysis is unresolved, never evidence for A.
+
+| Choice | Same-tag claimed-evidence rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — rearmed results still need fresh proof** | `R^{same-reuse}_v=∅`. In every otherwise-admissible later post-rearm commit of the same exact fixed tag `k`, a canonical occurrence previously claimed through `k` remains ineligible for `k`. Fresh canonical occurrences remain eligible normally; A selects no different-tag rule. | **Recommended.** A preserves D3-A's complete causal price instead of turning claim into a disguised cooldown. Relationship recurrence and evidence economy remain distinct: the bond may genuinely rearm, but its last manifestation already cashed that proof. Teach **“claimed proof stays claimed when its manifested result rearms.”** The original complete weave-and-claim remains **direct** standing-ideal fit; A's continuing exclusion is **neutral/protective**, new proof preserves meaningful distinction between manifestations, and universal no-same-tag-reuse is **aggregate**. Cost: persistent historical evidence may feel like disposable ammunition, and players may repeat an action only to restate an otherwise truthful relation. | `{P,Q}` claims `g,h,t`. Heat later breaks; a material Rekindle creates new Heat `h2` and validly rearms P. Old `g` remains fresh and source-valid, but `(P,g)` is still claimed under A, so P needs a new Guard occurrence `g2`. `h2` is new and was never claimed. Q and C3F remain untouched. |
+| **B — require same-committed-tag reuse support** | `R^{same-reuse}_v` is nonempty. At least one claimed occurrence later supplies the same authored `(k,x)` incidence to the same exact fixed committed tag after that tag's genuine valid rearm. B is an incidence-scoped eligibility exception, never a bulk clearing of `U(z)` or the Relic's claim state. It selects no universal/mixed prevalence, repeat count, cap, or exact family. | B's strongest case is a named history-centered **Remembered Vow**: an enduring truthful occurrence participates again in the same manifested identity after the player pays a meaningful reset and new present-state evidence. That continuity is **partial** across time and locally direct at `e2`. It can keep universal rearm from feeling token, but risks permanent hubs, cheap-leaf reset loops, ally-paid amplification, and an unreadable tag-by-proof eligibility matrix. First reduce which positive contracts claim or improve fresh-proof flow. Use B only if a named persistent-manifestation family remains forecastable, incidence-attributable, non-dominant, bounded by later rules, and teachable without hidden matrices; otherwise fall back to A. | In a guarded P-family, valid P rearm with new `h2` may make old `g` eligible for P again through explicit `(P,g)` permission. The claim record remains; Q receives no permission. If P claims again, re-claiming `g` is idempotent. |
+
+A/B are mutually exclusive and exhaustive because `R^{same-reuse}_v` is empty
+or nonempty. Universal and mixed incidence support both belong to B; exact
+assignments, families, and caps remain AUTHOR/SPEC. No second footprint card is
+needed: test the identical occurrence at the actual later authored output
+incidence. Merely finding `x` somewhere in the later original selected tuple
+does not prove reuse for `k`. Globally clearing all or part of `C(z)` would
+silently select a new claim-reset semantic and is forbidden.
+
+Substitutes retain original `P/Q` provenance without inheriting their commit
+identity. After `{S}`, later S reuse is C3E only when the contract authored
+`x->S` and S itself validly rearms; later P or Q use is C3F. After `{S1,S2}`,
+each substitute needs its own causal incidence and rearm; rearming S1 never
+unlocks S2. Their incidences need not partition one-per-original. Cancellation
+`{}` lies outside C3E because D2-A claims nothing.
+
+Both options preserve canonical occurrence identity. A new `g2` is not old
+`g`, even if both share a semantic label; an alias, sibling, ancestor, hidden
+compound member, new revision, or alternate-ledger route cannot disguise one
+as the other. B cannot refresh C3A age, resurrect expired/source-cleared proof,
+peel compounds, create an occurrence, grant another tag, or affect another
+root, Relic, combatant, or owner. Same-cut fan-out remains C3C; any later use
+under a non-attributed committed tag remains C3F. Persistent payoff is not
+evidence reuse. C3E chooses no claim prevalence/lifetime, exact cap, cadence,
+persistence schema, migration, release, or implementation.
+
+Presentation must keep two layers visible: `original P/Q proof weave ->
+treatment -> committed P/Q, S, or S1/S2`, followed by the claim. Under A,
+claimed canonical occurrences stay grey for the rearmed exact committed tag
+while fresh `g2/h2` occurrences light normally. Under B, show an explicit
+tag-scoped edge such as `S1 Echo eligible`; if that requires a hidden incidence
+matrix or suggests a false `P->S1`, `Q->S2` inheritance, B fails. Simulator/RL
+traces must preserve original contender ledgers, exact committed fixed tags,
+versioned `x->k` causal incidences at both commits, canonical
+occurrence/lineage/source identity, freshness and clearing state, claim link,
+C135 interval and rearm path, later ledger/tag/occurrence identity, reuse
+decision and denial reason, and later output/claim.
+
+Under A or B, C3E moves to `DIR-SELECTED` and C3F becomes `OWNER-OPEN`. The
+register then contains 20 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 56
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, rearmed
+results still need fresh proof.** Thus `R^{same-reuse}_v=∅`. In every
+otherwise-admissible later post-rearm commit of the same exact fixed tag `k`,
+a canonical occurrence previously claimed through `k` remains ineligible for
+`k`. A genuinely new occurrence remains eligible normally. This selects no
+later non-attributed-incidence rule, clears no claim state, and changes no
+freshness, source-validity, or target recurrence rule.
+
+C3E moves to `DIR-SELECTED`; C3F becomes `OWNER-OPEN`. At that selection
+checkpoint, the 109-row register contained 20 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 56 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`. The authoritative
+decision record remains unchanged.
+
+Two read-only named-claim audits then tested C3F. Both broke the old
+“different-tag” shorthand: C3E partitions by a canonical occurrence's prior
+causal incidences, not merely by receipt-label inequality. A tag may have
+co-committed earlier without that occurrence causing it. C3F must therefore
+own every later **new incidence** inside the same active Relic.
+
+**Pre-commit corrections — two final verifiers broke two successive C3F
+drafts.** The first draft correctly made support empty/nonempty, then silently
+required every B
+realization to be one disclosed, one-use hop consumed on first admission even
+when treatment produced a substitute or `{}`. Those are additional product
+choices, not consequences of nonempty support. Worse, `{}` commits no target
+incidence and a substitute may commit a tag other than the intended target, so
+the draft could not lawfully add that intended target to attribution history.
+The first repair then made two more silent choices: it treated every successful
+new incidence as a claim even though D1-B does not make claiming universal, and
+it removed the fresh-co-proof requirement without routing it. The register is
+therefore amended by five counted, B-only follow-ups: successful nonclaiming-
+target recurrence, fresh post-claim co-proof, propagation topology, and
+separate positive-substitute and empty-settlement authorization dispositions.
+C3F itself remains the exhaustive support question.
+
+### RCS-03C3F — later non-attributed-incidence reuse of claimed evidence — A selected
+
+For a claimed canonical occurrence `x`, let `z0(x)` be the first positive
+settlement that created its still-operative claim state in this ruleset version,
+combatant, and active persistent Relic instance/root. Later idempotent claims
+of `x` do not move this epoch. Claim clearing is forbidden, so `z0(x)` is
+immutable for this claim episode. For `x in C(z0)=U(z0)`, define its initial
+episode attributed-tag set
+
+`A_z0(x)={k in K(z0):(k,x) in I(z0)}`.
+
+More generally, `A^-_e(x)` is the monotone set of exact fixed C135
+context/receipt tags to which this already-claimed `x` has been causally
+attributed by the same active Relic from `z0(x)` through the cut before later
+event `e`; it starts at `A_z0(x)`. Older pre-`z0` attribution remains in
+canonical history but not in this claim episode. Let
+`A^{claim,-}_e(x)` be its subset whose incidences occurred in settlements that
+actually claimed `x`. Immediately after `z0`, both contain `A_z0(x)`.
+C3E-A controls later use of a target in `A^{claim,-}_e(x)`. C3F controls the
+first incidence to a target outside `A^-_e(x)`. Later recurrence through a
+successful but nonclaiming target in
+`A^-_e(x) setminus A^{claim,-}_e(x)` belongs to F1 rather than being silently
+treated as C3E-A.
+
+A **later non-attributed-incidence reuse witness** is a tuple
+`(z0,x,ℓ,e2)` satisfying all of the following:
+
+1. `z0=z0(x)` is the immutable claim-episode anchor and `x in C(z0)`;
+2. `e2` is a strictly later authoritative positive settlement in the same
+   ruleset version, combatant, and active persistent Relic instance/root;
+3. `ℓ` is an exact fixed C135 context/receipt tag committed at `e2`, with
+   `ℓ∉A^-_{e2}(x)` immediately before that settlement;
+4. the freshly read selected tuple at `e2` contains the identical canonical
+   occurrence `x`, and `(ℓ,x) in I(e2)` is prospectively authored by the
+   target treatment contract; and
+5. if only this active Relic's prior claim state were projected out, `x` would
+   still pass freshness, source validity, addressability, canonical identity,
+   complete-lineage/accounting identity, treatment, and target-tag recurrence.
+
+Let `R^{new-inc}_v` contain those witnesses. “New incidence” does not require
+that `ℓ` was absent from `K(z0)`. With `P={Guard g, Heat h}` and
+`Q={Return t, the same Heat h}`, natural attribution gives
+`A_z0(g)={P}`, `A_z0(h)={P,Q}`, and `A_z0(t)={Q}`. If P and Q co-commit, later
+`(Q,g)` is C3F because Q never received that incidence at `z0`; later `(P,g)`
+and either P/Q use of shared `h` remain blocked by C3E-A.
+
+| Choice | Later new-incidence rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — claimed proof is spent across this active Relic** | `R^{new-inc}_v=∅`. While this active Relic's claim remains operative, the claimed canonical occurrence cannot acquire any later causal incidence outside its prior attributed-tag set. Combined with C3E-A, it is unavailable to every later result incidence of this active Relic. | **Recommended.** A makes D3-A's complete-union claim one readable state—**claimed by this Relic**—rather than a tag-by-proof exception matrix. It prevents persistent hubs, cheap fresh leaves, ally-paid amplification, repeated Oracle probes, and outcome shopping from laundering the causal price. The original full weave/claim remains **direct** standing-ideal fit; this later exclusion is **neutral/protective**, and Relic-wide prevalence is **aggregate**. Cost: elaborate history is fully cashed by one claiming manifestation, which can suppress satisfying sequential builds and ask players to repeat a still-truthful deed. | P and Q claim `g,h,t`. Later distinct R would use old `g` plus fresh Vow `v`. A keeps `g` grey for the whole active Relic, so R needs a new Guard `g2`; another Relic's use remains RCS-08. |
+| **B — permit at least one later new incidence** | `R^{new-inc}_v` is nonempty. At least one claimed canonical occurrence later supplies one prospectively authored incidence to an exact target tag outside its prior attributed-tag set. The claim remains; B is a scoped eligibility exception, never a bulk reset. Universal/mixed prevalence, exact directed edges, and catalog assignments remain AUTHOR/SPEC. | B's strongest candidate is a named, visible **Echo Thread**: the same remembered deed truthfully causes a genuinely different later manifestation. At `e2`, identical `x` and distinct target `ℓ` participate **directly**; continuity across settlements is **partial**; support existence is **aggregate**. This is the more vivid Souls and Simulacra countercase, but B alone does **not** decide fresh co-proof, propagation, successful nonclaiming recurrence, or unsuccessful/substitute attempt disposition. Those are not smuggled in as safety rules. | P claims `g`. B says at least one later target—perhaps R—may receive an authored `(R,g)` incidence. It does not yet say whether R's success claims or independently latches g, whether fresh Vow `v` is required, whether g may also reach T or propagate onward, or what an R attempt ending in a substitute or `{}` consumes. Five B-only follow-ups resolve those questions before C3D. |
+
+A/B are mutually exclusive and exhaustive because `R^{new-inc}_v` is empty
+or nonempty. A target that co-committed at `z0` but lacked `(ℓ,x)` belongs to B's
+domain; choosing some different source tag cannot relabel an incidence already
+in `A^-_e(x)`. A new occurrence `x2`, alias, sibling, ancestor, hidden compound
+member, new root, changed configuration/version, or equivalent semantic label
+is not identical `x`. Mere presence in a later ledger is insufficient without
+the prospectively authored `(ℓ,x)` output incidence.
+
+If B is selected, resolve these counted rows one at a time before C3D:
+
+| Row | B-only boundary | Why it is not already decided |
+| --- | --- | --- |
+| `RCS-03C3F1` | **Successful nonclaiming-target recurrence:** after an actual C3F incidence commits without claiming `x`, does that incidence itself latch the target against later post-rearm reuse, does claim remain the only latch, or may disclosed families coexist? | C3E-A requires a claiming settlement. Attribution without claim cannot inherit its exclusion silently; later same-target use is no longer a new-incidence C3F witness. If no reachable C3F success is nonclaiming, this row prunes vacuously. |
+| `RCS-03C3F2` | **Fresh post-claim co-proof requirement across reuse admissions:** must every B-enabled admission—both a first-incidence C3F attempt and any F1-permitted same-target repeat—include at least one independently eligible canonical occurrence originated after `z0`, or may at least one supported admission proceed without one? | Normal target-ledger validity does not decide this relative-time requirement. It materially separates “old deed plus new act” from autonomous persistent-hub play; exact first/repeat prevalence remains AUTHOR/SPEC after the support choice. |
+| `RCS-03C3F3` | **Claimed-occurrence first-attribution propagation topology across later settlements:** terminal single transition, finite nonbranching successor path, or finite branch-capable DAG. | Vertices are the monotone per-`z0` attribution states `A^-_e(x)`. Each edge is one authoritative positive settlement and adds its nonempty atomic set of newly committed target incidences; within-settlement one/two-tag treatment remains inherited rather than being re-decided here. Realized paths are acyclic even if catalog tag labels have reciprocal routes. The root is `A_z0(x)`, including an empty set for an initially unattributed `x`; same-target recurrence stays in F1. |
+| `RCS-03C3F4A` | **Positive-substitute relay-attempt authorization disposition:** preserve all applicable authorization, consume all, or support disclosed coexistence when `x` is admitted but the intended tag does not commit and positive substitute tag(s) do. | Only actual authored substitute incidences enter `A^-`; disposition of separate unused/intended authorization is independent. If this reachable domain is empty, the row closes vacuously. |
+| `RCS-03C3F4B` | **Empty-settlement relay-attempt authorization disposition:** preserve all applicable authorization, consume all, or support disclosed coexistence when `x` is admitted and final output is `{}`. | `{}` contributes no committed tag or incidence, and D2-A's no-claim rule does not decide separate relay authorization. If this reachable domain is empty, the row closes vacuously. |
+
+`RCS-03C3F4` is only a non-counting grouping label for F4A/F4B. The two
+dispositions stay separate for the same reason positive and empty claim support
+were separated at D1/D2. Exact authorization storage and authored catalog edges
+remain SPEC/AUTHOR only after these player-facing choices are fixed.
+
+Several constraints are already derived and do not need more owner cards. An
+actual committed `(k,x)` adds only `k` to the atomic, idempotent post-settlement
+attribution state and therefore to `A^-_{e'}(x)` at every later cut `e'`; it
+enters `A^{claim,-}_{e'}(x)` only when that settlement actually claims `x`.
+C3E-A forbids successful post-rearm reuse only for the latter set; F1 owns the
+former set's recurrence rule. The fixed-version tag catalog makes the first-
+attribution graph finite. Alias, replay, same-cut, and cross-root laundering;
+claim clearing; age refresh; source resurrection; post-outcome edge selection;
+and bypass of whatever recurrence rule is selected remain forbidden. By
+contrast, fresh post-claim co-proof, a one-hop cap, and consumption on a
+noncommitting attempt are **not** derived and are not selected by C3F-B.
+
+A prospective positive substitute `(S,x)` is classified from its pre-
+settlement state. If `S∉A^-_e(x)`, an allowed commit is a first-attribution
+transition for F3. If `S∈A^{claim,-}_e(x)`, C3E-A bars it; if
+`S∈A^-_e(x) setminus A^{claim,-}_e(x)`, F1 decides it. Every incidence that
+actually commits enters the post-settlement attribution state and thus every
+later `A^-_{e'}(x)`; it enters every later `A^{claim,-}_{e'}(x)` only if that
+settlement claims `x`. F4A separately controls only the unused/intended
+authorization whose target did not commit.
+
+For fused `{S}`, if `(S,g)` was authored at `z0`, later P/Q/R use of `g` is
+C3F; B may support an authored later incidence but may not silently restore
+P/Q. For `{S1,S2}`, if `g` was attributed only to S1, later `(S2,g)` is
+C3F even though S2 co-committed, while later `(S1,g)` remains C3E-A. No
+`P->S1`, `Q->S2`, or one-substitute-per-original mapping is inferred.
+Cancellation `{}` originates no C3F claim because D2-A claims nothing.
+
+Ally-origin evidence may remain inside C3F when the consuming active Relic is
+unchanged; ownership and payment stay with the ally. Any other active Relic
+instance/root or combatant, or any cross-root amplification, remains RCS-08.
+C3F cannot refresh C3A age, resurrect cleared evidence, bypass target
+recurrence, alter canonical truth or source custody, create payoff, or turn
+contract rebinding/migration into reuse. Subsequent claiming settlements still
+take D3-A's complete union.
+
+Presentation under A greys the occurrence once as `CLAIMED BY THIS RELIC`.
+B cannot receive a final UI promise until F1-F4B close; an Echo Thread with
+one occurrence, arrow, target, and use is an illustrative candidate, not a
+silently selected topology. Every B UI must preserve the original
+`P/Q proof weave -> treatment -> committed P/Q, S, or S1/S2` provenance.
+Simulator/RL traces must preserve canonical occurrence/root/source owner,
+immutable `z0`, `U(z0)`, claim link, `K(z0)`, `I(z0)`, `A^-_e(x)`,
+`A^{claim,-}_e(x)`, actual target incidence, fresh-co-proof identity/time/payer,
+separate relay-
+authorization state, admission, outcome, disposition, and denial reason. Human
+prediction and attribution remain the fun/comprehension test; agent performance
+cannot establish them.
+
+The corrected register contains 114 rows: 25 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 56 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 26`. Under A, all five B-only rows prune and RCS-03D opens, yielding
+19 `SCREEN`, 1 `OWNER-OPEN`, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`. Immediately under B, applicable F1
+opens while the other four rows wait: 24 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 25`. If no reachable C3F success is nonclaiming, F1 instead prunes
+and F2 opens: 23 `SCREEN`, 1 `OWNER-OPEN`, 27 `PRUNED`, 57 `DIR-SELECTED`, 4
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`. After every applicable
+B-only child closes, RCS-03D opens at `Phi_SR = 20`. The authoritative decision
+record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, claimed proof
+is spent across this active Relic.** Thus `R^{new-inc}_v=emptyset`. From the
+immutable first operative claim epoch `z0(x)` until that claim episode ends,
+the same claimed canonical occurrence cannot acquire a later causal incidence
+to any exact target tag outside `A^-_e(x)` in the same active persistent Relic.
+Together with C3E-A, it is unavailable to every later result incidence of that
+Relic. A genuinely new occurrence remains eligible. Pre-`z0` history remains
+canonical but lies outside this claim episode; same-cut use remains C3C and
+another Relic/root/combatant remains RCS-08.
+
+C3F moves to `DIR-SELECTED`. `RCS-03C3F1`, `RCS-03C3F2`,
+`RCS-03C3F3`, `RCS-03C3F4A`, and `RCS-03C3F4B` move to `PRUNED` because
+their qualifying B-only relay domain is empty. At the pre-amendment checkpoint,
+the 114-row register therefore contained 19 `SCREEN`, 1 `OWNER-OPEN` at old
+RCS-03D, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 20`. The authoritative decision record remains
+unchanged.
+
+> **Thirty-sixth prerequisite correction, 2026-09-28 — old RCS-03D was
+> overcompressed.** Three independent read-only audits agreed that its register
+> label named only transformation-cause eligibility even though RCS-03A's
+> preserved scope expressly assigned cause, direction, adjacency, clearing,
+> and reversibility to it. A final cause-order audit then broke the proposed
+> five-family partition: an actual Relic-local claim write follows the positive
+> receipt commit and is an independently authoritative possible cause. A
+> separate dialect audit broke the proposal to leave a proper-subset cause
+> mapping wholly to authoring: state-supporting and boundary-supporting Relics
+> transform different persistent coordinates, so excluding either entire
+> dialect changes legal proposals and state transitions.
+>
+> At that checkpoint, old `RCS-03D` became a non-counting parent for sixteen
+> registered rows:
+> six cause-prevalence rows, one proper-branch dialect-incidence child for each,
+> and four transition-topology rows. This was the first repaired boundary used
+> by the pass; the thirty-seventh correction below supersedes its incomplete
+> cause-family list without undoing any selected direction:
+>
+> | Row | Atomic boundary | Dependency |
+> | --- | --- | --- |
+> | `RCS-03D1P` | Positive committed-settlement transformation-cause prevalence | follows C3F-A; first active row |
+> | `RCS-03D1P1` | State/boundary transformation-dialect incidence for proper positive-settlement support | only D1P-C; otherwise pruned |
+> | `RCS-03D1C` | Actual Relic-local evidence-claim-write transformation-cause prevalence | follows D1P and applicable P1 |
+> | `RCS-03D1C1` | State/boundary dialect incidence for proper claim-write support | only D1C-C; otherwise pruned |
+> | `RCS-03D1Z` | Ledger-bearing `{}` cancellation-settlement transformation-cause prevalence | follows D1C and applicable C1 |
+> | `RCS-03D1Z1` | State/boundary dialect incidence for proper cancellation support | only D1Z-C; otherwise pruned |
+> | `RCS-03D1N` | Then-hypothesized true-no-candidate invocation transformation-cause prevalence; later derived unreachable | followed D1Z in this superseded list |
+> | `RCS-03D1N1` | State/boundary dialect incidence for proper no-candidate support | later pruned because D1N's domain is empty |
+> | `RCS-03D1X` | Independent non-evaluation combat-semantic event transformation-cause prevalence | follows D1N and applicable N1 |
+> | `RCS-03D1X1` | State/boundary dialect incidence for proper independent-event support | only D1X-C; otherwise pruned |
+> | `RCS-03D1M` | Dedicated evolution/reconfiguration-operation transformation-cause prevalence | follows D1X and applicable X1 |
+> | `RCS-03D1M1` | State/boundary dialect incidence for proper operation support | only D1M-C; otherwise pruned |
+> | `RCS-03D2` | Direct-versus-staged nonclear assignment adjacency topology | follows all applicable D1 rows |
+> | `RCS-03D3` | Direct reverse-edge support among nonclear adjacent assignments | follows D2 |
+> | `RCS-03D4` | Explicit clear-to-unassigned support | follows D3 |
+> | `RCS-03D5` | Eventual nonclear return/reversibility topology | follows D4 and all cause rows |
+>
+> For every cause family `F`, its parent classifies the subset `D_F` of all
+> transforming definitions `D_mut`: empty, the whole domain, or nonempty
+> proper. A proper branch then separately chooses state-dialect only,
+> boundary-dialect only, or nonempty support in both dialects. Exact definition
+> identities, trigger catalogs, edge maps, durations, counts, and within-dialect
+> prevalence remain AUTHOR/SPEC/TUNE. The six cause subsets must jointly cover
+> `D_mut`; an otherwise selectable branch with no total versioned assignment is
+> pruned rather than interpreted as an uncaused transformation.
+>
+> P, C, Z, and N are distinct ordered semantic loci: the actual positive receipt
+> set commits; any selected evidence claim then writes; a ledger-bearing `{}`
+> commits no receipt and no claim under D2-A; and a true no-candidate invocation
+> has neither selected contender tuple nor causal union. X covers an already
+> meaningful independent combat/source/relationship event rather than an
+> evaluation result. M covers the existence of a dedicated semantic evolution
+> or reconfiguration operation; RCS-03E still owns transformation agency and
+> proposal approval, while RCS-13 owns operation initiation and lock horizon.
+> A semantic expiry is X when it is an
+> independently existing event and M when it initiates such an operation; it
+> is not a seventh cause family. Bare encounter/Circuit cuts remain inert under
+> C131-A/C132-A. Reward/acquisition, cross-root/team force, migration/repair,
+> collision, and committed identity remain RCS-09/RCS-08/RCS-15-16/RCS-04A/
+> RCS-04B respectively.
+>
+> Replacing one counted row with sixteen adds fifteen. After C3F-A, the repaired
+> register contains 129 rows: 34 `SCREEN`, 1 `OWNER-OPEN` at D1P, 31 `PRUNED`,
+> 57 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+> Closing each cause parent plus its child, by selection or pruning, opens D2 at
+> `Phi_SR = 23`; D2-D5 then open one at a time, and RCS-03E opens at
+> `Phi_SR = 19`. The added slots expose decisions already promised by old D;
+> they add no result, source, payoff, Relic slot, or implementation mechanic.
+
+### RCS-03D1P — positive committed-settlement transformation cause — B selected
+
+Let `D_mut` be the completed fixed-version transforming Relic definitions under
+RCS-03A-C, partitioned into nonempty state-supporting `D_S` and boundary-
+supporting `D_B`. A **positive-settlement transformation-cause witness** for
+definition `d` contains the same active persistent Relic instance in current
+operative assignment `a`, one authoritative cut-atomic evaluation `z`, and one
+prospectively authored persistent-transition proposal such that:
+
+1. `z` commits a nonempty final receipt set after all selected permission and
+   treatment rules—actual original tag(s) `P/Q` or actual substitute tag(s)
+   `S/S1/S2`;
+2. the complete actual settlement identity, not a provisional candidate,
+   intended tag, partial contender, animation, callback, or later payoff,
+   satisfies the versioned cause contract;
+3. intervening only on the prospectively versioned P-locus cause edge, while
+   holding the actual committed settlement and every other completed-trace fact
+   fixed, removes this proposal; transitive ancestry or coincidence is not a
+   witness;
+4. the proposal names a materially distinct legal assignment `a'` of the same
+   RCS-03A dialect and same Relic instance; and
+5. the current assignment remains authoritative. D1P creates a proposal only;
+   RCS-03E, RCS-04A, and RCS-04B still decide authority, collision, and the
+   identity of any committed output.
+
+Let `D_P` contain definitions with at least one such reachable witness.
+
+| Choice | Positive-result cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — successful manifestations never cause persistent transformation** | `D_P=emptyset`. Positive Relic results may still pay off, claim evidence, and recur under the selected rules, but the result commit itself never proposes a remembered-condition or remembered-attunement change. | A gives the sharpest separation between combat payoff and artifact biography. It avoids success-farming and automatic proposal spam, and leaves scars, silence, lived events, or deliberate operations available through later cause rows. The cost is that a Relic's own successful relationship never directly shapes what that Relic becomes; biography may feel menu-driven or externally imposed. The marginal ideal fit is neutral/protective. | Ashen in `Mercy` commits Covenant receipt P. P resolves normally, but no `Defiance` proposal can cite that commit as its cause. A later claim, cancellation, combat event, or operation may still qualify if its own row permits it. |
+| **B — every transforming Relic has at least one positive-result cause path** | `D_P=D_mut`. Every state-supporting and boundary-supporting definition has at least one reachable prospectively authored positive settlement that proposes a materially distinct assignment. This does **not** mean every result transforms, every edge uses this cause, or the proposal commits automatically. | **Recommended.** B gives one learnable rule across the system: **a Relic can be changed by what it successfully manifests**. At the exact cause/proposal boundary, the same Relic, its current relationship, its actual result, and a distinct proposed memory participate **directly**; the eventual across-time transformation remains **partial**, and universal definition prevalence is **aggregate**. B avoids C's hidden “truly evolving” caste while retaining authored variety. Risks are cheapest-recipe farming, success snowball, ally steering, proposal spam, and opaque substitute causation; later agency, adjacency, power, lock, and evaluation gates must reject those failures. | Ashen's actual `P` from Guard `g` plus ally Heat `h` may show `P -> DEFIANCE PROPOSED`. Dreamglass in `Oath` may have an authored denied-pair substitute `S` whose **actual** commit shows `S -> ECHO ATTUNEMENT PROPOSED`. Neither assignment changes until later authority resolves it. |
+| **C — positive-result-shaped and otherwise-shaped Relics coexist** | `D_P` is a nonempty proper subset of `D_mut`. At least one transforming definition has a qualifying positive cause and at least one has none. D1P1 then decides whether positive support occurs only in the state dialect, only in the boundary dialect, or in both. | C can give distinct archetypes genuinely different biographies: some learn from manifestation while others change only through rupture, silence, world events, or deliberate rites. Its local positive witnesses retain B's direct fit, but coexistence is only aggregate. The cost is a second causal language and a hidden premium taxonomy unless the distinction is disclosed, strategically meaningful, and non-dominated. | Ashen may learn from P while another named Relic never can. D1P alone may not silently decide that all remembered-condition Relics behave one way and all remembered-attunement Relics another; C's child owns that dialect boundary. |
+
+A/B/C are exhaustive because `D_P` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. A positive substitute counts through its
+actual fixed substitute tag only; no `P->S1`, `Q->S2`, or intended-output
+inheritance is inferred. `{}` and true no-candidate invocations belong to Z and
+N, not P. An actual evidence claim is a later ordered authoritative write and
+belongs to C even when the same settlement also creates a P proposal; any two
+proposals remain distinct inputs to RCS-04A.
+
+The cause law is bound prospectively and every proposal identity is atomic and
+idempotent. Reload, replay, duplicate delivery, callbacks, or a second rendering
+cannot mint another copy. An ally may supply proof while retaining ownership
+and payment; that grants no transformation approval. C3F-A spends claimed
+occurrences across this active Relic but does not prevent fresh-proof farming or
+nonclaiming positive settlements, so it is not a D1P balance proof.
+
+At the semantic/proof level, eventual presentation must distinguish an actual
+result from a merely proposed transformation and make the old assignment,
+proposed assignment, actual committed tag(s), and causal contributors
+reconstructable without implying that state already changed. Exact copy,
+layout, timing, and surface contract remain RCS-02/SR-10 work. Simulator/RL
+traces must preserve settlement ID, actual final tag set, pre-state,
+cause-contract identity/version, proposal ID/target, source contributors, and
+later approval/collision/disposition. Exact trigger and target catalogs,
+frequency, caps, claim predicates, payoff, balance, UI realization,
+persistence schema, and release content remain later work. The authoritative
+decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **B, every
+transforming Relic has at least one positive-result cause path.** Thus
+`D_P=D_mut`. Every completed state-supporting and boundary-supporting Relic
+definition must have at least one reachable, prospectively authored nonempty
+final receipt commit that causes a materially distinct persistent-transition
+proposal for that same active Relic. This is an aggregate definition-level
+promise: it does not make every result transformative, put this cause on every
+edge, approve any proposal, or select exact triggers, targets, frequency, or
+power.
+
+D1P moves to `DIR-SELECTED`. `RCS-03D1P1` moves to `PRUNED` because universal
+support necessarily reaches both nonempty transformation dialects and leaves
+no proper-subset dialect incidence to choose. `RCS-03D1C` becomes the sole
+`OWNER-OPEN` row. The 129-row register now contains 32 `SCREEN`, 1
+`OWNER-OPEN`, 32 `PRUNED`, 58 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 33`. The authoritative decision record remains
+unchanged.
+
+Two read-only named-claim audits then tested D1C. The consistency audit upheld
+the later actual claim write as a separate, prerequisite-ready cause locus:
+D1P-B guarantees one positive-commit path per definition but neither makes
+every positive settlement causal nor makes a later claim write causal. The
+gameplay audit recommends A. Claiming already spends the complete selected
+proof union for this active Relic, while D1P-B already gives every definition
+a success-shaped biography; a second universal cause channel would add
+double-proposal and collision burden without strengthening the standing ideal.
+C remains a guarded reopening for a disclosed Scar/Vow archetype whose fun
+cannot be represented honestly by the earlier receipt cause.
+
+### RCS-03D1C — actual evidence-claim-write transformation cause — A selected
+
+Let `D_C` contain each definition in `D_mut` with at least one reachable
+**claim-write transformation-cause witness**. Such a witness contains the same
+active persistent Relic instance in current operative assignment `a`, one
+completed positive evaluation `z`, its later authoritative Relic-local claim
+write, and one prospectively authored persistent-transition proposal such
+that:
+
+1. the complete actual positive receipt set has already committed atomically,
+   and every P-locus proposal from that commit is already a distinct ordered
+   fact;
+2. under selected C3D1-B/C3D3-A, `z` actually writes one atomic claim over its
+   complete deduplicated selected-ledger union `U(z)` after settlement; a
+   merely claim-capable contract, intended claim, or provisional ledger is not
+   a witness;
+3. the cause contract names that actual later claim-write locus, and
+   intervening only on its prospectively versioned C-locus cause edge while
+   holding the write, committed result, and every other completed-trace fact
+   fixed removes this proposal;
+4. the proposal names a materially distinct legal assignment `a'` of the same
+   RCS-03A dialect and same Relic instance; and
+5. `a` remains authoritative. D1C creates a proposal only; RCS-03E, RCS-04A,
+   and RCS-04B still own authority, collision, and committed identity.
+
+| Choice | Claim-write cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — claims spend proof but never cause transformation** | `D_C=emptyset`. Actual positive claim writes retain every selected claim/reuse consequence but never themselves propose a remembered-condition or remembered-attunement transition. | **Recommended.** A gives two readable verbs: **manifestation may propose biography; claiming spends proof**. Every definition already has a success-shaped path under D1P-B, and the complete weave already acquires a direct Relic-local claim relation while each occurrence remains truthful, source-owned, and distinct. A therefore protects rather than weakens the standing ideal. It avoids a second proposal channel, same-result collision clutter, claim-farming pressure, and a universal claim-content burden. Cost: a named artifact whose essential fantasy is “what I sacrifice scars me” cannot make the actual sacrifice the cause; attaching that change to the earlier receipt would tell a different causal story. | Ashen in `Mercy` commits Covenant P and may receive `DEFIANCE PROPOSED` from P. The later atomic claim makes `{Guard g, Heat h}` unavailable to this Relic, but mints no second proposal. |
+| **B — every transforming Relic has a claim-shaped path** | `D_C=D_mut`. Every state-supporting and boundary-supporting definition has at least one reachable actual claim write that independently causes a persistent-transition proposal. | B establishes a strong universal thesis: **every Relic can be changed specifically by what it sacrifices or internalizes**. That relation can be directly aligned with the ideal, but D1P-B already supplies universal success-shaped biography and C3D1-B deliberately left claim prevalence open. B therefore forces claim-capable content and a second teachable cause path onto every definition. A claiming settlement may produce distinct P and C proposals whose coexistence RCS-04A must resolve; B is justified only if this universal sacrifice fantasy is worth that system-wide UI, collision, ally-pressure, and fresh-proof-farming burden. | Ashen has a nonclaiming success path satisfying D1P-B. Separately, `Blood Witness` commits a result with no P-locus proposal; its later full-union claim write proposes `SCARRED MERCY`. Dreamglass must likewise have a non-filler claim-specific path. |
+| **C — a disclosed subset of Relics is claim-shaped** | `D_C` is a nonempty proper subset of `D_mut`. At least one transforming definition has a qualifying claim-write cause and at least one does not. D1C1 then decides whether this support occurs only in the state dialect, only in the boundary dialect, or in both. | **Guarded thematic alternative.** A named `WITNESS-BOUND`, Scar, Hunger, or Vow family can be changed by the proof it internalizes while every Relic still retains its D1P-B success path. This can add a genuinely different biography rather than a premium “can evolve” caste. It remains risky: if the extra route is pure upside it becomes a premium subtype; if punitive it becomes a trap; if undisclosed it is opaque. Use C only when the claim-specific route is prospectively visible, independently fun, non-dominated, and cannot be expressed truthfully as a receipt cause. | Ashen's full-union claim write may propose `SCARRED`, while Dreamglass can claim evidence normally but its write never proposes transformation. If Ashen's receipt also creates `DEFIANCE PROPOSED`, both inputs remain visible and await later collision rules. |
+
+A/B/C are exhaustive because `D_C` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. D1P-B does not decide D1C: P is the
+earlier actual result-commit locus and C is the later authoritative claim-write
+locus. Under A, claims remain strategically material through full-union proof
+spending and C3E-A/C3F-A's later Relic-wide exclusion. Under B or C, a C-locus
+proposal must be independently caused by the actual write; a “claim-capable”
+label or the earlier receipt cannot impersonate it.
+
+One atomic full-union write is one claim cause occurrence, not one occurrence
+per claimed child. Shared children deduplicate, and ancestors, siblings,
+unselected ledgers, other roots, Relics, combatants, and owners remain outside
+the write. This does not select exact proposal cardinality. Replay, callback,
+reload, reconnect, rendering, duplicate delivery, or an idempotent re-claim
+cannot create another cause occurrence or proposal. Ally proof retains its
+ownership and payment and grants no transformation approval.
+
+If one evaluation produces both P- and C-locus proposals, they remain distinct
+causal inputs even when their displayed targets match. D1C may not silently
+deduplicate, merge, prioritize, or approve them; RCS-04A owns collision after
+RCS-03E resolves authority. The semantic proof must preserve the ordered
+sequence—result commit, any P proposal, actual claim write, any C proposal—and
+the unchanged current assignment. Exact copy, layout, timing, and surface
+contract remain RCS-02/SR-10. Exact claim-capable definitions, trigger and
+target catalogs, prevalence within a supported dialect, frequency, power,
+balance, persistence schema, and release content remain later work. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, claims spend
+proof but never cause transformation.** Thus `D_C=emptyset`. An actual atomic
+full-union claim retains all selected proof-spend and later-reuse consequences,
+but its C-locus cause edge is absent for every transforming definition. A
+positive receipt may still create its distinct D1P-B proposal; the later claim
+creates no second proposal.
+
+D1C moves to `DIR-SELECTED`, and `RCS-03D1C1` moves to `PRUNED`. Under the
+then-current sixteen-row repair, D1Z would have become the sole `OWNER-OPEN`
+row; the register would have remained 129 rows with 30 `SCREEN`, 1
+`OWNER-OPEN`, 33 `PRUNED`, 59 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 31`. The prerequisite audit below supersedes that
+frontier before another owner question. The authoritative decision record
+remains unchanged.
+
+> **Thirty-seventh prerequisite correction, 2026-09-28 — my thirty-sixth
+> correction was still incomplete.** The earlier repair separated six obvious
+> cause families, but it did not walk the already-selected evaluator from its
+> first actual invocation to its last cancellation-side write. Three bounded,
+> read-only challenges found six additional authoritative semantic occurrences
+> that can independently create a proposal without changing any selected
+> result, claim, or recurrence rule. Omitting them would have let authoring
+> decide material transformation causes while the register falsely claimed the
+> cause surface was closed.
+>
+> Cause here means a **prospectively versioned direct edge at one named
+> semantic locus**, not generic but-for ancestry. A witness contains the actual
+> authoritative occurrence at that locus and a proposal edge authored there.
+> Its edge-deletion intervention holds that occurrence and the entire completed
+> trace fixed, removes only the named direct edge, and removes the proposal.
+> An earlier occurrence cannot inherit proposals created only by a downstream
+> verdict, settlement, claim, or latch merely because the downstream trace
+> would not exist without it. This correction also applies that sharper rule to
+> the already-selected P and C families; it changes neither answer.
+>
+> The finite lifecycle is:
+>
+> ```text
+> I — actual canonical evaluator invocation
+> └─ nonempty contender truth [derived predicate, not a cause row]
+>    └─ ledger tuple becomes fixed by either:
+>       ├─ one uniquely forced tuple [derived; no T occurrence]
+>       └─ T — nontrivial selection among multiple valid complete tuples
+>          [the two routes rejoin]
+>          └─ no pair, or exactly one permission realization:
+>             ├─ VT — true/allow verdict
+>             └─ VF — false/not-both verdict
+>                [the verdict routes rejoin]
+>                └─ deterministic disposition [derived mapping]
+>                   ├─ K — positive provisional output becomes complete/sealed
+>                   │  └─ P — positive receipt-set commit
+>                   │     └─ C — optional later claim write
+>                   └─ Z — ledger-bearing `{}` settlement commit
+>                      └─ L — canonical pair-recurrence latch write
+>
+> NC — hypothetical true zero-contender conclusion [derived unreachable;
+>      retained only as registered row `RCS-03D1N`]
+>
+> X — independent combat/source/relationship event
+> M — dedicated evolution/reconfiguration operation
+> ```
+>
+> `I`, `T`, `VT`, `VF`, `K`, and `L` are the six missed registered loci. The
+> later prerequisite audit proved that the proposed terminal no-candidate locus
+> has no reachable occurrence under the selected readiness contract; `NC` is
+> used here to avoid collision with the earlier successful no-response class
+> named `N`. A unique forced ledger tuple is input truth, not a T occurrence;
+> T exists only when the authority actually chooses among multiple valid
+> complete tuples. `VT` and `VF` must remain separate because true/allow and
+> false/not-both are different authoritative bits with different reachable
+> consequences. `K` is the selected C134-A provisional completion/sealing
+> occurrence, which precedes and is not the final P commit. `L` is the selected
+> D4-A persistent pair-recurrence latch write after `{}`, not the empty
+> settlement itself.
+>
+> The register therefore retains twelve parent rows, each with one conditional
+> proper-support dialect child, followed by the four transition-topology rows.
+> Eleven parents describe reachable cause families; D1N is a derived-empty
+> audit placeholder rather than a twelfth reachable family:
+>
+> | Row | Atomic boundary | Dependency |
+> | --- | --- | --- |
+> | `RCS-03D1I` | Actual canonical-evaluator-invocation cause prevalence | `DIR-SELECTED`; D1I-A |
+> | `RCS-03D1I1` | State/boundary incidence for proper invocation support | `PRUNED`; D1I-A |
+> | `RCS-03D1N` | Hypothetical terminal true-zero-contender conclusion cause prevalence | `DERIVED`; reachable domain empty under selected readiness/evidence/tuple rules |
+> | `RCS-03D1N1` | State/boundary incidence for proper no-candidate support | `PRUNED`; D1N has empty domain |
+> | `RCS-03D1T` | Actual nontrivial authoritative ledger-tuple-selection cause prevalence | follows I directly because N is derived empty |
+> | `RCS-03D1T1` | State/boundary incidence for proper tuple-selection support | only D1T-C; otherwise pruned |
+> | `RCS-03D1VT` | Actual true/allow permission-verdict cause prevalence | follows T and applicable T1 |
+> | `RCS-03D1VT1` | State/boundary incidence for proper true-verdict support | only D1VT-C; otherwise pruned |
+> | `RCS-03D1VF` | Actual false/not-both permission-verdict cause prevalence | follows VT and applicable VT1 |
+> | `RCS-03D1VF1` | State/boundary incidence for proper false-verdict support | only D1VF-C; otherwise pruned |
+> | `RCS-03D1K` | Positive provisional-output completion/sealing cause prevalence | follows VF and applicable VF1 |
+> | `RCS-03D1K1` | State/boundary incidence for proper provisional-completion support | only D1K-C; otherwise pruned |
+> | `RCS-03D1P` | Positive receipt-set-commit cause prevalence | `DIR-SELECTED`; D1P-B |
+> | `RCS-03D1P1` | State/boundary incidence for proper positive-commit support | `PRUNED`; D1P-B |
+> | `RCS-03D1C` | Actual evidence-claim-write cause prevalence | `DIR-SELECTED`; D1C-A |
+> | `RCS-03D1C1` | State/boundary incidence for proper claim-write support | `PRUNED`; D1C-A |
+> | `RCS-03D1Z` | Ledger-bearing `{}` settlement-commit cause prevalence | follows K and applicable K1 |
+> | `RCS-03D1Z1` | State/boundary incidence for proper cancellation support | only D1Z-C; otherwise pruned |
+> | `RCS-03D1L` | Canonical pair-recurrence-latch-write cause prevalence | follows Z and applicable Z1 |
+> | `RCS-03D1L1` | State/boundary incidence for proper latch-write support | only D1L-C; otherwise pruned |
+> | `RCS-03D1X` | Independent combat/source/relationship-event cause prevalence | follows L and applicable L1 |
+> | `RCS-03D1X1` | State/boundary incidence for proper independent-event support | only D1X-C; otherwise pruned |
+> | `RCS-03D1M` | Dedicated evolution/reconfiguration-operation cause prevalence | follows X and applicable X1 |
+> | `RCS-03D1M1` | State/boundary incidence for proper operation support | only D1M-C; otherwise pruned |
+> | `RCS-03D2` | Direct-versus-staged nonclear assignment adjacency | follows all twelve parents and applicable children |
+> | `RCS-03D3` | Direct reverse-edge support among nonclear adjacent assignments | follows D2 |
+> | `RCS-03D4` | Explicit clear-to-unassigned support | follows D3 |
+> | `RCS-03D5` | Eventual nonclear return/reversibility topology | follows D4 and all cause rows |
+>
+> No additional lifecycle row passes the same test. Readiness, eligibility,
+> contender satisfaction, tuple/evidence reads, and exact/related identity are
+> inputs or derived predicates. Raw RNG is represented by the semantic verdict
+> it realizes. Deterministic disposition is a mapping into K/P or Z rather than
+> another occurrence. Frames, callbacks, rendering, replay, and duplicate
+> delivery are nonsemantic. There is no positive-result recurrence latch under
+> the selected rules. The audit therefore reaches an explicit stopping line
+> rather than opening an unbounded decomposition.
+>
+> Replacing the incomplete sixteen-row D subtree with twenty-eight rows adds
+> twelve slots. After D1C-A, the repaired register at that checkpoint contained **141 rows: 42
+> `SCREEN`, 1 `OWNER-OPEN` at D1I, 33 `PRUNED`, 59 `DIR-SELECTED`, 4
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 43`**. Closing the twenty
+> then-open cause parent/child slots would return D2 as the sole frontier at
+> `Phi_SR = 23`; D2-D5 still close one at a time before RCS-03E opens at 19.
+> The twelve added slots are decision accounting, not twelve added mechanics.
+
+### RCS-03D1I — actual canonical evaluator invocation as transformation cause — A selected
+
+Let `D_I` contain each definition in `D_mut` with at least one reachable
+**invocation transformation-cause witness**. Under selected C1-A, C2A-A, and
+C4, an eligible semantic cut invokes exactly one canonical product evaluator
+for the active Relic, cut-atomically and without prompt, veto, banking, or a
+second same-cut opportunity. A witness requires:
+
+1. one actual invocation identity for that Relic and cut—not mere readiness,
+   eligibility, a future call, or an internal channel;
+2. a prospectively authored direct I-locus proposal edge based only on that
+   invocation identity and facts already bound before invocation, never on a
+   later N/T/verdict/K/P/Z/L outcome;
+3. deletion of only that edge removes the proposal while the actual invocation
+   and entire completed downstream trace remain fixed;
+4. a materially distinct legal assignment of the same RCS-03A dialect and
+   Relic instance; and
+5. the old assignment remains authoritative pending RCS-03E/RCS-04A/RCS-04B.
+
+| Choice | Invocation-cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — invocation listens but never transforms** | `D_I=emptyset`. The act of running the canonical evaluator never itself proposes persistent change. | **Recommended.** A teaches: **the relationship makes the Relic listen; what it actually manifests may shape it**. D1P-B already gives every transforming definition a positive-result biography path. A prevents an automatic proposal before any meaningful evaluator result, a second proposal on successful traces, ally-steered invocation pressure, and fresh-cut invocation farming. It is the cleanest protective reading of the standing ideal. Cost: the catalog cannot truthfully express an artifact changed merely by having been listened through; that fantasy must use an actual result, event, or operation. | Guard plus ally Heat makes Ashen eligible, so its one evaluator actually invokes. The invocation itself proposes nothing. A later P may produce `DEFIANCE PROPOSED`; a ledger-bearing `{}` may instead write its recurrence latch. Neither outcome is relabeled as I. |
+| **B — every transforming Relic has an invocation-shaped path** | `D_I=D_mut`. Every state- and boundary-supporting transforming definition has at least one reachable actual invocation that directly proposes change, even though not every invocation must do so. | B makes “being consulted changes every Relic” a universal thesis. It guarantees an invocation-shaped path for every transforming definition and puts a cause path on the automatic operation itself. A successful trace can also produce a distinct P proposal, increasing collision and UI load before agency is even chosen. | Ashen's evaluator invokes and creates `AWAKE PROPOSED` from only facts fixed before invocation. The completed evaluation later commits P and independently creates `DEFIANCE PROPOSED`; neither the downstream result nor its selected ledger determines whether the I edge exists. |
+| **C — a disclosed listener-bound subset changes on invocation** | `D_I` is a nonempty proper subset of `D_mut`; D1I1 then chooses state-only, boundary-only, or nonempty support in both dialects. | C can support a named `LISTENER-BOUND` or First Hearing family whose important fantasy is awakening when the bond is consulted, while ordinary Relics wait for outcomes. It is viable only if disclosed, independently fun, non-dominated, and protected from cheap cut/rearm farming; otherwise it becomes either a premium subtype or an automatic-trigger trap. | Dreamglass may propose `AWAKE OATH` at its actual invocation, before its selected ledger is known. Ashen invokes normally but cannot cite invocation as cause and still relies on its D1P-B result path. |
+
+A/B/C are exhaustive because `D_I` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. “Every definition has a path” does not
+mean every invocation transforms. Conversely, a later outcome-specific edge
+belongs to its own family and cannot be relabeled I. One active Relic at one
+cut has one invocation occurrence: tags, contender pairs, channels, callbacks,
+reloads, and renderings cannot multiply it.
+
+The system may record the I-locus edge transactionally, but it must withhold
+proposal presentation and authority until the cut-atomic evaluation completes;
+an invocation proposal cannot influence tuple selection, permission, or
+settlement. Ally evidence can make the pre-invocation facts true without
+granting the ally authority over the proposal. Exact anti-farming gates, rates,
+targets, copy, UI, and balance remain later work. The authoritative decision
+record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, invocation
+listens but never transforms.** Thus `D_I=emptyset`. Running the one actual
+canonical evaluator cannot itself propose a persistent transformation. A later
+semantic locus retains its own independent classification: in particular,
+D1P-B still gives every transforming definition at least one positive-result
+cause path. D1I moves to `DIR-SELECTED`, and `RCS-03D1I1` moves to `PRUNED`.
+
+> **Thirty-eighth prerequisite correction, 2026-09-28 — my newly registered
+> true-no-candidate branch is unreachable under the rules already selected.**
+> I caught this before presenting D1N, so the owner is not being asked to
+> choose among decorative options. The thirty-seventh audit correctly found
+> the invocation and tuple-selection loci, but it carried forward four old
+> placeholder clauses saying that an invocation might produce no candidate.
+> Those clauses are now corrected where they occurred.
+>
+> A readiness episode is defined for one fixed tag only after its relationship
+> facts and tag-specific occurrence/recurrence inputs are sufficient and no
+> other non-phase input blocks evaluation. C1-A makes its opening cut eligible,
+> C2A-A invokes there, and C3A reads the same cut's coherent authoritative
+> evidence. A satisfied tag supplies a valid complete ledger, so the contender
+> set is nonempty. A unique ledger tuple is fixed by derivation; multiplicity
+> is resolved by C3C3B1-A to exactly one complete tuple, never none. G1-A leaves
+> at most two contenders. A singleton proceeds positively; a pair either
+> survives permission or follows the selected false-pair disposition, whose
+> empty branch is the **ledger-bearing** `{}` settlement Z. Therefore every
+> actual invocation reaches a positive K/P route or ledger-bearing Z. It cannot
+> reach a true zero-contender/no-tuple terminal.
+>
+> The hypothetical terminal is called `NC` in current prose because `N`
+> already names an earlier successful no-response class; the registered ID
+> remains `RCS-03D1N` so the frozen index does not churn. D1N moves directly to
+> `DERIVED` with an empty reachable domain, and D1N1 moves to `PRUNED`. A future
+> design could create NC only by explicitly reopening invocation topology to
+> permit speculative evaluation outside a sufficient fixed-tag readiness
+> episode. The cause register therefore contains eleven reachable cause
+> families plus this one derived-empty audit placeholder—not twelve reachable
+> families.
+>
+> After D1I-A and the NC derivation, the 141-row register contains **38
+> `SCREEN`, 1 `OWNER-OPEN` at D1T, 35 `PRUNED`, 60 `DIR-SELECTED`, 5
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`**. Sixteen cause
+> parent/child slots remain from T through M; closing all of them returns D2 as the sole
+> frontier at `Phi_SR = 23`. D2-D5 still close before RCS-03E opens at 19. No
+> Relic mechanic was removed: an impossible outcome was removed from the choice
+> surface. The authoritative decision record remains unchanged.
+
+### RCS-03D1T — actual nontrivial authoritative ledger-tuple selection as transformation cause — A selected
+
+Let `D_T` contain each definition in `D_mut` with at least one reachable
+**tuple-selection transformation-cause witness**. Such a witness requires:
+
+1. one actual canonical evaluation whose valid complete ledger-tuple set `X`
+   has `|X| >= 2`—mere authored or structural multiplicity without an actual
+   evaluation does not qualify;
+2. one prospectively bound complete deterministic selector stance/law that
+   actually chooses exactly one authoritative tuple `x` from `X`;
+3. a prospectively versioned direct T-locus edge from that one completed
+   selection occurrence to a materially distinct legal assignment in the same
+   RCS-03A dialect and active Relic;
+4. deletion of only that edge removes the proposal while `X`, the bound law,
+   selected tuple `x`, invocation, later verdict, K/P/Z/L facts, completed
+   trace, and current assignment all remain fixed; and
+5. no inspection of a later permission bit, result, claim, or recurrence write.
+
+A uniquely forced tuple creates no T occurrence. Binding a stance is not T;
+reading a tuple is not T; rejected alternatives, per-tag comparisons, tie-break
+substeps, and downstream verdicts are not extra T occurrences. One actual
+evaluation has at most one T occurrence because C3C3B1-A returns one complete
+joint tuple, even if that tuple spans two tags.
+
+| Choice | Tuple-selection-cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — selection chooses proof but never transforms** | `D_T=emptyset`. The actual nontrivial choice among valid complete ledger tuples can change which proof becomes operative, but that selection occurrence never directly proposes persistent change. | **Recommended.** The routing stance remains mechanically consequential: holding the contender-tag set fixed, it can change the selected complete tuple, each contender's operative ledger, downstream permission/result inputs, and which proof a later claim spends. SR-05/SR-06/RCS-17 must still prove the authored stance menu is strategically worthwhile and fun; T-biography cannot rescue a hollow menu. D1P-B can still let the resulting positive manifestation shape every transforming Relic. A therefore teaches one readable causal sentence: **interpretation chooses which truthful proof-weave becomes operative; manifestation may shape the Relic**. This fits Achintya Bheda Abheda protectively—the distinct valid proof-weaves remain real, while one coherent authority makes one operative without pretending that every act of interpretation must become permanent biography. It avoids deliberate ledger-multiplicity farming, hidden pre-result proposals, and a universal authoring burden. Cost: no Relic can cite the act of choosing among equally valid proofs as its direct transformation cause. | With fixed contender set `{P,Q}`, Ashen admits `X={(L_v,L_q),(L_h,L_q)}`, where `L_v={Guard g,Vow v}`, `L_h={Guard g,Heat h}`, and `L_q={Return t,Heat h}`. Bound Dissonance selects `(L_v,L_q)` while Chorus would select `(L_h,L_q)`. The chosen complete tuple governs downstream mechanics and any claimed union but creates no T proposal. A later positive P edge may still propose `DEFIANCE`. |
+| **B — every transforming Relic has a selection-shaped path** | `D_T=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable multiplicity-positive evaluation whose actual authoritative tuple selection directly proposes change; not every selection must transform. | B makes “every Relic can be changed when it interprets plural truths” universal. It is thematically strong, but much stronger than the existing existential alternate-ledger promise: every transforming definition now needs a reachable multi-ledger route and a distinct T-shaped proposal path. Players gain a reason to engineer ambiguity, so authoring, disclosure, balance, and anti-farm burden rise across the whole catalog. A later P proposal may coexist and RCS-04A must eventually resolve both. | Every transforming Ashen- or Dreamglass-like definition needs some reachable `|X|>=2` state. On `X={(L_v,L_q),(L_h,L_q)}`, selection of the full tuple `(L_h,L_q)` may create `HEAT-REMEMBERING PROPOSED` before permission is realized; a later positive commit may independently create `DEFIANCE PROPOSED`. |
+| **C — a disclosed interpreter-bound subset changes on selection** | `D_T` is a nonempty proper subset of `D_mut`; D1T1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Guarded thematic alternative.** A named `INTERPRETER-BOUND`, Forked Memory, or Simulacrum family can be changed when one equally true proof-weave becomes operative, while ordinary Relics use selection only to route play. A route-sensitive remembered target is permitted authoring, not guaranteed by this row. This is the most explicit poetic fit with one-and-different truths, but also the easiest to make opaque: if extra biography is pure upside the subtype becomes premium; if its costs dominate it becomes a trap. Use C only if the distinction is prospectively visible, independently fun, non-dominated, and worth a second causal sentence. | Dreamglass may author its selection of full tuple `(L_v,L_q)` to propose `FORK-MARKED`; Ashen may make the same complete-tuple choice with no T proposal. Both selections still determine operative proof normally. |
+
+A/B/C are exhaustive because `D_T` is a subset of the nonempty `D_mut`:
+empty, the whole domain, or nonempty proper. The selected upstream contract
+guarantees that at least one actual T occurrence is reachable: C3C3A-B requires
+a reachable alternate-ledger state, C3C3B1-A resolves its multiplicity to one
+complete tuple, and C3C3B3A-B requires prospectively bindable settings that
+select differently on a held-fixed reachable product. That occurrence does not
+force any direct T edge. Conversely, B would add a per-definition universal
+path obligation that upstream choices do not already imply.
+
+Under A, D1T1 prunes and D1VT opens. Under B, D1T1 also prunes because universal
+support necessarily reaches both nonempty dialects. Under C, D1T1 opens next.
+The T edge may be recorded transactionally, but presentation and authority wait
+until the cut-atomic evaluation completes; the proposal cannot feed permission
+or settlement. Exact definitions, ledgers, stances, targets, rates, copy,
+surface, power, persistence, and balance remain later work. This card selects
+neither proposal approval nor collision resolution, and it authorizes no
+implementation. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, selection
+routes proof but never transforms.** Thus `D_T=emptyset`. An actual nontrivial
+selection still fixes the one authoritative complete joint ledger tuple and all
+of its downstream proof, permission, result, and claim consequences, but the T
+locus has no persistent-transformation proposal edge. A later positive commit
+may independently satisfy D1P-B. D1T moves to `DIR-SELECTED`, and
+`RCS-03D1T1` moves to `PRUNED`.
+
+After that transition, the 141-row register contains **36 `SCREEN`, 1
+`OWNER-OPEN` at D1VT, 36 `PRUNED`, 61 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`**. Fourteen cause parent/child slots
+remain from VT through M; closing them returns D2 as the sole frontier at
+`Phi_SR = 23`. The authoritative decision record remains unchanged.
+
+### RCS-03D1VT — actual true/allow permission verdict as transformation cause — A selected
+
+Let `D_VT` contain each definition in `D_mut` with at least one reachable
+**true-verdict transformation-cause witness**. Such a witness requires:
+
+1. one actual canonical evaluation with exactly two contender tags and one
+   selected complete joint ledger tuple whose pair reaches the permission
+   coordinate—a singleton has no permission verdict;
+2. one actual authoritative permission result `true`/allow for that unordered
+   pair, whether the bound law is deterministic or the bit is the committed
+   realization of a lawful Oracle distribution;
+3. one prospectively versioned direct VT-locus edge from that realized true bit
+   to a materially distinct legal assignment in the same RCS-03A dialect and
+   active Relic;
+4. deletion of only that edge removes the proposal while the selected tuple,
+   pair, law, context, true bit, later K/P/C facts, every independently created
+   proposal fact, completed trace, and current assignment remain fixed; and
+5. no inspection of a later provisional output, receipt commit, evidence claim,
+   recurrence write, approval, or collision result.
+
+The exact-shared, distinct-related, and hybrid forms are inputs to the same
+semantic permission verdict, not separate VT occurrences. A hybrid pair has one
+bit. G1-A permits at most two contenders, so one evaluation has at most one
+unordered pair and one VT occurrence. Deterministic versus stochastic law,
+responsive versus steadfast context, the earlier bound routing stance, and the
+factual reason for allowance may condition authoring but do not create new
+cause loci. The permission-law read, probability, raw random draw, contemplated
+allow branch, later positive output, and replayed bit are not VT.
+
+True-verdict reachability is already positive. Selected exact-permission E1-C
+requires a responsive law with reachable true and false bits, while E3-C
+separately requires a context-invariant always-allow law over its own nonempty
+reachable domain. These guarantees establish actual true verdicts but no direct
+VT proposal edge. They do not imply that every transforming definition has an
+allow-capable pair path.
+
+| Choice | True-verdict-cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — permission allows coexistence but never transforms** | `D_VT=emptyset`. An actual true/allow verdict retains every selected permission and downstream result consequence but never itself proposes persistent change. | **Recommended.** A teaches: **the covenant decides whether distinct manifestations may participate together; what actually manifests may shape the Relic**. The true bit remains mechanically decisive, and D1P-B preserves a positive-result biography path for every transforming definition. This is neutral/protective under Achintya Bheda Abheda: unity and difference are lived in the allowed pair without requiring the gate's “yes” to become a second biography event. A avoids automatic transformation access through cheap always-allow pairs, ally-steered second contenders, and stacked VT/K/P proposals. Cost: no Relic can be changed merely because its covenant permitted coexistence; that fantasy must attach to the later manifestation or another cause. | Guardian Vow `P` and Returning Vow `Q` select complete ledgers sharing `Heat h`. A context-invariant Stone Witness law returns true. Both pass the joint-survival gate, but the verdict creates no proposal. If their later positive commit has an authored P edge, it may independently propose `CONCORDANT`. |
+| **B — every transforming Relic has a true-verdict-shaped path** | `D_VT=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable real two-contender permission opportunity whose actual true verdict directly proposes change; not every true verdict must transform. | B makes “every Relic can be changed by permitting plurality” universal. It is much stronger than the selected catalog-level true-bit guarantees: every transforming definition now needs pair-capable, allow-capable content and a distinct VT proposal path. This pressures singleton-focused and steadfast-refusal identities, rewards farming safe always-allow pairs, and can stack a pre-result proposal with later K/P proposals. Choose B only for an explicit system-wide thesis that permission itself—not merely manifestation—must be biographical. | Every transforming definition needs some reachable pair like `P/Q`. When its permission law returns true, a direct VT edge may create `CONCORD-MARKED PROPOSED` before K completes; a later positive commit may independently create another proposal. |
+| **C — a disclosed concord-bound subset changes on true verdicts** | `D_VT` is a nonempty proper subset of `D_mut`; D1VT1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Guarded thematic alternative.** A named `CONCORD-BOUND`, Open Covenant, or Communion family can be changed when its relationship actually permits distinct manifestations to continue together, while ordinary Relics treat the same true bit only as permission. This can make the Souls and Simulacra theme tangible without universalizing it, but it adds a second causal sentence and risks a premium “extra evolution route” caste. Use C only if the true-verdict-specific biography is visible before the relevant commitment, independently fun, non-dominated, and cannot be expressed honestly as a later P-cause path. | Stone Witness may attach a direct `CONCORD-MARKED PROPOSED` edge to its actual true bit; Ashen may return the same true bit with no VT proposal. Both permission verdicts retain identical gate authority. |
+
+A/B/C are exhaustive because `D_VT` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. B means one qualifying path per
+transforming definition, not that every true verdict transforms. C classifies
+definitions, not exact versus related proof forms or deterministic versus
+Oracle implementations; exact trigger assignments and prevalence within a
+supported definition remain AUTHOR/SPEC under the selected semantic-locus
+stopping line.
+
+One actual true bit is one VT occurrence. Tags, ledger components, exact and
+related labels, hybrid membership, law predicates, RNG calls, callbacks,
+renderings, reloads, and duplicate delivery cannot multiply it. A VT edge may
+be recorded transactionally but cannot be presented or exercise authority until
+the cut-atomic evaluation completes, and it cannot affect K, P, or settlement.
+Exact definitions, pair identities, triggers, targets, rates, copy, surface,
+power, persistence, and balance remain later work. This card selects neither
+approval nor collision resolution and authorizes no implementation.
+
+Under A/B, D1VT1 prunes and D1VF opens. Under C, D1VT1 opens next. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, permission
+allows coexistence but never transforms.** Thus `D_VT=emptyset`. The actual
+true bit retains every gate consequence: the selected pair may continue into
+its lawful disposition and result. The VT locus has no persistent-
+transformation proposal edge. A later positive commit may independently
+satisfy D1P-B. D1VT moves to `DIR-SELECTED`, and `RCS-03D1VT1` moves to
+`PRUNED`.
+
+After that transition, the 141-row register contains **34 `SCREEN`, 1
+`OWNER-OPEN` at D1VF, 37 `PRUNED`, 62 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`**. Twelve cause parent/child slots
+remain from VF through M; closing them returns D2 as the sole frontier at
+`Phi_SR = 23`. The authoritative decision record remains unchanged.
+
+### RCS-03D1VF — actual false/not-both permission verdict as transformation cause — A selected
+
+Let `D_VF` contain each definition in `D_mut` with at least one reachable
+**false-verdict transformation-cause witness**. Such a witness requires:
+
+1. one actual canonical evaluation with exactly two contender tags and one
+   selected complete joint ledger tuple whose unordered pair reaches the
+   permission coordinate;
+2. one actual authoritative permission result `false`/not-both for that pair,
+   whether the bound law is deterministic or the bit is the once-committed
+   realization of a lawful Oracle distribution;
+3. one prospectively versioned direct VF-locus edge from that realized false
+   bit to a materially distinct legal assignment in the same RCS-03A dialect
+   and active Relic;
+4. deletion of only that edge removes the proposal while the selected tuple,
+   pair, law, context, bound stance, false bit, derived deterministic
+   disposition, later K/P/Z/L/C facts, every independently created proposal
+   fact, completed trace, and current assignment remain fixed; and
+5. no inspection of the later disposition, provisional output, positive or
+   empty commit, evidence claim, recurrence-latch write, approval, or collision
+   result.
+
+The false bit means only **the two original manifestations may not both
+continue**. It does not itself choose cancellation `{}`, singleton substitute
+`{S}`, or double substitutes `{S1,S2}`. Selected F1-A makes each fixed denied
+opportunity's eventual disposition single-valued, but that disposition remains
+a derived mapping after VF rather than another cause occurrence. Exact-shared,
+distinct-related, and hybrid proof forms feed the same semantic bit; a hybrid
+does not receive two votes. G1-A permits at most two contenders, so one
+evaluation has at most one unordered pair and one VF occurrence.
+
+Deterministic versus Oracle realization, responsive versus steadfast law,
+routing stance, factual context, and the later denied-output class may
+condition authoring but do not create separate VF loci. A denial probability,
+always-deny declaration, raw random draw, contemplated false branch,
+deterministic disposition, later output, callback, replay, reload, rendering,
+or duplicate delivery is not VF.
+
+False-verdict reachability is already positive. Selected exact-permission
+E1-C requires a responsive law with reachable true and false bits, and E3-C
+requires a distinct context-invariant always-deny law over its own nonempty
+reachable domain. Selected related-form polarity independently includes a
+steadfast-refusal projection. These guarantees create actual false verdicts
+but no direct VF proposal edge, and they do not imply that every transforming
+definition has a deny-capable pair path.
+
+| Choice | False-verdict-cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — refusal routes manifestation but never transforms** | `D_VF=emptyset`. The actual false/not-both verdict retains every permission and denied-disposition consequence but never itself proposes persistent change. | **Recommended.** A teaches: **the covenant refuses coexistence; what that refusal becomes may shape the Relic**. Refusal is already mechanically rich: it forbids the original pair's joint continuation and routes a prospectively legible severance, fusion/transmutation, or refraction/reconstitution. A positive denied output may later transform through K/P; an empty settlement and its recurrence latch retain their later Z/L classifications. The false bit protectively preserves real distinction under Achintya Bheda Abheda without mistaking negation alone for manifested biography. A avoids engineered-denial farming, ally-steered scars, and stacked VF-with-K/P-or-Z/L proposals. Cost: no Relic can be changed specifically by the instant its covenant says “not both.” | Guardian Vow `P` and Returning Vow `Q` select ledgers sharing `Heat h`; Severed Chorus returns false. The verdict forbids `{P,Q}` but creates no proposal. This fixed context's predetermined disposition later settles `{}`; other prospectively distinct denied opportunities may settle `{S}` or `{S1,S2}`. Each applicable downstream locus remains independent. |
+| **B — every transforming Relic has a refusal-shaped path** | `D_VF=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable real two-contender permission opportunity whose actual false verdict directly proposes change; not every false verdict must transform. | B makes “every Relic can be changed by refused coexistence” universal. A singleton, an always-deny label without an actual evaluation, or a later empty/substitute result cannot satisfy it. This forces pair-capable, deny-capable content across the transforming catalog, pressures singleton and steadfast-allow identities, rewards cheap second-contender or certain-denial engineering, permits teammate-steered biography, and can stack with every later result-side cause. Choose B only for an explicit system-wide thesis that refusal itself must be biographical. | Every transforming definition needs some reachable denied pair. When Severed Chorus returns false, a direct VF edge may create `REBUKED PROPOSED` before its fixed disposition; a later positive commit or empty settlement remains a separate occurrence. |
+| **C — a disclosed dissonance-bound subset changes on refusal** | `D_VF` is a nonempty proper subset of `D_mut`; D1VF1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Guarded thematic alternative.** A named `DISSONANCE-BOUND`, Broken Covenant, or Refusal-Witness family may remember the actual “not both” verdict whether the denied relationship later severs, fuses, or refracts, while ordinary Relics wait for what manifests. This can make rejection itself part of Souls and Simulacra biography, but it adds another causal sentence and risks a premium extra-evolution caste or punitive trap. Use C only if refusal-specific memory is prospectively visible, independently policy-changing, resistant to cheap ally coercion and denial farming, non-dominated, and not honestly an outcome-specific K/P/Z cause. | Dreamglass may attach `REBUKED PROPOSED` directly to its false bit while Ashen treats the same false bit only as a route into its fixed disposition. Deleting Dreamglass's VF edge must leave its eventual `{}`, `{S}`, or `{S1,S2}` result unchanged. |
+
+A/B/C are exhaustive because `D_VF` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. B means one qualifying path per
+transforming definition, not that every false verdict transforms. C classifies
+definitions, not proof form, law family, or denied-output class; exact trigger
+assignments and prevalence within a supported definition remain AUTHOR/SPEC.
+
+One actual false bit is one VF occurrence. Tags, ledger components, exact and
+related labels, hybrid membership, law predicates, RNG calls, disposition
+branches, callbacks, renderings, reloads, and duplicate delivery cannot
+multiply it. A VF edge may be recorded transactionally but cannot be presented
+or exercise authority until the cut-atomic evaluation completes, and it cannot
+affect the deterministic disposition, K/P, Z/L, or settlement. Exact
+definitions, pair identities, triggers, targets, rates, copy, surface, power,
+persistence, and balance remain later work. This card selects neither approval
+nor collision resolution and authorizes no implementation.
+
+Under A/B, D1VF1 prunes and D1K opens. Under C, D1VF1 opens next. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, refusal routes
+manifestation but never transforms.** Thus `D_VF=emptyset`. The actual
+false/not-both bit retains every permission consequence and routes its one
+prospectively fixed deterministic disposition, but the VF locus has no direct
+persistent-transformation proposal edge. A positive denied output still
+proceeds through K/P; a ledger-bearing empty settlement still proceeds through
+Z/L. D1VF moves to `DIR-SELECTED`, and `RCS-03D1VF1` moves to `PRUNED`.
+
+After that transition, the 141-row register contains **32 `SCREEN`, 1
+`OWNER-OPEN` at D1K, 38 `PRUNED`, 63 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 33`**. Ten cause parent/child slots remain from K
+through M; closing them returns D2 as the sole frontier at `Phi_SR = 23`. The
+authoritative decision record remains unchanged.
+
+### RCS-03D1K — complete positive provisional-output sealing as transformation cause — A selected
+
+Let `D_K` contain each definition in `D_mut` with at least one reachable
+**provisional-completion transformation-cause witness**. For one actual
+cut-atomic canonical evaluation `z` on the positive branch, let `Y_z` be its
+complete nonempty provisional output set after the selected tuple, any
+permission verdict, and the deterministic disposition are fixed. `Y_z` may be
+an allowed original set `{P}` or `{P,Q}`, or a positive denied substitute set
+`{S}` or `{S1,S2}`. Let `seal_K(z)` be the single semantic occurrence at which
+that whole set becomes complete and every member is sealed under C134-A.
+
+This set-level definition is a required safeguard against ambiguity in C134's
+older tag-level candidate notation. One evaluation has **one** `seal_K(z)`, not
+one occurrence per receipt. A width-two set becoming complete is one coherent
+output becoming inevitable. Raw candidate fragments, individual tag
+completions, counterfactual predicate sufficiency, resolver callbacks, and
+serialization steps are not K. The later P occurrence is still distinct: it
+is the atomic authoritative commit of the complete receipt set that K has made
+unrevocable.
+
+A K witness requires:
+
+1. one actual positive evaluation `z` and its single complete, sealed
+   nonempty provisional output-set occurrence `seal_K(z)`;
+2. one prospectively versioned direct K-locus edge from `seal_K(z)` to a
+   materially distinct legal assignment in the same RCS-03A dialect and
+   active persistent Relic;
+3. deletion of only that edge removes the proposal while `Y_z`, its sealing,
+   the later P commit, every independently authored P proposal, any later
+   claim, the completed trace, and the current assignment remain fixed;
+4. the edge reads only facts authoritative no later than `seal_K(z)`, never the
+   later receipt commit, claim, payoff, approval, or collision result; and
+5. K cannot alter the output, its sealing, or settlement. The current
+   assignment remains authoritative pending RCS-03E/RCS-04A/RCS-04B.
+
+C133-A and C134-A permit neither a new participant response nor automatic
+revocation between completion and successful commit. They make K inevitable
+to reach P on a completed positive trace; they do not merge the two semantic
+loci. D1P-B guarantees every transforming definition at least one reachable
+P-cause path, and every such P occurrence has a reachable K predecessor. It
+does not author a direct K edge. A B/C K edge may be recorded transactionally,
+but presentation and authority wait for the whole receipt-set commit. A
+technical abort produces neither receipt commit nor leaked proposal; replay
+cannot duplicate either stable identity.
+
+| Choice | Provisional-completion cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — sealing guarantees manifestation but never transforms** | `D_K=emptyset`. Becoming complete and unrevocable retains every consequence of C133-A/C134-A but never itself proposes persistent change. | **Recommended.** A teaches: **the relationship becomes inevitable; what it actually manifests may shape the Relic**. K remains meaningful—it unifies distinct receipt identities into one sealed output and prevents either agency or opaque automatic evolution from making that output fizzle—while D1P-B already gives every transforming Relic a readable success-shaped biography path at actual commit. This is neutral/protective under Achintya Bheda Abheda: becoming and manifestation remain continuous but really distinct without making every meaningful intermediate boundary another biography trigger. A avoids a nearly simultaneous K/P double-proposal language, subtle cause attribution, success farming, and extra collision/UI load. Cost: no Relic can remember the precise instant its manifestation became inevitable before it became actual. | Guard `g` plus Heat `h` makes complete sealed `{P,Q}`. K creates no proposal. The later atomic commit may still use an authored P edge to create `CONCORDANT PROPOSED`. |
+| **B — every transforming Relic has a sealing-shaped path** | `D_K=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable `seal_K(z)` whose direct K edge proposes a materially distinct assignment; not every K occurrence must transform. | B makes “every Relic can be changed when one possible manifestation becomes inevitable” a universal thesis. It is coherent, but every definition already needs a P-shaped path and no player can answer or change the sealed result between K and P. The catalog therefore carries two success-adjacent causal languages, with maximum authoring, explanation, farming, and collision burden. B does not require both edges on the same trace, but it permits one success to create independently attributable K and P proposals. | Complete sealed `{P}` may create `AWAKENED PROPOSED`; its later P commit may independently create `DEFIANCE PROPOSED`. Deleting only the K edge must leave `{P}`, the commit, and `DEFIANCE PROPOSED` unchanged. |
+| **C — a disclosed Becoming-bound subset changes on sealing** | `D_K` is a nonempty proper subset of `D_mut`; D1K1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Strongest thematic countercase.** A named `BECOMING-BOUND`, Threshold, or Premonition family may remember the instant a latent form becomes unavoidable, while ordinary Relics wait for manifested receipts. This can give Souls and Simulacra a real play-language distinction between becoming and having become. It is justified only when K provenance changes player policy, is prospectively disclosed and independently fun, remains non-dominated, and cannot honestly be expressed as a distinctive P trigger or target. Otherwise the family is a premium extra-evolution-roll caste built from an almost imperceptible timing distinction. | Dreamglass may create `FORETOLD PROPOSED` when `{S1,S2}` becomes complete and sealed after a denied-pair refraction. `{S1,S2}` is one K occurrence, never two; its later atomic P commit remains independently classifiable. |
+
+A/B/C are exhaustive because `D_K` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. B means one qualifying K path per
+transforming definition, not that every sealed output transforms. C classifies
+definitions, not receipt identities or output provenance. Under A/B, D1K1
+prunes and D1Z opens. Under C, D1K1 opens next.
+
+Allowed-original versus positive-denied origin; width one versus two; and
+`P/Q` versus `S/S1/S2` identity may condition prospectively authored K edges,
+but they do not create different authority, lifetime, or settlement events.
+The exact trigger and target catalog, within-definition prevalence, rates,
+copy, surface, power, persistence, anti-farming rules, approval, collision, and
+implementation remain AUTHOR/SPEC/TUNE or later registered decisions. The
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, sealing
+guarantees manifestation but never transforms.** Thus `D_K=emptyset`. The
+whole positive provisional output still becomes complete and unrevocable under
+C133-A/C134-A, but its K locus has no direct persistent-transformation proposal
+edge. The later actual receipt-set commit retains its independent D1P-B cause
+classification. D1K moves to `DIR-SELECTED`, and `RCS-03D1K1` moves to
+`PRUNED`.
+
+The post-answer audit also found and corrects one notation error of mine. D4
+already uses `kappa(z)` for a canonical cancellation-pair recurrence key; the
+first D1K draft reused that symbol for the sealing occurrence. Current D1K
+wording now uses `seal_K(z)`. This correction changes no selected rule,
+semantic occurrence, dependency, or count.
+
+After the selected transition, the 141-row register contains **30 `SCREEN`, 1
+`OWNER-OPEN` at D1Z, 39 `PRUNED`, 64 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 31`**. Eight cause parent/child slots remain from Z
+through M; closing them returns D2 as the sole frontier at `Phi_SR = 23`. The
+authoritative decision record remains unchanged.
+
+### RCS-03D1Z — actual ledger-bearing empty settlement as transformation cause — C selected with A failure fallback
+
+Reuse nonempty `Z^0_v`, the completed canonical product evaluations with a
+nonempty selected authoritative contender-ledger tuple and final pair-local
+output `{}`. Selected E1-C guarantees that at least one such cancellation is
+reachable somewhere in the completed catalog. It does not require a
+cancellation-capable route for every transforming definition.
+
+Let `D_Z` contain each definition in `D_mut` with at least one reachable
+**empty-settlement transformation-cause witness**. Such a witness requires:
+
+1. one actual evaluation in `Z^0_v`: exactly two ledger-satisfied contender
+   tags, one selected complete tuple, one realized false/not-both permission
+   bit, its prospectively fixed cancellation disposition, and one atomic
+   authoritative ledger-bearing `{}` settlement commit;
+2. one prospectively versioned direct Z-locus edge from that actual empty
+   commit to a materially distinct legal assignment in the same RCS-03A
+   dialect and active persistent Relic;
+3. deletion of only that edge removes the proposal while the selected tuple
+   and pair, false bit, fixed disposition, `{}` commit, D2-A preserved proof,
+   later L latch write, every independently authored L proposal, completed
+   trace, and current assignment remain fixed;
+4. the edge reads no later latch, relationship break/renewal, approval,
+   collision, or committed-transformation fact; and
+5. Z cannot create a positive receipt, claim evidence, change the recurrence
+   rule, or alter the empty settlement. The current assignment remains
+   authoritative pending RCS-03E/RCS-04A/RCS-04B.
+
+One evaluation has one Z occurrence. `{}` contains no receipt identities, so
+the two vanished contender tags, their ledgers, proof children, participants,
+and hypothetical “missing receipts” cannot multiply it. A forecast or intent
+to cancel, the earlier false bit, the deterministic mapping alone, a positive
+denied disposition, an unreachable no-candidate conclusion, abort, callback,
+rendering, reload, replay, and duplicate delivery are not Z.
+
+Z is mechanically distinct from both neighboring loci. VF is the earlier
+permission verdict that says the original pair may not both continue. Z is the
+later final fact that this fixed denied opportunity actually committed no
+aligned receipt. L is the still-later persistent write that records “this
+canonical pair has already been heard during this unbroken bond.” D2-A means Z
+claims no evidence; D4-A means the same pair cannot immediately reroll while
+its relationship stays continuously sufficient. Neither rule decides whether
+the empty commit itself may propose biography.
+
+| Choice | Empty-settlement cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — cancellation settles absence but never transforms** | `D_Z=emptyset`. Every `{}` retains its no-receipt, no-claim, and later recurrence-latch consequences but never itself proposes persistent change. | **Strong production fallback.** A keeps one simple catalog-wide biography rule: actual positive manifestation may shape every transforming Relic under D1P-B; an empty settlement closes and latches the bond without adding another evolution route. It has the lowest failure-farming, ally-coercion, collision, and explanation burden. Cost: no Relic can be shaped specifically by an actual relationship ending in absence; that fantasy must attach honestly to the later latch, another lived event, or a dedicated operation. | Guardian Vow `P` and Returning Vow `Q` settle `{}` under Severed Chorus. Their proof stays lit and L later marks `LISTENED—SEVERED`, but Z creates no transformation proposal. |
+| **B — every transforming Relic has a cancellation-shaped path** | `D_Z=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable actual `{}` settlement whose direct Z edge proposes a materially distinct assignment; not every cancellation must transform. | B asserts that every Soul/Relic can be changed by absence. It is far stronger than E1-C's catalog-level cancellation witness: every definition now needs a two-contender, deny-capable, cancellation-capable path in addition to its D1P-B positive path. This pressures singleton, steadfast-allow, and positive-denial identities; turns deliberate failure into a universal progression route; and maximizes authored-content, teammate-steering, break/rebuild farming, and later Z/L collision burden. Choose B only for an explicit universal thesis that every Relic must remember nonmanifestation. | Every transforming definition needs some Severed-Chorus-like route. Its actual `{}` may create `MOURNING PROPOSED`; a later L edge, if independently supported, could create a second proposal about adopting the no-relisten memory. |
+| **C — a disclosed Absence-bound subset changes on cancellation** | `D_Z` is a nonempty proper subset of `D_mut`; D1Z1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Conditionally recommended higher-ceiling direction, with A as the practical fallback.** A named `ABSENCE-BOUND`, Hollow Witness, or Mourning family may be shaped by an actual empty settlement while ordinary Relics are not. Unlike K, Z is a final, visible, strategically costly outcome: the player receives no receipt and the pair becomes latched until genuine break and renewal. That can support a clear policy of deliberately accepting severance to pursue a loss-shaped branch. Under the standing ideal, two truthful distinct relationships can fail to co-manifest while their real relation-through-absence still shapes the continuing Relic; limiting this to named Relics preserves genuine catalog difference. C fails and reopens with A if it becomes free failure insurance, a premium extra-evolution caste, cheap ally-steered progression, dominant blink-reset farming, or cannot be explained in one sentence. | An `ABSENCE-BOUND` Dreamglass commits `{}` from the denied `P/Q` pair and creates `MOURNING PROPOSED`. Deleting only its Z edge leaves `{}`, preserved proof, and the later `LISTENED—SEVERED` latch unchanged. An ordinary Ashen can undergo the same cancellation without a Z proposal. |
+
+A/B/C are exhaustive because `D_Z` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. B means one qualifying cancellation path
+per transforming definition, not that every cancellation transforms. C
+classifies definitions, not exact/related/hybrid proof form, deterministic or
+Oracle denial, routing stance, law, context, pair identity, or proof shape.
+Those facts may condition exact authored edges but create no new Z authority,
+lifetime, or settlement event.
+
+C's retained viability conditions are hard requirements, not automatic
+compensation. Before every affected player's last informed reversible
+commitment, the cancellation family and every fact capable of switching this
+opportunity into `{}` must remain truthfully available; cheap unilateral ally
+coercion fails. Matched policy tests must find real cases in which optimized
+players seek Z and real cases in which they avoid it. No-receipt cost,
+preserved-proof value, the later latch, proposal access, break/rebuild cadence,
+and alternative positive paths all enter that comparison. RCS-17/RCS-18 own
+the solver, RL, human-comprehension, fun, non-dominance, and exploit gates.
+
+Under A/B, D1Z1 prunes and D1L opens. Under C, D1Z1 opens next. Exact
+definitions, triggers, targets, within-definition prevalence, rates, copy,
+surface, power, persistence, proposal approval, collision, and implementation
+remain AUTHOR/SPEC/TUNE or later registered decisions. This card authorizes no
+implementation, and the authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **C, a disclosed
+Absence-bound proper subset, with A as the explicit failure fallback.** Thus
+`D_Z` is nonempty and proper in `D_mut`. At least one transforming definition
+has a reachable actual ledger-bearing `{}` settlement whose direct Z edge
+proposes a materially distinct same-dialect assignment, and at least one
+transforming definition has no such edge. This does not make every cancellation
+causal, approve any proposal, or select exact definitions, triggers, targets,
+rates, or power.
+
+The fallback is part of the selected direction, not a second simultaneously
+active ruleset. C remains active while RCS-17/RCS-18 can establish a
+prospectively legible, independently fun, non-dominated policy surface in which
+optimized players sometimes seek Z and sometimes avoid it. If Absence-bound
+play instead becomes free failure insurance, a premium extra-evolution caste,
+cheap ally-steered progression, dominant break/renew farming, or cannot be
+taught as “this Relic learns from an actual empty settlement,” the direction
+reopens to D1Z-A and `D_Z=emptyset`. No fallback condition has yet fired.
+
+D1Z moves to `DIR-SELECTED`, and `RCS-03D1Z1` becomes the sole
+`OWNER-OPEN` row. The 141-row register now contains **29 `SCREEN`, 1
+`OWNER-OPEN` at D1Z1, 39 `PRUNED`, 65 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 30`**. Seven cause parent/child slots remain from
+Z1 through M; closing them returns D2 as the sole frontier at `Phi_SR = 23`.
+The authoritative decision record remains unchanged.
+
+### RCS-03D1Z1 — transformation-dialect incidence of Absence-bound support — C selected
+
+RCS-03A-C partitions the nonempty transforming-definition domain `D_mut` into
+nonempty disjoint state-supporting `D_S` and boundary-supporting `D_B`. A
+state-supporting Relic can transform its lineage-carried remembered condition
+while its authored evaluation boundary stays fixed. A boundary-supporting Relic
+can transform its lineage-carried remembered evaluation-boundary attunement
+while its state stays fixed. One definition never transforms both coordinates.
+
+Selected D1Z-C fixes only a nonempty proper Absence-bound subset
+`D_Z ⊊ D_mut`. Define its dialect incidences:
+
+- `D_Z^S = D_Z ∩ D_S`; and
+- `D_Z^B = D_Z ∩ D_B`.
+
+Membership means that at least one definition in that dialect has a qualifying
+D1Z witness. It does not mean every definition in the included dialect, every
+empty settlement for a qualifying definition, or every legal transition uses
+Z. Each proposal remains inside its definition's existing RCS-03A dialect: a
+state Relic proposes a remembered-condition assignment, and a boundary Relic
+proposes a remembered-attunement assignment. D1Z1 cannot create a hybrid axis
+or change the Z occurrence, authority, or fallback.
+
+| Choice | Dialect incidence of the selected proper Z support | Recommendation, ideal fit, and gameplay tradeoff | Concrete design example |
+| --- | --- | --- | --- |
+| **A — Absence-bound support occurs only in the state dialect** | `D_Z^S` is nonempty and `D_Z^B` is empty. Because `D_B` is nonempty, `D_Z` remains globally proper even if authoring later puts every state definition in `D_Z`. | **Strong scope fallback.** The one-line fantasy is **“absence changes what the Relic bears.”** A loss-shaped settlement can scar, temper, or recondition a state Relic without adding boundary-attunement timing and snapshot complexity. This is the easiest form to explain and preview. Its cost is a structural caste: only remembered-condition Relics receive the extra absence-biography route, so they may read as richer or premium. Favorable conditions invite pair-rotation farming; unfavorable conditions can make the family a punishment; ally-forced cancellation can steer another player's state. | A state-supporting Hollow Ashen in `Mercy` commits `{}` and proposes `MOURNING CONDITION`. A boundary-supporting Dreamglass may undergo the same cancellation but has no Z proposal. |
+| **B — Absence-bound support occurs only in the boundary dialect** | `D_Z^S` is empty and `D_Z^B` is nonempty. Because `D_S` is nonempty, `D_Z` remains globally proper even if authoring later puts every boundary definition in `D_Z`. | The one-line fantasy is **“silence changes how the Relic listens.”** This is the sharpest direct relation-through-absence expression: failed co-manifestation retunes the continuing relationship rather than changing an inner condition. It is also the hardest to teach and optimize. Cancellation can become a route to a best listening point, snapshot arbitrage, self-reinforcing retune loops, or severe ally-forced build disruption. Choose B only if that narrower, stranger identity is worth excluding state-side scars entirely. | A boundary-supporting Hollow Lens in `Oath` commits `{}` and proposes `ECHO ATTUNEMENT` while remembered state stays fixed. A state-supporting Ashen has no Z proposal. |
+| **C — disclosed Absence-bound support occurs in both dialects** | Both `D_Z^S` and `D_Z^B` are nonempty, while inherited `D_Z ⊊ D_mut` remains mandatory. C does not decide whether either intersection is universal or proper inside its dialect. | **Recommended if D1Z-C is retained.** One causal sentence—**“this Relic can learn from an actual empty settlement”**—has two genuinely distinct expressions. A state Relic changes what it bears; a boundary Relic changes how it listens. The same continuing artifact and one real absence relation persist while the material coordinate differs, a direct Souls and Simulacra and Achintya Bheda Abheda fit without collapsing the dialects. The cost is two policy surfaces to author, teach, simulate, and balance. A token example in either dialect, a premium extra-route class, or one dialect that optimized play always seeks or always avoids fails the direction. | Hollow Ashen may propose `MOURNING CONDITION`; Hollow Lens may propose `ECHO ATTUNEMENT`; ordinary state and boundary Relics can still commit `{}` without any Z proposal. |
+
+A/B/C are exhaustive. Because `D_Z` is nonempty, its intersections cannot both
+be empty; because `D_S` and `D_B` partition `D_mut`, the remaining possibilities
+are state only, boundary only, or both. In C, global properness remains explicit:
+support in both dialects must not be misread as `D_Z=D_mut`.
+
+The recommendation has a two-level fallback ladder. If both included dialects
+produce legible, policy-changing, non-dominated play, retain D1Z1-C. If state-
+condition play passes but boundary-attunement play remains opaque or creates a
+best-attunement loop, D1Z1-A is the narrower scope fallback. If even state-only
+absence biography becomes farming, coercion, premium-caste design, punishment,
+or explanation debt, use the already selected parent fallback D1Z-A and prune
+D1Z1. Neither fallback is selected by this recommendation.
+
+For every included dialect, RCS-17/RCS-18 must later find material optimized
+cases that seek Z and cases that avoid it after counting the lost receipt,
+preserved proof, latch horizon, positive alternatives, current assignment, and
+proposed target. The cancellation family and every fact capable of changing the
+opportunity to `{}` remain knowable before the affected player's last informed
+reversible commitment. A shared disclosed Absence-bound classification and
+distinct `CONDITION PROPOSED` versus `ATTUNEMENT PROPOSED` semantic vocabulary
+are required; the exact marker, copy, and UI remain later work.
+
+Exact definitions, within-dialect prevalence, Z triggers, targets, edge maps,
+rates, power, presentation, persistence, approval, collision, L/X/M cause
+eligibility, and implementation remain AUTHOR/SPEC/TUNE or later registered
+decisions. Under every D1Z1 answer, D1L opens next. This card authorizes no
+implementation, and the authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **C, disclosed
+Absence-bound support in both transformation dialects.** Thus `D_Z^S` and
+`D_Z^B` are both nonempty while inherited `D_Z ⊊ D_mut` remains mandatory.
+At least one state-supporting and at least one boundary-supporting definition
+has a qualifying Z cause path, and at least one transforming definition remains
+outside `D_Z`. Every proposal stays inside its definition's one RCS-03A
+dialect; C creates no hybrid axis and does not make every definition or every
+cancellation causal.
+
+The bare C answer selects no new D1Z1 fallback. The previously recommended
+D1Z1-A scope fallback remains advisory and unselected. The separately selected
+parent D1Z-A system fallback remains in force if the entire empty-settlement
+biography mechanic later fails its policy, comprehension, non-dominance, or
+anti-exploit gates; no fallback has fired.
+
+D1Z1 moves to `DIR-SELECTED`, and `RCS-03D1L` becomes the sole
+`OWNER-OPEN` row. The 141-row register now contains **28 `SCREEN`, 1
+`OWNER-OPEN` at D1L, 39 `PRUNED`, 66 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 29`**. Six cause parent/child slots remain—L/L1,
+X/X1, and M/M1—so closing them returns D2 as the sole frontier at
+`Phi_SR = 23`. The authoritative decision record remains unchanged.
+
+### RCS-03D1L — persistent canonical-pair recurrence-latch write as transformation cause — A selected
+
+Selected D4-A gives every actual ledger-bearing `{}` cancellation one listen
+per unbroken canonical pair bond. For `z in Z^0_v`, `kappa(z)` fixes the
+version, combatant, active Relic, operative context, treatment contract, and
+unordered original contender pair. After Z commits `{}`, L is the first
+authoritative persistent transition for the current continuous-sufficiency
+interval from unlatched to `LISTENED—SEVERED` for that key. It prevents another
+evaluation of the same pair until genuine relationship insufficiency and later
+renewal. Evidence remains available; the latch claims nothing.
+
+Let `D_L` contain each definition in `D_mut` with at least one reachable
+**latch-write transformation-cause witness**. Such a witness requires:
+
+1. one actual `z in Z^0_v`, its fixed `kappa(z)`, and its single first
+   authoritative unlatched-to-`LISTENED—SEVERED` write in the current
+   continuous-sufficiency interval;
+2. one prospectively versioned direct L-locus edge from that write to a
+   materially distinct legal assignment in the same RCS-03A dialect and active
+   persistent Relic;
+3. deletion of only that edge removes the L proposal while the earlier false
+   bit, fixed disposition, `{}` commit, preserved proof, every independent Z
+   proposal, the latch write and state, its no-reattempt consequence, completed
+   trace, and current assignment remain fixed;
+4. the edge reads no later genuine break, renewal, rearm, evaluation, approval,
+   collision, or committed-transformation fact; and
+5. L cannot alter the empty settlement, proof, latch state, canonical key,
+   continuous-sufficiency interval, or recurrence rule. The current assignment
+   remains authoritative pending RCS-03E/RCS-04A/RCS-04B.
+
+One unlatched-to-latched transition is one L occurrence. It is not one per
+contender tag, ledger, proof child, participant, pair ordering, UI refresh, or
+save field. Reading an already-set latch, `Already heard`, polling,
+serialization, duplicate delivery, reload, replay, callback, route/ledger
+churn, and idempotent rewrite mint no occurrence. Genuine break ends the
+interval; renewal may permit a later episode, but neither is part of this L.
+If the guarded D4-B reattempt fallback ever replaces D4-A, L must be replayed
+against that changed recurrence contract rather than carried forward silently.
+
+Z and L remain ordered but distinct. Z is the actual final fact that nothing
+manifested. L is the later durable fact that this still-sufficient canonical
+pair has now been heard and cannot listen again during the same bond. A direct
+L edge must depend on that newly authoritative spent-bond memory, not use L as
+a delayed duplicate label for Z. The current rules provide no participant
+choice between Z and its mandatory L write; that adjacency is the strongest
+reason to keep separate causal accounting while recommending no L cause edges.
+
+| Choice | Latch-write cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete design example |
+| --- | --- | --- | --- |
+| **A — the latch governs recurrence but never transforms** | `D_L=emptyset`. Every L write retains its full persistent no-reattempt consequence but has no direct transformation-proposal edge. | **Recommended.** A teaches: **absence may shape an Absence-bound Relic; remembering that this bond was already heard governs recurrence**. Selected D1Z-C already gives the cancellation outcome a disclosed biography route, while L remains highly meaningful by closing rerolls, preserving the spent-bond relation, and forcing genuine break/renewal. A avoids a second proposal immediately after Z, cause-label archaeology, collision load, and cancellation becoming two evolution rolls. Under the standing ideal, the same bond continuing with genuinely changed recurrence status is already a meaningful unity-and-difference relation; A protectively refuses to turn every rich boundary into another biography trigger. Cost: no Relic can be shaped specifically by adopting the persistent memory that this bond has been heard. | Hollow Ashen's `P/Q` settles `{}` and may create `MOURNING CONDITION PROPOSED` at Z. L then writes `LISTENED—SEVERED(P,Q)` and blocks a re-listen, but creates no second proposal. |
+| **B — every transforming Relic has a latch-write-shaped path** | `D_L=D_mut`. Every state- and boundary-supporting transforming definition must have at least one reachable actual first L write whose direct edge proposes a materially distinct assignment; not every latch write transforms. | B forces every transforming definition to own a two-contender deny/cancel/latch path in addition to its D1P-B positive path. It functionally restores universal cancellation-shaped biography immediately after D1Z deliberately kept Z support proper, while maximizing pair rotation, cheap break/renew farming, ally steering, and Z/L collision burden. Choose B only for an explicit universal thesis that every Relic must be changed by a bond becoming spent. | Every definition needs some `P/Q -> {} -> LISTENED—SEVERED(P,Q)` route. Z and L may independently create two proposals from the same cancellation, both awaiting later collision rules. |
+| **C — a disclosed Closure-bound subset changes on the first latch write** | `D_L` is a nonempty proper subset of `D_mut`; D1L1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Guarded thematic countermodel.** A named `CLOSURE-BOUND`, Vow-bound, or Last Witness family may change not because manifestation was empty, but because the continuing bond became persistently spent. A state example may propose `RESOLVED CONDITION`; a boundary example may propose `AFTER-ECHO ATTUNEMENT`. This is locally evocative, but under current D4-A the player cannot reach an L occurrence without accepting its Z occurrence or accept that Z occurrence without the L write. C earns reopening only if the newly written pair memory is indispensable to the proposal's legal or strategic meaning, changes post-cancellation policy about preserving, breaking, or replacing the spent bond, and cannot honestly be authored at Z. Otherwise it launders another cancellation cause through a later label and creates a premium extra-proposal caste. | A Closure-bound Vowscar that has no Z edge commits `{}`, then its first `LISTENED—SEVERED(P,Q)` write proposes `RESOLVED CONDITION`. Deleting only the L edge leaves `{}`, every Z proposal, the latch, and the no-reattempt rule unchanged. |
+
+A/B/C are exhaustive because `D_L` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. D1Z-C does not derive D1L-C or constrain
+the exact intersection `D_L ∩ D_Z`; a definition may eventually have neither,
+one, or both only if the selected L branch and later authoring permit it. Exact
+overlap is deferred, and any Z/L coexistence produces distinct proposals for
+RCS-04A rather than an automatic merge.
+
+C should replace A only if matched traces prove all of the following: players
+can explain “empty manifestation” versus “the bond becoming spent”; at least
+one L proposal requires the new persistent pair memory in a way an honest Z
+edge cannot reproduce; that distinction changes post-cancellation policy;
+optimized play sometimes seeks and sometimes avoids L after all costs and Z
+proposals are counted; self-reset, pair rotation, reload duplication, and ally
+coercion fail; and any Z/L coexistence remains legible and non-stacking after
+later collision rules. C is a replacement path, not a selected fallback.
+
+Under A/B, D1L1 prunes and D1X opens. Under C, D1L1 opens next. Exact
+definitions, dialect incidence, overlap with `D_Z`, triggers, targets, rates,
+power, presentation, persistence realization, approval, collision, committed
+identity, break/renew cadence, and implementation remain AUTHOR/SPEC/TUNE or
+later registered decisions. This card authorizes no implementation, and the
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **A, the latch
+governs recurrence but never transforms.** Thus `D_L=emptyset`. Every actual
+first `LISTENED—SEVERED` write retains its canonical key, persistent spent-bond
+memory, proof preservation, and no-reattempt effect until genuine break and
+renewal, but no direct L-locus edge may create a transformation proposal.
+Selected D1Z-C remains the only cancellation-side biography route currently
+admitted; L cannot relabel or duplicate it.
+
+D1L moves to `DIR-SELECTED`, D1L1 moves to `PRUNED`, and `RCS-03D1X`
+becomes the sole `OWNER-OPEN` row. The 141-row register now contains **26
+`SCREEN`, 1 `OWNER-OPEN` at D1X, 40 `PRUNED`, 67 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`**. Four cause
+parent/child slots remain—X/X1 and M/M1—so closing them returns D2 as the sole
+frontier at `Phi_SR = 23`. The authoritative decision record remains
+unchanged.
+
+Two read-only audits then challenged D1X as a possible residual catch-all. They
+upheld one prevalence card only after adding the positive independence test
+below. The words “combat event” alone are insufficient: an event invented only
+to carry a Relic proposal, an evaluator result renamed as an event, or a bare
+clock cut is not X.
+
+### RCS-03D1X — independently meaningful combat/source/relationship event as transformation cause — C selected with A system fallback
+
+Let `E^{ind}_v` be the prospectively versioned set of qualifying independent-
+event occurrences. An actual occurrence `x` belongs to `E^{ind}_v` only when:
+
+1. `x` is an authoritative committed occurrence already owned by a combat,
+   source, or relationship rule outside Relic transformation-cause logic;
+2. its owning rule supplies its canonical identity and semantic cut, and with
+   every transformation-proposal edge projected out, changing or removing `x`
+   still materially changes a native combat, source, relationship, accounting,
+   evidence, or legal-continuation fact;
+3. deleting an X edge leaves `x` and all its native facts unchanged, including
+   applicable actor, target, authorization, payment, combat result, source
+   lineage, `H`/`S` fact, relationship status, and legal continuations; and
+4. the X edge may read only `x` and facts authoritative no later than its cut.
+   It may not inspect a later evaluator result, dedicated operation, proposal
+   approval, collision, or committed transformation.
+
+Let `D_X` contain each definition in `D_mut` with at least one reachable
+**independent-event transformation-cause witness**. Such a witness contains the
+same active persistent Relic in current operative assignment `a`, one actual
+`x in E^{ind}_v`, and one prospectively versioned direct X-locus edge from `x`
+to a materially distinct legal assignment `a'` in that definition's existing
+RCS-03A dialect. Deleting only that edge must remove only the named X proposal
+while holding fixed `x`, every native consequence above, the full completed
+trace, every I/T/VT/VF/K/P/C/Z/L occurrence and proposal, any independently
+initiated M operation and proposal, every other transformation edge, and `a`.
+The proposal does not commit `a'`; `a` remains authoritative pending
+RCS-03E/RCS-04A/RCS-04B.
+
+One canonical native event is one X occurrence. Its tags, roots, ledgers,
+proof roles, participants, observers, consumers, aliases, UI representations,
+callbacks, log records, saves, replays, or duplicate deliveries cannot multiply
+it. Several genuinely distinct canonical events may occur at one cut and may
+create separately attributable proposals for later collision handling. Exact
+event identity remains with the event's owning combat/source/relationship
+system; D1X cannot split or merge that identity for transformation convenience.
+
+The boundary is deliberately closed. I, T, VT, VF, K, P, C, Z, and L remain
+their own evaluator-chain loci even if code serializes them as events.
+Readiness, eligibility, contender truth, evidence or tuple reads, exact/related
+classification, raw RNG, and deterministic disposition are predicates or
+mappings, not X. A label, tick, frame, callback, animation, post-hoc match,
+bare turn/round/encounter/Circuit cut, storage write, reload, replay, or event
+invented solely to carry an X edge is ineligible. A dedicated Relic evolution
+or reconfiguration operation belongs to M. Reward/acquisition, cross-root or
+cross-combatant force, migration/repair, collision, and committed identity
+remain RCS-09/RCS-08/RCS-15–16/RCS-04A/RCS-04B.
+The examples below stay within the bearer-owned event domain; D1X does not
+silently authorize an ally's or opponent's event to force another combatant's
+Relic proposal.
+
+A semantic expiry is X only when the expiry is itself an independently
+meaningful native event—for example, it actually ends a material state or
+relationship and changes its ordinary legal consequences. A bare timer pulse
+is not X. If that expiry separately initiates a dedicated Relic reattunement
+operation, the native expiry is X and the operation is M; direct edges at both
+loci remain separate proposals rather than one double-counted cause.
+
+| Choice | Independent-event cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete design example |
+| --- | --- | --- | --- |
+| **A — lived events affect battle but never directly transform** | `D_X=emptyset`. Qualifying events retain every native combat, source, relationship, evidence, and evaluator consequence but have no direct X-locus transformation edge. | **Practical production fallback.** A keeps the catalog-wide causal grammar compact: every transforming Relic already has its D1P-B success-shaped path, the disclosed Absence-bound subset has Z, and deliberate operations remain available at M. It sharply limits event farming, accidental scars, teammate steering, proposal spam, and attribution debt. Its fit is neutral/protective. The cost is real: a Relic cannot directly remember a wound, defense, source loss, or relationship rupture merely because it lived through it; that experience matters only through ordinary combat, a later evaluator result, or a dedicated operation. | Aster's paid `Temper` materially revises bearer-owned `Heat I` to `Heat II`, changing ordinary predicates and counterplay and possibly becoming later evidence. The event creates no `TEMPERED CONDITION` proposal. |
+| **B — every transforming Relic has at least one lived-event path** | `D_X=D_mut`. Every state- and boundary-supporting transforming definition has at least one reachable qualifying independent event whose direct X edge proposes a materially distinct assignment; not every event transforms. | B gives one strong universal fantasy: **every Relic may be shaped both by what it manifests and by something it lives through**. At a valid event/proposal boundary, one independently real event retains its native consequence while participating in the continuing artifact's distinct proposed memory—a direct local Achintya Bheda Abheda fit; universal prevalence is aggregate and eventual committed change remains partial. The price is a mandatory second organic cause language for every definition on top of D1P-B, inviting token `take damage` edges, cheapest-event farming, self-harm or expiry loops, ally steering, P/X collisions, and pressure that can make M redundant. | Every definition needs some honest lived-event route. Ashen might propose `TEMPERED CONDITION` when the bearer's paid `Heat I -> Heat II` revision completes; Dreamglass might propose `AFTER-ECHO ATTUNEMENT` when a material bearer-owned Ward genuinely expires. |
+| **C — a disclosed Event-bound subset changes on lived events** | `D_X` is a nonempty proper subset of `D_mut`; D1X1 then chooses state-only, boundary-only, or nonempty support in both dialects. | **Conditionally recommended higher-ceiling direction, with A as the practical fallback.** A named `EVENT-BOUND`, Scar-bound, or World-Witness family can make external lived experience a genuine policy surface without forcing two organic cause languages onto every Relic. Included witnesses have B's direct local fit; coexistence across the catalog is only aggregate. Players may deliberately pay for a material state revision, preserve a soon-expiring source, or deny the event. C fails if the extra path is pure upside, hidden, token, cheaply farmed, or merely a premium “more ways to evolve” caste. | An Event-bound Vowscar may receive `TEMPERED CONDITION PROPOSED` when the bearer's Heat genuinely revises, while an ordinary Ashen undergoes the same native revision with no X proposal. An Event-bound Hourglass may instead receive `AFTER-ECHO ATTUNEMENT PROPOSED` when its material Ward expires; those examples do not preselect D1X1. |
+
+A/B/C are exhaustive because `D_X` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. Selected D1P-B guarantees every
+transforming definition a positive-result path, so A leaves no definition
+uncaused. C does not select an exact family, event catalog, actor or target
+scope, trigger, target assignment, frequency, rate, cap, power, definition-level
+overlap with `D_Z`, or same-trace/target coexistence among X, P, and Z.
+Selected D1P-B already fixes `D_P=D_mut`, so definition-level
+`D_X ∩ D_P = D_X`; D1X1 alone owns dialect incidence if C is selected.
+
+The recommendation is C only if later RCS-17/RCS-18 human and policy tests
+show that players can distinguish the native event, proposal, and eventual
+committed transformation; the event remains meaningful without its proposal;
+optimized policies materially sometimes seek and sometimes avoid X; cheap
+self-damage, expiry cycling, source churn, ally coercion, replay, and event-spam
+loops fail; Event-bound Relics are not a pure-upside caste; and X/P/M
+coexistence remains attributable after collision rules. If those gates fail,
+replace C with A rather than preserving a decorative route. The fallback is a
+recommendation, not selected unless the owner says so.
+
+Under A/B, D1X1 prunes and D1M opens. Under C, D1X1 opens next. Exact event
+catalogs, definition identities, within-dialect prevalence, edge maps, target
+assignments, rates, caps, power, presentation, approval, collision, committed
+identity, M support, persistence realization, and implementation remain
+AUTHOR/SPEC/TUNE or later registered decisions. This card authorizes no
+implementation, and the authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **C, a disclosed
+Event-bound proper subset, with A as the explicit system fallback.** Thus
+`D_X` is nonempty and proper in `D_mut`: at least one transforming definition
+has a qualifying independent-event cause path and at least one has none. This
+does not make every native event causal, approve a proposal, or select exact
+definitions, events, edges, targets, rates, or power.
+
+C is the active worksheet direction. The selected A fallback is a replacement,
+not a simultaneous rule: if the documented comprehension, policy,
+non-dominance, anti-exploit, or attribution gates fail, `D_X=emptyset`, D1X1
+prunes, and no lived event directly proposes transformation. The fallback has
+not fired. B is not selected. The parent's A fallback also does not silently
+select D1X1-A; state-only incidence is the newly opened child choice below.
+
+> **Agent correction, 2026-09-28 — the first D1X card deferred one overlap
+> that was already derived.** D1P-B fixes `D_P=D_mut`, so every Event-bound
+> definition necessarily also has at least one positive-result cause path and
+> `D_X ∩ D_P = D_X`. What remains deferred is definition-level overlap with
+> the proper `D_Z`, plus whether X and P/Z proposals occur on the same trace or
+> target the same assignment. The incorrect blanket “overlap with
+> `D_P`/`D_Z`” sentence is corrected at its source above. No owner answer,
+> fallback, dependency, or count changes.
+
+D1X moves to `DIR-SELECTED`, and `RCS-03D1X1` becomes the sole
+`OWNER-OPEN` row. The 141-row register now contains **25 `SCREEN`, 1
+`OWNER-OPEN` at D1X1, 40 `PRUNED`, 68 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. Three cause parent/child slots
+remain—X1, M, and M1—so closing them returns D2 as the sole frontier at
+`Phi_SR = 23`. The authoritative decision record remains unchanged.
+
+### RCS-03D1X1 — transformation-dialect incidence of Event-bound support — C selected with A scope fallback
+
+RCS-03A-C partitions nonempty `D_mut` into nonempty disjoint state-supporting
+`D_S` and boundary-supporting `D_B`. State definitions transform what
+lineage-carried remembered condition the Relic bears while their authored
+evaluation boundary stays fixed. Boundary definitions transform how the Relic
+is persistently attuned to listen while state stays fixed. One definition never
+gains both axes.
+
+Selected D1X-C fixes only a nonempty proper Event-bound subset
+`D_X ⊊ D_mut`. Define its dialect incidences:
+
+- `D_X^S = D_X ∩ D_S`; and
+- `D_X^B = D_X ∩ D_B`.
+
+Membership means at least one definition in that dialect has a qualifying X
+witness. It does not mean every definition in an included dialect, every native
+event for a qualifying definition, or every legal transition uses X. Every
+proposal remains in its definition's selected RCS-03A dialect. D1X1 cannot
+create a hybrid axis, alter native-event identity, widen actor scope, approve a
+proposal, or weaken the selected parent fallback.
+
+| Choice | Dialect incidence of the selected proper X support | Recommendation, ideal fit, and gameplay tradeoff | Concrete design example |
+| --- | --- | --- | --- |
+| **A — Event-bound support occurs only in the state dialect** | `D_X^S` is nonempty and `D_X^B` is empty. Because `D_B` is nonempty, `D_X` remains globally proper even if later authoring puts every state definition in `D_X`. | **Recommended child scope fallback.** The rule is **“what this Relic lives through can change what it bears.”** It is the clearest, most scar-like form and avoids event-driven attunement timing, expiry cycling, and best-listening-point opacity. One native event retaining its ordinary consequence while participating in distinct remembered condition is a direct local Achintya Bheda Abheda fit; the dialect restriction is aggregate. Cost: only condition Relics receive organic lived-event biography, making the state dialect structurally richer. | A state-supporting Event-bound Vowscar in `Mercy` experiences its bearer's paid native `Heat I -> Heat II` revision; Temper retains every ordinary effect while its X edge proposes `TEMPERED CONDITION`. A boundary Hourglass can undergo the same native revision without an X proposal. |
+| **B — Event-bound support occurs only in the boundary dialect** | `D_X^S` is empty and `D_X^B` is nonempty. Because `D_S` is nonempty, `D_X` remains globally proper even if later authoring puts every boundary definition in `D_X`. | The rule is **“what this Relic lives through can change how it listens.”** This is the strangest and potentially most relational expression, but also the least legible. Native expiries can encourage preservation-versus-expiration play, yet invite expiry cycling, self-retune loops, snapshot arbitrage, and one optimized listening point. Choose B alone only if that narrower identity justifies excluding intuitive state-side scars entirely. | A boundary-supporting Event-bound Hourglass in `Oath` has a material bearer-owned Ward genuinely expire. The Ward ends and ordinary continuations change regardless of X; its edge separately proposes `AFTER-ECHO ATTUNEMENT` while state stays fixed. A state Vowscar receives no X proposal from that expiry. |
+| **C — disclosed Event-bound support occurs in both dialects** | Both `D_X^S` and `D_X^B` are nonempty while inherited `D_X ⊊ D_mut` remains mandatory. C does not decide whether either intersection is universal or proper within its dialect. | **Recommended higher-ceiling direction, with D1X1-A as a separately selectable scope fallback.** One shared rule—**“this Relic can be shaped by what its bearer truly lives through”**—has two already-selected expressions: lived events may change what one Relic bears and how another listens. Each honest witness has direct local ideal fit; merely occupying both catalog dialects is aggregate. C avoids reserving organic biography for one dialect, but requires two independently legible, non-token, non-dominated policy surfaces and carries the greatest authoring, simulation, and comprehension burden. | Event-bound Vowscar may propose `TEMPERED CONDITION` from the paid Heat revision, and Event-bound Hourglass may propose `AFTER-ECHO ATTUNEMENT` from genuine Ward expiry. Neither event needs X to retain its native consequences, and at least one transforming definition remains outside `D_X`. |
+
+A/B/C are exhaustive. Parent C makes `D_X` nonempty, so both intersections
+cannot be empty; `D_S` and `D_B` partition `D_mut`, leaving state only,
+boundary only, or both. In C, global properness remains explicit: support in
+both dialects does not imply `D_X=D_mut`, every event transforms, or one Relic
+has two transformation axes.
+
+The selected direction has a three-level production ladder. D1X1-C is active
+while both dialects produce legible, policy-changing, non-dominated play. If
+boundary-attunement play proves opaque, cyclical, or dominated while state-side
+play survives, the selected D1X1-A child scope fallback retains state-condition
+event biography. The already selected parent D1X-A system fallback removes
+every X edge if even state-side event biography fails. No fallback has fired.
+
+For every included dialect, RCS-17/RCS-18 must later establish non-token native
+events, optimized reasons both to seek and avoid them, clear separation among
+event/proposal/commit, resistance to self-trigger and event churn, and no pure-
+upside Event-bound caste. `D_X ∩ D_P = D_X` remains derived, but this does not
+require X and P on one trace, one target, or one edge. Exact definitions,
+within-dialect prevalence, `D_X ∩ D_Z`, event catalogs, actor scope, edge maps,
+targets, rates, caps, power, presentation, approval, collision, identity,
+persistence, M support, and implementation remain AUTHOR/SPEC/TUNE or later
+registered decisions.
+
+Under every D1X1 answer, D1M opens next. D1X1 then moves to `DIR-SELECTED`;
+D1M becomes the sole `OWNER-OPEN` row; and the register contains 24 `SCREEN`,
+1 `OWNER-OPEN`, 40 `PRUNED`, 69 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and
+1 `EVALUATE`, with `Phi_SR = 25`. This card authorizes no implementation, and
+the authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **C, disclosed
+Event-bound support in both transformation dialects, with D1X1-A as the
+explicit child scope fallback.** Thus `D_X^S` and `D_X^B` are both nonempty
+while inherited `D_X ⊊ D_mut` remains mandatory. At least one state-supporting
+and one distinct boundary-supporting definition has a qualifying X cause path,
+and at least one transforming definition remains outside `D_X`. Every proposal
+stays inside its definition's one RCS-03A dialect. C creates neither a hybrid
+axis nor universal Event-bound support.
+
+C is active. D1X1-A is an armed replacement, not a simultaneous rule: if
+boundary-attunement event play fails its comprehension, policy,
+non-dominance, or anti-exploit gates while state-side event biography remains
+viable, then `D_X^S` remains nonempty, `D_X^B` becomes empty, and the X
+mechanic narrows to state Relics. If state-side event biography fails, the
+already selected parent D1X-A system fallback instead makes `D_X` empty and
+prunes the child incidence rule. D1X1-B is not a fallback. Neither selected
+fallback has fired.
+
+D1X1 moves to `DIR-SELECTED`, and `RCS-03D1M` becomes the sole
+`OWNER-OPEN` row. The 141-row register now contains **24 `SCREEN`, 1
+`OWNER-OPEN` at D1M, 40 `PRUNED`, 69 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`**. Two cause parent/child slots
+remain—M and M1—so closing them returns D2 as the sole frontier at
+`Phi_SR = 23`. The authoritative decision record remains unchanged.
+
+### RCS-03D1M — dedicated evolution/reconfiguration operation as transformation cause — B selected with A system fallback
+
+Let `O^M_v` be the prospectively versioned set of authoritative dedicated
+Relic evolution or reconfiguration operations. An actual occurrence `m`
+belongs to `O^M_v` only when:
+
+1. `m` is one admitted semantic operation concerning one active persistent
+   Relic, explicitly authored to seek evolution or persistent reconfiguration;
+   it is not a UI click, animation, callback, save write, generic equip or
+   Charm action, or acceptance of an already-existing proposal;
+2. the operation contract supplies one canonical identity and semantic cause
+   cut under the later RCS-13 initiation/admission law; aliases, retries,
+   callbacks, receipts, reloads, and duplicate delivery cannot multiply it;
+3. one prospectively versioned direct M-locus edge runs from `m` to a
+   materially distinct legal assignment in that definition's existing
+   RCS-03A dialect and may inspect no later approval, collision, or committed
+   transformation; and
+4. deleting only that edge removes only the named M proposal while holding
+   fixed `m`, its applicable admission/payment/lock facts, every independent
+   P/Z/X occurrence and proposal, every other transformation edge, and the
+   current assignment.
+
+Let `D_M` contain each definition in `D_mut` with at least one reachable
+**dedicated-operation transformation-cause witness**. Unlike X, M need not
+retain separate non-transformation value when its edge is projected out: its
+honest semantic purpose may be to seek transformation. It must nevertheless be
+a real admitted operation rather than an interface or engine step invented to
+multiply proposals. The current assignment remains authoritative until later
+RCS-03E agency/approval, RCS-04A collision, and RCS-04B committed-identity
+rules act.
+
+Evolution and reconfiguration need not split on this card. Their exact
+operation kinds may differ, but the question here is only whether at least one
+actual operation supplies a direct M edge for a definition. RCS-13 retains
+operation initiation, admission, configuration, and lock horizons; RCS-03E
+retains transformation agency and proposal approval. Pressing “accept” on an
+existing P/Z/X proposal is therefore not a fresh M cause. A semantic expiry is
+X when it is an independently meaningful native event; only a separately
+admitted operation it initiates can be M.
+
+| Choice | Dedicated-operation cause prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — dedicated operations never originate transformation proposals** | `D_M` is empty. Later configuration or approval workflows may act within their own authority, but no dedicated operation creates a new persistent-transformation proposal. | **Strong system fallback and lowest-complexity direction.** Every transforming definition already has a positive-manifestation path under D1P-B; selected proper subsets may additionally learn from absence or lived events. A keeps biography organic, prevents currency-to-best-state loops, post-preview counter-respec, operation spam, and a second macro operation surface. Its ideal fit is protective: the Relic is shaped through real relationship history rather than treated as an inert object. Cost: no operation-originated M path can redirect a long-lived Relic, though later deliberate cultivation or approval of P/Z/X proposals remains possible under its own authority. | Ashen has already received `TEMPERED CONDITION PROPOSED` from a legal P or X cause. A later confirmation or lock may act on that existing proposal under RCS-03E/RCS-13, but it creates no second proposal. Opening a Reliquary or requesting a retune without P/Z/X cannot originate one. |
+| **B — every transforming Relic has a dedicated-operation path** | `D_M=D_mut`. Every state- and boundary-supporting definition has at least one reachable actual dedicated operation whose direct M edge may originate a proposal. This does not make every target or direction selectable, every operation free, or any proposal automatically approved or committed. | **Recommended universal-operation direction, with A as the explicit system fallback if selected.** B removes a formal no-M class, but does not itself select participant control, one common rite form, equal access/cost/usefulness, or a shared teaching grammar. At this prevalence boundary its ideal fit is aggregate. A later concrete rite can fit directly only if a distinct Soul/bearer commitment and the Relic's existing biography jointly and visibly constrain one proposal while neither becomes the other's authority. B fails if it becomes universal respec, mandatory grind, a token path, a renamed P/Z/X proposal, the dominant shortcut past organic causes, a post-information counterpick, or operation churn. | At a later legal macro horizon, an admitted Vowscar rite may propose `TEMPERED CONDITION`; an admitted Hourglass rite may propose `AFTER-ECHO ATTUNEMENT`. The operations do not themselves approve or commit those targets, and the example selects no actor, payment, horizon, or common operation form. |
+| **C — a disclosed Rite-bound proper subset has dedicated-operation paths** | `D_M` is a nonempty proper subset of `D_mut`; D1M1 then chooses state-only, boundary-only, or nonempty support in both dialects. | C offers the greatest catalog differentiation: some Relics have an authored operation path while others transform only through manifestation, absence, or lived events. Each honest operation may later earn B's conditional direct local ideal fit, but subset coexistence is merely aggregate. C also adds a third cause-subset taxonomy beside Absence-bound and Event-bound and carries the greatest premium-caste risk: “this Relic gets an extra operation route” can dominate an otherwise comparable identity. Narrowing a generic respec problem to a subset does not cure it. | A named Rite-bound Vowscar may admit a reconciliation operation that proposes a new remembered condition. An ordinary Hourglass may have no M edge and still transform through its universal P path. The example does not preselect D1M1's dialect incidence. |
+
+A/B/C are exhaustive because `D_M` is a subset of nonempty `D_mut`: empty,
+the whole domain, or nonempty proper. B means at least one qualifying operation
+path per definition, not that every assignment, direction, operation, or
+request transforms. Under C, exact within-dialect prevalence remains later.
+
+The recommendation is B with D1M-A offered as an explicit replacement
+fallback, not C. B guarantees operation capability, not on-demand player
+control or practical parity. It survives only if later RCS-13, RCS-17, and
+RCS-18 work proves all of the following: every required M path has a non-token
+purpose; matched optimized cases sometimes choose M and sometimes prefer an
+organic P/Z/X proposal; M neither duplicates an already-live organic proposal
+nor dominates the special Z/X policy surface for definitions forced to support
+both; the operation is a costly or constraining commitment rather than target-
+any respec; preview timing and locks prevent counterpick abuse; payment,
+reload, oscillation, and repeated-operation loops fail; and players can
+distinguish operation, proposal, approval, and committed change. A later-valid
+realization might permit a pre-information, lock-bearing commitment whose
+target is constrained by current Soul/Relic biography rather than freely
+picked, while a faster organic route remains strategically preferable in other
+matched states. That is an illustrative gate witness, not a selected actor,
+timing, lock, or target rule. If the gates fail, A removes every M edge without
+removing deliberate cultivation or approval of proposals created elsewhere.
+No fallback is selected unless the owner includes it in the answer.
+
+Selected D1P-B fixes `D_P=D_mut`, so necessarily `D_M ∩ D_P=D_M`: every
+definition with an operation path also has a positive-result path. The A and B
+branches also determine definition-level overlap with the selected proper cause
+subsets: under A both `D_M ∩ D_Z` and `D_M ∩ D_X` are empty; under B they equal
+`D_Z` and `D_X` respectively. Only C leaves those definition-level overlaps
+open. Whether the necessarily distinct cause edges yield proposals on the same
+trace or for the same target remains unselected under every branch. A P receipt
+used later as an operation input does not become M; P and M retain distinct
+occurrences and edges.
+
+Under A/B, D1M1 prunes and D2 opens, producing 22 `SCREEN`, 1 `OWNER-OPEN`,
+41 `PRUNED`, 70 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`,
+with `Phi_SR = 23`. Under C, D1M1 opens next at `Phi_SR = 24`; closing it
+then opens D2 at 23. Exact operations, actors, initiation/admission, costs,
+locks, targets, rates, power, presentation, agency, approval, collision,
+persistence, fault handling, and implementation remain later registered work.
+This card authorizes no implementation, and the authoritative decision record
+remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **B, every
+transforming Relic has a dedicated-operation path, with D1M-A as the explicit
+whole-system fallback.** Thus `D_M=D_mut`: every state-supporting and every
+boundary-supporting transforming definition has at least one reachable actual
+dedicated evolution/reconfiguration operation whose direct M edge may
+originate a materially distinct same-dialect assignment proposal. This does
+not make every target, direction, or operation selectable; guarantee player
+initiation or equal practical access; or approve or commit any proposal.
+
+B is active. D1M-A is an armed replacement, not a simultaneous rule: if the M
+system fails its non-token purpose, policy non-dominance, comprehension,
+anti-duplication, anti-counterpick, commitment, or anti-loop gates, A replaces
+B and removes every M edge. Deliberate cultivation and approval of proposals
+caused by P/Z/X remain available under their later rules. D1M-C is unselected,
+and the fallback has not fired.
+
+Selected D1P-B forces `D_M ∩ D_P=D_M`; selected universal M support also
+forces `D_M ∩ D_Z=D_Z` and `D_M ∩ D_X=D_X` at the
+definition level. These equalities do not require M and P/Z/X to occur on one
+trace, propose the same target, or share an edge. Their occurrences and direct
+causal edges remain distinct.
+
+D1M moves to `DIR-SELECTED`; D1M1 moves to `PRUNED` because universal support
+necessarily reaches both nonempty transformation dialects; and RCS-03D2
+becomes the sole `OWNER-OPEN` row. The 141-row register now contains **22
+`SCREEN`, 1 `OWNER-OPEN` at D2, 41 `PRUNED`, 70 `DIR-SELECTED`, 5 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`**. All reachable cause loci are now
+closed at worksheet-direction granularity. Exact operations, edges, rates,
+actors, initiation/admission, costs, locks, targets, power, presentation,
+agency, approval, collision, committed identity, persistence, fault handling,
+and implementation remain later work. The authoritative decision record
+remains unchanged.
+
+> **Thirty-ninth prerequisite correction, 2026-09-28 — proper staged topology
+> hid a dialect-incidence choice.** The first repaired register gave D2 one row
+> for direct-versus-staged nonclear adjacency. A named-claim topology audit
+> found that D2's proper-subset branch can put genuinely staged transition
+> grammar only in state-supporting definitions, only in boundary-supporting
+> definitions, or in both. Those alternatives determine whether mandatory
+> biography changes what a Relic bears, how it listens, or both. Treating them
+> as authoring would repeat the exact whole-dialect omission that required the
+> D1 cause-incidence children.
+>
+> D2 therefore remains the parent prevalence card and one conditional
+> `RCS-03D2A` row is added. D2A opens only under D2-C and chooses state-only,
+> boundary-only, or nonempty support in both dialects; it prunes under D2-A/B.
+> This correction originally said D3 followed D2A and classified every
+> remaining within-dialect question as authoring. The fortieth correction below
+> breaks that overbroad claim: D2A1 first owns empty/nonempty dialect incidence
+> of the shortcut-complete complement. Exact positive counts, assignments,
+> edges, causes per edge, and availability contexts remain later authoring or
+> specification work.
+>
+> Adding one `SCREEN` row raises the frozen register from 141 to **142 rows**:
+> **23 `SCREEN`, 1 `OWNER-OPEN` at D2, 41 `PRUNED`, 70 `DIR-SELECTED`, 5
+> `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`**. No owner answer,
+> cause rule, receipt, result, assignment, edge, or authoritative-record text
+> changes. The correction exposes one already-player-material consequence
+> before D2 is presented.
+
+### RCS-03D2 — direct shortcut versus required staged nonclear assignment topology — C selected with A system fallback
+
+For each completed fixed-version transforming definition `d`, let `A_d` be
+its materially distinct legal **nonclear** assignments in its one selected
+RCS-03A dialect. Define the directed proposal-adjacency relation `E_d` so
+`(a,b)` belongs to `E_d` exactly when, while assignment `a` is authoritative,
+at least one selected D1 cause family can legally originate a direct proposal
+naming distinct assignment `b` without another assignment committing first.
+`E_d` is the union across P, Z, X, and M support actually available to `d`;
+an organic two-step route is not required staging if a dedicated M operation
+or any other cause supplies a direct shortcut.
+
+The graph is evaluated under the **active** parent-cause configuration. If any
+selected D1 fallback later removes or narrows Z, X, or M support, rebuild
+`E_d`, `R_d`, and `G_d`. The completed catalog must either be reauthored within
+the surviving cause rules to satisfy the exact selected D2/D2A branch again or
+explicitly reopen D2 and every topology-dependent descendant before release.
+A parent fallback may not silently change a definition's staged/shortcut class.
+
+An edge records legal proposal capability only. It does not make the proposal
+available in every context, player-selectable, approved, collision-winning, or
+committed. Those authorities remain with later RCS-03E/RCS-04A/RCS-13 work.
+
+Let `R_d` contain the **distinct-endpoint** ordered pairs `(a,b)`, with `a != b`,
+whose directed reachability is witnessed by one legal canonical same-artifact
+fixed-version history whose successive assignment transitions use one or more
+`E_d` edges and whose vertices all remain nonclear. Edges from mutually
+incompatible histories cannot be stitched into reachability. Let
+`G_d=R_d \setminus E_d` be its **transitive-gap set**. Thus `(a,b)` belongs to
+`G_d` only when `b` is reachable after at least two successive nonclear
+assignment transitions but no selected cause can propose `b` directly while
+`a` is current. The intermediate assignments must be material played states,
+not animations, currencies, receipts, progress bars, or aliases. Define
+
+`D_stage={d in D_mut : G_d is nonempty}`.
+
+A definition outside `D_stage` is **shortcut-complete**, not all-pairs
+complete: every endpoint that is already reachable from a source has some
+direct edge from that source. The definition may still have unreachable
+ordered pairs, conditional edges, long optional routes, and one-way travel.
+This narrower term prevents D2 from silently deciding D3 reverse edges or D5
+return reachability.
+
+| Choice | Required-stage prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete topology example |
+| --- | --- | --- | --- |
+| **A — every transforming definition is shortcut-complete** | `D_stage` is empty. Whenever a nonclear assignment `b` is reachable from nonclear `a`, some legal cause can propose `b` directly from `a`; a player may still take an optional multi-step route. | **Practical system fallback and clearest grammar.** A prevents mandatory filler states, progression tolls, and hidden route puzzles. Each honest direct edge may put one continuing artifact and one materially different assignment in a direct local relation; the catalog-wide exclusion of required staging is protective/aggregate. A does not mean free respec, target-any M, immediate availability, reverse travel, or automatic approval. Its cost is less authored becoming: a Relic cannot make an intermediate condition semantically indispensable to a later reachable form. | Vowscar may have `Mercy -> Tempered -> Defiance`, but if `Defiance` is reachable from `Mercy`, some P/Z/X/M edge also permits `Mercy -> Defiance`. The shortcut may require a different lawful cause or context and need not be chosen. |
+| **B — every transforming definition has at least one genuine staged gap** | `D_stage=D_mut`. Every state- and boundary-supporting definition has some reachable ordered nonclear endpoint that requires at least one material intermediate assignment. This guarantees one staged gap per definition, not that every transition or endpoint is staged. | B gives every Relic at least one real pilgrimage and prevents its complete biography from collapsing to only direct destination changes. Each adjacent edge may realize the ideal directly; the same continuing artifact across an indispensable temporal sequence is partial, while universal prevalence is aggregate. The price is a minimum of three nonclear assignments and one nonskippable route for every definition, plus universal UI, authoring, pacing, balance, and proof burden. It risks compulsory ladders, rushed-through middle states, and grind disguised as biography. | Every definition needs some analogue of `Mercy -> Tempered -> Defiance` with no legal `Mercy -> Defiance` edge from P, Z, X, **or M**. `Tempered` must change actual play before a later cause can propose `Defiance`. The reverse directions remain D3/D5 work. |
+| **C — staged and shortcut-complete definitions coexist** | `D_stage` is a nonempty proper subset of `D_mut`; D2A then chooses state-only, boundary-only, or nonempty support in both dialects. At least one definition has a genuine transitive gap and at least one has none. | **Recommended guarded higher-ceiling direction, with D2-A as the practical system fallback if selected.** C permits disclosed pilgrimage Relics beside more directly responsive Relics without forcing a filler third state onto every name. An indispensable intermediate can make one artifact's biography mechanically real; a shortcut-complete peer supplies the clarity baseline. Local edges and staged histories inherit A/B's direct/partial ratings, while class coexistence is only aggregate. C fails if staged names become a premium caste or a trap, intermediate forms are speed bumps, universal M bypasses the advertised journey, topology is hidden, or the extra grammar is not worth learning. | Vowscar may require `Mercy -> Tempered -> Defiance`, with no direct shortcut from any cause. Dreamglass may let every already-reachable attunement endpoint be proposed directly from its source. Both topology classes must later pass the prospective legibility gate before any consequential commitment; this card selects neither the exact information surface nor irreversibility. The names and assignments are illustrative. |
+
+A/B/C are exhaustive because `D_stage` is a subset of nonempty `D_mut`: it is
+empty, the whole domain, or nonempty proper. The test is reachability-relative,
+not an all-to-all graph requirement. An unreachable `a,b` pair is not a staged
+gap; a two-step route with any legal direct `a -> b` shortcut is not a staged
+gap; and a context-specific inconvenience cannot masquerade as authored staged
+topology if another legal cause supplies the shortcut.
+
+The recommendation is guarded C with D2-A offered as an explicit whole-system
+fallback, not universal B. C earns its extra grammar only if the transition map
+is prospectively legible, each required intermediate changes optimized policy
+for a material duration, staged and shortcut-complete definitions are both
+non-dominated, no acquired copy is a hidden topology-quality roll, and the
+universal D1M-B operation respects rather than bypasses every advertised gap.
+If those gates fail, A removes required gaps while retaining cause-specific,
+locked, costly, and approval-dependent direct edges. A fallback is not selected
+unless the owner includes it in the answer. Firing D2-A or any upstream cause
+fallback triggers the same downstream graph revalidation rule rather than
+silently inheriting topology conclusions derived from removed edges.
+
+D2 decides no direct reverse edge: `(a,b)` in `E_d` says nothing about
+`(b,a)`, which remains D3. It excludes the unassigned vertex, so explicit
+clearing remains D4. It requires neither a cycle nor a route back from a later
+assignment, so eventual return remains D5. It selects no exact graph, stage
+count beyond one witness, target availability, cause-to-edge assignment,
+agency, approval, collision, operation actor/cost/lock, committed identity,
+power, presentation, migration, or implementation.
+
+Under D2-A/B, D2A and its dependent D2A1 prune and D3 opens, producing 21
+`SCREEN`, 1 `OWNER-OPEN`, 43 `PRUNED`, 71 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`, with `Phi_SR = 22`. Under D2-C, D2A opens next
+while D2A1 remains screened, producing 23 `SCREEN`, 1 `OWNER-OPEN`, 41
+`PRUNED`, 71 `DIR-SELECTED`, and `Phi_SR = 24`; D2A and D2A1 then close one
+at a time before D3 opens at 22. These counts incorporate the fortieth
+prerequisite correction below. This card authorizes no implementation, and the
+authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **C, staged and
+shortcut-complete transforming definitions coexist, with D2-A as the explicit
+whole-system fallback.** Thus `D_stage` is a nonempty proper subset of
+`D_mut`: at least one completed transforming definition has a genuine
+distinct-endpoint nonclear transitive gap, and at least one is shortcut-
+complete over every endpoint it can already reach. C does not select which
+transformation dialect contains the staged definitions; D2A owns that question.
+
+C is active. D2-A is an armed replacement, not a simultaneous rule: if the
+mixed topology fails its prospective-legibility, material-intermediate,
+non-dominance, anti-bypass, anti-copy-lottery, or comprehension gates, A
+replaces C and makes `D_stage` empty. The fallback has not fired, and D2-B is
+unselected. Firing A prunes D2A and D2A1. It also requires rebuilding `E_d`,
+`R_d`, and `G_d` and revalidating or explicitly reopening every topology-
+dependent answer; no D2A/D2A1/D3-D5 or later conclusion may silently survive
+graph reauthoring or an upstream cause-edge change.
+
+D2 moves to `DIR-SELECTED`, and RCS-03D2A becomes the sole `OWNER-OPEN` row.
+After the correction below, the 143-row register contains **23 `SCREEN`, 1
+`OWNER-OPEN` at D2A, 41 `PRUNED`, 71 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 24`**. D3 remains screened until D2A and D2A1
+close. Exact definitions, finer within-dialect prevalence, assignments, edges,
+cause-to-edge mappings, availability, reverse travel, clearing, eventual
+return, agency, approval, collision, costs, locks, power, presentation,
+persistence, and implementation remain unselected. The authoritative decision
+record remains unchanged.
+
+> **Fortieth prerequisite correction, 2026-09-28 — the first D2A repair
+> classified staged support but not its shortcut-complete complement.** A
+> read-only atomicity audit found that knowing which dialects contain staged
+> definitions does not tell the player whether the same dialect also offers a
+> shortcut-complete Relic. Under state-only staging, state definitions may all
+> be staged or staged and shortcut-complete names may coexist; the boundary-
+> only branch has the symmetric ambiguity. Under both-dialect staging, the
+> globally required shortcut-complete witness may occur only in state, only in
+> boundary, or in both. Those cases change whether a player can retain a chosen
+> transformation dialect while selecting direct rather than pilgrimage
+> topology. That is a legal-build boundary, not a percentage or proof-strength
+> preference, so it cannot be flattened into authoring.
+>
+> One conditional `RCS-03D2A1` row therefore classifies the dialect incidence
+> of `D_short=D_mut \setminus D_stage` after D2A. Under D2A-A it chooses
+> boundary-only versus both-dialect shortcut support; under D2A-B, state-only
+> versus both; under D2A-C, state-only, boundary-only, or both. D2A1 opens after
+> every D2A answer while D2-C remains active. It prunes if parent fallback D2-A
+> fires, and D3 follows its closure. Exact counts above these empty/nonempty
+> incidences remain authoring.
+>
+> Adding D2A1 raises the register from 142 to **143 rows**. In the current D2-C
+> state it contains **23 `SCREEN`, 1 `OWNER-OPEN` at D2A, 41 `PRUNED`, 71
+> `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`**.
+> No owner answer, active fallback, assignment, edge, cause, or authoritative-
+> record text changes. The correction prevents the next answer from silently
+> deciding whether direct-response alternatives exist inside a staged dialect.
+
+### RCS-03D2A — transformation-dialect incidence of proper required-stage support — active owner choice
+
+RCS-03A-C partitions the nonempty transforming-definition domain `D_mut` into
+nonempty disjoint state-supporting `D_S` and boundary-supporting `D_B`. State
+definitions transform what lineage-carried remembered condition a Relic bears
+while its authored evaluation boundary stays fixed. Boundary definitions
+transform how a Relic is persistently attuned to listen while its state stays
+fixed. One definition never gains both transformation axes.
+
+Selected D2-C fixes a nonempty proper required-stage subset
+`D_stage ⊊ D_mut`. Define its dialect incidences:
+
+- `D_stage^S = D_stage ∩ D_S`; and
+- `D_stage^B = D_stage ∩ D_B`.
+
+Membership means at least one definition in that dialect has at least one
+genuine D2 transitive gap. It does not mean every definition in the included
+dialect, every transition of a staged definition, or every reachable endpoint
+is staged. Every graph remains inside its definition's one selected RCS-03A
+dialect. D2A cannot create a hybrid axis, add an assignment or edge, assign a
+cause, or decide any proposal's authority. D2A-A/B necessarily place shortcut-
+complete support in the opposite dialect, but do not say whether the staged
+dialect also retains it; D2A-C leaves the complement's state/boundary incidence
+open. D2A1 closes exactly that residual build-availability question.
+
+| Choice | Dialect incidence of selected proper staged support | Recommendation, ideal fit, and gameplay tradeoff | Concrete topology example |
+| --- | --- | --- | --- |
+| **A — required-stage support occurs only in the state dialect** | `D_stage^S` is nonempty and `D_stage^B` is empty. Every boundary-supporting definition is shortcut-complete. Because `D_B` is nonempty, inherited global properness holds even if every state definition later receives a gap. D2A1 decides whether any state definition is also shortcut-complete. | **Recommended child scope fallback.** A gives the clearest pilgrimage grammar: **what the Relic bears must sometimes become through a materially lived intermediate condition.** The same artifact across indispensable condition changes is a partial temporal realization of continuity-with-difference; restricting it to one dialect is aggregate. A avoids mandatory attunement-route puzzles, but gives state Relics structurally richer biographies and risks condition ladders whose middle state is merely endured. | A state Vowscar can require `Mercy -> Tempered -> Defiance`, with no legal `Mercy -> Defiance` edge from P/Z/X/M. Every boundary Dreamglass route is shortcut-complete over its already-reachable attunements, although conditional, one-way, and optional multi-step routes remain legal. |
+| **B — required-stage support occurs only in the boundary dialect** | `D_stage^S` is empty and `D_stage^B` is nonempty. Every state-supporting definition is shortcut-complete. Because `D_S` is nonempty, inherited global properness holds even if every boundary definition later receives a gap. D2A1 decides whether any boundary definition is also shortcut-complete. | B gives the strangest relational pilgrimage: **how the Relic listens must sometimes pass through one indispensable mode of relation.** A continuing artifact across distinct attunements may express the ideal partially, but the dialect restriction is aggregate. This can make attunement biography uniquely uncanny; it also has the highest route-opacity, snapshot-arbitrage, best-listening-point, and timing-puzzle risk while excluding the more intuitive state-side journey. | A boundary Dreamglass can require `Oath -> Resonant -> Echo`, with no legal `Oath -> Echo` edge. Every state Vowscar is shortcut-complete over its reachable remembered conditions. `Resonant` must materially alter play rather than serve as a progress marker. |
+| **C — required-stage support occurs in both dialects** | Both `D_stage^S` and `D_stage^B` are nonempty while inherited `D_stage ⊊ D_mut` remains mandatory. At least one state definition and one distinct boundary definition are staged, and at least one further transforming definition is shortcut-complete. C therefore requires at least three transforming definitions. D2A1 decides whether shortcut-complete support occurs in state only, boundary only, or both. | **Recommended guarded higher-ceiling direction, with D2A-A offered separately as a scope fallback.** Both established Relic languages can carry genuine becoming: one through what it bears and another through how it listens, while a shortcut-complete peer keeps direct responsiveness in the catalog. Each material edge may realize continuity and distinction directly; one artifact's indispensable sequence is partial; both-dialect incidence and class coexistence are aggregate. The cost is two staged policy surfaces, a three-definition floor, greater teaching/simulation burden, and premium-pilgrimage or filler-middle-state pressure. | Vowscar requires `Mercy -> Tempered -> Defiance`; Dreamglass requires `Oath -> Resonant -> Echo`; a third transforming Relic remains shortcut-complete. Neither endpoint shortcut exists on the staged witnesses, but C does not decide which dialect contains that third topology, reverse edges, return routes, or which causes supply adjacent edges. |
+
+A/B/C are exhaustive. Parent C makes `D_stage` nonempty, so both intersections
+cannot be empty. Because `D_S` and `D_B` partition `D_mut`, support occurs only
+in state, only in boundary, or in both. Under C, global properness remains
+explicit: both-dialect staged support neither makes every definition staged nor
+requires both a staged and shortcut-complete definition inside each dialect.
+That remaining complement incidence is exactly D2A1 rather than unspecified
+authoring.
+
+The recommendation has a three-level production ladder. If both dialects yield
+legible, materially policy-changing, non-dominated staged play, use D2A-C. If
+boundary-attunement staging becomes opaque, cyclical, timing-dominated, or not
+worth teaching while state-condition staging survives, D2A-A is the narrower
+scope fallback. If state-side staging also becomes grind, filler, or a premium
+caste, the already selected parent D2-A removes every required gap and prunes
+D2A. D2A-A is not selected unless the owner names it. If state staging fails
+while boundary staging alone remains promising, neither fallback silently
+chooses B; D2A must be explicitly reopened or the parent system fallback used.
+Firing either fallback rebuilds the active graphs and revalidates or reopens
+D2A1, because moving definitions out of `D_stage` can change the shortcut-
+complete complement's dialect incidence.
+
+For every included dialect, RCS-17/RCS-18 must later establish a prospectively
+understandable route; an intermediate that materially changes optimized policy
+for a meaningful duration; matched cases that pursue and avoid the route; no
+M/P/Z/X shortcut around an advertised gap; no best-stage, compulsory grind, or
+hidden acquired-copy topology roll; and no staged-versus-shortcut power caste.
+Boundary witnesses additionally must resist snapshot and retuning loops. State
+witnesses must resist a disguised scalar upgrade ladder. These are validation
+gates, not extra transformation mechanics.
+
+Exact definitions, prevalence beyond D2A1's empty/nonempty incidences, stage
+counts above one witness, assignment identities, edge and cause maps, contexts,
+rates, availability, reverse edges, clearing, return, agency, approval,
+collision, operation actors/costs/locks, power, presentation, migration, and
+implementation remain AUTHOR/SPEC/TUNE or later registered decisions. Under
+every D2A answer, D2A moves to `DIR-SELECTED` and D2A1 becomes the sole
+`OWNER-OPEN` row, producing 22 `SCREEN`, 1 `OWNER-OPEN`, 41 `PRUNED`, 72
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`, with
+`Phi_SR = 23`. Closing D2A1 then opens D3 at `Phi_SR = 22`. This card
+authorizes no implementation, and the authoritative decision record remains
+unchanged.
 
 ## Session protocol and evidence
 
