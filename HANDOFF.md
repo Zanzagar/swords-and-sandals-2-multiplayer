@@ -28,9 +28,11 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-28 19:39 — the press holds under ranged-first, and ring3 is running](docs/handoffs/2026-09-28-1939--the-press-holds-under-ranged-first-and-ring3-is-running.md)**
-(session `f4d2f69f`). Start there: **two background runs may have been cut by a restart (ring3 slices
-2-4, a sixth press verifier); the file says how to pick them up.** *(It supersedes
+[2026-09-29 07:16 — the press is refined twice, two ring3 slices landed, and two verifiers are running](docs/handoffs/2026-09-29-0716--the-press-is-refined-and-two-ring3-slices-landed.md)**
+(session `9cd94403`). Start there: **two write-nothing verifiers may still be running (ring3's camera
+slice, the eighth press verifier); the file says how to pick them up.** *(It supersedes
+[2026-09-28 19:39 — the press holds under ranged-first, and ring3 is running](docs/handoffs/2026-09-28-1939--the-press-holds-under-ranged-first-and-ring3-is-running.md),
+whose start-here items are DONE.)* *(That one supersedes
 [2026-09-28 17:50 — the press heads for a spot, and ring3 is paused](docs/handoffs/2026-09-28-1750--the-press-heads-for-a-spot-and-ring3-is-paused.md),
 whose not-done items are DONE.)* *(That one supersedes
 [2026-09-28 14:18 — big fighters walk again, and the AI presses a 2v1](docs/handoffs/2026-09-28-1418--big-fighters-walk-and-the-ai-presses-a-2v1.md),
