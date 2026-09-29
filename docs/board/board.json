@@ -1,6 +1,6 @@
 {
  "updatedAt": "2026-09-29",
- "head": "e586e19",
+ "head": "87ef43f",
  "lede": "Every system in the Swords and Sandals II team-arena project — the engine behind Swords and Sandals II: Souls and Simulacra (working title) — and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -622,9 +622,9 @@
    "title": "Actions around the fighter (the game's own button ring)",
    "summary": "Decided by the owner 2026-09-24 in a grilling round: the original's eight-button ring around the acting fighter, adapted for team play — WHO FIRST (a foe is always selected and the ring shows what you can do to him), spatial movement (walk slots; rank arrows above and below), one click acts (optional confirm), hidden where the original hides / greyed with a reason where team rules forbid, the original's weapon-swap button and items row. Built in slices S2-S9.",
    "gaps": "Unreadable to a new player. Direction-absolute walk buttons are the build's semantics but confusing on the blue side. There is no confirmation for irreversible spends.",
-   "next": "ring3: jump and charge greyed (decision 9, 457003a), the items row clear of the bow's words (decision 7, 1b55bad) and the reach preview (decision 1, c31fe35) are on main; the camera framing a person's ring (decision 6) is built and awaiting its verifier (the first died on a network error).",
+   "next": "ring3: jump and charge greyed (decision 9, 457003a), the items row clear of the bow's words (decision 7, 1b55bad) and the reach preview (decision 1, c31fe35) are on main. The camera framing a person's ring (decision 6) is built but HELD on branch ring3/camera (93eef4b): its verifier found it departs from decision 6's text on four points, which are the owner's calls.",
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
-   "ownerDecision": "Open (2026-09-29): with exactly one living foe the reach preview lights nothing (an authored exception) where decision 1 says every foe it can reach; keep it, or light the lone foe too? Also recorded by the slices: the items row's lift follows the stance; the snipe's preview is authored; a whirlwind lights foes it would waste on.",
+   "ownerDecision": "Open (2026-09-29). Reach preview: with one living foe it lights nothing (authored) where decision 1 says every foe; keep, or light him? Camera (held): (1) on person turns it reframes the survivors' close-up, where decision 6 says the close-up is untouched; (2) at a turn's end the pan can snap up to ~24 px in one frame rather than crop a fighter worse; (3) an AI action can start while that framing still eases out (up to 1.5 px); (4) past a ~3,200-unit spread the ring is squeezed at the zoom floor as before, rather than crop a far flank. Also recorded by the slices: the items row's lift follows the stance; the snipe's preview is authored.",
    "updated": "2026-09-29"
   },
   {
@@ -1357,6 +1357,10 @@
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-29",
+   "text": "The ring's camera framing is built and held for four owner calls (branch ring3/camera); the spell row and reach preview are on main."
+  },
   {
    "date": "2026-09-29",
    "text": "The action ring's items row keeps clear of the bow's words (1b55bad) and the reach preview lights every foe a spell or bombard can reach (c31fe35); one owner call open on a lone foe."

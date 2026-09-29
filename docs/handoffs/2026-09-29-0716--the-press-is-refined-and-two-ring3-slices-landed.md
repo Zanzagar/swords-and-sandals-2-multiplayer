@@ -62,18 +62,26 @@ handoff so a lag shows.
 
 ## If you restart now
 
-- **The camera slice** is built and unmerged: commit `562e45f` on the scratch branch `ring3/merge`
-  (worktree `.claude/worktrees/ring3-merge`; its message is a WIP placeholder — rewrite it from
-  `~/.cache/ss2-scratch/ring3/merge-notes/camera.json` when merging). The slices' working copy is the
-  `ring3` worktree (`ring3/rest2`, uncommitted, byte-identical to `c2b5751` + `03-camera.cumulative.diff`,
-  checked). Its verifier (`ring3:verify3`) is a RESUME of `wf_95bff0e1-595`; if cut, resume again with
-  the same args (in this session's transcript; the run's script is under
-  `~/.claude/projects/-home-corey-projects-swords-and-sandals-2-multiplayer/9cd94403-3a27-4b7f-ad74-fb82a311247c/workflows/scripts/`).
+- ~~**The camera slice** is built and unmerged … its verifier is a RESUME~~ — **UPDATED 07:55: the
+  resumed verifier returned BROKEN, and the slice is HELD** on the pushed branch `ring3/camera`
+  (`93eef4b`, one commit ahead of `main`, its message final). Its four departures from decision 6's
+  text are owner calls (below); once decided, merge it (`git merge --ff-only ring3/camera` if `main`
+  has not moved, else cherry-pick), full suite, decision 6's "Built" note, the board. The `ring3`
+  worktree and the scratch branches are removed; the worktree's diff is archived in
+  `~/.cache/ss2-scratch/worktree-archive-2026-09-28/ring3/`.
 - **The eighth press verifier** (write-nothing, on `be56a22`; scratch `~/.cache/ss2-scratch/verify-press8/`):
   if cut, re-run it from its brief in this session's transcript.
 
 ## Owner calls, open (new ones first)
 
+0. **The camera slice (decision 6), held on `ring3/camera`** — its verifier (2026-09-29) found four
+   departures, three of them the code doing what its comments say: (a) on a person's turn it
+   reframes the survivors' CLOSE-UP, where decision 6 says the close-up is untouched (the other
+   reading is one line, and those rings squeeze off their fighter as before); (b) at a turn's end the
+   pan can SNAP up to ~24 px in one frame (55 px in the slice's own sweep) rather than crop a fighter
+   worse; (c) an AI action can start while that framing still eases out (up to 1.5 px at 30 fps);
+   (d) past a ~3,200-unit spread the ring cannot be framed at the zoom floor and squeezes flush, as
+   before — framing it would crop a far flank. Also the fitted view gets no framing at all.
 1. **The reach preview with ONE living foe lights nothing** (authored), where decision 1 says every
    foe it can reach — keep, or light the lone foe too (a one-line change and three moved pins).
 2. The ring3 slices' recorded calls: the items row's lift follows the stance; a place's S7 caption
