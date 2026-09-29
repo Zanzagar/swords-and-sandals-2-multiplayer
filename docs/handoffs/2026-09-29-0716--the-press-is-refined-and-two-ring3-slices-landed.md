@@ -4,28 +4,32 @@ written:      2026-09-29 07:16 -0400
 sessionStart: 2026-09-28 21:06 -0400
 sessionId:    9cd94403-3a27-4b7f-ad74-fb82a311247c
 agentRuns:    implement-slices wf_95bff0e1-595 (ring3: spellrow, reach, camera + 3 verifiers; verify3 died on
-              a network error, EAI_AGAIN, and was RESUMED — IN FLIGHT at writing); press verifiers six (re-run
-              from scratch, REFUTED ab56337), seven (REFUTED 6dee6b4 in staged positions) and eight (on
-              be56a22, IN FLIGHT at writing)
-branch:       arena/champion-capture == github/main at 6c4d06a — both PUSHED through it
-commits:      c2b5751..6c4d06a (plus harness b584b41, ca0635e)
-suite:        main tree at e586e19: 3,874 tests, 3,873 pass, 0 fail, 1 skipped (the archive check)
-board:        current at e586e19 (republished, version 18)
-status:       WORK IN FLIGHT (two write-nothing verifiers). See "If you restart now".
+              a network error, EAI_AGAIN, was RESUMED and returned BROKEN); press verifiers six (REFUTED
+              ab56337), seven (REFUTED 6dee6b4 in staged positions) and eight (REFUTED be56a22)
+branch:       arena/champion-capture == github/main at 71a9d3b before this file's last commit — PUSHED;
+              ring3/camera (93eef4b) PUSHED and HELD
+commits:      c2b5751..71a9d3b (plus harness b584b41, ca0635e)
+suite:        main tree at 25c2e8a: 3,881 tests, 3,880 pass, 0 fail, 1 skipped (the archive check)
+board:        current at 71a9d3b (republished, version 21)
+status:       NOTHING IN FLIGHT. Updated 09:40 (it was written mid-flight at 07:16).
 supersedes:   2026-09-28-1939--the-press-holds-under-ranged-first-and-ring3-is-running.md — its start-here
               items are DONE: ring3 relaunched and finished (camera's verifier re-running), the sixth
               press verifier re-run and acted on.
 ---
 
-# The press is refined twice, two ring3 slices landed, and two verifiers are running
+# The press keeps one fix, two ring3 slices landed, and the camera waits on the owner
 
 ## The one-sentence version
 
-The sixth press verifier refuted ab56337 and the seventh refuted my fix for it in staged positions;
-both are answered (`6dee6b4`, then `be56a22`, every repro a test) and an eighth verifier is on
-`be56a22`; ring3's spell row and reach preview are on `main` (`1b55bad`, `c31fe35`) and its camera
-slice waits on a re-run verifier; and the board is current again, with a `board:` field in every
-handoff so a lag shows.
+Three verifiers in a row refuted the press, twice because of guards I added; **the press on `main`
+(`25c2e8a`) is `ab56337`'s plus one fix, the detour past an ally's body**, which on the arena's own
+bouts (seeds 1-400) takes idling with a spot open from 5 to 0 and leaves everything else as it was;
+ring3's spell row and reach preview are on `main`, its camera slice is HELD on `ring3/camera` for four
+owner calls; the P2 table is re-measured (774 : 762); and the board is current, with a `board:` field
+in every handoff so a lag shows.
+
+*(The 07:16 version of this sentence said "the press is refined twice … an eighth verifier is on
+`be56a22`". The eighth refuted it; see "What changed", last press bullets.)*
 
 ## What changed
 
@@ -64,6 +68,16 @@ handoff so a lag shows.
   `Docs:`** the P2 table's sixth measurement at `57d8919`: `off` unchanged, ranged-first +3.6 to +34.8
   points over it in 3v3, head to head 776 : 760. (The eighth verifier was briefed on `be56a22`, which
   still had the gate: a finding about the gate is moot.)
+- **`25c2e8a` `Fix:` the eighth verifier REFUTED `be56a22`**, and the press keeps only its detour: my
+  shuttle guard (`ss2QueueStepShuttles`, be56a22) simulated one arm and let through steps other arms
+  undid (its M1/M2), and my widened rank guard (6dee6b4) skipped ways forward (M5) — both guards are
+  back at `ab56337`'s form, the helpers deleted; the detour's look-ahead now also accepts a lane with a
+  fight of his own (M3). Its repros are tests (`VERIFIER8`). OPEN again and pinned, as at `ab56337`:
+  tricks 3v3 seed 338's middle-lane shuttle and the seventh verifier's S2E; OPEN and pinned since
+  `6dee6b4`: C2x (detour, walk, arm 4 behind the same big ally). Host, ranged-first, seeds 1-400:
+  idle 0 / shuttles 1 / cycles 62 / strict 6, against `c2b5751`'s 5 / 1 / 62 / 6 and `be56a22`'s
+  0 / 0 / 77. **`71a9d3b` `Docs:`** P2's seventh measurement: every cell as at `ab56337` except plain
+  3v3, which the detour moves up; head to head 774 : 762.
 - **Board:** `b4d2c45` and `6c4d06a` — it had lagged all of 2026-09-28; `docs/handoffs/README.md` now
   asks every handoff for a `board:` field.
 
@@ -106,17 +120,18 @@ handoff so a lag shows.
 
 ## Next, ranked
 
-1. Read the camera verifier; merge `562e45f` (cherry-pick, full suite on the main tree, `Decided:`
-   trailer, decision 6's "Built" note, the board) or fix what it breaks.
-2. Read the eighth press verifier; fix anything it breaks under ranged-first before building on the
-   press.
-3. Re-measure P2 (`tools/ai-press-census.mjs`, the decision's table) on the settled press; the `off`
-   column must come out unchanged.
-4. **Pre-existing, found by the seventh verifier (T692, T513):** a fighter between two fights paces as
-   the nearest fought foe flips while he walks toward either one's spot. Proposed: choose the press
-   target by NEAREST OPEN SPOT, which walking toward cannot flip — but it changes the press's
-   targeting, P1 and the P2 evidence, so it wants the owner's nod.
-5. The worktree archive can be deleted once nobody has asked for anything in it.
+1. **The owner's calls** (above): the camera's four readings (then merge `ring3/camera`, full suite,
+   decision 6's "Built" note, the board), the lone-foe reach preview, and P2.
+2. **The press's direction, proposed for the owner:** stop patching arms one verifier at a time.
+   Every open cycle (seed 338, S2E, S3, C2x, the two-target pacing of T692/T513, D1177, the flank/press
+   alternation) comes from arms that each pick their own target and move for their own reason; three
+   rounds of guards each fixed the repros in front of them and opened cycles elsewhere. Rebuild the
+   press's movement around ONE target and intent — the nearest open spot, which walking toward cannot
+   flip — that the older arms consult instead of second-guessing. It changes the press's targeting, P1
+   and the P2 evidence, so it wants the owner's nod before it starts.
+3. A write-nothing verifier on `25c2e8a` before anything is built on the press; its claim should name
+   the pinned open cases as known.
+4. The worktree archive can be deleted once nobody has asked for anything in it.
 
 ## Things I got wrong (this session)
 
@@ -131,3 +146,7 @@ handoff so a lag shows.
 - **`pkill -f` matched my own shell** and killed it (exit 144). Both verifiers did the same to
   themselves; the eighth's brief now warns.
 - **I planned to batch the board after ring3**, the lapse the board memory forbids; the owner asked.
+- **Two of my press guards were refuted by the next verifier each** (the widened rank guard in
+  `6dee6b4`, the shuttle guard in `be56a22`), and a third change of mine, the join-arm P4 gate, was
+  caught by the P2 table costing plain 3v3 4.5 points — added to fix a staged case without measuring
+  it on the host. All three are reverted; the lesson is item 2 of "Next".

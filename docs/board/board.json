@@ -1,6 +1,6 @@
 {
  "updatedAt": "2026-09-29",
- "head": "eb5d69d",
+ "head": "71a9d3b",
  "lede": "Every system in the Swords and Sandals II team-arena project — the engine behind Swords and Sandals II: Souls and Simulacra (working title) — and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -282,11 +282,11 @@
    "column": "gaps",
    "order": 19,
    "title": "Team AI (authored layer): targeting, ranks, flanking, crowd and taunt valuation",
-   "summary": "Authored team behaviour on top of the ladder: swing at the weakest REACHABLE foe; walk at the own-rank foe; change rank only when its own rank is empty of foes; join an ally's fight (SS2_RANK_JOIN_SURPLUS 0); draw the bow rather than walk; price taunts in hitpoints; play to the crowd when safe and ahead (SS2_AI_CROWD purseInSwings 100, aheadShare). Presses a numbers advantage (P1/P2/P4, 5cb6977): no crowd-pleaser while an ally fights a foe it could help against; goes round to an open spot beside the target (06beab0), detouring through a clear lane when an ally blocks its walk (6dee6b4); the older arms do not step into a queue while there is a way round (ab56337, 6dee6b4); aiPress off is exactly the AI before the press (463fe3f). Seven write-nothing verifiers have probed it. aiPress ranged-first ships; pincer-first is one word away.",
-   "gaps": "be56a22 answers the seventh verifier's staged findings (the detour only past a body and only to a lane that still presses; the older arms skip only a step the press would undo); an eighth verifier is checking it. 57d8919 reverted a join-arm P4 gate of mine that the P2 table caught costing plain 3v3 4.5 points of 2v1 conversion and doubling its dancing, so the staged S3 hop (an archer's shot making a lane look covered) is open again, under every aiPress. Also open and pre-existing: a fighter between two fights can pace as the nearest fought foe flips (fix proposed: target the nearest open spot). P2, sixth measurement (57d8919): ranged-first converts 3v3 2v1s +3.6 to +34.8 points over off, 776 : 760 head to head; off unchanged. Pincer-first has a bow sheathe/redraw cycle to fix before it could be chosen. Under ranged-first a priced taunt ranks above going round (by design). A pair still plays to the crowd in a 2v1 before anyone engages. The archer's closed-on test ignores lanes. Coefficients tuned on the demo roster only.",
-   "next": "Read the eighth verifier; fix what it breaks. Owner: keep ranged-first or flip to pincer-first (docs/design/battle-ui.md#decided-ai-press-2026-09-27), and whether the press should target the nearest open spot.",
-   "evidence": "ss2-rules.js:3142 (ss2FlankingWalk), 3295 (ss2TauntValue), 3529-3839 (SS2_AI_CROWD, ss2SafelyOutOfRange, ss2CrowdPleaserValue, ss2RankToJoin); bf53d81, b81f3dc, 69e4217; test/ss2-ai-crowd.test.js, test/ss2-flanking.test.js, test/ss2-rank-join.test.js, test/ss2-ai-tired-rest.test.js. ss2PressTarget, ss2PressMove; test/ss2-ai-press.test.js. 74c0014 (the far-side guard); tools/ai-press-census.mjs. 92f9701. 06beab0, 463fe3f, ab56337, 6dee6b4; 1f9961c (the P2 table at ab56337). be56a22. 57d8919 (the revert), eb5d69d (P2 at 57d8919).",
-   "ownerDecision": "",
+   "summary": "Authored team behaviour on top of the ladder: swing at the weakest REACHABLE foe; walk at the own-rank foe; change rank only when its own rank is empty of foes; join an ally's fight (SS2_RANK_JOIN_SURPLUS 0); draw the bow rather than walk; price taunts in hitpoints; play to the crowd when safe and ahead (SS2_AI_CROWD purseInSwings 100, aheadShare). Presses a numbers advantage (P1/P2/P4, 5cb6977): no crowd-pleaser while an ally fights a foe it could help against; goes round to an open spot beside the target (06beab0), detouring through a clear lane when an ally's body blocks its walk (6dee6b4, refined in be56a22 and 25c2e8a); the older arms do not step into a queue while there is a way round (ab56337). aiPress off is exactly the AI before the press (463fe3f). Eight write-nothing verifiers have probed it. aiPress ranged-first ships; pincer-first is one word away.",
+   "gaps": "At 25c2e8a the press is ab56337's plus the detour: on the arena's own bouts (ranged-first, seeds 1-400, 4,800 bouts) no idling with a spot open (5 before), 1 shuttle (tricks 3v3 seed 338), 62 cycles, as at c2b5751. Open and pinned by tests: seed 338's middle-lane shuttle; the seventh verifier's S2E rest; S3, the two-lane hop under an archer's shot; C2x, a detour cycle behind a big ally; and pacing between two fights as the nearest fought foe flips. Three rounds of new guards (6dee6b4, be56a22, and a join-arm gate reverted in 57d8919) each fixed the repros in front of them and opened cycles elsewhere: every arm has its own idea of the target. P2, seventh measurement (25c2e8a): ranged-first converts 3v3 2v1s +3.6 to +34.8 points over off, 774 : 762 head to head; off unchanged. Pincer-first has a bow sheathe/redraw cycle to fix before it could be chosen. Under ranged-first a priced taunt ranks above going round (by design). A pair still plays to the crowd in a 2v1 before anyone engages. The archer's closed-on test ignores lanes.",
+   "next": "Owner: keep ranged-first or flip to pincer-first; and whether to rebuild the press's movement around ONE target and intent (the nearest open spot, which walking toward cannot flip) that every arm consults, rather than patch arms one verifier at a time.",
+   "evidence": "ss2-rules.js:3142 (ss2FlankingWalk), 3295 (ss2TauntValue), 3529-3839 (SS2_AI_CROWD, ss2SafelyOutOfRange, ss2CrowdPleaserValue, ss2RankToJoin); bf53d81, b81f3dc, 69e4217; test/ss2-ai-crowd.test.js, test/ss2-flanking.test.js, test/ss2-rank-join.test.js, test/ss2-ai-tired-rest.test.js. ss2PressTarget, ss2PressMove; test/ss2-ai-press.test.js. 74c0014 (the far-side guard); tools/ai-press-census.mjs. 92f9701. 06beab0, 463fe3f, ab56337, 6dee6b4; 1f9961c (the P2 table at ab56337). be56a22. 57d8919 (the revert), eb5d69d (P2 at 57d8919). 25c2e8a (the consolidation), 71a9d3b (P2 at 25c2e8a).",
+   "ownerDecision": "Proposed 2026-09-29: rebuild the press's movement around one target and intent (the nearest open spot), which the open cycles all trace to.",
    "updated": "2026-09-29"
   },
   {
@@ -1357,6 +1357,10 @@
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-29",
+   "text": "An eighth verifier refuted be56a22; the press keeps only its detour, both guards back at ab56337's form (25c2e8a): on the host, idling with a spot open 5 -> 0, everything else as at c2b5751. P2 measured a seventh time (71a9d3b)."
+  },
   {
    "date": "2026-09-29",
    "text": "P2 measured a sixth time: ranged-first +3.6 to +34.8 points over off, 776 : 760 head to head (eb5d69d); a join-arm gate that cost plain 3v3 4.5 points was reverted (57d8919)."
