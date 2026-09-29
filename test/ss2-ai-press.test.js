@@ -27,6 +27,7 @@ import { applyAction, combatantById, createTeamBattle, currentCombatant, legalAc
 import {
   createSs2TeamRules,
   ss2Combatant,
+  ss2PressGoal,
   ss2PressMove,
   ss2PressTarget,
   ss2TeamRules,
@@ -36,6 +37,7 @@ import {
 
 const FRONT = SS2_ARENA.frontY;
 const SECOND = SS2_ARENA.frontY - SS2_ARENA.rankStride;
+const THIRD = SS2_ARENA.frontY - 2 * SS2_ARENA.rankStride;
 
 const gladiator = (overrides = {}) => ({
   strength: 9, speed: 5, attack: 9, defence: 5, vitality: 5, stamina: 4,
@@ -301,7 +303,13 @@ const PRESS_SHUTTLES = Object.freeze([
   // Added 2026-09-28: the bouts that shuttled only at 92f9701 (a fourth
   // verifier's census; none shuttles at 74c0014). The last field is the side size.
   ["ranged-first", "tricks", 46], ["ranged-first", "buffs", 6, 2], ["pincer-first", "buffs", 6, 2],
-  ["ranged-first", "buffs", 11, 2], ["pincer-first", "buffs", 11, 2]
+  ["ranged-first", "buffs", 11, 2], ["pincer-first", "buffs", 11, 2],
+  // Added 2026-09-28: a sixth verifier's census (seeds 97-400), the same at
+  // 06beab0 and ab56337. The press stepped red-1 out of the queue in the
+  // middle lane; when a knockback took its target out of reach, the rank arm
+  // stepped it back toward a foe TWO lanes away, which lands in the middle
+  // lane, the queue, and its guard read only the nearest foe's own lane.
+  ["ranged-first", "tricks", 338]
 ]);
 
 test("the arena's own bouts where the press alone shuttled a fighter between lanes no longer do", async () => {
@@ -418,7 +426,8 @@ function stagedRun(spec, { aiPress = "ranged-first", actions = 120 } = {}) {
     id: team,
     combatants: spec.filter((entry) => entry.team === team).map((entry) =>
       ss2Combatant(gladiator({ gladiator_dir: team === "red" ? "right" : "left",
-        ...(entry.sturdy ? sturdy : {}), ...(entry.bow ? { secondary_weapon: 61, equipped_weapon: 2 } : {}) }),
+        ...(entry.sturdy ? sturdy : {}), ...(entry.bow ? { secondary_weapon: 61, equipped_weapon: 2 } : {}),
+        ...(entry.fields ?? {}) }),
       { id: entry.id, name: entry.id, controller: "local", x: entry.x, y: entry.y }))
   }));
   const battle = createTeamBattle({ seed: 1, rules: createSs2TeamRules({ aiPress }), teams });
@@ -426,7 +435,12 @@ function stagedRun(spec, { aiPress = "ranged-first", actions = 120 } = {}) {
   for (let taken = 0; taken < actions && !battle.result; taken += 1) {
     const actorId = currentCombatant(battle).id;
     const chosen = suggestAction(battle, actorId);
-    log.push({ actorId, type: chosen.type, targetId: chosen.targetId });
+    // Whether the press had an open spot to go round to on this turn: the
+    // claim's "while an open spot exists" (2026-09-28).
+    const view = viewFor(battle, actorId);
+    const target = ss2PressTarget(view);
+    const open = target !== null && ss2PressGoal(view, target) !== null;
+    log.push({ actorId, type: chosen.type, targetId: chosen.targetId, open });
     applyAction(battle, { actorId, ...chosen });
   }
   const turnsOf = (id) => log.filter((entry) => entry.actorId === id);
@@ -617,3 +631,84 @@ for (const aiPress of ["ranged-first", "pincer-first"]) {
     assert.ok(run.turnsOf("red-2").some((entry) => /^rank-/.test(entry.type)), "and steps into the lanes toward the fight");
   });
 }
+
+/**
+ * ► **WALLED OFF FROM THE OPEN SPOT BY AN ALLY IN HIS OWN LANE, THE FREE
+ *   MEMBER TAKES A CLEAR LANE ROUND — a sixth write-nothing verifier's finding,
+ *   2026-09-28, against ab56337.** `ss2PressGoal` found an open spot, so the
+ *   join and rank arms' queue guards skipped the step into the target's lane;
+ *   but `ss2PressMove`'s only move from another lane was the walk toward that
+ *   spot, and an ally's body in the actor's own lane withholds that walk (a
+ *   body blocks only in the walker's own lane). Nothing else moved him: he
+ *   rested or taunted every turn, 0 attacks (plain 3v3 seeds 29, 79 and 288,
+ *   champions 3v3 seeds 196 and 358 on the arena's own host; these two
+ *   layouts are the verifier's S1 and S2). One step into a lane whose walk is
+ *   clear was enough, forced by hand, for the AI to go round and strike.
+ */
+for (const aiPress of ["ranged-first", "pincer-first"]) {
+  // Idle WHILE THE PRESS HAS AN OPEN SPOT — the claim's own terms. With both
+  // flanks held, queueing and waiting (a priced taunt included) is the answer.
+  const idle = (entry) => entry.open && ["rest", "taunt", "wincrowd"].includes(entry.type);
+  test(`${aiPress}: blocked by an ally in his own lane, the free member steps to a clear lane, goes round and strikes, never idling`, () => {
+    const run = stagedRun([
+      { id: "red-2", team: "red", x: -84, y: SECOND, sturdy: true, fields: { charisma: 99 } },
+      { id: "red-3", team: "red", x: 30, y: THIRD, sturdy: true, fields: { charisma: 99 } },
+      { id: "blue-1", team: "blue", x: 2, y: SECOND, sturdy: true },
+      { id: "blue-2", team: "blue", x: 88, y: SECOND, sturdy: true, fields: { charisma: 1 } },
+      { id: "blue-3", team: "blue", x: 130, y: THIRD, sturdy: true }
+    ], { aiPress });
+    assert.ok(run.longestRun("blue-2", idle) < 4, `blue-2 idled ${run.longestRun("blue-2", idle)} turns running`);
+    assert.ok(run.shuttle("blue-2") < 4, `blue-2 alternated rank steps ${run.shuttle("blue-2")} turns running`);
+    assert.ok(run.struck("blue-2", "red-2") || run.struck("blue-2", "red-3"), "blue-2 goes round and strikes");
+  });
+
+  test(`${aiPress}: behind an ally archer in his own lane, the free member goes round through a clear lane rather than rest`, () => {
+    const run = stagedRun([
+      { id: "red-1", team: "red", x: 1745, y: SECOND, sturdy: true, bow: true, fields: { charisma: 1 } },
+      { id: "red-2", team: "red", x: 1345, y: FRONT, sturdy: true },
+      { id: "red-3", team: "red", x: 1831, y: SECOND, sturdy: true, fields: { charisma: 1 } },
+      { id: "blue-1", team: "blue", x: 1252, y: FRONT, sturdy: true, fields: { strength: 20, charisma: 99 } }
+    ], { aiPress });
+    assert.ok(run.longestRun("red-3", idle) < 4, `red-3 idled ${run.longestRun("red-3", idle)} turns running`);
+    assert.ok(run.shuttle("red-3") < 4, `red-3 alternated rank steps ${run.shuttle("red-3")} turns running`);
+    // Under pincer-first the archer red-1 puts his bow away and goes round
+    // first, so both of blue-1's flanks end up held and red-3 queues in his
+    // lane; under ranged-first red-1 keeps shooting and red-3 takes the far side.
+    // (So under pincer-first this layout did not idle with a spot open at
+    // ab56337 either — measured — and stands here as a guard, not a repro.)
+    assert.equal(combatantById(run.battle, "red-3").y, FRONT, "red-3 ends in blue-1's lane");
+    if (aiPress === "ranged-first") assert.ok(run.struck("red-3", "blue-1"), "red-3 reaches blue-1 and strikes");
+  });
+}
+
+/**
+ * ► **P4 BINDS THE JOIN ARM TOO, WITH THE PRESS ON — a sixth write-nothing
+ *   verifier's staged S3, 2026-09-28 (the same at 06beab0, ab56337 and under
+ *   `aiPress: "off"`).** The join arm counts an ally "engaged" by the FOE's
+ *   reach as well, and a drawn bow's is ~4,500, so an archer shooting blue-1
+ *   made the front lane look covered: blue-3 left it to join blue-2's fight
+ *   in the middle lane, where the press had no open spot (the wall), and the
+ *   join arm sent him back to the "engaged" front lane — 27 alternating rank
+ *   steps, 0 attacks. By P4 the archer is blue-3's own fight: in his lane, and
+ *   no ally is fighting him (`ss2PressTarget`'s reading, an ally's own reach).
+ *   With the press on the join arm now asks P4 first; `aiPress: "off"` stays
+ *   the AI before the press, the measurement baseline, and still hops.
+ */
+const archerOwnLane = () => [
+  { id: "red-1", team: "red", x: 1667, y: FRONT, sturdy: true, bow: true, fields: { strength: 20, charisma: 40 } },
+  { id: "red-2", team: "red", x: 2100, y: SECOND, sturdy: true },
+  { id: "blue-1", team: "blue", x: 1921, y: FRONT, sturdy: true },
+  { id: "blue-2", team: "blue", x: 2014, y: SECOND, sturdy: true, fields: { strength: 20 } },
+  { id: "blue-3", team: "blue", x: 1069, y: FRONT, sturdy: true }
+];
+for (const aiPress of ["ranged-first", "pincer-first"]) {
+  test(`${aiPress}: with an archer in his own lane that no ally fights, the free member closes on him rather than hop between two fights`, () => {
+    const run = stagedRun(archerOwnLane(), { aiPress, actions: 150 });
+    assert.ok(run.shuttle("blue-3") < 4, `blue-3 alternated rank steps ${run.shuttle("blue-3")} turns running`);
+    assert.ok(run.struck("blue-3", "red-1"), "blue-3 closes on the archer and strikes");
+  });
+}
+test("aiPress \"off\" keeps the join arm's two-lane hop: the AI before the press, kept exact as the baseline", () => {
+  const run = stagedRun(archerOwnLane(), { aiPress: "off", actions: 150 });
+  assert.ok(run.shuttle("blue-3") >= 4, `off must be unchanged here (${run.shuttle("blue-3")})`);
+});

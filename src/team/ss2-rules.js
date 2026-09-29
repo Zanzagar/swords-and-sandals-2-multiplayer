@@ -4447,15 +4447,9 @@ const SS2_RANK_DIRECTION = Object.freeze({
 export function ss2PressTarget(view) {
   const actor = view.actor;
   if (!Number.isFinite(actor?.x) || !Number.isFinite(actor?.y)) return null;
-  // `?? []`: `chooseAiAction` is called directly by tests with a view that
-  // carries only the list they care about, and the press must not throw
-  // before the checks that are the point of such a test.
-  const allies = (view.allies ?? []).filter((ally) =>
-    ally.id !== actor.id && ally.alive !== false && Number.isFinite(ally.x));
-  const fought = (foe) => allies.some((ally) =>
-    ss2SameLane(ally, foe) && ss2FightDistance(ally, foe) < ss2Reach(ally));
+  const fought = ss2FoughtByAlly(view);
   const living = (view.foes ?? []).filter((foe) => foe.alive !== false && Number.isFinite(foe.x));
-  if (living.some((foe) => ss2SameLane(actor, foe) && !fought(foe))) return null;
+  if (ss2OwnFightUnfought(view)) return null;
   let best = null;
   let bestDistance = Infinity;
   for (const foe of living) {
@@ -4470,6 +4464,35 @@ export function ss2PressTarget(view) {
 }
 
 /**
+ * A predicate: is `foe` one some ally of the actor is FIGHTING — in the ally's
+ * lane and inside the ally's own reach (`ss2Reach`, a drawn bow's included)?
+ * The press's reading of "fought" (`ss2PressTarget`).
+ */
+function ss2FoughtByAlly(view) {
+  const actor = view.actor;
+  // `?? []`: `chooseAiAction` is called directly by tests with a view that
+  // carries only the list they care about, and the press must not throw
+  // before the checks that are the point of such a test.
+  const allies = (view.allies ?? []).filter((ally) =>
+    ally.id !== actor.id && ally.alive !== false && Number.isFinite(ally.x));
+  return (foe) => allies.some((ally) =>
+    ss2SameLane(ally, foe) && ss2FightDistance(ally, foe) < ss2Reach(ally));
+}
+
+/**
+ * ► **P4, FINISH YOUR OWN FIGHT: does the actor's own lane hold a living foe
+ *   that no ally is fighting?** Then that foe is the actor's fight already.
+ *   Shared by `ss2PressTarget` and — with the press on — the join arm in
+ *   `chooseAiAction` (2026-09-28, a sixth verifier's S3), so the two cannot
+ *   disagree about whose fight a foe is.
+ */
+function ss2OwnFightUnfought(view) {
+  const fought = ss2FoughtByAlly(view);
+  return (view.foes ?? []).some((foe) => foe.alive !== false && Number.isFinite(foe.x)
+    && ss2SameLane(view.actor, foe) && !fought(foe));
+}
+
+/**
  * ► **THE PRESS'S GOAL AGAINST `target`: the open spot beside him it heads for,
  *   `{ side, x }`, or `null` when there is none** (2026-09-28). One body-width
  *   from the target on the actor's own side if that spot is open, else on the
@@ -4478,8 +4501,14 @@ export function ss2PressTarget(view) {
  *   `ss2ArcherMinimumRange`), and clear of bodies in his lane. `null` means
  *   the press has nothing to add: both flanks held, or the far side shut and
  *   the near one held. Shared by `ss2PressMove` and by the older arms' queue
- *   guards in `chooseAiAction`, so the two cannot disagree about whether
- *   going round is possible.
+ *   guards in `chooseAiAction`, so the two ~~cannot disagree about whether
+ *   going round is possible~~ agree about whether there is a spot to go round
+ *   to. **Corrected 2026-09-28 — they did disagree about whether the press
+ *   could MOVE toward it** (a sixth write-nothing verifier): an ally in the
+ *   actor's own lane withheld his walk, `ss2PressMove` returned `null`, the
+ *   guards still saw a spot and skipped the queue step, and he rested. The
+ *   press now detours through a lane whose walk is clear; it can still return
+ *   `null` with a spot open when no neighbouring lane's walk is clear either.
  */
 export function ss2PressGoal(view, target) {
   const actor = view.actor;
@@ -4628,12 +4657,43 @@ export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankS
   // target's lane, where `ss2RankArrivalX` lands him with nobody between him
   // and the target, on the goal's side. The landing is read in the TARGET's
   // lane, a look-ahead: from two lanes away the step lands in the middle one.
-  if (Math.abs(actor.x - goalX) > ss2WalkDisplacement(ss2MovementSpeed(actor))) return find(toGoal);
+  //
+  // ► **AND WHEN A BODY IN HIS OWN LANE WITHHOLDS THAT WALK, A DETOUR — added
+  //   2026-09-28 after a sixth write-nothing verifier REFUTED ab56337.** An
+  //   ally standing between him and the goal in his own lane withholds the
+  //   walk (a body blocks only in the walker's own lane), and this returned
+  //   `null` while `ss2PressGoal` still had an open spot — so the older arms'
+  //   queue guards skipped the step into the target's lane too, and nothing
+  //   moved him: he rested or taunted every turn with 0 attacks (plain 3v3
+  //   seeds 29, 79 and 288; champions 3v3 seeds 196 and 358). One step into a
+  //   lane whose walk is clear, forced by hand, was all it took to go round and
+  //   strike. So, as in the queued case above: a step to a neighbouring lane
+  //   whose walk toward the goal is not blocked where the step lands, the lane
+  //   with no foe in it first — **never the target's own lane**, which is the
+  //   look-ahead's call and elsewhere lands him in the queue.
+  const walkOrDetour = () => {
+    const walk = find(toGoal);
+    if (walk) return walk;
+    const steps = [Ss2ActionType.RANK_FRONT, Ss2ActionType.RANK_BACK].map(find).filter(Boolean);
+    const open = steps.filter((step) => {
+      const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
+      if (y === target.y) return false;
+      const x = ss2RankArrivalX(actor.x, bodies, y);
+      if (x === null) return false;
+      return !ss2WalkBlocked({ ...actor, x, y }, bodies, goalX > x ? 1 : -1);
+    });
+    const clear = open.find((step) => {
+      const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
+      return !foes.some((foe) => foe.alive !== false && foe.y === y);
+    });
+    return clear ?? open[0] ?? null;
+  };
+  if (Math.abs(actor.x - goalX) > ss2WalkDisplacement(ss2MovementSpeed(actor))) return walkOrDetour();
   const arrival = ss2RankArrivalX(actor.x, bodies, target.y);
   if (arrival !== null && !queuedAt(arrival) && Math.sign(arrival - target.x) === goal) {
     return find(target.y > actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK);
   }
-  return actor.x !== goalX ? find(toGoal) : null;
+  return actor.x !== goalX ? walkOrDetour() : null;
 }
 
 /** The `aiPress` values `createSs2TeamRules` takes; see `ss2PressMove`. */
@@ -16134,7 +16194,23 @@ export function createSs2TeamRules({
         //   press on, a join that lands behind an ally is skipped while
         //   `ss2PressGoal` has an open spot; with none (both flanks held, the
         //   wall) queueing and waiting is still the answer, as before.
-        if (positionedInDepth) {
+        // ► **AND, WITH THE PRESS ON, NOT WHILE P4 SAYS THE ACTOR HAS A FIGHT
+        //   OF HIS OWN (2026-09-28, a sixth verifier's staged S3).** The same
+        //   foe's-reach reading made an archer shooting an ally look like that
+        //   ally's fight, so the lane looked covered and the actor left it to
+        //   join the next lane's, where the press had no open spot; from there
+        //   this arm sent him back to the "engaged" lane — 27 alternating rank
+        //   steps and 0 attacks, under every `aiPress`. By P4 (`ss2PressTarget`)
+        //   an own-lane foe no ally is fighting is the actor's own fight, so
+        //   with the press on he closes on it instead; `aiPress: "off"` keeps
+        //   the old arm exactly, as the measurement baseline. **Only at a
+        //   `rankJoinSurplus` of 0 or more** — P4 is the shipped dial's
+        //   reading ("fight who is in front of you"); a negative dial asks a
+        //   gladiator to leave his own fight for a 2-on-1, and there the dial
+        //   wins (test/ss2-rank-join.test.js, whose four dial tests my first
+        //   cut of this guard broke).
+        if (positionedInDepth
+          && !(aiPress !== "off" && rankJoinSurplus >= 0 && ss2OwnFightUnfought(view))) {
           const join = ss2RankToJoin(view, rankJoinSurplus, rankStride);
           const step = join ? options.find((option) => option.type === join) : null;
           if (step) {
@@ -16153,8 +16229,9 @@ export function createSs2TeamRules({
         //   reach the press target vanished for a turn, this arm stepped the
         //   free member into the queue behind that ally, and the press stepped
         //   him out again when the ally re-engaged — a shuttle on the arena's
-        //   own host (buffs 2v2 seeds 6 and 11). Read in the foe's lane, the
-        //   press's own look-ahead.
+        //   own host (buffs 2v2 seeds 6 and 11). ~~Read in the foe's lane, the
+        //   press's own look-ahead.~~ Read in the lane the step lands in
+        //   (corrected 2026-09-28, below).
         if (positionedInDepth && !ownRankHasFoe && nearest && Number.isFinite(nearest.y)) {
           const towardRank = nearest.y > view.actor.y ? Ss2ActionType.RANK_FRONT : Ss2ActionType.RANK_BACK;
           const step = options.find((option) => option.type === towardRank);
@@ -16165,9 +16242,18 @@ export function createSs2TeamRules({
           // the target at the wall, skipping left the fighter pacing under
           // the target or walking into the wall with 0 attacks, where
           // queueing and waiting was the old and better answer).
+          // ► **READ IN THE LANE THE STEP LANDS IN, not only the nearest foe's
+          //   (2026-09-28, a sixth verifier: tricks 3v3 seed 338).** Toward a
+          //   foe TWO lanes away the step lands in the middle one; with an ally
+          //   fighting there, that is the queue the press had just stepped the
+          //   fighter out of, and this arm put him back whenever a knockback
+          //   took the press target out of reach — a shuttle. So the guard asks
+          //   about the nearest foe in the landing lane, as the join arm's does
+          //   (the same foe as before when the step lands in the nearest's lane).
           const destY = step ? actor.y + SS2_RANK_DIRECTION[towardRank] * rankStride : null;
-          const queued = aiPress !== "off" && step && destY === nearest.y && ss2StepQueues(view, destY, nearest)
-            && ss2PressGoal(view, nearest) !== null;
+          const there = step ? nearestFoe({ ...view, foes: view.foes.filter((foe) => foe.y === destY) }) : null;
+          const queued = aiPress !== "off" && there && ss2StepQueues(view, destY, there)
+            && ss2PressGoal(view, there) !== null;
           if (step && !queued) return step;
         }
 
