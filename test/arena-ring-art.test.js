@@ -468,11 +468,20 @@ test("the shell places the ring with the build's camera only in the stage view, 
   assert.match(paint, /ringPlacementFor\(\{[^}]*camera: arenaScreenAvailable\(\) \? camera : null,[^}]*\}\)/,
     "the build's camera in the stage view; the fitted view has none");
   assert.match(paint, /ringButtonsAt\(ringView\.model, \{[^}]*centerX: placement\.x,[^}]*centerY: placement\.y,[^}]*unit: placement\.unit,[^}]*layout: ringButtonPack\?\.layout \?\? null[^}]*\}\)/);
-  assert.match(paint, /ringButtonArt\(buttons, \{[^}]*pack: ringButtonPack,[^}]*facing: ringView\.model\.stance\?\.facing[^}]*hoverSlot: ringHover,[^}]*\}\)/);
+  // ~~`/ringButtonArt\(buttons, \{[^}]*pack: ringButtonPack,[^}]*facing: ...[^}]*hoverSlot: ringHover,[^}]*\}\)/`~~ and the
+  // two below it — 2026-09-28, slice "spellrow" (decision 7, `docs/design/battle-ui.md#decided-hud-2026-09-24`):
+  // the eight are drawn before the rest, so the items row can keep clear of their words, and the options are one
+  // object (`art`) that both draws read — the same fields, from the same places.
+  assert.match(paint, /const art = \{[^}]*pack: ringButtonPack,[^}]*facing: ringView\.model\.stance\?\.facing[^}]*hoverSlot: ringHover,[^}]*\};/);
+  assert.match(paint, /const eight = ringButtonArt\(ringButtonsAt\([\s\S]*?\}\), art\);/);
+  assert.match(paint, /\], art\)\s*\], stage, \{ fighterX: placement\.x \}\);/, "the rest drawn with the same options");
+  assert.equal((paint.match(/ringButtonArt\(/g) ?? []).length, 2, "and nothing drawn with any other");
   assert.match(paint, /psyche: resourceValue\(actor, "", 1\)/, "the actor's own psyche counter");
   // The bow frames' count and the attack and bow words reach the art only through these two.
-  assert.match(paint, /ringButtonArt\(buttons, \{[^}]*ammo: resourceValue\(actor, "", 0\),[^}]*\}\)/, "the actor's own arrows");
-  assert.match(paint, /ringButtonArt\(buttons, \{[^}]*\btextPack\s*\}\)/, "the page's text pack, for the build's glyphs");
+  // ~~`/ringButtonArt\(buttons, \{[^}]*ammo: resourceValue\(actor, "", 0\),[^}]*\}\)/`~~ (2026-09-28, the same):
+  assert.match(paint, /const art = \{[^}]*ammo: resourceValue\(actor, "", 0\),[^}]*\};/, "the actor's own arrows");
+  // ~~`/ringButtonArt\(buttons, \{[^}]*\btextPack\s*\}\)/`~~ (2026-09-28, the same):
+  assert.match(paint, /const art = \{[^}]*\btextPack\s*\};/, "the page's text pack, for the build's glyphs");
   assert.match(paint, /const actor = host\.combatant\(ringView\.actorId\);/, "the counters are the ACTING fighter's");
   // The blanking above hides WHICH resource each reads; the raw source says it (psyche_up and ammo_left
   // are the build's own `_root.game.hero` fields, `src/render/action-buttons.js`).

@@ -199,7 +199,7 @@ import {
   ringSlotAt,
   ringSwapButtonAt
 } from "/tools/arena/ring-layout.js";
-import { ringButtonArt } from "/tools/arena/ring-art.js";
+import { ringButtonArt, ringWordBoxesOf } from "/tools/arena/ring-art.js";
 import { namePlateFor, namePlateLayout, teamHudFor } from "/tools/arena/team-hud.js";
 import {
   cameraYscaleFor,
@@ -5201,7 +5201,9 @@ function paintTargetRing(view, origin) {
  * is the build's own ninth button at its own place (S6, `ringSwapButtonAt`),
  * showing the weapon it swaps to; the items row (S5, `ringItemButtonsAt`) is
  * the build's own over the ring, lifted over the step-back arrow where that
- * would reach it, each place labelled with its letter above it. Then the moves
+ * would reach it and over the words the eight paint (decision 7: BOMBARD,
+ * which the build's own row covers; `ringWordBoxesOf`), each place labelled
+ * with its letter above it. Then the moves
  * no slot holds (S4, `ringMoveButtonsAt`): a walk the stance does not wire,
  * beside its side's walk slot, and the rank arrows, back above the head and
  * forward below the name — no label, as their glyph is their arrow key. The
@@ -5237,51 +5239,64 @@ function paintRing(view, fit) {
   //   over. `ringBoundsFor` decides; the fitted view, with no bar, keeps the
   //   whole stage.
   const stage = ringBoundsFor(fit, { barred: arenaScreenAvailable() });
-  const buttons = ringButtonsInside([
-    ...ringButtonsAt(ringView.model, {
-      centerX: placement.x,
-      centerY: placement.y,
-      unit: placement.unit,
-      layout: ringButtonPack?.layout ?? null
-    }),
-    // The items row (S5): the build's own row over the ring, and — the
-    // owner's layout — above the step-back arrow, which stands off the same
-    // drawn head.
-    ...ringItemButtonsAt(ringView.model, {
-      centerX: placement.x,
-      centerY: placement.y,
-      unit: placement.unit,
-      layout: ringButtonPack?.layout ?? null,
-      rowLayout: ringButtonPack?.inventory?.layout ?? null,
-      head: ringOrigins.actor.head,
-      bounds: { top: stage.y, bottom: stage.y + stage.height }
-    }),
-    ...ringSwapButtonAt(ringView.model, {
-      centerX: placement.x,
-      centerY: placement.y,
-      unit: placement.unit,
-      layout: ringButtonPack?.layout ?? null
-    }),
-    ...ringMoveButtonsAt(ringView.model, {
-      centerX: placement.x,
-      centerY: placement.y,
-      unit: placement.unit,
-      layout: ringButtonPack?.layout ?? null,
-      head: ringOrigins.actor.head,
-      feet: ringOrigins.actor.below,
-      bounds: { top: stage.y, bottom: stage.y + stage.height }
-    })
-  ], stage, { fighterX: placement.x });
-  ringButtons = buttons;
+  // What every button paints: the pack, the stance's facing, the pointer, and
+  // the ACTING fighter's own psyche counter and arrows (`ringButtonArt`).
   const actor = host.combatant(ringView.actorId);
-  const drawn = ringButtonArt(buttons, {
+  const art = {
     pack: ringButtonPack,
     facing: ringView.model.stance?.facing ?? "right",
     hoverSlot: ringHover,
     psyche: resourceValue(actor, "psyche_up", 1),
     ammo: resourceValue(actor, "ammo_left", 0),
     textPack
-  });
+  };
+  // ► **THE EIGHT ARE DRAWN FIRST (decision 7, slice "spellrow",
+  //   2026-09-28)**, so the items row can keep clear of the words they paint
+  //   — BOMBARD over its disc, which the build's own row covered — read off
+  //   that very art (`ringWordBoxesOf`). A button's art is in its own
+  //   pixels, so drawing it before the ring is kept on the stage changes
+  //   nothing it paints, and each is drawn once, as before.
+  const eight = ringButtonArt(ringButtonsAt(ringView.model, {
+    centerX: placement.x,
+    centerY: placement.y,
+    unit: placement.unit,
+    layout: ringButtonPack?.layout ?? null
+  }), art);
+  const buttons = ringButtonsInside([
+    ...eight,
+    ...ringButtonArt([
+      // The items row (S5): the build's own row over the ring, and — the
+      // owner's layout — above the step-back arrow, which stands off the same
+      // drawn head, and above every word the eight paint (decision 7).
+      ...ringItemButtonsAt(ringView.model, {
+        centerX: placement.x,
+        centerY: placement.y,
+        unit: placement.unit,
+        layout: ringButtonPack?.layout ?? null,
+        rowLayout: ringButtonPack?.inventory?.layout ?? null,
+        head: ringOrigins.actor.head,
+        bounds: { top: stage.y, bottom: stage.y + stage.height },
+        words: ringWordBoxesOf(eight)
+      }),
+      ...ringSwapButtonAt(ringView.model, {
+        centerX: placement.x,
+        centerY: placement.y,
+        unit: placement.unit,
+        layout: ringButtonPack?.layout ?? null
+      }),
+      ...ringMoveButtonsAt(ringView.model, {
+        centerX: placement.x,
+        centerY: placement.y,
+        unit: placement.unit,
+        layout: ringButtonPack?.layout ?? null,
+        head: ringOrigins.actor.head,
+        feet: ringOrigins.actor.below,
+        bounds: { top: stage.y, bottom: stage.y + stage.height }
+      })
+    ], art)
+  ], stage, { fighterX: placement.x });
+  ringButtons = buttons;
+  const drawn = buttons;
   // The boxes of the labels drawn so far this frame, which the next keeps off.
   const labelled = [];
   // ~~`for (const button of drawn)`~~ — decision 9 (slice "jumpcharge",

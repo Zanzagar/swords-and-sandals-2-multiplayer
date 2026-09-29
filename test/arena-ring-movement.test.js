@@ -598,9 +598,17 @@ test("the shell draws the moves with the ring, off the acting fighter's DRAWN he
   // left visible above the build's UI bar, where the bar is drawn (`ringBoundsFor`,
   // `test/arena-combat-hud.test.js`) — the whole clipped stage let the rank-front arrow sit under the bar.
   assert.match(paint, /const stage = ringBoundsFor\(fit, \{ barred: arenaScreenAvailable\(\) \}\);/);
-  assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\(/, "the eight first, all kept on the stage");
+  // ~~`/const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\(/`~~ — 2026-09-28, slice "spellrow" (decision 7,
+  // `docs/design/battle-ui.md#decided-hud-2026-09-24`): the eight are DRAWN first (`const eight =
+  // ringButtonArt(ringButtonsAt(...), art)`), so the items row can keep clear of the words they paint; still the
+  // eight first, and still every button kept on the stage together.
+  assert.match(paint, /const eight = ringButtonArt\(ringButtonsAt\(ringView\.model, /);
+  assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.eight,/, "the eight first, all kept on the stage");
   // ring2 "edge": with the fighter's drawn centre, so a walk the move would carry across him stays on his side.
-  assert.match(paint, /\.\.\.ringMoveButtonsAt\([\s\S]*?\}\)\s*\], stage, \{ fighterX: placement\.x \}\);/);
+  // ~~`/\.\.\.ringMoveButtonsAt\([\s\S]*?\}\)\s*\], stage, \{ fighterX: placement\.x \}\);/`~~ — 2026-09-28, slice
+  // "spellrow": the row, the swap and the moves are drawn (`ringButtonArt([...], art)`) before the fit, as the
+  // eight are; the fit is the same.
+  assert.match(paint, /\.\.\.ringMoveButtonsAt\([\s\S]*?\}\)\s*\], art\)\s*\], stage, \{ fighterX: placement\.x \}\);/);
   assert.match(paint, /ringButtons = buttons;/, "the click is tested against every button drawn, the moves included");
   assert.match(paint, /if \(button\.move\) continue;/, "a move carries no key label on the stage: its arrow is its glyph");
 });

@@ -1,7 +1,8 @@
 /**
  * WHERE THE RING IS DRAWN, AND WHAT A CLICK ON THE CANVAS HITS — slices S2,
  * S3, S4 (the moves no slot holds, `ringMoveButtonsAt`), S5 (the items row,
- * `ringItemButtonsAt`) and S6 (the swap, `ringSwapButtonAt`) of
+ * `ringItemButtonsAt` — since decision 7, 2026-09-28, clear of the words the
+ * eight paint) and S6 (the swap, `ringSwapButtonAt`) of
  * `docs/design/battle-ui.md`. Pure canvas geometry for
  * `tools/arena/main.js`, which only paints what this places and asks this what
  * a point landed on.
@@ -207,6 +208,22 @@ export function ringSwapButtonAt(model, { centerX, centerY, unit, layout = null 
  *   size the build's place always clears it (measured over 60 bouts in both
  *   of the page's views); a colossus's head, and the arrow over it, do not.
  *
+ * ► **AND ABOVE EVERY WORD THE EIGHT CARRY (the owner's decision 7,
+ *   `docs/design/battle-ui.md#decided-hud-2026-09-24`: "the spell row never
+ *   covers the bow buttons' words") — AUTHORED; the build's own row does.**
+ *   The long bow frame draws BOMBARD over its disc in optionA or optionD, and
+ *   the build's row stands 1.8 overlay px into it — painted after the eight,
+ *   it covered the word's top third (the owner's report, 2026-09-24). So each
+ *   place stands the same gap as over the arrow above every word under it —
+ *   a word's box coming within that gap of the place's column (`words`, in
+ *   canvas px: `ringWordBoxesOf`) — and the whole row rises just that far,
+ *   the larger of the two lifts. Only BOMBARD ever reaches the row in the
+ *   build's art: POWER, the one other word in optionA/optionD, stands 3.75
+ *   overlay px under it, and the arrow count is at its disc's centre; so a
+ *   ring with no bombard keeps the build's place. The words are the row's to
+ *   clear, not the other way round: they are the build's own art, drawn where
+ *   the build draws them on its button (S3).
+ *
  * @param {object} model  from `ringModelFor`; its `items`
  * @param {object} at
  * @param {number} at.centerX, at.centerY  the ring's centre, canvas pixels
@@ -215,10 +232,13 @@ export function ringSwapButtonAt(model, { centerX, centerY, unit, layout = null 
  * @param {object|null} [at.rowLayout]  the pack's `buttons.inventory.layout`
  * @param {number} [at.head]   canvas y of the top of the acting fighter's head; none, no lift
  * @param {{top: number, bottom: number}|null} [at.bounds]  what the step-back arrow is kept inside
+ * @param {{x0: number, x1: number, y0: number, y1: number}[]} [at.words]  the boxes of the words
+ *   drawn on the ring's other buttons, canvas px, where they stand with the row
+ *   (`ringWordBoxesOf` of the eight, drawn); none, no lift for them
  * @returns {object[]} `{key, slot, verb: "item", itemId, x, y, r, scale, side: "top"}`,
  *   in the row's key order
  */
-export function ringItemButtonsAt(model, { centerX, centerY, unit, layout = null, rowLayout = null, head, bounds = null }) {
+export function ringItemButtonsAt(model, { centerX, centerY, unit, layout = null, rowLayout = null, head, bounds = null, words = [] }) {
   const row = SS2_STRIP.items.rowAt;
   const out = [];
   for (const item of model?.items ?? []) {
@@ -253,8 +273,28 @@ export function ringItemButtonsAt(model, { centerX, centerY, unit, layout = null
   // that takes; the build's place stands where it already clears.
   const arrow = rankArrowPlace(model, "above-head", { centerX, unit, layout, head, bounds });
   const limit = arrow.y - arrow.r - arrow.gap;
-  const lift = Number.isFinite(limit) ? Math.max(0, Math.max(...out.map((button) => button.y + button.r)) - limit) : 0;
+  const overArrow = Number.isFinite(limit) ? Math.max(0, Math.max(...out.map((button) => button.y + button.r)) - limit) : 0;
+  // Decision 7: and above every word under a place, by the same gap.
+  const lift = Math.max(overArrow, liftOverWords(out, words, arrow.gap));
   return Object.freeze(lift === 0 ? out : out.map((button) => Object.freeze({ ...button, y: button.y - lift })));
+}
+
+/**
+ * How far the row must rise so that each place stands `gap` above every word
+ * under it: a word whose box comes within `gap` of the place's column, and is
+ * not already wholly above the place by that gap. 0 when none is.
+ */
+function liftOverWords(places, words, gap) {
+  let lift = 0;
+  for (const word of Array.isArray(words) ? words : []) {
+    if (![word?.x0, word?.x1, word?.y0, word?.y1].every(Number.isFinite)) continue;
+    for (const place of places) {
+      if (word.x1 <= place.x - place.r - gap || word.x0 >= place.x + place.r + gap) continue;
+      if (word.y1 <= place.y - place.r - gap) continue;
+      lift = Math.max(lift, place.y + place.r + gap - word.y0);
+    }
+  }
+  return lift;
 }
 
 /**
