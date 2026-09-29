@@ -1,6 +1,73 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-29 universal dedicated-operation support selected; nonclear topology is next
+## 2026-09-29 staged/shortcut coexistence selected; staged-dialect incidence is next
+
+Zanzagar selected `RCS-03D2-C` with `RCS-03D2-A` as the explicit
+whole-system fallback. `D_stage` is nonempty proper: at least one transforming
+definition has a genuine distinct-endpoint nonclear transitive gap, and at
+least one is shortcut-complete over its already-reachable endpoints. C is
+active. A is an armed replacement—not simultaneous and not fired—if staged
+play fails its prospective-legibility, material-intermediate, non-dominance,
+anti-bypass, anti-copy-lottery, or comprehension gates. D2-B is unselected.
+
+Any D2-A or upstream cause fallback must rebuild `E_d/R_d/G_d` and revalidate
+or explicitly reopen every topology-dependent answer. No graph class survives
+silently after its supporting edge set changes. The authoritative decision
+record remains byte-unchanged.
+
+A read-only atomicity audit caught a second incidence boundary before D2A was
+presented. D2A validly asks which dialects contain staged definitions, but each
+answer still leaves open whether the shortcut-complete complement also occurs
+inside the staged dialect. That changes whether a player can retain a chosen
+state/boundary grammar while selecting direct rather than pilgrimage topology.
+The fortieth correction therefore adds dependent `RCS-03D2A1`; exact prevalence
+above empty/nonempty dialect incidence remains authoring.
+
+The register now has 143 rows: 23 `SCREEN`, 1 `OWNER-OPEN` at D2A, 41
+`PRUNED`, 71 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 24`. D2A1 is screened and opens after every D2A answer while D2-C
+remains active. After D2A1 closes, D3 opens at 22.
+
+`RCS-03D2A` asks where nonempty required-stage support occurs:
+
+- **A — state only.** Some state Relic requires a material intermediate;
+  every boundary Relic is shortcut-complete. This is the recommended child
+  scope fallback and clearest pilgrimage grammar. D2A1 later decides whether
+  state also retains any shortcut-complete definitions.
+- **B — boundary only.** Some boundary Relic requires a material intermediate;
+  every state Relic is shortcut-complete. This is the strangest relational
+  form and carries the greatest route-opacity, snapshot, retuning-loop, and
+  best-listening-point risk. D2A1 later decides whether boundary also retains
+  any shortcut-complete definitions.
+- **C — both dialects. Recommended guarded higher-ceiling direction, with
+  D2A-A offered as a child scope fallback.** At least one state definition and
+  one boundary definition are staged, while inherited D2 properness requires a
+  third shortcut-complete definition. This creates a three-definition floor;
+  D2A1 later decides which dialects contain shortcut-complete support.
+
+Examples: state staging may require
+`Mercy -> Tempered -> Defiance` with no `Mercy -> Defiance` edge from any
+P/Z/X/M cause. Boundary staging may require
+`Oath -> Resonant -> Echo` with no `Oath -> Echo` edge. Every intermediate must
+materially change optimized play; a meter, toll, animation, or rushed-through
+weak form does not qualify.
+
+Recommend guarded C if both dialects independently pass legibility,
+material-intermediate, non-dominance, anti-bypass, and anti-token gates. Offer
+D2A-A as the explicit scope fallback if boundary-attunement staging fails while
+state-condition staging survives. The already selected D2-A remains the deeper
+system fallback if required staging as a whole fails. If state staging fails
+but boundary staging survives, neither A fallback silently selects B; reopen
+D2A or use the system fallback. Ask only for D2A A, B, or C. Require
+**“C with D2A-A scope fallback”** to select the recommended ladder.
+
+D2A does not fully settle the shortcut-complete complement's incidence; D2A1
+closes the residual case left after D2A's forced consequences. D2A
+decides no exact graph, within-cell count, reverse edge, clearing, eventual
+return, cause-to-edge map, agency, approval, collision, actor, cost, lock,
+power, UI, persistence, or implementation.
+
+## 2026-09-29 universal dedicated-operation support selected; nonclear topology is next — superseded frontier
 
 Zanzagar selected `RCS-03D1M-B` with `RCS-03D1M-A` as the explicit
 whole-system fallback. `D_M=D_mut`: every transforming definition has at least
@@ -11885,7 +11952,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-29 01:53 UTC — direct shortcut versus required staged nonclear topology is next](docs/handoffs/2026-09-29-0153--relic-nonclear-topology-next.md)**
+[2026-09-29 02:43 UTC — staged-topology dialect incidence is next](docs/handoffs/2026-09-29-0243--relic-staged-dialect-incidence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

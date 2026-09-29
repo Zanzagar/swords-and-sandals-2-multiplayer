@@ -7470,13 +7470,13 @@ both. That changes whether mandatory biography belongs to remembered-condition
 or remembered-attunement play. Leaving this to authoring would repeat the
 dialect omission that forced every proper D1 cause subset to receive a child.
 The register therefore adds conditional D2A for this three-way incidence
-choice. A/B prune it; C opens it; D3 follows D2 and any applicable child.
+choice. A/B prune it and C opens it. The first audit said D3 followed D2A;
+the fortieth correction below breaks that claim and inserts D2A1 first.
 
-Adding one `SCREEN` row makes the register 142 rows: 23 `SCREEN`, 1
+At that checkpoint, adding one `SCREEN` row made the register 142 rows: 23 `SCREEN`, 1
 `OWNER-OPEN` at D2, 41 `PRUNED`, 70 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
-and 1 `EVALUATE`; `Phi_SR = 24`. No selected rule changes. Under D2-A/B, D2A
-prunes and D3 opens at `Phi_SR = 22`; under D2-C, D2A opens at 23 and its
-closure opens D3 at 22.
+and 1 `EVALUATE`; `Phi_SR = 24`. No selected rule changed. Its original branch
+arithmetic is superseded by the 143-row correction below.
 
 **D2 atomicity and gameplay audit — one exhaustive prevalence card after the
 repair.** `E_d` is cause-union topology: after D1M-B, an M shortcut defeats a
@@ -7525,6 +7525,129 @@ unassigned; D5 remains open because no branch requires cycles or return; and
 RCS-03E remains open because proposals are not approval or commit. Exact graphs,
 assignment identities, edges, cause-to-edge assignments, contexts, counts,
 actors, costs, locks, power, UI, and implementation remain later work.
+
+Zanzagar selected D2-C with D2-A as the explicit whole-system fallback. Thus
+`D_stage` is nonempty proper: staged and shortcut-complete transforming
+definitions coexist. C is active; A is an armed, unfired replacement, not a
+concurrent topology; B is unselected. If C fails its legibility, material-
+intermediate, non-dominance, anti-bypass, anti-copy-lottery, or comprehension
+gates, A replaces it and makes `D_stage` empty. A later fallback or upstream
+cause-edge change must rebuild `E_d/R_d/G_d`, prune D2A and D2A1 if A fires, and
+revalidate or explicitly reopen every topology-dependent descendant rather
+than silently retaining classifications derived from the old graph.
+
+D2 moves from `OWNER-OPEN` to `DIR-SELECTED`; D2A moves from `SCREEN` to
+`OWNER-OPEN`; the fortieth correction below adds D2A1 as one `SCREEN` row. The
+independently reparsed register therefore has 143 rows: 23 `SCREEN`, 1
+`OWNER-OPEN` at D2A, 41 `PRUNED`, 71 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 24`. D3 remains screened. The authoritative
+decision record remains unchanged.
+
+**D2A atomicity, lower-bound, and gameplay audit — one dialect-incidence card.**
+RCS-03A-C partitions nonempty `D_mut` into nonempty disjoint `D_S` and `D_B`.
+Let `D_stage^S=D_stage ∩ D_S` and
+`D_stage^B=D_stage ∩ D_B`. Because selected D2-C makes `D_stage`
+nonempty, the intersections cannot both be empty. They are therefore state-
+only, boundary-only, or both. No fourth hybrid case exists because one
+definition retains one transformation dialect. D2A classifies only whether
+each staged intersection is empty. A/B thereby force shortcut-complete support
+in the opposite dialect, while D2A1 closes the residual complement incidence;
+exact positive counts, assignments, edges, cause maps, contexts, and every
+later authority remain independent.
+
+The branch minima expose one real catalog consequence. State-only and boundary-
+only incidence can coattain the inherited two-definition floor: one staged
+definition in the included dialect and one shortcut-complete definition in the
+other. Both-dialect incidence needs one staged definition from each disjoint
+dialect plus at least one definition outside globally proper `D_stage`, so it
+forces at least three transforming definitions. It does not force the
+shortcut-complete witness into either particular dialect, and it does not
+require mixed staged/shortcut incidence inside both dialects.
+
+- D2A-A makes `D_stage^S` nonempty and `D_stage^B` empty. Every boundary
+  definition is shortcut-complete, while state Relics own the only mandatory
+  journeys. This is the recommended child scope fallback: remembered-condition
+  staging is easier to preview and less timing-sensitive, but it risks a
+  condition ladder and makes state Relics structurally richer.
+- D2A-B makes `D_stage^S` empty and `D_stage^B` nonempty. Every state
+  definition is shortcut-complete, while boundary Relics own the only
+  mandatory journeys. This is the strangest relational form and may be worth a
+  narrow identity, but it maximizes route opacity, snapshot arbitrage,
+  attunement cycling, and one-best-listening-point risk while excluding the
+  more intuitive condition pilgrimage.
+- D2A-C makes both intersections nonempty while global properness remains.
+  **Recommend guarded C, with D2A-A offered as a separately selectable child
+  scope fallback.** State and boundary Relics can each express one genuinely
+  indispensable becoming sequence while at least one peer supplies direct
+  responsiveness. Local material edges may realize continuity-with-difference
+  directly; an indispensable same-artifact temporal sequence is partial; and
+  both-dialect/class incidence is aggregate. C has the highest ceiling and the
+  highest teaching, authoring, simulation, and caste pressure.
+
+Concrete countermodels keep the incidence row honest. Under A, Vowscar may
+require `Mercy -> Tempered -> Defiance`, while every boundary definition has a
+direct edge for every already-reachable attunement endpoint. Under B,
+Dreamglass may require `Oath -> Resonant -> Echo`, while every state definition
+is shortcut-complete. Under C, both gaps coexist and a third definition remains
+shortcut-complete. In every staged witness, any legal P/Z/X/M endpoint shortcut
+destroys that gap, and the intermediate must alter optimized play for a
+material duration rather than serve as a meter, toll, or animation.
+
+**Fortieth prerequisite correction — D2A leaves shortcut-complete dialect
+incidence unresolved.** The first D2A audit treated every remaining within-
+dialect prevalence question as authoring. That was too broad. Consider three
+catalogs under D2A-C:
+
+- `D_S={s1,s2}`, `D_B={b1}`, `D_stage={s1,b1}` leaves shortcut-complete
+  support only in state;
+- `D_S={s1}`, `D_B={b1,b2}`, `D_stage={s1,b1}` leaves it only in boundary;
+  and
+- adding a shortcut-complete definition in each dialect gives both-dialect
+  shortcut support.
+
+All three satisfy D2A-C, but they differ in whether a player can retain a
+preferred transformation dialect while choosing direct rather than pilgrimage
+topology. The same residue exists under D2A-A: state definitions may all be
+staged or state may contain both topology classes, while boundary is necessarily
+shortcut-complete. D2A-B is symmetric. This changes legal build policy and
+passes the closure index's owner-card admission test; it is not a request for
+an exact percentage or stronger proof.
+
+Add one dependent `RCS-03D2A1` row for the dialect incidence of
+`D_short=D_mut \setminus D_stage`. Under D2A-A, D2A1 chooses boundary-only
+versus both-dialect shortcut support. Under D2A-B, it chooses state-only versus
+both. Under D2A-C, it chooses state-only, boundary-only, or both. One row is
+minimal because every branch asks the same empty/nonempty complement-incidence
+question; splitting it by parent answer would multiply mutually exclusive
+aliases, while folding it into D2A would turn one staged-support choice into a
+seven-cell joint matrix. D2A1 opens after every D2A answer while D2-C remains
+active, prunes if D2-A replaces C, and closes before D3.
+
+The correction raises the register to 143 rows. In the current post-D2 state,
+it has 23 `SCREEN`, 1 `OWNER-OPEN` at D2A, 41 `PRUNED`, 71 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`. After any D2A answer,
+D2A1 is the sole frontier with 22 `SCREEN`, 1 `OWNER-OPEN`, 41 `PRUNED`, 72
+`DIR-SELECTED`, and `Phi_SR = 23`. After D2A1, D3 opens with 21 `SCREEN`, 1
+`OWNER-OPEN`, 41 `PRUNED`, 73 `DIR-SELECTED`, and `Phi_SR = 22`. If parent
+D2-A fires, D2A and D2A1 both prune and D3 opens with 21 `SCREEN`, 1
+`OWNER-OPEN`, 43 `PRUNED`, 71 `DIR-SELECTED`, and `Phi_SR = 22`.
+
+The fallback ladder is asymmetric by design and must not be overread. If both
+dialects pass, C remains active. If boundary staging fails while state staging
+survives, a selected D2A-A child fallback could narrow incidence without
+removing every gap. If state staging also fails, the already armed parent D2-A
+removes all required gaps. If state staging fails but boundary staging remains
+viable, neither A fallback silently selects D2A-B: the incidence choice must be
+reopened or the parent fallback used. D2A-C and its proposed A fallback do not
+alter D2-A's deeper system replacement. Either fallback can change
+`D_short` incidence and therefore must revalidate or reopen D2A1.
+
+D2A decides no exact graph or prevalence beyond the separately registered
+D2A1 complement-incidence question, no reverse edge, clear-to-unassigned route,
+eventual return, cause-to-edge assignment, target availability, proposal
+agency/approval, collision, actor, cost, lock, power, UI, persistence, or
+implementation. Under any D2A answer, D2A becomes `DIR-SELECTED` and D2A1
+opens at `Phi_SR = 23`; D3 follows D2A1 at 22.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
