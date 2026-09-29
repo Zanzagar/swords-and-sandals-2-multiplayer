@@ -1,5 +1,29 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-29 absence asks; lived-event approval source is next
+
+Zanzagar selected `RCS-03E1Z-B` with `RCS-03E1Z-A` as the qualified
+cause-local system fallback. Every reachable proposal caused by an actual
+ledger-bearing empty settlement is participant-contingent: the owning
+combatant's persistent custodian has a material approve/withhold coordinate.
+E2 later decides whether it was bound in advance or remains live-capable.
+
+Assent cannot soften or rewind the event it answers. The `{}` settlement, lost
+receipt, preserved proof, later `LISTENED—SEVERED` latch, recurrence
+consequences, and combat history remain authoritative whether a Z proposal is
+approved or withheld. E1Z-A is armed and unfired. It may replace B only if
+participant approval fails cause-wide across viable E2 timing/default/recovery
+models through dominant fixed dispositions, selective failure audition,
+counterpick or stall pressure, or unacceptable policy bureaucracy, while a
+disclosed deterministic Z law remains legible, fun, and preserves real
+seek/avoid play. Definition-local failure reopens E1Z toward C. If Z remains
+farming or punishment under A, selected parent D1Z-A removes Z instead.
+
+E1ZA/E1ZA1 prune. The 156-row register now has **21 `SCREEN`, 1 `OWNER-OPEN`
+at E1X, 49 `PRUNED`, 78 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 22`**. The authoritative decision record remains
+byte-unchanged.
+
 **Test-profile finding, 2026-09-29:** the integrated no-asset/no-observation
 tree measured **3,881 tests, 3,860 passed, 21 skipped, 0 failed**, not the 18
 currently printed in `AGENTS.md`. The complete difference is
@@ -9,7 +33,51 @@ currently printed in `AGENTS.md`. The complete difference is
 repository policy is corrected; this is a documentation-count finding, not a
 test failure.
 
-## 2026-09-29 P asks and an initiated Rite executes; Z approval source is next
+`RCS-03E1X` now decides approval source for proposals caused by qualifying
+independently meaningful lived events. The event and all of its native
+combat/source/relationship consequences remain fixed under every answer:
+
+- **A — every X proposal is system-deterministic. Recommended.** Fixed
+  event-local law admits or withholds the proposal. Agency lies prospectively
+  in equipping the disclosed Event-bound Relic and seeking, avoiding,
+  preserving, or denying exposure. A genuinely lived event binds instead of
+  becoming a result the player may audition and veto. Risks are involuntary
+  scars from hard-to-avoid or adversarial events and rational avoidance of the
+  family.
+- **B — every X proposal is participant-contingent. Qualified cause-local
+  agency fallback.** The custodian can materially approve or withhold every X
+  proposal. This protects against unavoidable event-shaped rewriting but can
+  duplicate agency after a knowingly self-authored event. Under live-capable
+  E2 it also enables event audition: cause the event, inspect the proposed
+  target, accept only upside; advance binding removes that exact post-result
+  shopping but retains option value and policy burden.
+- **C — participant and deterministic X definitions coexist.** Each fixed
+  definition/version uses one source for every X proposal. E1XA/E1XA1 then
+  decide the two classes' dialect incidences. This supports two disclosed
+  identities but risks an agency-premium caste and spends two more cards.
+
+Recommend **A with E1X-B as the qualified cause-local agency fallback**. Fire
+B only if prospective exposure control still leaves material involuntary-build
+regret across viable event catalogs and E2 timings, while assent remains
+strategic rather than always-reject or a stall; result shopping is specifically
+a live-capable E2 failure. If X remains token, farmable, coercive, opaque, or
+dominating under either source, selected parent D1X-A removes X directly. If
+boundary-attunement event play alone fails, selected D1X1-A narrows the domain
+and reopens E1X.
+
+One concrete known replacement remains explicit rather than flattened:
+**“self-authored events bind; suffered events ask.”** It varies source inside
+one definition by a stable event-authorization subcause and is not C. If the
+owner prefers it, amend the register before selecting E1X and define
+self-authored, suffered, coerced, joint, and ambiguous events; other stable
+actor/event-family splits require the same amendment discipline. One
+Event-bound definition with a bearer-paid Heat revision and a bearer-owned
+opponent-caused wound proves the issue: A binds both, B asks for both, and C
+cannot split them. Ask only for E1X A, B, C, or a replacement path. E1X
+selects no timing, default, collision winner, target, event catalog, actor
+scope, persistence mechanism, or power.
+
+## 2026-09-29 P asks and an initiated Rite executes; Z approval source is next — superseded frontier
 
 Zanzagar selected `RCS-03E1-C` with `RCS-03E1-B` as the qualified agency
 fallback and `RCS-03E1-A` as the deeper system fallback. Every reachable
@@ -12405,7 +12473,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-29 16:46 UTC — actual empty-settlement proposal approval is next](docs/handoffs/2026-09-29-1646--relic-empty-settlement-approval-next.md)**
+[2026-09-29 19:56 UTC — lived-event proposal approval is next](docs/handoffs/2026-09-29-1956--relic-lived-event-approval-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

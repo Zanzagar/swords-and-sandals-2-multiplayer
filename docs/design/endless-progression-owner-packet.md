@@ -431,11 +431,14 @@ and every M proposal is system-deterministic, so universal P/M support gives
 every transforming definition both modes without a definition or dialect
 caste. The fallbacks are armed and unfired. A post-answer audit split both
 proper-subset cause children so mixed definition classes cannot hide inside a
-supposedly binary source rule. **RCS-03E1Z is now the sole owner-facing choice
-under SR-04:** whether actual empty-settlement Z proposals are wholly
+supposedly binary source rule. Zanzagar then selected RCS-03E1Z-B with E1Z-A
+as the qualified cause-local system fallback: every actual empty-settlement Z
+proposal receives material custodian approval authority without letting assent
+undo the absence. E1ZA/E1ZA1 prune. **RCS-03E1X is now the sole owner-facing
+choice under SR-04:** whether independently lived-event X proposals are wholly
 system-deterministic, wholly participant-contingent, or use a disclosed
-definition-uniform coexistence taxonomy. X authority and participant timing
-remain later cards. The current register has 156 rows and `Phi_SR = 25`.
+definition-uniform coexistence taxonomy. Participant timing remains later.
+The current register has 156 rows and `Phi_SR = 22`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -27359,7 +27362,7 @@ incidence row plus E1X/E2 remains `SCREEN`. A D1M-A fallback or any later loss
 of universal P/M support reopens E1. The authoritative decision record remains
 unchanged.
 
-### RCS-03E1Z — Z-locus proposal approval-source prevalence — active owner choice
+### RCS-03E1Z — Z-locus proposal approval-source prevalence — B selected with A fallback
 
 Selected D1Z-C and D1Z1-C give a disclosed nonempty proper Absence-bound
 definition subset `D_Z` with nonempty state- and boundary-dialect incidence.
@@ -27437,6 +27440,108 @@ with **21 `SCREEN`, 1 `OWNER-OPEN` at E1X, 49 `PRUNED`, 78 `DIR-SELECTED`,
 and `Phi_SR = 22`**. Under E1Z-C, E1ZA opens at 24, E1ZA1 at 23, and E1X at
 22; at that last checkpoint the incidence children are `DIR-SELECTED` rather
 than pruned. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-29:** **B, every
+reachable Z proposal is participant-contingent, with E1Z-A as the qualified
+cause-local system fallback.** Thus `P^{approve,Z}_v=O^Z_v`. At every actual
+ledger-bearing `{}` settlement that supports an individually identified Z
+proposal, one still-operative approve/withhold coordinate sourced from the
+owning combatant's persistent custodian can materially change whether that
+proposal advances. E2, not E1Z, later decides whether this authority is bound
+in advance, remains live-capable, or uses a disclosed mixture.
+
+The empty settlement and all of its nonapproval consequences remain final.
+Withholding a Z proposal never creates a receipt, restores spent proof or
+combat state, clears `LISTENED—SEVERED`, grants another listen, changes the
+proposal target, or rewinds the causal history. One Z occurrence may support
+several separately identified proposals; each receives its own disposition.
+E1Z-A is armed and unfired. It may replace B only if participant assent fails
+across viable E2 timing/default/recovery models through dominant fixed
+dispositions, selective failure audition, counterpick or stall pressure, or
+unacceptable policy bureaucracy, while one prospectively disclosed
+deterministic Z law remains legible, fun, and leaves optimized reasons both to
+seek and avoid absence. Definition-local failure reopens E1Z toward C rather
+than silently firing the cause-wide fallback. If Z remains exploitative or
+punitive under A, selected parent D1Z-A removes Z causes instead.
+
+E1Z moves to `DIR-SELECTED`; E1ZA/E1ZA1 move to `PRUNED`; E1X becomes the
+sole `OWNER-OPEN` row. The 156-row register now contains **21 `SCREEN`, 1
+`OWNER-OPEN` at E1X, 49 `PRUNED`, 78 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 22`**. The authoritative decision record remains
+unchanged.
+
+### RCS-03E1X — X-locus proposal approval-source prevalence — active owner choice
+
+Selected D1X-C and D1X1-C give a disclosed nonempty proper Event-bound
+definition subset `D_X` with nonempty state- and boundary-dialect incidence.
+For each `d` in `D_X`, let nonempty `O^X_{v,d}` contain its reachable lawful
+disposition opportunities for individually identified X proposals, and let
+`O^X_v` be their union. Define
+`P^{approve,X}_v = P^approve_v intersect O^X_v`.
+
+At one X opportunity, hold fixed the same active Relic instance, owner, root,
+definition/version, current assignment, actual qualifying independent event
+with its canonical identity and complete native consequences, proposal and
+target, proposal-local disclosed facts, and every nonapproval input. Approval
+cannot undo, refund, replay, or reinterpret the event; restore an expired or
+spent native state; change its combat/source/relationship result; or erase its
+evidence and legal-continuation effects. It controls only whether the distinct
+persistent-assignment proposal advances. One event may support multiple
+separately identified proposals; this card dispositions each proposal and sets
+no proposal-cardinality cap.
+
+| Choice | X-approval-source prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every X proposal is system-deterministic** | `P^{approve,X}_v` is empty. Once an X proposal's fixed event and proposal-local facts are known, one versioned total law admits or withholds it; no custodian grant, veto, standing assent, or later confirmation changes that disposition. E1XA/E1XA1 prune. | **Recommended higher-ceiling direction, with E1X-B as the qualified cause-local agency fallback.** A makes a genuinely lived event bind rather than become a result the player may audition and veto. Player agency lies prospectively in equipping the disclosed Event-bound Relic and seeking, avoiding, preserving, or denying the native event. The independently meaningful event and continuing Relic remain distinct while jointly operative, giving direct local event↔Relic fit; deterministic approval itself is neutral/protective with respect to the Soul because the custodian has no separate approval role at this boundary. A also balances the selected grammar: manifestations and absence ask; lived events bind; an initiated Rite executes. Risks are involuntary scars from hard-to-avoid or adversarial events, rational avoidance of Event-bound Relics, and teammate or opponent steering if later actor scope is careless. | Aster knowingly pays for native `Heat I -> Heat II`; that revision remains real and creates `TEMPERED CONDITION PROPOSED` for an Event-bound Vowscar. Its fixed local law admits the proposal even if Mara would prefer to keep `MERCY`. The payment, Heat revision, and evidence do not depend on X approval. |
+| **B — every X proposal is participant-contingent** | `P^{approve,X}_v=O^X_v`. Every reachable X proposal has one material approve/withhold coordinate sourced from the owning combatant's persistent custodian. E1XA/E1XA1 prune. E2 later decides whether that authority is advance-bound, live-capable, or supports both timings. | **Qualified cause-local agency fallback.** B protects a build from persistent rewriting after a suffered or effectively unavoidable event and adds a direct local Soul-assent relation when the coordinate is non-token. It also turns every lived event into prospective option value and can duplicate agency after a knowingly self-authored event. Under live-capable E2 it additionally invites “cause the event, inspect the target, accept only upside” farming and stalls; advance-bound E2 removes that post-result inspection but retains policy burden and option value. Choose B only if prospective exposure control cannot protect optimized play and assent remains strategic rather than an automatic veto. | The same paid Heat revision occurs and still changes every native fact. Changing only Mara's operative approve/withhold coordinate changes whether `TEMPERED CONDITION PROPOSED` advances. Withholding does not refund the payment, restore Heat I, or erase the event. |
+| **C — participant and deterministic X definitions coexist** | `D_X` is partitioned into nonempty `D_X^P` and `D_X^D`. Every reachable X proposal of one fixed definition/version in `D_X^P` is participant-contingent; every one in `D_X^D` is system-deterministic. E1XA then E1XA1 decide the two classes' dialect incidences. Event family, actor, authorization, target, favorability, context, instance, owner, and individual opportunity cannot switch one definition's source. | C supports disclosed Soul-Answered Event-bound biographies beside Fate-Bound ones. It can preserve two coherent identities, but coexistence is only aggregate under the standing ideal. It creates two authority grammars inside an already proper Event-bound catalog, risks making veto-capable Relics premium and deterministic Relics traps, and costs two more incidence cards. Choose C only if both identities independently create non-dominated optimized play that neither uniform direction can express. | A state Event-bound Vowscar uses fixed law for every `TEMPERED CONDITION` proposal, while a boundary Event-bound Hourglass asks Mara whether each `AFTER-ECHO ATTUNEMENT` proposal advances. E1XA/E1XA1—not this example—decide whether either source class also occurs in the other dialect. |
+
+A/B/C are exhaustive under the currently admitted definition-uniform source
+rule because `D_X^P` is empty, all of nonempty `D_X`, or nonempty proper with
+nonempty complement. C chooses an authored definition taxonomy; it does not
+permit one definition to switch source opportunistically. Under C, E1XA asks
+whether `D_X^P` has state-only, boundary-only, or both-dialect incidence;
+E1XA1 then classifies nonempty `D_X^D`, yielding the same seven possible
+incidence pairs as the Z subtree.
+
+One concrete known replacement path remains explicit rather than becoming a
+hidden fourth answer:
+**“self-authored events bind; suffered events ask.”** That rule varies source
+inside one definition by a stable event-authorization subcause, so it is not C.
+If the owner wants it, stop and amend the register before selecting E1X; the
+replacement must define canonical self-authored, suffered, coerced, joint, and
+ambiguous events, then pass no-caste and anti-farming review. Actor or event
+family may not drift into AUTHOR as an unrecorded exception, and any other
+stable-subcause proposal must pass the same amendment test. The concrete
+countermodel is one Event-bound Vowscar with two eligible events: a bearer-paid
+Heat revision, for which another live assent may be token, and a bearer-owned
+wound or guard-break caused by an opponent, for which deterministic persistent
+mutation may feel involuntary. A binds both, B asks for both, and C cannot split
+them inside the one definition.
+
+The recommendation is **E1X-A with E1X-B as the qualified cause-local agency
+fallback**. Fire B only if prospectively disclosed equip/exposure control still
+leaves material involuntary-build regret across viable event catalogs and E2
+timings, while participant assent remains meaningfully variable rather than
+always reject or a stall surface; post-result shopping is specifically a
+live-capable E2 failure. A definition-local failure may motivate C; an
+authorization-subcause failure may motivate the replacement above. If X
+itself remains token, farmable, coercive, opaque, or dominating under either
+approval source, selected parent D1X-A removes X instead. If only boundary-
+attunement event play fails while state-side event biography survives,
+selected D1X1-A narrows the X domain, reopens E1X, and prunes or rederives its
+incidence children.
+
+Every branch must preserve selected D5-B's compatible lived-return witness in
+every transforming definition. RCS-02 retains disclosure, communication,
+unavailable-custodian recovery, and defaults; E2 retains timing; RCS-04A
+retains collisions; RCS-13 retains equip/reconfiguration/evolution-initiation
+and lock horizons; RCS-17/18 retain solver/RL, human-comprehension, fun,
+non-dominance, and exploit gates.
+Under E1X-A or B, E1XA/E1XA1 prune and E2 opens with **18 `SCREEN`, 1
+`OWNER-OPEN` at E2, 51 `PRUNED`, 79 `DIR-SELECTED`, and `Phi_SR = 19`**.
+Under E1X-C, E1XA opens at 21, E1XA1 at 20, and E2 at 19. The authoritative
+decision record remains unchanged.
 
 ## Session protocol and evidence
 

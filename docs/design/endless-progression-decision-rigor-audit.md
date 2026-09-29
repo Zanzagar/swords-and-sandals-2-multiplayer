@@ -11312,3 +11312,80 @@ fallback removes Z causes instead. If any selected source/timing law erases a
 definition's only legal D5 return witness, reopen D5 rather than stitching
 separate approval histories. The authoritative decision record remains
 unchanged.
+
+### RCS-03E1Z disposition and E1X frontier audit — 2026-09-29
+
+Zanzagar selected **E1Z-B with E1Z-A as the qualified cause-local system
+fallback**. Every reachable lawful disposition opportunity for every
+individually identified Z proposal is participant-contingent. The owning
+combatant's persistent custodian has one material approve/withhold coordinate;
+E2 later decides whether it was bound before opportunity-specific facts or
+remains live-capable. The actual ledger-bearing `{}` settlement, lost receipt,
+preserved proof, later `LISTENED—SEVERED` latch, recurrence consequences, and
+combat history remain authoritative under either disposition. Withholding
+controls only whether the distinct persistent-assignment proposal advances.
+
+E1Z-A is armed and unfired. It replaces B only if participant approval fails
+across viable E2 timing/default/recovery models through dominant fixed
+dispositions, selective failure audition, counterpick or stall pressure, or
+unacceptable policy bureaucracy, while deterministic Z remains prospectively
+legible, fun, and supports real seek/avoid play. A definition-local failure
+reopens E1Z toward C rather than silently firing a cause-wide fallback. If Z
+remains farming or punishment under deterministic approval, parent D1Z-A
+removes Z instead. E1ZA/E1ZA1 therefore prune on the active branch.
+
+The next frontier is E1X. Selected D1X-C/D1X1-C make `D_X` a nonempty proper
+Event-bound definition subset with nonempty state and boundary incidence. At
+one X proposal opportunity, its qualifying independent event and every native
+combat/source/relationship consequence remain fixed whether approval admits or
+withholds the proposal. Approval cannot undo or refund the event, restore an
+expired state, alter its evidence, or change its native result.
+
+Under the admitted definition-uniform rule, E1X has three exhaustive routes:
+
+1. A makes every X proposal system-deterministic;
+2. B makes every X proposal participant-contingent; and
+3. C partitions `D_X` into nonempty participant and deterministic definition
+   classes, then opens E1XA/E1XA1 for their dialect incidences.
+
+Recommend **E1X-A with E1X-B as the qualified cause-local agency fallback**.
+Unlike Z, a qualifying X occurrence is already a materially independent lived
+event. Deterministic approval lets that event bind while preserving prospective
+agency in disclosed equip and seek/avoid/exposure policy. It also yields the
+coherent active grammar: manifestations and absence ask; lived events bind; an
+initiated Rite executes. B directly represents Soul assent and protects
+against unavoidable or adversarial events, but it duplicates approval after a
+knowingly self-authored event. Under live-capable E2 it creates a powerful
+event-audition strategy: cause the event, inspect the proposed assignment,
+retain only favorable results. Advance-bound E2 removes that exact post-result
+shopping but retains prospective option value and policy bureaucracy.
+
+Fire E1X-B only if prospective exposure control still leaves material
+involuntary-build regret across viable event catalogs and E2 timings, while
+assent remains strategically material rather than always-reject or a stall;
+result shopping is specifically a live-capable E2 failure. Definition-local
+failure may motivate C. Intrinsic X tokenism, farming, coercion, opacity, or
+dominance under either source routes directly to selected parent D1X-A rather
+than requiring B as an intermediate cure. If boundary-attunement event play
+alone fails, selected D1X1-A narrows to state-side X and necessarily reopens
+E1X because its old both-dialect source map cannot survive by label.
+
+One concrete known stable countermodel remains explicit rather than flattened:
+“self-authored events bind; suffered events ask.” It varies approval source by
+event-authorization subcause inside one definition and is therefore not E1X-C.
+The current register does not silently permit it. Choosing that replacement
+requires an owner-visible amendment defining self-authored, suffered, coerced,
+joint, and ambiguous event classes plus no-caste and anti-farming tests; other
+stable actor or event-family splits require the same treatment. One Event-bound
+definition receiving both a bearer-paid Heat revision and a bearer-owned wound
+or guard-break caused by an opponent proves the separation: A binds both, B
+asks for both, and C cannot split them. The existence of the replacement path
+does not select or register it before the owner prefers it over A/B/C.
+
+After E1Z-B, E1Z moves to `DIR-SELECTED`, E1ZA/E1ZA1 move to `PRUNED`, and
+E1X becomes the sole `OWNER-OPEN` row. The 156-row register contains **21
+`SCREEN`, 1 `OWNER-OPEN` at E1X, 49 `PRUNED`, 78 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**. Under E1X-A/B the
+two incidence children prune and E2 opens at 19. Under E1X-C, E1XA opens at
+21, E1XA1 at 20, and E2 at 19. The authoritative decision record remains
+unchanged.
