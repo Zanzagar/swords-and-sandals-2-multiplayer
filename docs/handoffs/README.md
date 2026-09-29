@@ -41,9 +41,17 @@ agentRuns:    wf_bc86037b-0f9 (13 auditors), wf_d2aa6793-7cb (1 writer + 3 verif
 branch:       arena/champion-capture
 commits:      73f7fba..2585952
 suite:        617 passed / 0 failed / 0 skipped
+board:        current at 2585952
 supersedes:   none
 ---
 ```
+
+**`board:` (added 2026-09-29)** names the commit the project board reflects —
+`docs/board/board.json`'s `head`, as republished to the Artifact HANDOFF.md
+names. If it is behind the work the handoff reports, move the cards and
+republish BEFORE writing the handoff; the field is how a lag shows. The owner
+asked whether the board was being kept current, and it was not: its last
+republish reflected 2026-09-27 while nine commits of 2026-09-28 had landed.
 
 `sessionId` and `agentRuns` are the load-bearing ones. Every subagent's full
 transcript, its brief included, is recoverable at:
