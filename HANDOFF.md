@@ -1,6 +1,91 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-29 no active blank-state route selected; compatible lived return is next
+## 2026-09-29 universal lived return selected; proposal approval source is next
+
+Zanzagar selected `RCS-03D5-B` with `RCS-03D5-A` as the explicit system
+fallback. Every completed state- and boundary-supporting transforming
+definition now requires at least one prospectively legible, policy-material
+legal history of the same active Relic instance, owner, root, definition, and
+fixed version that lives `a ... b ... a` for distinct nonclear assignments.
+Every later leg begins from the exact authoritative state left by the earlier
+one; separately lawful histories cannot be stitched. This is existential per
+definition, not full reversibility. Irreversible limbs and terminal forms
+remain legal.
+
+Returning restores only the current assignment coordinate. It never restores
+spent proof, receipts, claims, recurrence latches, costs, cooldowns, causal
+events, lineage chronology, combat state, or revealed information. Reload,
+migration, repair, duplicate replacement, unequip/re-equip, and snapshot
+restoration are invalid witnesses. D5-A is armed and unfired. It replaces B
+only if compatible lived return fails as a system at the anti-profit,
+state-integrity, commitment, comprehension, counterpick, or boundary-snapshot
+gates while irreversible biographies remain fun. Definition-local failure
+reopens D5 toward C. D3-A or D4-C necessarily rebuilds the graph and reopens
+D5. D5A/D5A1 are pruned. The authoritative decision record remains
+byte-unchanged.
+
+The post-answer audit found that old RCS-03E was not atomic. It bundled the
+source of transformation-proposal approval with the timing of participant
+approval. The forty-fourth prerequisite correction makes old RCS-03E a
+non-counting alias and registers:
+
+- `RCS-03E1`: whether proposal approval is system-deterministic only,
+  participant-contingent universally, or uses the systemic
+  P-participant/M-deterministic coexistence route;
+- conditional `RCS-03E1Z` and `RCS-03E1X`: the two still-independent
+  proper-subset cause laws under E1-C; and
+- conditional `RCS-03E2`: when admitted participant authority is
+  advance-only, live-capable universally, or supports both timings.
+
+The first E1-C draft was broken: global coexistence let one dialect receive
+meaningful assent while another never could, even with every stated answer
+fixed. A read-only adversarial review caught that hidden authority caste before
+commit or push. Current C fixes P and M systemically; Z and X remain explicit
+later binary decisions rather than AUTHOR notes. E1-A prunes E1Z/E1X/E2; E1-B
+prunes E1Z/E1X and opens E2; E1-C opens E1Z, E1X, then E2 before collision
+precedence. The 152-row register now contains 21 `SCREEN`, 1 `OWNER-OPEN` at
+E1, 47 `PRUNED`, 76 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 22`.
+
+`RCS-03E1` asks whether the owning combatant's persistent custodian can
+materially change one individually identified P/Z/X/M proposal's
+approve/withhold disposition while every nonapproval input stays fixed:
+
+- **A — every proposal is system-deterministic.** Once proposal-local facts
+  are fixed, versioned rules admit or withhold it; no custodian assent or veto
+  changes that result. This is the cleanest flow and deepest fallback, but it
+  risks involuntary persistent build changes and rational trigger avoidance.
+  Example: Ashen proposes `DEFIANCE`; its rule admits the proposal
+  automatically, even if Mara would prefer to withhold it. E1Z/E1X/E2 prune.
+- **B — every proposal is participant-contingent.** Every proposal has a
+  material custodian-sourced approve/withhold coordinate. This gives the clear
+  promise “the Relic proposes; its Soul's custodian assents,” but makes every
+  proposal option value, spreads policy/prompt/unavailable-custodian burden
+  everywhere, and can duplicate an informed M-operation commitment with a
+  second confirmation. E1Z/E1X prune; E2 next decides timing.
+- **C — cause-authored universal coexistence. Recommended.** Every P proposal
+  is participant-contingent; every M proposal is system-deterministic. Because
+  P and M support are universal, every definition in both dialects has at
+  least one opportunity of each mode, eliminating a controllable-definition
+  caste. Ashen's P settlement asks for meaningful assent; the same Relic's
+  already admitted, paid, constrained M rite follows through without another
+  “are you sure?” decision. C opens E1Z then E1X; it does not hide those cause
+  laws in authoring. Two grammars and cause-route shopping remain costs.
+
+Recommend **C with E1-B qualified agency fallback and E1-A deeper system
+fallback**. The counterexample to universal B is a custodian who already
+knowingly initiated and locked a paid, constrained M rite: another mandatory
+approval can be a token “are you sure?” tax rather than meaningful agency.
+The preferred later terminal combination is E1Z-B and E1X-A:
+“manifestations and absence ask; lived events bind; an initiated Rite
+executes,” but E1-C does not select those children. Fire B only if even an
+informed, admitted, constrained M proposal needs separate material assent.
+X-specific involuntary-change failure belongs first to E1X-B. Fire A only if
+participant approval fails system-wide across viable timing models and
+deterministic rules remain fun. A live-prompt failure alone belongs to E2.
+Ask only for E1 A, B, or C and preserve any explicitly named fallbacks.
+
+## 2026-09-29 no active blank-state route selected; compatible lived return is next — superseded frontier
 
 Zanzagar selected `RCS-03D4-A` with `RCS-03D4-C` as the explicit qualified
 fallback. No direct proposal originating from an authoritative nonclear
@@ -12237,7 +12322,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-29 04:55 UTC — compatible lived nonclear-return prevalence is next](docs/handoffs/2026-09-29-0455--relic-compatible-return-prevalence-next.md)**
+[2026-09-29 06:21 UTC — transformation-proposal approval source is next](docs/handoffs/2026-09-29-0621--relic-approval-source-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

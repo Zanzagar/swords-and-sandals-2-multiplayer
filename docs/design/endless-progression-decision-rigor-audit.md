@@ -11109,3 +11109,117 @@ The lean alternative would have trusted
 the complete accepted replays for EP-D02 and EP-D07 and repaired only R9.4; it
 was not selected, and it would not have proved that every historical choice
 received the later one-at-a-time treatment.
+
+### RCS-03D5 disposition and RCS-03E atomicity audit — 2026-09-29
+
+Zanzagar selected **RCS-03D5-B with D5-A as the system fallback**. Thus every
+completed state- and boundary-supporting transforming definition has at least
+one prospectively legible, policy-material legal history of the same active
+Relic instance, owner, root, definition, and fixed version that lives
+`a ... b ... a` for distinct nonclear assignments. Every later leg begins
+from the exact authoritative state produced by the earlier one; separate
+histories cannot be stitched. This is existential per definition, not full
+reversibility. One-way limbs, terminal forms, unavailable proposals, and
+failed approval remain legal.
+
+A return restores only the current assignment coordinate. It does not restore
+spent proof, receipts, claims, latches, costs, cooldowns, causal events,
+chronology, combat state, or revealed information. Reload, migration, repair,
+duplicate replacement, unequip/re-equip, and snapshot restoration are not
+return witnesses. D5-A is armed but unfired: it replaces B only if compatible
+lived return fails as a system at the anti-profit, state-integrity,
+commitment, comprehension, counterpick, or boundary-snapshot gates while
+irreversible biographies remain fun. A definition-local failure reopens D5
+toward C. D3-A or D4-C rebuilds the graph and necessarily reopens D5.
+D5A/D5A1 therefore prune on the active branch.
+
+The post-answer audit rejected old RCS-03E as an atomic owner card. Its three
+labels—discretionary, precommitted, and deterministic—mixed two independent
+questions:
+
+1. can a participant-semantic coordinate materially change one identified
+   proposal's approve/withhold disposition; and
+2. if it can, is that coordinate irrevocably bound in advance or still
+   operative after the live proposal-specific facts are available?
+
+Old RCS-03E is now a non-counting alias. **RCS-03E1** owns the first question.
+A makes every proposal system-deterministic. B makes every proposal
+participant-contingent. C fixes every P proposal as participant-contingent and
+every M proposal as system-deterministic; universal P/M support therefore
+gives every definition in both dialects both modes. Conditional
+**RCS-03E1Z** and **RCS-03E1X** then decide the source uniformly within their
+still-independent proper-subset causes. Conditional **RCS-03E2** owns timing:
+advance-only, live-capable universal, or disclosed coexistence.
+
+The first uncommitted E1-C draft was broken. It required only global
+coexistence and deferred exact mapping to AUTHOR while relying on a clean
+P-participant/M-deterministic witness in its recommendation. A read-only diff
+review held every answer fixed and constructed one compliant world in which
+both dialects exposed assent and another in which only state definitions did.
+That authority and build-policy difference passes the owner-card admission
+test. Leaving it implicit would have created the very controllable-definition
+caste the prose warned against. This was the drafting agent's error; it was
+caught before commit or push.
+
+The smallest rigorous repair is not to freeze Z and X together. Whether the
+custodian may reject an absence-shaped Z proposal after actual `{}` and
+whether a disclosed lived X event binds a persistent scar are independent
+authority choices. E1Z and E1X therefore each expose system-deterministic
+versus participant-contingent authority. Mixed authority within one cause is
+excluded unless a later genuinely distinct semantic subcause passes reopening.
+E1-A prunes E1Z/E1X/E2. E1-B prunes E1Z/E1X and opens E2. E1-C opens E1Z,
+then E1X, then E2. The repaired tree has sixteen terminal patterns and prevents
+automatic evaluator invocation from being mistaken for automatic proposal
+approval.
+
+A/B/C are the three admitted systemic E1 directions rather than an assertion
+that every mathematical subset deserves authoring. System-deterministic P plus
+participant-contingent M combines involuntary success-shaped rewriting with a
+second decision after an informed Rite, without a compensating semantic gain.
+Definition-, dialect-, target-, or opportunity-specific P/M mixtures require
+an owner-written replacement and a no-caste proof.
+
+No additional owner split passes admission now. C3c.21-A already identifies
+the participant-side human authority as the owning combatant's persistent
+custodian. RCS-02 retains disclosure, additional consent/communication, and
+absent-authority recovery/default policy. RCS-13 retains operation initiation,
+bind/rebind, and lock horizons. RCS-04A retains choice and precedence among
+colliding approved proposals; RCS-04B retains committed identity; RCS-15/16
+retain persistence, migration, transaction, and repair realization.
+E1/E1Z/E1X/E2 admit one binary disposition for one concrete proposal, not
+participant-authored conditional programs, proposal banking, or hidden target
+selection.
+
+The recommendation audit rejected unconditional E1-B. Universal dedicated
+operation support supplies the countermodel: if a custodian knowingly
+initiates and locks a paid, target-constrained M rite, requiring a second
+material approval can become a token “are you sure?” tax. Conversely, making
+every organic P/Z/X proposal deterministic can create involuntary persistent
+build changes and rational trigger avoidance. The recommended higher-ceiling
+direction is therefore **E1-C with E1-B as a qualified agency fallback and
+E1-A as the deeper system fallback**. C gives P proposals meaningful assent
+while an already admitted M rite follows through deterministically. The
+preferred later terminal combination is E1Z-B and E1X-A: manifestations and
+actual absence ask; lived events bind; an initiated Rite executes. Z assent
+avoids forced punishment. X deterministic authority preserves the independent
+event's otherness and puts agency in prospectively seeking or avoiding a
+disclosed Event-bound exposure instead of post-event outcome shopping. Those
+two child recommendations are not selected by E1-C.
+
+E1-B may replace C only if even knowingly initiated, admitted, constrained M
+proposals still cause material involuntary-build regret and separate assent
+remains strategically material rather than an always-accept click, prompt tax,
+disconnect blocker, or post-information counterpick. X-specific regret first
+belongs to E1X-B, not the system fallback. E1-A may replace C/B only if
+participant approval fails system-wide across viable timings while
+deterministic laws remain legible and fun. Live-prompt failure alone belongs
+to E2.
+
+Replacing one counted E row with E1/E1Z/E1X/E2 raises the register from 149 to
+152 rows. After selected D5-B it contains 21 `SCREEN`, 1 `OWNER-OPEN` at E1,
+47 `PRUNED`, 76 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 22`. Under E1-A the three children prune and RCS-04A opens at 18.
+Under E1-B, E1Z/E1X prune and E2 opens at 19. Under E1-C, E1Z opens at 21,
+E1X at 20, and E2 at 19; closing E2 opens RCS-04A at 18. A D1M-A fallback or
+later loss of universal P/M support reopens E1. The authoritative decision
+record remains unchanged.

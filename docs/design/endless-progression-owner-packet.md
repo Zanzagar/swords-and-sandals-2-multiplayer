@@ -421,10 +421,15 @@ fallback, giving every transforming definition one material direct-reverse
 proposal pair without granting an executable roundtrip. Zanzagar then selected
 D4-A with D4-C as the qualified Release-bound fallback, so no active
 fixed-version transformation history can enter its typed unassigned value.
-**RCS-03D5 is now the sole owner-facing choice under SR-04:** whether no
-transforming definition, every transforming definition, or a nonempty proper
-subset has one compatible lived nonclear-return history. The current register
-has 149 rows and `Phi_SR = 22`.
+Zanzagar then selected D5-B with D5-A as the explicit whole-system fallback,
+so every transforming definition has at least one compatible lived nonclear-
+return history without making every branch reversible. The original RCS-03E
+row then proved to combine approval-control source with participant timing.
+**RCS-03E1 is now the sole owner-facing choice under SR-04:** whether proposal
+approval is wholly system-deterministic, wholly participant-contingent, or
+uses the cause-authored P-participant/M-deterministic coexistence route before
+separately resolving Z and X. The current register has 152 rows and
+`Phi_SR = 22`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -26991,7 +26996,7 @@ unchanged.
 > No selected cause, assignment, edge, result, or authoritative-record text
 > changes.
 
-### RCS-03D5 — compatible lived nonclear return support — active owner choice
+### RCS-03D5 — compatible lived nonclear return support — B selected with A system fallback
 
 For each completed fixed-version transforming definition `d`, retain D2's
 material nonclear assignment set `A_d` and direct-proposal relation `E_d`.
@@ -27067,6 +27072,210 @@ Under A/B, D5 becomes `DIR-SELECTED`, D5A/D5A1 prune, and RCS-03E opens with
 `PRUNED`, 76 `DIR-SELECTED`, and `Phi_SR = 21`**; D5A then opens D5A1 at 20,
 and closing D5A1 opens RCS-03E at 19. The authoritative decision record
 remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-29:** **B, every
+transforming definition has at least one compatible lived nonclear return,
+with D5-A as the explicit whole-system fallback.** Thus
+`D_ret=D_mut`. Every completed state- and boundary-supporting transforming
+definition has at least one prospectively legible, policy-material legal
+history of the same active Relic instance, owner, root, definition, and fixed
+version that lives `a ... b ... a` for distinct nonclear assignments `a` and
+`b`. Every later leg begins from the exact authoritative state left by the
+earlier one. Separately lawful histories cannot be stitched.
+
+B is existential per definition. It does not make every assignment, edge,
+pair, departure, or history return-capable; irreversible limbs and terminal
+forms remain legal. Returning changes only the current assignment coordinate.
+It never restores spent evidence, receipts, claims, recurrence latches,
+costs, cooldowns, causal occurrences, lineage chronology, combat state, or
+revealed information. Reload, migration, repair, duplicate replacement,
+unequip/re-equip, and snapshot restoration remain invalid witnesses.
+
+D5-A is armed and unfired. It replaces B only if compatible lived return fails
+as a system at the anti-profit, state-integrity, commitment, comprehension,
+counterpick, or boundary-snapshot gates while irreversible directed
+biographies remain fun. Definition-local failure reopens D5 toward C and its
+two incidence children instead of firing A. D5-C is otherwise unselected.
+D5A and D5A1 move to `PRUNED` on the active branch. Any cause or topology
+fallback that removes edges rebuilds `Q_d` and `D_ret`; D3-A or D4-C
+necessarily reopens D5 rather than preserving its label by name.
+
+At the pre-amendment checkpoint, D5 moved to `DIR-SELECTED`, D5A/D5A1 moved
+to `PRUNED`, and RCS-03E became the sole `OWNER-OPEN` row. The 149-row
+register then contained **18 `SCREEN`, 1 `OWNER-OPEN` at RCS-03E, 47
+`PRUNED`, 76 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 19`**. The authoritative decision record remains unchanged.
+
+> **Forty-fourth prerequisite correction, 2026-09-29 — transformation
+> approval-control source and participant timing are independent.** The old
+> RCS-03E shorthand offered “discretionary, precommitted, or deterministic”
+> as though those formed one atomic authority choice. They do not. Whether a
+> still-operative participant coordinate can change a proposal's disposition
+> is independent of whether that coordinate acts live after the proposal is
+> known or was bound earlier. The same separation was already required for
+> evaluator invocation at RCS-03C2A/C2B; automatic invocation does not imply
+> automatic transformation approval.
+>
+> Old `RCS-03E` becomes a non-counting parent alias for four rows:
+>
+> 1. `RCS-03E1` — transformation-proposal approval-control source:
+>    system-deterministic only, participant-contingent universal, or a
+>    cause-authored coexistence anchored by participant-contingent P and
+>    system-deterministic M;
+> 2. `RCS-03E1Z` — conditional Z-locus approval source under E1-C;
+> 3. `RCS-03E1X` — conditional X-locus approval source under E1-C; and
+> 4. `RCS-03E2` — conditional participant-approval timing when E1 admits
+>    participant authority: advance-only, live-capable universal, or disclosed
+>    coexistence.
+>
+> E1-A prunes E1Z/E1X/E2. E1-B prunes E1Z/E1X and activates E2. E1-C
+> activates E1Z, then E1X, then E2 before collision precedence. “Live-capable”
+> means a participant-semantic coordinate can still change approve versus
+> withhold at the proposal's live approval cut; an earlier default plus a live
+> veto therefore remains live-capable. Advance-only authority is irrevocably
+> bound before that opportunity-specific information is available. This yields
+> sixteen terminal paths: one under E1-A, three under E1-B, and twelve under
+> E1-C.
+>
+> **Adversarial correction before commit — the first E1-C draft was broken.**
+> It required only global coexistence and then deferred the cause/definition/
+> dialect map to AUTHOR. A read-only diff review constructed two worlds that
+> satisfied the same C and E2 answers while only one allowed boundary Relics
+> meaningful custodian assent. The draft therefore hid the exact authority
+> caste it warned against, and its clean P-participant/M-deterministic example
+> was doing normative work while labelled merely illustrative. That was this
+> drafting agent's error. Current E1-C now fixes P and M systemically, while
+> E1Z/E1X expose the two still-independent material cause choices. No broken
+> draft was committed or pushed.
+>
+> No further split passes admission now. EP-D02-C3c.21-A already fixes the
+> owner-side human authority as the owning combatant's persistent custodian.
+> RCS-02 retains exact disclosure, any additional consent/communication
+> contract, and absent-authority recovery/default policy; RCS-13 retains
+> operation initiation plus bind/rebind and lock horizons; RCS-04A retains
+> choice or precedence among colliding approved proposals; RCS-04B retains
+> committed identity; RCS-15/16 retain persistence, migration, transaction,
+> and repair realization. E1/E1Z/E1X/E2 use one binary disposition for one concrete
+> proposal opportunity; they do not admit a participant-programmed conditional
+> language, proposal banking, or a hidden target selector. A concrete design
+> that needs one of those must pass
+> the reopening test rather than hiding it in AUTHOR/SPEC.
+>
+> Replacing one counted E row with E1/E1Z/E1X/E2 raises the register from 149
+> to **152 rows**. After selected D5-B it contains **21 `SCREEN`, 1
+> `OWNER-OPEN` at E1, 47 `PRUNED`, 76 `DIR-SELECTED`, 5 `DERIVED`, 1
+> `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**. No selected cause, topology,
+> return, result, assignment, or authoritative-record text changes.
+
+### RCS-03E1 — transformation-proposal approval-control source — active owner choice
+
+Let `O^approve_v` be the nonempty set of reachable lawful disposition
+opportunities for individually identified P/Z/X/M transformation proposals.
+For each direct cause locus `c` in `{P,Z,X,M}`, let `O^c_v` contain its
+opportunities. Atomic proposal identities make those four sets a partition;
+same-trace or same-target proposals from different loci remain distinct.
+Selected D1P-B and D1M-B give every transforming definition at least one
+reachable P opportunity and at least one reachable M opportunity. Z and X
+remain disclosed proper definition subsets with nonempty incidence in both
+dialects.
+At one opportunity, hold fixed the same active Relic instance, owner, root,
+definition/version, current assignment, proposal identity, cause occurrence,
+proposed target, proposal-local disclosed facts, and every nonapproval input.
+The current assignment remains authoritative; approval does not yet defeat a
+competing proposal or commit a new identity.
+
+An opportunity is **participant-contingent** when at least one still-operative
+participant-semantic coordinate, lawfully sourced from the owning combatant's
+persistent custodian under C3c.21-A, can materially change whether that
+proposal is admitted forward. The coordinate may be live or prospectively
+bound; E2 decides timing. Let `P^approve_v` contain exactly those
+participant-contingent opportunities.
+
+Every opportunity outside `P^approve_v` is **system-deterministic**: after all
+fixed proposal-local inputs are known, one versioned total rule admits or
+withholds the proposal, and no participant coordinate can change that result.
+The system executing a participant's bound disposition does not erase
+participant authority. Conversely, causing P/Z/X/M, initiating an M operation,
+equipping a Relic, or accepting a sole default does not create approval
+authority unless its authored semantics carry a distinct still-operative
+approve/withhold force. Random, administrator, AI, or external-oracle
+disposition is outside this tree and requires an owner-written replacement.
+
+| Choice | Proposal-approval control rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every proposal is system-deterministic** | `P^approve_v` is empty. Every P/Z/X/M proposal is individually admitted or withheld by its fixed proposal-local law. No custodian grant, veto, standing assent, or later confirmation can change that disposition. E1Z/E1X/E2 prune. | **Deepest whole-system fallback and cleanest flow.** A permits organic history to shape a Relic without prompts, pending custodian decisions, or approval-stage counterpicking. The continuing artifact across real difference retains D5's partial ideal fit; deterministic approval adds no new relation and is neutral/protective. Costs are involuntary persistent build change, rational avoidance of otherwise-fun triggers, and the danger that an authored “personality” feels like the game damaging the player's item. | Ashen's positive settlement creates `DEFIANCE PROPOSED`. With its complete proposal-local facts fixed, the rules admit it automatically; Mara cannot veto it. A paid reconciliation rite may likewise follow through automatically once RCS-13 has admitted it. RCS-04A still resolves any simultaneous admitted proposals. |
+| **B — every proposal is participant-contingent** | `P^approve_v=O^approve_v`. Every reachable P/Z/X/M proposal has a material custodian-sourced approve/withhold coordinate. E1Z/E1X prune; E2 next decides whether that authority is advance-only, live-capable everywhere, or supports both timings. | **Strong agency-safety fallback, not the primary recommendation.** B gives one clear promise: the Relic proposes and its Soul's custodian materially assents. A non-token proposal/assent relation can express continuity and distinction **directly** at that local boundary; universal prevalence is aggregate. It also turns every proposal into option value, risks accepting upside while vetoing scars, duplicates informed M-operation commitment with a second confirmation, and spreads policy or prompt burden plus unavailable-custodian stalls across the entire transformation surface. | A Vowscar settlement proposes `TEMPERED`; a prospectively bound Mara disposition or later live Mara decision changes whether it advances. But if Mara already initiated and locked a paid `TEMPERED -> MERCY` rite, requiring another always-yes approval is token authority and fails B's materiality gate. |
+| **C — cause-authored universal coexistence** | Every reachable P-locus proposal is participant-contingent and every reachable M-locus proposal is system-deterministic: `O^P_v` is contained in `P^approve_v`, while `O^M_v` is disjoint from it. Because P and M support are universal, every transforming definition in both dialects has at least one reachable opportunity of each mode. C opens E1Z then E1X to decide the two genuinely independent proper-subset causes before E2. | **Recommended higher-ceiling direction, with B as the qualified agency-safety fallback and A as the deeper system fallback.** C makes successful manifestation ask for meaningful Soul/custodian assent while a knowingly initiated Rite follows through without a redundant confirmation. It eliminates a controllable-definition or dialect caste by construction. Costs are two authority grammars and cause-route shopping; Z and X cannot be hidden in authoring, so their source laws remain explicit follow-ups. | Ashen's P settlement creates `DEFIANCE PROPOSED`, whose custodian coordinate can change approve versus withhold. The same definition's already admitted, paid, target-constrained M rite creates `MERCY PROPOSED`, whose complete local law resolves it without a second “are you sure?” decision. E1Z/E1X, not this example, settle absence and lived-event proposals. |
+
+A, B, and C are the three admitted systemic directions, not a claim that every
+mathematical subset of `O^approve_v` deserves silent authoring. A
+system-deterministic P plus participant-contingent M combines involuntary
+success-shaped rewriting with a second decision after an already informed
+Rite, without a compensating semantic benefit over A/B/C. Definition-,
+dialect-, target-, or opportunity-specific P/M mixtures recreate an authority
+caste or hidden control language. Any such alternative requires an
+owner-written replacement that identifies a stable semantic source rule and
+passes the admission and no-caste tests.
+
+Participant-contingent does not mean participant-exclusive execution; a system
+composer, canonical validation step, or total completion rule may still act.
+A participant coordinate is material only if changing it can change
+disposition with every nonapproval input fixed. A cosmetic confirmation,
+forced one-option prompt, always-accept click, or already-consumed operation
+initiation is not a witness.
+
+Every branch preserves D5-B's actual compatible return histories. Approval
+rules may make many proposals fail to commit, but they cannot erase every
+legal return witness from any transforming definition without reopening D5.
+Likewise, E1 grants no collision selection. Each proposal is dispositioned on
+its own local facts; using a rival proposal's identity, target, or predicted
+outcome to select a favorite belongs to RCS-04A. Approved proposals then enter
+that later collision rule as a set.
+
+The recommendation is E1-C. It gives P biography meaningful assent while
+letting a knowingly initiated, admitted, constrained M rite follow through
+without an “are you sure?” tax. The preferred later terminal combination is
+E1Z-B and E1X-A: manifestations and actual absence ask; independently lived
+events bind; an initiated Rite executes. Z remains independent because forced
+absence-shaped change can feel punitive. X remains independent because a
+disclosed Event-bound native event may make agency live in prospectively
+seeking or avoiding exposure rather than vetoing the consequence afterward.
+Those later recommendations are not selected by E1-C.
+
+Arm E1-B only as a qualified agency-safety replacement if even knowingly
+initiated, admitted, constrained M proposals still cause material involuntary-
+build regret after prospective disclosure and safe commit horizons—and a
+separate custodian assent remains strategically material rather than an
+always-yes click, prompt tax, disconnect blocker, or post-information
+counterpick. Event-specific involuntary-change failure belongs first to E1X's
+participant branch, not this system fallback. Arm E1-A as the deeper whole-
+system replacement only if participant approval fails across viable timing models:
+optimized play overwhelmingly always accepts or rejects, advance dispositions
+become loadout bureaucracy, live authority causes unacceptable prompts or
+stalls, and deterministic proposal-local laws remain legible and fun. A live-
+prompt failure alone belongs to E2; a cause-local failure stays inside C.
+
+Selecting that full ladder requires **“C with E1-B qualified agency fallback
+and E1-A deeper system fallback.”** Bare C arms neither replacement.
+
+E1 selects no participant timing, Z/X approval source, approval rate, default,
+expiry, queue, target preference, rival-proposal inspection, operation
+initiation, payment, lock, collision winner, committed identity, persistence
+mechanism, power, UI, or implementation. Under C, P/M mapping is fixed by
+cause for every opportunity; it is not AUTHOR. E1Z/E1X must close before E2.
+A D1M-A fallback or any later loss of universal P/M support reopens E1. D1Z-A
+or D1X-A merely removes and prunes its corresponding child; D1X1-A alone
+leaves state-side X and does not prune E1X.
+
+Under A, E1 becomes `DIR-SELECTED`, E1Z/E1X/E2 prune, and RCS-04A opens with
+**17 `SCREEN`, 1 `OWNER-OPEN`, 50 `PRUNED`, 77 `DIR-SELECTED`, and
+`Phi_SR = 18`**. Under B, E1 becomes `DIR-SELECTED`, E1Z/E1X prune, and E2
+opens with **18 `SCREEN`, 1 `OWNER-OPEN`, 49 `PRUNED`, 77 `DIR-SELECTED`, and
+`Phi_SR = 19`**. Under C, E1Z opens with **20 `SCREEN`, 1 `OWNER-OPEN`, 47
+`PRUNED`, 77 `DIR-SELECTED`, and `Phi_SR = 21`**; closing E1Z opens E1X at
+20, closing E1X opens E2 at 19, and closing E2 opens RCS-04A with **17
+`SCREEN`, 1 `OWNER-OPEN`, 47 `PRUNED`, 80 `DIR-SELECTED`, and
+`Phi_SR = 18`**. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 
