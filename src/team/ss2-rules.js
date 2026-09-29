@@ -4548,6 +4548,51 @@ function ss2StepQueues(view, destY, foe) {
 }
 
 /**
+ * Which lane the press's queued arm (arm 1 of `ss2PressMove`) would step the
+ * actor OUT to, were he standing queued at (`x`, `y`) in `target`'s lane: that
+ * lane's y, or `null`. Arm 1 with every rank that exists taken as offered —
+ * the front before the back, a lane whose walk toward the goal is clear where
+ * the step lands, a lane with no foe in it first (2026-09-29).
+ */
+function ss2PressStepOutY(view, target, x, y, rankStride) {
+  const actor = { ...view.actor, x, y };
+  const aim = ss2PressGoal({ ...view, actor }, target);
+  if (aim === null) return null;
+  const allies = (view.allies ?? []).filter((ally) =>
+    ally.id !== actor.id && ally.alive !== false && Number.isFinite(ally.x));
+  const foes = view.foes ?? [];
+  const bodies = [...foes, ...allies];
+  const open = [1, -1].map((direction) => ss2RankDestination(y, direction, rankStride))
+    .filter((to) => to !== null)
+    .filter((to) => {
+      const landX = ss2RankArrivalX(x, bodies, to);
+      return landX !== null && !ss2WalkBlocked({ ...actor, x: landX, y: to }, bodies, aim.x > landX ? 1 : -1);
+    });
+  const clear = open.find((to) => !foes.some((foe) => foe.alive !== false && foe.y === to));
+  return clear ?? open[0] ?? null;
+}
+
+/**
+ * ► **A RANK STEP THAT WOULD SHUTTLE: it lands in a queue (`ss2StepQueues`)
+ *   from which the press would step the actor straight back to the lane he is
+ *   leaving** (2026-09-29). The older arms' guards skip only this. Before, they
+ *   skipped any step into a queue while `ss2PressGoal` had a spot, and a
+ *   seventh write-nothing verifier found that the ONLY way forward is often
+ *   through the queue lane and out of its far side — at the wall behind an
+ *   ally archer the fighter walked into the wall, rested or paced instead (its
+ *   S2E and S2E-guard layouts; c2b5751 stepped through and struck 38 times).
+ *   A step through the queue to the other lane is progress; a step the press
+ *   would undo next turn is the shuttle the guards exist for.
+ */
+function ss2QueueStepShuttles(view, destY, foe, rankStride) {
+  if (!ss2StepQueues(view, destY, foe)) return false;
+  const actor = view.actor;
+  const others = [...(view.foes ?? []), ...(view.allies ?? []).filter((ally) => ally.id !== actor.id)];
+  const landX = ss2RankArrivalX(actor.x, others, destY);
+  return landX !== null && ss2PressStepOutY(view, foe, landX, destY, rankStride) === actor.y;
+}
+
+/**
  * ► **GOING ROUND — the move that presses `target`, or `null` (P2).** The same
  *   under both `aiPress` variants; they differ only in what it outranks (the
  *   ranged choices and the taunt; see `pincerFirst` in `chooseAiAction`).
@@ -4671,16 +4716,32 @@ export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankS
   //   whose walk toward the goal is not blocked where the step lands, the lane
   //   with no foe in it first — **never the target's own lane**, which is the
   //   look-ahead's call and elsewhere lands him in the queue.
+  //
+  // ► **NARROWED 2026-09-29 after a seventh write-nothing verifier REFUTED
+  //   6dee6b4 in staged positions — two conditions the first cut lacked.**
+  //   (a) **Only when a BODY withholds the walk** (`ss2WalkBlocked` in his own
+  //   lane): a closed-on archer is offered only the walk away, the detour took
+  //   that for a blocked walk, and each lane looked open from the other — 40
+  //   alternating rank steps, 0 strikes. (b) **Only to a lane from which the
+  //   press still has a target with an open spot**: from the landing the
+  //   nearest fought foe could be another, with NO spot, and the join arm
+  //   stepped him straight back (the verifier's T2491 and T179). ~~The SAME
+  //   target~~ was my first reading and it was wrong: the sixth verifier's S1
+  //   detours, finds a new target WITH a spot, goes round him and strikes.
   const walkOrDetour = () => {
     const walk = find(toGoal);
     if (walk) return walk;
+    if (!ss2WalkBlocked(actor, bodies, goalX > actor.x ? 1 : -1)) return null;
     const steps = [Ss2ActionType.RANK_FRONT, Ss2ActionType.RANK_BACK].map(find).filter(Boolean);
     const open = steps.filter((step) => {
       const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
       if (y === target.y) return false;
       const x = ss2RankArrivalX(actor.x, bodies, y);
       if (x === null) return false;
-      return !ss2WalkBlocked({ ...actor, x, y }, bodies, goalX > x ? 1 : -1);
+      if (ss2WalkBlocked({ ...actor, x, y }, bodies, goalX > x ? 1 : -1)) return false;
+      const after = { ...view, actor: { ...actor, x, y } };
+      const next = ss2PressTarget(after);
+      return next !== null && ss2PressGoal(after, next) !== null;
     });
     const clear = open.find((step) => {
       const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
@@ -16216,8 +16277,9 @@ export function createSs2TeamRules({
           if (step) {
             const destY = actor.y + SS2_RANK_DIRECTION[join] * rankStride;
             const there = nearestFoe({ ...view, foes: view.foes.filter((foe) => foe.y === destY) });
-            const queues = aiPress !== "off" && there && ss2StepQueues(view, destY, there)
-              && ss2PressGoal(view, there) !== null;
+            // ~~`ss2StepQueues(...) && ss2PressGoal(view, there) !== null`~~ — only a
+            // step the press would undo next turn (2026-09-29, `ss2QueueStepShuttles`).
+            const queues = aiPress !== "off" && there && ss2QueueStepShuttles(view, destY, there, rankStride);
             if (!queues) return step;
           }
         }
@@ -16252,8 +16314,9 @@ export function createSs2TeamRules({
           //   (the same foe as before when the step lands in the nearest's lane).
           const destY = step ? actor.y + SS2_RANK_DIRECTION[towardRank] * rankStride : null;
           const there = step ? nearestFoe({ ...view, foes: view.foes.filter((foe) => foe.y === destY) }) : null;
-          const queued = aiPress !== "off" && there && ss2StepQueues(view, destY, there)
-            && ss2PressGoal(view, there) !== null;
+          // ~~`ss2StepQueues(...) && ss2PressGoal(view, there) !== null`~~ — only a
+          // step the press would undo next turn (2026-09-29, `ss2QueueStepShuttles`).
+          const queued = aiPress !== "off" && there && ss2QueueStepShuttles(view, destY, there, rankStride);
           if (step && !queued) return step;
         }
 
