@@ -303,13 +303,10 @@ const PRESS_SHUTTLES = Object.freeze([
   // Added 2026-09-28: the bouts that shuttled only at 92f9701 (a fourth
   // verifier's census; none shuttles at 74c0014). The last field is the side size.
   ["ranged-first", "tricks", 46], ["ranged-first", "buffs", 6, 2], ["pincer-first", "buffs", 6, 2],
-  ["ranged-first", "buffs", 11, 2], ["pincer-first", "buffs", 11, 2],
-  // Added 2026-09-28: a sixth verifier's census (seeds 97-400), the same at
-  // 06beab0 and ab56337. The press stepped red-1 out of the queue in the
-  // middle lane; when a knockback took its target out of reach, the rank arm
-  // stepped it back toward a foe TWO lanes away, which lands in the middle
-  // lane, the queue, and its guard read only the nearest foe's own lane.
-  ["ranged-first", "tricks", 338]
+  ["ranged-first", "buffs", 11, 2], ["pincer-first", "buffs", 11, 2]
+  // ~~["ranged-first", "tricks", 338]~~ — added 2026-09-28 with the rank guard's
+  // landing-lane reading, removed 2026-09-29 with it (an eighth verifier: the
+  // widened guard skipped ways forward). Seed 338 is OPEN again, pinned below.
 ]);
 
 test("the arena's own bouts where the press alone shuttled a fighter between lanes no longer do", async () => {
@@ -420,7 +417,7 @@ test("with only a shooter on the target, the free member closes on his near side
  *   the archer, and the older join arm stepped him back in, turn after turn
  *   (tricks 3v3 seed 46). Neither happened at 74bb257.
  */
-function stagedRun(spec, { aiPress = "ranged-first", actions = 120 } = {}) {
+function stagedRun(spec, { aiPress = "ranged-first", actions = 120, seed = 1 } = {}) {
   const sturdy = { vitality: 60, herolevel: 60, character_level: 60, defence: 30 };
   const teams = ["red", "blue"].map((team) => ({
     id: team,
@@ -430,7 +427,7 @@ function stagedRun(spec, { aiPress = "ranged-first", actions = 120 } = {}) {
         ...(entry.fields ?? {}) }),
       { id: entry.id, name: entry.id, controller: "local", x: entry.x, y: entry.y }))
   }));
-  const battle = createTeamBattle({ seed: 1, rules: createSs2TeamRules({ aiPress }), teams });
+  const battle = createTeamBattle({ seed, rules: createSs2TeamRules({ aiPress }), teams });
   const log = [];
   for (let taken = 0; taken < actions && !battle.result; taken += 1) {
     const actorId = currentCombatant(battle).id;
@@ -440,8 +437,9 @@ function stagedRun(spec, { aiPress = "ranged-first", actions = 120 } = {}) {
     const view = viewFor(battle, actorId);
     const target = ss2PressTarget(view);
     const open = target !== null && ss2PressGoal(view, target) !== null;
-    log.push({ actorId, type: chosen.type, targetId: chosen.targetId, open });
+    const x0 = combatantById(battle, actorId).x;
     applyAction(battle, { actorId, ...chosen });
+    log.push({ actorId, type: chosen.type, targetId: chosen.targetId, open, x0, x1: combatantById(battle, actorId).x });
   }
   const turnsOf = (id) => log.filter((entry) => entry.actorId === id);
   const longestRun = (id, matches) => {
@@ -682,7 +680,8 @@ for (const aiPress of ["ranged-first", "pincer-first"]) {
 }
 
 /**
- * ► **P4 BINDS THE JOIN ARM TOO, WITH THE PRESS ON — a sixth write-nothing
+ * ► ~~**P4 BINDS THE JOIN ARM TOO, WITH THE PRESS ON**~~ **(reverted 2026-09-29,
+ *   below)** — a sixth write-nothing
  *   verifier's staged S3, 2026-09-28 (the same at 06beab0, ab56337 and under
  *   `aiPress: "off"`).** The join arm counts an ally "engaged" by the FOE's
  *   reach as well, and a drawn bow's is ~4,500, so an archer shooting blue-1
@@ -701,14 +700,173 @@ const archerOwnLane = () => [
   { id: "blue-2", team: "blue", x: 2014, y: SECOND, sturdy: true, fields: { strength: 20 } },
   { id: "blue-3", team: "blue", x: 1069, y: FRONT, sturdy: true }
 ];
-for (const aiPress of ["ranged-first", "pincer-first"]) {
-  test(`${aiPress}: with an archer in his own lane that no ally fights, the free member closes on him rather than hop between two fights`, () => {
+// ► **REVERTED 2026-09-29, MEASURED — S3 IS OPEN AGAIN, UNDER EVERY aiPress.** The
+//   P4 gate on the join arm fixed this layout but cost the shipped ranged-first
+//   plain 3v3 4.5 points of 2v1 conversion and more than doubled its dancing
+//   (tools/ai-press-census.mjs: 75.9% / 2.1% without it, 71.4% / 5.5% with). The
+//   two tests that asserted the fix are replaced by this one, which pins the hop
+//   as it stands so that a real fix has to move it on purpose. ~~ranged-first /
+//   pincer-first: "the free member closes on him rather than hop between two
+//   fights"~~ (they passed from 6dee6b4 to this revert).
+test("OPEN: with an archer in his own lane that no ally fights in melee, the free member hops between two lanes' fights, under every aiPress", () => {
+  for (const aiPress of ["off", "ranged-first", "pincer-first"]) {
     const run = stagedRun(archerOwnLane(), { aiPress, actions: 150 });
-    assert.ok(run.shuttle("blue-3") < 4, `blue-3 alternated rank steps ${run.shuttle("blue-3")} turns running`);
-    assert.ok(run.struck("blue-3", "red-1"), "blue-3 closes on the archer and strikes");
+    assert.ok(run.shuttle("blue-3") >= 4, `${aiPress}: the hop is pinned as open (${run.shuttle("blue-3")})`);
+  }
+});
+
+/**
+ * ► **A SEVENTH WRITE-NOTHING VERIFIER REFUTED 6dee6b4 IN STAGED POSITIONS,
+ *   2026-09-29 — its repros, verbatim** (`~/.cache/ss2-scratch/verify-press7/out/<name>.json`
+ *   on the machine that ran it; `lane` 0 is the front rank, `preset` and `f`
+ *   are fields, the last column the battle seed). None of these stalls at
+ *   c2b5751, where the focus fighter strikes 20-53 times; at 6dee6b4:
+ *
+ * - **ArcherShuttle**: the detour fired whenever the walk toward the goal was
+ *   not offered — here because a closed-on archer is offered only the walk
+ *   away, not because a body blocks — and each lane looked open from the
+ *   other: 40 alternating rank steps, 0 strikes.
+ * - **T2491, T179**: the detour landed him where the nearest fought foe was
+ *   another, with no open spot, and the join arm stepped him straight back.
+ * - **Flicker-min**: detour, flank walk twice, join, round and round: 0 strikes.
+ * - **S2E-guard-wall / -min / -mirror**: the rank guard widened in 6dee6b4
+ *   skipped his only way forward (through the middle lane's queue and out the
+ *   far side): he walked into the wall, rested, or paced.
+ * - **S2E** (the S2 test moved one lane back) rests at c2b5751 too: the join
+ *   guard skipped the same way through.
+ */
+const VERIFIER7 = {
+  ArcherShuttle: [{"id":"red-1","team":"red","x":0,"lane":0,"preset":["sturdy"]},{"id":"blue-1","team":"blue","x":-100,"lane":0,"preset":["sturdy"]},{"id":"blue-2","team":"blue","x":-55,"lane":2,"preset":["sturdy","bow"],"f":{"strength":60,"speed":3}}],
+  T2491: [{"id":"red-1","team":"red","x":-1915,"lane":0,"f":{"strength":60,"speed":5,"charisma":12,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-2","team":"red","x":-2082,"lane":0,"f":{"strength":60,"speed":4,"charisma":6}},{"id":"red-3","team":"red","x":-2095,"lane":2,"f":{"strength":9,"speed":5,"charisma":12,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-1","team":"blue","x":-1893,"lane":2,"f":{"strength":9,"speed":6,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-2","team":"blue","x":-2095,"lane":1,"f":{"strength":9,"speed":5,"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61}}],
+  T179: [{"id":"red-1","team":"red","x":1928,"lane":1,"f":{"strength":60,"speed":5,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61,"equipped_weapon":2}},{"id":"red-2","team":"red","x":2100,"lane":2,"f":{"strength":20,"speed":3,"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-3","team":"red","x":2100,"lane":0,"f":{"strength":9,"speed":4,"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-1","team":"blue","x":2052,"lane":1,"f":{"strength":60,"speed":6,"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-2","team":"blue","x":1995,"lane":0,"f":{"strength":9,"speed":3,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30}}],
+  "Flicker-min": [{"id":"red-1","team":"red","x":2050,"lane":1,"preset":["sturdy"]},{"id":"red-2","team":"red","x":1964,"lane":0,"preset":["sturdy"]},{"id":"blue-1","team":"blue","x":1950,"lane":1,"preset":["sturdy"]},{"id":"blue-2","team":"blue","x":1878,"lane":0,"preset":["sturdy"]},{"id":"blue-3","team":"blue","x":1864,"lane":1,"preset":["sturdy"]}],
+  "S2E-guard-wall": [{"id":"red-1","team":"red","x":-2014,"lane":2,"preset":["sturdy","bow"],"f":{"charisma":1}},{"id":"red-2","team":"red","x":-1614,"lane":1,"preset":["sturdy"]},{"id":"red-3","team":"red","x":-2100,"lane":2,"preset":["sturdy"],"f":{"charisma":1}},{"id":"blue-1","team":"blue","x":-1521,"lane":1,"preset":["sturdy"],"f":{"strength":20,"charisma":99}},{"id":"blue-2","team":"blue","x":-2100,"lane":0,"preset":["sturdy","bow"]}],
+  "S2E-guard-min": [{"id":"red-1","team":"red","x":1745,"lane":2,"preset":["sturdy","bow"],"f":{"charisma":1}},{"id":"red-2","team":"red","x":1345,"lane":1,"preset":["sturdy"]},{"id":"red-3","team":"red","x":1831,"lane":2,"preset":["sturdy"],"f":{"charisma":1}},{"id":"blue-1","team":"blue","x":1252,"lane":1,"preset":["sturdy"],"f":{"strength":20,"charisma":99}},{"id":"blue-2","team":"blue","x":1831,"lane":0,"preset":["sturdy","bow"]}],
+  "S2E-guard-mirror": [{"id":"red-1","team":"red","x":-1745,"lane":2,"preset":["sturdy","bow"],"f":{"charisma":1}},{"id":"red-2","team":"red","x":-1345,"lane":1,"preset":["sturdy"]},{"id":"red-3","team":"red","x":-1831,"lane":2,"preset":["sturdy"],"f":{"charisma":1}},{"id":"blue-1","team":"blue","x":-1252,"lane":1,"preset":["sturdy"],"f":{"strength":20,"charisma":99}},{"id":"blue-2","team":"blue","x":-1831,"lane":0,"preset":["sturdy","bow"]}],
+  S2E: [{"id":"red-1","team":"red","x":1745,"lane":2,"preset":["sturdy","bow"],"f":{"charisma":1}},{"id":"red-2","team":"red","x":1345,"lane":1,"preset":["sturdy"]},{"id":"red-3","team":"red","x":1831,"lane":2,"preset":["sturdy"],"f":{"charisma":1}},{"id":"blue-1","team":"blue","x":1252,"lane":1,"preset":["sturdy"],"f":{"strength":20,"charisma":99}}]
+};
+const VERIFIER7_PRESETS = {
+  sturdy: { vitality: 60, herolevel: 60, character_level: 60, defence: 30 },
+  bow: { secondary_weapon: 61, equipped_weapon: 2 }
+};
+const fromVerifier = (spec) => spec.map((entry) => ({
+  id: entry.id, team: entry.team, x: entry.x, y: [FRONT, SECOND, THIRD][entry.lane],
+  fields: Object.assign({}, ...(entry.preset ?? []).map((name) => VERIFIER7_PRESETS[name]), entry.f ?? {})
+}));
+const VERIFIER7_ROWS = [
+  ["ArcherShuttle", "blue-2", 120, 1], ["T2491", "red-2", 200, 2491], ["T179", "red-2", 200, 179],
+  ["Flicker-min", "blue-3", 300, 1], ["S2E-guard-wall", "red-3", 200, 1], ["S2E-guard-min", "red-3", 200, 1],
+  ["S2E-guard-mirror", "red-3", 200, 1]
+  // ~~["S2E", "red-3", 200, 1]~~ — fixed only by be56a22's shuttle guard, which an
+  // eighth verifier refuted; with the guards back at ab56337's form S2E rests
+  // again, as it did at c2b5751. Pinned as OPEN below.
+];
+for (const [name, focus, actions, seed] of VERIFIER7_ROWS) {
+  test(`ranged-first, the seventh verifier's ${name}: ${focus} makes progress — no shuttle, no stuck walk, no idling with a spot open — and strikes`, () => {
+    const run = stagedRun(fromVerifier(VERIFIER7[name]), { actions, seed });
+    // Rests and crowd-pleasers, not the taunt: under ranged-first a priced taunt at
+    // an own-lane foe ranks above going round BY DESIGN (the P2 variant; the
+    // verifier set its champions seed 1058 aside the same way). Flicker-min opens
+    // with five such taunts at c2b5751 too, and then goes round and strikes.
+    const idle = (entry) => entry.open && ["rest", "wincrowd"].includes(entry.type);
+    const stuck = (entry) => /^walk-/.test(entry.type) && entry.x0 === entry.x1;
+    const strikes = run.turnsOf(focus).filter((entry) => /attack$|^snipe$|^bombard$/.test(entry.type)).length;
+    assert.ok(run.shuttle(focus) < 4, `${focus} alternated rank steps ${run.shuttle(focus)} turns running`);
+    assert.ok(run.longestRun(focus, stuck) < 4, `${focus} walked in place ${run.longestRun(focus, stuck)} turns running`);
+    assert.ok(run.longestRun(focus, idle) < 4, `${focus} idled with a spot open ${run.longestRun(focus, idle)} turns running`);
+    assert.ok(strikes >= 5, `${focus} struck ${strikes} times in ${run.turnsOf(focus).length} turns`);
   });
 }
-test("aiPress \"off\" keeps the join arm's two-lane hop: the AI before the press, kept exact as the baseline", () => {
-  const run = stagedRun(archerOwnLane(), { aiPress: "off", actions: 150 });
-  assert.ok(run.shuttle("blue-3") >= 4, `off must be unchanged here (${run.shuttle("blue-3")})`);
+
+/**
+ * ► **AN EIGHTH WRITE-NOTHING VERIFIER REFUTED be56a22, 2026-09-29 — its repros,
+ *   verbatim** (`~/.cache/ss2-scratch/verify-press8/specs/<name>.json` on the machine
+ *   that ran it). Its mechanisms: **M1/M2 (be56a22's `ss2QueueStepShuttles`):** the
+ *   shuttle guard let a step into a queue through whenever the press's QUEUED arm would
+ *   not undo it — and arm 4, the join arm or the flank arm then did (X696, B527, D613,
+ *   Q1579). **M5 (6dee6b4's widened rank guard):** it skipped a step that was the way
+ *   forward, and the toward-walk paced or walked into the wall (E869, G3x). Both guards
+ *   go back to ab56337's forms, which five verifiers had hardened. **M3:** the detour's
+ *   look-ahead refused a lane where the fighter would have his own fight (P4), so he
+ *   rested (D292). **M4 (from 6dee6b4, OPEN):** detour, walk, then arm 4 steps into the
+ *   middle lane behind the same big ally, and round again (C2x).
+ */
+const VERIFIER8 = {
+  "X696": [{"id":"red-1","team":"red","x":-1902,"lane":1,"f":{"strength":40,"speed":5,"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-2","team":"red","x":-2085,"lane":1,"f":{"strength":20,"speed":4,"charisma":40,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-1","team":"blue","x":-1703,"lane":2,"f":{"strength":9,"speed":3,"charisma":40,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-2","team":"blue","x":-1898,"lane":2,"f":{"strength":9,"speed":4,"charisma":40,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-3","team":"blue","x":-1926,"lane":0,"f":{"strength":60,"speed":4,"charisma":3,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61,"equipped_weapon":2}}],
+  "B527": [{"id":"red-1","team":"red","x":-633,"lane":0,"f":{"strength":120,"speed":8,"charisma":40,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61,"equipped_weapon":2}},{"id":"red-2","team":"red","x":325,"lane":1,"f":{"strength":40,"speed":5,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-3","team":"red","x":-99,"lane":2,"f":{"strength":9,"speed":4,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61,"equipped_weapon":2}},{"id":"blue-1","team":"blue","x":-17,"lane":1,"f":{"strength":40,"speed":8,"charisma":12,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-2","team":"blue","x":-393,"lane":0,"f":{"strength":60,"speed":5,"charisma":3,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-3","team":"blue","x":-811,"lane":0,"f":{"strength":40,"speed":5,"charisma":40,"vitality":60,"herolevel":60,"character_level":60,"defence":30}}],
+  "D613": [{"id":"blue-1","team":"blue","x":48,"lane":2,"f":{"strength":20,"speed":6,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61}},{"id":"red-1","team":"red","x":-58,"lane":2,"f":{"strength":9,"speed":8,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61,"equipped_weapon":2}},{"id":"red-2","team":"red","x":-769,"lane":1,"f":{"strength":20,"speed":6,"charisma":12,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-3","team":"red","x":-670,"lane":1,"f":{"strength":9,"speed":3,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61,"equipped_weapon":2}},{"id":"blue-2","team":"blue","x":640,"lane":0,"f":{"strength":40,"speed":6,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-3","team":"blue","x":180,"lane":1,"f":{"strength":9,"speed":4,"charisma":12,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61}}],
+  "Q1579": [{"id":"blue-1","team":"blue","x":1925,"lane":2,"f":{"strength":9,"speed":5,"charisma":12,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61}},{"id":"red-1","team":"red","x":2022,"lane":2,"f":{"strength":9,"speed":8,"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61,"equipped_weapon":2}},{"id":"blue-2","team":"blue","x":2100,"lane":0,"f":{"strength":9,"speed":4,"charisma":6}},{"id":"blue-3","team":"blue","x":1542,"lane":0,"f":{"strength":9,"speed":3,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-3","team":"red","x":1426,"lane":1,"f":{"strength":40,"speed":3,"charisma":3,"vitality":60,"herolevel":60,"character_level":60,"defence":30}}],
+  "D292": [{"id":"red-1","team":"red","x":-84,"lane":0,"f":{"strength":60,"speed":4,"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-1","team":"blue","x":-208,"lane":0,"f":{"strength":9,"speed":4,"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-2","team":"blue","x":-1053,"lane":2,"f":{"strength":60,"speed":5,"charisma":40,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-3","team":"blue","x":-933,"lane":2,"f":{"strength":9,"speed":3,"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61,"equipped_weapon":2}},{"id":"red-2","team":"red","x":592,"lane":2,"f":{"strength":40,"speed":6,"charisma":40,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-3","team":"red","x":38,"lane":0,"f":{"strength":9,"speed":4,"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}}],
+  "E869": [{"id":"red-1","team":"red","x":-1035,"lane":1,"f":{"strength":9,"speed":3,"charisma":40,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-2","team":"red","x":-2100,"lane":2,"f":{"strength":20,"speed":6,"charisma":6,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-1","team":"blue","x":-1599,"lane":0,"f":{"strength":9,"speed":5,"charisma":12,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-2","team":"blue","x":-2100,"lane":0,"f":{"strength":9,"speed":5,"charisma":40,"secondary_weapon":61}},{"id":"blue-3","team":"blue","x":-1984,"lane":2,"f":{"strength":20,"speed":8,"charisma":3,"vitality":60,"herolevel":60,"character_level":60,"defence":30}}],
+  "G3x": [{"id":"red-1","team":"red","x":0,"lane":0,"f":{"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-2","team":"red","x":-300,"lane":1,"f":{"charisma":1,"speed":3,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-2","team":"blue","x":-2050,"lane":1,"f":{"charisma":1,"speed":3,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61,"equipped_weapon":2}},{"id":"blue-3","team":"blue","x":600,"lane":2,"f":{"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30,"secondary_weapon":61,"equipped_weapon":2}}],
+  "C2x": [{"id":"red-1","team":"red","x":214,"lane":0,"f":{"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-2","team":"red","x":280,"lane":1,"f":{"charisma":1,"speed":3,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"red-3","team":"red","x":400,"lane":1,"f":{"charisma":1,"strength":60,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-1","team":"blue","x":300,"lane":0,"f":{"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}},{"id":"blue-2","team":"blue","x":520,"lane":1,"f":{"charisma":1,"vitality":60,"herolevel":60,"character_level":60,"defence":30}}],
+};
+const VERIFIER8_ROWS = [
+  // [name, focus, actions, seed, what c2b5751 does there]
+  ["X696", "blue-1", 200, 696, "no-shuttle"], ["B527", "blue-3", 200, 527, "progress"],
+  ["D613", "red-2", 200, 613, "no-shuttle"], ["Q1579", "blue-2", 200, 1579, "progress"],
+  ["D292", "blue-2", 200, 292, "progress"], ["E869", "blue-2", 200, 869, "no-shuttle"],
+  ["G3x", "red-1", 200, 1, "no-pacing"]
+];
+for (const [name, focus, actions, seed, expect] of VERIFIER8_ROWS) {
+  test(`ranged-first, the eighth verifier's ${name}: ${focus} ${expect === "progress" ? "makes progress and strikes" : expect === "no-pacing" ? "does not pace" : "does not shuttle or walk in place"}`, () => {
+    const run = stagedRun(fromVerifier(VERIFIER8[name]), { actions, seed });
+    const turns = run.turnsOf(focus);
+    const stuck = (entry) => /^walk-/.test(entry.type) && entry.x0 === entry.x1;
+    const idle = (entry) => entry.open && ["rest", "wincrowd"].includes(entry.type);
+    let pacing = 0;
+    let run2 = 0;
+    turns.forEach((entry, index) => {
+      const prev = turns[index - 1];
+      run2 = /^walk-/.test(entry.type) && prev && /^walk-/.test(prev.type) && prev.type !== entry.type ? run2 + 1 : 0;
+      pacing = Math.max(pacing, run2);
+    });
+    const strikes = turns.filter((entry) => /attack$|^snipe$|^bombard$/.test(entry.type)).length;
+    assert.ok(run.shuttle(focus) < 4, `${focus} alternated rank steps ${run.shuttle(focus)} turns running`);
+    assert.ok(run.longestRun(focus, stuck) < 4, `${focus} walked in place ${run.longestRun(focus, stuck)} turns running`);
+    if (expect === "no-pacing") assert.ok(pacing < 6, `${focus} paced ${pacing} turns running`);
+    if (expect === "progress") {
+      assert.ok(run.longestRun(focus, idle) < 4, `${focus} idled with a spot open ${run.longestRun(focus, idle)} turns running`);
+      assert.ok(strikes >= 5, `${focus} struck ${strikes} times in ${turns.length} turns`);
+    }
+  });
+}
+test("OPEN (M4, since 6dee6b4): the eighth verifier's C2x cycles detour, walk, step in behind the same big ally, 0 strikes", () => {
+  const run = stagedRun(fromVerifier(VERIFIER8.C2x), { actions: 200, seed: 1 });
+  const strikes = run.turnsOf("red-2").filter((entry) => /attack$/.test(entry.type)).length;
+  assert.equal(strikes, 0, "pinned as open: a fix has to move this on purpose (c2b5751 strikes 39 times here)");
+});
+
+test("OPEN (as at c2b5751): the seventh verifier's S2E — an edge-lane fighter behind an ally archer, his target in the middle lane — rests with a spot open", () => {
+  const run = stagedRun(fromVerifier(VERIFIER7.S2E), { actions: 150, seed: 1 });
+  const idle = (entry) => entry.open && entry.type === "rest";
+  assert.ok(run.longestRun("red-3", idle) >= 4, `pinned as open (${run.longestRun("red-3", idle)})`);
+});
+
+test("OPEN (since 06beab0): tricks 3v3 seed 338 — a knockback takes the press target out of reach and the rank arm steps red-1 back into the middle-lane queue", async () => {
+  const { createVanillaBattleHost, SS2_STATIC_MAP_BINDINGS } = await import("../src/adapter/index.js");
+  const { ss2BattleValues } = await import("../src/team/ss2-rules.js");
+  const { demoItemsFrom, demoSide } = await import("../tools/arena/roster.js");
+  const seed = 338;
+  const host = createVanillaBattleHost({
+    teams: ["red", "blue"].map((side) => demoSide(side, 3, { ss2Combatant, ss2BattleValues, items: demoItemsFrom("tricks"), seed })),
+    rules: createSs2TeamRules({ aiPress: "ranged-first" }), bindings: SS2_STATIC_MAP_BINDINGS, seed, awaitAnimations: true
+  });
+  host.constructArena();
+  let last = null;
+  let length = 0;
+  let longest = 0;
+  for (let taken = 0; taken < 900 && !host.battle.result; taken += 1) {
+    const actorId = host.currentCombatantId();
+    const chosen = host.suggestAction(actorId);
+    if (actorId === "red-1") {
+      const rank = /^rank-/.test(chosen.type);
+      length = rank ? (last && last !== chosen.type ? length + 1 : 1) : 0;
+      last = rank ? chosen.type : null;
+      longest = Math.max(longest, length);
+    }
+    const step = host.submit({ actorId, ...chosen });
+    for (const token of step.actionTokens) host.reportActionAnimation(token);
+  }
+  assert.ok(longest >= 4, `pinned as open: red-1 alternated rank steps ${longest} turns running`);
 });

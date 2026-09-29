@@ -1,6 +1,6 @@
 {
- "updatedAt": "2026-09-27",
- "head": "bb3a691",
+ "updatedAt": "2026-09-29",
+ "head": "71a9d3b",
  "lede": "Every system in the Swords and Sandals II team-arena project — the engine behind Swords and Sandals II: Souls and Simulacra (working title) — and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -87,12 +87,12 @@
    "column": "needs-design",
    "order": 4,
    "title": "Charge and jump verbs (the build has them; the engine has neither)",
-   "summary": "The build wires chargeleft/right and jumpleft/right on the warrior and archer controller frames (and Chargeattack on reach). The engine offers neither verb.",
+   "summary": "The build wires chargeleft/right and jumpleft/right on the warrior and archer controller frames (and Chargeattack on reach). The engine offers neither verb. Since 457003a both stand on the action ring, greyed \"Not built yet\", as decided.",
    "gaps": "The jump moves _y, which this engine already spends on rank depth, so a jump needs a third named axis. The jump's total displacement is unverified. The charge's mid-charge attack (Chargeattack) is unmodelled.",
    "next": "A design pass (grilling): the leap axis, lane changes, the mid-charge attack; then derive the build's jump distance from the map before wiring.",
    "evidence": "Battle map §Buttons wired per controller frame (docs/integration/ss2-battle-map.md:210-284); ss2-rules.js:2340-2394 (the charge is an advance gate; the jump total is 'ONE agent's reading with no verifier'); SS2_CROWD_ACTION already carries charge +2 and jump -2 (src/team/ss2-crowd.js).",
    "ownerDecision": "Decided 2026-09-24: shown greyed \"Not built yet\" on the ring until built (reversing \"stay hidden\"); the design pass should consider lane changes (a jump or charge that crosses ranks).",
-   "updated": "2026-09-24"
+   "updated": "2026-09-28"
   },
   {
    "id": "archer-kit-bombard-snipe-bash-attack-swap-weapon",
@@ -282,12 +282,12 @@
    "column": "gaps",
    "order": 19,
    "title": "Team AI (authored layer): targeting, ranks, flanking, crowd and taunt valuation",
-   "summary": "Authored team behaviour on top of the ladder: swing at the weakest REACHABLE foe; walk at the own-rank foe; change rank only when its own rank is empty of foes; join an ally's fight (SS2_RANK_JOIN_SURPLUS 0); go round a foe an ally is fighting; draw the bow rather than walk; price taunts in hitpoints; play to the crowd when safe and ahead (SS2_AI_CROWD purseInSwings 100, aheadShare). Presses a numbers advantage (P1/P2/P4, 5cb6977): no crowd-pleaser while an ally fights a foe it could help against; out of a lane blocked by an ally, past the foe in the next lane, in from the far side, only while that far side is open (74c0014 and 92f9701: verifiers caught the press shuttling a fighter between lanes when the far side was taken, and a distant drawn bow counted as holding a side). aiPress ranged-first ships; pincer-first is one word away.",
-   "gaps": "Ranged-first is at least as strong as pincer-first (784-752 head to head over 1,536 bouts at 92f9701); pincer-first corners more visibly on champions, lengthens their 3v3 bouts ~8% and converts clearly less on buffs 2v2. A pair still plays to the crowd in a 2v1 before anyone engages (the 2026-09-23 rule), which may read as waiting. The archer's closed-on test ignores lanes: a foe in another lane takes away an archer's shots and its walk toward (verifier, 2026-09-27). The coefficients were tuned on the demo roster only. The latest handoff names residual render-sweep wall cases (a ghost strike cast facing away at the wall). The b81f3dc fix exposed that the AI could chase to the wall (16 of 25 tricks bouts stalled), so behaviour under new rosters is unmeasured.",
-   "next": "Owner: keep ranged-first or flip to pincer-first (docs/design/battle-ui.md #decided-ai-press-2026-09-27). Decide whether the archer's closed-on test should read the lane.",
-   "evidence": "ss2-rules.js:3142 (ss2FlankingWalk), 3295 (ss2TauntValue), 3529-3839 (SS2_AI_CROWD, ss2SafelyOutOfRange, ss2CrowdPleaserValue, ss2RankToJoin); bf53d81, b81f3dc, 69e4217; test/ss2-ai-crowd.test.js, test/ss2-flanking.test.js, test/ss2-rank-join.test.js, test/ss2-ai-tired-rest.test.js. ss2PressTarget, ss2PressMove; test/ss2-ai-press.test.js. 74c0014 (the far-side guard); tools/ai-press-census.mjs. 92f9701.",
-   "ownerDecision": "",
-   "updated": "2026-09-27"
+   "summary": "Authored team behaviour on top of the ladder: swing at the weakest REACHABLE foe; walk at the own-rank foe; change rank only when its own rank is empty of foes; join an ally's fight (SS2_RANK_JOIN_SURPLUS 0); draw the bow rather than walk; price taunts in hitpoints; play to the crowd when safe and ahead (SS2_AI_CROWD purseInSwings 100, aheadShare). Presses a numbers advantage (P1/P2/P4, 5cb6977): no crowd-pleaser while an ally fights a foe it could help against; goes round to an open spot beside the target (06beab0), detouring through a clear lane when an ally's body blocks its walk (6dee6b4, refined in be56a22 and 25c2e8a); the older arms do not step into a queue while there is a way round (ab56337). aiPress off is exactly the AI before the press (463fe3f). Eight write-nothing verifiers have probed it. aiPress ranged-first ships; pincer-first is one word away.",
+   "gaps": "At 25c2e8a the press is ab56337's plus the detour: on the arena's own bouts (ranged-first, seeds 1-400, 4,800 bouts) no idling with a spot open (5 before), 1 shuttle (tricks 3v3 seed 338), 62 cycles, as at c2b5751. Open and pinned by tests: seed 338's middle-lane shuttle; the seventh verifier's S2E rest; S3, the two-lane hop under an archer's shot; C2x, a detour cycle behind a big ally; and pacing between two fights as the nearest fought foe flips. Three rounds of new guards (6dee6b4, be56a22, and a join-arm gate reverted in 57d8919) each fixed the repros in front of them and opened cycles elsewhere: every arm has its own idea of the target. P2, seventh measurement (25c2e8a): ranged-first converts 3v3 2v1s +3.6 to +34.8 points over off, 774 : 762 head to head; off unchanged. Pincer-first has a bow sheathe/redraw cycle to fix before it could be chosen. Under ranged-first a priced taunt ranks above going round (by design). A pair still plays to the crowd in a 2v1 before anyone engages. The archer's closed-on test ignores lanes.",
+   "next": "Owner: keep ranged-first or flip to pincer-first; and whether to rebuild the press's movement around ONE target and intent (the nearest open spot, which walking toward cannot flip) that every arm consults, rather than patch arms one verifier at a time.",
+   "evidence": "ss2-rules.js:3142 (ss2FlankingWalk), 3295 (ss2TauntValue), 3529-3839 (SS2_AI_CROWD, ss2SafelyOutOfRange, ss2CrowdPleaserValue, ss2RankToJoin); bf53d81, b81f3dc, 69e4217; test/ss2-ai-crowd.test.js, test/ss2-flanking.test.js, test/ss2-rank-join.test.js, test/ss2-ai-tired-rest.test.js. ss2PressTarget, ss2PressMove; test/ss2-ai-press.test.js. 74c0014 (the far-side guard); tools/ai-press-census.mjs. 92f9701. 06beab0, 463fe3f, ab56337, 6dee6b4; 1f9961c (the P2 table at ab56337). be56a22. 57d8919 (the revert), eb5d69d (P2 at 57d8919). 25c2e8a (the consolidation), 71a9d3b (P2 at 25c2e8a).",
+   "ownerDecision": "Proposed 2026-09-29: rebuild the press's movement around one target and intent (the nearest open spot), which the open cycles all trace to.",
+   "updated": "2026-09-29"
   },
   {
    "id": "crowd-economy-and-the-victory-purse",
@@ -622,10 +622,10 @@
    "title": "Actions around the fighter (the game's own button ring)",
    "summary": "Decided by the owner 2026-09-24 in a grilling round: the original's eight-button ring around the acting fighter, adapted for team play — WHO FIRST (a foe is always selected and the ring shows what you can do to him), spatial movement (walk slots; rank arrows above and below), one click acts (optional confirm), hidden where the original hides / greyed with a reason where team rules forbid, the original's weapon-swap button and items row. Built in slices S2-S9.",
    "gaps": "Unreadable to a new player. Direction-absolute walk buttons are the build's semantics but confusing on the blue side. There is no confirmation for irreversible spends.",
-   "next": "The ring3 track: R1 the spell row clear of the bow's words, R2 the reach preview, C1 the camera frames a person's ring at a fixed on-screen size (briefs written).",
+   "next": "ring3: jump and charge greyed (decision 9, 457003a), the items row clear of the bow's words (decision 7, 1b55bad) and the reach preview (decision 1, c31fe35) are on main. The camera framing a person's ring (decision 6) is built but HELD on branch ring3/camera (93eef4b): its verifier found it departs from decision 6's text on four points, which are the owner's calls.",
    "evidence": "Owner's decisions 2026-09-24 (a grilling round): docs/design/battle-ui.md, 'The in-battle actions: DECIDED'.",
-   "ownerDecision": "",
-   "updated": "2026-09-24"
+   "ownerDecision": "Open (2026-09-29). Reach preview: with one living foe it lights nothing (authored) where decision 1 says every foe; keep, or light him? Camera (held): (1) on person turns it reframes the survivors' close-up, where decision 6 says the close-up is untouched; (2) at a turn's end the pan can snap up to ~24 px in one frame rather than crop a fighter worse; (3) an AI action can start while that framing still eases out (up to 1.5 px); (4) past a ~3,200-unit spread the ring is squeezed at the zoom floor as before, rather than crop a far flank. Also recorded by the slices: the items row's lift follows the stance; the snipe's preview is authored.",
+   "updated": "2026-09-29"
   },
   {
    "id": "who-can-play-human-hot-seat-spectate-controller-",
@@ -1357,6 +1357,46 @@
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-29",
+   "text": "An eighth verifier refuted be56a22; the press keeps only its detour, both guards back at ab56337's form (25c2e8a): on the host, idling with a spot open 5 -> 0, everything else as at c2b5751. P2 measured a seventh time (71a9d3b)."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "P2 measured a sixth time: ranged-first +3.6 to +34.8 points over off, 776 : 760 head to head (eb5d69d); a join-arm gate that cost plain 3v3 4.5 points was reverted (57d8919)."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "The ring's camera framing is built and held for four owner calls (branch ring3/camera); the spell row and reach preview are on main."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "The action ring's items row keeps clear of the bow's words (1b55bad) and the reach preview lights every foe a spell or bombard can reach (c31fe35); one owner call open on a lone foe."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "The press's detour and queue guards refined after the seventh verifier (be56a22); an eighth verifier is checking it."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "The press's seventh write-nothing verifier refuted 6dee6b4 in staged positions; on the arena's own bouts (seeds 1-400) it has 0 shuttles and 2 idle windows, against 1 and 7 before it. Being fixed."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "The action ring's spell row, reach preview and camera framing are built and under verification (ring3)."
+  },
+  {
+   "date": "2026-09-28",
+   "text": "The press detours through a clear lane when an ally blocks its walk; the rank arm's queue guard reads the landing lane; the join arm keeps to its own fight (6dee6b4)."
+  },
+  {
+   "date": "2026-09-28",
+   "text": "Jump and charge stand on the action ring, greyed \"Not built yet\" (457003a)."
+  },
+  {
+   "date": "2026-09-28",
+   "text": "The press heads for an open spot beside the target, aiPress off is exact again, the older arms stop re-queueing a fighter it stepped out (06beab0, 463fe3f, ab56337); P2 measured a fifth time: 774 : 762 head to head (1f9961c)."
+  },
   {
    "date": "2026-09-27",
    "text": "The AI presses a 2v1: no dancing while an ally fights, and it goes round to the far side when that side is open (5cb6977, 74c0014, 92f9701)."

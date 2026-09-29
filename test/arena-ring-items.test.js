@@ -582,7 +582,11 @@ function functionBody(name) {
 
 test("the shell draws the row with the ring — from the pack's row layout, off the actor's drawn head, kept on the stage with the rest — and clicks what it drew", () => {
   const paint = functionBody("paintRing");
-  assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\([\s\S]*?\}\),\s*\.\.\.ringItemButtonsAt\(ringView\.model, \{[^}]*centerX: placement\.x,[^}]*centerY: placement\.y,[^}]*unit: placement\.unit,[^}]*layout: ringButtonPack\?\.layout \?\? null,[^}]*rowLayout: ringButtonPack\?\.inventory\?\.layout \?\? null,[^}]*head: ringOrigins\.actor\.head,[^}]*bounds: \{ top: stage\.y, bottom: stage\.y \+ stage\.height \}[^}]*\}\),\s*\.\.\.ringSwapButtonAt\(/,
+  // ~~`const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\([\s\S]*?\}\),\s*\.\.\.ringItemButtonsAt\(`~~ — 2026-09-28,
+  // slice "spellrow" (decision 7, `docs/design/battle-ui.md#decided-hud-2026-09-24`): the eight are drawn first
+  // (`...eight`) and the row after them is drawn with the swap and the moves (`ringButtonArt([...], art)`),
+  // handed the words the eight paint (`test/arena-ring-spellrow.test.js` pins that); every other input as S5 put it.
+  assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.eight,\s*\.\.\.ringButtonArt\(\[\s*\.\.\.ringItemButtonsAt\(ringView\.model, \{[^}]*centerX: placement\.x,[^}]*centerY: placement\.y,[^}]*unit: placement\.unit,[^}]*layout: ringButtonPack\?\.layout \?\? null,[^}]*rowLayout: ringButtonPack\?\.inventory\?\.layout \?\? null,[^}]*head: ringOrigins\.actor\.head,[^}]*bounds: \{ top: stage\.y, bottom: stage\.y \+ stage\.height \}[^}]*\}\),\s*\.\.\.ringSwapButtonAt\(/,
     "the row after the eight, inside the stage fit, off the head the step-back arrow stands off");
   assert.match(paint, /ringButtons = buttons;/, "a click is tested against the row too");
   // A place's label is its letter alone: the build's own name is the strip's.

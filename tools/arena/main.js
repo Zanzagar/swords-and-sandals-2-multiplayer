@@ -196,10 +196,12 @@ import {
   ringMoveButtonsAt,
   ringPaintOrder,
   ringPlacementFor,
+  ringReachNumberAt,
+  ringReachNumberHit,
   ringSlotAt,
   ringSwapButtonAt
 } from "/tools/arena/ring-layout.js";
-import { ringButtonArt } from "/tools/arena/ring-art.js";
+import { ringButtonArt, ringWordBoxesOf } from "/tools/arena/ring-art.js";
 import { namePlateFor, namePlateLayout, teamHudFor } from "/tools/arena/team-hud.js";
 import {
   cameraYscaleFor,
@@ -230,6 +232,7 @@ import {
   ringPaceView
 } from "/tools/arena/ring-pacing.js";
 import {
+  RING_REACH_DIM,
   RING_STRIP_IDLE,
   ringConfirmSettingFrom,
   ringConfirmSettingSave,
@@ -237,6 +240,10 @@ import {
   ringOddsFor,
   ringPreviewFor,
   ringPreviewShown,
+  ringReachAfter,
+  ringReachFade,
+  ringReachFor,
+  ringReachShownFor,
   ringShownText,
   ringStripPreviewAfter
 } from "/tools/arena/ring-preview.js";
@@ -624,6 +631,29 @@ let ringPending = null;
 let ringStripState = RING_STRIP_IDLE;
 /** S7: the stage caption of the hovered button, asked once per ring and button: `{view, slot, text}`. */
 let ringCaption = null;
+/**
+ * ► **THE REACH PREVIEW (the owner's decision 1,
+ *   `docs/design/battle-ui.md#decided-hud-2026-09-24`: "multiple enemies means
+ *   TARGET PICKING").** Pointing at or focusing a spell or shot with a reach
+ *   lights every foe it can reach with a numbered gold ring and dims the rest
+ *   (`ringReachFor`, from the engine's own offer, `ringView.legal`).
+ *   `ringReach` is the VERB previewed (`ringReachAfter`), kept while the
+ *   pointer and the focus are on nothing, or cross another button — so the
+ *   pointer can leave the button, click another lit foe, and find the preview
+ *   still up, re-aimed at him. `ringReachShown` is what the preview line and
+ *   the stage show: what the pointer or the focus is on, else that standing
+ *   preview's own button on the ring on screen (`ringReachShownFor`). Both are
+ *   set in `renderRingPreview`; a click on the bare stage puts `ringReach`
+ *   away; `renderStage` reads `ringReachShown`.
+ */
+let ringReach = null;
+let ringReachShown = null;
+/**
+ * Where the last frame DREW each lit foe's number, `{foeId, x, y, r}` in canvas
+ * pixels (`paintReachNumbers`): a click or the pointer on one is on that foe —
+ * it stands over his head, outside the box `foeAt` tests.
+ */
+let ringReachNumbers = [];
 /**
  * ► **THE AI'S PACE (slice S8; the owner's decision 8): THE ARENA'S CLOCK.**
  *   Every animation, arrow, pop-up and crowd change is drawn — and the gate
@@ -4560,6 +4590,12 @@ function renderStage(view, fit, now) {
   // what THIS frame draws.
   const drawnBoxes = [];
   ringOrigins = { actor: null, foe: null };
+  // ► **THE REACH PREVIEW (decision 1)**: the foes the spell or shot under the
+  //   pointer or the focus — or left standing — can reach, lit, and every
+  //   other living foe dimmed (`ringReachFor`, from the engine's own offer).
+  //   Numbered once they are all drawn (`paintReachNumbers`). Only on a
+  //   person's turn, so an AI or spectated turn draws what it drew before.
+  const reach = ringShown() ? ringReachFor(ringView.model, ringReachShown, { legal: ringView.legal }) : null;
 
   // ► **PAINT ORDER FOLLOWS THE DEPTH BEING DRAWN, NOT THE ONE BEING HELD
   //   (2026-09-12).** `scene.drawOrder` sorts on the actor's `y`, which the
@@ -4742,7 +4778,14 @@ function renderStage(view, fit, now) {
     // THE GOLD RING on the selected foe, on the sand under him: under his
     // shadow and his body, like the ground it is drawn on.
     if (ringShown() && combatantId === ringView.model.selectedId) paintTargetRing(view, origin);
-    drawOps(paintShadow(figure, pose), view, origin);
+    // Decision 1: every other foe the previewed spell or shot can reach gets
+    // the same ring, dashed; his number goes over his head (`paintReachNumbers`).
+    else if (reach?.lit.some((one) => one.foeId === combatantId)) paintTargetRing(view, origin, { dashed: true });
+    // ...and every foe it cannot reach is drawn DIMMED: his shadow, his body and
+    // his face through the painters' own `fade` (`ringReachFade`), his plate too.
+    const dimmed = reach?.dim.includes(combatantId) ?? false;
+    const shownPose = dimmed ? { ...pose, fade: ringReachFade(pose.fade) } : pose;
+    drawOps(paintShadow(figure, shownPose), view, origin);
 
     // ► **THE FALLBACK IS PER FAMILY, not per session.** This engine can express
     //   phases the build has no clip for — a lane change, for one — so a
@@ -4767,7 +4810,8 @@ function renderStage(view, fit, now) {
       //   `origin.size` below. `figure.build` (bulk, stance) is the AUTHORED
       //   fallback's shape only; the fallback stands at the build's height too
       //   (`SS2_FIGURE_HEIGHT` in `painter.js`), so one geometry serves both.
-      fade: pose.fade,
+      // Decision 1: a foe the reach preview dims is faded here, body and face.
+      fade: shownPose.fade,
       // ► **CANVAS PIXELS PER ARENA UNIT — the same `k` `figureOriginMatrix`
       //   puts on the context, and the one factor the figure painter cannot
       //   work out for itself.** A group's blur radius is in the fighter clip's
@@ -4808,7 +4852,7 @@ function renderStage(view, fit, now) {
       : null;
     if (face) heldFace.set(combatantId, { eyes: face.eyes.expression, mouth: face.mouth.expression });
     drawOps(
-      face ? mergeFaceOps(extracted, face.ops) : (extracted.length > 0 ? extracted : paintFigure(figure, pose)),
+      face ? mergeFaceOps(extracted, face.ops) : (extracted.length > 0 ? extracted : paintFigure(figure, shownPose)),
       view,
       origin
     );
@@ -4912,6 +4956,7 @@ function renderStage(view, fit, now) {
     const namePx = Math.max(10, view.scale * 15);
     context.save();
     context.globalAlpha = plate.alpha;
+    if (dimmed) context.globalAlpha *= RING_REACH_DIM;
     context.font = `600 ${namePx}px ui-sans-serif, system-ui, sans-serif`;
     context.textAlign = "center";
     context.textBaseline = "alphabetic";
@@ -4952,6 +4997,9 @@ function renderStage(view, fit, now) {
   //   rocks and the blood — and under the rain, the UI bar and the border
   //   (root depths 80, 438, 1193), drawn after the ring below.
   paintCombatHud(fit);
+  // Decision 1: each lit foe's number over his head — over the fighters and
+  // the HUD, under the ring, whose buttons are never under anything.
+  paintReachNumbers(drawnBoxes, fit);
   // THE RING, over every fighter and under the build's own bar and border
   // (drawn next): the overlay is `gladiators`' child at depth 40000, above the
   // bodies, and the bar and border are root layers above the whole arena. The
@@ -5167,9 +5215,12 @@ function ringShown() {
 
 /**
  * THE GOLD RING ON THE SELECTED FOE — authored (the owner's design canvas):
- * an ellipse on the sand around his feet, sized with him.
+ * an ellipse on the sand around his feet, sized with him. Decision 1: `dashed`
+ * for every OTHER foe a previewed spell or shot can reach — the design's
+ * "dashed gold numbered rings on valid targets" — so the one a click fires at
+ * stays the one solid ring.
  */
-function paintTargetRing(view, origin) {
+function paintTargetRing(view, origin, { dashed = false } = {}) {
   const x = view.toX(origin.x);
   const y = view.toY(origin.y, 0);
   const rx = 70 * (origin.size ?? 1) * view.scale;
@@ -5179,11 +5230,54 @@ function paintTargetRing(view, origin) {
     context.globalAlpha = 0.95;
     context.strokeStyle = "#f2c14e";
     context.lineWidth = Math.max(2, rx * 0.07);
+    if (dashed) context.setLineDash([rx * 0.24, rx * 0.14]);
     context.beginPath();
     context.ellipse(x, y, rx, rx * 0.3, 0, 0, Math.PI * 2);
     context.stroke();
   } finally {
     context.restore();
+  }
+}
+
+/**
+ * ► **EACH LIT FOE'S NUMBER (the owner's decision 1: "a numbered gold ring
+ *   (1–3, left to right)")** — 1 to 3 left to right as each is DRAWN this
+ *   frame (`ringReachFor`'s `xOf`, off the boxes the fighters were just drawn
+ *   in), a gold disc over his head in the ring's gold, the figure in the dark
+ *   of the name plates' outline (`ringReachNumberAt`: where, AUTHORED). On the
+ *   stage the ring keeps to (D4). Nothing when no preview shows. Where each is
+ *   drawn is kept for a click (`ringReachNumbers`): the number is his too.
+ */
+function paintReachNumbers(boxes, fit) {
+  ringReachNumbers = [];
+  if (!ringShown()) return;
+  const drawnX = new Map(boxes.map((box) => [box.id, (box.x0 + box.x1) / 2]));
+  const reach = ringReachFor(ringView.model, ringReachShown, { legal: ringView.legal, xOf: (id) => drawnX.get(id) });
+  if (!reach) return;
+  const stage = ringBoundsFor(fit, { barred: arenaScreenAvailable() });
+  for (const { foeId, number } of reach.lit) {
+    const box = boxes.find((one) => one.id === foeId);
+    if (!box) continue;
+    const disc = ringReachNumberAt(box, { scale: fit.scale, stage });
+    ringReachNumbers.push({ foeId, x: disc.x, y: disc.y, r: disc.r });
+    context.save();
+    try {
+      context.globalAlpha = 0.95;
+      context.fillStyle = "#f2c14e";
+      context.strokeStyle = "#0b0a0d";
+      context.lineWidth = Math.max(1, disc.r * 0.14);
+      context.beginPath();
+      context.arc(disc.x, disc.y, disc.r, 0, Math.PI * 2);
+      context.fill();
+      context.stroke();
+      context.fillStyle = "#0b0a0d";
+      context.font = `700 ${disc.px}px ui-sans-serif, system-ui, sans-serif`;
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(String(number), disc.x, disc.y + disc.px * 0.04);
+    } finally {
+      context.restore();
+    }
   }
 }
 
@@ -5201,7 +5295,9 @@ function paintTargetRing(view, origin) {
  * is the build's own ninth button at its own place (S6, `ringSwapButtonAt`),
  * showing the weapon it swaps to; the items row (S5, `ringItemButtonsAt`) is
  * the build's own over the ring, lifted over the step-back arrow where that
- * would reach it, each place labelled with its letter above it. Then the moves
+ * would reach it and over the words the eight paint (decision 7: BOMBARD,
+ * which the build's own row covers; `ringWordBoxesOf`), each place labelled
+ * with its letter above it. Then the moves
  * no slot holds (S4, `ringMoveButtonsAt`): a walk the stance does not wire,
  * beside its side's walk slot, and the rank arrows, back above the head and
  * forward below the name — no label, as their glyph is their arrow key. The
@@ -5237,51 +5333,64 @@ function paintRing(view, fit) {
   //   over. `ringBoundsFor` decides; the fitted view, with no bar, keeps the
   //   whole stage.
   const stage = ringBoundsFor(fit, { barred: arenaScreenAvailable() });
-  const buttons = ringButtonsInside([
-    ...ringButtonsAt(ringView.model, {
-      centerX: placement.x,
-      centerY: placement.y,
-      unit: placement.unit,
-      layout: ringButtonPack?.layout ?? null
-    }),
-    // The items row (S5): the build's own row over the ring, and — the
-    // owner's layout — above the step-back arrow, which stands off the same
-    // drawn head.
-    ...ringItemButtonsAt(ringView.model, {
-      centerX: placement.x,
-      centerY: placement.y,
-      unit: placement.unit,
-      layout: ringButtonPack?.layout ?? null,
-      rowLayout: ringButtonPack?.inventory?.layout ?? null,
-      head: ringOrigins.actor.head,
-      bounds: { top: stage.y, bottom: stage.y + stage.height }
-    }),
-    ...ringSwapButtonAt(ringView.model, {
-      centerX: placement.x,
-      centerY: placement.y,
-      unit: placement.unit,
-      layout: ringButtonPack?.layout ?? null
-    }),
-    ...ringMoveButtonsAt(ringView.model, {
-      centerX: placement.x,
-      centerY: placement.y,
-      unit: placement.unit,
-      layout: ringButtonPack?.layout ?? null,
-      head: ringOrigins.actor.head,
-      feet: ringOrigins.actor.below,
-      bounds: { top: stage.y, bottom: stage.y + stage.height }
-    })
-  ], stage, { fighterX: placement.x });
-  ringButtons = buttons;
+  // What every button paints: the pack, the stance's facing, the pointer, and
+  // the ACTING fighter's own psyche counter and arrows (`ringButtonArt`).
   const actor = host.combatant(ringView.actorId);
-  const drawn = ringButtonArt(buttons, {
+  const art = {
     pack: ringButtonPack,
     facing: ringView.model.stance?.facing ?? "right",
     hoverSlot: ringHover,
     psyche: resourceValue(actor, "psyche_up", 1),
     ammo: resourceValue(actor, "ammo_left", 0),
     textPack
-  });
+  };
+  // ► **THE EIGHT ARE DRAWN FIRST (decision 7, slice "spellrow",
+  //   2026-09-28)**, so the items row can keep clear of the words they paint
+  //   — BOMBARD over its disc, which the build's own row covered — read off
+  //   that very art (`ringWordBoxesOf`). A button's art is in its own
+  //   pixels, so drawing it before the ring is kept on the stage changes
+  //   nothing it paints, and each is drawn once, as before.
+  const eight = ringButtonArt(ringButtonsAt(ringView.model, {
+    centerX: placement.x,
+    centerY: placement.y,
+    unit: placement.unit,
+    layout: ringButtonPack?.layout ?? null
+  }), art);
+  const buttons = ringButtonsInside([
+    ...eight,
+    ...ringButtonArt([
+      // The items row (S5): the build's own row over the ring, and — the
+      // owner's layout — above the step-back arrow, which stands off the same
+      // drawn head, and above every word the eight paint (decision 7).
+      ...ringItemButtonsAt(ringView.model, {
+        centerX: placement.x,
+        centerY: placement.y,
+        unit: placement.unit,
+        layout: ringButtonPack?.layout ?? null,
+        rowLayout: ringButtonPack?.inventory?.layout ?? null,
+        head: ringOrigins.actor.head,
+        bounds: { top: stage.y, bottom: stage.y + stage.height },
+        words: ringWordBoxesOf(eight)
+      }),
+      ...ringSwapButtonAt(ringView.model, {
+        centerX: placement.x,
+        centerY: placement.y,
+        unit: placement.unit,
+        layout: ringButtonPack?.layout ?? null
+      }),
+      ...ringMoveButtonsAt(ringView.model, {
+        centerX: placement.x,
+        centerY: placement.y,
+        unit: placement.unit,
+        layout: ringButtonPack?.layout ?? null,
+        head: ringOrigins.actor.head,
+        feet: ringOrigins.actor.below,
+        bounds: { top: stage.y, bottom: stage.y + stage.height }
+      })
+    ], art)
+  ], stage, { fighterX: placement.x });
+  ringButtons = buttons;
+  const drawn = buttons;
   // The boxes of the labels drawn so far this frame, which the next keeps off.
   const labelled = [];
   // ~~`for (const button of drawn)`~~ — decision 9 (slice "jumpcharge",
@@ -6115,6 +6224,7 @@ function renderControls() {
   // leaves none on the stage or in the strip.
   ringView = null;
   ringButtons = []; // a click before the next paint must not hit the OLD ring (verifier, 2026-09-24)
+  ringReachNumbers = []; // nor the old ring's numbers (decision 1)
   renderRingStrip();
   const container = el("actions");
   // ► **NO BUTTON BEFORE THE ASSET GATE OPENS.** A person's first action is
@@ -6193,7 +6303,10 @@ function renderControls() {
       ready: turn.ready,
       turnNumber: host.battle.turnNumber,
       turnKey: `${host.battle.turnNumber}:${host.battle.turnCursor}`,
-      previews: new Map()
+      previews: new Map(),
+      // Decision 1: the offer the ring was built from — every foe a spell or
+      // shot can reach is one it holds that verb against (`ringReachFor`).
+      legal: panel.buttons.map(({ action }) => action)
     };
     // S7: a choice stands only while the ring on screen shows it — one the new
     // target's ring does not show is DROPPED, so switching back cannot bring
@@ -6557,17 +6670,30 @@ function renderRingPreview() {
     back.hidden = !ringConfirm;
     back.disabled = !pending;
   }
+  // S9: what is shown may be a GREYED button (on the stage or in the strip),
+  // whose line is why it is greyed.
+  const live = view
+    ? ringPreviewShown({ strip: ringStripState, stageHover: ringHover ? ringShownFor(view.model, ringHover) : null, pending })
+    : null;
+  // Decision 1: the pointer or the focus on a spell or shot that lights a foe
+  // previews it; on NOTHING — the sand, a foe, a Target button — it leaves the
+  // preview standing, so a click on another lit foe keeps it up, re-aimed at
+  // him on his ring (`ringReachAfter`, `ringReachShownFor`); on any other
+  // button it only hides it while it is there. Another spell or shot replaces
+  // it; the turn's end, or a click on the bare stage, drops it. Before the
+  // line's own guard: the stage reads it whatever the strip holds.
+  if (view) ringReach = ringReachAfter(ringReach, { turn: view.turnKey, shown: live.action, model: view.model, legal: view.legal });
+  ringReachShown = view ? live.action ?? ringReachShownFor(view.model, ringReach, { turn: view.turnKey }) : null;
   if (!text) return;
   if (!view) {
     text.textContent = "";
     return;
   }
-  // S9: what is shown may be a GREYED button (on the stage or in the strip),
-  // whose line is why it is greyed.
-  const { action: shown, chosen } = ringPreviewShown({ strip: ringStripState, stageHover: ringHover ? ringShownFor(view.model, ringHover) : null, pending });
+  // What is shown — the standing reach preview included, whose words name its target.
+  const shown = ringReachShown;
   const line = shown ? ringShownTextOf(shown) : null;
   text.textContent = line
-    ? `${chosen ? "Chosen — " : ""}${line}`
+    ? `${live.chosen ? "Chosen — " : ""}${line}`
     : ringConfirm
       ? "Choose an action, then Confirm (Enter)."
       : "Point at or focus an action to see what it will do.";
@@ -6582,11 +6708,18 @@ function ringPreviewOf(action) {
   return view.previews.get(id);
 }
 
-/** S7: what one action on screen will do, in words — the strip's own for its button, then the engine's numbers. */
+/**
+ * S7: what one action on screen will do, in words — the strip's own for its
+ * button, then the engine's numbers. Decision 1: a spell or shot with a reach
+ * names its target ("Fireball → Nym") and says how to change it (`reach`).
+ */
 function ringPreviewTextOf(action) {
   const view = ringView;
   if (!view) return null;
-  return ringPreviewFor(view.model, action, ringPreviewOf(action), { nameOf: (id) => host.combatant(id)?.name ?? id })?.text ?? null;
+  return ringPreviewFor(view.model, action, ringPreviewOf(action), {
+    nameOf: (id) => host.combatant(id)?.name ?? id,
+    reach: ringReachFor(view.model, action, { legal: view.legal })
+  })?.text ?? null;
 }
 
 /**
@@ -6717,8 +6850,10 @@ function canvasPointOf(event) {
  * ONE CLICK ACTS (the owner's Q2): on a drawn button it sends that slot's
  * action — or, with "confirm every move" on, chooses it (S7) — and on a
  * GREYED one it says why and sends nothing (S9): `ringClickCommand`, the road
- * a key takes, run where every command runs. On a foe it selects him. The
- * bar's sound toggle keeps its own click.
+ * a key takes, run where every command runs. On a foe it selects him — and a
+ * reach preview standing stays up, re-aimed at him (decision 1: "click another
+ * lit foe to change"; `renderRingPreview`). The bar's sound toggle keeps its
+ * own click.
  */
 canvas.addEventListener("click", (event) => {
   if (!ringView) return;
@@ -6731,14 +6866,22 @@ canvas.addEventListener("click", (event) => {
     runRingCommand(ringClickCommand(ringView.model, slot, { confirm: ringConfirm }));
     return;
   }
-  const foeId = foeAt(fighterBoxes, point.x, point.y, ringView.model.foeIds);
+  // A lit foe's number (decision 1) is painted over the fighters, so it is
+  // tested before them — and it is his, though it stands outside his box.
+  const foeId = ringReachNumberHit(ringReachNumbers, point.x, point.y) ?? foeAt(fighterBoxes, point.x, point.y, ringView.model.foeIds);
   if (foeId) selectRingFoe(foeId);
+  // Decision 1, AUTHORED: a click on the bare stage — no button, no foe — puts
+  // a standing reach preview away (`ringReachAfter` keeps it everywhere else).
+  else if (ringReach) {
+    ringReach = null;
+    renderRingPreview();
+  }
 });
 
 canvas.addEventListener("pointermove", (event) => {
   const point = ringView ? canvasPointOf(event) : null;
   const slot = point && ringShown() ? ringSlotAt(ringButtons, point.x, point.y) : null;
-  const foeId = point && !slot ? foeAt(fighterBoxes, point.x, point.y, ringView.model.foeIds) : null;
+  const foeId = point && !slot ? ringReachNumberHit(ringReachNumbers, point.x, point.y) ?? foeAt(fighterBoxes, point.x, point.y, ringView.model.foeIds) : null;
   // S9: a greyed button is pointed at (its caption says why) but not pressable.
   canvas.style.cursor = slot ? (ringGreyFor(ringView.model, slot) ? "not-allowed" : "pointer") : foeId ? "pointer" : "";
   // S7: a new button under the pointer — the strip's preview line follows it

@@ -4482,9 +4482,11 @@ function ss2FoughtByAlly(view) {
 /**
  * ► **P4, FINISH YOUR OWN FIGHT: does the actor's own lane hold a living foe
  *   that no ally is fighting?** Then that foe is the actor's fight already.
- *   Shared by `ss2PressTarget` and — with the press on — the join arm in
+ *   ~~Shared by `ss2PressTarget` and — with the press on — the join arm in
  *   `chooseAiAction` (2026-09-28, a sixth verifier's S3), so the two cannot
- *   disagree about whose fight a foe is.
+ *   disagree about whose fight a foe is.~~ `ss2PressTarget`'s alone since
+ *   2026-09-29: the join-arm gate was measured to cost plain 3v3's 2v1
+ *   conversion and was reverted (see the join arm).
  */
 function ss2OwnFightUnfought(view) {
   const fought = ss2FoughtByAlly(view);
@@ -4671,16 +4673,36 @@ export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankS
   //   whose walk toward the goal is not blocked where the step lands, the lane
   //   with no foe in it first — **never the target's own lane**, which is the
   //   look-ahead's call and elsewhere lands him in the queue.
+  //
+  // ► **NARROWED 2026-09-29 after a seventh write-nothing verifier REFUTED
+  //   6dee6b4 in staged positions — two conditions the first cut lacked.**
+  //   (a) **Only when a BODY withholds the walk** (`ss2WalkBlocked` in his own
+  //   lane): a closed-on archer is offered only the walk away, the detour took
+  //   that for a blocked walk, and each lane looked open from the other — 40
+  //   alternating rank steps, 0 strikes. (b) **Only to a lane from which the
+  //   press still has a target with an open spot**: from the landing the
+  //   nearest fought foe could be another, with NO spot, and the join arm
+  //   stepped him straight back (the verifier's T2491 and T179). ~~The SAME
+  //   target~~ was my first reading and it was wrong: the sixth verifier's S1
+  //   detours, finds a new target WITH a spot, goes round him and strikes.
   const walkOrDetour = () => {
     const walk = find(toGoal);
     if (walk) return walk;
+    if (!ss2WalkBlocked(actor, bodies, goalX > actor.x ? 1 : -1)) return null;
     const steps = [Ss2ActionType.RANK_FRONT, Ss2ActionType.RANK_BACK].map(find).filter(Boolean);
     const open = steps.filter((step) => {
       const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
       if (y === target.y) return false;
       const x = ss2RankArrivalX(actor.x, bodies, y);
       if (x === null) return false;
-      return !ss2WalkBlocked({ ...actor, x, y }, bodies, goalX > x ? 1 : -1);
+      if (ss2WalkBlocked({ ...actor, x, y }, bodies, goalX > x ? 1 : -1)) return false;
+      const after = { ...view, actor: { ...actor, x, y } };
+      const next = ss2PressTarget(after);
+      // ► **OR HIS OWN FIGHT (2026-09-29, an eighth verifier's D292, its M3):**
+      //   refusing a lane where P4 gives him a foe of his own left him resting,
+      //   c2b5751's idle again. There the press stands down and he closes on it.
+      if (next === null) return ss2OwnFightUnfought(after);
+      return ss2PressGoal(after, next) !== null;
     });
     const clear = open.find((step) => {
       const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
@@ -16194,8 +16216,16 @@ export function createSs2TeamRules({
         //   press on, a join that lands behind an ally is skipped while
         //   `ss2PressGoal` has an open spot; with none (both flanks held, the
         //   wall) queueing and waiting is still the answer, as before.
-        // ► **AND, WITH THE PRESS ON, NOT WHILE P4 SAYS THE ACTOR HAS A FIGHT
-        //   OF HIS OWN (2026-09-28, a sixth verifier's staged S3).** The same
+        // ► ~~**AND, WITH THE PRESS ON, NOT WHILE P4 SAYS THE ACTOR HAS A FIGHT
+        //   OF HIS OWN (2026-09-28, a sixth verifier's staged S3).**~~ **REVERTED
+        //   2026-09-29, MEASURED: the gate below cost the shipped ranged-first
+        //   plain 3v3 4.5 points of 2v1 conversion (75.9% without it, 71.4% with)
+        //   and more than doubled the dancing (2.1% of the free member's 2v1
+        //   turns, 5.5% with it; tools/ai-press-census.mjs, 96 seeds): gladiators
+        //   held by it waited for their own foe and played to the crowd instead of
+        //   joining a fight. S3's two-lane hop is OPEN again, under every aiPress
+        //   as it always was (test/ss2-ai-press.test.js pins it).** What it was:
+        //   The same
         //   foe's-reach reading made an archer shooting an ally look like that
         //   ally's fight, so the lane looked covered and the actor left it to
         //   join the next lane's, where the press had no open spot; from there
@@ -16209,13 +16239,18 @@ export function createSs2TeamRules({
         //   gladiator to leave his own fight for a 2-on-1, and there the dial
         //   wins (test/ss2-rank-join.test.js, whose four dial tests my first
         //   cut of this guard broke).
-        if (positionedInDepth
-          && !(aiPress !== "off" && rankJoinSurplus >= 0 && ss2OwnFightUnfought(view))) {
+        if (positionedInDepth) {
           const join = ss2RankToJoin(view, rankJoinSurplus, rankStride);
           const step = join ? options.find((option) => option.type === join) : null;
           if (step) {
             const destY = actor.y + SS2_RANK_DIRECTION[join] * rankStride;
             const there = nearestFoe({ ...view, foes: view.foes.filter((foe) => foe.y === destY) });
+            // ~~Only a step the press would undo next turn (be56a22,
+            // `ss2QueueStepShuttles`)~~ — REVERTED 2026-09-29: an eighth verifier
+            // found that guard letting through steps that arm 4, this arm or the
+            // flank arm then undid (its M1/M2), because it simulated only the
+            // press's queued arm. Back to ab56337's reading, which five verifiers
+            // had hardened.
             const queues = aiPress !== "off" && there && ss2StepQueues(view, destY, there)
               && ss2PressGoal(view, there) !== null;
             if (!queues) return step;
@@ -16242,18 +16277,18 @@ export function createSs2TeamRules({
           // the target at the wall, skipping left the fighter pacing under
           // the target or walking into the wall with 0 attacks, where
           // queueing and waiting was the old and better answer).
-          // ► **READ IN THE LANE THE STEP LANDS IN, not only the nearest foe's
-          //   (2026-09-28, a sixth verifier: tricks 3v3 seed 338).** Toward a
-          //   foe TWO lanes away the step lands in the middle one; with an ally
-          //   fighting there, that is the queue the press had just stepped the
-          //   fighter out of, and this arm put him back whenever a knockback
-          //   took the press target out of reach — a shuttle. So the guard asks
-          //   about the nearest foe in the landing lane, as the join arm's does
-          //   (the same foe as before when the step lands in the nearest's lane).
+          // ► ~~**READ IN THE LANE THE STEP LANDS IN, not only the nearest foe's
+          //   (2026-09-28, a sixth verifier: tricks 3v3 seed 338).**~~ **REVERTED
+          //   2026-09-29 to ab56337's reading (the nearest foe's own lane only):**
+          //   the widened guard (6dee6b4, then be56a22's shuttle test) skipped
+          //   steps that were the way forward, and the toward-walk below paced
+          //   under a foe two lanes away or walked into the wall (the seventh
+          //   verifier's S2E-guard layouts, the eighth's M5: E869, G3x, tricks 3v3
+          //   seeds 28 and 524 on the host). Seed 338's middle-lane shuttle, the
+          //   case the widening was for, is OPEN again (as at ab56337).
           const destY = step ? actor.y + SS2_RANK_DIRECTION[towardRank] * rankStride : null;
-          const there = step ? nearestFoe({ ...view, foes: view.foes.filter((foe) => foe.y === destY) }) : null;
-          const queued = aiPress !== "off" && there && ss2StepQueues(view, destY, there)
-            && ss2PressGoal(view, there) !== null;
+          const queued = aiPress !== "off" && step && destY === nearest.y && ss2StepQueues(view, destY, nearest)
+            && ss2PressGoal(view, nearest) !== null;
           if (step && !queued) return step;
         }
 

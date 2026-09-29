@@ -794,6 +794,18 @@ and the ring is squeezed onto the stage after it.
    a spell or bombard lights EVERY foe it can reach with a numbered gold ring (1–3, left to right)
    and dims the rest; the hover text names the target ("Fireball → Nym · click another lit foe to
    change"); one click still fires at the SELECTED foe (the who-first decision stands).
+   **Built 2026-09-29 (ring3 slice "reach", `c31fe35`):** `ringReachFor` / `ringReachAfter` /
+   `ringReachShownFor` / `ringReachFade` in `tools/arena/ring-preview.js`, `ringReachNumberAt` /
+   `ringReachNumberHit` in `tools/arena/ring-layout.js`, wired in `main.js`; lit exactly as the
+   engine's offer holds the verb, dashed gold rings (the selected foe's stays solid), clickable numbers
+   over the heads, a click on another lit foe re-aims, one click fires; `test/arena-ring-reach.test.js`.
+   **FINDING:** every foe spell and every bombard is offered at EVERY living foe (3,092 turns, 0
+   subsets), so "dims the rest" dims only for the snipe, which the slice lights too (authored).
+   **OPEN, THE OWNER'S CALL:** with exactly ONE living foe — every 1v1 turn, the last foe standing —
+   nothing is lit: an authored `if (foeIds.length < 2) return null` in `ringReachFor`, where this
+   decision says every foe it can reach. A write-nothing verifier (2026-09-29) measured 906 such
+   entries and found everything else exact. Matching this text is `=== 0` there and three moved pins
+   in the test; keeping the exception means amending this decision.
 2. **Team HUD (Q1a, Q2, Q3c):** the right-hand roster becomes TWO TEAM PANELS, red then blue; each
    fighter's row shows **health, energy and armour** bars with numbers *(**superseded for the
    three readings, 2026-09-24 evening**: they are drawn IN THE GAME FRAME with the build's own
@@ -865,6 +877,14 @@ and the ring is squeezed onto the stage after it.
    and the close-up included — keeps the fighters above the in-frame HUD, and the close-up keeps
    every rank off the painted wall; a 1v1 stays the build's own camera. See D3 below.)*
 7. **The spell row never covers the bow buttons' words** ("Bombard", "Snipe", the arrow count).
+   **Built 2026-09-29 (ring3 slice "spellrow", `1b55bad`):** the row rises the least that keeps the
+   ring's own gap above every word the eight paint (`ringWordBoxesOf` in `tools/arena/ring-art.js`,
+   `ringItemButtonsAt`'s `words`); in the build's own layout it stood 1.8 overlay px into BOMBARD,
+   the only word it ever reached. A write-nothing verifier HELD it at every stance, facing and zoom
+   in both views (no demo 1v1 has an archer, so its 1v1 clause proved nothing).
+   `test/arena-ring-spellrow.test.js`. Owner calls recorded, not taken: the lift follows the stance
+   (only while a BOMBARD is drawn under a filled place); a place's S7 hover caption still passes over
+   BOMBARD while pointed at; the build's own row covers the word, so this departs from it.
 8. **The grilling gate (Q6a, Q8a, Q9b)** — how the harness enforces this front end rather than
    invoking it on judgment: every commit carries a trailer, `Decided: <doc#section>` (a recorded
    grilling decision, like this section) or a class trailer (`Fix:`, `Docs:`, `Chore:`, `Test:`),
@@ -876,6 +896,7 @@ and the ring is squeezed onto the stage after it.
 
 9. **Jump and charge are SHOWN GREYED, "Not built yet"** (the owner, 2026-09-24, reversing the ring's
    decision 7 "stay hidden"): the engine's `not-built` reason (grey) already says so, and S9 draws it.
+   **Built 2026-09-28 (ring3 slice "jumpcharge", `457003a`):** on the ring, greyed, nothing else moving.
    **Their own design pass should consider lane changes** — e.g. a jump or charge that crosses ranks — as
    well as the build's sideways leap and the mid-charge attack (`Chargeattack`, unmodelled).
 
@@ -992,25 +1013,31 @@ decision: `ss2BodyBlocks`, `57b2209`.)*
   | roster | 2v1 converted (pair wins whole): off / ranged / pincer | both pair members on the lone foe | pair turns spent dancing | mean bout length |
   |---|---|---|---|---|
   | plain 2v2 | 8.3% / 9.4% / 9.4% | 0.0 / 1.3 / 1.3% | 18.3 / 4.2 / 4.2% | 50.9 / 50.4 / 50.4 |
-  | plain 3v3 | 53.3 / 75.3 / 76.1% | 6.4 / 28.4 / 30.0% | 37.3 / 2.3 / 1.3% | 85.5 / 79.0 / 78.9 |
+  | plain 3v3 | 53.3 / 75.9 / 76.7% | 6.4 / 28.2 / 29.8% | 37.3 / 2.1 / 1.0% | 85.5 / 78.9 / 78.8 |
   | buffs 2v2 | 54.2 / 57.3 / 34.4% | 7.9 / 23.2 / 12.7% | 1.7 / 0.5 / 0.7% | 49.1 / 49.9 / 68.3 |
-  | buffs 3v3 | 50.0 / 84.8 / 76.6% | 9.7 / 32.0 / 29.9% | 28.4 / 1.4 / 2.5% | 95.0 / 67.4 / 84.2 |
-  | tricks 3v3 | 47.2 / 52.1 / 56.1% | 0.4 / 2.9 / 3.0% | 23.5 / 9.0 / 9.2% | 205.9 / 198.4 / 203.0 |
+  | buffs 3v3 | 50.0 / 84.8 / 76.6% | 9.7 / 32.0 / 29.9% | 28.4 / 1.4 / 2.5% | 95.0 / 67.4 / 84.4 |
+  | tricks 3v3 | 47.2 / 52.1 / 56.1% | 0.4 / 2.9 / 3.0% | 23.5 / 9.0 / 9.2% | 205.9 / 198.5 / 203.0 |
   | crowd 3v3 | 53.3 / 75.9 / 75.9% | 4.3 / 29.2 / 31.3% | 41.3 / 2.7 / 1.4% | 203.4 / 192.7 / 192.9 |
   | champions 2v2 | 97.9 / 97.9 / 96.9% | 19.0 / 21.2 / 17.9% | 2.8 / 1.0 / 0.7% | 36.2 / 36.2 / 39.6 |
-  | champions 3v3 | 78.8 / 82.4 / 79.4% | 3.4 / 3.8 / 21.5% | 6.0 / 2.0 / 3.2% | 61.6 / 62.2 / 69.0 |
+  | champions 3v3 | 78.8 / 82.4 / 78.8% | 3.4 / 3.8 / 17.1% | 6.0 / 2.0 / 3.4% | 61.6 / 62.2 / 68.8 |
 
-  *Measured at `ab56337`, the fifth measurement; five write-nothing verifiers moved the code under
-  it (`74c0014`, `92f9701`, `06beab0`, `463fe3f`, `ab56337`: a lane shuttle when the far side was
-  taken, a distant bow holding a side, early lane entry opening long-range taunts, the older arms
-  re-queueing a fighter the press had stepped out, and the `off` baseline drifting). Head to head
-  over the five measurements: 770 : 766, 773 : 763, 784 : 752, 774 : 762, 774 : 762. "Dancing" counts
+  *Measured at `25c2e8a`, the seventh measurement (the sixth at `57d8919`, the fifth at `ab56337`);
+  eight write-nothing verifiers moved the code under it (`74c0014`, `92f9701`, `06beab0`, `463fe3f`, `ab56337`: a lane
+  shuttle when the far side was taken, a distant bow holding a side, early lane entry opening
+  long-range taunts, the older arms re-queueing a fighter the press had stepped out, and the `off`
+  baseline drifting; then `6dee6b4` and `be56a22`: a fighter resting with a spot open because an ally
+  blocked his walk, and my first detour's own regressions), `57d8919` reverted a join-arm gate of
+  mine that this table caught costing plain 3v3 4.5 points and doubling its dancing, and `25c2e8a`
+  put both older-arm guards back at `ab56337`'s form after an eighth verifier refuted the guards I
+  had added, keeping only the detour. `off` is identical to the fifth measurement in every cell, and
+  so is every other cell but plain 3v3, which the detour moves up. Head to head over the seven
+  measurements: 770 : 766, 773 : 763, 784 : 752, 774 : 762, 774 : 762, 776 : 760, 774 : 762. "Dancing" counts
   every crowd-pleaser in a 2v1 phase; P1 stops it only while an ally fights, so what is left is before
   anyone engages, or a foe of the dancer's own still coming (P4).*
 
   - **P1 + going round, against `off` (ranged-first, the shipped variant):** in 3v3 the pair
-    converts a 2v1 far more often (plain +22.0 points, buffs +34.8, crowd +22.6, tricks +4.9,
-    champions +3.6), both members are on the lone foe 3-7x as often on the demo rosters, the dance
+    converts a 2v1 far more often (plain +22.6 points, buffs +34.8, crowd +22.6, tricks +4.9,
+    champions +3.6; at `ab56337` plain was +22.0), both members are on the lone foe 3-7x as often on the demo rosters, the dance
     while an ally fights a foe this gladiator could help against is gone (P1, pinned by
     `test/ss2-ai-press.test.js`), and demo-roster bouts get shorter (buffs 3v3 95 -> 67 turns).
     Champion bouts are within 1%. 2v2 moves less: the 2v1 there is usually over before a detour

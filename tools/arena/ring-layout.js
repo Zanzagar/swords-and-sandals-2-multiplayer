@@ -1,8 +1,10 @@
 /**
  * WHERE THE RING IS DRAWN, AND WHAT A CLICK ON THE CANVAS HITS — slices S2,
  * S3, S4 (the moves no slot holds, `ringMoveButtonsAt`), S5 (the items row,
- * `ringItemButtonsAt`) and S6 (the swap, `ringSwapButtonAt`) of
- * `docs/design/battle-ui.md`. Pure canvas geometry for
+ * `ringItemButtonsAt` — since decision 7, 2026-09-28, clear of the words the
+ * eight paint) and S6 (the swap, `ringSwapButtonAt`) of
+ * `docs/design/battle-ui.md` — and, for the reach preview (decision 1,
+ * 2026-09-28), where a lit foe's number stands (`ringReachNumberAt`). Pure canvas geometry for
  * `tools/arena/main.js`, which only paints what this places and asks this what
  * a point landed on.
  *
@@ -207,6 +209,22 @@ export function ringSwapButtonAt(model, { centerX, centerY, unit, layout = null 
  *   size the build's place always clears it (measured over 60 bouts in both
  *   of the page's views); a colossus's head, and the arrow over it, do not.
  *
+ * ► **AND ABOVE EVERY WORD THE EIGHT CARRY (the owner's decision 7,
+ *   `docs/design/battle-ui.md#decided-hud-2026-09-24`: "the spell row never
+ *   covers the bow buttons' words") — AUTHORED; the build's own row does.**
+ *   The long bow frame draws BOMBARD over its disc in optionA or optionD, and
+ *   the build's row stands 1.8 overlay px into it — painted after the eight,
+ *   it covered the word's top third (the owner's report, 2026-09-24). So each
+ *   place stands the same gap as over the arrow above every word under it —
+ *   a word's box coming within that gap of the place's column (`words`, in
+ *   canvas px: `ringWordBoxesOf`) — and the whole row rises just that far,
+ *   the larger of the two lifts. Only BOMBARD ever reaches the row in the
+ *   build's art: POWER, the one other word in optionA/optionD, stands 3.75
+ *   overlay px under it, and the arrow count is at its disc's centre; so a
+ *   ring with no bombard keeps the build's place. The words are the row's to
+ *   clear, not the other way round: they are the build's own art, drawn where
+ *   the build draws them on its button (S3).
+ *
  * @param {object} model  from `ringModelFor`; its `items`
  * @param {object} at
  * @param {number} at.centerX, at.centerY  the ring's centre, canvas pixels
@@ -215,10 +233,13 @@ export function ringSwapButtonAt(model, { centerX, centerY, unit, layout = null 
  * @param {object|null} [at.rowLayout]  the pack's `buttons.inventory.layout`
  * @param {number} [at.head]   canvas y of the top of the acting fighter's head; none, no lift
  * @param {{top: number, bottom: number}|null} [at.bounds]  what the step-back arrow is kept inside
+ * @param {{x0: number, x1: number, y0: number, y1: number}[]} [at.words]  the boxes of the words
+ *   drawn on the ring's other buttons, canvas px, where they stand with the row
+ *   (`ringWordBoxesOf` of the eight, drawn); none, no lift for them
  * @returns {object[]} `{key, slot, verb: "item", itemId, x, y, r, scale, side: "top"}`,
  *   in the row's key order
  */
-export function ringItemButtonsAt(model, { centerX, centerY, unit, layout = null, rowLayout = null, head, bounds = null }) {
+export function ringItemButtonsAt(model, { centerX, centerY, unit, layout = null, rowLayout = null, head, bounds = null, words = [] }) {
   const row = SS2_STRIP.items.rowAt;
   const out = [];
   for (const item of model?.items ?? []) {
@@ -253,8 +274,28 @@ export function ringItemButtonsAt(model, { centerX, centerY, unit, layout = null
   // that takes; the build's place stands where it already clears.
   const arrow = rankArrowPlace(model, "above-head", { centerX, unit, layout, head, bounds });
   const limit = arrow.y - arrow.r - arrow.gap;
-  const lift = Number.isFinite(limit) ? Math.max(0, Math.max(...out.map((button) => button.y + button.r)) - limit) : 0;
+  const overArrow = Number.isFinite(limit) ? Math.max(0, Math.max(...out.map((button) => button.y + button.r)) - limit) : 0;
+  // Decision 7: and above every word under a place, by the same gap.
+  const lift = Math.max(overArrow, liftOverWords(out, words, arrow.gap));
   return Object.freeze(lift === 0 ? out : out.map((button) => Object.freeze({ ...button, y: button.y - lift })));
+}
+
+/**
+ * How far the row must rise so that each place stands `gap` above every word
+ * under it: a word whose box comes within `gap` of the place's column, and is
+ * not already wholly above the place by that gap. 0 when none is.
+ */
+function liftOverWords(places, words, gap) {
+  let lift = 0;
+  for (const word of Array.isArray(words) ? words : []) {
+    if (![word?.x0, word?.x1, word?.y0, word?.y1].every(Number.isFinite)) continue;
+    for (const place of places) {
+      if (word.x1 <= place.x - place.r - gap || word.x0 >= place.x + place.r + gap) continue;
+      if (word.y1 <= place.y - place.r - gap) continue;
+      lift = Math.max(lift, place.y + place.r + gap - word.y0);
+    }
+  }
+  return lift;
 }
 
 /**
@@ -705,6 +746,53 @@ export function ringCaptionLines(text, { maxWidth, measure }) {
   }
   if (line !== "") lines.push(line);
   return lines;
+}
+
+/**
+ * ► **WHERE A LIT FOE'S NUMBER STANDS (the owner's decision 1: "a numbered
+ *   gold ring (1–3, left to right)") — AUTHORED.** The ring itself is on the
+ *   sand under his feet, where his name plate already stands, so the number
+ *   is a disc over his HEAD: centred on his drawn box, `gap` above its top,
+ *   at the stage fit's size (9 stage px, its figure 12), and kept on the
+ *   visible stage. Nobody's feet and no key label stand there, and the ring
+ *   is painted after it, so a button is never under a number.
+ *
+ * @param {{x0: number, x1: number, y0: number}} box  the foe's drawn box (`fighterBoxFor`), canvas px
+ * @param {{scale: number, stage: {x: number, y: number, width: number, height: number}}} at
+ *   `scale`, canvas px per stage px (the stage fit's); `stage`, the visible stage (`ringBoundsFor`)
+ * @returns {{x: number, y: number, r: number, px: number}} the disc's centre and radius and the figure's size, canvas px
+ */
+export function ringReachNumberAt(box, { scale, stage }) {
+  const r = RING_REACH_NUMBER.radius * scale;
+  const gap = RING_REACH_NUMBER.gap * scale;
+  const x = Math.min(Math.max((box.x0 + box.x1) / 2, stage.x + r), stage.x + stage.width - r);
+  const y = Math.min(Math.max(box.y0 - gap - r, stage.y + r), stage.y + stage.height - r);
+  return Object.freeze({ x, y, r, px: RING_REACH_NUMBER.px * scale });
+}
+
+/** The number's disc, its gap over the head and its figure, stage px (AUTHORED). */
+const RING_REACH_NUMBER = Object.freeze({ radius: 9, gap: 4, px: 12 });
+
+/**
+ * THE LIT FOE WHOSE NUMBER A POINT IS ON (decision 1): the number is his to
+ * click as his body is — it stands over his head, outside the box `foeAt`
+ * tests, and a click there was the bare stage (found on this slice's
+ * self-review). Rim included; of two discs that overlap, the nearer.
+ *
+ * @param {{foeId: string, x: number, y: number, r: number}[]} numbers  where the frame drew them
+ * @returns {string|null}
+ */
+export function ringReachNumberHit(numbers, x, y) {
+  let best = null;
+  let bestDistance = Infinity;
+  for (const number of numbers ?? []) {
+    const distance = Math.hypot(x - number.x, y - number.y);
+    if (distance <= number.r && distance < bestDistance) {
+      best = number.foeId;
+      bestDistance = distance;
+    }
+  }
+  return best;
 }
 
 /** The slot of the drawn button a point is on (rim included), or null. */

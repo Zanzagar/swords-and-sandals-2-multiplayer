@@ -460,7 +460,10 @@ function functionBody(name) {
 
 test("the shell draws the swap with the ring, kept on the stage with it, clicks what it drew, and centres 116's disc on the button", () => {
   const paint = functionBody("paintRing");
-  assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\([\s\S]*?\}\),\s*\.\.\.ringSwapButtonAt\(ringView\.model, \{[^}]*centerX: placement\.x,[^}]*centerY: placement\.y,[^}]*unit: placement\.unit,[^}]*layout: ringButtonPack\?\.layout \?\? null[^}]*\}\),\s*\.\.\.ringMoveButtonsAt\(/,
+  // ~~`const buttons = ringButtonsInside\(\[\s*\.\.\.ringButtonsAt\([\s\S]*?\}\),\s*\.\.\.ringSwapButtonAt\(`~~ — 2026-09-28,
+  // slice "spellrow" (decision 7, `docs/design/battle-ui.md#decided-hud-2026-09-24`): the eight are drawn first
+  // (`...eight`), and the row, the swap and the moves drawn together after them; the order is the same.
+  assert.match(paint, /const buttons = ringButtonsInside\(\[\s*\.\.\.eight,\s*\.\.\.ringButtonArt\(\[[\s\S]*?\}\),\s*\.\.\.ringSwapButtonAt\(ringView\.model, \{[^}]*centerX: placement\.x,[^}]*centerY: placement\.y,[^}]*unit: placement\.unit,[^}]*layout: ringButtonPack\?\.layout \?\? null[^}]*\}\),\s*\.\.\.ringMoveButtonsAt\(/,
     "the swap after the eight (the build's depth 101 is over them) and inside the stage fit");
   assert.match(paint, /ringButtons = buttons;/, "a click is tested against the swap too");
   // ring2 "edge" (Codex review, pass 1): the size is named first, and the label is handed the stage
