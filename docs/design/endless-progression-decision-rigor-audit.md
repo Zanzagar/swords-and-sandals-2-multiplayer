@@ -7820,9 +7820,73 @@ oscillation, post-preview counterpicking, and boundary snapshot shopping. Fire
 A only if paired support fails as a whole while directed graphs remain fun.
 Definition-local failure reopens C rather than erasing every pair. Adding or
 removing edges for any branch or fallback must preserve or explicitly reopen
-D2/D2A/D2A1; upstream cause/topology fallbacks likewise revalidate D3. After
-D3-A/B, the two children prune and D4 opens at `Phi_SR = 21`; after C, D3A
-opens at 23, then D3A1 at 22, then D4 at 21.
+D2/D2A/D2A1; upstream cause/topology fallbacks likewise revalidate D3. The
+forty-second correction below adds D4's two proper-branch incidence children;
+after it, D3-A/B prunes the D3 children and opens D4 at `Phi_SR = 23`, while
+D3-C opens D3A at 25, D3A1 at 24, and D4 at 23.
+
+**D3 disposition and D4 atomicity audit.** Zanzagar selected D3-B with D3-A
+as the explicit whole-system fallback. `D_rev=D_mut`: every transforming
+definition has at least one policy-material direct-reverse pair. D3A/D3A1
+prune. The fallback is armed and unfired; system-wide paired-support failure
+may fire A, while definition-local failure reopens C instead. No all-edge
+symmetry, current availability, or executable roundtrip was inferred.
+
+Two independent read-only D4 attacks then separated three questions that the
+old one-line row could otherwise blur:
+
+1. D4 itself asks whether a completed definition has at least one direct
+   proposal edge from a material nonclear assignment to its distinguished
+   unassigned value. It does not ask whether every source can clear.
+2. Under a proper subset, the state/boundary incidence of clear support and of
+   the nonempty clear-free complement each changes the legal catalog within a
+   chosen dialect. D4A/D4A1 must therefore expose the same seven terminal
+   incidence patterns as D3A/D3A1.
+3. An edge out of the unassigned value is not silently granted by D4. D5 owns
+   every `bottom_d -> A_d` proposal edge and every compatible clear-mediated
+   nonclear-return route; RCS-13 separately owns operation initiation and
+   locks. D4 cannot invent a free menu action or a seventh cause family. The
+   earlier D1 prevalence witnesses remain nonclear, but an already-admitted
+   P/Z/X/M locus may target D4's separately typed unassigned value without
+   becoming a new semantic cause or a second D1 witness.
+
+Formally, for `bottom_d` outside nonclear `A_d`, let
+`C_d={(a,bottom_d):a in A_d and a selected actual P/Z/X/M cause may lawfully
+originate that direct proposal while a is authoritative}` and
+`D_clear={d in D_mut:C_d is nonempty}`. A makes `D_clear` empty, B makes it
+universal, and C makes it nonempty proper. The partition is exhaustive. A
+qualifying edge changes only the same active Relic's assignment coordinate;
+instance, owner, active root, definition, and version continue. Proposal
+capability grants no availability, choice, approval, collision victory,
+commit, operation admission, persistence realization, or re-entry.
+
+The strongest state countermodel is staged Vowscar
+`Mercy <-> Tempered -> Defiance`. If a later `Mercy -> bottom -> Defiance`
+route is cheap, optimized play can bypass the selected staged journey while
+D2's formally nonclear graph still appears compliant. The boundary
+countermodel is Dreamglass `Oath <-> Resonant -> Echo`: clearing after preview
+and re-entering at the best listener creates snapshot shopping or a hidden
+third dialect. Clear/reseed can also cleanse liabilities, reset per-assignment
+triggers or locks, farm transition rewards, and launder eventual return. Those
+are later D5/RCS-13/RCS-17/RCS-18 rejection tests, not permissions supplied by
+D4.
+
+Recommend D4-A, no explicit clear support. Selected D3-B already gives every
+definition one material bidirectional nonclear seam, so a universal blank
+adds reset power rather than necessary structural flexibility. Named forms
+preserve the most legible same-artifact/across-difference relationship; a
+form-free interval is at most a partial continuity motif, not a stronger
+universal Achintya Bheda Abheda fit. D4-C is the only credible fallback, and
+only as a qualified reopening if human play proves a disclosed Release-bound
+archetype supplies a material, non-dominated policy that no named nonclear
+assignment can express.
+Universal D4-B is not the fallback.
+
+This forty-second correction adds D4A/D4A1 and raises the register to 147
+rows. After selected D3-B it contains 22 `SCREEN`, 1 `OWNER-OPEN` at D4, 43
+`PRUNED`, 74 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`. D4-A/B prunes both children and opens D5 at 20. D4-C opens D4A
+at 22, D4A1 at 21, and D5 at 20. Closing D5 still opens RCS-03E at 19.
 
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one

@@ -1,6 +1,69 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-29 both-dialect topology mix selected; direct-reverse prevalence is next
+## 2026-09-29 universal reverse seams selected; explicit clearing is next
+
+Zanzagar selected `RCS-03D3-B` with `RCS-03D3-A` as the explicit
+whole-system fallback. Every transforming state and boundary definition has at
+least one prospectively legible, policy-material pair of nonclear assignments
+with a lawful direct proposal edge in each direction. Other edges may remain
+one-way, staged gaps survive, and the pair grants no currently available
+choice or executable roundtrip. A is armed and unfired; it replaces B only if
+paired support fails as a system at the anti-oscillation, causal-integrity,
+comprehension, counterpick, or boundary-snapshot gates while directed graphs
+remain fun. Definition-local failure reopens D3 toward C instead. D3A/D3A1
+prune. The authoritative decision record remains byte-unchanged.
+
+A three-question read-only D4 audit found and bounded one missed consequence
+without widening the active card. D4 is definition-level existential support,
+not all-assignment saturation. Under its proper branch, both clear support and
+the nonempty clear-free complement have independently player-material
+state/boundary incidences. The forty-second prerequisite correction therefore
+adds D4A and D4A1. D4 owns only a direct nonclear-to-unassigned proposal;
+D5 already owns every unassigned-to-nonclear edge and every compatible clear-
+mediated return route, so no duplicate re-entry row is added. A clear uses an
+already-admitted P/Z/X/M semantic locus and does not invent a seventh cause.
+
+The 147-row register now contains 22 `SCREEN`, 1 `OWNER-OPEN` at D4, 43
+`PRUNED`, 74 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`. D4 asks how explicit clear support is distributed across
+completed transforming definitions. Let `bottom_d` be the typed unassigned
+value outside nonclear `A_d`, let `C_d` contain lawful direct
+`a -> bottom_d` proposal edges, and let
+`D_clear={d in D_mut:C_d is nonempty}`:
+
+- **A — none. Recommended.** `D_clear` is empty. Every persistent
+  transformation stays between named nonclear forms; D4A/D4A1 prune. D3-B
+  already supplies one bidirectional seam per definition, so A retains
+  structural flexibility without adding a generic blank/reset lane. A quiet
+  form must be an honest, material named assignment rather than a null-state
+  disguise.
+- **B — universal.** `D_clear=D_mut`. Every definition has at least one
+  material source assignment that may propose clearing, but not every
+  assignment must clear. This supplies one consistent withdrawal grammar and
+  the largest cleansing, downside-shutoff, reset, stage-bypass, counterpick,
+  and boundary-snapshot surface.
+- **C — proper coexistence. Qualified fallback only.** `D_clear` is nonempty
+  proper. Disclosed Release-bound Relics coexist with assignment-continuous
+  Relics. This is the credible higher-ceiling exception, but creates a
+  flexibility caste and opens D4A then D4A1 before D5.
+
+Concrete state boundary: Vowscar may use
+`Mercy <-> Tempered -> Defiance`. If a later cheap
+`Mercy -> bottom -> Defiance` route exists, it launders the selected staged
+journey even though D2's nonclear graph still looks compliant. Concrete
+boundary-dialect boundary: Dreamglass may use
+`Oath <-> Resonant -> Echo`; clear/re-entry after preview can become best-
+listening-point shopping. D4 itself creates neither route out of `bottom` nor
+the player authority to use a clear edge.
+
+Recommend **A**. If later human play proves a disclosed release/silence
+archetype creates a material, non-dominated policy that no honest named form
+can express, reopen toward C and resolve both incidence children. B is not the
+fallback because one valuable exception does not justify universal blanking.
+Require **“A with D4-C qualified fallback”** to arm that ladder; bare A arms
+none. Ask only for D4 A, B, or C.
+
+## 2026-09-29 both-dialect topology mix selected; direct-reverse prevalence is next — superseded frontier
 
 Zanzagar selected `RCS-03D2A1-C` with `RCS-03D2A1-B` as the explicit
 qualified fallback. Together with selected D2A-C, both transformation dialects
@@ -12113,7 +12176,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-29 03:55 UTC — definition-level direct-reverse prevalence is next](docs/handoffs/2026-09-29-0355--relic-direct-reverse-prevalence-next.md)**
+[2026-09-29 04:37 UTC — explicit clear-to-unassigned prevalence is next](docs/handoffs/2026-09-29-0437--relic-explicit-clear-prevalence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
