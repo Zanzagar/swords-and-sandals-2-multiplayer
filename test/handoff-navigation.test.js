@@ -157,9 +157,10 @@ function supersededName(frontmatterText) {
  * When each handoff FIRST entered git, as an epoch-seconds number.
  *
  * THE FILENAME STAMP IS A CLAIM; THIS IS THE FACT. The frozen engine and
- * progression histories used different timezone conventions, and a delayed
- * progression checkpoint causes 34 ordering inversions. Those boundaries are
- * enumerated exactly below. This derivation keeps future UTC, same-session
+ * progression histories used different timezone conventions, a delayed
+ * progression checkpoint causes 34 ordering inversions, and the preserved-
+ * history recovery merge exposes five cross-lane inversions. Those boundaries
+ * are enumerated exactly below. This derivation keeps future UTC, same-session
  * handoffs honest without rewriting history.
  *
  * `--follow` is load-bearing: `2026-09-01-1550--codex-independence…` was
@@ -245,6 +246,14 @@ const DELAYED_PROGRESSION_CHECKPOINT_INVERSIONS = Object.freeze([
   "2026-09-23-2119--the-arena-draws-what-the-engine-does.md"
 ]);
 
+const GATE_RECOVERY_MERGE_INVERSIONS = Object.freeze([
+  "2026-09-26-0239--relic-semantic-child-addressability-selected.md",
+  "2026-09-26-0318--relic-authored-compound-topology-selected.md",
+  "2026-09-28-1418--big-fighters-walk-and-the-ai-presses-a-2v1.md",
+  "2026-09-28-1750--the-press-heads-for-a-spot-and-ring3-is-paused.md",
+  "2026-09-28-1939--the-press-holds-under-ranged-first-and-ring3-is-running.md"
+]);
+
 const KNOWN_STAMP_INVERSIONS = Object.freeze({
   "2026-09-01-0030--migration-closeout-and-what-is-untested.md":
     "two sessions closed the same night; this one committed at 2026-08-31 23:39 -0400 " +
@@ -262,7 +271,12 @@ const KNOWN_STAMP_INVERSIONS = Object.freeze({
     "both conventions are frozen at the integration boundary",
   "2026-09-24-1534--relic-fully-coupled-evidence-excluded.md":
     "UTC progression filename follows the 14:50 local engine filename but entered git earlier; " +
-    "both conventions are frozen at the integration boundary"
+    "both conventions are frozen at the integration boundary",
+  ...Object.fromEntries(GATE_RECOVERY_MERGE_INVERSIONS.map((name) => [
+    name,
+    "the non-destructive gate-recovery merge b48520b combined two independently chronological " +
+      "published lanes; the cross-lane first-add order is frozen and their links must survive"
+  ]))
 });
 
 test("the head's LATEST pointer names a handoff nothing else supersedes", async () => {

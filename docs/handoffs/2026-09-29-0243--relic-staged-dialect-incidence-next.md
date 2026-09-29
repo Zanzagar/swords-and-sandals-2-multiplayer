@@ -68,10 +68,10 @@ After any D2A answer, present D2A1 rather than D3.
   goldens, saves, snapshots, or assets.
 - Before ending, reparse the register, preserve the decision-record hash, run
   proportional serial tests, commit atomically with the Codex co-author and
-  reason trailers, push only the feature branch, verify clean synchronization,
-  push and continue only `design/endless-progression-gate-recovery`, verify its
-  synchronization, and do not merge PR #3; that PR tracks only the preserved
-  rejected branch.
+  reason trailers, push and continue only
+  `design/endless-progression-gate-recovery`, and verify clean synchronization.
+  Draft PR #4 tracks this replacement and only a human may merge it. Do not
+  merge PR #3; that PR tracks only the preserved rejected branch.
 
 ## Traps from this session
 
@@ -94,4 +94,5 @@ deleted, force-pushed, or merged. The complete rejected content was recovered
 from `eac3347` in one valid squash, then integrated with current main on
 `design/endless-progression-gate-recovery`. Continue only from that branch
 after re-running the default-branch checker; PR #3 is preserved evidence and
-must not merge.
+must not merge. Draft PR #4 is the replacement; its trailer checks passed and
+GitHub reported it `CLEAN`/`MERGEABLE` when opened.

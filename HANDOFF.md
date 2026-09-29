@@ -37,7 +37,9 @@ real gate. Published history and PR #3 were not rewritten, deleted, or merged;
 PR #3 remains the preserved rejected line and **must not merge**. The content is
 recovered from `eac3347` as one gate-compliant squash and then integrated with
 current main on `design/endless-progression-gate-recovery`. Continue only on
-that recovery branch; no pull request currently tracks it.
+that recovery branch. Draft PR #4 tracks the replacement; its trailer checks
+passed and GitHub reported it `CLEAN`/`MERGEABLE` at creation. Only a human may
+merge it.
 
 `RCS-03D2A` asks where nonempty required-stage support occurs:
 
@@ -15996,7 +15998,8 @@ PR #3 preserves `design/endless-progression-owner-packet`, but its 38
 post-baseline commits fail the trailer gate and **must not merge**. Current work
 lives on `design/endless-progression-gate-recovery`, which retains the
 grandfathered progression ancestry, recovers the rejected line in one valid
-squash, and integrates the current engine lane here. It carries the
+squash, and integrates the current engine lane here. Draft PR #4 tracks that
+replacement. It carries the
 owner-guided Arena Circuit, loot, inventory, opponent, settlement, Charm, and
 Soul Relic design. The authoritative decision record and live closure index
 distinguish accepted rules from still-open design; integration does not
@@ -19241,8 +19244,8 @@ for the owner, not a cleanup an agent should perform.**
   **Superseded 2026-09-29:** the default-branch checker rejects all 38 commits
   after that line's latest grandfathered ancestor, `eac3347`; PR #3 is
   `DIRTY`/`CONFLICTING` and must not merge. The preserved replacement work is
-  on `design/endless-progression-gate-recovery`, which no pull request yet
-  tracks; only a human may merge a future replacement PR.
+  on `design/endless-progression-gate-recovery`; draft PR #4 tracks it and its
+  trailer checks passed. Only a human may merge the replacement PR.
 
 
 ### Still open, with the evidence below the archive line
