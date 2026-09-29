@@ -794,6 +794,18 @@ and the ring is squeezed onto the stage after it.
    a spell or bombard lights EVERY foe it can reach with a numbered gold ring (1–3, left to right)
    and dims the rest; the hover text names the target ("Fireball → Nym · click another lit foe to
    change"); one click still fires at the SELECTED foe (the who-first decision stands).
+   **Built 2026-09-29 (ring3 slice "reach", `c31fe35`):** `ringReachFor` / `ringReachAfter` /
+   `ringReachShownFor` / `ringReachFade` in `tools/arena/ring-preview.js`, `ringReachNumberAt` /
+   `ringReachNumberHit` in `tools/arena/ring-layout.js`, wired in `main.js`; lit exactly as the
+   engine's offer holds the verb, dashed gold rings (the selected foe's stays solid), clickable numbers
+   over the heads, a click on another lit foe re-aims, one click fires; `test/arena-ring-reach.test.js`.
+   **FINDING:** every foe spell and every bombard is offered at EVERY living foe (3,092 turns, 0
+   subsets), so "dims the rest" dims only for the snipe, which the slice lights too (authored).
+   **OPEN, THE OWNER'S CALL:** with exactly ONE living foe — every 1v1 turn, the last foe standing —
+   nothing is lit: an authored `if (foeIds.length < 2) return null` in `ringReachFor`, where this
+   decision says every foe it can reach. A write-nothing verifier (2026-09-29) measured 906 such
+   entries and found everything else exact. Matching this text is `=== 0` there and three moved pins
+   in the test; keeping the exception means amending this decision.
 2. **Team HUD (Q1a, Q2, Q3c):** the right-hand roster becomes TWO TEAM PANELS, red then blue; each
    fighter's row shows **health, energy and armour** bars with numbers *(**superseded for the
    three readings, 2026-09-24 evening**: they are drawn IN THE GAME FRAME with the build's own
@@ -865,6 +877,14 @@ and the ring is squeezed onto the stage after it.
    and the close-up included — keeps the fighters above the in-frame HUD, and the close-up keeps
    every rank off the painted wall; a 1v1 stays the build's own camera. See D3 below.)*
 7. **The spell row never covers the bow buttons' words** ("Bombard", "Snipe", the arrow count).
+   **Built 2026-09-29 (ring3 slice "spellrow", `1b55bad`):** the row rises the least that keeps the
+   ring's own gap above every word the eight paint (`ringWordBoxesOf` in `tools/arena/ring-art.js`,
+   `ringItemButtonsAt`'s `words`); in the build's own layout it stood 1.8 overlay px into BOMBARD,
+   the only word it ever reached. A write-nothing verifier HELD it at every stance, facing and zoom
+   in both views (no demo 1v1 has an archer, so its 1v1 clause proved nothing).
+   `test/arena-ring-spellrow.test.js`. Owner calls recorded, not taken: the lift follows the stance
+   (only while a BOMBARD is drawn under a filled place); a place's S7 hover caption still passes over
+   BOMBARD while pointed at; the build's own row covers the word, so this departs from it.
 8. **The grilling gate (Q6a, Q8a, Q9b)** — how the harness enforces this front end rather than
    invoking it on judgment: every commit carries a trailer, `Decided: <doc#section>` (a recorded
    grilling decision, like this section) or a class trailer (`Fix:`, `Docs:`, `Chore:`, `Test:`),
@@ -876,6 +896,7 @@ and the ring is squeezed onto the stage after it.
 
 9. **Jump and charge are SHOWN GREYED, "Not built yet"** (the owner, 2026-09-24, reversing the ring's
    decision 7 "stay hidden"): the engine's `not-built` reason (grey) already says so, and S9 draws it.
+   **Built 2026-09-28 (ring3 slice "jumpcharge", `457003a`):** on the ring, greyed, nothing else moving.
    **Their own design pass should consider lane changes** — e.g. a jump or charge that crosses ranks — as
    well as the build's sideways leap and the mid-charge attack (`Chargeattack`, unmodelled).
 
