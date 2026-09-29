@@ -4550,51 +4550,6 @@ function ss2StepQueues(view, destY, foe) {
 }
 
 /**
- * Which lane the press's queued arm (arm 1 of `ss2PressMove`) would step the
- * actor OUT to, were he standing queued at (`x`, `y`) in `target`'s lane: that
- * lane's y, or `null`. Arm 1 with every rank that exists taken as offered —
- * the front before the back, a lane whose walk toward the goal is clear where
- * the step lands, a lane with no foe in it first (2026-09-29).
- */
-function ss2PressStepOutY(view, target, x, y, rankStride) {
-  const actor = { ...view.actor, x, y };
-  const aim = ss2PressGoal({ ...view, actor }, target);
-  if (aim === null) return null;
-  const allies = (view.allies ?? []).filter((ally) =>
-    ally.id !== actor.id && ally.alive !== false && Number.isFinite(ally.x));
-  const foes = view.foes ?? [];
-  const bodies = [...foes, ...allies];
-  const open = [1, -1].map((direction) => ss2RankDestination(y, direction, rankStride))
-    .filter((to) => to !== null)
-    .filter((to) => {
-      const landX = ss2RankArrivalX(x, bodies, to);
-      return landX !== null && !ss2WalkBlocked({ ...actor, x: landX, y: to }, bodies, aim.x > landX ? 1 : -1);
-    });
-  const clear = open.find((to) => !foes.some((foe) => foe.alive !== false && foe.y === to));
-  return clear ?? open[0] ?? null;
-}
-
-/**
- * ► **A RANK STEP THAT WOULD SHUTTLE: it lands in a queue (`ss2StepQueues`)
- *   from which the press would step the actor straight back to the lane he is
- *   leaving** (2026-09-29). The older arms' guards skip only this. Before, they
- *   skipped any step into a queue while `ss2PressGoal` had a spot, and a
- *   seventh write-nothing verifier found that the ONLY way forward is often
- *   through the queue lane and out of its far side — at the wall behind an
- *   ally archer the fighter walked into the wall, rested or paced instead (its
- *   S2E and S2E-guard layouts; c2b5751 stepped through and struck 38 times).
- *   A step through the queue to the other lane is progress; a step the press
- *   would undo next turn is the shuttle the guards exist for.
- */
-function ss2QueueStepShuttles(view, destY, foe, rankStride) {
-  if (!ss2StepQueues(view, destY, foe)) return false;
-  const actor = view.actor;
-  const others = [...(view.foes ?? []), ...(view.allies ?? []).filter((ally) => ally.id !== actor.id)];
-  const landX = ss2RankArrivalX(actor.x, others, destY);
-  return landX !== null && ss2PressStepOutY(view, foe, landX, destY, rankStride) === actor.y;
-}
-
-/**
  * ► **GOING ROUND — the move that presses `target`, or `null` (P2).** The same
  *   under both `aiPress` variants; they differ only in what it outranks (the
  *   ranged choices and the taunt; see `pincerFirst` in `chooseAiAction`).
@@ -4743,7 +4698,11 @@ export function ss2PressMove(view, options, target, rankStride = SS2_ARENA.rankS
       if (ss2WalkBlocked({ ...actor, x, y }, bodies, goalX > x ? 1 : -1)) return false;
       const after = { ...view, actor: { ...actor, x, y } };
       const next = ss2PressTarget(after);
-      return next !== null && ss2PressGoal(after, next) !== null;
+      // ► **OR HIS OWN FIGHT (2026-09-29, an eighth verifier's D292, its M3):**
+      //   refusing a lane where P4 gives him a foe of his own left him resting,
+      //   c2b5751's idle again. There the press stands down and he closes on it.
+      if (next === null) return ss2OwnFightUnfought(after);
+      return ss2PressGoal(after, next) !== null;
     });
     const clear = open.find((step) => {
       const y = actor.y + SS2_RANK_DIRECTION[step.type] * rankStride;
@@ -16286,9 +16245,14 @@ export function createSs2TeamRules({
           if (step) {
             const destY = actor.y + SS2_RANK_DIRECTION[join] * rankStride;
             const there = nearestFoe({ ...view, foes: view.foes.filter((foe) => foe.y === destY) });
-            // ~~`ss2StepQueues(...) && ss2PressGoal(view, there) !== null`~~ — only a
-            // step the press would undo next turn (2026-09-29, `ss2QueueStepShuttles`).
-            const queues = aiPress !== "off" && there && ss2QueueStepShuttles(view, destY, there, rankStride);
+            // ~~Only a step the press would undo next turn (be56a22,
+            // `ss2QueueStepShuttles`)~~ — REVERTED 2026-09-29: an eighth verifier
+            // found that guard letting through steps that arm 4, this arm or the
+            // flank arm then undid (its M1/M2), because it simulated only the
+            // press's queued arm. Back to ab56337's reading, which five verifiers
+            // had hardened.
+            const queues = aiPress !== "off" && there && ss2StepQueues(view, destY, there)
+              && ss2PressGoal(view, there) !== null;
             if (!queues) return step;
           }
         }
@@ -16313,19 +16277,18 @@ export function createSs2TeamRules({
           // the target at the wall, skipping left the fighter pacing under
           // the target or walking into the wall with 0 attacks, where
           // queueing and waiting was the old and better answer).
-          // ► **READ IN THE LANE THE STEP LANDS IN, not only the nearest foe's
-          //   (2026-09-28, a sixth verifier: tricks 3v3 seed 338).** Toward a
-          //   foe TWO lanes away the step lands in the middle one; with an ally
-          //   fighting there, that is the queue the press had just stepped the
-          //   fighter out of, and this arm put him back whenever a knockback
-          //   took the press target out of reach — a shuttle. So the guard asks
-          //   about the nearest foe in the landing lane, as the join arm's does
-          //   (the same foe as before when the step lands in the nearest's lane).
+          // ► ~~**READ IN THE LANE THE STEP LANDS IN, not only the nearest foe's
+          //   (2026-09-28, a sixth verifier: tricks 3v3 seed 338).**~~ **REVERTED
+          //   2026-09-29 to ab56337's reading (the nearest foe's own lane only):**
+          //   the widened guard (6dee6b4, then be56a22's shuttle test) skipped
+          //   steps that were the way forward, and the toward-walk below paced
+          //   under a foe two lanes away or walked into the wall (the seventh
+          //   verifier's S2E-guard layouts, the eighth's M5: E869, G3x, tricks 3v3
+          //   seeds 28 and 524 on the host). Seed 338's middle-lane shuttle, the
+          //   case the widening was for, is OPEN again (as at ab56337).
           const destY = step ? actor.y + SS2_RANK_DIRECTION[towardRank] * rankStride : null;
-          const there = step ? nearestFoe({ ...view, foes: view.foes.filter((foe) => foe.y === destY) }) : null;
-          // ~~`ss2StepQueues(...) && ss2PressGoal(view, there) !== null`~~ — only a
-          // step the press would undo next turn (2026-09-29, `ss2QueueStepShuttles`).
-          const queued = aiPress !== "off" && there && ss2QueueStepShuttles(view, destY, there, rankStride);
+          const queued = aiPress !== "off" && step && destY === nearest.y && ss2StepQueues(view, destY, nearest)
+            && ss2PressGoal(view, nearest) !== null;
           if (step && !queued) return step;
         }
 
