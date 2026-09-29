@@ -410,12 +410,13 @@ has at least one dedicated-operation proposal path unless the complete M
 system fails its gates. Zanzagar then selected D2-C with D2-A as the explicit
 whole-system fallback: staged and shortcut-complete definitions coexist unless
 required staging fails its comprehension, material-intermediate,
-non-dominance, anti-bypass, or anti-lottery gates. **RCS-03D2A is now the sole
-owner-facing choice under SR-04:** whether proper required-stage support occurs
+non-dominance, anti-bypass, or anti-lottery gates. Zanzagar then selected
+D2A-C with D2A-A as the explicit child scope fallback: required-stage support
+occurs in both transformation dialects unless boundary-attunement staging fails
+while state-condition staging survives. **RCS-03D2A1 is now the sole owner-
+facing choice under SR-04:** whether the shortcut-complete complement occurs
 only in state Relics, only in boundary Relics, or in both transformation
-dialects. A fortieth prerequisite correction restores the shortcut-complete
-complement's dialect incidence as dependent D2A1. The current register has 143
-rows and `Phi_SR = 24`.
+dialects. The current register has 143 rows and `Phi_SR = 23`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -26482,7 +26483,7 @@ record remains unchanged.
 > record text changes. The correction prevents the next answer from silently
 > deciding whether direct-response alternatives exist inside a staged dialect.
 
-### RCS-03D2A — transformation-dialect incidence of proper required-stage support — active owner choice
+### RCS-03D2A — transformation-dialect incidence of proper required-stage support — C selected with A scope fallback
 
 RCS-03A-C partitions the nonempty transforming-definition domain `D_mut` into
 nonempty disjoint state-supporting `D_S` and boundary-supporting `D_B`. State
@@ -26527,9 +26528,10 @@ boundary-attunement staging becomes opaque, cyclical, timing-dominated, or not
 worth teaching while state-condition staging survives, D2A-A is the narrower
 scope fallback. If state-side staging also becomes grind, filler, or a premium
 caste, the already selected parent D2-A removes every required gap and prunes
-D2A. D2A-A is not selected unless the owner names it. If state staging fails
-while boundary staging alone remains promising, neither fallback silently
-chooses B; D2A must be explicitly reopened or the parent system fallback used.
+D2A. A bare C would not have selected D2A-A; the direction answer below names
+it explicitly. If state staging fails while boundary staging alone remains
+promising, neither fallback silently chooses B; D2A must be explicitly
+reopened or the parent system fallback used.
 Firing either fallback rebuilds the active graphs and revalidates or reopens
 D2A1, because moving definitions out of `D_stage` can change the shortcut-
 complete complement's dialect incidence.
@@ -26554,6 +26556,105 @@ every D2A answer, D2A moves to `DIR-SELECTED` and D2A1 becomes the sole
 `Phi_SR = 23`. Closing D2A1 then opens D3 at `Phi_SR = 22`. This card
 authorizes no implementation, and the authoritative decision record remains
 unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-28:** **C, required-
+stage support occurs in both transformation dialects, with D2A-A as the
+explicit child scope fallback.** Thus `D_stage^S` and `D_stage^B` are both
+nonempty: at least one state definition and one distinct boundary definition
+have a genuine transitive gap. Inherited D2-C properness still requires at
+least one shortcut-complete transforming definition, so the selected branch
+has a three-definition floor. It does not place that complement witness;
+D2A1 owns its dialect incidence.
+
+C is active. D2A-A is an armed replacement, not a simultaneous rule: if
+boundary-attunement staging fails its legibility, material-intermediate,
+non-dominance, snapshot, retuning-loop, or comprehension gates while state-
+condition staging survives, A replaces C, makes `D_stage^B` empty, and retains
+nonempty `D_stage^S`. The fallback has not fired, and D2A-B is unselected. If
+state staging fails while boundary staging survives, neither D2A-A nor parent
+D2-A silently selects D2A-B; explicitly reopen D2A or use the whole-system
+fallback. If staging as a whole fails, already-selected D2-A makes
+`D_stage` empty and prunes D2A/D2A1.
+
+Firing D2A-A changes the admissible complement-incidence branches and must
+revalidate or reopen D2A1 from rebuilt `E_d/R_d/G_d`; no old D2A1 option label
+survives by name alone. D2A moves to `DIR-SELECTED`, and D2A1 becomes the sole
+`OWNER-OPEN` row. The 143-row register now contains **22 `SCREEN`, 1
+`OWNER-OPEN` at D2A1, 41 `PRUNED`, 72 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`,
+and 1 `EVALUATE`; `Phi_SR = 23`**. D3 remains screened. Exact definitions,
+positive counts beyond the incidence minima, assignments, edges, cause maps,
+availability, reverse travel, clearing, return, agency, approval, collision,
+costs, locks, power, presentation, acquisition, persistence, and
+implementation remain unselected. The authoritative decision record remains
+unchanged.
+
+### RCS-03D2A1 — transformation-dialect incidence of the shortcut-complete complement — active owner choice
+
+Selected D2-C defines the nonempty complement
+`D_short=D_mut \setminus D_stage`. Under selected D2A-C, both staged
+incidences are nonempty. Define the remaining complement incidences:
+
+- `D_short^S = D_short \cap D_S`; and
+- `D_short^B = D_short \cap D_B`.
+
+Membership means at least one completed definition in that dialect is
+shortcut-complete over its already-reachable nonclear endpoints. It does not
+mean every endpoint is reachable, every proposal is currently available, any
+reverse edge exists, or the player owns that definition. Acquisition remains
+RCS-09. Because `D_short` is nonempty and `D_S`/`D_B` disjointly partition
+`D_mut`, exactly one of the following three incidence patterns must hold.
+
+| Choice | Dialect incidence and forced catalog shape | Recommendation, ideal fit, and gameplay tradeoff | Concrete minimal catalog |
+| --- | --- | --- | --- |
+| **A — shortcut-complete support occurs only in the state dialect** | `D_short^S` is nonempty and `D_short^B` is empty. State definitions contain both staged and shortcut-complete topology classes; **every boundary definition is staged**, meaning each has at least one genuine gap. The minimum catalog remains two state definitions plus one boundary definition: three total. | A preserves a direct-response alternative for what a Relic bears but makes every form of how it listens carry some pilgrimage obligation. Its incidence-level fit to the standing ideal is aggregate; the meaningful partial fit remains inside each artifact's transition history. A may support a deliberately uncanny boundary identity, but it removes the clarity comparator from the more timing- and snapshot-sensitive dialect and risks making boundary Relics a premium or trap caste. | State Vowscar is staged; state Emberseal is shortcut-complete; boundary Dreamglass is staged. No boundary definition may be shortcut-complete, although any one boundary definition may still have many direct transitions. |
+| **B — shortcut-complete support occurs only in the boundary dialect** | `D_short^S` is empty and `D_short^B` is nonempty. **Every state definition is staged**; boundary definitions contain both topology classes. The minimum catalog is one state definition plus two boundary definitions: three total. | **Qualified narrower fallback.** B preserves a direct clarity baseline in the more opaque boundary dialect and confines universal pilgrimage topology to the easier-to-preview remembered-condition language. Its risk is turning every state Relic into a disguised upgrade ladder or compulsory cheapest-route problem. B is safe as a fallback only if all-state staged play remains legible, non-token, and fun; it is not a generic repair for any failure of C. | State Vowscar is staged; boundary Dreamglass is staged; boundary Clear Lens is shortcut-complete. Every state definition has some genuine gap, but not every state transition is indirect. |
+| **C — shortcut-complete support occurs in both dialects** | Both `D_short^S` and `D_short^B` are nonempty. Together with selected D2A-C, each dialect contains at least one staged and one shortcut-complete definition. This forces at least two state plus two boundary definitions: **four transforming definitions total**. | **Recommended guarded higher-ceiling direction, with D2A1-B offered separately as a qualified fallback.** C lets topology and dialect vary independently: the catalog can support direct or pilgrimage grammar without requiring a change in whether the Relic transforms what it bears or how it listens; later acquisition decides actual access. That is the richest policy surface and avoids a dialect-locked topology caste. Its own philosophical fit remains aggregate—not a direct realization merely because four catalog cells exist. The cost is a four-cell teaching/authoring floor, possible checkbox symmetry, preview counterpicking, token witnesses, shortcut option-value dominance, or overcompensated staged names becoming premium. | State Vowscar and boundary Dreamglass are staged; state Emberseal and boundary Clear Lens are shortcut-complete. All four are distinct completed definitions. Reverse edges and exact acquisition remain open. |
+
+A/B/C are exhaustive and mutually exclusive. The impossible fourth vector,
+empty support in both dialects, would make `D_short` empty and contradict
+selected D2-C. Under A, `D_S` is mixed while `D_B` is wholly staged; under B,
+`D_S` is wholly staged while `D_B` is mixed; under C, both dialects are mixed.
+“Wholly staged” means every definition in that dialect has at least one
+genuine transitive gap, not that every transition is indirect. Exact counts
+above the minima, names, assignments, gap lengths, edge maps, cause
+correlations, distribution, and prevalence remain authoring/specification and
+do not mint another owner card.
+
+The guarded recommendation is C with D2A1-B offered for explicit selection as
+a qualified fallback. Fire B only if the state shortcut-complete cell cannot
+produce a distinct, non-token, non-dominated policy or the four-cell catalog
+cannot justify its teaching and authoring burden, **while** every state
+definition can still sustain fun staged play and both boundary topology
+classes remain independently worthwhile. Do not fire B merely because C fails
+generally: boundary-staging failure belongs to selected D2A-A; state-staging
+failure reopens D2A or invokes D2-A; boundary-shortcut failure while boundary
+staging survives reopens D2A1; and a staged-versus-shortcut power caste in both
+dialects invalidates the parent coexistence premise rather than being repaired
+by asymmetry.
+
+If D2A-A fires, boundary shortcut support becomes forced and the live D2A1
+question becomes boundary-only versus both. Rebuild the sets and revalidate or
+reopen the answer; a previously selected B may be re-established only if state
+shortcut support remains empty, never inherited by label. If D2-A fires,
+`D_stage` becomes empty, all definitions become shortcut-complete over their
+reachable endpoints, and D2A/D2A1 both prune. Any Z/X/M fallback likewise
+rebuilds `E_d/R_d/G_d` and revalidates every topology descendant.
+
+RCS-17/RCS-18 must later test matched optimized policies that choose and avoid
+staged routes within every mixed dialect; disclosure before consequential
+commitment; materially played intermediates; no hidden copy-quality roll; no
+automatic compensation that creates a premium staged caste; and no direct
+option whose flexibility dominates every staged peer. These are acceptance
+gates, not extra mechanics or exact tuning selected here.
+
+D2A1 selects no exact definition, graph, reverse edge, clear-to-unassigned
+route, eventual return, edge cause, availability context, agency, approval,
+collision, operation actor/cost/lock, power, acquisition schedule, UI,
+persistence, migration, or implementation. Under any answer D2A1 moves to
+`DIR-SELECTED` and D3 becomes the sole `OWNER-OPEN` row, producing 21
+`SCREEN`, 1 `OWNER-OPEN`, 41 `PRUNED`, 73 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`, with `Phi_SR = 22`. This card authorizes no
+implementation, and the authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

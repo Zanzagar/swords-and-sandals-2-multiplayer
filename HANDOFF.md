@@ -1,6 +1,74 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-29 staged/shortcut coexistence selected; staged-dialect incidence is next
+## 2026-09-29 both-dialect staging selected; shortcut-complete incidence is next
+
+Zanzagar selected `RCS-03D2A-C` with `RCS-03D2A-A` as the explicit child
+scope fallback. Required-stage support is nonempty in both transformation
+dialects: some state Relic has a reachable destination that requires a material
+remembered condition, and some distinct boundary Relic has a reachable
+destination that requires a material attunement. Inherited D2-C still requires
+at least one shortcut-complete definition, creating a three-definition floor.
+C is active; A is an armed, unfired replacement if boundary staging fails
+while state staging survives. Parent D2-A remains the deeper whole-system
+fallback.
+
+If state staging fails while boundary staging remains viable, neither selected
+A fallback silently chooses D2A-B. Reopen D2A or use D2-A. Firing D2A-A or an
+upstream edge fallback rebuilds `E_d/R_d/G_d` and revalidates or reopens D2A1;
+no complement-incidence label survives graph changes by name alone. The
+authoritative decision record remains byte-unchanged.
+
+Two read-only audits independently upheld D2A1 as one exhaustive atomic card
+with no missing child before D3. Define
+`D_short=D_mut \setminus D_stage`. Under selected D2A-C its shortcut-complete
+state and boundary incidences cannot both be empty, so exactly three cases
+remain. The 143-row register now has 22 `SCREEN`, 1 `OWNER-OPEN` at D2A1, 41
+`PRUNED`, 72 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`. Closing D2A1 opens D3 at 22.
+
+`RCS-03D2A1` asks which dialects retain at least one shortcut-complete
+definition:
+
+- **A — state only.** State is mixed; every boundary definition is staged.
+  Minimum catalog: two state plus one boundary definition, three total. This
+  removes the direct clarity comparator from the more opaque boundary dialect.
+- **B — boundary only. Qualified narrower fallback.** Every state definition
+  is staged; boundary is mixed. Minimum catalog: one state plus two boundary
+  definitions, three total. This preserves a direct baseline for attunement
+  play but risks making every state Relic a condition ladder.
+- **C — both dialects. Recommended guarded higher-ceiling direction, with
+  D2A1-B offered as a qualified fallback.** Both dialects contain staged and
+  shortcut-complete definitions, forcing at least two state plus two boundary
+  definitions: four total. Dialect and topology can vary independently, at the
+  cost of a four-cell teaching and authoring burden.
+
+Illustrative C catalog: state Vowscar requires
+`Mercy -> Tempered -> Defiance`, while state Emberseal has a direct endpoint
+shortcut; boundary Dreamglass requires `Oath -> Resonant -> Echo`, while
+boundary Clear Lens has a direct endpoint shortcut. These examples choose no
+reverse edge, exact assignment catalog, acquisition rule, or power.
+
+D2A1-C's philosophical fit is aggregate, not direct: four catalog cells do not
+themselves realize Achintya Bheda Abheda. The meaningful partial fit remains
+inside one artifact whose continuity persists across materially distinct
+states. C is recommended for gameplay because it avoids locking one topology
+class to one dialect and enables matched policies within both.
+
+Offer B only under the strict qualified trigger: the state shortcut-complete
+cell cannot earn a distinct, non-token, non-dominated policy or the four-cell
+catalog cannot justify its burden, while all-state staged play remains fun and
+both boundary classes remain worthwhile. Boundary-staging failure uses D2A-A;
+state-staging failure reopens D2A or uses D2-A; boundary-shortcut failure
+reopens D2A1; and a topology power caste invalidates parent D2-C. Ask only for
+D2A1 A, B, or C. Require **“C with D2A1-B qualified fallback”** to select the
+recommended ladder.
+
+D2A1 chooses no exact graph, gap count beyond the forced witnesses, reverse
+edge, clearing, return, cause map, availability, agency, approval, collision,
+actor, cost, lock, power, acquisition, UI, persistence, migration, or
+implementation.
+
+## 2026-09-29 staged/shortcut coexistence selected; staged-dialect incidence is next — superseded frontier
 
 Zanzagar selected `RCS-03D2-C` with `RCS-03D2-A` as the explicit
 whole-system fallback. `D_stage` is nonempty proper: at least one transforming
@@ -11965,7 +12033,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-29 02:43 UTC — staged-topology dialect incidence is next](docs/handoffs/2026-09-29-0243--relic-staged-dialect-incidence-next.md)**
+[2026-09-29 03:29 UTC — shortcut-complete dialect incidence is next](docs/handoffs/2026-09-29-0329--relic-shortcut-dialect-incidence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

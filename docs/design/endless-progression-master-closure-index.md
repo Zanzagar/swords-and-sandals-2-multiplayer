@@ -3233,20 +3233,22 @@ M system fails its gates. D1M is `DIR-SELECTED` and D1M1 is `PRUNED`.
 Zanzagar then selected D2-C with D2-A as the explicit system fallback: a
 nonempty proper set of transforming definitions has genuine nonclear
 transitive gaps, so staged and shortcut-complete topologies coexist unless
-required staging fails its gates. D2 is `DIR-SELECTED`, and D2A is the sole
-frontier.
+required staging fails its gates. D2 is `DIR-SELECTED`. Zanzagar then selected
+D2A-C with D2A-A as the explicit child scope fallback: staged support is
+nonempty in both transformation dialects unless boundary staging fails while
+state staging survives. D2A is `DIR-SELECTED`, and D2A1 is the sole frontier.
 
 The thirty-ninth prerequisite correction adds conditional D2A because proper
 staged-topology support may occur only in the state dialect, only in the
 boundary dialect, or in both. The fortieth correction adds D2A1 because each
 D2A branch still leaves a player-material question about which dialects retain
 shortcut-complete alternatives. The current 143-row register therefore
-contains **23 `SCREEN`, 1 `OWNER-OPEN` at D2A, 41 `PRUNED`, 71
-`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`**.
+contains **22 `SCREEN`, 1 `OWNER-OPEN` at D2A1, 41 `PRUNED`, 72
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`**.
 Every reachable cause parent and applicable cause-dialect child is closed at
-worksheet-direction granularity. D2A, D2A1, and D3-D5 still lead to RCS-03E at
-19. The register describes eleven reachable cause families plus one derived-
-empty audit placeholder, not twelve reachable families.
+worksheet-direction granularity. D2A1 and D3-D5 still lead to RCS-03E at 19.
+The register describes eleven reachable cause families plus one derived-empty
+audit placeholder, not twelve reachable families.
 
 ### 7.3 Frozen remaining Relic slot register
 
@@ -3382,8 +3384,8 @@ overcompression.
 | `RCS-03D1M` | Dedicated evolution/reconfiguration-operation transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; B makes operation-cause support universal across `D_mut`, with A selected as a whole-system replacement fallback if the M mechanic fails its purpose, policy, comprehension, anti-duplication, commitment, or anti-loop gates; RCS-03E still retains transformation agency/approval and RCS-13 retains operation initiation/admission and lock horizon |
 | `RCS-03D1M1` | State/boundary transformation-dialect incidence for proper dedicated-operation cause support | `PRUNED`; D1M-B's universal definition support necessarily reaches both nonempty dialects and leaves no proper-subset incidence to choose |
 | `RCS-03D2` | Direct shortcut versus required staged nonclear assignment topology | `DIR-SELECTED`; C makes `D_stage` nonempty proper so staged and shortcut-complete transforming definitions coexist, with D2-A selected as the whole-system replacement if required staging fails its legibility, material-intermediate, non-dominance, anti-bypass, anti-copy-lottery, or comprehension gates; any parent-cause or D2 fallback must rebuild the graph and revalidate or explicitly reopen dependent topology answers |
-| `RCS-03D2A` | State/boundary transformation-dialect incidence for proper required-stage support | `OWNER-OPEN`; D2-C requires choosing whether nonempty staged support occurs only in state, only in boundary, or in both dialects; A/B force shortcut-complete support in the opposite dialect, while D2A1 separately resolves the residual complement incidence |
-| `RCS-03D2A1` | State/boundary transformation-dialect incidence for the shortcut-complete complement after D2A | `SCREEN`; opens after every D2A answer while D2-C remains active, choosing boundary-only versus both after D2A-A, state-only versus both after D2A-B, or state-only/boundary-only/both after D2A-C; prunes if D2-A fires |
+| `RCS-03D2A` | State/boundary transformation-dialect incidence for proper required-stage support | `DIR-SELECTED`; C makes staged support nonempty in both dialects with A selected as the child state-only scope fallback if boundary-attunement staging fails while state-condition staging survives; the parent D2-A whole-system fallback remains deeper, and neither fallback has fired |
+| `RCS-03D2A1` | State/boundary transformation-dialect incidence for the shortcut-complete complement after D2A | `OWNER-OPEN`; selected D2A-C requires choosing state-only, boundary-only, or both-dialect shortcut support, which respectively forces state-mixed/all-boundary-staged, all-state-staged/boundary-mixed, or both dialects mixed; D2A1 prunes if D2-A fires and must be revalidated or reopened if D2A-A or an upstream edge fallback fires |
 | `RCS-03D3` | Direct reverse-edge support among nonclear adjacent assignments | `SCREEN`; follows D2A1 under active D2-C and classifies whether a legal nonclear adjacent transition may have a direct reverse edge rather than requiring another route |
 | `RCS-03D4` | Explicit clear-to-unassigned transition support | `SCREEN`; follows D3 and decides whether a persistent Relic may legally clear its current assignment rather than move only among nonclear assignments |
 | `RCS-03D5` | Eventual nonclear return and reversibility topology | `SCREEN`; follows D4 and all cause rows; distinguishes irreversible reachability from legal eventual return without deciding exact graphs or durations |
@@ -3781,17 +3783,18 @@ shortcut-complete definitions coexist, with D2-A selected as the whole-system
 fallback. The thirty-ninth correction adds D2A for the state-only, boundary-
 only, or both-dialect incidence of proper staged-topology support. The
 fortieth adds D2A1 for the independently player-material dialect incidence of
-the shortcut-complete complement. The current register has **143 slots**: 23
-`SCREEN`, 1 `OWNER-OPEN` at D2A, 41 `PRUNED`, 71 `DIR-SELECTED`, 5
-`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`. All reachable cause
-slots are closed. Closing D2A, D2A1, and D3-D5 one at a time opens RCS-03E at
-`Phi_SR = 19`.
+the shortcut-complete complement. D2A-C then places required-stage support in
+both dialects, with D2A-A selected as the child state-only scope fallback. The
+current register has **143 slots**: 22 `SCREEN`, 1 `OWNER-OPEN` at D2A1, 41
+`PRUNED`, 72 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`. All reachable cause slots are closed. Closing D2A1 and D3-D5
+one at a time opens RCS-03E at `Phi_SR = 19`.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-twenty-four owner cards under this forty-times-corrected charter and will
+twenty-three owner cards under this forty-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -3815,7 +3818,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 143 frozen candidate slots; current `Phi_SR = 24` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, D1N is derived empty, D1T-A keeps tuple selection authoritative but noncausal, D1VT-A lets permission govern coexistence without itself transforming, D1VF-A lets refusal route disposition without itself transforming, D1K-A keeps sealing meaningful but noncausal, D1Z-C reserves disclosed proper Absence-bound support with A as failure fallback, D1Z1-C gives that proper subset nonempty incidence in both transformation dialects, D1L-A keeps the spent-bond latch recurrence-significant but noncausal, D1X-C reserves disclosed proper Event-bound support with A as the selected system fallback, D1X1-C gives it both-dialect incidence with A as the selected child scope fallback, D1M-B gives every transforming definition a dedicated-operation cause path with A as the selected system fallback, and D2-C makes staged and shortcut-complete topology coexist with D2-A as the selected system fallback | At most 24 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children, all closed at direction granularity; D2A then D2A1 close before D3-D5, then agency opens at 19; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 143 frozen candidate slots; current `Phi_SR = 23` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, D1N is derived empty, D1T-A keeps tuple selection authoritative but noncausal, D1VT-A lets permission govern coexistence without itself transforming, D1VF-A lets refusal route disposition without itself transforming, D1K-A keeps sealing meaningful but noncausal, D1Z-C reserves disclosed proper Absence-bound support with A as failure fallback, D1Z1-C gives that proper subset nonempty incidence in both transformation dialects, D1L-A keeps the spent-bond latch recurrence-significant but noncausal, D1X-C reserves disclosed proper Event-bound support with A as the selected system fallback, D1X1-C gives it both-dialect incidence with A as the selected child scope fallback, D1M-B gives every transforming definition a dedicated-operation cause path with A as the selected system fallback, D2-C makes staged and shortcut-complete topology coexist with D2-A as the selected system fallback, and D2A-C puts staged support in both dialects with D2A-A as the selected child scope fallback | At most 23 future owner cards without another explicit charter amendment; four are Charm-only, and many others are closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children, all closed at direction granularity; D2A1 closes before D3-D5, then agency opens at 19; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

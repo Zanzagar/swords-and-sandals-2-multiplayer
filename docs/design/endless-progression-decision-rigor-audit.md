@@ -7649,6 +7649,81 @@ agency/approval, collision, actor, cost, lock, power, UI, persistence, or
 implementation. Under any D2A answer, D2A becomes `DIR-SELECTED` and D2A1
 opens at `Phi_SR = 23`; D3 follows D2A1 at 22.
 
+Zanzagar selected D2A-C with D2A-A as the explicit child scope fallback.
+Required-stage support is nonempty in both transformation dialects: at least
+one state definition and one distinct boundary definition have a genuine
+transitive gap. Global D2-C properness requires a third shortcut-complete
+definition but does not place it. C is active; A is armed and unfired. A
+replaces C only if boundary-attunement staging fails while state-condition
+staging survives. State-staging failure with viable boundary staging reopens
+D2A or invokes D2-A rather than silently selecting D2A-B. Parent D2-A remains
+the deeper fallback if staging as a whole fails.
+
+D2A moves to `DIR-SELECTED`; D2A1 becomes the sole `OWNER-OPEN` row. The
+independently reparsed 143-row register contains 22 `SCREEN`, 1 `OWNER-OPEN`
+at D2A1, 41 `PRUNED`, 72 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 23`. The authoritative decision record remains
+unchanged.
+
+**D2A1 atomicity, minimum-catalog, and gameplay audit — one exhaustive
+complement-incidence card.** Let
+`D_short=D_mut \setminus D_stage`,
+`D_short^S=D_short \cap D_S`, and
+`D_short^B=D_short \cap D_B`. Selected D2-C makes `D_short` nonempty, while
+selected D2A-C makes both staged dialect incidences nonempty. The disjoint
+exhaustive `D_S`/`D_B` partition therefore permits exactly three nonzero
+shortcut-incidence vectors: state only `(1,0)`, boundary only `(0,1)`, or both
+`(1,1)`. `(0,0)` contradicts parent properness, and no hybrid case exists
+because one definition has one RCS-03A transformation dialect.
+
+The forced catalog shapes are player-material and expose the real lower bound:
+
+- D2A1-A makes shortcut support state-only. State is mixed and every boundary
+  definition is staged. It needs at least two state definitions and one
+  boundary definition, three total. It removes the direct clarity comparator
+  from the more route-opaque boundary dialect.
+- D2A1-B makes shortcut support boundary-only. Every state definition is
+  staged and boundary is mixed. It needs one state definition and two boundary
+  definitions, three total. This is the qualified narrower fallback because
+  it preserves direct-response comparison around snapshot- and timing-
+  sensitive attunement play, but it risks turning all state Relics into
+  condition ladders.
+- D2A1-C makes both shortcut incidences nonempty. Both dialects are mixed and
+  the minimum rises to two state plus two boundary definitions, four total.
+  **Recommend guarded C with D2A1-B offered as a separately selectable
+  qualified fallback.** C lets dialect and topology vary independently and
+  gives the richest matched policy surface. Its marginal standing-ideal fit is
+  aggregate rather than direct; the meaningful partial realization remains
+  inside each artifact's materially distinct transitions. Its costs are a
+  four-cell teaching/authoring floor, token quadrant witnesses, preview
+  counterpicking, shortcut option-value dominance, and premium-staged caste
+  pressure.
+
+“Every definition is staged” means each definition has at least one genuine
+transitive gap, not that every transition is indirect. A minimal C witness is
+one staged Vowscar, one shortcut-complete Emberseal, one staged Dreamglass, and
+one shortcut-complete Clear Lens. Reverse edges remain D3. Exact positive
+counts, identities, gap lengths, graphs, cause maps, availability, acquisition,
+and correlations with proper Z/X subsets remain AUTHOR/SPEC and do not pass
+the closure-index test for another mandatory child.
+
+The B fallback has a strict trigger. It may fire only if the state shortcut-
+complete cell cannot earn a distinct non-token, non-dominated policy or the
+four-cell catalog cannot justify its teaching/authoring burden, while all-state
+staged play stays fun and both boundary topology classes stay independently
+worthwhile. It is not a general C-failure branch. Boundary-staging failure uses
+selected D2A-A; state-staging failure reopens D2A or uses D2-A; boundary-
+shortcut failure reopens D2A1; a power caste across both dialects invalidates
+the parent coexistence premise.
+
+If D2A-A fires, boundary shortcut support becomes forced and D2A1 must be
+revalidated or reopened as boundary-only versus both; a prior label may be
+re-established from rebuilt membership but never inherited. If D2-A fires,
+D2A/D2A1 prune. Any Z/X/M fallback rebuilds `E_d/R_d/G_d` and revalidates every
+topology descendant. No counterexample or missing owner-material child was
+found: after D2A1, D3 is the next frontier with 21 `SCREEN`, 1 `OWNER-OPEN`,
+41 `PRUNED`, 73 `DIR-SELECTED`, and `Phi_SR = 22`.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or
