@@ -1,5 +1,14 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+**Test-profile finding, 2026-09-29:** the integrated no-asset/no-observation
+tree measured **3,881 tests, 3,860 passed, 21 skipped, 0 failed**, not the 18
+currently printed in `AGENTS.md`. The complete difference is
+`test/arena-ring-spellrow.test.js`: its narrow run measures 9 tests, 6 passed,
+3 asset-gated skips. Those three real-pack spell-row checks are absent from the
+18-skip inventory. Treat 21 as the measured profile for this tree until the
+repository policy is corrected; this is a documentation-count finding, not a
+test failure.
+
 ## 2026-09-29 P asks and an initiated Rite executes; Z approval source is next
 
 Zanzagar selected `RCS-03E1-C` with `RCS-03E1-B` as the qualified agency
