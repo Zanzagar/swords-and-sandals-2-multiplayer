@@ -26588,7 +26588,7 @@ costs, locks, power, presentation, acquisition, persistence, and
 implementation remain unselected. The authoritative decision record remains
 unchanged.
 
-### RCS-03D2A1 — transformation-dialect incidence of the shortcut-complete complement — active owner choice
+### RCS-03D2A1 — transformation-dialect incidence of the shortcut-complete complement — C selected with B qualified fallback
 
 Selected D2-C defines the nonempty complement
 `D_short=D_mut \setminus D_stage`. Under selected D2A-C, both staged
@@ -26655,6 +26655,147 @@ persistence, migration, or implementation. Under any answer D2A1 moves to
 `SCREEN`, 1 `OWNER-OPEN`, 41 `PRUNED`, 73 `DIR-SELECTED`, 5 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`, with `Phi_SR = 22`. This card authorizes no
 implementation, and the authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-29:** **C, shortcut-
+complete support occurs in both transformation dialects, with D2A1-B as the
+explicit qualified fallback.** Together with selected D2A-C, this makes both
+dialects mixed: at least one state definition and one boundary definition are
+staged, and at least one distinct definition in each dialect is shortcut-
+complete. The active branch therefore has a four-definition floor: two state
+and two boundary definitions. This is a catalog constraint, not a grant of all
+four definitions to one player; acquisition remains RCS-09.
+
+C is active. B is armed, unfired, and narrow rather than a generic response to
+C failing. It may replace C only if the state shortcut-complete cell cannot
+produce a distinct, non-token, non-dominated policy **or** the four-cell catalog
+cannot justify its teaching and authoring burden, while every state definition
+can still sustain fun staged play and both boundary topology classes remain
+independently worthwhile. If B fires, state shortcut support becomes empty,
+every state definition remains staged, and boundary retains both staged and
+shortcut-complete support.
+
+Other failures stay on their owning branches. Boundary-staging failure invokes
+selected D2A-A; state-staging failure reopens D2A or invokes D2-A; boundary-
+shortcut failure while boundary staging survives reopens D2A1; and a staged-
+versus-shortcut power caste across both dialects invalidates parent D2-C. If
+D2A-A or a Z/X/M cause fallback fires, rebuild `E_d/R_d/G_d` and revalidate or
+reopen D2A1 from actual membership rather than carrying C or B forward by
+label. If D2-A fires, D2A and D2A1 prune.
+
+D2A1 moves to `DIR-SELECTED`, and D3 becomes the sole `OWNER-OPEN` row. The
+143-row register now contains **21 `SCREEN`, 1 `OWNER-OPEN` at D3, 41
+`PRUNED`, 73 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 22`**. Exact definitions, counts above the forced minima, graphs,
+reverse edges, clearing, eventual return, cause-to-edge maps, availability,
+agency, approval, collision, costs, locks, power, presentation, acquisition,
+persistence, migration, and implementation remain unselected. The
+authoritative decision record remains unchanged.
+
+> **Forty-first prerequisite correction, 2026-09-29 — proper direct-reverse
+> support leaves two player-material dialect-incidence questions.** The frozen
+> D3 row correctly separated a direct reverse edge from D2 staging and D5
+> eventual return, but it did not say what D3's prevalence domain was. The
+> atomic domain is transforming **definitions**, not individual edges: a
+> definition is reverse-capable when at least one pair of its distinct nonclear
+> assignments has a direct proposal edge in each direction. Saturating every
+> edge would make all nonclear reachability symmetric and pre-decide much of
+> D5; exact pair counts above one remain authoring and evaluation.
+>
+> If reverse-capable and reverse-free definitions coexist under D3-C, support
+> may occur only in state, only in boundary, or in both dialects. Even after
+> that incidence is known, the nonempty reverse-free complement may occur only
+> in the opposite dialect, in both, or—when reverse support spans both—in state
+> only, boundary only, or both. Those seven terminal patterns change whether a
+> player can retain a chosen transformation dialect while selecting a
+> direct-reverse seam versus a direct-reverse-free biography. This is the same
+> legal-build boundary that required D2A and D2A1; leaving it to unspecified
+> authoring would flatten it again.
+>
+> Two conditional rows are therefore registered. `RCS-03D3A` classifies the
+> state/boundary incidence of proper reverse-capable support, and
+> `RCS-03D3A1` classifies its nonempty reverse-free complement. Both prune under
+> D3-A/B; under D3-C they close one at a time before D4. Adding the two rows
+> raises the register from 143 to **145 rows**. After selected D2A1-C, it
+> contains **23 `SCREEN`, 1 `OWNER-OPEN` at D3, 41 `PRUNED`, 73
+> `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`**.
+> No selected answer, edge, assignment, or authoritative-record text changes.
+
+### RCS-03D3 — definition-level direct-reverse-pair support among nonclear assignments — active owner choice
+
+For each completed fixed-version transforming definition `d`, retain D2's
+materially distinct nonclear assignment set `A_d` and directed direct-proposal
+relation `E_d`. Define its unordered direct-reverse-pair set
+
+`P_d={{a,b}: a != b, (a,b) in E_d, and (b,a) in E_d}`
+
+and define `D_rev={d in D_mut : P_d is nonempty}`. Thus a definition belongs
+to `D_rev` when it has at least one pair of assignments for which a lawful
+direct proposal edge exists in each direction. The two edges may have different
+selected P/Z/X/M causes and lawful contexts. “Reverse-free” below always means
+**direct-reverse-pair-free**; it does not exclude a longer eventual return.
+
+This remains **proposal-capability topology**, not an on-demand undo promise.
+Pair membership does not make either edge currently available, selectable,
+approved, collision-winning, or committed, and it does not prove that two
+edges from different contexts can be exercised sequentially in one canonical
+history. RCS-03E/RCS-04A/RCS-13 retain those authorities; D5 later classifies
+actual eventual nonclear return without stitching incompatible histories.
+
+| Choice | Definition-level direct-reverse prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete topology example |
+| --- | --- | --- | --- |
+| **A — no transforming definition has a direct-reverse pair** | `D_rev` is empty. For every `(a,b)` in every `E_d`, `(b,a)` is absent. This forbids direct two-cycles but permits longer directed cycles, so A does **not** select eventual irreversibility. D3A/D3A1 prune. | A gives every immediate transformation the grammar of a ratchet, scar, or vow. Its standing-ideal fit is neutral/protective: the continuing Relic and materially distinct assignments may still realize continuity-with-difference, but forbidding the exact reverse adds no stronger realization. It creates commitment and authored asymmetry, at the cost of experiment paralysis, terminal-form chasing, guide dependence, duplicate-as-escape pressure, and cheap three-cycle laundering of apparent irreversibility. | State Vowscar can use `Mercy -> Tempered -> Defiance -> Mercy`, with no paired edge and no `Mercy -> Defiance`, so it remains staged. State Emberseal can use one-way `Ash -> Kindled` and remain shortcut-complete because the reverse endpoint is unreachable. Boundary Dreamglass and Clear Lens can use the analogous directed three-cycle and one-way edge. |
+| **B — every transforming definition has at least one direct-reverse pair** | `D_rev=D_mut`. Every state and boundary definition has at least one paired adjacent seam. **This does not require every edge to be paired**: staged gaps, one-way crossings, and unreachable pairs remain legal. D3A/D3A1 prune. | **Recommended guarded direction, with D3-A offered separately as a whole-system fallback.** Every Relic receives one material bidirectional proposal relationship while other edges may still carry irreversible-feeling scars. At the actual paired seam, one continuing artifact persists across two genuinely distinct assignments in both directions; that is the strongest local potential fit to the standing ideal, while universal definition prevalence is aggregate. B avoids a flexibility caste, but risks ping-pong reward farming, reset laundering, cheapest-cause oscillation, post-information counterpicking, boundary snapshot shopping, and token side pairs that satisfy the rule without mattering. | State Vowscar can use `Mercy <-> Tempered -> Defiance`, with no `Mercy -> Defiance`; state Emberseal can use `Ash <-> Kindled`. Boundary Dreamglass can use `Oath <-> Resonant -> Echo`, with no `Oath -> Echo`; boundary Clear Lens can use `Hush <-> Chorus`. The staged/shortcut-complete class in each dialect survives. |
+| **C — reverse-capable and reverse-free definitions coexist** | `D_rev` is a nonempty proper subset of `D_mut`. At least one definition has a paired seam and at least one has none. C opens D3A and then D3A1; it does not itself select their dialect incidences. | C supports bidirectionally authored rites beside direct-reverse-free scars and vows, but its class coexistence is merely aggregate. Reverse-capable names may dominate through option value, reverse-free names may become traps or require premium compensation, and a meaningless side pair or obscure directed name can satisfy the rule tokenistically. C is a legitimate archetype direction only if that added taxonomy earns its two incidence decisions and both classes remain non-dominated. | One illustrative descendant gives paired seams to staged state Vowscar and shortcut-complete boundary Clear Lens, while shortcut-complete state Emberseal and staged boundary Dreamglass remain reverse-free. C permits but does not require that both-dialect/both-complement pattern. |
+
+A/B/C are exhaustive because `D_rev` is a subset of nonempty `D_mut`: it is
+empty, universal, or nonempty proper. The prevalence unit is a completed
+definition. “Every definition has a pair” is not “every edge is reversible.”
+The latter stronger saturation would make every directed path reversible edge
+by edge, collapse much of D5, and add proof burden without creating the local
+player experience that one material pair per definition does not already
+establish.
+
+One interaction with D2 is forced. Under A, a shortcut-complete definition
+cannot contain a compatible nonclear cycle: if `a -> b` and `b` can return to
+`a` through two or more compatible edges, `(b,a)` is a forbidden D2 gap; if it
+can return directly, `{a,b}` is a forbidden D3 pair. Thus the state and
+boundary shortcut-complete witnesses required by D2A1-C become directed-
+acyclic at compatible proposal reachability under A. Staged definitions may
+still contain three-cycles. This is a derived consequence, not a hidden D5
+answer for the rest of the catalog.
+
+The recommendation is guarded B with D3-A offered for explicit selection as a
+whole-system fallback. Each definition's qualifying witness pair must join
+assignments that each materially change optimized policy and be prospectively
+legible. Every authored pair, including any pair beyond that witness, must
+avoid net-positive traversal rewards, trigger resets, cheap M/P/Z/X
+oscillation, and post-preview counterpicking and, for boundary Relics, resist
+snapshot and best-listening-point shopping. A token side pair cannot serve as
+the required witness even though it passes the bare set equation. These are
+RCS-17/RCS-18 acceptance gates, not hidden cost, lock, or authority rules.
+
+Fire A only if direct paired support as a system fails those anti-oscillation,
+causal-integrity, comprehension, or boundary-snapshot gates while directed
+graphs remain fun. If failure is definition-local, do not erase pairs
+globally: reopen D3 toward C and resolve D3A/D3A1. A bare B selects no fallback;
+selecting the recommended ladder requires **“B with D3-A system fallback.”**
+
+Every D3 branch remains constrained by selected D2-C/D2A-C/D2A1-C. Adding or
+removing reverse edges may change `R_d`, `G_d`, or a definition's staged class;
+the catalog must be authored to satisfy both selections simultaneously or
+explicitly reopen the affected parent topology answer. Likewise, firing any
+Z/X/M or D2/D2A/D2A1 fallback rebuilds the active graphs and revalidates or
+reopens D3 and applicable children rather than preserving a label by name.
+
+D3 selects no exact pair beyond its prevalence witness, all-edge symmetry,
+actual roundtrip, cause-to-edge map, context availability, clear-to-unassigned
+route, eventual return for other assignments, agency, approval, collision,
+operation actor/cost/lock, power, acquisition, UI, persistence, migration, or
+implementation. Under A/B, D3 becomes `DIR-SELECTED`, D3A/D3A1 prune, and D4
+opens with **20 `SCREEN`, 1 `OWNER-OPEN`, 43 `PRUNED`, 74 `DIR-SELECTED`, and
+`Phi_SR = 21`**. Under C, D3A opens next with **22 `SCREEN`, 1 `OWNER-OPEN`,
+41 `PRUNED`, 74 `DIR-SELECTED`, and `Phi_SR = 23`**. The authoritative
+decision record remains unchanged.
 
 ## Session protocol and evidence
 

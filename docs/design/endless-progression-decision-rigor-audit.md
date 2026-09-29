@@ -7724,6 +7724,106 @@ topology descendant. No counterexample or missing owner-material child was
 found: after D2A1, D3 is the next frontier with 21 `SCREEN`, 1 `OWNER-OPEN`,
 41 `PRUNED`, 73 `DIR-SELECTED`, and `Phi_SR = 22`.
 
+Zanzagar selected D2A1-C with D2A1-B as the explicit qualified fallback.
+Shortcut-complete support is therefore nonempty in both transformation
+dialects. Together with D2A-C, state and boundary each contain staged and
+shortcut-complete definitions, forcing a minimum catalog of two definitions in
+each dialect. C is active. B is armed and unfired; it is not a generic repair
+for C.
+
+B may replace C only if the state shortcut-complete cell cannot sustain a
+distinct, non-token, non-dominated policy or the four-cell catalog cannot
+justify its teaching/authoring burden, while all-state staged play remains fun
+and both boundary topology classes remain independently worthwhile. Boundary-
+staging failure still invokes D2A-A; state-staging failure reopens D2A or uses
+D2-A; boundary-shortcut failure reopens D2A1; and a topology power caste
+invalidates D2-C. Any D2A-A or cause-edge fallback rebuilds the relevant sets
+and revalidates or reopens D2A1; D2-A prunes D2A/D2A1.
+
+D2A1 moves to `DIR-SELECTED`; D3 becomes the sole `OWNER-OPEN` row. The
+reparsed 143-row register contains 21 `SCREEN`, 1 `OWNER-OPEN` at D3, 41
+`PRUNED`, 73 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 22`. The authoritative decision record remains unchanged.
+
+**Forty-first prerequisite correction — D3 proper prevalence needs two
+dialect-incidence children.** Two read-only audits attacked the missing D3
+semantics from different domains. The edge-saturation countermodel defined
+reciprocal and one-way unordered adjacencies and correctly showed that a mixed
+edge set can vary by dialect and by same-definition co-incidence. It is not the
+right owner-card domain: making its universal branch require the reverse of
+**every** edge makes every directed nonclear path reversible edge by edge and
+therefore consumes much of D5's eventual-return decision. Its extra
+same-definition child likewise asks for pair saturation beyond the local
+experience D3 needs to guarantee.
+
+D3 instead follows the established definition-prevalence grammar. For each
+definition let
+`P_d={{a,b}:a!=b,(a,b) in E_d,(b,a) in E_d}` and
+`D_rev={d in D_mut:P_d is nonempty}`. A requires `D_rev` empty, B requires it
+universal, and C requires it nonempty proper. This is exhaustive and preserves
+D5: B gives every definition one structural direct-reverse seam without
+requiring every edge or reachable pair to return. Whether a reverse-capable
+definition also contains one-way edges, and exact pair saturation above one,
+remain AUTHOR/EVALUATE unless later evidence crosses the closure index's
+reopening test.
+
+C still is not atomic by itself. Proper `D_rev` can occur in state only,
+boundary only, or both; its nonempty complement can then occur in the forced
+opposite dialect, in both, or—when `D_rev` spans both—in state only, boundary
+only, or both. These are seven terminal patterns that change whether a player
+can keep a chosen state/boundary grammar while selecting a direct-reverse seam
+or a direct-reverse-free biography. Conditional D3A therefore classifies
+`D_rev`'s dialect incidence, and D3A1 classifies the reverse-free complement.
+Both prune under A/B. This correction adds two rows, taking the selected-D2A1
+register to 145 rows: 23 `SCREEN`, 1 `OWNER-OPEN` at D3, 41 `PRUNED`, 73
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`.
+
+**D3 gameplay and boundary audit.** A direct-reverse pair is structural
+proposal capability only. Its directions may have different causes or
+contexts; D3 grants no current availability, selection, approval, collision
+victory, commitment, or compatible sequential history. Requiring an exercised
+forward-and-return history here would take D5's work. D4 separately owns the
+unassigned vertex.
+
+- D3-A makes every direct edge locally one-way but permits three-cycles. A
+  staged `Mercy -> Tempered -> Defiance -> Mercy` therefore shows why A is not
+  eventual irreversibility. It supports scars and vows but risks experiment
+  paralysis, terminal-form optimization, duplicate-as-escape behavior, and
+  cheap long-cycle laundering. Its D2 interaction is stricter for shortcut-
+  complete definitions: any compatible return path would be either a forbidden
+  direct pair or a transitive gap, so their proposal reachability must be
+  acyclic under A.
+- D3-B gives every transforming definition at least one material paired seam.
+  `Mercy <-> Tempered -> Defiance` remains staged when `Mercy -> Defiance` is
+  absent, while `Ash <-> Kindled` is shortcut-complete. The same construction
+  works in the boundary dialect, so B is compatible with all four cells forced
+  by D2A1-C. It avoids a reverse-option caste but risks ping-pong farming,
+  reset laundering, cheap-cause oscillation, post-information counterpicking,
+  boundary snapshot shopping, and meaningless side-pair witnesses.
+- D3-C makes reverse-capable and reverse-free definitions coexist and opens the
+  two incidence children. It offers bidirectionally authored rites beside
+  direct-reverse-free biographies but creates a flexibility taxonomy whose
+  option value can make one class dominant or force premium compensation for
+  the other.
+
+Recommend guarded D3-B with D3-A offered as an explicitly selectable
+whole-system fallback. B gives each continuing Relic one local relationship in
+which two materially distinct assignments remain directly related in both
+directions; that is the strongest local potential standing-ideal fit, while
+universal prevalence is aggregate. A is neutral/protective rather than a
+stronger philosophical fit. C's class coexistence is merely aggregate.
+
+B's acceptance gates require one prospectively legible, policy-material witness
+pair in every definition; a token side pair cannot be that witness. Every
+authored pair must reject traversal profit, reset laundering, cheap P/Z/X/M
+oscillation, post-preview counterpicking, and boundary snapshot shopping. Fire
+A only if paired support fails as a whole while directed graphs remain fun.
+Definition-local failure reopens C rather than erasing every pair. Adding or
+removing edges for any branch or fallback must preserve or explicitly reopen
+D2/D2A/D2A1; upstream cause/topology fallbacks likewise revalidate D3. After
+D3-A/B, the two children prune and D4 opens at `Phi_SR = 21`; after C, D3A
+opens at 23, then D3A1 at 22, then D4 at 21.
+
 Atomic/idempotent receipts, whole-state equip refusal, the arithmetic 48 ceiling
 after its source/tariff choices, removal of the incompatible maximum-one
 3-Load-identity rule, and EP-A03's fixed-four supersession are enforcement or

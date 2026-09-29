@@ -1,6 +1,86 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
-## 2026-09-29 both-dialect staging selected; shortcut-complete incidence is next
+## 2026-09-29 both-dialect topology mix selected; direct-reverse prevalence is next
+
+Zanzagar selected `RCS-03D2A1-C` with `RCS-03D2A1-B` as the explicit
+qualified fallback. Together with selected D2A-C, both transformation dialects
+now contain staged and shortcut-complete definitions. The active branch has a
+four-definition floor: at least two state and two boundary definitions. C is
+active. B is armed and unfired; it is not a generic fallback.
+
+D2A1-B may replace C only if the state shortcut-complete cell cannot sustain a
+distinct, non-token, non-dominated policy or the four-cell catalog cannot
+justify its burden, while every state definition still sustains fun staged
+play and both boundary topology classes remain worthwhile. Boundary-staging
+failure uses D2A-A; state-staging failure reopens D2A or uses D2-A; boundary-
+shortcut failure reopens D2A1; and a cross-dialect topology caste invalidates
+D2-C. Any fallback that changes edges rebuilds `E_d/R_d/G_d` and revalidates
+dependent topology labels. The authoritative decision record remains byte-
+unchanged.
+
+A pair of read-only D3 audits exposed and bounded one missed consequence
+boundary. D3 must classify definition-level direct-reverse support rather than
+all-edge saturation: requiring the reverse of every edge would make every path
+reversible edge by edge and consume much of D5. Let
+`P_d={{a,b}:a!=b,(a,b) in E_d,(b,a) in E_d}` and
+`D_rev={d in D_mut:P_d is nonempty}`. Exact pair counts above one and whether a
+reverse-capable definition also contains one-way edges remain authoring and
+evaluation. “Reverse-free” means no direct-reverse pair, not no longer return.
+
+The forty-first prerequisite correction registers two children only under the
+proper branch: D3A classifies which dialects contain `D_rev`, and D3A1
+classifies the nonempty reverse-free complement. This prevents a mixed answer
+from hiding whether state or boundary players can choose a direct-reverse seam
+versus a direct-reverse-free biography. Under D3-A/B both children prune. The
+145-row register now has 23 `SCREEN`, 1 `OWNER-OPEN` at D3, 41 `PRUNED`, 73
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`.
+
+`RCS-03D3` asks how direct-reverse support is distributed across completed
+transforming definitions:
+
+- **A — none.** `D_rev` is empty: every direct nonclear edge lacks its exact
+  reverse. Longer cycles remain legal, so A does not decide eventual return.
+  It supports ratchets, scars, and vows but risks experiment paralysis,
+  terminal-form chasing, guide dependence, and cheap three-cycle laundering.
+  A also forces every shortcut-complete definition's compatible proposal
+  reachability to be acyclic; otherwise a return is either a pair or a D2 gap.
+- **B — every definition has at least one pair. Recommended guarded direction,
+  with D3-A offered as a whole-system fallback.** Every Relic gets one material
+  bidirectional proposal seam; other edges may remain one-way and staged gaps
+  survive. This avoids a flexibility caste but risks ping-pong farming, reset
+  laundering, cheap-cause oscillation, post-information counterpicking,
+  boundary snapshot shopping, and token side pairs.
+- **C — reverse-capable and reverse-free definitions coexist.** `D_rev` is
+  nonempty proper. This supports bidirectionally authored rites beside direct-
+  reverse-free biographies, but creates a potentially dominant flexibility
+  taxonomy and opens D3A then D3A1 before D4.
+
+Concrete B witness: staged state Vowscar uses
+`Mercy <-> Tempered -> Defiance` without `Mercy -> Defiance`; shortcut-
+complete state Emberseal uses `Ash <-> Kindled`; staged boundary Dreamglass
+uses `Oath <-> Resonant -> Echo` without `Oath -> Echo`; shortcut-complete
+boundary Clear Lens uses `Hush <-> Chorus`. Thus one pair per definition does
+not erase the selected staged/shortcut structure.
+
+Recommend B because one material pair in every definition creates a local
+relationship where the same artifact persists across genuinely distinct
+assignments in both directions without making the whole graph symmetric. The
+local pair has the strongest potential Achintya Bheda Abheda fit; universal
+prevalence remains aggregate. A's prohibition is neutral/protective, and C's
+class coexistence is merely aggregate.
+
+Offer D3-A only as a whole-system fallback if paired support cannot survive
+anti-oscillation, causal-integrity, comprehension, counterpick, or boundary-
+snapshot gates while directed graphs remain fun. Definition-local failure
+reopens C instead of erasing every pair. Require **“B with D3-A system
+fallback”** to select the recommended ladder; a bare B selects no fallback.
+
+D3 is structural proposal capability only. It grants no current availability,
+selection, approval, collision victory, commitment, or executable two-step
+roundtrip. D4 still owns clearing and D5 still owns actual eventual nonclear
+return without incompatible-history stitching. Ask only for D3 A, B, or C.
+
+## 2026-09-29 both-dialect staging selected; shortcut-complete incidence is next — superseded frontier
 
 Zanzagar selected `RCS-03D2A-C` with `RCS-03D2A-A` as the explicit child
 scope fallback. Required-stage support is nonempty in both transformation
@@ -12033,7 +12113,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-29 03:29 UTC — shortcut-complete dialect incidence is next](docs/handoffs/2026-09-29-0329--relic-shortcut-dialect-incidence-next.md)**
+[2026-09-29 03:55 UTC — definition-level direct-reverse prevalence is next](docs/handoffs/2026-09-29-0355--relic-direct-reverse-prevalence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
