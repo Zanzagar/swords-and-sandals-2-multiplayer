@@ -57,6 +57,13 @@ handoff so a lag shows.
 - **ring3:** `1b55bad` spell row clear of the bow's words (decision 7; verifier HELD); `c31fe35` reach
   preview (decision 1; verifier PARTIALLY-BROKEN on a lone foe — an owner call, recorded at the
   decision); `e586e19` the decisions' "Built" notes (1, 7 and 9).
+- **`57d8919` `Fix:` REVERTED the join-arm P4 gate I added in `6dee6b4`** — the P2 re-run caught it
+  costing the shipped ranged-first plain 3v3 4.5 points of 2v1 conversion (75.9% -> 71.4%) and
+  doubling its dancing (2.1% -> 5.5%), isolated on a scratch copy with only the gate disabled. S3 (the
+  two-lane hop under an archer's shot) is OPEN again under every aiPress, pinned by a test. **`eb5d69d`
+  `Docs:`** the P2 table's sixth measurement at `57d8919`: `off` unchanged, ranged-first +3.6 to +34.8
+  points over it in 3v3, head to head 776 : 760. (The eighth verifier was briefed on `be56a22`, which
+  still had the gate: a finding about the gate is moot.)
 - **Board:** `b4d2c45` and `6c4d06a` — it had lagged all of 2026-09-28; `docs/handoffs/README.md` now
   asks every handoff for a `board:` field.
 
