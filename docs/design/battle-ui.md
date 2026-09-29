@@ -1015,35 +1015,37 @@ decision: `ss2BodyBlocks`, `57b2209`.)*
   | plain 2v2 | 8.3% / 9.4% / 9.4% | 0.0 / 1.3 / 1.3% | 18.3 / 4.2 / 4.2% | 50.9 / 50.4 / 50.4 |
   | plain 3v3 | 53.3 / 75.9 / 76.7% | 6.4 / 28.2 / 29.8% | 37.3 / 2.1 / 1.0% | 85.5 / 78.9 / 78.8 |
   | buffs 2v2 | 54.2 / 57.3 / 34.4% | 7.9 / 23.2 / 12.7% | 1.7 / 0.5 / 0.7% | 49.1 / 49.9 / 68.3 |
-  | buffs 3v3 | 50.0 / 84.8 / 76.6% | 9.7 / 32.0 / 29.8% | 28.4 / 1.4 / 2.7% | 95.0 / 67.5 / 84.3 |
-  | tricks 3v3 | 47.2 / 53.2 / 56.9% | 0.4 / 2.7 / 2.9% | 23.5 / 10.6 / 9.6% | 205.9 / 198.5 / 203.4 |
-  | crowd 3v3 | 53.3 / 75.9 / 75.9% | 4.3 / 29.2 / 31.1% | 41.3 / 2.7 / 1.4% | 203.4 / 192.7 / 192.9 |
+  | buffs 3v3 | 50.0 / 84.8 / 76.6% | 9.7 / 32.0 / 29.9% | 28.4 / 1.4 / 2.5% | 95.0 / 67.4 / 84.4 |
+  | tricks 3v3 | 47.2 / 52.1 / 56.1% | 0.4 / 2.9 / 3.0% | 23.5 / 9.0 / 9.2% | 205.9 / 198.5 / 203.0 |
+  | crowd 3v3 | 53.3 / 75.9 / 75.9% | 4.3 / 29.2 / 31.3% | 41.3 / 2.7 / 1.4% | 203.4 / 192.7 / 192.9 |
   | champions 2v2 | 97.9 / 97.9 / 96.9% | 19.0 / 21.2 / 17.9% | 2.8 / 1.0 / 0.7% | 36.2 / 36.2 / 39.6 |
-  | champions 3v3 | 78.8 / 82.4 / 78.8% | 3.4 / 3.8 / 17.3% | 6.0 / 2.0 / 3.6% | 61.6 / 62.2 / 68.9 |
+  | champions 3v3 | 78.8 / 82.4 / 78.8% | 3.4 / 3.8 / 17.1% | 6.0 / 2.0 / 3.4% | 61.6 / 62.2 / 68.8 |
 
-  *Measured at `57d8919`, the sixth measurement (the fifth was at `ab56337`); seven write-nothing
-  verifiers moved the code under it (`74c0014`, `92f9701`, `06beab0`, `463fe3f`, `ab56337`: a lane
+  *Measured at `25c2e8a`, the seventh measurement (the sixth at `57d8919`, the fifth at `ab56337`);
+  eight write-nothing verifiers moved the code under it (`74c0014`, `92f9701`, `06beab0`, `463fe3f`, `ab56337`: a lane
   shuttle when the far side was taken, a distant bow holding a side, early lane entry opening
   long-range taunts, the older arms re-queueing a fighter the press had stepped out, and the `off`
   baseline drifting; then `6dee6b4` and `be56a22`: a fighter resting with a spot open because an ally
-  blocked his walk, and my first detour's own regressions), and `57d8919` reverted a join-arm gate of
-  mine that this table caught costing plain 3v3 4.5 points and doubling its dancing. `off` is
-  identical to the fifth measurement in every cell. Head to head over the six measurements:
-  770 : 766, 773 : 763, 784 : 752, 774 : 762, 774 : 762, 776 : 760. "Dancing" counts
+  blocked his walk, and my first detour's own regressions), `57d8919` reverted a join-arm gate of
+  mine that this table caught costing plain 3v3 4.5 points and doubling its dancing, and `25c2e8a`
+  put both older-arm guards back at `ab56337`'s form after an eighth verifier refuted the guards I
+  had added, keeping only the detour. `off` is identical to the fifth measurement in every cell, and
+  so is every other cell but plain 3v3, which the detour moves up. Head to head over the seven
+  measurements: 770 : 766, 773 : 763, 784 : 752, 774 : 762, 774 : 762, 776 : 760, 774 : 762. "Dancing" counts
   every crowd-pleaser in a 2v1 phase; P1 stops it only while an ally fights, so what is left is before
   anyone engages, or a foe of the dancer's own still coming (P4).*
 
   - **P1 + going round, against `off` (ranged-first, the shipped variant):** in 3v3 the pair
-    converts a 2v1 far more often (plain +22.6 points, buffs +34.8, crowd +22.6, tricks +6.0,
-    champions +3.6; at `ab56337` plain was +22.0 and tricks +4.9), both members are on the lone foe 3-7x as often on the demo rosters, the dance
+    converts a 2v1 far more often (plain +22.6 points, buffs +34.8, crowd +22.6, tricks +4.9,
+    champions +3.6; at `ab56337` plain was +22.0), both members are on the lone foe 3-7x as often on the demo rosters, the dance
     while an ally fights a foe this gladiator could help against is gone (P1, pinned by
     `test/ss2-ai-press.test.js`), and demo-roster bouts get shorter (buffs 3v3 95 -> 67 turns).
     Champion bouts are within 1%. 2v2 moves less: the 2v1 there is usually over before a detour
     arrives. No bout failed to settle in any cell; no AI walk went nowhere; no lane shuttle of four
     or more in seeds 1-96 of champions 2/3v3, tricks 3v3 and buffs 2/3v3, either variant.
   - **Ranged-first against pincer-first: ranged-first is at least as strong.** Head to head (each
-    side a different variant, both colour assignments, 96 seeds, all eight rosters): **776 wins to
-    760 over 1,536 bouts** (774 : 762 at `ab56337`), pincer-first clearly weaker on buffs 2v2 (34.4% converted against 57.3%,
+    side a different variant, both colour assignments, 96 seeds, all eight rosters): **774 wins to
+    762 over 1,536 bouts**, pincer-first clearly weaker on buffs 2v2 (34.4% converted against 57.3%,
     bouts 68 against 50 turns) and buffs 3v3 (76.6 against 84.8). Pincer-first still corners more
     VISIBLY on champions (the pair on both sides of the lone foe 32% of 2v1 turns against 20% in 2v2,
     back attacks 14.6% of the pair's blows against 7.4%) and makes champion 3v3 bouts ~11% longer.
