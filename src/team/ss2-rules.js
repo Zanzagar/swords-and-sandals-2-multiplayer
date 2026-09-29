@@ -4482,9 +4482,11 @@ function ss2FoughtByAlly(view) {
 /**
  * ► **P4, FINISH YOUR OWN FIGHT: does the actor's own lane hold a living foe
  *   that no ally is fighting?** Then that foe is the actor's fight already.
- *   Shared by `ss2PressTarget` and — with the press on — the join arm in
+ *   ~~Shared by `ss2PressTarget` and — with the press on — the join arm in
  *   `chooseAiAction` (2026-09-28, a sixth verifier's S3), so the two cannot
- *   disagree about whose fight a foe is.
+ *   disagree about whose fight a foe is.~~ `ss2PressTarget`'s alone since
+ *   2026-09-29: the join-arm gate was measured to cost plain 3v3's 2v1
+ *   conversion and was reverted (see the join arm).
  */
 function ss2OwnFightUnfought(view) {
   const fought = ss2FoughtByAlly(view);
@@ -16255,8 +16257,16 @@ export function createSs2TeamRules({
         //   press on, a join that lands behind an ally is skipped while
         //   `ss2PressGoal` has an open spot; with none (both flanks held, the
         //   wall) queueing and waiting is still the answer, as before.
-        // ► **AND, WITH THE PRESS ON, NOT WHILE P4 SAYS THE ACTOR HAS A FIGHT
-        //   OF HIS OWN (2026-09-28, a sixth verifier's staged S3).** The same
+        // ► ~~**AND, WITH THE PRESS ON, NOT WHILE P4 SAYS THE ACTOR HAS A FIGHT
+        //   OF HIS OWN (2026-09-28, a sixth verifier's staged S3).**~~ **REVERTED
+        //   2026-09-29, MEASURED: the gate below cost the shipped ranged-first
+        //   plain 3v3 4.5 points of 2v1 conversion (75.9% without it, 71.4% with)
+        //   and more than doubled the dancing (2.1% of the free member's 2v1
+        //   turns, 5.5% with it; tools/ai-press-census.mjs, 96 seeds): gladiators
+        //   held by it waited for their own foe and played to the crowd instead of
+        //   joining a fight. S3's two-lane hop is OPEN again, under every aiPress
+        //   as it always was (test/ss2-ai-press.test.js pins it).** What it was:
+        //   The same
         //   foe's-reach reading made an archer shooting an ally look like that
         //   ally's fight, so the lane looked covered and the actor left it to
         //   join the next lane's, where the press had no open spot; from there
@@ -16270,8 +16280,7 @@ export function createSs2TeamRules({
         //   gladiator to leave his own fight for a 2-on-1, and there the dial
         //   wins (test/ss2-rank-join.test.js, whose four dial tests my first
         //   cut of this guard broke).
-        if (positionedInDepth
-          && !(aiPress !== "off" && rankJoinSurplus >= 0 && ss2OwnFightUnfought(view))) {
+        if (positionedInDepth) {
           const join = ss2RankToJoin(view, rankJoinSurplus, rankStride);
           const step = join ? options.find((option) => option.type === join) : null;
           if (step) {

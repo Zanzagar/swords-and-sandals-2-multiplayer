@@ -683,7 +683,8 @@ for (const aiPress of ["ranged-first", "pincer-first"]) {
 }
 
 /**
- * ► **P4 BINDS THE JOIN ARM TOO, WITH THE PRESS ON — a sixth write-nothing
+ * ► ~~**P4 BINDS THE JOIN ARM TOO, WITH THE PRESS ON**~~ **(reverted 2026-09-29,
+ *   below)** — a sixth write-nothing
  *   verifier's staged S3, 2026-09-28 (the same at 06beab0, ab56337 and under
  *   `aiPress: "off"`).** The join arm counts an ally "engaged" by the FOE's
  *   reach as well, and a drawn bow's is ~4,500, so an archer shooting blue-1
@@ -702,16 +703,19 @@ const archerOwnLane = () => [
   { id: "blue-2", team: "blue", x: 2014, y: SECOND, sturdy: true, fields: { strength: 20 } },
   { id: "blue-3", team: "blue", x: 1069, y: FRONT, sturdy: true }
 ];
-for (const aiPress of ["ranged-first", "pincer-first"]) {
-  test(`${aiPress}: with an archer in his own lane that no ally fights, the free member closes on him rather than hop between two fights`, () => {
+// ► **REVERTED 2026-09-29, MEASURED — S3 IS OPEN AGAIN, UNDER EVERY aiPress.** The
+//   P4 gate on the join arm fixed this layout but cost the shipped ranged-first
+//   plain 3v3 4.5 points of 2v1 conversion and more than doubled its dancing
+//   (tools/ai-press-census.mjs: 75.9% / 2.1% without it, 71.4% / 5.5% with). The
+//   two tests that asserted the fix are replaced by this one, which pins the hop
+//   as it stands so that a real fix has to move it on purpose. ~~ranged-first /
+//   pincer-first: "the free member closes on him rather than hop between two
+//   fights"~~ (they passed from 6dee6b4 to this revert).
+test("OPEN: with an archer in his own lane that no ally fights in melee, the free member hops between two lanes' fights, under every aiPress", () => {
+  for (const aiPress of ["off", "ranged-first", "pincer-first"]) {
     const run = stagedRun(archerOwnLane(), { aiPress, actions: 150 });
-    assert.ok(run.shuttle("blue-3") < 4, `blue-3 alternated rank steps ${run.shuttle("blue-3")} turns running`);
-    assert.ok(run.struck("blue-3", "red-1"), "blue-3 closes on the archer and strikes");
-  });
-}
-test("aiPress \"off\" keeps the join arm's two-lane hop: the AI before the press, kept exact as the baseline", () => {
-  const run = stagedRun(archerOwnLane(), { aiPress: "off", actions: 150 });
-  assert.ok(run.shuttle("blue-3") >= 4, `off must be unchanged here (${run.shuttle("blue-3")})`);
+    assert.ok(run.shuttle("blue-3") >= 4, `${aiPress}: the hop is pinned as open (${run.shuttle("blue-3")})`);
+  }
 });
 
 /**
