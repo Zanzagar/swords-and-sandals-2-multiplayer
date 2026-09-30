@@ -1,5 +1,52 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-29 P lives, Z binds; collision geometry is next
+
+Zanzagar selected `RCS-03E2C-A`. Every P proposal retains materially
+operative custodian approval at its live cut; every Z disposition is
+irrevocably bound before that exact empty-settlement opportunity's facts are
+available. Actual `{}` and every native consequence remain final. P includes
+nonempty substitutes, so this prevents live audition of Z's ledger-bearing
+absence proposal, not every failure-associated live proposal. Parent E2-A is
+still armed and unfired under its existing qualified production condition.
+
+The prerequisite audit found old `RCS-04A` overcompressed. An initial audit
+proposed eight child rows; two independent challenges derived maximal frozen
+cohort atomicity and target bucketing rather than turning them into fake
+choices, then caught one substantive question a six-row repair would have
+lost: whether contributor count/cause may influence system rank or probability.
+The final amendment replaces old counted RCS-04A with seven conditional rows:
+collision geometry; genuine-conflict result; authority; contributor basis;
+system randomness; system-kernel scope; and participant timing.
+
+The 163-row register now has **23 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A1, 51
+`PRUNED`, 81 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 24`**. The authoritative decision record remains byte-unchanged.
+
+`RCS-04A1` chooses the release catalog's reachable collision geometry:
+
+- **A — proposals are always isolated.** Every frozen cohort contains one
+  approved proposal. Simplest, but the selected plurality of causes never
+  mechanically meets at settlement.
+- **B — target-concordant coexistence only.** Some cohort contains several
+  distinct proposals, but every cohort names one target. Contributor IDs stay
+  preserved and that target commits as exactly one assignment transition. A1
+  itself grants no count-based bonus; later payoff and disclosure remain in
+  RCS-05/08 and RCS-02. This is the cleanest direct local Achintya Bheda Abheda
+  fit.
+- **C — genuine target conflict is supported. Recommended, with B as the
+  qualified simplicity fallback.** At least one cohort contains different
+  proposed targets; concordant cohorts may also exist. This creates alignment,
+  exposure, and incompatible-biography play. It opens A2 to decide what such a
+  conflict settles. Risks are deliberate jamming, wasted Rites, unreadable no-
+  change, cause suppression, and starving real D5 return histories.
+
+Recommend C because it lets the already selected cause plurality become
+gameplay rather than lore. Use B if optimized play mainly manufactures cheap
+conflicts to veto X/M/Z, suppresses cause families, makes paid Rites or D5
+returns unreliable, or cannot be explained quickly. Ask only for A1 A, B, C,
+or an explicit replacement.
+
 ## 2026-09-29 opposite cause timings selected; P/Z orientation is next
 
 Zanzagar selected `RCS-03E2-C` with `RCS-03E2-A` as the qualified
@@ -12593,7 +12640,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 01:46 UTC — P-versus-Z timing orientation is next](docs/handoffs/2026-09-30-0146--relic-timing-orientation-next.md)**
+[2026-09-30 02:19 UTC — Relic collision geometry is next](docs/handoffs/2026-09-30-0219--relic-collision-geometry-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

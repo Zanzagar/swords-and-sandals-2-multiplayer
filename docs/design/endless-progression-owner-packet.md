@@ -439,9 +439,15 @@ E1X-B as the qualified cause-local agency fallback: every independently lived-
 event X proposal follows fixed law, while the event and all native consequences
 remain final. E1XA/E1XA1 prune. Zanzagar then selected RCS-03E2-C with E2-A
 as the qualified production fallback: participant-contingent P and Z approvals
-use opposite cause-uniform timings. **RCS-03E2C is now the sole owner-facing
-choice under SR-04:** whether P is live and Z advance-bound or P is advance-
-bound and Z live. The current register has 157 rows and `Phi_SR = 19`.
+use opposite cause-uniform timings. Zanzagar then selected **RCS-03E2C-A**:
+every P proposal retains live custodian approval while every Z disposition is
+bound before its exact empty-settlement opportunity is known. A collision
+audit then found that old RCS-04A hid seven conditional product decisions;
+the forced cohort atomicity and target-bucketing rules remain derived rather
+than becoming two fake cards. **RCS-04A1 is now the sole owner-facing choice
+under SR-04:** whether approved proposals never coexist, may coexist only when
+their targets agree, or may contain a genuine distinct-target conflict. The
+current register has 163 rows and `Phi_SR = 24`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -27712,7 +27718,7 @@ E2 moves to `DIR-SELECTED`; E2C becomes the sole `OWNER-OPEN` row. The
 `PRUNED`, 80 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 19`**. The authoritative decision record remains unchanged.
 
-### RCS-03E2C — P-versus-Z timing orientation — active owner choice
+### RCS-03E2C — P-versus-Z timing orientation — A selected
 
 Retain E2's live set `L_v`, universal P opportunity set `O^P_v`, and nonempty
 proper both-dialect Z opportunity set `O^Z_v`. E2-C has already fixed that
@@ -27755,6 +27761,124 @@ Either answer moves E2C to `DIR-SELECTED` and opens RCS-04A as the sole
 `OWNER-OPEN` at RCS-04A, 51 `PRUNED`, 81 `DIR-SELECTED`, 5 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 18`**. The authoritative decision record
 remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-29:** **A, P live and Z
+advance-bound.** Thus `L_v=O^P_v`. After each exact P proposal is identified,
+its owning combatant's custodian retains a materially operative approve/
+withhold coordinate through the live approval cut. Every Z disposition is
+irrevocably bound before that ledger-bearing empty-settlement opportunity's
+specific facts are available. The actual `{}` settlement and all of its native
+consequences remain final under either disposition.
+
+This selects orientation only. P includes nonempty final substitutes, so live
+P does not eliminate every failure-associated or downside-shaped live
+proposal; it narrowly prevents live audition of Z's actual empty-settlement
+proposal. Parent E2-A remains armed and unfired under its existing production-
+failure condition. RCS-02 still owns exact disclosure, defaults, timeout,
+communication, and unavailable-custodian recovery; RCS-13 owns the advance
+bind/rebind horizon. An upstream approval-source change reopens timing under
+the already selected rules rather than inheriting this P/Z label.
+
+> **Forty-seventh prerequisite correction, 2026-09-29 — old RCS-04A was
+> overcompressed.** It named collision precedence and settlement as one card,
+> although collision reachability, the admissible result, resolution
+> authority, contributor sensitivity, stochasticity, system-kernel scope, and
+> participant timing can each change shipped play while the other coordinates
+> remain fixed. A first read-only audit proposed eight children. Two targeted
+> challenge audits rejected that count: the selected topology already forces
+> one maximal frozen cohort per active Relic, authoritative source revision,
+> and canonical semantic cut, and grouping proposals by identical target while
+> retaining every contributor ID is representation rather than a player
+> choice. The second challenge also caught what a six-row repair would lose:
+> whether same-target contributor count or cause composition may influence a
+> system winner changes route farming and odds, so that question remains an
+> explicit conditional card.
+>
+> The repaired non-counting RCS-04A parent therefore owns these invariants.
+> Independently approved proposals for the same active Relic, same
+> authoritative pre-assignment/source revision, and same canonical cut freeze
+> into one maximal cohort before any collision commit. Settlement is one
+> semantic atomic compare-and-set: no intermediate assignment becomes
+> authoritative or observable. Every proposal remains individually identified
+> and is also grouped into its proposed-target class. The assignment remains
+> unchanged or becomes exactly one target named by at least one still-valid
+> proposal; no synthetic target, sequential same-cut transition, stale rebase,
+> delivery-order precedence, or proposal banking is admitted. Settlement
+> terminally dispositions every cohort member while preserving every native
+> P/Z/X/M event, result, payment, and lock. RCS-04B later owns committed
+> artifact/definition/lineage identity, not a new target.
+>
+> Seven counted conditional rows replace old counted RCS-04A:
+>
+> 1. `RCS-04A1` — reachable collision geometry: no multi-proposal cohort,
+>    target-concordant coexistence only, or genuine distinct-target conflict;
+> 2. `RCS-04A2` — admissible settlement result for genuine conflict;
+> 3. `RCS-04A3` — system versus participant resolution authority when a
+>    nonnull conflict result remains possible;
+> 4. `RCS-04A4` — under system resolution, whether contributor multiplicity
+>    and cause composition are attribution-only or may affect target rank/
+>    probability;
+> 5. `RCS-04A5` — under system resolution, deterministic-only versus genuine
+>    stochastic support;
+> 6. `RCS-04A6` — under system resolution, one catalog-wide kernel grammar
+>    versus fixed definition/version-local kernels, with disclosure retained
+>    by RCS-02; and
+> 7. `RCS-04A7` — under participant resolution, advance-bound doctrine versus
+>    live frozen-cohort choice.
+>
+> A1-A/B prune A2-A7. A1-C opens A2. A2's null-only route prunes A3-A7;
+> any target-capable route opens A3. System authority opens A4-A6 and prunes
+> A7; participant authority prunes A4-A6 and opens A7. Exact rankings, weights,
+> probabilities, and context maps remain AUTHOR/SPEC/TUNE only after their
+> authority and semantic basis are selected. Any mixed-authority, mixed-timing,
+> or cohort-class partition not named by this tree requires an owner-visible
+> amendment rather than hidden authoring.
+>
+> Replacing one row with seven raises the register from 157 to **163 rows**.
+> After E2C-A, it contains **23 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A1, 51
+> `PRUNED`, 81 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+> `Phi_SR = 24`**. The authoritative decision record remains unchanged.
+
+### RCS-04A1 — reachable collision geometry — active owner choice
+
+Let `K` be the maximal frozen cohort of independently approved proposals for
+one active Relic, one authoritative pre-assignment/source revision, and one
+canonical semantic cut. Let `T(K)` be the set of distinct proposed assignment
+targets represented in `K`. Proposal IDs remain distinct even when their
+targets agree. This card chooses which collision geometry the fixed release
+catalog must actually make reachable:
+
+| Choice | Reachable geometry | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — proposals are always isolated** | Every reachable cohort has `|K|=1`. Authored cause opportunities may occur at different cuts, but no active Relic/source revision can ever present two approved proposals to one settlement. A2-A7 prune. | Simplest and most legible, with no collision exploits, prompts, precedence caste, or arbitration burden. It also makes the selected plurality of P/Z/X/M biographies mechanically pass one another without ever meeting; RCS-04A becomes almost entirely defensive plumbing. The local ideal fit is partial only: a cause and Relic interact, but distinct truthful causes never remain jointly operative at settlement. | Ashen's positive result may propose `TEMPERED` at one cut and an admitted Rite may propose `MERCY` at another, but authoring must make it impossible for both to inhabit the same `K`. Each settles alone. |
+| **B — coexistence is target-concordant only** | At least one reachable cohort has `|K|>1`, but every reachable cohort has `|T(K)|=1`. All contributor IDs remain preserved; their shared target commits as exactly one assignment transition. A1 itself grants no count-based power, reward, recurrence, or progression multiplier. A2-A7 prune. | This is the cleanest direct local *Achintya Bheda Abheda* expression: distinct causal histories remain real while jointly supporting one becoming. It adds buildcraft around alignment without target conflict or veto play. Its cost is an authoring constraint that can make supposedly independent causes feel prearranged, and the collision system has no adversarial tension. | A P manifestation and an X event both propose `TEMPERED`. They remain two distinct preserved proposals but commit one `TEMPERED` assignment transition. No reachable cohort may instead contain `TEMPERED` and `MERCY`. |
+| **C — genuine target conflict is supported** | At least one reachable cohort has `|T(K)|>1`; target-concordant cohorts may also exist and behave as in B. C opens A2 to decide what a genuine conflict may settle. | **Recommended higher-ceiling direction, with B as the qualified simplicity fallback.** Multiple biographies can genuinely disagree about what one continuing Relic should become, creating exposure management, target-alignment buildcraft, and meaningful collision risk without yet choosing a winner. Unity and difference are both operative, but conflict itself is not a stronger theological claim; the strongest direct fit remains concordance. Risks are deliberate veto/jamming, wasted paid Rites, opaque no-change results, cause-route suppression, and starving D5 return witnesses. | Ashen's P manifestation proposes `TEMPERED` while its already-admitted M Rite proposes `MERCY` in the same frozen cohort. Neither delivery order nor live P approval chooses the winner. A2 next decides whether one proposed target must win, neither may win, or a bounded target/null surface exists. |
+
+A/B/C are the admitted catalog-level geometries. A multi-proposal cohort may
+not be split into serial writes, carried across cuts, or rebased after a first
+commit. Under B/C, same-target contributors settle one assignment transition;
+A1 itself creates no numerical or progression multiplier. RCS-05/RCS-08 still
+own any later bounded payoff or cross-system budget, and RCS-02 owns what
+contributor information a player sees. Whether contributor multiplicity or
+cause composition later influences a **system arbitration among different
+target classes** is reserved expressly to A4. RCS-04B still owns how the
+settled target plus preserved contributor identities become committed artifact,
+definition, and lineage identity.
+
+Recommend **C, with B as the qualified simplicity fallback**. C lets the
+selected cause plurality matter as gameplay rather than lore: players can
+build for concordance, manage incompatible routes, and sometimes accept that
+one Relic is being pulled toward genuinely different futures. Fall back to B
+if optimized play mainly manufactures cheap conflicts to veto X/M/Z, ordinary
+collisions make paid Rites or D5 returns unreliable, players suppress whole
+cause families to avoid conflict, or the result cannot be explained quickly.
+B is invalid as a fallback if its authoring merely disguises one dominant
+target or makes multi-cause support decorative.
+
+Any answer must preserve at least one practically reachable D5-B compatible
+return history per transforming definition or reopen D5. A letter selects a
+worksheet direction only; it does not amend the authoritative decision record,
+authorize implementation, choose exact catalogs, or fire a fallback.
 
 ## Session protocol and evidence
 

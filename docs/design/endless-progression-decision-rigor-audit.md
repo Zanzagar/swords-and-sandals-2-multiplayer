@@ -11510,3 +11510,74 @@ E2 moves to `DIR-SELECTED` and E2C becomes the sole `OWNER-OPEN` row. The
 Either E2C orientation then opens RCS-04A with **17 `SCREEN`, 1 `OWNER-OPEN`,
 51 `PRUNED`, 81 `DIR-SELECTED`, and `Phi_SR = 18`**. The authoritative
 decision record remains unchanged.
+
+### RCS-03E2C disposition and RCS-04A atomicity audit — 2026-09-29
+
+Zanzagar selected **E2C-A, P live and Z advance-bound**. Thus `L_v=O^P_v`:
+every exact P proposal retains materially operative custodian authority through
+its live approval cut, while every Z disposition is irrevocably bound before
+that exact ledger-bearing empty-settlement opportunity's facts are available.
+The actual absence and all native consequences remain final. P includes
+nonempty substitutes, so the narrow anti-audition claim concerns Z's actual
+empty-settlement proposal; P-live does not eliminate every failure-associated
+live proposal. Parent E2-A remains armed and unfired.
+
+The next-prerequisite audit found old RCS-04A non-atomic. Its single phrase
+“collision precedence and settlement” admitted independently different worlds
+for collision reachability, nullability, authority, contributor weighting,
+randomness, kernel scope, and participant timing. One read-only verifier first
+proposed eight counted children. Two independent challenge passes rejected two
+parts of that structure while preserving its substantive warning:
+
+- collision cohort timing is **derived**, not an owner choice. Selected cut-
+  atomic topology and D5 exact-successive-state composition force the maximal
+  set of independently approved proposals sharing one active Relic,
+  authoritative pre-assignment/source revision, and canonical semantic cut to
+  freeze before one atomic compare-and-set. Serial application would apply a
+  stale edge, silently rebase it into a new proposal, or create an unselected
+  same-cut chain; cross-cut retention would introduce proposal banking;
+- target bucketing is also **derived representation**. Same-target proposal
+  IDs remain distinct and traceable, but they name one assignment candidate.
+  Erasing contributor IDs is invalid. Calling those proposals “separate
+  competitors” instead changes play only through a later rule that uses their
+  count or causes;
+- that later contributor-sensitivity question is **not** representation. In a
+  cohort `P->b`, `X->b`, `M->c`, uniform proposal weighting gives `b` two of
+  three shares while uniform target weighting gives it one of two. Rank,
+  probability, route farming, and disclosure differ, so a six-row repair that
+  left contributor basis implicit would still be flattened.
+
+The smallest defended repair is therefore seven counted conditional rows:
+
+1. A1, reachable collision geometry;
+2. A2, admissible genuine-conflict settlement result;
+3. A3, system versus participant resolution authority;
+4. A4, contributor-neutral versus contributor-sensitive system arbitration;
+5. A5, deterministic-only versus stochastic-capable system settlement;
+6. A6, catalog-wide versus definition/version-local system kernel; and
+7. A7, advance-bound versus live participant collision resolution.
+
+The parent invariant additionally forbids synthetic targets, same-cut
+sequential assignment, stale rebasing, delivery-order precedence, and loser
+banking. Every proposal is terminally dispositioned, while its native cause,
+event, result, payment, and lock remain. RCS-04B receives only null or one
+already-proposed target plus preserved proposal/contributor identities and
+owns the later committed artifact/definition/lineage identity.
+
+A1 passes the admission test with three exhaustive admitted catalog-level
+geometries. A forbids every multi-proposal cohort. B requires at least one
+multi-proposal cohort but makes every such cohort target-concordant. C requires
+at least one genuine distinct-target cohort and permits concordant cohorts as
+well. These worlds change required content, build risk, counterplay, and
+whether the selected cause plurality ever meets at settlement. Recommend
+**A1-C with A1-B as the qualified simplicity fallback**. C creates target-
+alignment and exposure-management play; B is the cleanest direct local
+standing-ideal expression because distinct causes jointly support one
+becoming. Conflict itself is not a stronger theological claim. Fire B only if
+C primarily enables cheap veto/jamming, suppresses whole cause families,
+makes paid Rites or D5 returns unreliable, or cannot be explained quickly.
+
+Replacing old counted RCS-04A with seven rows raises the register from 157 to
+163. After E2C-A it contains **23 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A1, 51
+`PRUNED`, 81 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 24`**. The authoritative decision record remains unchanged.
