@@ -12597,3 +12597,128 @@ pruning, or reclassifying a row. The register is **181 rows: 19 `SCREEN`, 1
 `OWNER-OPEN` at RCS-04A6, 61 `PRUNED`, 93 `DIR-SELECTED`, 5 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`**. Any A6 answer would open A7 at
 `Phi_SR = 19`. The authoritative decision record remains unchanged.
+
+### RCS-04A6 disposition and policy-commitment-timing audit — 2026-09-30
+
+Zanzagar selected **RCS-04A6-A with RCS-04A6-B as the qualified artifact-
+identity fallback**. Every canonical complete automatic collision law must be
+a bounded expression in one finite, versioned, transferable player-semantic
+grammar `Γ`. Laws retain distinct recipes, parameters, A4 sensitivity classes,
+and A5 variance classes, but may not hide unrelated calculi behind custom
+operations, arbitrary programs, opaque law-ID dispatch, or nominal modes with
+law-local meanings.
+
+A6-B is armed and unfired. It may replace A only if every honest shared
+grammar flattens the strongest Relic identities, creates a universal solved
+calculus, or survives only through hidden custom dispatch, and at least two
+irreducible local dialects remain compactly teachable, causally forecastable,
+non-token, non-dominated equal-ceiling sidegrades without complexity premium,
+novice trap, Rite/D5 unreliability, redraw shopping, cheap cause farming,
+teammate opacity, or unbounded validation/migration burden. Grammar unity is
+not itself *Achintya Bheda Abheda*; the direct fit remains Soul intention,
+contributor histories, and immutable Relic law staying distinct and jointly
+operative in one settlement.
+
+Three bounded read-only audits then attacked A7's option topology, its boundary
+against E2/E2C and RCS-02/RCS-13, and its gameplay recommendation. All three
+independently found **REPAIR, not reclassification**. A7 changes legal actions,
+usable information, commitment state, prompt burden, and exploit exposure, so
+it passes §3.1. But the old binary shorthand omitted a coherent catalog in
+which some fixed policy contracts bind before exact collision information and
+others retain a live whole-covenant choice.
+
+Retain the nonempty exact-`{P}` policy-contract class `C_v^P`. B1I-A already
+makes every reachable genuine conflict on each member materially policy-
+responsive. Binding a policy earlier does not make the opportunity intrinsic
+`I`; the earlier participant covenant remains a material input to the later
+law.
+
+Every fixed contract/version receives one stable timing doctrine:
+
+- **advance-bound:** the indivisible whole covenant is irrevocable before the
+  current opportunity's proposal IDs, targets, contributors, causes, and
+  frozen-cohort facts become lawful inputs to the choice; or
+- **live-capable:** after maximal approved cohort `K` freezes, but before `Γ`
+  evaluates, any A5 draw occurs, or a target commits, at least two lawful whole
+  covenants remain selectable and materially change the complete law for that
+  held-fixed `K`.
+
+A standing default with a lawful live override is live. A current-target-
+naming action is direct `D`, not policy `P`. Timing may not vary inside a fixed
+contract by target, favorability, contributors, context, holder availability,
+timeout, owner, instance, or opportunity. Such a dual/contextual timing profile
+is player-material and requires an explicit register amendment.
+
+The authoritative sequence is:
+
+`proposal approval final → maximal K freezes → whole covenant final → Γ evaluates → one A5 realization if needed → one target commits`.
+
+This distinguishes A7 from its neighbors. E2/E2C governs approve/withhold
+authority for individual P/Z proposals and therefore changes `K` membership.
+A7 changes the complete collision law with `K` held fixed. RCS-02 retains the
+holder, disclosure, communication, default, timeout, and unavailable-holder
+contract. RCS-13 retains the exact earlier equip/encounter/Circuit bind,
+rebind, and lock-duration horizon. RCS-15 retains persistent identity, state
+lineage, versioning, and migration; RCS-16 retains storage, transaction, and
+fault-repair realization, including serialization and reconnect behavior. A3X
+later maps the already-selected timing-inclusive legal-action signatures
+across transformation dialects.
+
+Let `L_v^P` contain the stable live-capable contracts. The exhaustive repaired
+topology is:
+
+1. **A — universal advance binding:** `L_v^P=∅`;
+2. **B — universal live capability:** `L_v^P=C_v^P`; and
+3. **C — stable timing-family coexistence:**
+   `∅⊊L_v^P⊊C_v^P`.
+
+C requires at least one non-token contract of each timing family. It needs no
+new child: the families are defined by timing, so swapping unnamed contracts
+between them is catalog membership. Exact incidence and intersections with
+A4/A5 families remain AUTHOR/SPEC absent a stronger independent-availability
+promise. A3X is the already-registered correlation card for complete timing-
+inclusive action signatures and forces no answer under A7-C.
+
+The matched boundary fixes a frozen `K={P→DEFIANCE, M→MERCY}`. Under A,
+Mara's earlier Merciful Chorus or Defiant Dissonance covenant already governs
+the shared `Γ`; no collision-time action exists. Under B, that same `K`
+freezes and Mara then selects one whole covenant before evaluation. Under C,
+Oathbound Ashen uses the first doctrine while Veil of Answering Echoes uses
+the second. These catalogs differ in a legal action, the information available
+to it, current-result shopping exposure, and multiplayer prompt/default burden.
+
+Recommend **A, with C as the qualified artifact-identity/direct-participation
+fallback**. A gives the selected intrinsic, policy, and direct profiles clean
+roles: artifact self-will, prospective doctrine, and live target choice. It
+avoids stacking a collision-policy prompt after live P approval, prevents
+current-cohort target/probability shopping, and protects advance-bound Z from
+practical audition through a later policy choice. Its ideal fit is partial
+across time: prior Soul covenant, later distinct contributors, and immutable
+Relic grammar remain jointly operative.
+
+Fire C only if well-disclosed advance policies still become recurrent solved
+defaults, forgotten chores, emotionally remote choices, or arbitrary Rite
+regret; at least one live identity supplies repeatable policy-level play that
+cannot honestly be represented by direct `D`; and both families remain one-
+sentence teachable, non-token, non-dominated equal-ceiling sidegrades with no
+timing or complexity compensation. Live bundles may not rewrite proposal
+production, approval, routing, payments, contributor facts, or cohort
+membership; inspect a draw/provisional result; recreate Z failure audition,
+mandatory Rite insurance, cheap returns, or target-per-covenant pseudo-direct
+choice. B is the class-wide live-agency escalation if advance binding fails
+everywhere and every contract clears those gates.
+
+One frozen cohort, one frozen menu, and one covenant commitment are mandatory.
+Cancellation, timeout, save/load, reconnect, retry, or replay cannot change
+the menu or reopen a committed covenant. Persistence must distinguish cohort-
+frozen/policy-pending, policy-committed/result-unrealized, and result-committed
+phases. Solver/RL and self-play map and attack covenant dominance, live-
+information value, regret, Rite/D5 reliability, Z audition, prompt frequency,
+timeout exposure, and teammate externality; human tests retain authority over
+fun, comprehension, trust, blame, and coordination.
+
+A6-A moves A6 to `DIR-SELECTED` and A7 to `OWNER-OPEN` without adding,
+pruning, or reclassifying a row. The register is **181 rows: 18 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A7, 61 `PRUNED`, 94 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**. Any A7 answer would open A3X at
+`Phi_SR = 18`. The authoritative decision record remains unchanged.

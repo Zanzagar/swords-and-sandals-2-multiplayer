@@ -1,6 +1,94 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 one collision grammar; policy commitment timing is next
+
+Zanzagar selected **RCS-04A6-A with RCS-04A6-B as the qualified artifact-
+identity fallback**. Every canonical complete automatic collision law must be
+a bounded expression in one finite, versioned, transferable player-semantic
+grammar. Laws retain distinct recipes, parameters, sensitivity classes, and
+variance classes, but custom operations, arbitrary law programs, opaque law-
+ID dispatch, and nominal modes with unrelated meanings cannot fake transfer.
+
+A6-B is armed and unfired. It replaces A only if every honest bounded shared
+grammar flattens the strongest Relic identities, creates one universal solved
+calculus, or survives only through hidden custom dispatch—and at least two
+irreducible local dialects remain compactly teachable, causally forecastable,
+non-token, non-dominated equal-ceiling sidegrades without complexity premium,
+novice trap, Rite/D5 unreliability, redraw shopping, cheap cause farming,
+teammate opacity, or unbounded validation/migration burden. Grammar unity is
+not itself *Achintya Bheda Abheda*.
+
+Three bounded read-only A7 audits unanimously found that A7 remains one owner
+card but its old “advance-bound versus live” binary omitted a meaningful stable
+mixed catalog. A timing doctrine changes whether a legal action exists after
+exact collision information is available. The repair adds C without adding a
+row or promising timing inside every A4/A5 family.
+
+The register is **181 rows: 18 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A7, 61
+`PRUNED`, 94 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 19`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-04A7` chooses when the indivisible authored whole covenant on an exact-
+`{P}` policy contract becomes irrevocable:
+
+- **A — every policy contract is advance-bound. Recommended.** The covenant
+  locks before the current opportunity's proposal IDs, targets, contributors,
+  causes, and frozen-cohort facts are available. Policy specialists reward
+  prospective doctrine; direct specialists retain live target choice. This
+  prevents post-cohort target/probability shopping, sequential P-approval plus
+  policy prompts, quarterbacking, and live Rite insurance. Costs are
+  configuration chores, solved defaults, forgotten commitments, emotional
+  distance, and possible Rite regret.
+- **B — every policy contract is live-capable.** After maximal cohort `K`
+  freezes but before grammar evaluation, any stochastic draw, or target
+  commit, every policy contract offers at least two whole covenants that
+  materially change the complete law for that same `K`. This maximizes
+  immediate Soul agency but puts a live option on every policy conflict and
+  risks prompt chains, result shopping, Z audition, stalls, blame, and
+  disguised direct control.
+- **C — stable advance-bound and live-capable contract families coexist.** At
+  least one fixed contract uses each doctrine. This is the qualified artifact-
+  identity/direct-participation fallback: vow-like Relics commit prospectively,
+  while answering Relics meet the frozen conflict. It also creates two timing
+  grammars and the sharpest live-policy premium and novice-trap risk.
+
+Recommend **A with C as the qualified artifact-identity/direct-participation
+fallback**. A preserves clean roles for intrinsic, policy, and direct Relics.
+Fire C only if well-disclosed advance policy still becomes a recurrent solved
+default, forgotten chore, emotionally remote choice, or arbitrary source of
+Rite regret; at least one live identity creates repeatable policy-level play
+that cannot honestly be represented by direct control; and both families are
+one-sentence teachable, non-token, non-dominated equal-ceiling sidegrades with
+no timing or complexity compensation. B is the class-wide live-agency
+escalation, not the fallback.
+
+The sequence is fixed:
+
+`proposal approval final → maximal K freezes → whole covenant final → shared grammar evaluates → one draw if needed → one target commits`.
+
+E2/E2C therefore still own individual proposal admission and cohort
+membership. RCS-02 owns holder/disclosure/default/recovery; RCS-13 owns the
+exact earlier bind/rebind horizon. Live covenant selection may not rewrite
+proposal production, approval, routing, payment, contributor facts, or `K`;
+inspect a draw or provisional result; or alias one covenant to each current
+target. One frozen cohort receives one frozen menu and one atomic covenant
+commitment across timeout, save/load, reconnect, retry, and replay.
+
+Timing is stable by contract/version. Contextual or dual-timing contracts need
+an owner-visible amendment. Exact timing membership and intersections with
+A4/A5 families remain AUTHOR/SPEC. A3X later maps the selected timing-inclusive
+legal-action signatures across transformation dialects. Any A7 answer opens
+A3X at `Phi_SR = 18`.
+
+The full gear/progression mockup refresh remains an SR-12 closeout obligation
+in `docs/design/endless-build-system-map.svg`; do not update it piecemeal while
+the Relic contract still moves.
+
 ## 2026-09-30 reliable and fateful laws coexist; transferable collision grammar is next
+
+**Superseded for navigation by the section above.** Its A6 card and
+`Phi_SR = 20` checkpoint predate the selected A answer and A7 audits.
 
 Zanzagar selected **RCS-04A5-C with RCS-04A5-A as the qualified policy-
 mastery/multiplayer-trust/Rite-and-return fallback**. The canonical complete
@@ -13527,7 +13615,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 20:26 UTC — Transferable collision grammar is next](docs/handoffs/2026-09-30-2026--relic-collision-grammar-next.md)**
+[2026-09-30 21:03 UTC — Policy commitment timing is next](docs/handoffs/2026-09-30-2103--relic-policy-commitment-timing-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
