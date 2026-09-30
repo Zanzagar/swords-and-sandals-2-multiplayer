@@ -1,12 +1,78 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 proposed target must settle; conflict dialect is next
+
+Zanzagar selected `RCS-04A2-A` with `RCS-04A2-C` as the qualified fairness
+fallback. Every genuine distinct-target conflict must settle exactly one
+still-valid proposed target; the authoritative source assignment cannot remain
+merely because proposals disagree. A2-C is armed and unfired. It may replace A
+only if every viable target-forcing resolver causes material arbitrary or
+involuntary harm while a target/null domain remains legible, non-dominated,
+anti-jam, Rite-safe, and D5-safe. Firing it reopens the complete target-only
+authority/control subtree. A1-B remains the deeper replacement if genuine
+conflict itself fails.
+
+Three read-only authority/gameplay/dependency audits and one read-only
+adjudication broke old RCS-04A3 before presentation. A participant setting can
+materially change a target law while immutable Relic semantics still compose
+inputs or complete it; that is neither exclusive system authority nor
+participant-total authority. Direct actual-result control, policy-mediated
+control, policy-coordinate recombination, constructive policy language, and
+participant-authored context branches also expose distinct legal actions and
+cannot hide inside holder, timing, or AUTHOR work.
+
+The finite repair adds one conflict-dialect prerequisite and replaces old
+counted A3 with twelve conditional rows: material participant-control
+prevalence; configurable-class and intrinsic-complement dialect incidence;
+six exact control-form-profile splits; policy-coordinate recombinability;
+constructive policy language; and conditional context branching. Two final
+adversarial passes caught that “support for both” first collapsed separate
+contracts with same-contract support, then collapsed context-separated forms,
+same-opportunity choice, and contextual loss of one form. The six splits
+exhaust the seven nonempty fixed-contract profiles over policy-only, direct-
+only, and both coavailable. A4–A6 govern complete automatic resolver laws
+after applicable participant configuration. A7 governs policy timing only.
+RCS-02 retains exact holder/information/default, and RCS-13 retains binding
+horizon.
+
+The new prerequisite is `RCS-04A1C`, because A1-C required genuine conflict
+somewhere without saying which transformation dialects can reach it:
+
+- **A — state conflict only. Qualified clarity fallback.** At least one
+  remembered-condition definition supports distinct-target collision; every
+  boundary-attunement cohort remains isolated or target-concordant. This is
+  easiest to explain but makes boundary Relics structurally safer/simpler.
+- **B — boundary conflict only.** At least one remembered-attunement definition
+  supports conflict; every state-condition cohort remains isolated or
+  concordant. This makes disagreement about how a Relic listens distinctive,
+  but puts the harder dialect under all collision complexity.
+- **C — both dialects support conflict. Recommended.** At least one state and
+  one boundary definition each support genuine conflict. This prevents one
+  dialect from becoming the safe or less expressive class and gives the
+  highest build ceiling, with broader teaching and authoring burden.
+
+Cross-dialect support is an aggregate promise, not a stronger theological fit
+than the local conflict; inherited target concordance remains the clearest
+direct *Achintya Bheda Abheda* expression. Arm A only if boundary conflicts
+remain materially less legible or create dominant timing/preview arbitrage
+after viable resolution designs are tested, while state conflicts remain fun.
+
+The amended register has **175 rows: 33 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A1C, 51 `PRUNED`, 83 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 34`**. The authoritative decision record remains
+byte-unchanged. Ask only for A1C A, B, C, or an explicit replacement.
+
 ## 2026-09-29 genuine Relic conflict selected; result domain is next
+
+**Superseded for navigation by the 2026-09-30 section above.** The option
+analysis below records the pre-authority-audit checkpoint; current row names,
+pruning, counts, and next frontier are those above.
 
 Zanzagar selected `RCS-04A1-C` with `RCS-04A1-B` as the qualified simplicity
 fallback. The release catalog must contain at least one maximal frozen cohort
 with two distinct proposed targets; target-concordant cohorts remain legal and
 commit their unique target once. A1-B is armed and unfired. It removes genuine
-conflict and prunes A2–A7 only if conflict itself causes cheap jamming, cause
+conflict and prunes A1C, A2, and A3A–A7 only if conflict itself causes cheap jamming, cause
 suppression, unreliable paid Rites or practical D5 returns, or comprehension
 failure. It does not coexist with a later A2 fallback.
 
@@ -16,25 +82,25 @@ proposed-target set `T`, the later resolver receives exactly one of:
 
 - **A — proposed targets only. Recommended.** One member of `T` must commit;
   unchanged `a` is unavailable. Conflict produces a real becoming and cannot
-  become a universal status-quo veto. It opens A3 to decide authority. Risks
+  become a universal status-quo veto. It opens the amended control subtree after A1C. Risks
   are cause caste, spoiler proposals, involuntary persistent rewriting, and a
   paid Rite still losing.
 - **B — unchanged only.** Every genuine conflict leaves `a` authoritative and
   terminally loses all proposals. This teaches “agreement transforms;
   disagreement preserves,” but makes cheap conflicts powerful vetoes over P/Z/
   X/M, routinely wastes Rites, suppresses cause diversity, and can block D5
-  returns. It prunes A3–A7.
+  returns. It prunes A3A–A7.
 - **C — full target-plus-unchanged domain. Qualified A2 fairness fallback.**
   Every member of `T` plus `a` enters the later resolver. This preserves
   conflict while permitting no change, but creates the broadest option and
-  explanation surface. It opens A3 over that entire domain.
+  explanation surface. It opens the amended A3A–A7 subtree over that domain.
 
 Recommend **A2-A with A2-C as the qualified fairness fallback and A1-B as the
 deeper simplicity fallback**. Fire A2-C only if all viable target-forcing
 resolvers cause material arbitrary/involuntary harm while conflict remains fun
 and null stays legible, non-dominant, anti-jam, Rite-safe, and D5-safe. If
-fired after downstream A3–A7 selections, A2-C invalidates and reopens A3 and
-every applicable A4–A7 row; no target-only downstream label transfers by name
+fired after downstream A3A–A7 selections, A2-C invalidates and reopens A3A and
+every applicable A3A1–A7 row; no target-only downstream label transfers by name
 to the expanded target/null domain. If conflict itself fails, fire A1-B
 instead.
 
@@ -44,10 +110,10 @@ result domain, including target versus unchanged under C. Cause-, definition-,
 context-, cohort-, or target-specific result menus require an owner-visible
 amendment rather than hidden authoring.
 
-The 163-row register now has **22 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A2, 51
+At this checkpoint the 163-row register had **22 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A2, 51
 `PRUNED`, 82 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 23`**. The authoritative decision record remains byte-unchanged.
-Ask only for A2 A, B, C, or an explicit replacement.
+The 2026-09-30 section above supersedes this old prompt.
 
 ## 2026-09-29 P lives, Z binds; collision geometry is next
 
@@ -12689,7 +12755,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 03:03 UTC — Relic conflict result is next](docs/handoffs/2026-09-30-0303--relic-conflict-result-next.md)**
+[2026-09-30 04:16 UTC — Relic conflict dialect is next](docs/handoffs/2026-09-30-0416--relic-conflict-dialect-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

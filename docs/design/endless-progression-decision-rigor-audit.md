@@ -11649,3 +11649,110 @@ After A1-C, the register contains **22 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A2,
 `Phi_SR = 23`**. A2-A/C open A3 at 22. A2-B prunes A3–A7 and opens RCS-04B at
 17. The register remains 163 rows and the authoritative decision record
 remains unchanged.
+
+### RCS-04A2 disposition and authority-subtree repair — 2026-09-30
+
+Zanzagar selected **RCS-04A2-A with RCS-04A2-C as the qualified fairness
+fallback**. Every genuine conflict must therefore return one still-valid
+member of its proposed-target set. The authoritative source assignment is not
+an admissible result merely because proposals disagree. A2-C is armed and
+unfired under its recorded arbitrary/involuntary-harm, legibility,
+non-domination, anti-jam, paid-Rite, and D5-return gates. Firing it invalidates
+the complete target-only authority/control subtree; A1-B remains the deeper
+replacement if genuine conflict itself fails.
+
+Three read-only named-claim audits then attacked old A3's authority shape,
+gameplay completeness, and dependency arithmetic. A read-only adjudication
+reconciled two proposed repairs. The exclusive system/participant split is
+not exhaustive: a participant may bind a material target priority while
+immutable Relic semantics compose inputs, complete ties, or randomize. Both
+coordinates can affect one cohort, yet moving a fixed completion clause
+between the participant-facing stance and immutable contract changes no legal
+action or complete result law. The representation-invariant question is
+whether a material participant coordinate exists, not which component is
+called the final resolver.
+
+Old A3 also bundled four independently admitted participant-action families:
+
+1. whether participant result control is absent, universal, or a stable
+   definition/version proper subset;
+2. which fixed-contract profiles exist over policy-only, direct-result-only,
+   and same-opportunity coavailable control forms;
+3. for policy control, whether its coordinate is inseparably bundled with
+   another participant-semantic setting or independently recombinable; and
+4. whether its legal language is a closed whole-policy menu, permits bounded
+   construction, and conditionally permits participant-authored context
+   branches.
+
+Direct result designation is live by definition. A policy may still be bound
+either before exact cohort facts or while live, so A7 must retain timing only
+for the policy-mediated subset. RCS-02 cannot absorb the control language: it
+owns exact holder, consent, communication, disclosure, default, and absent-
+authority recovery. RCS-13 owns binding and reconfiguration horizon. Exact
+menus, primitives, caps, predicates, priority maps, UI, storage, and
+completion factoring remain AUTHOR/SPEC/TUNE.
+
+The same audit found an upstream conflation. A1-C requires genuine conflict
+somewhere but does not say whether it occurs in the state dialect, boundary
+dialect, or both. Without that domain, “boundary contracts are intrinsic” and
+“boundary conflicts do not exist” are indistinguishable. New RCS-04A1C fixes
+that content-family incidence before participant-control prevalence.
+
+If configurable and intrinsic collision contracts later coexist while A1C
+makes both dialects conflict-capable, the configurable class's dialect
+incidence does not determine its complement. Two conditional rows preserve the
+seven feasible positive/complement pairs. In a single conflict-capable dialect
+both rows derive that dialect. Exact definitions, counts, and frequencies do
+not become owner choices.
+
+Final adversarial verification broke two successive compressed repairs of
+family 2 before commit. “Both forms” first failed to distinguish separate
+policy-only/direct-only contracts from one contract supporting both. A
+contract-level co-support split then failed to distinguish context-separated
+forms from same-opportunity choice and uniform coavailability from contexts
+that remove one form. Those countermodels change legal actions, loadout
+guarantees, forecast burden, and required information.
+
+For each fixed participant-configurable definition/version contract `c`, let
+`F_c(o)` classify a reachable material controlled conflict as `P` (policy
+only), `D` (direct result only), or `B` (both genuinely coavailable at that
+same held-fixed opportunity). Its nonempty range has exactly seven profiles:
+`{P}`, `{D}`, `{B}`, `{P,D}`, `{P,B}`, `{D,B}`, and `{P,D,B}`. Six conditional
+empty/universal/proper incidence splits form an exhaustive binary partition
+tree over those profiles. This is owner work because profile presence changes
+legal actions and per-Relic control guarantees; exact contracts, predicates,
+counts, frequencies, and placement remain AUTHOR/SPEC/EVALUATE. A one-shot
+“policy” that only names the current target canonicalizes to direct control,
+and UI aliases cannot manufacture coavailability.
+
+The final scope adjudication also rejected a compact three-row alternative
+that tracked global form support plus within-contract variability. A catalog
+with `{P,B}` and `{D,B}` contracts and a catalog containing only `{P,D,B}`
+contracts can share proper direct availability, proper policy coavailability,
+and universal contract variability. Only the first lets a loadout guarantee
+one preferred control form. Hiding that difference under AUTHOR would select
+a player-facing build and forecast promise without the owner.
+
+The minimal amendment therefore adds A1C and replaces old counted A3 with
+A3A, A3A1, A3A2, A3B1 through A3B6, A3C, A3D1, and A3D2. No residual-system-
+materiality row is admitted because it fails representation invariance. A4 contributor/cause
+sensitivity, A5 stochastic support, and A6 kernel scope instead apply to
+canonical complete automatic resolver laws after participant configuration
+and immutable composition. Participant configurability alone no longer prunes
+them. A7 owns policy timing only.
+
+The first post-amendment card is RCS-04A1C. Its state-only, boundary-only, and
+both-dialect options pass admission because they require or exclude conflict
+buildcraft for an entire transformation content family. Recommend both-dialect
+support so neither already-selected Relic language becomes the permanently
+safe or less expressive class. Retain state-only as a qualified clarity
+fallback if boundary-attunement conflicts remain materially less legible or
+create dominant timing/preview arbitrage after viable resolution designs are
+tested. That catalog incidence is only an **aggregate** ideal fit; the local
+conflict remains partial, while inherited target concordance remains the
+strongest direct expression.
+
+The register rises from 163 to **175 rows**. After A2-A and before A1C is
+answered it contains **33 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A1C, 51
+`PRUNED`, 83 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 34`**. The authoritative decision record remains unchanged.

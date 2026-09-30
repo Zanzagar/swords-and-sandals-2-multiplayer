@@ -447,11 +447,16 @@ the forced cohort atomicity and target-bucketing rules remain derived rather
 than becoming two fake cards. Zanzagar then selected **RCS-04A1-C with
 RCS-04A1-B as the qualified simplicity fallback**: the release catalog must
 contain at least one genuine distinct-target collision, while target-
-concordant cohorts remain legal and commit once. **RCS-04A2 is now the sole
-owner-facing choice under SR-04:** whether genuine disagreement must commit
-one proposed target, must preserve the current assignment, or admits both
-result categories before later resolution authority is chosen. The current
-register has 163 rows and `Phi_SR = 23`.
+concordant cohorts remain legal and commit once. Zanzagar then selected
+**RCS-04A2-A with RCS-04A2-C as the qualified fairness fallback**: every
+genuine conflict must settle one still-valid proposed target, while no change
+may join the result domain unless the fallback fires. A prerequisite authority
+audit then found both an omitted conflict-dialect boundary and, after two
+adversarial control-form challenges, twelve distinct authority/control-
+language rows inside old RCS-04A3. **RCS-04A1C is now the
+sole owner-facing choice under SR-04:** whether genuine conflict exists in the
+state dialect, boundary dialect, or both. The amended register has 175 rows
+and `Phi_SR = 34`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -27830,9 +27835,10 @@ the already selected rules rather than inheriting this P/Z label.
 > 7. `RCS-04A7` — under participant resolution, advance-bound doctrine versus
 >    live frozen-cohort choice.
 >
-> A1-A/B prune A2-A7. A1-C opens A2. A2's null-only route prunes A3-A7;
-> any target-capable route opens A3. System authority opens A4-A6 and prunes
-> A7; participant authority prunes A4-A6 and opens A7. Exact rankings, weights,
+> At this checkpoint A1-A/B pruned A2-A7 and A1-C opened A2. A2's null-only
+> route pruned A3-A7; any target-capable route opened A3. The forty-eighth
+> correction below supersedes the exclusive system/participant branch and its
+> pruning arithmetic. Exact rankings, weights,
 > probabilities, and context maps remain AUTHOR/SPEC/TUNE only after their
 > authority and semantic basis are selected. Any mixed-authority, mixed-timing,
 > or cohort-class partition not named by this tree requires an owner-visible
@@ -27854,8 +27860,8 @@ catalog must actually make reachable:
 
 | Choice | Reachable geometry | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
 | --- | --- | --- | --- |
-| **A — proposals are always isolated** | Every reachable cohort has `|K|=1`. Authored cause opportunities may occur at different cuts, but no active Relic/source revision can ever present two approved proposals to one settlement. A2-A7 prune. | Simplest and most legible, with no collision exploits, prompts, precedence caste, or arbitration burden. It also makes the selected plurality of P/Z/X/M biographies mechanically pass one another without ever meeting; RCS-04A becomes almost entirely defensive plumbing. The local ideal fit is partial only: a cause and Relic interact, but distinct truthful causes never remain jointly operative at settlement. | Ashen's positive result may propose `TEMPERED` at one cut and an admitted Rite may propose `MERCY` at another, but authoring must make it impossible for both to inhabit the same `K`. Each settles alone. |
-| **B — coexistence is target-concordant only** | At least one reachable cohort has `|K|>1`, but every reachable cohort has `|T(K)|=1`. All contributor IDs remain preserved; their shared target commits as exactly one assignment transition. A1 itself grants no count-based power, reward, recurrence, or progression multiplier. A2-A7 prune. | This is the cleanest direct local *Achintya Bheda Abheda* expression: distinct causal histories remain real while jointly supporting one becoming. It adds buildcraft around alignment without target conflict or veto play. Its cost is an authoring constraint that can make supposedly independent causes feel prearranged, and the collision system has no adversarial tension. | A P manifestation and an X event both propose `TEMPERED`. They remain two distinct preserved proposals but commit one `TEMPERED` assignment transition. No reachable cohort may instead contain `TEMPERED` and `MERCY`. |
+| **A — proposals are always isolated** | Every reachable cohort has `|K|=1`. Authored cause opportunities may occur at different cuts, but no active Relic/source revision can ever present two approved proposals to one settlement. A1C, A2, and A3A–A7 prune. | Simplest and most legible, with no collision exploits, prompts, precedence caste, or arbitration burden. It also makes the selected plurality of P/Z/X/M biographies mechanically pass one another without ever meeting; RCS-04A becomes almost entirely defensive plumbing. The local ideal fit is partial only: a cause and Relic interact, but distinct truthful causes never remain jointly operative at settlement. | Ashen's positive result may propose `TEMPERED` at one cut and an admitted Rite may propose `MERCY` at another, but authoring must make it impossible for both to inhabit the same `K`. Each settles alone. |
+| **B — coexistence is target-concordant only** | At least one reachable cohort has `|K|>1`, but every reachable cohort has `|T(K)|=1`. All contributor IDs remain preserved; their shared target commits as exactly one assignment transition. A1 itself grants no count-based power, reward, recurrence, or progression multiplier. A1C, A2, and A3A–A7 prune. | This is the cleanest direct local *Achintya Bheda Abheda* expression: distinct causal histories remain real while jointly supporting one becoming. It adds buildcraft around alignment without target conflict or veto play. Its cost is an authoring constraint that can make supposedly independent causes feel prearranged, and the collision system has no adversarial tension. | A P manifestation and an X event both propose `TEMPERED`. They remain two distinct preserved proposals but commit one `TEMPERED` assignment transition. No reachable cohort may instead contain `TEMPERED` and `MERCY`. |
 | **C — genuine target conflict is supported** | At least one reachable cohort has `|T(K)|>1`; target-concordant cohorts may also exist and behave as in B. C opens A2 to decide what a genuine conflict may settle. | **Recommended higher-ceiling direction, with B as the qualified simplicity fallback.** Multiple biographies can genuinely disagree about what one continuing Relic should become, creating exposure management, target-alignment buildcraft, and meaningful collision risk without yet choosing a winner. Unity and difference are both operative, but conflict itself is not a stronger theological claim; the strongest direct fit remains concordance. Risks are deliberate veto/jamming, wasted paid Rites, opaque no-change results, cause-route suppression, and starving D5 return witnesses. | Ashen's P manifestation proposes `TEMPERED` while its already-admitted M Rite proposes `MERCY` in the same frozen cohort. Neither delivery order nor live P approval chooses the winner. A2 next decides whether one proposed target must win, neither may win, or a bounded target/null surface exists. |
 
 A/B/C are the admitted catalog-level geometries. A multi-proposal cohort may
@@ -27896,7 +27902,8 @@ RCS-04A1-B is armed and unfired. It replaces C only if genuine conflict itself
 primarily enables cheap veto/jamming, suppresses whole cause families, makes
 paid Rites or practical D5 return histories unreliable, or fails quick player
 comprehension. Firing it removes every distinct-target cohort and prunes
-RCS-04A2–A7; it does not coexist with a later A2 fallback. It is not valid if
+RCS-04A1C, RCS-04A2, and RCS-04A3A–A7; it does not coexist with a later A2
+fallback. It is not valid if
 target-concordant authoring merely hides one dominant target or makes preserved
 multi-cause support decorative.
 
@@ -27923,22 +27930,23 @@ but excludes another would also preselect precedence. Either requires an
 owner-visible amendment naming its stable semantic partition.
 
 A2 selects no player choice, system priority, randomness, weight, timing,
-information disclosure, or committed identity. Under A/C, A3 owns authority
-over the **entire** result domain, including target versus unchanged under C.
-On a system branch, A4 owns whether contributor count/cause composition may
-affect any result rank or probability, including null versus target; A5/A6 own
-randomness and kernel scope across the whole domain. On a participant branch,
-A7 owns when the actual result is selected. RCS-02 retains holder/disclosure/
-default, RCS-13 retains binding horizon, and RCS-04B receives only the selected
-proposed target or unchanged result plus preserved proposal identities.
+information disclosure, or committed identity. Under A/C, the amended A3
+subtree owns material participant result control over the **entire** result
+domain, including target versus unchanged under C. A4 owns whether contributor
+count/cause composition may affect any complete automatic resolver law; A5/A6
+own randomness and kernel scope across those complete laws. A7 owns only when
+a policy-mediated participant coordinate becomes irrevocable. RCS-02 retains
+holder/disclosure/default, RCS-13 retains binding horizon, and RCS-04B receives
+only the selected proposed target or unchanged result plus preserved proposal
+identities.
 
-### RCS-04A2 — genuine-conflict admissible result — active owner choice
+### RCS-04A2 — genuine-conflict admissible result — A selected with C fallback
 
 | Choice | Uniform result domain for every genuine conflict | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
 | --- | --- | --- | --- |
-| **A — one proposed target must settle** | `R(K)=T(K)` for every genuine-conflict cohort. The current assignment is not an admissible collision result; one still-valid proposed target must commit. A3 next chooses resolution authority. | **Recommended higher-stakes direction, with A2-C as a qualified fairness fallback and A1-B as the deeper simplicity fallback.** Conflict produces a real becoming instead of a general veto shield. Distinct causal histories remain preserved while one proposed form manifests, a partial—not direct—ideal fit; inherited concordance remains the strongest local Achintya Bheda Abheda expression. Risks are an arbitrary precedence caste, spoiler proposals biasing the eventual resolver, involuntary persistent rewriting, and a paid Rite still losing to another target. | A state-supporting Relic is authoritatively in assignment `a`. A live-approved P proposal names `b` while an admitted paid M Rite names distinct `c`. The later resolver must commit `b` or `c`; it cannot leave `a`. This card does not say which target wins or who chooses it. |
-| **B — genuine conflict always preserves the current assignment** | `R(K)={a(K)}` for every genuine-conflict cohort. Every conflicting proposal terminates as a loser and no assignment transition occurs. A3–A7 prune and RCS-04B opens. | B gives the shortest rule: **agreement transforms; disagreement leaves the Relic as it was.** It makes target alignment a serious build objective and mandates no prompt. But it gives every cheap conflicting proposal veto value: live P can indirectly cancel deterministic X/M, a sacrificial M can shield against advance-bound Z, paid Rites routinely disappear, and D5 return legs can be blocked. Difference becomes strategically sterile rather than a stronger ideal realization. | With the same `a`, `b`, and `c` cohort, the Relic remains in `a`; both proposal IDs settle terminally, the positive result and Rite payment remain final, and nothing queues. |
-| **C — every conflict admits targets and no change** | `R(K)=T(K) union {a(K)}` for every genuine-conflict cohort. Every proposed target and the unchanged assignment enter the later resolver's domain. A3 next chooses authority over that whole domain. The completed policy must retain material reachable target and unchanged witnesses or C collapses into A/B. | **Qualified conflict-preserving fairness fallback, not the primary recommendation.** C can preserve genuine disagreement while allowing an otherwise harmful forced rewrite to leave identity unchanged. It also creates the broadest option surface and explanation burden; participant authority can become “pick the best target or keep my build,” while system resolution can make null odds opaque. Its ideal fit is aggregate, not stronger than concordance. | The same cohort hands `{a,b,c}` to the later resolver. A3–A7—not this card—decide whether fixed law, probability, or a materially timed participant coordinate returns one result. |
+| **A — one proposed target must settle** | `R(K)=T(K)` for every genuine-conflict cohort. The current assignment is not an admissible collision result; one still-valid proposed target must commit. The amended A3 subtree later chooses material participant control. | **Recommended higher-stakes direction, with A2-C as a qualified fairness fallback and A1-B as the deeper simplicity fallback.** Conflict produces a real becoming instead of a general veto shield. Distinct causal histories remain preserved while one proposed form manifests, a partial—not direct—ideal fit; inherited concordance remains the strongest local Achintya Bheda Abheda expression. Risks are an arbitrary precedence caste, spoiler proposals biasing the eventual resolver, involuntary persistent rewriting, and a paid Rite still losing to another target. | A state-supporting Relic is authoritatively in assignment `a`. A live-approved P proposal names `b` while an admitted paid M Rite names distinct `c`. The later resolver must commit `b` or `c`; it cannot leave `a`. This card does not say which target wins or who chooses it. |
+| **B — genuine conflict always preserves the current assignment** | `R(K)={a(K)}` for every genuine-conflict cohort. Every conflicting proposal terminates as a loser and no assignment transition occurs. A3A–A7 prune and RCS-04B opens. | B gives the shortest rule: **agreement transforms; disagreement leaves the Relic as it was.** It makes target alignment a serious build objective and mandates no prompt. But it gives every cheap conflicting proposal veto value: live P can indirectly cancel deterministic X/M, a sacrificial M can shield against advance-bound Z, paid Rites routinely disappear, and D5 return legs can be blocked. Difference becomes strategically sterile rather than a stronger ideal realization. | With the same `a`, `b`, and `c` cohort, the Relic remains in `a`; both proposal IDs settle terminally, the positive result and Rite payment remain final, and nothing queues. |
+| **C — every conflict admits targets and no change** | `R(K)=T(K) union {a(K)}` for every genuine-conflict cohort. Every proposed target and the unchanged assignment enter the later resolver's domain. The amended A3 subtree later chooses material participant control over that whole domain. The completed policy must retain material reachable target and unchanged witnesses or C collapses into A/B. | **Qualified conflict-preserving fairness fallback, not the primary recommendation.** C can preserve genuine disagreement while allowing an otherwise harmful forced rewrite to leave identity unchanged. It also creates the broadest option surface and explanation burden; participant authority can become “pick the best target or keep my build,” while automatic resolution can make null odds opaque. Its ideal fit is aggregate, not stronger than concordance. | The same cohort hands `{a,b,c}` to the later resolver. A3A–A7—not this card—decide whether fixed law, probability, or a materially timed participant coordinate returns one result. |
 
 A is recommended because A1-C was selected to make incompatible biographies
 real gameplay. Universal nullification turns the easiest extra proposal into a
@@ -27951,21 +27959,176 @@ Arm **A2-C** only if every otherwise viable target-forcing resolver creates
 material arbitrary or involuntary harm while genuine conflict remains fun,
 and a full target/null domain can stay legible, non-dominated, resistant to
 cheap veto, acceptable for paid Rites, and compatible with practical D5
-returns. Firing A2-C after any downstream A3–A7 direction has been selected
-invalidates and reopens A3 and every applicable A4–A7 row. No authority,
-contributor-basis, stochasticity, kernel-scope, or timing label selected for
-the target-only domain transfers by name to the expanded target/null domain.
+returns. Firing A2-C after any downstream A3A–A7 direction has been selected
+invalidates and reopens A3A and every applicable A3A1–A7 row. No authority,
+control-language, contributor-basis, stochasticity, kernel-scope, or timing
+label selected for the target-only domain transfers by name to the expanded
+target/null domain.
 If genuine conflict itself fails those tests, fire the already armed **A1-B**
 replacement instead. A2-B remains a coherent positive thesis for
 “becoming requires concordance,” but it is not the simplicity fallback because
 A1-B expresses that thesis without first charging causes and then nulling them.
 
-After A2-A or A2-C, A2 becomes `DIR-SELECTED` and A3 opens with **21
-`SCREEN`, 1 `OWNER-OPEN`, 51 `PRUNED`, 83 `DIR-SELECTED`, and `Phi_SR = 22`**.
-After A2-B, A3–A7 prune and RCS-04B opens with **16 `SCREEN`, 1
-`OWNER-OPEN`, 56 `PRUNED`, 83 `DIR-SELECTED`, and `Phi_SR = 17`**. Every
-branch retains 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; the register remains
-163 rows and the authoritative decision record remains unchanged.
+**Direction answer — selected by Zanzagar on 2026-09-30:** **A, one proposed
+target must settle, with RCS-04A2-C as the qualified fairness fallback.** For
+every genuine-conflict cohort, `R(K)=T(K)`: exactly one still-valid proposed
+target commits and the authoritative source assignment cannot survive merely
+because proposals disagree. A2 selects no winner, controller, priority,
+probability, policy language, timing, disclosure, or committed lineage.
+
+RCS-04A2-C is armed and unfired. It may replace A only if every viable
+target-forcing resolver causes material arbitrary or involuntary harm while
+genuine conflict remains fun and a full target/null domain can remain legible,
+non-dominated, resistant to cheap veto, acceptable for paid Rites, and
+compatible with practical D5 returns. Firing it reopens the complete amended
+A3A–A7 subtree; no target-only label transfers by name. If genuine conflict
+itself fails, RCS-04A1-B remains the deeper simplicity replacement.
+
+#### Forty-eighth prerequisite correction — collision dialect and authority grammar
+
+Three bounded read-only named-claim audits and one read-only adjudication
+tested old RCS-04A3 before presentation. They broke its exclusive “system
+versus participant” branch. A lawful participant setting may materially change
+the target law while immutable Relic semantics still compose inputs, complete
+ties, or randomize. That same-cohort law is neither system-exclusive nor
+participant-total, and moving a fixed completion clause between the named
+setting and its immutable contract changes representation rather than play.
+
+The material first question is therefore **participant configurability** of a
+complete collision-result law. A contract is configurable only when two lawful
+participant controls, on one held-fixed genuine conflict and identical
+noncontrol inputs, change the selected target or its complete target law.
+Merely equipping the Relic, approving a proposal upstream, accepting one
+mandatory default, or refactoring one law does not qualify.
+
+The audit also found one omitted prerequisite. RCS-04A1-C requires genuine
+conflict somewhere but never says whether state-transforming definitions,
+boundary-transforming definitions, or both can reach it. Authority incidence
+cannot distinguish “boundary conflicts are intrinsic” from “boundary
+conflicts do not exist” until that domain is fixed. `RCS-04A1C` therefore
+opens before the authority subtree.
+
+Old counted RCS-04A3 becomes a non-counting parent for twelve rows:
+
+1. `RCS-04A3A` — material participant result-control prevalence: empty,
+   universal, or a stable definition/version proper subset;
+2. `RCS-04A3A1` — conditional transformation-dialect incidence of that
+   configurable proper subset;
+3. `RCS-04A3A2` — conditional dialect incidence of its intrinsic complement;
+4. `RCS-04A3B1` — direct-capable contract prevalence;
+5. `RCS-04A3B2` — policy-capable prevalence inside the direct-capable class;
+6. `RCS-04A3B3` — same-opportunity coavailability prevalence inside the
+   dual-form class;
+7. `RCS-04A3B4` — context-varying availability prevalence inside the
+   coavailability-capable class;
+8. `RCS-04A3B5` — policy-only-opportunity prevalence inside that varying
+   class;
+9. `RCS-04A3B6` — direct-only-opportunity prevalence inside the direct-
+   removal class;
+10. `RCS-04A3C` — independently recombinable collision-policy-coordinate
+   prevalence where policy-mediated control exists;
+11. `RCS-04A3D1` — closed whole-policy stance versus bounded constructive
+   collision-policy language; and
+12. `RCS-04A3D2` — conditional participant-authored context branching inside
+   constructive collision policies.
+
+Direct actual-result control is live by definition, but a live participant
+may instead select a bounded policy, so control form and timing cannot be one
+row. A7 now owns only when a **policy-mediated** control becomes irrevocable.
+RCS-02 still owns exact holder, consent, disclosure, communication, default,
+and unavailable-authority recovery; RCS-13 owns binding/reconfiguration
+horizon. A4–A6 now inspect canonical complete automatic resolver laws after
+applicable participant settings and immutable contract composition. They do
+not prune merely because participant configurability exists. Exact menus,
+primitives, priorities, predicates, maps, UI, storage, and completion factoring
+remain AUTHOR/SPEC/TUNE.
+
+#### Forty-ninth prerequisite correction — exact control-form profiles
+
+The first authority repair still compressed separate policy-only and direct-
+only contracts with same-contract access to both forms. An intermediate
+two-row repair then made a second mistake: “both forms somewhere on this
+contract” collapsed context-separated forms with same-opportunity choice, and
+“same-opportunity choice exists” still collapsed uniform coavailability with
+contexts that remove one form. Those worlds change legal actions, forecast
+burden, option value, and prompt/loadout policy. No later recombinability,
+language, timing, holder, or binding row owns form availability.
+
+For each participant-configurable fixed definition/version contract `c`, let
+`F_c(o)` classify every reachable material participant-controlled frozen
+conflict opportunity as `P` (policy only), `D` (direct result only), or `B`
+(both genuinely coavailable at that same held-fixed opportunity). A generated
+one-shot “policy” whose only semantic effect is naming the current target
+canonicalizes to `D`; two aliases or widgets do not create `B`. The nonempty
+range `S_c` has exactly seven possible profiles:
+
+| Profile | Player-facing contract grammar |
+| --- | --- |
+| `{P}` | Policy only at every controlled conflict. |
+| `{D}` | Direct result choice only at every controlled conflict. |
+| `{B}` | Both forms coavailable at every controlled conflict. |
+| `{P,D}` | Context selects policy-only or direct-only; the forms never coexist at one opportunity. |
+| `{P,B}` | Policy is always available; direct choice is contextually unavailable. |
+| `{D,B}` | Direct choice is always available; policy is contextually unavailable. |
+| `{P,D,B}` | Both coexist somewhere and either form can be unavailable elsewhere. |
+
+A final compact proposal tracked global `P`/`D`/`B` support plus whether each
+contract's availability varied. It also failed. A catalog with one `{P,B}`
+contract and one `{D,B}` contract can have the same proper direct prevalence,
+proper policy coavailability, and universal contract variability as a catalog
+containing only `{P,D,B}` contracts. In the first catalog a player can equip a
+Relic that always preserves policy control or one that always preserves direct
+control; in the second, no Relic guarantees either preferred form. That is a
+build and forecast difference now, not a later authoring refinement.
+
+Six conditional empty/universal/proper incidence rows form one finite binary
+partition tree over those seven profiles. B1 splits contracts that ever permit
+direct control from `{P}`. B2 splits contracts that also ever permit policy
+control from `{D}`. B3 splits contracts with a same-opportunity `B` witness
+from `{P,D}`. B4 splits context-varying coavailability contracts from `{B}`.
+B5 splits contracts with a `P` opportunity from `{D,B}`. B6 finally separates
+`{P,B}` from `{P,D,B}`. A child exists only when its positive parent class is
+nonempty; at each split A makes it empty, B universal, and C nonempty proper.
+This encodes every nonempty catalog subset of the seven profiles without one
+127-option card. Exact definitions, counts, frequencies, context predicates,
+and placement remain AUTHOR/SPEC/EVALUATE once profile presence is settled.
+
+One additional counted prerequisite plus twelve A3 children replacing one old
+A3 row raises the finite register from 163 to **175 rows**. After A2-A and
+before the next answer it contains **33 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A1C, 51 `PRUNED`, 83 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 34`**. This correction adds no mechanic or selected
+control model; it prevents later authoring from hiding materially different
+player actions inside one authority label.
+
+### RCS-04A1C — genuine-conflict transformation-dialect incidence — active owner choice
+
+Let `G_v` be the nonempty set of supported definition/version collision
+contracts with at least one reachable genuine-conflict cohort. Definition
+purity partitions it into state-dialect contracts `G^S_v` and boundary-dialect
+contracts `G^B_v`. This card chooses which dialects must contain genuine
+conflict somewhere; exact definitions, counts, frequency, and encounter
+placement remain AUTHOR/SPEC.
+
+| Choice | Required genuine-conflict incidence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — state-dialect conflict only** | `G^S_v` is nonempty and `G^B_v` is empty. At least one remembered-condition Relic can receive distinct targets; every boundary-attunement cohort is isolated or target-concordant. | **Qualified clarity fallback.** Remembered conditions make competing futures easiest to read, while already timing-sensitive boundary attunements avoid another arbitration layer. This is neutral/protective at the dialect boundary and preserves the partial fit inside state conflicts. It also creates a structural caste: boundary Relics never receive conflict buildcraft and may become the safer or simpler premium. | An Ashen-like state Relic can receive distinct `MERCY` and `DEFIANCE` targets in one cohort. A Dreamglass-like boundary Relic may receive several `OATH` proposals or several `ECHO` proposals, but never both together. |
+| **B — boundary-dialect conflict only** | `G^S_v` is empty and `G^B_v` is nonempty. At least one remembered-attunement Relic can receive distinct targets; every state-condition cohort is isolated or target-concordant. | B makes disagreement about **how the Relic listens** the distinctive conflict fantasy and keeps condition biographies clean. That can be uncanny and thematic, but boundary meaning is the harder dialect to teach, while familiar state Relics become inexplicably immune. The individual conflict fit is partial; the dialect split itself is merely aggregate. | A Dreamglass-like Relic can receive distinct `OATH` and `ECHO` attunement targets in one cohort. Ashen-like `MERCY` and `DEFIANCE` targets can never coexist in one cohort. |
+| **C — both dialects support genuine conflict** | Both `G^S_v` and `G^B_v` are nonempty. At least one state definition and at least one boundary definition can reach distinct-target collision; this does not require every definition to do so. | **Recommended higher-ceiling and grammar-consistent direction, with A as the qualified clarity fallback.** Both already-selected transformation languages can host incompatible biographies, preventing one dialect from becoming the permanently safe or less expressive class. It creates the broadest alignment, exposure, and counterbuild space, at the cost of authoring, preview, simulation, and teaching burden in both dialects. Cross-dialect support is only aggregate ideal fit; no catalog symmetry is stronger than the local relationship. | One authored Ashen-like witness reaches `MERCY` versus `DEFIANCE`; a distinct Dreamglass-like witness reaches `OATH` versus `ECHO`. Each conflict remains inside one definition-pure Relic and settles independently under A2-A. |
+
+A/B/C are exhaustive because nonempty `G_v` has state-only, boundary-only, or
+both-dialect incidence. C does not require equal counts, every definition,
+cross-dialect cohorts, or one shared target vocabulary. A may replace C only
+if boundary-attunement conflict remains materially less legible or creates
+dominant timing/preview arbitrage after viable resolution designs are tested,
+while state conflict remains fun and non-dominant. Mere authoring cost does not
+fire the fallback. If genuine conflict in both dialects fails, RCS-04A1-B
+remains the deeper concordant-only replacement.
+
+Any answer moves A1C to `DIR-SELECTED` and opens A3A. The 175-row register then
+contains **32 `SCREEN`, 1 `OWNER-OPEN`, 51 `PRUNED`, 84 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 33`**. The authoritative
+decision record remains unchanged.
 
 ## Session protocol and evidence
 
