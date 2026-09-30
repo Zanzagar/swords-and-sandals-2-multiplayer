@@ -1,6 +1,79 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 direct and policy specialists coexist; hybrid capability is next
+
+Zanzagar selected **RCS-04A3B1-C with RCS-04A3B1-A as the qualified low-
+interruption/policy-mastery fallback**. Inside the nonempty configurable class,
+direct-capable contracts form a nonempty proper subset. At least one fixed
+contract has a live current-target coordinate, while at least one other
+configurable contract never directly names the result and has controlled-form
+projection `{P}`.
+
+B1-A may replace C only if direct choice repeatedly causes prompt fatigue,
+target shopping, team quarterbacking, latency/default harm, or unavoidable
+option-value premium while policy contracts remain legible, strategically
+rich, Rite-safe, and capable of equal optimized Legendary ceilings. B1-B is
+the agency/clarity escalation if policy-only settlement remains broadly opaque
+or unfair despite the best viable disclosure while direct choice remains
+fluid, non-token, non-dominant, and earned everywhere.
+
+Three read-only named-claim audits upheld RCS-04A3B2 as the next atomic card
+and repaired the policy boundary. Policy-mediated control is any material
+participant collision-control state whose payload is not solely current-target
+designation. Two lawful values—possibly bound before the exact cohort
+exists—must remain different on one matched later frozen conflict and produce
+different committed targets or complete laws. Policy may be deterministic or
+stochastic, live or advance-bound, and bundled with another participant
+setting. A one-shot target-only action remains direct. Defaults, immutable
+resolvers, upstream choices, cosmetic labels, RNG outcomes, and duplicate
+aliases do not create policy capability. This clarification adds no row.
+
+The register remains **181 rows: 36 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3B2, 51 `PRUNED`, 86 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 37`**. B1I remains applicable but queued. The
+authoritative decision record remains byte-unchanged.
+
+`RCS-04A3B2` asks whether direct-capable contracts also support policy:
+
+- **A — direct-capable contracts are controlled-form direct-only.
+  Recommended.** B1-C's separate policy-only class remains. Each configurable
+  Relic gets one clean interaction sentence: it asks for a result or follows an
+  orientation, not both.
+- **B — every direct-capable contract also supports policy. Universal dual-
+  capability escalation.** Every direct-capable Relic teaches both an
+  immediate-result action and a policy grammar somewhere, though B3 still owns
+  same-opportunity coavailability.
+- **C — direct-only and dual-capable contracts coexist. Qualified higher-
+  ceiling/identity exception.** A rare many-faced covenant may use both forms,
+  but the catalog now has intrinsic, policy-only, direct-only, and dual-capable
+  temperaments.
+
+Illustratively, A makes Soul-answered Ashen direct-only whenever it offers
+participant control, while Oathbound Dreamglass remains policy-only and Stone
+Witness intrinsic. Under C, a different Dreamglass could have a direct
+opportunity in one context and a policy opportunity in another. Nothing in B2
+says both forms coexist at the same conflict.
+
+Recommend **A with C as the qualified higher-ceiling/identity exception**.
+B1-C already preserves both live-choice fun and policy mastery. A resists
+“more buttons equals more depth” and best answers the owner's convolution
+concern. Use C only if a concrete hybrid produces an irreducible, quickly
+legible loop with real liabilities and is neither a strict action-set upgrade
+nor a required optimized-build component. Escalate to B only if every tested
+direct-only identity is strategically shallow and policy support adds
+indispensable mastery across the whole class.
+
+The final full gear/progression visual refresh remains a required SR-12
+closeout artifact. The canonical tracked file is
+`docs/design/endless-build-system-map.svg`; no tracked HTML companion exists.
+Regenerate its visible diagram and accessible description only after explicit
+Relic-contract acceptance, including launch/later-patch scope and no stale
+frontier labels.
+
 ## 2026-09-30 configurable and intrinsic conflict coexist; direct control is next
+
+**Superseded for navigation by the section above.** Its B1 card and
+`Phi_SR = 38` checkpoint predate the selected C answer and B2 policy audit.
 
 Zanzagar selected **RCS-04A3A-C with RCS-04A3A-A as the qualified
 simplicity/artifact-identity fallback**. The fixed genuine-conflict catalog
@@ -12922,7 +12995,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 12:11 UTC — Relic direct actual-result control is next](docs/handoffs/2026-09-30-1211--relic-direct-control-next.md)**
+[2026-09-30 12:35 UTC — Relic policy incidence inside direct-capable contracts is next](docs/handoffs/2026-09-30-1235--relic-policy-incidence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

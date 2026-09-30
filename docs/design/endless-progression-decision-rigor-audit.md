@@ -11889,3 +11889,62 @@ B1-A would prune B2–B6 and B2I–B6I1 and open B1I at `Phi_SR = 26`. B1-B woul
 prune B1I and open B2 at `Phi_SR = 36`. B1-C would open B2 while keeping B1I
 applicable but queued at `Phi_SR = 37`. The authoritative decision record
 remains unchanged.
+
+### RCS-04A3B1 disposition and policy-capability boundary audit — 2026-09-30
+
+Zanzagar selected **RCS-04A3B1-C with RCS-04A3B1-A as the qualified low-
+interruption/policy-mastery fallback**. Inside the nonempty configurable class,
+direct-capable contracts are a nonempty proper subset. At least one fixed
+contract has a live current-target coordinate, while at least one other
+configurable contract has controlled-form projection `{P}` and never directly
+names the current result. This establishes neither policy support inside the
+direct-capable class nor any `I` incidence or dialect allocation.
+
+B1-A may replace C only if direct result choice repeatedly causes prompt
+fatigue, target shopping, team quarterbacking, latency/default harm, or an
+unavoidable option-value premium while policy contracts remain legible,
+strategically rich, Rite-safe, and capable of equal optimized Legendary
+ceilings. B1-B is the agency/clarity escalation if policy-only settlement
+remains broadly opaque or unfair despite the best viable disclosure while
+direct choice stays fluid, non-token, non-dominant, and earned everywhere.
+
+Three read-only named-claim audits then tested B2 atomicity, dependency
+arithmetic, and player-facing consequences. The split holds. Inside nonempty
+`D_v`, let `P_v^D` contain contracts with some reachable conflict at which an
+authored participant collision-policy state is materially operative.
+`P_v^D` is exactly empty, universal, or a nonempty proper subset. A member of
+`D_v` outside `P_v^D` can contain neither `P` nor `B`; its controlled-form
+projection is therefore exactly `{D}`, with optional `I` owned later. No new
+row or fourth option is needed.
+
+The audit did require a policy-definition repair. Policy is any material
+participant collision-control state whose semantic payload is not solely
+current-target designation. Two lawful values—possibly bound before the exact
+cohort exists—must remain operatively different on one matched reachable
+frozen conflict with nonpolicy inputs fixed and induce different committed
+targets or complete laws. Policy may be deterministic or stochastic, live or
+advance-bound, and bundled with another participant-semantic setting. A
+one-shot target-only action remains direct. A compound target-plus-policy
+action is policy-only unless target varies with policy fixed; independent
+coordinates may later witness B3. Defaults, immutable resolvers, upstream
+choices, cosmetic labels, RNG realizations, and duplicate policy aliases do
+not establish policy capability.
+
+Recommend **B2-A, with B2-C as the qualified higher-ceiling/identity
+exception**; B2-B is the universal dual-capability escalation. B1-C already
+preserves a policy-only configurable class, so A retains live-choice and
+policy-mastery builds while giving each Relic one clean interaction sentence.
+C is justified only if a concrete dual-capable Relic produces an irreducible,
+quickly legible loop with real liabilities and is neither a strict action-set
+upgrade nor a required optimized-build component. Use B only if every tested
+direct-only identity is strategically shallow and policy support adds
+indispensable mastery across the whole class. Hybrid breadth cannot substitute
+for later equal-ceiling proof.
+
+B1-C moves only B1 to `DIR-SELECTED` and B2 to `OWNER-OPEN`. The register
+remains **181 rows: 36 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3B2, 51 `PRUNED`,
+86 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`**.
+B2-A would prune B3–B6 and B3I–B6I1, open B1I while B2I remains queued, and
+yield `Phi_SR = 27`. B2-B would prune B2I and open B3 at `Phi_SR = 35`.
+B2-C would open B3 while B1I and B2I remain queued at `Phi_SR = 36`. The
+authoritative decision record remains unchanged.

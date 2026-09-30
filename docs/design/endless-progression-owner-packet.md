@@ -461,10 +461,14 @@ Zanzagar selected **RCS-04A3A-C with RCS-04A3A-A as the qualified
 simplicity/artifact-identity fallback**: participant-configurable and
 participant-intrinsic conflict contracts coexist. Three B1 audits upheld the
 next prevalence split and tightened direct control to a semantic current-target
-coordinate so deterministic policies cannot fake it. **RCS-04A3B1 is now the
-sole owner-facing choice under SR-04:** whether direct actual-result control
-exists on no configurable contracts, every configurable contract, or a stable
-proper subset. The amended register has 181 rows and `Phi_SR = 38`.
+coordinate so deterministic policies cannot fake it. Zanzagar selected
+**RCS-04A3B1-C with RCS-04A3B1-A as the qualified low-interruption/policy-
+mastery fallback**: direct-capable and policy-only configurable contracts
+coexist. Three B2 audits upheld the next prevalence split and clarified that a
+material advance-bound policy still counts. **RCS-04A3B2 is now the sole
+owner-facing choice under SR-04:** whether no, every, or a stable proper subset
+of direct-capable contracts also supports policy. The amended register has 181
+rows and `Phi_SR = 37`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -28271,7 +28275,7 @@ total versioned A3X map later records dialect allocation without hiding it in
 marginal incidence. The authoritative decision record remains unchanged until
 the complete normative replay is explicitly accepted.
 
-### RCS-04A3B1 — direct actual-result control prevalence — active owner choice
+### RCS-04A3B1 — direct actual-result control prevalence — C selected
 
 Let `D_v` contain exactly those contracts in nonempty `G_v^{ctrl}` with at
 least one reachable direct actual-result opportunity. At such a held-fixed
@@ -28315,11 +28319,78 @@ fluid, non-token, non-dominant, and thematically earned on every configurable
 contract. Exact power compensation remains RCS-05/RCS-06/RCS-08 work; B1 may
 not disguise unconditional strength as interaction style.
 
-Selecting A prunes B2–B6 and B2I–B6I1, opens B1I, and yields **`Phi_SR =
-26`**. Selecting B prunes B1I, opens B2, and yields **`Phi_SR = 36`**.
-Selecting C opens B2 while B1I remains applicable but queued, yielding
-**`Phi_SR = 37`**. A letter selects worksheet direction only. The
-authoritative decision record remains unchanged.
+**Direction answer — selected by Zanzagar on 2026-09-30:** **C, with A as the
+qualified low-interruption/policy-mastery fallback.** `D_v` is a nonempty
+proper subset of `G_v^{ctrl}`: at least one configurable fixed contract has a
+live direct actual-result opportunity and at least one other configurable
+contract never does. The complement's controlled-form projection is `{P}`.
+This does not decide whether direct-capable contracts also support policy,
+whether either class has `I` opportunities, or how any complete signature maps
+to a transformation dialect.
+
+B1-A is armed and unfired. It may replace C only if direct result choice
+repeatedly creates prompt fatigue, target shopping, team quarterbacking,
+latency/default harm, or an unavoidable option-value premium while policy-
+mediated contracts remain legible, strategically rich, Rite-safe, and capable
+of equal optimized Legendary ceilings. B1-B remains the agency/clarity
+escalation—not a fallback—if policy-only settlement proves broadly opaque or
+unfair despite the best viable preview/disclosure while direct choice remains
+fluid, non-token, non-dominant, and earned on every configurable contract.
+
+Selecting C moves B1 to `DIR-SELECTED` and opens B2 while B1I remains
+applicable but queued. The 181-row register now contains **36 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A3B2, 51 `PRUNED`, 86 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`**. The authoritative decision record
+remains unchanged.
+
+### RCS-04A3B2 — policy capability inside direct-capable contracts — active owner choice
+
+Let `P_v^D` contain exactly those contracts in nonempty `D_v` with at least
+one reachable conflict at which authored participant collision-policy state is
+materially operative. Two lawful policy values—possibly bound before the exact
+cohort exists—must remain different on one matched reachable frozen conflict
+with nonpolicy inputs held fixed and must induce different committed targets
+or complete result laws. The policy may be deterministic or stochastic, live
+or advance-bound, and bundled with another participant-semantic setting.
+
+Policy is the residual material non-direct form: its semantic payload is not
+solely current-target designation. A priority, filter, weight, vote, or
+conditional resolver rule may qualify even when its present output is a point
+mass. A one-shot action whose only payload names the current target remains
+direct. A compound target-plus-policy action is policy-only at that opportunity
+unless target can vary while policy stays fixed; independently variable direct
+and policy coordinates may later establish B3 coavailability. Mandatory
+defaults, immutable resolvers, upstream build/action choices, cosmetic stances,
+different random realizations, or two labels with identical complete laws do
+not establish policy capability.
+
+| Choice | Policy incidence inside `D_v` | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — direct-capable contracts are controlled-form direct-only** | `P_v^D` is empty. Every contract in `D_v` has controlled-form projection exactly `{D}`; later B2I may distinguish exact `{D}` from `{I,D}`. B1-C's separate `{P}` class remains policy-only. | **Recommended specialization direction.** Each configurable Relic gets one clean interaction sentence: this Relic asks for a result, while that Relic follows an orientation. The catalog retains both clutch live choice and policy mastery without loading both grammars onto one item. A minimizes Swiss-army option value, premium-class pressure, and the owner's convolution concern, though it can make an individual direct-only identity shallower if its result menu lacks enough context. Either specialist can fit the ideal directly when immutable Relic grammar and distinct participant contribution remain materially indispensable; coexistence across entries is aggregate. | A Soul-answered Ashen directly chooses valid `MERCY` or `DEFIANCE` whenever it offers participant control and never exposes a priority, filter, or stance. The separate Oathbound Dreamglass remains policy-only under B1-C; the intrinsic Stone Witness remains self-willed under A3A-C. |
+| **B — every direct-capable contract also supports policy** | `P_v^D=D_v`. Every direct-capable fixed contract has at least one policy-mediated opportunity somewhere. B does not require policy and direct control at the same conflict; B3 owns that later boundary. | **Universal dual-capability escalation.** Every direct-capable Relic gains both an immediate-result action and a policy grammar across its reachable contexts, maximizing mastery breadth. It also makes the direct-capable class the likeliest Swiss-army premium, increases teaching and comparison load, and may make B1-C's policy-only class look like a lower tier. Separate contexts do not by themselves create a stronger ideal fit. Use B only if every tested direct-only identity is strategically shallow and policy support adds indispensable mastery without merely padding its action set. | Ashen has one reachable conflict where a live action names `MERCY`, and another where `RITE-FIRST` versus `MANIFESTATION-FIRST` changes the complete law. Dreamglass may arrange its two forms differently. Nothing here says both are available together. |
+| **C — direct-only and dual-capable contracts coexist** | `P_v^D` is a nonempty proper subset of `D_v`. At least one direct-capable contract has projection `{D}`, while another supports policy somewhere as well. Later rows decide the dual-capable projection and all `I` incidence. | **Qualified higher-ceiling/identity exception.** C permits a rare many-faced covenant whose direct intervention and prospective orientation form one distinctive identity, while preserving direct specialists. It also creates four catalog temperaments—intrinsic, policy-only, direct-only, and dual-capable—and the greatest teaching, comparison, and hidden-tier burden. This aggregate variety earns no automatic theological preference. Choose C only if at least one dual-capable loop is fun, quickly legible, irreducible to two specialist Relics, and demonstrably not a strict action-set upgrade or required optimized-build component. | Ashen is direct-only. Dreamglass has a direct opportunity in one context and a policy opportunity in another. Oathbound remains policy-only and Stone Witness intrinsic. Exact names, incidence, and dialect placement remain illustrative. |
+
+A/B/C exhaust the subset relation of `P_v^D` to nonempty `D_v`. B2 does not
+choose same-opportunity coavailability, context-varying form loss, `I`
+incidence, policy-coordinate recombinability, constructive language, policy
+timing, holder, information, automatic-law details, or dialect placement.
+Those remain B3–B6, B1I–B6I1, A3C/D1/D2, A7, RCS-02, A4–A6, and A3X.
+
+Recommend **A, with C as the qualified higher-ceiling/identity exception**.
+B1-C already preserves a complete policy-only configurable class, so A keeps
+both gameplay fantasies while resisting “more buttons equals more depth.” Use
+C only when a concrete hybrid Relic proves an irreducible, legible loop with
+real liabilities and no automatic optimized-build premium. Escalate to B only
+if that necessity holds across every direct-capable contract. Equal optimized
+Legendary ceilings still require RCS-05/RCS-06/RCS-08 proof; hybrid breadth
+cannot serve as an unconditional power bonus.
+
+Selecting A prunes B3–B6 and B3I–B6I1, opens B1I while B2I remains applicable
+but queued, and yields **`Phi_SR = 27`**. Selecting B prunes B2I, opens B3
+while B1I remains queued, and yields **`Phi_SR = 35`**. Selecting C opens B3
+while B1I and B2I remain applicable but queued, yielding **`Phi_SR = 36`**.
+A letter selects worksheet direction only. The authoritative decision record
+remains unchanged.
 
 ## Session protocol and evidence
 
