@@ -11581,3 +11581,71 @@ Replacing old counted RCS-04A with seven rows raises the register from 157 to
 163. After E2C-A it contains **23 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A1, 51
 `PRUNED`, 81 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 24`**. The authoritative decision record remains unchanged.
+
+### RCS-04A1 disposition and A2 result-domain audit — 2026-09-29
+
+Zanzagar selected **RCS-04A1-C with RCS-04A1-B as the qualified simplicity
+fallback**. The fixed release catalog must therefore contain at least one
+reachable maximal frozen cohort with two distinct proposed targets. Target-
+concordant cohorts remain legal and commit their unique target exactly once
+while preserving every contributor ID. A1-B is armed and unfired: it removes
+all distinct-target cohorts only if genuine conflict itself causes cheap
+jamming, cause suppression, unreliable paid Rites or practical D5 returns, or
+comprehension failure. It prunes A2–A7 if fired and cannot coexist with an A2
+fallback.
+
+Three independent read-only audits tested A2's boundary. They agree that no
+new counted row is needed if A2 selects one **uniform admissible result domain**
+for every genuine-conflict cohort `K`. Let `a(K)` be the authoritative source
+assignment and let `T(K)` contain every distinct still-valid proposed target.
+The repaired parent already limits one atomic result to `T(K) union {a(K)}`.
+The three nonempty uniform category domains are therefore:
+
+1. `R(K)=T(K)`: a proposed target must commit;
+2. `R(K)={a(K)}`: the current assignment must remain; and
+3. `R(K)=T(K) union {a(K)}`: both categories enter the later resolver.
+
+C cannot mean only that both result categories occur somewhere in the catalog.
+That would let Ashen conflicts be target-only while Dreamglass conflicts are
+null-only, silently making definition identity a collision caste. Cause-,
+context-, cohort-, and target-specific menus or target shortlists likewise
+require an owner-visible amendment. The result domain is not an output
+probability support: a later deterministic system function, stochastic kernel,
+or participant coordinate may return one member after its own rows close.
+
+The audit caught two downstream scope leaks before presentation. A3 must own
+authority over the entire A2 domain, including target versus unchanged under
+C. A4 contributor sensitivity must likewise cover every result rank or
+probability, not only target-versus-target precedence: in `P->b`, `X->b`,
+`M->c`, contributor multiplicity could alter null propensity without changing
+the relative `b:c` order. A5/A6 then govern randomness and kernel scope over
+the complete domain, while A7 governs when a participant selects the actual
+result. These are wording repairs inside the seven registered rows, not new
+cards.
+
+Recommend **A2-A with A2-C as a qualified fairness fallback and A1-B as the
+deeper simplicity fallback**. A forces genuine disagreement to produce one
+proposed becoming and avoids universal status-quo jamming. B is coherent and
+elegant—agreement transforms, disagreement preserves—but a live P proposal can
+then exist mainly to cancel deterministic X/M, a sacrificial M can shield
+against advance-bound Z, desired paid Rites routinely disappear, and every
+genuine conflict can block D5 return legs. A still risks a premium cause caste,
+spoiler proposals, and involuntary rewriting; A3–A6 must reject those failures.
+
+A2-C may replace A only if target-forcing resolution creates material arbitrary
+or involuntary harm while genuine conflict remains worthwhile and a full
+target/null domain stays legible, non-dominated, resistant to cheap veto,
+acceptable for paid Rites, and compatible with practical D5 witnesses. Firing
+A2-C after any downstream A3–A7 selection invalidates and reopens A3 and every
+applicable A4–A7 row; no target-only authority, contributor-basis,
+stochasticity, kernel-scope, or timing label transfers by name to the expanded
+target/null domain. If conflict itself fails, fire A1-B instead. None of A/B/C
+makes genuine conflict a stronger ideal expression: inherited target
+concordance remains the direct local Achintya Bheda Abheda fit; A is partial
+and C aggregate.
+
+After A1-C, the register contains **22 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A2,
+51 `PRUNED`, 82 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`**. A2-A/C open A3 at 22. A2-B prunes A3–A7 and opens RCS-04B at
+17. The register remains 163 rows and the authoritative decision record
+remains unchanged.

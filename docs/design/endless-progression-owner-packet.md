@@ -444,10 +444,14 @@ every P proposal retains live custodian approval while every Z disposition is
 bound before its exact empty-settlement opportunity is known. A collision
 audit then found that old RCS-04A hid seven conditional product decisions;
 the forced cohort atomicity and target-bucketing rules remain derived rather
-than becoming two fake cards. **RCS-04A1 is now the sole owner-facing choice
-under SR-04:** whether approved proposals never coexist, may coexist only when
-their targets agree, or may contain a genuine distinct-target conflict. The
-current register has 163 rows and `Phi_SR = 24`.
+than becoming two fake cards. Zanzagar then selected **RCS-04A1-C with
+RCS-04A1-B as the qualified simplicity fallback**: the release catalog must
+contain at least one genuine distinct-target collision, while target-
+concordant cohorts remain legal and commit once. **RCS-04A2 is now the sole
+owner-facing choice under SR-04:** whether genuine disagreement must commit
+one proposed target, must preserve the current assignment, or admits both
+result categories before later resolution authority is chosen. The current
+register has 163 rows and `Phi_SR = 23`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -27839,7 +27843,7 @@ the already selected rules rather than inheriting this P/Z label.
 > `PRUNED`, 81 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 > `Phi_SR = 24`**. The authoritative decision record remains unchanged.
 
-### RCS-04A1 — reachable collision geometry — active owner choice
+### RCS-04A1 — reachable collision geometry — C selected with B fallback
 
 Let `K` be the maximal frozen cohort of independently approved proposals for
 one active Relic, one authoritative pre-assignment/source revision, and one
@@ -27879,6 +27883,89 @@ Any answer must preserve at least one practically reachable D5-B compatible
 return history per transforming definition or reopen D5. A letter selects a
 worksheet direction only; it does not amend the authoritative decision record,
 authorize implementation, choose exact catalogs, or fire a fallback.
+
+**Direction answer — selected by Zanzagar on 2026-09-29:** **C, genuine
+target conflict is supported, with RCS-04A1-B as the qualified simplicity
+fallback.** The fixed release catalog must contain at least one reachable
+maximal frozen cohort `K` with `|T(K)|>1`. Target-concordant cohorts may also
+occur; they preserve every contributor ID and commit their unique target as
+exactly one assignment transition. A1 does not choose what a genuine conflict
+settles, who or what controls that result, or how committed lineage is formed.
+
+RCS-04A1-B is armed and unfired. It replaces C only if genuine conflict itself
+primarily enables cheap veto/jamming, suppresses whole cause families, makes
+paid Rites or practical D5 return histories unreliable, or fails quick player
+comprehension. Firing it removes every distinct-target cohort and prunes
+RCS-04A2–A7; it does not coexist with a later A2 fallback. It is not valid if
+target-concordant authoring merely hides one dominant target or makes preserved
+multi-cause support decorative.
+
+After A1-C, the 163-row register contains **22 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A2, 51 `PRUNED`, 82 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 23`**. The authoritative decision record remains
+unchanged.
+
+#### RCS-04A2 scope audit — one uniform admissible result domain
+
+For each reachable genuine-conflict cohort `K`, let `a(K)` be its authoritative
+pre-assignment and let `T(K)` contain its at least two distinct still-valid
+proposed targets. The repaired parent already forces exactly one atomic
+assignment-level result in `T(K) union {a(K)}`. Let nonempty `R(K)` be the
+result domain handed to the later resolver before its authority or kernel is
+chosen.
+
+A2 is atomic only as a **uniform result-domain** choice. Its three options are
+the three nonempty uniform category sets: proposed target only, unchanged only,
+or both. C cannot mean merely that target and unchanged results occur somewhere
+in the catalog. A definition-, cause-, context-, cohort-, or target-specific
+menu would create a hidden collision caste; a shortlist that admits one target
+but excludes another would also preselect precedence. Either requires an
+owner-visible amendment naming its stable semantic partition.
+
+A2 selects no player choice, system priority, randomness, weight, timing,
+information disclosure, or committed identity. Under A/C, A3 owns authority
+over the **entire** result domain, including target versus unchanged under C.
+On a system branch, A4 owns whether contributor count/cause composition may
+affect any result rank or probability, including null versus target; A5/A6 own
+randomness and kernel scope across the whole domain. On a participant branch,
+A7 owns when the actual result is selected. RCS-02 retains holder/disclosure/
+default, RCS-13 retains binding horizon, and RCS-04B receives only the selected
+proposed target or unchanged result plus preserved proposal identities.
+
+### RCS-04A2 — genuine-conflict admissible result — active owner choice
+
+| Choice | Uniform result domain for every genuine conflict | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — one proposed target must settle** | `R(K)=T(K)` for every genuine-conflict cohort. The current assignment is not an admissible collision result; one still-valid proposed target must commit. A3 next chooses resolution authority. | **Recommended higher-stakes direction, with A2-C as a qualified fairness fallback and A1-B as the deeper simplicity fallback.** Conflict produces a real becoming instead of a general veto shield. Distinct causal histories remain preserved while one proposed form manifests, a partial—not direct—ideal fit; inherited concordance remains the strongest local Achintya Bheda Abheda expression. Risks are an arbitrary precedence caste, spoiler proposals biasing the eventual resolver, involuntary persistent rewriting, and a paid Rite still losing to another target. | A state-supporting Relic is authoritatively in assignment `a`. A live-approved P proposal names `b` while an admitted paid M Rite names distinct `c`. The later resolver must commit `b` or `c`; it cannot leave `a`. This card does not say which target wins or who chooses it. |
+| **B — genuine conflict always preserves the current assignment** | `R(K)={a(K)}` for every genuine-conflict cohort. Every conflicting proposal terminates as a loser and no assignment transition occurs. A3–A7 prune and RCS-04B opens. | B gives the shortest rule: **agreement transforms; disagreement leaves the Relic as it was.** It makes target alignment a serious build objective and mandates no prompt. But it gives every cheap conflicting proposal veto value: live P can indirectly cancel deterministic X/M, a sacrificial M can shield against advance-bound Z, paid Rites routinely disappear, and D5 return legs can be blocked. Difference becomes strategically sterile rather than a stronger ideal realization. | With the same `a`, `b`, and `c` cohort, the Relic remains in `a`; both proposal IDs settle terminally, the positive result and Rite payment remain final, and nothing queues. |
+| **C — every conflict admits targets and no change** | `R(K)=T(K) union {a(K)}` for every genuine-conflict cohort. Every proposed target and the unchanged assignment enter the later resolver's domain. A3 next chooses authority over that whole domain. The completed policy must retain material reachable target and unchanged witnesses or C collapses into A/B. | **Qualified conflict-preserving fairness fallback, not the primary recommendation.** C can preserve genuine disagreement while allowing an otherwise harmful forced rewrite to leave identity unchanged. It also creates the broadest option surface and explanation burden; participant authority can become “pick the best target or keep my build,” while system resolution can make null odds opaque. Its ideal fit is aggregate, not stronger than concordance. | The same cohort hands `{a,b,c}` to the later resolver. A3–A7—not this card—decide whether fixed law, probability, or a materially timed participant coordinate returns one result. |
+
+A is recommended because A1-C was selected to make incompatible biographies
+real gameplay. Universal nullification turns the easiest extra proposal into a
+status-quo shield and often rewards suppressing the cause diversity just
+selected. A still needs strict later gates: no premium cause caste, cheap
+spoiler influence, hidden arrival-order rule, or practical loss of any D5
+return witness.
+
+Arm **A2-C** only if every otherwise viable target-forcing resolver creates
+material arbitrary or involuntary harm while genuine conflict remains fun,
+and a full target/null domain can stay legible, non-dominated, resistant to
+cheap veto, acceptable for paid Rites, and compatible with practical D5
+returns. Firing A2-C after any downstream A3–A7 direction has been selected
+invalidates and reopens A3 and every applicable A4–A7 row. No authority,
+contributor-basis, stochasticity, kernel-scope, or timing label selected for
+the target-only domain transfers by name to the expanded target/null domain.
+If genuine conflict itself fails those tests, fire the already armed **A1-B**
+replacement instead. A2-B remains a coherent positive thesis for
+“becoming requires concordance,” but it is not the simplicity fallback because
+A1-B expresses that thesis without first charging causes and then nulling them.
+
+After A2-A or A2-C, A2 becomes `DIR-SELECTED` and A3 opens with **21
+`SCREEN`, 1 `OWNER-OPEN`, 51 `PRUNED`, 83 `DIR-SELECTED`, and `Phi_SR = 22`**.
+After A2-B, A3–A7 prune and RCS-04B opens with **16 `SCREEN`, 1
+`OWNER-OPEN`, 56 `PRUNED`, 83 `DIR-SELECTED`, and `Phi_SR = 17`**. Every
+branch retains 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; the register remains
+163 rows and the authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 

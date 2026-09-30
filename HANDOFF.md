@@ -1,5 +1,54 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-29 genuine Relic conflict selected; result domain is next
+
+Zanzagar selected `RCS-04A1-C` with `RCS-04A1-B` as the qualified simplicity
+fallback. The release catalog must contain at least one maximal frozen cohort
+with two distinct proposed targets; target-concordant cohorts remain legal and
+commit their unique target once. A1-B is armed and unfired. It removes genuine
+conflict and prunes A2–A7 only if conflict itself causes cheap jamming, cause
+suppression, unreliable paid Rites or practical D5 returns, or comprehension
+failure. It does not coexist with a later A2 fallback.
+
+Three read-only audits uphold RCS-04A2 as one atomic uniform result-domain
+choice. For every genuine conflict with authoritative assignment `a` and
+proposed-target set `T`, the later resolver receives exactly one of:
+
+- **A — proposed targets only. Recommended.** One member of `T` must commit;
+  unchanged `a` is unavailable. Conflict produces a real becoming and cannot
+  become a universal status-quo veto. It opens A3 to decide authority. Risks
+  are cause caste, spoiler proposals, involuntary persistent rewriting, and a
+  paid Rite still losing.
+- **B — unchanged only.** Every genuine conflict leaves `a` authoritative and
+  terminally loses all proposals. This teaches “agreement transforms;
+  disagreement preserves,” but makes cheap conflicts powerful vetoes over P/Z/
+  X/M, routinely wastes Rites, suppresses cause diversity, and can block D5
+  returns. It prunes A3–A7.
+- **C — full target-plus-unchanged domain. Qualified A2 fairness fallback.**
+  Every member of `T` plus `a` enters the later resolver. This preserves
+  conflict while permitting no change, but creates the broadest option and
+  explanation surface. It opens A3 over that entire domain.
+
+Recommend **A2-A with A2-C as the qualified fairness fallback and A1-B as the
+deeper simplicity fallback**. Fire A2-C only if all viable target-forcing
+resolvers cause material arbitrary/involuntary harm while conflict remains fun
+and null stays legible, non-dominant, anti-jam, Rite-safe, and D5-safe. If
+fired after downstream A3–A7 selections, A2-C invalidates and reopens A3 and
+every applicable A4–A7 row; no target-only downstream label transfers by name
+to the expanded target/null domain. If conflict itself fails, fire A1-B
+instead.
+
+The A2 audit also widens the already registered downstream scopes without
+adding rows: A3 authority and A4 contributor sensitivity cover the complete
+result domain, including target versus unchanged under C. Cause-, definition-,
+context-, cohort-, or target-specific result menus require an owner-visible
+amendment rather than hidden authoring.
+
+The 163-row register now has **22 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A2, 51
+`PRUNED`, 82 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`**. The authoritative decision record remains byte-unchanged.
+Ask only for A2 A, B, C, or an explicit replacement.
+
 ## 2026-09-29 P lives, Z binds; collision geometry is next
 
 Zanzagar selected `RCS-03E2C-A`. Every P proposal retains materially
@@ -12640,7 +12689,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 02:19 UTC — Relic collision geometry is next](docs/handoffs/2026-09-30-0219--relic-collision-geometry-next.md)**
+[2026-09-30 03:03 UTC — Relic conflict result is next](docs/handoffs/2026-09-30-0303--relic-conflict-result-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
