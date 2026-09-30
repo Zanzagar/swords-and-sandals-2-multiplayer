@@ -471,11 +471,16 @@ exception**: direct-capable contracts never also expose policy-mediated
 control, while B1-C's separate policy-only class remains. Three B1I audits
 then upheld the intrinsic-incidence split and clarified that universal `I`
 support means at least one authored participant-intrinsic opportunity per
-contract, not intrinsic settlement at every opportunity. **RCS-04A3B1I is now
-the sole owner-facing choice under SR-04:** whether policy-only contracts have
-no `I` opportunities, every such contract has at least one, or exact `{P}` and
-`{I,P}` contracts coexist. The amended register has 181 rows and `Phi_SR =
-27`.
+contract, not intrinsic settlement at every opportunity. Zanzagar selected
+**RCS-04A3B1I-A with RCS-04A3B1I-B as the qualified system fallback**: every
+policy-only contract is complete-profile exact `{P}`, so a material policy
+governs every genuine conflict on that contract. Three B2I audits then upheld
+the direct-specialist intrinsic-incidence split but repaired a one-button-plus-
+default loophole: execution failure cannot supply either a second direct arm
+or an intrinsic opportunity. **RCS-04A3B2I is now the sole owner-facing
+choice under SR-04:** whether direct-only contracts have no `I` opportunities,
+every such contract has at least one, or exact `{D}` and `{I,D}` contracts
+coexist. The amended register has 181 rows and `Phi_SR = 26`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -28415,7 +28420,7 @@ B1I while B2I remains applicable but queued. The 181-row register now contains
 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`**.
 The authoritative decision record remains unchanged.
 
-### RCS-04A3B1I — participant-intrinsic opportunity incidence inside policy-only contracts — active owner choice
+### RCS-04A3B1I — participant-intrinsic opportunity incidence inside policy-only contracts — A selected
 
 Let `C_v^P` be the nonempty class whose controlled-form projection is exactly
 `{P}`, established by B1-C. Let `J_v^P` contain exactly those contracts in
@@ -28459,10 +28464,88 @@ meaningful, one-sentence teachable, Rite-safe, and not merely a denial-of-
 agency token. C remains available for a proved mixed identity catalog, but is
 not the fallback because it carries the sharpest profile-tier burden.
 
-Every A/B/C answer moves B1I to `DIR-SELECTED` and opens B2I without pruning
-another registered row. The register would then contain **25 `SCREEN`, 1
-`OWNER-OPEN` at RCS-04A3B2I, 60 `PRUNED`, 88 `DIR-SELECTED`, 5 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. A letter selects worksheet
+**Direction answer — selected by Zanzagar on 2026-09-30:** **A, with B as the
+qualified system fallback.** `J_v^P` is empty. Every policy-only contract is
+complete-profile exact `{P}`: every reachable genuine conflict on that
+contract retains a material participant policy coordinate. Earlier binding
+does not weaken this promise when alternative lawful bindings still produce
+different complete laws on the matched later conflict.
+
+B1I-B is armed and unfired. It may replace A only if equal-access optimized
+testing shows that universal policy coverage creates an unavoidable control-
+coverage premium over intrinsic and direct specialists, or remains solved and
+tool-like despite meaningful commitments, liabilities, and previews—and every
+policy contract can support a prospectively disclosed participant-intrinsic
+context that is tactically meaningful, one-sentence teachable, Rite-safe, and
+not merely a denial-of-agency token. B1I-C remains an authored mixed-profile
+alternative rather than the fallback because it carries the sharpest hidden-
+tier burden.
+
+Selecting A moves B1I to `DIR-SELECTED` and opens B2I without pruning another
+row. The 181-row register now contains **25 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3B2I, 60 `PRUNED`, 88 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 26`**. The authoritative decision record remains
+unchanged.
+
+### RCS-04A3B2I — participant-intrinsic opportunity incidence inside direct-only contracts — active owner choice
+
+Let `C_v^D` be the class made nonempty by B1-C whose controlled-form projection
+is exactly `{D}` under B2-A. Let `J_v^D` contain exactly those contracts in
+`C_v^D` with at least one reachable genuine-conflict opportunity classified
+`I`. Universal `I` support means **every contract has at least one** such
+opportunity; it cannot mean every opportunity is `I` because every member of
+`C_v^D` already has a valid direct-control witness.
+
+Classify lawful semantic controls, not prompt deliveries or execution traces.
+A `D` witness requires two lawful **live** participant-control vectors that
+differ only in one current-result coordinate, name distinct still-valid
+targets, and produce completed laws committing the respective named targets.
+Invalid or stale choices, duplicate prompts, confirmation, a lone mandatory
+default, timeout, disconnect, unavailable-holder handling, or fallback
+execution supplies neither a second direct arm nor an authored `I` witness.
+An advance-bound material rule, delegate-to-resolver arm, veto, filter, vote,
+or ranking is policy-mediated `P`, not direct, and would contradict B2-A's
+exact-`{D}` class.
+
+Boundary countermodel: suppose valid results are `{MERCY, DEFIANCE}`, immutable
+law defaults to `MERCY`, and the UI offers only `override -> DEFIANCE`.
+Timeout/default to `MERCY` is not a second lawful participant target value, so
+the one button does not establish `D`; because that button materially changes
+the result, the opportunity is not `I` either. The design is illegal under the
+selected ontology unless it supplies an explicit second semantic arm choosing
+`MERCY`, in which case the pair canonicalizes to direct target choice, or it
+reopens the control-form design. Operational failure may never fill the gap.
+
+| Choice | `I` incidence inside `C_v^D` | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — direct specialists ask at every genuine conflict** | `J_v^D` is empty. Every contract is exact `{D}`: every reachable genuine conflict has a valid live direct-result coordinate and none is participant-intrinsic. | A gives the clearest immediate-agency sentence and makes every local conflict a potential direct ideal fit when Soul choice and immutable Relic grammar are separately indispensable. Because direct control is live by definition, however, exact `{D}` can turn every genuine conflict into a prompt, amplify target shopping, team quarterbacking, latency/default harm, and make “always choose the best answer” a premium profile. | Soul-answered Ashen receives still-valid `MERCY` and `DEFIANCE` proposals and always presents two live semantic arms naming those targets. Its covenant limits what is lawful but never resolves a genuine conflict without asking. |
+| **B — every direct specialist also has an authored self-willed context** | `J_v^D=C_v^D`. Every contract is exact `{I,D}`: each has at least one valid live direct opportunity and at least one authored participant-intrinsic conflict opportunity. One rare token `I` witness does not prove useful cadence. | **Recommended agency/self-will rhythm.** B prevents live target choice from being literally universal and leaves later cadence authoring room to make intervention exceptional instead of automatic; B2I alone fixes no frequency. It also standardizes mixed support instead of creating an always-controllable premium subtype and adds no action breadth because `I` is absence of participant result control. It does force a disclosed two-context grammar onto every direct specialist and can make a paid Rite loss feel like arbitrary denial if the boundary is unclear or ornamental. Each `D` opportunity can directly fit the ideal; an `I` opportunity strongly preserves Relic distinction but contains no participant control, so cross-context alternation is only a partial fit. | Ordinary Ashen conflicts ask the Soul to choose `MERCY` or `DEFIANCE`. In a prospectively disclosed **Last Witness** context, immutable Ashen covenant settles one still-valid proposal without any participant result-control coordinate: “sometimes it asks the Soul; in its sealed context, it answers for itself.” |
+| **C — always-asking and contextually self-willed direct specialists coexist** | `J_v^D` is a nonempty proper subset of `C_v^D`. Exact `{D}` and exact `{I,D}` contracts both exist; therefore the class contains at least two fixed contracts. | C creates the richest item-specific agency identities and lets players opt into self-will. It also creates the hardest comparison and strongest hidden-tier risk: exact `{D}` may become the premium always-responsive caste while `{I,D}` receives thematic or scalar compensation. Catalog coexistence is aggregate, not a direct ideal fit. Use C only as a narrow identity exception when selected `{I,D}` loops are exceptional and legible, other definitions cannot support honest intrinsic contexts, and matched optimized testing proves neither profile becomes required. | Soul-answered Ashen always asks. Severed Ashen asks ordinarily but invokes its covenant at Last Witness. Exact names, contexts, counts, and dialect placement remain illustrative. |
+
+A/B/C exhaust the subset relation of `J_v^D` to nonempty `C_v^D`. B2I does
+not choose exact intrinsic contexts or useful frequency, target menus, holder/
+default/recovery, disclosure, automatic laws, dialect placement, or power
+compensation. Those remain AUTHOR/SPEC, RCS-02/RCS-13/RCS-16, A4–A6, A3X,
+RCS-05/RCS-06/RCS-08, and RCS-17/RCS-18. Invalidating all but one target
+before cohort freeze is not genuine conflict; post-freeze invalidation is a
+stale-action/fault case, not `I`.
+
+Recommend **B, with A as the qualified practical agency/clarity fallback**.
+Direct choice is live, so exact `{D}` carries much more interruption and
+option-value pressure than B1I-A's possibly advance-bound policy coverage.
+Fire A only when both conditions hold: after the best one-sentence rule,
+pre-conflict forecast, and Rite disclosure, B's `I/D` boundary still feels
+like arbitrary denial or can be satisfied only by rare/contrived token
+contexts; and exact-`{D}` testing shows naturally infrequent prompts, bounded
+non-solved menus, acceptable multiplayer/default handling, and no unavoidable
+dominance over policy or intrinsic specialists. C remains a narrowly gated
+identity exception, not the fallback. No answer earns scalar compensation or
+a “two modes” bonus; equal optimized Legendary ceilings remain later proof.
+
+Every A/B/C answer moves B2I to `DIR-SELECTED` and opens A3C without pruning
+another registered row. The register would then contain **24 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A3C, 60 `PRUNED`, 89 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`**. A letter selects worksheet
 direction only. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence

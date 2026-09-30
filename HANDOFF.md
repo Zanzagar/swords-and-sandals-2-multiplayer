@@ -1,6 +1,75 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 policy specialists always answer; direct-specialist self-will is next
+
+Zanzagar selected **RCS-04A3B1I-A with RCS-04A3B1I-B as the qualified system
+fallback**. Every policy-only contract is complete-profile exact `{P}`: every
+reachable genuine conflict retains a material participant policy coordinate.
+Earlier-bound policy still counts when two lawful bindings change the same
+matched later law. B may replace A only if universal policy coverage creates
+unavoidable control premium or solved tool-like play while every policy
+contract supports a disclosed, meaningful, teachable, Rite-safe, non-token
+intrinsic context.
+
+Three read-only named-claim audits upheld RCS-04A3B2I as the sole next
+presented card and repaired one direct-specific loophole. Classify semantic
+target arms, not UI deliveries or execution traces. `D` requires two lawful
+live controls naming distinct still-valid targets whose completed laws commit
+those respective targets. One button plus timeout/default, invalid or stale
+choices, confirmation, duplicate prompts, holder failure, disconnect, or
+fallback execution supplies neither another direct arm nor an authored `I`
+opportunity. An advance-bound material rule or resolver-delegate arm is policy
+`P`, which would contradict B2-A's exact-`{D}` class.
+
+The register is **181 rows: 25 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3B2I, 60
+`PRUNED`, 88 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 26`**. The authoritative decision record remains byte-unchanged.
+
+`RCS-04A3B2I` asks whether the direct-only contract class contains authored
+participant-intrinsic conflict opportunities:
+
+- **A — direct specialists ask at every genuine conflict.** Every contract is
+  exact `{D}`. This maximizes immediate agency and direct local ideal fit, but
+  every genuine conflict requires a live target decision and may amplify prompt
+  fatigue, target shopping, quarterbacking, latency, and option premium.
+- **B — every direct specialist also has an authored self-willed context.
+  Recommended.** Every contract is exact `{I,D}`: at least one valid direct
+  opportunity and at least one disclosed participant-intrinsic conflict. This
+  prevents live intervention from being literally universal and lets later
+  cadence authoring make it exceptional without adding a second action
+  language.
+- **C — exact `{D}` and `{I,D}` specialists coexist.** Some always ask while
+  others have self-willed contexts. This maximizes identity contrast and the
+  risk that exact `{D}` becomes the premium always-responsive caste.
+
+The direct recommendation intentionally differs from B1I. Policy may bind in
+advance, but direct choice is live by definition. Recommend **B with A as the
+qualified practical agency/clarity fallback**. Under B, ordinary Soul-answered
+Ashen conflicts ask for `MERCY` or `DEFIANCE`; a prospectively disclosed **Last
+Witness** context invokes immutable covenant without a participant result-
+control coordinate: “sometimes it asks the Soul; in its sealed context, it
+answers for itself.” One rare token `I` witness is insufficient to justify B.
+
+Fire A only when both conditions hold: after the best one-sentence rule,
+forecast, and Rite disclosure, B's boundary still feels like arbitrary denial
+or admits only contrived token contexts; and exact-`{D}` testing shows
+naturally infrequent, non-solved prompts, acceptable multiplayer/default
+handling, and no unavoidable dominance over policy or intrinsic specialists.
+Each `D` opportunity can directly embody *Achintya Bheda Abheda* when Soul
+choice and Relic grammar jointly matter. An `I` opportunity strongly preserves
+Relic distinction but contains no participant control, so their cross-context
+alternation is only a partial fit. C is a narrow identity exception, not the
+fallback, and no answer earns scalar compensation or a “two modes” bonus.
+
+Every B2I answer opens A3C without another prune and yields `Phi_SR = 25`.
+The final full gear/progression visual refresh remains required at SR-12
+closeout in `docs/design/endless-build-system-map.svg`; the SVG remains
+untouched while the Relic contract moves.
+
 ## 2026-09-30 direct and policy specialists stay separate; policy-specialist self-will is next
+
+**Superseded for navigation by the section above.** Its B1I card and
+`Phi_SR = 27` checkpoint predate the selected A answer and B2I audits.
 
 Zanzagar selected **RCS-04A3B2-A with RCS-04A3B2-C as the qualified higher-
 ceiling/identity exception**. Every direct-capable fixed contract has
@@ -13062,7 +13131,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 14:37 UTC — Participant-intrinsic opportunities inside policy-only Relics are next](docs/handoffs/2026-09-30-1437--relic-policy-intrinsic-incidence-next.md)**
+[2026-09-30 15:16 UTC — Participant-intrinsic opportunities inside direct-only Relics are next](docs/handoffs/2026-09-30-1516--relic-direct-intrinsic-incidence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

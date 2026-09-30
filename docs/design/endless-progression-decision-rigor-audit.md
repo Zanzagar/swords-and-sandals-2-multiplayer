@@ -12005,3 +12005,71 @@ while B2I remains queued. The register is **181 rows: 26 `SCREEN`, 1
 and opens B2I without further pruning, yielding **25 `SCREEN`, 1 `OWNER-OPEN`,
 60 `PRUNED`, 88 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 26`**. The authoritative decision record remains unchanged.
+
+### RCS-04A3B1I disposition and direct-specialist intrinsic-incidence audit — 2026-09-30
+
+Zanzagar selected **RCS-04A3B1I-A with RCS-04A3B1I-B as the qualified system
+fallback**. Every policy-only contract is complete-profile exact `{P}`: every
+reachable genuine conflict on that fixed contract retains a material
+participant policy coordinate. Earlier-bound policy remains material when two
+lawful earlier bindings change the complete law of the same matched later
+conflict. Execution failure, a mandatory default, or an unavailable holder
+cannot manufacture a participant-intrinsic opportunity.
+
+B1I-B may replace A only if equal-access optimized testing shows that
+universal policy coverage creates unavoidable control premium or solved tool-
+like play, while every policy contract can support a prospectively disclosed,
+tactically meaningful, one-sentence teachable, Rite-safe, non-token intrinsic
+context. B1I-C remains a mixed-profile alternative rather than the fallback
+because of its stronger hidden-tier risk.
+
+Three read-only named-claim audits then attacked B2I dependency arithmetic,
+semantic exhaustiveness, and gameplay. The empty/universal/nonempty-proper
+partition holds without another row. Let `C_v^D` be the class made nonempty by
+B1-C and controlled-form exact `{D}` by B2-A; let `J_v^D` contain contracts
+with at least one reachable `I` opportunity. Empty yields only exact `{D}`;
+universal yields only exact `{I,D}` with at least one witness of each form per
+contract; proper yields coexistence of both profiles. Pure `{I}` cannot be a
+fourth leaf because membership in `C_v^D` already requires a `D` witness.
+
+The audit did break the unstated direct boundary. Classify lawful semantic
+controls, not UI deliveries or failure traces. `D` requires two lawful live
+vectors differing only in a current-result coordinate, naming distinct still-
+valid targets, whose completed laws commit the respective targets. Invalid or
+stale choices, duplicate prompts, confirmation, a lone default, timeout,
+disconnect, unavailable-holder handling, or fallback execution supplies
+neither another direct arm nor `I`. A material advance-bound rule, resolver-
+delegate arm, veto, filter, vote, or rank is `P` and contradicts B2-A's exact-
+`{D}` class.
+
+The decisive countermodel offers only `override -> DEFIANCE` while immutable
+law defaults to `MERCY`. Timeout/default does not become a participant arm, so
+the one button cannot establish `D`; because the button changes the result,
+the opportunity is not `I`. The design must supply an explicit second semantic
+arm choosing `MERCY`, which canonicalizes the pair to direct choice, or reopen
+the form design. It cannot be silently classified. Automatic completion may
+remain `D` only if it preserves the selected-target difference; erasing every
+participant difference makes the opportunity `I`.
+
+Recommend **B2I-B with B2I-A as the qualified practical agency/clarity
+fallback**. Unlike policy, direct control is live by definition. Exact `{D}`
+therefore creates a prompt at every genuine conflict and carries greater
+target-shopping, quarterbacking, latency, and option-premium pressure. B
+prevents live intervention from being universal and leaves later cadence
+authoring room without adding action breadth: sometimes the Relic asks the
+Soul, while its disclosed sealed context answers for itself. B2I fixes no
+frequency. Each `D` opportunity can directly express the standing ideal; `I`
+preserves distinction but has no participant control, so
+alternation is only a partial cross-context fit. Fire A only if B still feels
+like arbitrary denial after the best forecast/disclosure or admits only token
+intrinsic contexts, while exact-`{D}` testing proves naturally infrequent,
+non-solved prompts and no unavoidable dominance. C remains a narrow identity
+exception, not the fallback. No profile earns scalar compensation.
+
+B1I-A moves B1I to `DIR-SELECTED` and B2I to `OWNER-OPEN` with no pruning.
+The register is **181 rows: 25 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3B2I, 60
+`PRUNED`, 88 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 26`**. Every B2I answer then closes B2I and opens A3C without
+further pruning, yielding **24 `SCREEN`, 1 `OWNER-OPEN`, 60 `PRUNED`, 89
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`**.
+The authoritative decision record remains unchanged.
