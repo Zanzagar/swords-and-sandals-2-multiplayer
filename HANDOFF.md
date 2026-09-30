@@ -1,6 +1,79 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 direct specialists sometimes answer themselves; policy-coordinate packaging is next
+
+Zanzagar selected **RCS-04A3B2I-B with RCS-04A3B2I-A as the qualified
+practical agency/clarity fallback**. Every direct-only contract is complete-
+profile exact `{I,D}`: every fixed contract has at least one honest live
+direct-result opportunity and at least one authored participant-intrinsic
+genuine-conflict opportunity. B2I fixes no useful frequency; a rare or
+contrived token `I` witness is insufficient.
+
+B2I-A is armed and unfired. It may replace B only if, after the best one-
+sentence rule, pre-conflict forecast, and Rite disclosure, the `I/D` boundary
+still feels like arbitrary denial or admits only token intrinsic contexts;
+and exact-`{D}` testing shows naturally infrequent, bounded, non-solved
+prompts, acceptable multiplayer/default handling, and no unavoidable
+dominance. B2I-C remains a narrow identity exception. No profile earns scalar
+compensation or a “two modes” bonus.
+
+Three read-only named-claim audits upheld RCS-04A3C as the sole next card and
+fixed its semantic boundary. Inside the nonempty exact-`{P}` class, a contract
+has an independently variable collision-policy coordinate only if two lawful
+settings on one matched conflict keep every other participant-semantic value
+fixed, change policy, and change the complete target law. Two separately
+labelled widgets with forced one-to-one pairings remain bundled. One opaque
+whole-stance selector can still be independent. A standalone policy qualifies,
+and one held-fixed fiber suffices; a full Cartesian product is not required.
+
+The register is **181 rows: 24 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3C, 60
+`PRUNED`, 89 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 25`**. The authoritative decision record remains byte-unchanged.
+
+`RCS-04A3C` asks how collision policy is packaged with other participant
+semantics:
+
+- **A — bundled-only. Recommended.** Every policy change is part of a
+  cohesive whole covenant that also changes another meaningful participant
+  semantic. Merciful Chorus can pair Chorus routing with `RITE-FIRST`, while
+  Defiant Dissonance pairs Dissonance with `MANIFESTATION-FIRST`; the cross-
+  pairs are illegal. This protects artifact voice and avoids a universal extra
+  optimization axis, but can make a player surrender preferred routing merely
+  to protect a paid Rite.
+- **B — independently variable on every policy contract. Qualified class-wide
+  agency/clarity fallback.** Every contract has at least one held-fixed witness
+  where policy alone changes. This gives clean agency and replay attribution,
+  but adds configuration/search surface and can turn `RITE-FIRST` into cheap
+  mandatory insurance. Universal does not require every possible cross-pair.
+- **C — bundled and independent contracts coexist.** This creates the richest
+  identity contrast and two configuration grammars, with the strongest risk
+  that independent Relics become the premium Rite-safe caste.
+
+Recommend **A with B as the qualified class-wide agency/clarity fallback**.
+A is valid only if each bundle is a cohesive, one-sentence covenant using a
+meaningful existing companion setting; inventing token semantics to claim
+bundling fails it. Fire B if the best bundles still create recurrent cross-
+system hostage-taking, opaque replay attribution, or paid-Rite regret, and a
+finite disclosed independent coordinate tests as low-friction, non-solved,
+non-quarterbacked, and non-premium. C is a narrow identity exception if a
+localized need survives matched equal-ceiling testing.
+
+Neither packaging topology automatically strengthens *Achintya Bheda
+Abheda*. Independent participant coordinates are not the same relationship as
+Soul and immutable Relic grammar. Under any answer, the direct local fit still
+requires participant covenant and Relic nature to remain distinct and jointly
+indispensable. A3D1 later owns closed authored policy stances versus a bounded
+constructive language; A3C does not decide that question.
+
+Every A3C answer opens A3D1 without pruning or adding a row and yields
+`Phi_SR = 24`. The final full gear/progression visual refresh remains required
+at SR-12 closeout in `docs/design/endless-build-system-map.svg`; the SVG stays
+untouched while the Relic contract moves.
+
 ## 2026-09-30 policy specialists always answer; direct-specialist self-will is next
+
+**Superseded for navigation by the section above.** Its B2I card and
+`Phi_SR = 26` checkpoint predate the selected B answer and A3C audits.
 
 Zanzagar selected **RCS-04A3B1I-A with RCS-04A3B1I-B as the qualified system
 fallback**. Every policy-only contract is complete-profile exact `{P}`: every
@@ -13131,7 +13204,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 15:16 UTC — Participant-intrinsic opportunities inside direct-only Relics are next](docs/handoffs/2026-09-30-1516--relic-direct-intrinsic-incidence-next.md)**
+[2026-09-30 18:41 UTC — Collision-policy coordinate packaging is next](docs/handoffs/2026-09-30-1841--relic-policy-coordinate-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

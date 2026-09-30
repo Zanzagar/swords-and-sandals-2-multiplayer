@@ -12073,3 +12073,82 @@ The register is **181 rows: 25 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3B2I, 60
 further pruning, yielding **24 `SCREEN`, 1 `OWNER-OPEN`, 60 `PRUNED`, 89
 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`**.
 The authoritative decision record remains unchanged.
+
+### RCS-04A3B2I disposition and independent-policy-coordinate audit — 2026-09-30
+
+Zanzagar selected **RCS-04A3B2I-B with RCS-04A3B2I-A as the qualified
+practical agency/clarity fallback**. Every direct-only fixed contract is now
+complete-profile exact `{I,D}`: it has at least one honest live direct-result
+opportunity and at least one authored participant-intrinsic genuine-conflict
+opportunity. B2I establishes no useful frequency, and a rare or contrived
+token `I` witness cannot satisfy its gameplay purpose.
+
+B2I-A may replace B only when both conditions hold. After the best one-
+sentence rule, pre-conflict forecast, and Rite disclosure, the `I/D` boundary
+must still feel like arbitrary denial or admit only token intrinsic contexts;
+and exact-`{D}` testing must show naturally infrequent, bounded, non-solved
+prompts, acceptable multiplayer/default handling, and no unavoidable
+dominance over policy or intrinsic specialists. B2I-C remains a narrow
+identity exception rather than the fallback. Neither interaction breadth nor
+self-will earns scalar compensation; equal optimized Legendary ceilings
+remain later RCS-05/RCS-06/RCS-08 proof.
+
+Three read-only named-claim audits then attacked A3C's dependency arithmetic,
+semantic boundary, and gameplay consequences. The empty/universal/nonempty-
+proper partition holds. Let `C_v^P` be the nonempty exact-`{P}` contract class
+forced by B1-C, B2-A, and B1I-A. For a lawful complete participant setting
+`s`, let `p(s)` be its collision-policy projection and `r(s)` its complete
+remaining participant-semantic projection. Let `R_v^P` contain a fixed
+contract exactly when two lawful settings exist on one matched reachable
+genuine conflict with identical complete `r`, distinct `p`, identical
+contract/version, cohort, factual and non-setting inputs, and materially
+different completed target laws. A3C-A makes `R_v^P` empty, B makes it equal
+to `C_v^P`, and C makes it a nonempty proper subset. B1-C guarantees the
+denominator is nonempty; B2-A prevents the direct-only class from adding a
+second policy denominator; B1I-A changes opportunity incidence but not this
+contract partition.
+
+The audits imposed one mandatory semantic guard: A3C classifies **local held-
+fixed separability**, not UI layout and not global Cartesian factorization.
+Two widgets permitting only `(routing0, policy0)` and `(routing1, policy1)`
+remain bundled because routing changes with policy. Compiling independently
+chosen coordinates into one opaque stance ID does not erase independence, and
+splitting a forced diagonal pair into two stored fields does not create it. A
+standalone material policy qualifies because the remaining projection is the
+empty tuple. `{(r0,p0),(r0,p1),(r1,p0)}` also qualifies through the `r0` fiber
+despite missing `(r1,p1)`. Requiring a full 2-by-2 rectangle would silently
+replace the established local-coordinate question with a stronger cross-
+composability question and misclassify standalone policies.
+
+Whole authored stances do not answer A3C by name. Two whole stances differing
+only in canonical policy semantics can establish independence while remaining
+a closed language under A3D1. Conversely, an authored whole that changes
+routing and policy together is bundled even if its current sampled routing
+output happens to match. A3D1 still owns closed whole-policy values versus a
+bounded constructive language; A3D2 owns participant-authored context
+branching; A7 owns policy binding timing; RCS-02/RCS-13 own holder,
+disclosure, default, and binding horizon; A4–A6 own automatic result-law
+properties; and A3X owns complete-signature dialect topology. No A3C answer
+prunes or preselects those rows.
+
+Recommend **A3C-A, with A3C-B as the qualified class-wide agency/clarity
+fallback**. A avoids making every policy Relic carry another recombinable
+optimization axis and supports cohesive one-sentence covenants, but it is
+valid only when each bundle uses a meaningful existing companion setting.
+Inventing token semantics merely to claim bundling fails the recommendation.
+Fire B if the best bundles across the policy class still create recurrent
+cross-system hostage-taking, opaque replay attribution, or paid-Rite regret,
+and a finite disclosed independent coordinate tests as low-friction, non-
+solved, non-quarterbacked, and not an unavoidable premium. C is a localized
+identity exception only when matched optimized testing proves independent
+subtypes are sidegrades with real liabilities. Independence between two
+participant coordinates does not by itself strengthen the local *Achintya
+Bheda Abheda* relationship; under any topology the direct fit still requires
+participant covenant and immutable Relic grammar to remain distinct and
+jointly indispensable.
+
+B2I-B moves B2I to `DIR-SELECTED` and A3C to `OWNER-OPEN` without pruning or
+adding a row. The register is **181 rows: 24 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3C, 60 `PRUNED`, 89 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 25`**. Every A3C answer then opens A3D1 at `Phi_SR =
+24`. The authoritative decision record remains unchanged.

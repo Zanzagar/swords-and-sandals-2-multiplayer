@@ -477,10 +477,18 @@ policy-only contract is complete-profile exact `{P}`, so a material policy
 governs every genuine conflict on that contract. Three B2I audits then upheld
 the direct-specialist intrinsic-incidence split but repaired a one-button-plus-
 default loophole: execution failure cannot supply either a second direct arm
-or an intrinsic opportunity. **RCS-04A3B2I is now the sole owner-facing
-choice under SR-04:** whether direct-only contracts have no `I` opportunities,
-every such contract has at least one, or exact `{D}` and `{I,D}` contracts
-coexist. The amended register has 181 rows and `Phi_SR = 26`.
+or an intrinsic opportunity. Zanzagar selected **RCS-04A3B2I-B with
+RCS-04A3B2I-A as the qualified practical agency/clarity fallback**: every
+direct-only contract is complete-profile exact `{I,D}`, with at least one
+honest live direct choice and at least one authored participant-intrinsic
+conflict. Three A3C audits then upheld the next prevalence split and fixed its
+semantic test: collision policy is independently variable only when it changes
+the complete result law while every other participant-semantic setting remains
+fixed; UI separation and full Cartesian saturation are neither sufficient nor
+required. **RCS-04A3C is now the sole owner-facing choice under SR-04:**
+whether collision policy is always bundled with another participant setting,
+separately variable on every policy contract, or each topology coexists. The
+amended register has 181 rows and `Phi_SR = 25`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -28487,7 +28495,7 @@ RCS-04A3B2I, 60 `PRUNED`, 88 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 26`**. The authoritative decision record remains
 unchanged.
 
-### RCS-04A3B2I — participant-intrinsic opportunity incidence inside direct-only contracts — active owner choice
+### RCS-04A3B2I — participant-intrinsic opportunity incidence inside direct-only contracts — B selected
 
 Let `C_v^D` be the class made nonempty by B1-C whose controlled-form projection
 is exactly `{D}` under B2-A. Let `J_v^D` contain exactly those contracts in
@@ -28542,10 +28550,95 @@ dominance over policy or intrinsic specialists. C remains a narrowly gated
 identity exception, not the fallback. No answer earns scalar compensation or
 a “two modes” bonus; equal optimized Legendary ceilings remain later proof.
 
-Every A/B/C answer moves B2I to `DIR-SELECTED` and opens A3C without pruning
-another registered row. The register would then contain **24 `SCREEN`, 1
+**Direction answer — selected by Zanzagar on 2026-09-30:** **B, with A as the
+qualified practical agency/clarity fallback.** `J_v^D=C_v^D`. Every direct-
+only contract is complete-profile exact `{I,D}`: it has at least one valid live
+direct-result opportunity and at least one authored participant-intrinsic
+conflict opportunity. B2I fixes no useful frequency, and a rare or contrived
+token `I` witness is insufficient to satisfy the selected gameplay purpose.
+
+B2I-A is armed and unfired. It may replace B only when both conditions hold:
+after the best one-sentence rule, pre-conflict forecast, and Rite disclosure,
+the `I/D` boundary still feels like arbitrary denial or admits only token
+intrinsic contexts; and exact-`{D}` testing shows naturally infrequent,
+bounded, non-solved prompts, acceptable multiplayer/default handling, and no
+unavoidable dominance over policy or intrinsic specialists. B2I-C remains a
+narrow identity exception rather than the fallback. No profile earns scalar
+compensation or a “two modes” bonus.
+
+Selecting B moves B2I to `DIR-SELECTED` and opens A3C without pruning another
+registered row. The register now contains **24 `SCREEN`, 1
 `OWNER-OPEN` at RCS-04A3C, 60 `PRUNED`, 89 `DIR-SELECTED`, 5 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`**. A letter selects worksheet
+direction only. The authoritative decision record remains unchanged.
+
+### RCS-04A3C — independent collision-policy-coordinate prevalence — active owner choice
+
+Let `C_v^P` be the nonempty exact-`{P}` policy-contract class established by
+B1-C, B2-A, and B1I-A. Canonicalize every lawful participant setting by its
+complete semantics rather than its label, UI widget, storage field, generated
+ID, or compiler form. Split a setting `s` into its collision-policy projection
+`p(s)` and its complete remaining participant-semantic projection `r(s)`.
+
+A fixed contract `c` has an **independently variable collision-policy
+coordinate** exactly when two lawful settings `s0` and `s1` exist on one
+matched reachable genuine conflict such that:
+
+1. `r(s0)=r(s1)` across the complete semantics of every non-policy
+   participant coordinate, not merely their observed output in this example;
+2. `p(s0) != p(s1)`;
+3. contract/version, frozen conflict cohort, factual inputs, immutable Relic
+   grammar, and every non-setting input are identical; and
+4. the two completed target laws or distributions differ materially.
+
+Let `R_v^P` contain the contracts in `C_v^P` that pass that test. This is a
+**local held-fixed witness**, not a demand for a full Cartesian product. For
+example, `{(Chorus,RITE-FIRST), (Chorus,MANIFESTATION-FIRST),
+(Dissonance,RITE-FIRST)}` already proves independence along the `Chorus`
+fiber even though `(Dissonance,MANIFESTATION-FIRST)` is absent. A standalone
+material policy with no other participant-semantic coordinate also qualifies:
+`r(s)` is then empty and policy can still vary while everything else is fixed.
+
+Presentation cannot manufacture or erase this property. Two separately named
+widgets that permit only forced diagonal pairs remain bundled. Conversely, a
+single “whole covenant” selector or opaque compiled stance ID remains
+independent when two lawful covenant values differ only in policy semantics.
+Changing routing, permission, ownership, or any other participant-semantic
+role alongside policy fails the witness even if that companion change happens
+not to alter this one sampled outcome.
+
+| Choice | Independent-policy incidence inside `C_v^P` | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — collision policy is bundled-only** | `R_v^P` is empty. Every material collision-policy change is inseparably packaged with at least one other participant-semantic change. A coherent whole covenant is required; inventing a token companion field merely to avoid independence does not qualify. | **Recommended cohesive-covenant direction, with B as the qualified agency/clarity fallback.** A avoids giving every policy Relic another recombinable optimization axis and lets an artifact speak through authored whole temperaments. It can reduce loadout matrices, policy-console feel, team quarterbacking, and the option premium of universal recombination. But bundling can itself become convoluted: a player may have to surrender preferred routing merely to protect a paid Rite, and replay attribution can hide which clause caused the result. Bundling does not create a stronger ideal fit by itself; the local fit still comes from participant covenant and immutable Relic grammar remaining distinct and jointly indispensable. | Oathbound Dreamglass offers two indivisible covenants: **Merciful Chorus** combines Chorus routing with `RITE-FIRST`; **Defiant Dissonance** combines Dissonance routing with `MANIFESTATION-FIRST`. `Chorus + MANIFESTATION-FIRST` and `Dissonance + RITE-FIRST` are illegal. The player chooses one meaningful whole temperament, not two knobs. |
+| **B — collision policy is independently variable on every policy contract** | `R_v^P=C_v^P`. Every policy contract has at least one honest held-fixed witness in which policy changes while every other participant semantic stays fixed. This requires neither full Cartesian support nor independent access to every authored policy value. | B gives the clearest causal agency: a player can change how a collision settles without being forced to change an unrelated behavior. Paid-Rite planning and replay explanation become cleaner. The cost is a universal extra optimization axis, more preview/configuration surface, stronger solved-setting and team-quarterbacking pressure, and a risk that `RITE-FIRST` becomes cheap mandatory insurance. Independent participant coordinates are not the same thing as Soul/Relic nonduality; extra recombination does not automatically strengthen the standing ideal. | Dreamglass separately exposes `Dissonance/Chorus` routing and `RITE-FIRST/MANIFESTATION-FIRST` collision orientation. In the simple teaching form all four combinations are legal, and switching only the collision orientation changes the matched result law. A smaller three-combination catalog could also pass through one held-fixed routing fiber. |
+| **C — bundled and independently variable policy contracts coexist** | `R_v^P` is a nonempty proper subset of `C_v^P`; therefore at least two fixed policy contracts exist. Definition/version fixes the topology rather than letting it change opportunistically by encounter. | C maximizes artifact-specific temperament: some covenants are indivisible wholes while others invite separate policy mastery. It also creates two configuration grammars and the sharpest hidden-tier risk. The independently variable subtype can look like the premium, Rite-safe, quarterback-friendly caste, while bundled Relics appear taxed or demand compensation. Catalog coexistence is aggregate, not a stronger local ideal realization. Use it only for a proved identity exception whose extra feasible settings have real liabilities and equal optimized ceiling. | Oathbound Dreamglass uses A's indivisible Merciful/Defiant covenants, while Woven Dreamglass exposes B's separate routing and collision selectors. The difference is stable in their definitions and visible before commitment. |
+
+A/B/C exhaust the subset relation of `R_v^P` to nonempty `C_v^P`.
+Independence is neither UI separateness nor constructive policy authoring.
+RCS-04A3D1 next owns closed whole-policy values versus a bounded constructive
+language; A3D2 owns participant-authored predicates/branches; A7 owns policy
+binding timing; RCS-02/RCS-13 own holder, disclosure, default, and lock
+horizon; A4–A6 own completed automatic laws; and A3X owns the later complete-
+signature dialect topology. A bundled policy can still use a constructive
+language, and an independent policy coordinate can still offer only closed
+authored values.
+
+Recommend **A, with B as the qualified class-wide agency/clarity fallback**.
+The recommendation is valid only when each bundle is a cohesive, one-sentence
+covenant using a meaningful existing companion setting. Fire B if the best
+bundles across the policy class still create recurrent cross-system hostage-
+taking, opaque replay attribution, or paid-Rite regret—and a finite disclosed
+independent coordinate tests as low-friction, non-solved, non-quarterbacked,
+and not an unavoidable premium. Do not invent a meaningless companion
+coordinate to preserve A. C remains a narrow definition-identity exception if
+the failure is localized and matched optimized testing proves the independent
+subtype is a sidegrade with real liabilities. No answer earns scalar
+compensation; equal optimized Legendary ceilings remain later proof.
+
+Every A/B/C answer moves A3C to `DIR-SELECTED` and opens A3D1 without pruning
+or adding a registered row. The register would then contain **23 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A3D1, 60 `PRUNED`, 90 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`**. A letter selects worksheet
 direction only. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence

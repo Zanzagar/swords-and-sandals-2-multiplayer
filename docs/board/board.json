@@ -1,6 +1,6 @@
 {
  "updatedAt": "2026-09-30",
- "head": "fbab922",
+ "head": "6c9dfa3",
  "lede": "Every system in the Swords and Sandals II team-arena project — the engine behind Swords and Sandals II: Souls and Simulacra (working title) — and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -855,10 +855,10 @@
    "order": 63,
    "title": "Endless progression design (integrated recovery branch)",
    "summary": "The recovered design lane is integrated with current main on draft PR #4. EP-D01 and EP-D02 are accepted replacements and EP-D07 is accepted; the larger owner-guided pass continues without implementation authorization. No Endless code exists.",
-   "gaps": "EP-D03 through D06 and EP-A01 through A03 remain open. The Soul Relic/Charm pass has 12 closure gates and a 181-row finite register. Configurable and intrinsic contracts coexist; direct-capable contracts are controlled-form exact {D}, while every policy-only contract is complete-profile exact {P}. Its active frontier is RCS-04A3B2I, whether direct-only contracts have no authored participant-intrinsic conflict opportunities, every such contract has at least one, or exact {D} and {I,D} contracts coexist. Readiness blockers still include pacing, retry/seed shopping, post-completion economy, combat-kernel budgets, Pressure termination, and u64 encoding.",
+   "gaps": "EP-D03 through D06 and EP-A01 through A03 remain open. The Soul Relic/Charm pass has 12 closure gates and a 181-row finite register. Configurable and intrinsic contracts coexist; every direct-only contract is complete-profile exact {I,D}, while every policy-only contract is complete-profile exact {P}. Its active frontier is RCS-04A3C: whether collision policy is bundled with other participant semantics on every policy contract, independently variable on every contract, or each topology coexists. Readiness blockers still include pacing, retry/seed shopping, post-completion economy, combat-kernel budgets, Pressure termination, and u64 encoding.",
    "next": "Continue one owner card at a time from HANDOFF.md's LATEST link; do not implement until the complete normative replay is explicitly accepted and implementation is separately authorized.",
-   "evidence": "docs/design/endless-progression-decisions.md (authoritative accepted EP-D01/02/07); docs/design/endless-progression-owner-packet.md RCS-04A3B2I; docs/design/endless-progression-master-closure-index.md sections 7.1, 7.3, and 8; draft PR #4.",
-   "ownerDecision": "Current worksheet direction: E1-C with B/A fallbacks, E1Z-B with E1Z-A fallback, E1X-A with E1X-B fallback, E2-C with E2-A fallback, E2C-A (P live/Z advance-bound), RCS-04A1-C with A1-B fallback, RCS-04A2-A with A2-C fallback, RCS-04A1C-C with A1C-A fallback, RCS-04A3A-C with A3A-A fallback, RCS-04A3B1-C with B1-A fallback, RCS-04A3B2-A with B2-C as the qualified higher-ceiling/identity exception, and RCS-04A3B1I-A with B1I-B as the qualified system fallback (policy specialists remain participant-responsive at every genuine conflict). RCS-04A3B2I remains open; these directions are not yet authoritative record text.",
+   "evidence": "docs/design/endless-progression-decisions.md (authoritative accepted EP-D01/02/07); docs/design/endless-progression-owner-packet.md RCS-04A3C; docs/design/endless-progression-master-closure-index.md sections 7.1, 7.3, and 8; draft PR #4.",
+   "ownerDecision": "Current worksheet direction: E1-C with B/A fallbacks, E1Z-B with E1Z-A fallback, E1X-A with E1X-B fallback, E2-C with E2-A fallback, E2C-A (P live/Z advance-bound), RCS-04A1-C with A1-B fallback, RCS-04A2-A with A2-C fallback, RCS-04A1C-C with A1C-A fallback, RCS-04A3A-C with A3A-A fallback, RCS-04A3B1-C with B1-A fallback, RCS-04A3B2-A with B2-C as the qualified higher-ceiling/identity exception, RCS-04A3B1I-A with B1I-B as the qualified system fallback, and RCS-04A3B2I-B with B2I-A as the qualified practical agency/clarity fallback (every direct-only contract has both honest live choice and authored self-will). RCS-04A3C remains open; these directions are not yet authoritative record text.",
    "updated": "2026-09-30"
   },
   {
@@ -870,7 +870,7 @@
    "summary": "The formerly local progression work is committed and pushed on design/endless-progression-gate-recovery, synchronized with main, and tracked by clean draft PR #4. Gate-invalid open PR #3 remains preserved history and must not merge.",
    "gaps": "PR #4 is intentionally draft and only a human may merge it. Worksheet directions remain distinct from authoritative accepted decisions, and implementation remains blocked. The private Artifact copy of this board must be republished after this source update.",
    "next": "Keep the recovery branch synchronized and reviewable while the owner closes the finite Relic frontier; merge only after the owner requests it and the normative replay is ready.",
-   "evidence": "branch design/endless-progression-gate-recovery; draft PR #4; HANDOFF.md LATEST; docs/handoffs/2026-09-30-1516--relic-direct-intrinsic-incidence-next.md.",
+   "evidence": "branch design/endless-progression-gate-recovery; draft PR #4; HANDOFF.md LATEST; docs/handoffs/2026-09-30-1841--relic-policy-coordinate-next.md.",
    "ownerDecision": "Use Souls and Simulacra as the standalone north star and Achintya Bheda Abheda as the standing ideal; finish the full design-framework pass before the later expansion/audit/adaptation pass.",
    "updated": "2026-09-30"
   },
@@ -1357,6 +1357,10 @@
   }
  ],
  "changes": [
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A3B2I-B makes every direct-only Relic complete-profile exact {I,D}, with B2I-A as the qualified practical agency/clarity fallback. RCS-04A3C now asks whether collision policy is bundled-only, independently variable on every policy contract, or split across both topologies."
+  },
   {
    "date": "2026-09-30",
    "text": "RCS-04A3B1I-A keeps every policy-only Relic complete-profile exact {P}, with B1I-B as the qualified system fallback. RCS-04A3B2I now asks whether direct-only Relics always ask live, all also have a disclosed self-willed context, or both profiles coexist."
