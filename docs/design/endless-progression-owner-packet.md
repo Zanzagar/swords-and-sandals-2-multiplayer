@@ -496,11 +496,20 @@ mastery/menu-bloat fallback**: every policy contract offers only a finite menu
 of indivisible authored whole bundled covenants. Three A4 audits then broke
 the old binary shorthand: universal contributor sensitivity and stable
 neutral/sensitive coexistence impose different build promises and cannot be
-hidden together under “may affect.” **RCS-04A4 is now the sole owner-facing
-choice under SR-04:** whether contributor multiplicity/cause composition is
-attribution-only under every complete automatic law, affects every such law
-somewhere, or distinguishes stable neutral and sensitive laws. The amended
-register has 181 rows and `Phi_SR = 22`.
+hidden together under “may affect.” Zanzagar selected **RCS-04A4-C with
+RCS-04A4-A as the qualified clarity/equal-ceiling/anti-farming fallback**:
+stable contributor-neutral and contributor-sensitive automatic laws coexist.
+Three A5 named-claim audits and two cross-challenges then tested whether
+stochastic support had to split by those two A4 classes. A neutral semantic
+adjudication rejected the split: no selected rule promises independently
+available deterministic and stochastic postures while holding contributor-
+sensitivity class fixed. Exact cross-placement is therefore AUTHOR/SPEC,
+with every canonical law explicitly classified and RCS-17/RCS-18 responsible
+for detecting a player-material failure that would reopen the boundary.
+**RCS-04A5 is now the sole owner-facing choice under SR-04:** whether complete
+automatic collision laws are all deterministic, all stochastic-capable
+somewhere, or split into stable deterministic-only and stochastic-capable
+families. The register remains 181 rows and `Phi_SR = 21`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -28776,7 +28785,7 @@ now contains **21 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A4, 61 `PRUNED`, 91
 letter selects worksheet direction only. The authoritative decision record
 remains unchanged.
 
-### RCS-04A4 — contributor sensitivity across complete automatic collision laws — active owner choice
+### RCS-04A4 — contributor sensitivity across complete automatic collision laws — C selected with A fallback
 
 Let `W_v^auto` be the nonempty set of canonical, versioned, total **automatic
 collision-result laws** after lawful participant configuration and immutable
@@ -28836,15 +28845,153 @@ they must be replaced by contributor-neutral target-semantic covenants; under
 C they may exist only inside the sensitive subset. This correction changes no
 selected A3 direction.
 
+**Direction answer — selected by Zanzagar on 2026-09-30:** **C, with A as the
+qualified clarity/equal-ceiling/anti-farming fallback.** Thus
+`∅⊊S_v⊊W_v^auto`. At least one canonical complete automatic collision law is
+contributor-neutral and at least one is contributor-sensitive. Each law's
+classification is invariant for its definition/version. The design may use a
+Choir covenant whose result law hears the plurality of causes and a Stone
+covenant that judges each distinct proposed becoming once, but it may not
+change one law's classification opportunistically by target, instance,
+matchup, or current outcome.
+
+The fallback is armed and unfired. Replace C with A if the best sensitive laws
+need hidden weights; cheap X/P route shopping, legitimate same-cause
+inflation, ally steering, or proposal-throughput caste play becomes optimal;
+paid M Rites or practical D5 returns become unreliable; neutral laws become
+novice traps; sensitivity merely duplicates another covenant choice; or
+matched solver/RL and human tests cannot establish equal optimized ceilings,
+non-dominance, robustness, and understandable attribution. Sensitive and
+neutral laws are sidegrade identities with strict optimized niches; neither
+receives scalar compensation. B remains a universal escalation, not the
+fallback.
+
 A4 does not choose deterministic versus stochastic support (A5), catalog-wide
 versus definition/version-local kernel scope (A6), exact weights/rankings or
 disclosure (AUTHOR/SPEC/TUNE and RCS-02), policy-binding timing (A7), or
-committed lineage identity (RCS-04B). Every A/B/C answer moves A4 to
-`DIR-SELECTED` and opens A5 without adding or pruning a registered row. The
-register would then contain **20 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A5, 61
-`PRUNED`, 92 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 21`**. A letter selects worksheet direction only. The authoritative
-decision record remains unchanged.
+committed lineage identity (RCS-04B). A4 moves to `DIR-SELECTED` and A5 opens
+without adding or pruning a registered row. The register now contains **20
+`SCREEN`, 1 `OWNER-OPEN` at RCS-04A5, 61 `PRUNED`, 92 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`**. A letter selects
+worksheet direction only. The authoritative decision record remains
+unchanged.
+
+Three bounded read-only named-claim audits then attacked A5's semantic
+denominator, atomicity after A4-C, and gameplay value. The atomicity and
+gameplay auditors disagreed over whether neutral and sensitive laws needed
+separate stochastic-incidence cards, then each reversed position under a
+matched-catalog cross-challenge. A final neutral semantic adjudication applied
+the master index's admission and anti-recursion rules.
+
+The result is one global A5 card. Two catalogs can place deterministic and
+stochastic laws differently across A4's neutral/sensitive classes and thereby
+change individual build identities, but no selected product rule promises
+that variance posture can be changed while sensitivity class stays fixed.
+Adding `A5N` and `A5S` would therefore impose a new cross-product content
+minimum, not expose an already-selected consequence boundary. AUTHOR/SPEC
+must still declare both classifications for every canonical law; RCS-17 and
+RCS-18 must test their actual combinations. If a placement changes legal
+actions or required information, creates an unavoidable premium/trap, or
+fails a declared balance or comprehension threshold, the explicit reopening
+rule applies. This differs from A3X, whose complete legal-action signatures
+change available control and authority grammar directly.
+
+### RCS-04A5 — stochastic support across complete automatic collision laws — active owner choice
+
+Retain nonempty `W_v^auto` from A4. For each `w∈W_v^auto`, let
+`O_w^auto` be its nonempty domain of reachable **automatic collision
+occurrences** after lawful configuration and immutable Relic completion. For
+an occurrence `o`, hold fixed the contract/law version, bound whole covenant
+and every other lawful participant setting, immutable Relic completion,
+authoritative source revision/cut, distinct proposed-target set `T(K_o)`, the
+complete per-target contributor multiset, every causal and factual context,
+the automatic-versus-direct arm, and every earlier committed authoritative
+state regardless of random origin.
+
+Let `κ_w(o)` be the result distribution immediately before the earliest
+semantic realization that commits A2-A's one still-valid proposed target. A
+law is **stochastic-capable** exactly when at least one fixed reachable `o`
+gives two or more distinct canonical targets positive probability. Define
+
+`G_v={w∈W_v^auto : w is stochastic-capable}`.
+
+The distribution is over the current declared realization, not over facts
+already fixed in `o`. A genuinely earlier persisted acquisition,
+transformation, or law variant is fixed state. Caching this occurrence's draw
+one callback earlier does not make it prior state. A seeded generator may
+implement one declared stochastic realization; an opaque deterministic hash
+of already-fixed private inputs is still deterministic.
+
+| Choice | Stochastic-support incidence inside `W_v^auto` | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — deterministic-only automatic laws** | `G_v` is empty. For every complete automatic law and every reachable fixed occurrence, `κ_w(o)` is a point mass on one target. Different fixed contexts may deterministically select different targets. | **Qualified policy-mastery/multiplayer-trust fallback.** A makes perfect information sufficient to predict every automatic result, protecting paid-Rite planning, team coordination, replay explanation, and exact policy comparison. It still permits deep context- and contributor-sensitive rules; determinism is not simplicity. Its costs are easier solving and less support for risk-management or fate-marked Relic identities. Certainty is protective of the standing ideal but does not itself create unity-in-difference. | Under **Stone of Two Names**, the fully fixed cohort offers MERCY and TEMPERED. Its authored score and stable tie rule always commit MERCY. A different contributor arrangement may deterministically commit TEMPERED under selected A4-C, but repeating the same complete occurrence never changes the target. |
+| **B — every automatic law is stochastic-capable somewhere** | `G_v=W_v^auto`. Every canonical complete automatic law has at least one honest reachable fixed occurrence with a nondegenerate target distribution. This does not require every occurrence under the law to roll. | B makes unresolved fate a universal property of automatic Relic judgment and prevents any complete law family from being wholly predictable. It also imposes variance, forecast, seed-integrity, trust, and robust-policy burdens catalog-wide; even an otherwise Stone-like law must have a fateful region. It is the escalation only if a deterministic refuge itself contradicts the desired artifact identity. Randomness alone is not an ideal realization. | Every law has some disclosed **Unsettled Echo** context. For illustration, a fixed two-target occurrence under one law may give both MERCY and TEMPERED positive probability, even though that same law is certain in other contexts. One wholly deterministic law would violate B. |
+| **C — deterministic-only and stochastic-capable automatic laws coexist** | `∅⊊G_v⊊W_v^auto`. At least one complete law is deterministic over its entire reachable automatic domain and at least one distinct complete law has a reachable nondegenerate target distribution. Membership is stable by canonical law/version. | **Recommended authored fate/reliability direction, with A as the qualified policy-mastery/multiplayer-trust/Rite-and-return fallback.** C makes variance a chosen, disclosed Relic or whole-covenant identity rather than B's universal tax. Deterministic laws can reward exact mastery; stochastic laws can reward hedging, redundancy, and recovery planning. Both families need strict optimized niches and equal optimized Legendary ceilings, with no scalar variance compensation. The risks are two prediction dialects, seed shopping, teammate grief, opaque expected-value premiums, deterministic novice traps, and “random” spectacle that never changes truthful policy. | **Stone of Two Names** supplies the deterministic family. **Veil of Many Echoes** has at least one fixed disclosed occurrence where MERCY and TEMPERED each remain genuinely possible and one result is committed once. A player choosing the Veil should alter positioning, redundancy, or recovery policy because either target can occur—not merely watch a different animation. |
+
+A/B/C exhaust the subset relation of `G_v` to nonempty `W_v^auto`. A
+singleton deterministic law yields A; a singleton stochastic-capable law
+yields B; C requires at least two laws. One law that is random in one context
+and certain in another remains one stochastic-capable law, not coexistence.
+One law that maps different fixed contexts to different certain targets
+remains deterministic.
+
+Every occurrence receives one committed realization. Duplicate callbacks,
+serialization, reconnect, reload, replay, rejection sampling, a post-result
+veto, fallback switching, or downstream retry may not redraw or substitute a
+different target. RCS-16 later owns atomic fault repair. This row makes no
+claim that a whole-battle Rematch must repeat the same outcome; EP-A02 still
+owns public RNG, seed and retry policy.
+
+Selected A4-C and any A5 answer classify the same whole laws along two axes,
+but they do not guarantee every cross-product cell. If A5-C is selected, the
+catalog could place deterministic laws in the neutral class and stochastic
+laws in the sensitive class, reverse that placement, or contain a richer
+mixture. Requiring players to change variance posture while holding
+sensitivity class fixed would be a stronger four-cell content promise and
+needs an explicit later amendment. Exact law placement remains AUTHOR/SPEC;
+RCS-02 must disclose each completed law's behavior, while RCS-17/RCS-18 test
+the resulting build, policy, fairness, robustness, and comprehension surface.
+
+Recommend **C, with A as the qualified policy-mastery/multiplayer-trust/Rite-
+and-return fallback**. C survives only if each required family supplies a
+reachable, legible, non-token, non-dominated build or policy purpose; the
+stochastic identity materially changes at least one truthful legal play or
+build policy; both families retain strict optimized niches at equal optimized
+Legendary ceilings; risk is understandable before commitment and attributable
+afterward; and matched enumeration/dynamic-programming checks, exploit
+scripts, seeded simulation, RL/self-play across held-out seeds and formats,
+and human tests find robust performance without a mandatory gamble or safety
+class.
+
+Fire A if stochasticity merely changes spectacle; disclosed risk cannot guide
+real hedging; contributor-sensitive odds reward cheap route farming; seed,
+reload, or redraw shopping survives; teammates can impose unforecastable risk;
+paid M Rites or practical D5 returns become unreliable; a stochastic expected-
+value premium or deterministic novice trap appears; or solver/RL and human
+tests cannot establish non-dominance, robustness, fairness, and causal
+explanation. B is a universal escalation, not the fallback. Reinforcement
+learning maps and stress-tests policy surfaces; it does not choose the design
+philosophy or replace human comprehension and multiplayer-trust testing.
+
+Stochasticity is not itself *Achintya Bheda Abheda*. Under A, B, or C, the
+direct local fit still requires Soul intention, contributor histories, and
+immutable Relic law to remain genuinely distinct and jointly operative in one
+settled becoming. C adds authored fate/reliability diversity at the catalog
+level; it does not become a stronger theological claim merely because chance
+exists.
+
+A5 selects no exact odds, probability response curve, entropy source, seed
+visibility, correlation among simultaneous occurrences, compensation, payoff,
+rarity, catalog placement, or implementation. A6 owns catalog-wide versus
+definition/version-local kernel grammar; A7 owns policy-binding timing;
+RCS-04B owns committed lineage identity; RCS-02/SR-10 own disclosure; and
+EP-A02/RCS-15/RCS-16 own retry, persistence, migration, idempotence, and fault
+repair. Every A/B/C answer moves A5 to `DIR-SELECTED` and opens A6 without
+adding or pruning a registered row. The register would then contain **19
+`SCREEN`, 1 `OWNER-OPEN` at RCS-04A6, 61 `PRUNED`, 93 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`**. A letter selects
+worksheet direction only. The authoritative decision record remains
+unchanged.
 
 ## Session protocol and evidence
 

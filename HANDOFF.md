@@ -1,6 +1,87 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 neutral and sensitive laws coexist; stochastic support is next
+
+Zanzagar selected **RCS-04A4-C with RCS-04A4-A as the qualified clarity/equal-
+ceiling/anti-farming fallback**. The canonical automatic collision-law catalog
+must contain at least one contributor-neutral and at least one contributor-
+sensitive complete law. Each law/version keeps one stable classification;
+neither class receives scalar compensation, and both must retain strict
+optimized niches at equal optimized Legendary ceilings.
+
+A4-A is armed and unfired. It replaces C if sensitive laws need hidden
+weights; cheap X/P route shopping, same-cause inflation, ally steering, or
+proposal-throughput caste play becomes optimal; paid M Rites or practical D5
+returns become unreliable; neutral laws become novice traps; sensitivity
+duplicates another covenant choice; or matched solver/RL and human tests fail
+parity, non-dominance, robustness, or understandable attribution. B remains a
+universal escalation rather than the fallback. Selected A2-A still forces one
+proposed target, and A3C-A/D1-A still require closed whole bundled covenants.
+
+Three read-only A5 named-claim audits and two cross-challenges tested whether
+A4-C required separate stochastic-incidence cards for neutral and sensitive
+laws. The challengers reversed positions, so agreement count was not treated
+as evidence. A neutral semantic adjudication applied the master index's
+admission and anti-recursion rules and kept one global A5 card. No selected
+rule promises that deterministic/stochastic posture can be changed while
+sensitivity class stays fixed. Exact A4×A5 placement is therefore AUTHOR/SPEC,
+with every canonical law classified explicitly and RCS-17/RCS-18 responsible
+for reopening the boundary if actual placement changes legal actions or
+information, creates a premium/trap, or fails a declared balance,
+comprehension, or release threshold.
+
+The register is **181 rows: 20 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A5, 61
+`PRUNED`, 92 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 21`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-04A5` asks whether complete automatic collision laws support genuine
+stochastic target settlement after all lawful configuration and prior
+authoritative state are fixed:
+
+- **A — deterministic-only automatic laws.** Every fixed reachable occurrence
+  has a point-mass result. Different contexts and contributor arrangements may
+  still deterministically choose different proposed targets. This maximizes
+  policy mastery, multiplayer trust, Rite planning, and replay explanation.
+- **B — every automatic law is stochastic-capable somewhere.** Every law has
+  at least one honest fixed occurrence where two proposed targets have positive
+  probability, though other contexts under that law may be certain. This makes
+  fate universal and imposes its trust and robustness burden on every family.
+- **C — deterministic-only and stochastic-capable laws coexist. Recommended.**
+  Stable Stone-like laws reward exact prediction while Veil-like laws reward
+  disclosed hedging, redundancy, and recovery planning. Variance becomes a
+  chosen artifact identity rather than a catalog-wide tax.
+
+Recommend **C with A as the qualified policy-mastery/multiplayer-trust/Rite-
+and-return fallback**. C is valid only if both families have reachable,
+legible, non-token, non-dominated purposes and equal optimized Legendary
+ceilings; stochastic identity changes a truthful legal policy; risk is
+forecastable and attributable; and enumeration, exploit scripts, seeded
+simulation, RL/self-play over held-out seeds/formats, and human tests establish
+robustness, fairness, comprehension, and coordination. Fire A if chance is only
+spectacle; seed/reload/redraw shopping survives; contributor-sensitive odds
+reward cheap route farming; teammates can impose opaque risk; paid Rites or D5
+returns become unreliable; or a stochastic premium/deterministic novice trap
+appears. B is not the fallback. RL maps the policy surface; it does not decide
+the philosophy or replace human trust testing.
+
+One fixed occurrence receives one committed realization: callbacks,
+serialization, reload, reconnect, replay, rejection, veto, fallback, or
+downstream retry cannot redraw it. A5 does not decide whole-battle Rematch,
+seed/public-RNG policy, exact odds, correlation, kernel scope, disclosure,
+lineage, persistence, or fault repair. Randomness is not itself *Achintya
+Bheda Abheda*; the direct fit still requires Soul, contributor histories, and
+immutable Relic law to remain distinct and jointly operative in the one
+settled becoming. Any A5 answer opens A6 at `Phi_SR = 20`.
+
+The final full gear/progression mockup refresh remains an SR-12 closeout
+obligation in `docs/design/endless-build-system-map.svg`; do not update it
+piecemeal while the Relic contract still moves.
+
 ## 2026-09-30 policy covenants stay whole; contributor sensitivity is next
+
+**Superseded for navigation by the section above.** Its A4 card and
+`Phi_SR = 22` checkpoint predate the selected C answer and A5 audits.
 
 Zanzagar selected **RCS-04A3D1-A with RCS-04A3D1-B as the qualified class-
 wide expressive-mastery/menu-bloat fallback**. Every exact-`{P}` policy
@@ -13359,7 +13440,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 19:18 UTC — Contributor sensitivity is next](docs/handoffs/2026-09-30-1918--relic-contributor-sensitivity-next.md)**
+[2026-09-30 19:52 UTC — Genuine stochastic support is next](docs/handoffs/2026-09-30-1952--relic-stochastic-support-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
