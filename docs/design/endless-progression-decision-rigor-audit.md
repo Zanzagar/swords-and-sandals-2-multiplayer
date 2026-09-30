@@ -11756,3 +11756,74 @@ The register rises from 163 to **175 rows**. After A2-A and before A1C is
 answered it contains **33 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A1C, 51
 `PRUNED`, 83 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 34`**. The authoritative decision record remains unchanged.
+
+### RCS-04A1C disposition and complete opportunity-profile repair — 2026-09-30
+
+Zanzagar selected **RCS-04A1C-C with RCS-04A1C-A as the qualified clarity
+fallback**. The fixed release catalog must therefore contain at least one
+state-dialect and at least one boundary-dialect definition/version contract
+with a reachable genuine distinct-target conflict. This is an aggregate
+content-family promise, not equal counts, universal conflict, a shared target
+vocabulary, a cross-dialect cohort, or a stronger local ideal relationship.
+A may replace C only if boundary conflict remains materially less legible or
+creates dominant timing/preview arbitrage after viable resolver designs are
+tested while state conflict remains fun. A1-B remains the deeper
+concordant-only replacement if conflict itself fails.
+
+Three read-only named-claim audits then attacked A3A atomicity, downstream
+dependencies, and the purported seven-profile partition. A3A's contract-level
+empty/universal/proper split holds: a fixed contract is configurable iff at
+least one held-fixed genuine conflict admits two lawful participant controls
+that change the committed target or its complete probability law. The profile
+tree did not hold. It classified only opportunities where a participant
+coordinate was already material and silently discarded uncontrolled conflicts
+on that same configurable contract.
+
+The decisive countermodel keeps the same configurable state and boundary
+contracts, the same policy-only projection, and every later control-language,
+timing, holder, and automatic-kernel label fixed. In one catalog the policy is
+material at every conflict. In the other, it is material in one context while
+another context uses the identical resolver parameter intrinsically. The old
+register labels both worlds identically, although only the first guarantees
+collision authority when the Relic is equipped. That changes a legal action,
+authority, forecast information, and loadout guarantee, so AUTHOR cannot hide
+it under the admission rule.
+
+The repair classifies every reachable conflict opportunity as `I`, `P`, `D`,
+or `B`: no participant coordinate, policy only, direct result only, or both
+genuinely coavailable. `I` means authored absence, not a timeout, unavailable
+holder, default, earlier policy binding, or immutable completion. Pure `{I}`
+is the nonconfigurable class. For configurable contracts, B1–B6 still select
+one of seven nonempty `{P,D,B}` projections. Seven conditional `I`-incidence
+rows then choose whether each present projection has only its pure profile,
+only its `I`-augmented profile, or both. Pure `{I}` plus the fourteen
+configurable profiles exhaust all fifteen nonempty subsets of `{I,P,D,B}`.
+
+A proposed dialect repair added fourteen exact-profile and six later marginal-
+class incidence rows. Cross-audit rejected it: every marginal may occur in
+both dialects while exact combinations of opportunity profile,
+recombinability, policy language, branching, and timing remain segregated.
+Those rows would create an illusion of closure and still permit a hidden
+dialect caste.
+
+The minimal correlation-honest replacement is RCS-04A3X. After all applicable
+A3/A7 directions, it classifies the set of canonical **complete** participant-
+control legal-action signatures by whether exact signatures are universally
+state/boundary paired, never paired, or contain a stable proper paired subset.
+AUTHOR/SPEC must enumerate a total versioned map from every supported
+signature to state-only, boundary-only, or paired support; native membership
+and orientation cannot vary by target, context, instance, or opportunity and
+must pass RCS-17 dominance/token-witness review. Any later player-material
+coordinate extends the signature and reopens A3X. Exact membership is then
+explicit catalog authoring under a selected topology rather than implicit
+incidence freedom. The old A3A1/A3A2 marginal rows retire as non-counting
+historical aliases.
+
+Removing those two rows and adding seven `I` rows plus A3X changes the register
+from 175 to **181 rows**. After A1C-C it contains **38 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A3A, 51 `PRUNED`, 84 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`**. Recommend A3A-C with A3A-A as the
+qualified simplicity/artifact-identity fallback; B is the agency/fairness
+escalation if intrinsic forced-target settlement broadly fails while bounded
+participant control remains material and fun everywhere. The authoritative
+decision record remains unchanged.

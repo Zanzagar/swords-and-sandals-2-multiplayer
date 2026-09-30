@@ -1355,7 +1355,7 @@ worksheet history. They primarily populate `SR-01` through `SR-05` and parts of
 | `SR-01` | Fantasy, purpose, and topology | One vocabulary/relationship map distinguishes Soul, simulacrum/combatant, Bound Soul, Relic root, input/payoff Charms, sources, and results; each has a unique job and no slot duplicates another system's theme or UI role. | `PARTIAL`: standalone root/customizer and cross-source-weaver directions exist; normative map/replay remains. |
 | `SR-02` | Access, ownership, slots, custody, and loss | A state machine covers disabled/eligible/enabled states, one-root/two-Charm occupancy, personal ownership, duplicates, transfer, destruction/loss, retirement, and every illegal transition for Relics and Charms separately. | `PARTIAL`: personal Relic/Charm access, one root, two Charms, and permanent nontransferable Relics are selected; Charm custody/loss remains open. |
 | `SR-03` | Source and input grammar | A total matrix names eligible bearer/ally/source evidence, temporal and basis cells, Charm modifications, participation requirements, and legal/illegal examples; every selected cell has a gameplay use. | `PARTIAL`: extensive grammar directions, nonempty irreducible multi-root current-state support, repeated same-provenance cross-root support, exact-`Pi`-universal build identity, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, and nonempty within-evaluation cross-receipt overlap support exist; nontrivial within-parent site support is derived, while overlap form/treatment, cross-opportunity behavior, and total authored examples/exclusions remain open. |
-| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, universal continuity-root preservation across those revisions, nonempty irreducible multi-root current-state support, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, nonempty within-evaluation cross-receipt overlap support, full-union positive-result claims, one listen per uninterrupted cancelled-pair bond, Relic-wide spending of claimed proof, universal positive-result and dedicated-operation transformation-cause support, empty direct invocation/tuple-selection/true-verdict/false-verdict/provisional-sealing/claim-write/latch-write cause support, derived-empty true-zero-contender support, proper both-dialect Absence-bound and Event-bound support with their selected fallbacks, coexistence of staged and shortcut-complete nonclear topology in both dialects, the qualified shortcut-incidence fallback, universal material direct-reverse support with D3-A as its system fallback, no active clear-to-unassigned route with D4-C as a qualified Release-bound fallback, universal compatible lived nonclear-return support with D5-A as its system fallback, P-participant/M-deterministic approval coexistence with E1-B/E1-A fallbacks, participant-contingent Z approval with E1Z-A as its qualified cause-local fallback, system-deterministic X approval with E1X-B as its qualified cause-local fallback, opposite cause-uniform P/Z participant timing with E2-A as its qualified production fallback, P-live/Z-advance orientation, genuine distinct-target collision support with target-concordant-only A1-B as the qualified simplicity fallback, and proposed-target-only genuine-conflict settlement with A2-C as the qualified fairness fallback are selected; D1M-A is the selected system fallback if universal dedicated-operation support fails its gates; coherent same-cut evidence acquisition, exact `{D,E,O}` material phase support, nontrivial within-parent application-site support, maximal frozen collision cohorts, and target-equivalence bucketing with preserved contributor identity are derived; all reachable cause loci, participant timing, collision geometry, and the genuine-conflict result domain are closed at direction granularity, genuine-conflict transformation-dialect incidence is the sole frontier, and it precedes participant-control prevalence and lineage ownership. |
+| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, universal continuity-root preservation across those revisions, nonempty irreducible multi-root current-state support, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, nonempty within-evaluation cross-receipt overlap support, full-union positive-result claims, one listen per uninterrupted cancelled-pair bond, Relic-wide spending of claimed proof, universal positive-result and dedicated-operation transformation-cause support, empty direct invocation/tuple-selection/true-verdict/false-verdict/provisional-sealing/claim-write/latch-write cause support, derived-empty true-zero-contender support, proper both-dialect Absence-bound and Event-bound support with their selected fallbacks, coexistence of staged and shortcut-complete nonclear topology in both dialects, the qualified shortcut-incidence fallback, universal material direct-reverse support with D3-A as its system fallback, no active clear-to-unassigned route with D4-C as a qualified Release-bound fallback, universal compatible lived nonclear-return support with D5-A as its system fallback, P-participant/M-deterministic approval coexistence with E1-B/E1-A fallbacks, participant-contingent Z approval with E1Z-A as its qualified cause-local fallback, system-deterministic X approval with E1X-B as its qualified cause-local fallback, opposite cause-uniform P/Z participant timing with E2-A as its qualified production fallback, P-live/Z-advance orientation, genuine distinct-target collision support with target-concordant-only A1-B as the qualified simplicity fallback, and proposed-target-only genuine-conflict settlement with A2-C as the qualified fairness fallback are selected; D1M-A is the selected system fallback if universal dedicated-operation support fails its gates; coherent same-cut evidence acquisition, exact `{D,E,O}` material phase support, nontrivial within-parent application-site support, maximal frozen collision cohorts, and target-equivalence bucketing with preserved contributor identity are derived; all reachable cause loci, participant timing, collision geometry, the genuine-conflict result domain, and both-dialect genuine-conflict incidence are closed at direction granularity; participant collision-control prevalence is the sole frontier, while the repaired opportunity-profile and complete-signature topology precede lineage ownership. |
 | `SR-05` | Relational archetypes and Achintya boundary | Every required archetype maps to an operative player choice or state transition where continuity and distinction are mechanically legible; no mandatory class exists only to satisfy a graph, coverage, or symmetry token. | `PARTIAL`: structural/archetype directions through C170 exist; concrete player-visible proof does not. |
 | `SR-06` | Representative and release catalog | A finite versioned release catalog (or explicit launch minimum plus deferred catalog boundary) supplies source/relationship/payoff definitions, counterexamples, and at least one viable build purpose for every required family. | `OPEN` |
 | `SR-07` | Configuration and evolution horizons | Equip, Charm socketing, reconfiguration, rebinding, learning/evolution, encounter/Circuit locks, preview, and rollback rules name every clean boundary and cannot be shopped through reload or route information. | `OPEN` |
@@ -1388,6 +1388,12 @@ without inventing hidden rules:
 11. save, reload, version migration, and injected failure/replay behavior; and
 12. explicit launch content, later-patch deferrals, tuning metrics, and
     acceptance/rejection thresholds.
+13. the non-normative
+    [system-fit visual](endless-build-system-map.svg) is refreshed only at
+    final Relic closeout from the explicitly accepted coherent contract, so
+    its visible diagram and accessible description show the complete gear and
+    progression hierarchy, explicit launch-versus-later-patch scope, and no
+    stale worksheet or frontier labels.
 
 The packet is a finite proof of the framework. It is not a demand to author
 every future Relic. Conversely, abstract set coverage without these scenarios
@@ -3330,33 +3336,45 @@ adjudication. They found that old RCS-04A3's exclusive system/participant
 branch lost same-cohort participant configuration plus immutable Relic-law
 composition, and that A1-C never fixed which transformation dialects can
 actually reach genuine conflict. One new RCS-04A1C prerequisite fixes
-state-only, boundary-only, or both-dialect conflict incidence. Old counted
-RCS-04A3 becomes a non-counting parent for twelve rows: participant-control
-prevalence; configurable-class and intrinsic-complement dialect incidence;
-six exact control-form-profile incidence splits; policy-coordinate
-recombinability; constructive policy language; and conditional participant-
-authored context branching. A4-A6 now govern complete automatic resolver laws
-after applicable participant configuration, while A7 governs policy timing
-only. Exact holder/information/default and binding horizon remain RCS-02 and
-RCS-13.
+state-only, boundary-only, or both-dialect conflict incidence. At that
+checkpoint old counted RCS-04A3 became a non-counting parent for twelve rows.
+The fiftieth correction below supersedes that row count and its incomplete
+controlled-opportunity profile universe. A4-A6 still govern complete automatic
+resolver laws after applicable participant configuration, while A7 governs
+policy timing only. Exact holder/information/default and binding horizon remain
+RCS-02 and RCS-13.
 
 The forty-ninth correction prominently records two failures in that first
 repair. “Both forms” first collapsed separate fixed contracts with one
 contract supporting both. The intermediate two-row repair then collapsed
 context-separated availability with same-opportunity choice, and uniform
 coavailability with contexts that remove one form. Those worlds change legal
-actions and required forecast information. For each fixed contract, every
-material controlled opportunity is therefore classified as policy-only,
-direct-only, or both genuinely coavailable. Six conditional incidence splits
-exhaust the seven possible nonempty contract profiles over those three values.
-Exact definitions, frequencies, predicates, and placement remain AUTHOR/SPEC/
-EVALUATE after profile presence is settled.
+actions and required forecast information. It correctly partitions the seven
+nonempty **controlled-form projections** over policy-only, direct-only, and
+both genuinely coavailable, but it incorrectly omitted reachable conflicts on
+the same configurable contract at which no participant result-control
+coordinate exists. Its old statement that seven profiles were exhaustive is
+therefore historical, not current.
 
-Adding one prerequisite and replacing one A3 row with twelve raises the current
-register to **175 rows: 33 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A1C, 51
-`PRUNED`, 83 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 34`**. The amendment adds no selected mechanic; it exposes distinct
-legal actions and authority classes before authoring can hide them.
+Zanzagar selected RCS-04A1C-C, so genuine distinct-target conflict has at
+least one state-dialect and at least one boundary-dialect witness. The
+fiftieth correction follows three further read-only audits. It adds `I` for a
+reachable conflict with no authored material participant result-control
+coordinate, seven conditional rows that split each controlled-form projection
+by absence, universality, or proper coexistence of `I`, and one later complete-
+signature dialect-topology row. The old A3A1/A3A2 marginal-incidence rows
+become non-counting historical aliases: independently classifying marginals
+still hid cross-coordinate dialect segregation. A3X instead classifies the
+complete versioned A3/A7 legal-action signature and requires AUTHOR/SPEC to
+enumerate its total state-only, boundary-only, or paired map. Any later new
+player-material coordinate reopens A3X.
+
+Removing those two incomplete marginal rows and adding eight exact rows makes
+the current register **181 rows: 38 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3A, 51
+`PRUNED`, 84 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 39`**. The amendment selects no participant-control model. It repairs
+the opportunity universe and makes dialect coupling an explicit later product
+choice rather than an authoring accident.
 Any upstream source change invalidates and re-screens the timing subtree:
 E1-A prunes it, while a changed nonempty participant domain reopens the
 applicable timing row(s).
@@ -3365,7 +3383,7 @@ audit placeholder, not twelve reachable families.
 
 ### 7.3 Frozen remaining Relic slot register
 
-To make that route genuinely finite, the remaining C3c pass has 175
+To make that route genuinely finite, the remaining C3c pass has 181
 candidate slots. A slot may produce at most one atomic owner card. It may
 instead close as already selected, derived, specified, authored, evaluated,
 deferred, or pruned. It may not mint descendant slots automatically.
@@ -3518,17 +3536,22 @@ overcompression.
 | `RCS-03E2` | Participant-approval timing for the active participant-contingent P/Z proposal subset | `DIR-SELECTED`; C gives P and Z opposite cause-uniform timings, with E2-A as the qualified production fallback if both orientations or the two-grammar system fail while all-advance bindings remain materially strategic; upstream source changes invalidate timing, E1-A prunes it, and a changed nonempty participant domain reopens applicable rows |
 | `RCS-03E2C` | P-versus-Z timing orientation under E2-C cause-uniform coexistence | `DIR-SELECTED`; A makes every P proposal live-capable and every Z proposal advance-bound; within-cause definition/dialect/target/favorability/context/owner/instance/opportunity variation requires an owner-visible amendment |
 | `RCS-04A1` | Reachable collision geometry across maximal frozen same-Relic/source-revision/cut proposal cohorts | `DIR-SELECTED`; C requires at least one genuine distinct-target conflict while retaining target-concordant cohorts, with B armed as the qualified simplicity fallback if genuine conflict causes jamming, cause suppression, unreliable paid Rites/D5 returns, or comprehension failure |
-| `RCS-04A1C` | Transformation-dialect incidence of genuine distinct-target conflict under A1-C | `OWNER-OPEN`; chooses nonempty state-only, boundary-only, or both-dialect conflict support before participant-control prevalence; exact definitions, counts, and frequency remain AUTHOR/SPEC |
-| `RCS-04A2` | Uniform admissible assignment-result domain for every genuine distinct-target conflict | `DIR-SELECTED`; A requires exactly one still-valid proposed target to settle, with C armed as the qualified fairness fallback if every target-forcing resolver causes material arbitrary/involuntary harm while target/null resolution remains legible, non-dominated, anti-jam, Rite-safe, and D5-safe; firing C reopens the complete applicable A3A–A7 subtree rather than transferring target-only labels by name |
-| `RCS-04A3A` | Material participant result-control prevalence across genuine-conflict definition/version contracts | `SCREEN`; after A1C, chooses empty, universal, or stable definition/version proper-subset participant configurability of the complete target-result law; same-cohort immutable system composition does not erase a material participant coordinate |
-| `RCS-04A3A1` | Transformation-dialect incidence of the participant-configurable collision-contract class under A3A-C | `SCREEN`; only proper coexistence; derived in a single conflict-capable dialect, otherwise chooses state-only, boundary-only, or both before complement incidence |
-| `RCS-04A3A2` | Transformation-dialect incidence of the intrinsic collision-contract complement after A3A1 | `SCREEN`; only proper coexistence; derived in a single conflict-capable dialect, otherwise completes one of the seven feasible positive/complement incidence pairs |
-| `RCS-04A3B1` | Direct-capable prevalence across participant-configurable collision contracts | `SCREEN`; chooses empty, universal, or stable proper support for contracts that permit direct actual-result control at some reachable controlled conflict; the complement is exact `{P}` policy-only profile support |
-| `RCS-04A3B2` | Policy-capable prevalence inside the direct-capable contract class | `SCREEN`; only when B1's positive class is nonempty; chooses empty, universal, or stable proper support for also permitting policy control somewhere; its negative leaf is exact `{D}` direct-only profile support |
-| `RCS-04A3B3` | Same-opportunity coavailability prevalence inside the dual-form contract class | `SCREEN`; only when B2's positive class is nonempty; chooses empty, universal, or stable proper support for a held-fixed conflict offering distinct policy and direct-result actions together; its negative leaf is exact context-separated `{P,D}` support |
-| `RCS-04A3B4` | Context-varying form-availability prevalence inside the coavailability-capable class | `SCREEN`; only when B3's positive class is nonempty; chooses empty, universal, or stable proper support for at least one exclusive-form opportunity in the same fixed contract; its negative leaf is uniform `{B}` support |
-| `RCS-04A3B5` | Policy-only-opportunity prevalence inside context-varying coavailability contracts | `SCREEN`; only when B4's positive class is nonempty; chooses empty, universal, or stable proper support for contexts that remove direct choice; its negative leaf is exact `{D,B}` support |
-| `RCS-04A3B6` | Direct-only-opportunity prevalence inside the direct-removal class | `SCREEN`; only when B5's positive class is nonempty; chooses empty, universal, or stable proper support for contexts that also remove policy control, separating exact `{P,B}` from `{P,D,B}` profile support |
+| `RCS-04A1C` | Transformation-dialect incidence of genuine distinct-target conflict under A1-C | `DIR-SELECTED`; C requires at least one state-dialect and one boundary-dialect genuine-conflict contract without requiring every definition, equal counts, shared targets, or cross-dialect cohorts; A is the qualified clarity fallback if boundary conflict remains materially less legible or creates dominant timing/preview arbitrage while state conflict remains fun |
+| `RCS-04A2` | Uniform admissible assignment-result domain for every genuine distinct-target conflict | `DIR-SELECTED`; A requires exactly one still-valid proposed target to settle, with C armed as the qualified fairness fallback if every target-forcing resolver causes material arbitrary/involuntary harm while target/null resolution remains legible, non-dominated, anti-jam, Rite-safe, and D5-safe; firing C reopens the complete applicable A3/A7/A3X subtree rather than transferring target-only labels by name |
+| `RCS-04A3A` | Material participant result-control prevalence across genuine-conflict definition/version contracts | `OWNER-OPEN`; chooses empty, universal, or stable definition/version proper-subset configurability, where a contract is configurable iff at least one held-fixed conflict admits a material participant coordinate; other opportunities on that same contract may still be `I` |
+| `RCS-04A3B1` | Direct-capable prevalence across participant-configurable collision contracts | `SCREEN`; chooses empty, universal, or stable proper support for contracts that permit direct actual-result control at some reachable controlled conflict; the complement has controlled-form projection `{P}` |
+| `RCS-04A3B2` | Policy-capable prevalence inside the direct-capable contract class | `SCREEN`; only when B1's positive class is nonempty; chooses empty, universal, or stable proper support for also permitting policy control somewhere; its negative leaf has controlled-form projection `{D}` |
+| `RCS-04A3B3` | Same-opportunity coavailability prevalence inside the dual-form contract class | `SCREEN`; only when B2's positive class is nonempty; chooses empty, universal, or stable proper support for a held-fixed conflict offering distinct policy and direct-result actions together; its negative leaf has controlled-form projection `{P,D}` |
+| `RCS-04A3B4` | Context-varying form-availability prevalence inside the coavailability-capable class | `SCREEN`; only when B3's positive class is nonempty; chooses empty, universal, or stable proper support for at least one exclusive-form opportunity in the same fixed contract; its negative leaf has controlled-form projection `{B}` |
+| `RCS-04A3B5` | Policy-only-opportunity prevalence inside context-varying coavailability contracts | `SCREEN`; only when B4's positive class is nonempty; chooses empty, universal, or stable proper support for contexts that remove direct choice; its negative leaf has controlled-form projection `{D,B}` |
+| `RCS-04A3B6` | Direct-only-opportunity prevalence inside the direct-removal class | `SCREEN`; only when B5's positive class is nonempty; chooses empty, universal, or stable proper support for contexts that also remove policy control, separating controlled-form projections `{P,B}` from `{P,D,B}` |
+| `RCS-04A3B1I` | Intrinsic-opportunity incidence inside the nonempty `{P}` controlled-form projection class | `SCREEN`; chooses no `I` opportunities, universal `I` support, or stable coexistence of exact `{P}` and `{I,P}` contracts; `I` means authored absence of a material participant result-control coordinate, not timeout/default/unavailable-holder behavior |
+| `RCS-04A3B2I` | Intrinsic-opportunity incidence inside the nonempty `{D}` controlled-form projection class | `SCREEN`; chooses no `I` opportunities, universal `I` support, or stable coexistence of exact `{D}` and `{I,D}` contracts |
+| `RCS-04A3B3I` | Intrinsic-opportunity incidence inside the nonempty `{P,D}` controlled-form projection class | `SCREEN`; chooses no `I` opportunities, universal `I` support, or stable coexistence of exact `{P,D}` and `{I,P,D}` contracts |
+| `RCS-04A3B4I` | Intrinsic-opportunity incidence inside the nonempty `{B}` controlled-form projection class | `SCREEN`; chooses no `I` opportunities, universal `I` support, or stable coexistence of exact `{B}` and `{I,B}` contracts |
+| `RCS-04A3B5I` | Intrinsic-opportunity incidence inside the nonempty `{D,B}` controlled-form projection class | `SCREEN`; chooses no `I` opportunities, universal `I` support, or stable coexistence of exact `{D,B}` and `{I,D,B}` contracts |
+| `RCS-04A3B6I` | Intrinsic-opportunity incidence inside the nonempty `{P,B}` controlled-form projection class | `SCREEN`; chooses no `I` opportunities, universal `I` support, or stable coexistence of exact `{P,B}` and `{I,P,B}` contracts |
+| `RCS-04A3B6I1` | Intrinsic-opportunity incidence inside the nonempty `{P,D,B}` controlled-form projection class | `SCREEN`; chooses no `I` opportunities, universal `I` support, or stable coexistence of exact `{P,D,B}` and `{I,P,D,B}` contracts |
 | `RCS-04A3C` | Independently recombinable collision-policy-coordinate prevalence among policy-mediated contracts | `SCREEN`; chooses bundled-only, universal independent recombination, or stable proper coexistence without confusing UI separation with semantic independence |
 | `RCS-04A3D1` | Constructive collision-policy-language prevalence across policy-mediated participant controls | `SCREEN`; chooses finite authored whole-policy stances only, bounded constructive policy on every contract, or stable proper coexistence; exact stances, primitives, caps, and presets remain AUTHOR/SPEC |
 | `RCS-04A3D2` | Participant-authored context-branching prevalence among constructive collision policies | `SCREEN`; only constructive support; distinguishes nonbranching ordering/filtering/parameters from bounded participant-authored predicates and branches |
@@ -3536,7 +3559,8 @@ overcompression.
 | `RCS-04A5` | Genuine stochastic support across complete collision-result laws | `SCREEN`; after applicable A3/A4 rows; distinguishes point-mass completed laws from at least one nondegenerate versioned distribution over the complete result domain; RCS-02 retains disclosure |
 | `RCS-04A6` | Complete collision-kernel semantic scope | `SCREEN`; after applicable A3–A5 rows; distinguishes one catalog-wide resolver grammar from fixed definition/version-local kernels over complete configured laws; exact rankings, weights, probabilities, maps, and disclosure remain AUTHOR/SPEC/TUNE under RCS-02 |
 | `RCS-04A7` | Policy-mediated participant collision-control timing | `SCREEN`; only when policy-mediated participant control exists; chooses when that complete policy becomes irrevocable relative to frozen cohort facts, while direct actual-result control is already live by definition; exact holder/disclosure/default remains RCS-02 and bind horizon remains RCS-13 |
-| `RCS-04B` | Committed-output identity across artifact, definition, and lineage | `SCREEN`; follows every applicable `RCS-04A1`–`RCS-04A7` row under `SR-04`; persistence realization stays in `RCS-15` |
+| `RCS-04A3X` | Cross-dialect topology of complete participant-control legal-action signatures | `SCREEN`; after every applicable A3/A7 direction, chooses universal state/boundary pairing, no exact pairing, or stable paired/native coexistence over a total versioned signature map; exact native membership/orientation is AUTHOR/SPEC, cannot vary by context/target/instance/opportunity, and any later player-material coordinate reopens this row |
+| `RCS-04B` | Committed-output identity across artifact, definition, and lineage | `SCREEN`; follows every applicable `RCS-04A1`–`RCS-04A7` row and RCS-04A3X under `SR-04`; persistence realization stays in `RCS-15` |
 | `RCS-05` | Qualitative Relic/Charm payoff and power envelope | `SCREEN` under `SR-09` |
 | `RCS-06` | Format/team/release scope over which that envelope must hold | `SCREEN` under `SR-09` |
 | `RCS-07` | Internal Relic-root/Charm compatibility policy | `SCREEN` under `SR-09` |
@@ -3977,23 +4001,27 @@ proposed target must settle.
 
 The forty-eighth and forty-ninth corrections add genuine-conflict
 transformation-dialect incidence and replace old exclusive A3 authority with
-twelve atomic participant-control/incidence/form/language rows. The last
-correction exhausts the seven fixed-contract profiles over policy-only,
-direct-only, and same-opportunity coavailable control. The current register
-has **175 slots**: 33 `SCREEN`, 1
-`OWNER-OPEN` at RCS-04A1C, 51 `PRUNED`, 83 `DIR-SELECTED`, 5 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
-All reachable cause and approval-timing slots remain closed. A1C now chooses
-whether genuine conflict exists in the state dialect, boundary dialect, or
-both before participant control is classified. Any source change invalidates
-timing; E1-A prunes it, while a changed nonempty participant domain reopens
-applicable rows.
+participant-control/form/language rows. Zanzagar selected A1C-C, requiring
+genuine conflict in both dialects. The fiftieth correction records that the
+old seven profiles were controlled-form projections, not complete profiles:
+an otherwise configurable contract may also have an `I` opportunity with no
+material participant coordinate. Seven conditional `I` rows now exhaust the
+four-state opportunity-profile universe. A rejected marginal-incidence repair
+still hid correlations among availability, language, and dialect, so A3A1/
+A3A2 retire as non-counting historical aliases and A3X later classifies the
+complete A3/A7 legal-action signature through one total versioned dialect map.
+The current register has **181 slots**: 38 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3A, 51 `PRUNED`, 84 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 39`.
+All reachable cause and approval-timing slots remain closed. Any source change
+invalidates timing; E1-A prunes it, while a changed nonempty participant
+domain reopens applicable rows.
 Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
 one registered slot. An explicit prerequisite amendment may offset that
 reduction only by naming the missed consequence boundary and new finite bound;
 it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
 outside owner choice. Therefore the remaining Relic pass has at most
-thirty-four owner cards under this forty-nine-times-corrected charter and will
+thirty-nine owner cards under this fifty-times-corrected charter and will
 usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
 `RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
 `RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
@@ -4001,8 +4029,8 @@ usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS
 `RCS-03C3C3B3`, `RCS-03C3C3B3B`, `RCS-03C3C3B4`, `RCS-03C3C3C`,
 `RCS-03C3C3C2`, `RCS-03C3C3C2E`, `RCS-03C3C3D`, `RCS-03C3C3D2`,
 `RCS-03C3C3D2E`, `RCS-03C3C3E`, `RCS-03C3C3F`,
-`RCS-03C3C3G`, `RCS-03C3F4`, `RCS-03D`, `RCS-03E`, `RCS-04`, `RCS-04A`, and
-`RCS-04A3`
+`RCS-03C3C3G`, `RCS-03C3F4`, `RCS-03D`, `RCS-03E`, `RCS-04`, `RCS-04A`,
+`RCS-04A3`, `RCS-04A3A1`, and `RCS-04A3A2`
 remain readable parent aliases only; `RCS-03C3C3` is now also a non-counting
 parent alias. They are not additional counted slots.
 
@@ -4018,7 +4046,7 @@ do provide a finite map of what remains.
 
 | Queue | Fixed closure units | Branch-dependent part |
 | --- | --- | --- |
-| Soul Relics/Charms | 12 `SR-*` gates; 175 frozen candidate slots; current `Phi_SR = 34` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, D1N is derived empty, D1T-A keeps tuple selection authoritative but noncausal, D1VT-A lets permission govern coexistence without itself transforming, D1VF-A lets refusal route disposition without itself transforming, D1K-A keeps sealing meaningful but noncausal, D1Z-C reserves disclosed proper Absence-bound support with A as failure fallback, D1Z1-C gives that proper subset nonempty incidence in both transformation dialects, D1L-A keeps the spent-bond latch recurrence-significant but noncausal, D1X-C reserves disclosed proper Event-bound support with A as the selected system fallback, D1X1-C gives it both-dialect incidence with A as the selected child scope fallback, D1M-B gives every transforming definition a dedicated-operation cause path with A as the selected system fallback, D2-C makes staged and shortcut-complete topology coexist with D2-A as the selected system fallback, D2A-C puts staged support in both dialects with D2A-A as the selected child scope fallback, D2A1-C puts shortcut-complete support in both dialects with D2A1-B as its qualified fallback, D3-B gives every transforming definition a material direct-reverse pair with D3-A as its system fallback, D4-A forbids active clear-to-unassigned histories with D4-C as its qualified Release-bound fallback, D5-B gives every transforming definition a compatible lived nonclear-return history with D5-A as its system fallback, E1-C makes every P proposal participant-contingent plus every M proposal system-deterministic with E1-B/E1-A fallbacks, E1Z-B makes every Z proposal participant-contingent with E1Z-A as its qualified cause-local fallback, E1X-A makes every X proposal system-deterministic with E1X-B as its qualified cause-local fallback, E2-C gives P and Z opposite cause-uniform participant timings with E2-A as its qualified production fallback, E2C-A makes P live and Z advance-bound, RCS-04A1-C requires genuine target conflict with A1-B as the qualified simplicity fallback, and RCS-04A2-A requires one proposed target to settle with A2-C as the qualified fairness fallback | At most 34 future owner cards without another explicit charter amendment; four are Charm-only, and many others are conditional closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children, all closed at direction granularity; RCS-04A1C now chooses state-only, boundary-only, or both-dialect genuine-conflict support before the repaired participant-control subtree; catalog size and tuning values are not card counts |
+| Soul Relics/Charms | 12 `SR-*` gates; 181 frozen candidate slots; current `Phi_SR = 39` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, D1N is derived empty, D1T-A keeps tuple selection authoritative but noncausal, D1VT-A lets permission govern coexistence without itself transforming, D1VF-A lets refusal route disposition without itself transforming, D1K-A keeps sealing meaningful but noncausal, D1Z-C reserves disclosed proper Absence-bound support with A as failure fallback, D1Z1-C gives that proper subset nonempty incidence in both transformation dialects, D1L-A keeps the spent-bond latch recurrence-significant but noncausal, D1X-C reserves disclosed proper Event-bound support with A as the selected system fallback, D1X1-C gives it both-dialect incidence with A as the selected child scope fallback, D1M-B gives every transforming definition a dedicated-operation cause path with A as the selected system fallback, D2-C makes staged and shortcut-complete topology coexist with D2-A as the selected system fallback, D2A-C puts staged support in both dialects with D2A-A as the selected child scope fallback, D2A1-C puts shortcut-complete support in both dialects with D2A1-B as its qualified fallback, D3-B gives every transforming definition a material direct-reverse pair with D3-A as its system fallback, D4-A forbids active clear-to-unassigned histories with D4-C as its qualified Release-bound fallback, D5-B gives every transforming definition a compatible lived nonclear-return history with D5-A as its system fallback, E1-C makes every P proposal participant-contingent plus every M proposal system-deterministic with E1-B/E1-A fallbacks, E1Z-B makes every Z proposal participant-contingent with E1Z-A as its qualified cause-local fallback, E1X-A makes every X proposal system-deterministic with E1X-B as its qualified cause-local fallback, E2-C gives P and Z opposite cause-uniform participant timings with E2-A as its qualified production fallback, E2C-A makes P live and Z advance-bound, RCS-04A1-C requires genuine target conflict with A1-B as the qualified simplicity fallback, RCS-04A2-A requires one proposed target to settle with A2-C as the qualified fairness fallback, and RCS-04A1C-C requires genuine conflict in both transformation dialects with A1C-A as the qualified clarity fallback | At most 39 future owner cards without another explicit charter amendment; four are Charm-only, and many others are conditional closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children, all closed at direction granularity; RCS-04A3A now chooses empty, universal, or stable proper participant configurability before the repaired opportunity-profile and complete-signature topology; catalog size and tuning values are not card counts |
 | EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
 | EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
 | EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |

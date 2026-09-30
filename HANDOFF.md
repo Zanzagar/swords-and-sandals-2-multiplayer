@@ -1,6 +1,96 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 conflict lives in both dialects; participant control is next
+
+Zanzagar selected `RCS-04A1C-C` with `RCS-04A1C-A` as the qualified clarity
+fallback. The fixed release catalog must contain at least one state-dialect and
+at least one boundary-dialect definition/version contract with a reachable
+genuine distinct-target conflict. This does not require every definition,
+equal counts, shared target vocabularies, or cross-dialect cohorts. A may
+replace C only if boundary conflict remains materially less legible or creates
+dominant timing/preview arbitrage after viable resolution designs are tested
+while state conflict remains fun. A1-B remains the deeper concordant-only
+replacement if conflict itself fails.
+
+Three bounded read-only audits found a real omission before A3A presentation.
+The old seven policy/direct/coavailable profiles classified only opportunities
+where participant control already existed. A configurable fixed contract can
+also contain a conflict at which no participant coordinate is material, which
+changes legal actions, authority, forecast burden, and whether equipping that
+Relic guarantees collision control.
+
+The fiftieth correction therefore classifies every reachable conflict
+opportunity as `I` (no authored material participant coordinate), `P` (policy
+only), `D` (direct result only), or `B` (both genuinely coavailable). Pure
+`{I}` is nonconfigurable. B1–B6 still partition the seven nonempty controlled-
+form projections over `{P,D,B}`; seven conditional `I` rows then distinguish
+the pure and `I`-augmented forms, exhausting all fourteen configurable
+profiles. Timeout, unavailable holder, default, earlier binding, and immutable
+Relic completion do not manufacture `I`.
+
+A proposed twenty-row marginal dialect repair was rejected before commit. It
+could put every marginal class in both dialects while keeping exact
+availability/language/timing combinations dialect-segregated. `RCS-04A3X`
+instead later classifies the canonical complete A3/A7 participant-control
+legal-action signature: every exact signature paired across dialects, none
+paired, or paired/native coexistence. AUTHOR/SPEC must enumerate the entire
+versioned state-only/boundary-only/paired map, may not vary it by target,
+context, instance, or opportunity, and must pass RCS-17 dominance and token-
+witness review. Any later player-material coordinate reopens A3X. Old
+A3A1/A3A2 are non-counting historical aliases, not current cards.
+
+The register now has **181 rows: 38 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3A,
+51 `PRUNED`, 84 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 39`**. The authoritative decision record remains byte-unchanged.
+
+`RCS-04A3A` asks only how many fixed genuine-conflict contracts are materially
+participant-configurable somewhere:
+
+- **A — none. Qualified simplicity/artifact-identity fallback.** Every frozen
+  conflict follows authored Relic law after upstream proposal choices. This
+  avoids prompts/configuration tax and gives Relics the clearest independent
+  will, but risks fixed cause castes, involuntary rewriting, wasted paid Rites,
+  and players suppressing otherwise-interesting biographies.
+- **B — every conflict-capable contract. Agency/fairness escalation.** Every
+  fixed contract exposes a material participant coordinate on at least one
+  conflict, though later `I` rows may still admit uncontrolled contexts. This
+  has the broadest mastery ceiling but risks universal policy-console burden,
+  proposal stuffing, dominant settings, and one obscure token witness.
+- **C — configurable and intrinsic-only contracts coexist. Recommended.**
+  Collision authority becomes part of Relic temperament: some artifacts answer
+  a participant orientation and others retain an irreducible will. Complexity
+  is item-specific rather than universal, but configurable Relics must not
+  become the obvious premium class or intrinsic Relics into traps.
+
+Concrete boundary: held-fixed Ashen may change its `MERCY`/`DEFIANCE` law under
+two lawful participant orientations while held-fixed Dreamglass always applies
+its authored `OATH`/`ECHO` covenant, or the roles may reverse. C is aggregate,
+not automatically a stronger ideal fit; a configurable local relationship is
+direct only when distinct participant orientation and immutable Relic grammar
+both remain materially operative.
+
+Recommend **C with A as the qualified simplicity/artifact-identity fallback**.
+Fire A only if every viable configurable contract degenerates into target
+shopping, proposal stuffing, dominant-setting ritual, policy-console
+homogenization, or unacceptable teaching burden while intrinsic conflict in
+both dialects remains fun, legible, Rite-safe, and return-safe. Use B as the
+agency/fairness escalation if intrinsic forced-target settlement proves
+broadly unacceptable while bounded control remains material, non-token, and
+fun everywhere. Ask only for A3A A, B, C, or an explicit replacement.
+
+The owner also required the full gear/progression mockup to be updated when
+the Relic section is completely designed. The canonical tracked artifact is
+`docs/design/endless-build-system-map.svg`, not an HTML file; no tracked or
+referenced HTML companion exists. SR-12's proof packet now requires a final-
+closeout refresh of both the visible diagram and accessible description from
+the explicitly accepted coherent contract, including launch-versus-later-
+patch scope and removal of stale frontier labels. The SVG is intentionally not
+being patched piecemeal while the design still moves.
+
 ## 2026-09-30 proposed target must settle; conflict dialect is next
+
+**Superseded for navigation by the section above.** Its A1C card and 175-row
+checkpoint predate the selected C answer and fiftieth prerequisite correction.
 
 Zanzagar selected `RCS-04A2-A` with `RCS-04A2-C` as the qualified fairness
 fallback. Every genuine distinct-target conflict must settle exactly one
@@ -12755,7 +12845,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 04:16 UTC — Relic conflict dialect is next](docs/handoffs/2026-09-30-0416--relic-conflict-dialect-next.md)**
+[2026-09-30 05:01 UTC — Relic participant control is next](docs/handoffs/2026-09-30-0501--relic-participant-control-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
