@@ -11827,3 +11827,65 @@ qualified simplicity/artifact-identity fallback; B is the agency/fairness
 escalation if intrinsic forced-target settlement broadly fails while bounded
 participant control remains material and fun everywhere. The authoritative
 decision record remains unchanged.
+
+### RCS-04A3A disposition and direct-control boundary audit — 2026-09-30
+
+Zanzagar selected **RCS-04A3A-C with RCS-04A3A-A as the qualified
+simplicity/artifact-identity fallback**. The fixed genuine-conflict catalog
+must therefore contain at least one participant-configurable contract and at
+least one participant-intrinsic contract. Configurability remains existential:
+a configurable contract may still contain later-selected `I` opportunities.
+This is an aggregate coexistence promise, not a dialect map or a guarantee
+that either class realizes the standing ideal locally.
+
+A may replace C only if every viable configurable contract degenerates into
+target shopping, proposal stuffing, a dominant-setting ritual, policy-console
+homogenization, unacceptable teaching burden, or an unavoidable premium class
+while intrinsic conflict in both dialects remains fun, legible, Rite-safe, and
+compatible with lived returns. Mere authoring cost does not fire it. A3A-B is
+the agency/fairness escalation if intrinsic forced-target settlement fails
+broadly while bounded control remains material and fun on every contract;
+A2-C remains the deeper repair if neither result domain is fair.
+
+Three read-only named-claim audits then tested B1 atomicity, dependency
+arithmetic, and player-facing consequences. The contract-level split holds.
+For nonempty `G_v^{ctrl}`, let `D_v` contain contracts with some reachable
+direct actual-result opportunity. `D_v` is exactly empty, universal, or a
+nonempty proper subset. Because every configurable contract has some `P`, `D`,
+or `B` opportunity, a contract outside `D_v` can have neither `D` nor `B`; its
+controlled-form projection is exactly `{P}`, with optional `I` handled later.
+No fourth option or new counted row is required.
+
+The audit did find a mandatory local definition repair. “Direct” is semantic,
+not a UI label or deterministic outcome. At a held-fixed conflict, two lawful
+participant-control vectors must differ only in a current-result coordinate
+naming distinct admissible targets, all other participant and noncontrol
+coordinates must remain identical, and the completed laws must commit the
+respective named targets while valid. A target button or one-shot target-
+naming alias qualifies. A reusable priority, filter, weight, vote, conditional
+rule, or resolver choice remains policy-mediated even when its current output
+is deterministic. A compound target-plus-policy action is not independently
+direct unless target can vary with policy held fixed. Confirmation, mandatory
+default, UI aliases, upstream approval, and a different random realization do
+not manufacture direct control. This closes a fake-witness loophole without
+adding a product choice.
+
+Recommend B1-C with B1-A as the qualified low-interruption/policy-mastery
+fallback; B1-B is the agency/clarity escalation. C combines direct-capable and
+policy-only configurable contracts, which together with A3A-C creates
+intrinsic, policy-only, and direct-capable Relic temperaments. Fire A if direct
+choice causes prompt fatigue, target shopping, quarterbacking, latency/default
+harm, or an unavoidable option-value premium while policy play remains rich
+and legible. Escalate to B only if policy-only settlement remains broadly
+opaque or unfair despite the best preview/disclosure while direct choice is
+fluid, non-token, non-dominant, and earned on every configurable contract.
+Equal optimized Legendary ceilings remain later RCS-05/RCS-06/RCS-08 proof;
+B1 cannot hide unconditional power inside an interaction label.
+
+A3A-C moves only A3A to `DIR-SELECTED` and B1 to `OWNER-OPEN`. The register
+remains **181 rows: 37 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3B1, 51 `PRUNED`,
+85 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`**.
+B1-A would prune B2–B6 and B2I–B6I1 and open B1I at `Phi_SR = 26`. B1-B would
+prune B1I and open B2 at `Phi_SR = 36`. B1-C would open B2 while keeping B1I
+applicable but queued at `Phi_SR = 37`. The authoritative decision record
+remains unchanged.

@@ -1,6 +1,83 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 configurable and intrinsic conflict coexist; direct control is next
+
+Zanzagar selected **RCS-04A3A-C with RCS-04A3A-A as the qualified
+simplicity/artifact-identity fallback**. The fixed genuine-conflict catalog
+must contain at least one participant-configurable contract and at least one
+participant-intrinsic contract. Configurable means that some held-fixed
+conflict has two lawful participant controls that change the committed target
+or complete target law; it does not promise control at every conflict.
+
+A3A-A may replace C only if every viable configurable contract degenerates
+into target shopping, proposal stuffing, dominant-setting ritual, policy-
+console homogenization, unacceptable teaching burden, or an unavoidable
+premium class while participant-intrinsic conflict remains fun, legible,
+Rite-safe, and compatible with lived returns. Mere authoring cost does not fire
+it. A3A-B remains the agency/fairness escalation if intrinsic forced-target
+settlement fails broadly while bounded participant control remains material,
+non-token, and fun everywhere. A2-C is the deeper fairness repair if neither
+result domain survives.
+
+Three read-only named-claim audits upheld RCS-04A3B1 as the next atomic card
+and found one local definition gap. Direct actual-result control is semantic,
+not a UI label or a deterministic policy output. At a held-fixed conflict, two
+lawful control vectors must differ only in a current-result coordinate naming
+distinct admissible targets, with all other participant and noncontrol
+coordinates fixed, and the completed law must commit the respective named
+target while valid. A target button or one-shot target-naming action qualifies.
+A priority, filter, weight, vote, conditional rule, or resolver choice remains
+policy-mediated even when it produces a point mass. Confirmation, mandatory
+default, UI aliases, upstream approval, and changing only RNG do not create
+direct control. This repair adds no row.
+
+The register remains **181 rows: 37 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3B1, 51 `PRUNED`, 85 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 38`**. The authoritative decision record remains
+byte-unchanged.
+
+`RCS-04A3B1` asks how direct-capable support is distributed inside the
+nonempty configurable class:
+
+- **A — no configurable contract is direct-capable. Qualified low-
+  interruption/policy-mastery fallback.** Every configurable contract uses
+  policy-mediated control, with later `I` incidence still possible. This
+  removes live result selection but does not itself choose when policy binds.
+- **B — every configurable contract is direct-capable somewhere. Agency/
+  clarity escalation.** Every configurable contract has at least one live
+  target-naming opportunity. It does not mean direct-only or every conflict;
+  B2 still decides policy support.
+- **C — direct-capable and policy-only configurable contracts coexist.
+  Recommended.** Together with A3A-C this yields intrinsic, policy-only, and
+  direct-capable Relic temperaments. The principal risk is a hidden tier ladder
+  in which live choice makes direct-capable Relics the premium class.
+
+Illustratively, a Soul-answered Ashen sometimes asks which valid `MERCY` or
+`DEFIANCE` result manifests; an Oathbound Dreamglass is configurable only
+through a material resolution policy; an intrinsic Stone Witness follows its
+own covenant. Names and dialect placement are not selected and remain later
+catalog/A3X work.
+
+Recommend **C with A as the qualified low-interruption/policy-mastery
+fallback**. Fire A if direct result choice causes prompt fatigue, target
+shopping, quarterbacking, latency/default harm, or unavoidable option-value
+premium while policy contracts remain legible, strategically rich, Rite-safe,
+and capable of equal optimized Legendary ceilings. Escalate to B only if
+policy-only settlement remains broadly opaque or unfair despite the best
+preview/disclosure while direct choice remains fluid, non-token, non-dominant,
+and thematically earned on every configurable contract.
+
+The final full gear/progression visual refresh remains a required SR-12
+closeout artifact. The canonical tracked file is
+`docs/design/endless-build-system-map.svg`; no tracked HTML companion exists.
+Regenerate its visible diagram and accessible description only after explicit
+Relic-contract acceptance, including launch/later-patch scope and no stale
+frontier labels.
+
 ## 2026-09-30 conflict lives in both dialects; participant control is next
+
+**Superseded for navigation by the section above.** Its A3A card and
+`Phi_SR = 39` checkpoint predate the selected C answer and B1 definition audit.
 
 Zanzagar selected `RCS-04A1C-C` with `RCS-04A1C-A` as the qualified clarity
 fallback. The fixed release catalog must contain at least one state-dialect and
@@ -12845,7 +12922,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 05:01 UTC — Relic participant control is next](docs/handoffs/2026-09-30-0501--relic-participant-control-next.md)**
+[2026-09-30 12:11 UTC — Relic direct actual-result control is next](docs/handoffs/2026-09-30-1211--relic-direct-control-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
