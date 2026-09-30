@@ -1,6 +1,82 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 collision policy stays bundled; covenant construction is next
+
+Zanzagar selected **RCS-04A3C-A with RCS-04A3C-B as the qualified class-wide
+agency/clarity fallback**. Every material collision-policy change on every
+exact-`{P}` contract is inseparably bundled with at least one other meaningful
+participant-semantic change. A single selector does not prove bundling,
+separate widgets do not disprove it, and a token companion semantic does not
+satisfy the selected gameplay purpose.
+
+A3C-B is armed and unfired. It may replace A only if the best cohesive,
+one-sentence bundles across the policy class still create recurrent cross-
+system hostage-taking, opaque replay attribution, or paid-Rite regret, and a
+finite disclosed independent coordinate tests as low-friction, non-solved,
+non-quarterbacked, and not an unavoidable premium. A3C-C remains a narrow
+identity exception. No topology earns scalar compensation.
+
+Three read-only named-claim audits upheld RCS-04A3D1 as the sole next card.
+Its distinction is semantic participant authorship, not output count or UI.
+A rich authored conditional covenant remains closed if selected whole. A
+builder is constructive if the participant materially combines, orders,
+filters, weights, or parameterizes bounded typed policy-bearing primitives;
+named presets or precompiled IDs do not erase that construction. Under A3C-A,
+every constructive policy change must still change a meaningful companion
+semantic. Keeping routing fixed while editing only collision orientation would
+fire or reopen A3C-B, not merely select D1-B.
+
+The register is **181 rows: 23 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3D1, 60
+`PRUNED`, 90 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 24`**. The authoritative decision record remains byte-unchanged.
+
+`RCS-04A3D1` asks whether policy-bearing bundled covenants are selected whole
+or constructed:
+
+- **A — closed authored whole covenants only. Recommended.** Every policy
+  contract offers a compact finite menu of indivisible bundled covenants such
+  as Merciful Chorus and Defiant Dissonance. The Soul chooses a material whole
+  orientation but cannot extract or edit its clauses. This maximizes artifact
+  voice, forecastability, replay attribution, and multiplayer ownership while
+  minimizing optimizer scripts and policy-console feel. It fails its own
+  rationale if authoring produces dozens of near-duplicate stances.
+- **B — every policy contract supports bounded bundled-covenant construction.
+  Qualified class-wide expressive-mastery/menu-bloat fallback.** Every policy
+  Relic exposes at least one honest builder. A valid Covenant Loom might let
+  the Soul order at most two joint verses whose collision and routing meanings
+  necessarily move together. This raises expressive ceiling and can replace
+  preset bloat, but greatly expands search, preview, canonicalization,
+  migration, copied-meta, quarterbacking, and dominant-template risks.
+- **C — closed-only and constructive contracts coexist.** Woven Relics may
+  expose the Loom while Oathbound Relics speak only complete vows. This gives
+  the richest identity contrast and strongest hidden-expertise premium; it is
+  a narrow exception, not the default fallback.
+
+Recommend **A with B as the qualified class-wide expressive-mastery/menu-
+bloat fallback**. Fire B only if compact menus fail across representative
+policy Relics through recurring near-duplicate proliferation or an omitted,
+easily stated whole-covenant intention; a finite typed builder fixes it while
+preserving A3C-A bundling and immutable Relic contribution; rules remain
+quickly forecastable; and matched tests reject dominant templates, cheap Rite
+insurance, hidden class premium, and routine teammate-authored configuration.
+If only one identity needs construction, C is the relevant exception and must
+pass stronger sidegrade proof.
+
+A gives a direct local *Achintya Bheda Abheda* fit when the Soul's whole
+orientation and immutable Relic grammar remain distinct and jointly necessary.
+B can preserve that fit with Relic-specific incomplete primitives, but
+combinability itself is not a stronger realization. C is aggregate.
+
+D1-A prunes A3D2 and opens A4 at `Phi_SR = 22`. D1-B/C opens A3D2 at
+`Phi_SR = 23`; after its answer A4 opens at 22. The final full gear/progression
+visual refresh remains required at SR-12 closeout in
+`docs/design/endless-build-system-map.svg`; the SVG stays untouched while the
+Relic contract moves.
+
 ## 2026-09-30 direct specialists sometimes answer themselves; policy-coordinate packaging is next
+
+**Superseded for navigation by the section above.** Its A3C card and
+`Phi_SR = 25` checkpoint predate the selected A answer and A3D1 audits.
 
 Zanzagar selected **RCS-04A3B2I-B with RCS-04A3B2I-A as the qualified
 practical agency/clarity fallback**. Every direct-only contract is complete-
@@ -13204,7 +13280,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 18:41 UTC — Collision-policy coordinate packaging is next](docs/handoffs/2026-09-30-1841--relic-policy-coordinate-next.md)**
+[2026-09-30 18:58 UTC — Bundled-covenant language is next](docs/handoffs/2026-09-30-1858--relic-covenant-language-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

@@ -12152,3 +12152,103 @@ adding a row. The register is **181 rows: 24 `SCREEN`, 1 `OWNER-OPEN` at
 RCS-04A3C, 60 `PRUNED`, 89 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 25`**. Every A3C answer then opens A3D1 at `Phi_SR =
 24`. The authoritative decision record remains unchanged.
+
+### RCS-04A3C disposition and constructive collision-language audit — 2026-09-30
+
+Zanzagar selected **RCS-04A3C-A with RCS-04A3C-B as the qualified class-wide
+agency/clarity fallback**. Every material collision-policy change on every
+exact-`{P}` contract is inseparably bundled with at least one other meaningful
+participant-semantic change. A single UI selector does not prove bundling,
+separate widgets do not disprove it, and token companion semantics do not
+satisfy the selected gameplay purpose.
+
+A3C-B may replace A only when the best cohesive one-sentence bundles across
+the policy class still create recurrent cross-system hostage-taking, opaque
+replay attribution, or paid-Rite regret, and a finite disclosed independent
+coordinate tests as low-friction, non-solved, non-quarterbacked, and not an
+unavoidable premium. A3C-C remains a narrow definition-identity exception
+rather than the fallback. No topology earns scalar compensation; equal
+optimized Legendary ceilings remain later proof.
+
+Three read-only named-claim audits then attacked A3D1's atomicity, semantic
+boundary, and gameplay recommendation. The row survives A3C-A. Coupling and
+construction are orthogonal: a participant may construct a policy-bearing
+covenant while every resulting policy change necessarily co-varies with a
+meaningful companion semantic. The earlier permission-language countermodel
+already proves the point—a constructed permission component may be paired one-
+to-one with distinct closed routing stances without creating a held-fixed
+independent permission coordinate. Conversely, selecting one elaborate
+author-written conditional covenant whole remains closed.
+
+Let `K_v^{coll-build}` contain a contract in the nonempty exact-`{P}` class
+exactly when its lawful prospective participant action grammar can create at
+least one material complete policy-bearing setting by combining, including or
+excluding, ordering, filtering, weighting, or parameterizing a bounded typed
+set of semantic policy primitives, rather than selecting one indivisible
+author-enumerated complete bundled covenant. A3D1-A makes this subset empty, B
+makes it the whole policy class, and C makes it a nonempty proper subset stable
+by definition/version. Presets do not erase construction; a large atomic menu
+does not create it. Therefore no fourth option or new row is required.
+
+The classification follows lawful semantic authorship before UI, storage,
+share code, generated IDs, or compiler form. Every constructive witness must
+change the canonical complete target law on a matched reachable conflict.
+Aliases, cosmetic fields, zero-weight, unreachable, always-shadowed, or
+semantically duplicate clauses, immutable completion, defaults, RNG, and
+several holders each selecting whole values do not count. Canonicalization
+must normalize aliases, numeric formats, duplicate or commutative clauses,
+dead terms, implicit defaults, and immutable completion. Every admitted
+construct plus immutable Relic grammar must type-check, terminate, and denote
+one total collision-result law over every reachable genuine conflict.
+
+Selected A3C-A is a hard invariant under every D1 option. No pair of lawful
+settings may change policy and its completed law while holding the complete
+remaining participant-semantic projection fixed. A valid builder may instead
+order joint covenant verses whose collision and routing/temperament semantics
+change together. A policy-only edit with companion semantics fixed fires or
+reopens A3C-B; it is not an A3D1-B escalation.
+
+“Bounded” requires finite versioned primitive vocabulary, clause or nesting
+limits, parameter domains and precision, and evaluation work. Exact primitives,
+values, caps, normalization, completion, and presets remain AUTHOR/SPEC.
+Unrestricted scripts, arbitrary per-state lookup tables, unbounded recursion,
+or a guaranteed universal cross-Relic DSL are explicit replacement paths.
+RCS-15/RCS-16 later own saved-schema version/migration and stale/corrupt
+repair, but a migration may not silently introduce a held-fixed independent
+policy coordinate forbidden by A3C-A.
+
+A3D2 remains independent conditional work. D1 asks whether participants can
+author bounded policy structure at all. Uniform ordering, filters, fixed-form
+weights, and bounded numeric parameters can be D1 construction with no
+participant-authored context branch. A participant-authored “if Rite, use X;
+else use Y” predicate is D2. An immutable authored conditional inside a whole
+covenant is D1-A and never activates D2. Thus D1-A prunes D2, while D1-B/C
+opens it only on the constructive class.
+
+Recommend **A3D1-A, with A3D1-B as the qualified class-wide expressive-
+mastery/menu-bloat fallback**. Closed authored whole covenants preserve
+material orientation without turning every policy Relic into a resolver
+editor, and minimize copied optimizer rules, quarterbacking, shadowed clauses,
+migration surface, and policy-console feel. This recommendation requires a
+compact, distinguishable, materially different menu; dozens of near-duplicate
+stances are formally closed but fail its comprehension rationale.
+
+Fire B only if compact closed menus fail across representative policy Relics
+through near-duplicate proliferation or omission of a recurring, easily stated
+whole-covenant intention; a finite typed builder solves that failure while
+preserving A3C-A bundling and indispensable immutable Relic contribution; the
+compiled rule remains quickly forecastable; matched tests find no dominant
+template, cheap Rite insurance, hidden policy-class premium, or routine
+teammate-authored norm; later default, serialization, and migration can remain
+deterministic and legible; and the gain is real expressive play rather than
+cosmetic reassembly. If the desire is to keep routing fixed while changing
+only collision orientation, use A3C-B instead. C remains a narrow localized
+identity exception requiring stronger coverage, regret, robustness, and
+teammate-dependence sidegrade proof.
+
+A3C-A moves A3C to `DIR-SELECTED` and A3D1 to `OWNER-OPEN` without pruning or
+adding a row. The register is **181 rows: 23 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3D1, 60 `PRUNED`, 90 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 24`**. D1-A would prune D2 and open A4 at `Phi_SR = 22`;
+D1-B/C would open D2 at `Phi_SR = 23`, after which A4 opens at 22. The
+authoritative decision record remains unchanged.

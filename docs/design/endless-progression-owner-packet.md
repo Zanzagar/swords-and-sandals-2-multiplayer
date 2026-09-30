@@ -485,10 +485,16 @@ conflict. Three A3C audits then upheld the next prevalence split and fixed its
 semantic test: collision policy is independently variable only when it changes
 the complete result law while every other participant-semantic setting remains
 fixed; UI separation and full Cartesian saturation are neither sufficient nor
-required. **RCS-04A3C is now the sole owner-facing choice under SR-04:**
-whether collision policy is always bundled with another participant setting,
-separately variable on every policy contract, or each topology coexists. The
-amended register has 181 rows and `Phi_SR = 25`.
+required. Zanzagar selected **RCS-04A3C-A with RCS-04A3C-B as the qualified
+class-wide agency/clarity fallback**: collision policy is always bundled with
+at least one other meaningful participant semantic. Three A3D1 audits then
+upheld the next language split and supplied a mandatory guard: construction
+may occur inside an inseparable bundled covenant, but no lawful policy edit may
+hold every other participant semantic fixed. **RCS-04A3D1 is now the sole
+owner-facing choice under SR-04:** whether every policy Relic offers only
+closed authored whole covenants, every policy Relic supports bounded covenant
+construction, or both language classes coexist. The amended register has 181
+rows and `Phi_SR = 24`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -28572,7 +28578,7 @@ registered row. The register now contains **24 `SCREEN`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`**. A letter selects worksheet
 direction only. The authoritative decision record remains unchanged.
 
-### RCS-04A3C — independent collision-policy-coordinate prevalence — active owner choice
+### RCS-04A3C — independent collision-policy-coordinate prevalence — A selected
 
 Let `C_v^P` be the nonempty exact-`{P}` policy-contract class established by
 B1-C, B2-A, and B1I-A. Canonicalize every lawful participant setting by its
@@ -28635,11 +28641,119 @@ the failure is localized and matched optimized testing proves the independent
 subtype is a sidegrade with real liabilities. No answer earns scalar
 compensation; equal optimized Legendary ceilings remain later proof.
 
-Every A/B/C answer moves A3C to `DIR-SELECTED` and opens A3D1 without pruning
-or adding a registered row. The register would then contain **23 `SCREEN`, 1
+**Direction answer — selected by Zanzagar on 2026-09-30:** **A, with B as the
+qualified class-wide agency/clarity fallback.** `R_v^P` is empty. Every
+material collision-policy change on every policy contract is inseparably
+bundled with at least one other meaningful participant-semantic change. A
+single selector does not prove bundling, separate widgets do not disprove it,
+and token companion semantics do not satisfy the selected gameplay purpose.
+
+A3C-B is armed and unfired. It may replace A only if the best cohesive,
+one-sentence bundles across the policy class still create recurrent cross-
+system hostage-taking, opaque replay attribution, or paid-Rite regret—and a
+finite disclosed independent coordinate tests as low-friction, non-solved,
+non-quarterbacked, and not an unavoidable premium. A3C-C remains a narrow
+definition-identity exception rather than the fallback. No topology earns
+scalar compensation; equal optimized Legendary ceilings remain later proof.
+
+Selecting A moves A3C to `DIR-SELECTED` and opens A3D1 without pruning or
+adding a registered row. The register now contains **23 `SCREEN`, 1
 `OWNER-OPEN` at RCS-04A3D1, 60 `PRUNED`, 90 `DIR-SELECTED`, 5 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`**. A letter selects worksheet
 direction only. The authoritative decision record remains unchanged.
+
+### RCS-04A3D1 — constructive collision-covenant-language prevalence — active owner choice
+
+Let `C_v^P` remain the nonempty exact-`{P}` policy-contract class. Let
+`K_v^{coll-build}` contain a fixed contract exactly when its lawful prospective
+participant configuration language exposes at least one **material semantic
+construction operation** over its collision-policy component—combining,
+including/excluding, ordering, filtering, weighting, or parameterizing a
+bounded typed set of policy-bearing primitives—rather than permitting only
+selection of one indivisible author-enumerated complete bundled covenant.
+
+Classify the participant's legal semantic action before UI, storage, share
+code, generated ID, or compiler representation, then canonicalize the complete
+result after immutable Relic completion. A richly conditional authored
+covenant remains closed when the participant can select it only whole. A real
+builder remains constructive when it also offers named presets or when all of
+its finite outputs are precompiled to IDs. Multiple holders each selecting a
+whole covenant, system completion, RNG choosing an authored covenant, or a
+faceted UI with forced one-to-one whole values does not manufacture
+construction.
+
+A constructive witness must change the canonical complete target law on at
+least one matched reachable genuine conflict. Cosmetic, duplicate, zero-
+weight, unreachable, always-shadowed, or semantically equivalent clauses do
+not count. Every lawful construct plus immutable Relic grammar must denote one
+total collision-result law over every reachable genuine conflict; A2-A admits
+no undefined or no-target fallthrough.
+
+Most importantly, selected A3C-A remains invariant under every D1 answer. No
+two lawful settings may change collision policy and its completed law while
+holding the complete remaining participant-semantic projection fixed.
+Construction may use **joint covenant primitives** whose policy and meaningful
+companion routing/temperament semantics necessarily change together. A builder
+that keeps Chorus routing fixed while switching `RITE-FIRST` to
+`MANIFESTATION-FIRST` contradicts A3C-A and would fire or reopen A3C-B; it is
+not merely a stronger D1-B witness.
+
+“Bounded” requires a finite versioned primitive vocabulary and finite limits
+on clause count or nesting, parameter domains and precision, and evaluation
+work. Exact primitives, values, caps, normalization rules, completion clauses,
+and presets remain AUTHOR/SPEC. Unrestricted scripts, arbitrary per-state
+lookup tables, unbounded recursion, or a guaranteed universal cross-Relic DSL
+are explicit replacement paths because they change termination, security,
+canonicalization, migration, UI, and artifact-identity obligations.
+
+| Choice | Constructive-language incidence inside `C_v^P` | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — closed authored whole covenants only** | `K_v^{coll-build}` is empty. Every policy contract offers a finite versioned menu of indivisible authored bundled covenants. Participants select one covenant whole and cannot extract, reorder, parameterize, or condition its semantic clauses. Exact menu sizes and covenant identities remain AUTHOR/SPEC. | **Recommended compact-covenant direction, with B as the qualified class-wide expressive-mastery/menu-bloat fallback.** A preserves meaningful choice without turning every Relic into a resolver editor: B1I-A already makes every policy contract responsive at every conflict. A named covenant can carry one sentence and one forecast, minimizing copied optimizer rules, team quarterbacking, shadowed clauses, migration surface, and policy-console feel. It also gives the strongest artifact voice. Its advantage depends on a compact, distinguishable, materially different menu; forty near-duplicate stances are formally closed but functionally a worse editor. Rite protection must carry an honest companion tradeoff or one covenant becomes solved. The Soul's whole orientation and immutable Relic grammar can remain distinct and jointly necessary, a direct local ideal fit. | Oathbound Dreamglass offers only **Merciful Chorus**—Chorus proof routing plus `RITE-FIRST`—and **Defiant Dissonance**—Dissonance routing plus `MANIFESTATION-FIRST`. Each may contain rich authored conditions, but the Soul binds it whole. No clause, priority, threshold, or cross-pair can be edited. |
+| **B — every policy contract supports bounded bundled-covenant construction** | `K_v^{coll-build}=C_v^P`. Every policy contract exposes at least one honest bounded construction path. Named closed presets may coexist; “universal” means every contract has a builder, not that every legal setting must be constructed. Every construct must preserve A3C-A's inseparable companion change. | B offers the highest expressive ceiling and may replace an exploding near-duplicate preset menu with a teachable typed grammar. It also multiplies search, preview, canonicalization, testing, copied-meta, migration, configuration-fatigue, and quarterbacking burdens. Because policy specialists are exact `{P}` at every genuine conflict, a dominant constructed template has broad leverage; a generic `RITE-FIRST > manifestation > event` braid can become mandatory insurance. Relic-specific joint primitives and immutable completion may preserve artifact identity, but construction itself is not a stronger ideal realization and a shared generic DSL can make Relics skins. A3D2 later decides participant-authored predicates/branches. | Every policy Relic exposes a bounded **Twin-Faced Covenant Loom**. The Soul may order at most two joint verses: **Mercy/Chorus** couples Rite protection to shared-proof routing; **Defiance/Dissonance** couples manifestation precedence to fresh isolated-proof routing; **Witness/Scarring** couples lived-event precedence to elder-proof routing. One braid supplies both projections, and the contract forbids two braids with identical routing semantics but different collision law. Named Merciful Chorus may remain a preset. |
+| **C — closed-only and constructive policy contracts coexist** | `K_v^{coll-build}` is a nonempty proper subset of `C_v^P`; at least one fixed contract is constructive and another is closed-only. Membership is stable by definition/version, and A3D2 applies only to the constructive subset. | C gives the richest authored identity: “Woven” Relics can invite covenant weaving while others speak only in complete vows. It also creates two control, preview, serialization, testing, and migration dialects and the sharpest hidden-expertise premium. If the builder reproduces closed covenants and adds settings without real liabilities, it weakly dominates even at equal peak win rate; if it adds no strategic behavior, the second grammar is waste. Use C only as a narrow identity exception when constructive Relics have immutable losses, closed Relics retain strict optimized niches, and matched tests compare coverage, regret, robustness, and teammate dependence—not scalar ceiling alone. | Oathbound Dreamglass remains Merciful Chorus/Defiant Dissonance only. Woven Dreamglass exposes the joint-verse Loom. Both remain A3C-A bundled; the difference is participant authorship, fixed by contract/version and disclosed before commitment. |
+
+A/B/C exhaust the subset relation of `K_v^{coll-build}` to nonempty `C_v^P`.
+The classification follows lawful participant semantic authorship, not output
+cardinality: a hundred-item atomic menu may be A, while a two-slot material
+editor may be B. Canonicalization must normalize aliases, numeric formats,
+duplicate or commutative clauses, dead terms, implicit defaults, and immutable
+completion before a witness is counted.
+
+A3D1 asks whether participants can author bounded policy structure at all.
+A3D2 applies only to constructive contracts and separately asks whether they
+may author context predicates and branch structure. Uniform primitive
+ordering, eligibility filters, fixed-form weights, and bounded numeric
+parameters may be D1 construction while D2 remains negative. “If a paid Rite
+is present, use braid X; otherwise use braid Y,” when the participant authors
+the predicate or branches, is D2 work. An author-written conditional inside a
+whole selected covenant remains D1-A and never activates D2.
+
+Recommend **A, with B as the qualified class-wide expressive-mastery/menu-
+bloat fallback**. Fire B only if all of these hold: the failure recurs across
+representative policy Relics; compact closed menus repeatedly require near-
+duplicate proliferation or omit a recurring, easily stated whole-covenant
+intention; a finite typed builder solves that problem while preserving A3C-A
+bundling and indispensable immutable Relic grammar; the compiled rule and
+current conflict remain quickly forecastable; matched tests find no dominant
+priority template, cheap Rite insurance, hidden policy-class premium, or
+routine teammate-authored norm; later default, unavailable-holder,
+serialization, and migration contracts can remain deterministic and legible;
+and the gain is real expressive play rather than cosmetic reassembly.
+
+If the actual complaint is “keep this routing but change only collision
+orientation,” fire A3C-B rather than D1-B. If only one localized identity
+needs construction, C is the relevant narrow exception and must pass the
+stronger sidegrade proof. No language class earns scalar compensation or
+automatic power for complexity.
+
+Selecting A moves D1 to `DIR-SELECTED`, prunes D2, and opens A4, yielding
+**21 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A4, 61 `PRUNED`, 91 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**. Selecting B or C
+moves D1 to `DIR-SELECTED` and opens D2, yielding **22 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A3D2, 60 `PRUNED`, 91 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`**. After any D2 answer, A4 opens at
+`Phi_SR = 22`. A letter selects worksheet direction only. The authoritative
+decision record remains unchanged.
 
 ## Session protocol and evidence
 
