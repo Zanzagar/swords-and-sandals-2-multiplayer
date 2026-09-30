@@ -1,6 +1,93 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 reliable and fateful laws coexist; transferable collision grammar is next
+
+Zanzagar selected **RCS-04A5-C with RCS-04A5-A as the qualified policy-
+mastery/multiplayer-trust/Rite-and-return fallback**. The canonical complete
+automatic collision-law catalog must contain at least one deterministic-only
+law and at least one distinct stochastic-capable law. Each law/version keeps
+one stable classification. Both families require strict optimized niches at
+equal optimized Legendary ceilings, and neither receives scalar compensation.
+
+A5-A is armed and unfired. It replaces C if chance is only spectacle; risk
+cannot guide truthful hedging; contributor-sensitive odds reward cheap route
+farming; seed, reload, callback, or downstream redraw shopping survives;
+teammates can impose opaque risk; paid M Rites or practical D5 returns become
+unreliable; a stochastic premium or deterministic novice trap appears; or
+solver/RL and human tests fail robustness, fairness, comprehension, causal
+explanation, or coordination. B remains a universal escalation, not the
+fallback. Every fixed occurrence receives one committed realization.
+
+A4-C and A5-C require both marginal families but do not promise all four
+sensitivity × variance cells. Every canonical law must declare both stable
+classifications; exact cross-placement is AUTHOR/SPEC unless a concrete
+tested consequence triggers reopening. Randomness is not itself *Achintya
+Bheda Abheda*. The direct fit remains Soul intention, contributor histories,
+and immutable Relic law staying distinct and jointly operative in the one
+settled becoming.
+
+Three bounded read-only A6 audits disagreed over whether “one global resolver
+versus local kernels” was a product decision or only code structure. A neutral
+adjudication kept A6 only after repairing its boundary around transferable
+player semantics. Arbitrary kernels can always be wrapped in one dispatcher;
+one function, many modules, shared helpers, callbacks, tables, interpreters,
+and storage layout therefore prove nothing. A6 now asks whether players reuse
+one causal language, not whether programmers reuse one function.
+
+The register is **181 rows: 19 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A6, 61
+`PRUNED`, 93 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 20`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-04A6` is one binary choice:
+
+- **A — one transferable catalog-wide player-semantic grammar. Recommended.**
+  Every complete automatic law is a bounded expression in one finite,
+  versioned algebra with common operator meanings, evaluation order,
+  normalization/certain-draw semantics, and at least one nontrivial causal
+  forecast or counterplay invariant. Laws retain distinct recipes and
+  parameters; custom operations, arbitrary law programs, opaque law-ID
+  dispatch, and nominal modes with unrelated meanings are forbidden.
+- **B — materially irreducible law/version-local grammar families. Qualified
+  artifact-identity fallback.** At least two reachable, non-token families
+  require different causal explanation or counterplay calculi. Any supposed
+  common encoding would need custom/law-conditioned dispatch, mutate an
+  operator's meaning/order/normalization, or reduce to vacuous “inputs produce
+  one target” plumbing. Several laws may still share a family.
+
+Under A, Stone and Veil can both use `project evidence → add nonnegative target
+support → normalize → certain argmax or committed draw`; Stone can be neutral/
+deterministic and Veil sensitive/stochastic, while players learn that adding
+positive support cannot reduce its target's probability. Under B, Stone may
+use that grammar while Veil uses a disclosed random-rotation cyclic duel
+`M>T`, `T>E`, `E>M`: `[M,T,E]` gives thirds, but the four rotations of
+`[M,M,T,E]` settle `E,E,M,T`, so adding M lowers M to `1/4`. That reversal
+requires genuinely different forecast and counterplay.
+
+Recommend **A with B as the qualified artifact-identity fallback**. A gives
+distinct Relic laws one learnable underlying order and best contains the
+complexity already introduced by A4/A5. Fire B only if every honest bounded
+shared grammar flattens the best Relic identities, creates one universal
+solved calculus, or survives only through hidden custom dispatch—and at least
+two local dialects remain compactly teachable, causally forecastable,
+non-token, non-dominated equal-ceiling sidegrades without a complexity premium
+or novice trap. RL/self-play maps and attacks policy surfaces; human testing
+retains authority over fun, trust, explanation, and team coordination.
+
+A6 chooses no exact operators, family incidence, rankings, weights, odds,
+disclosure UI, policy timing, lineage, persistence, or implementation. A/B
+exhaust the canonical player-semantic quotient: a shared core plus lawful
+expressions is A; one material semantic extension outside it is already B.
+Any answer opens A7 at `Phi_SR = 19`.
+
+The full gear/progression mockup refresh remains an SR-12 closeout obligation
+in `docs/design/endless-build-system-map.svg`; do not update it piecemeal while
+the Relic contract still moves.
+
 ## 2026-09-30 neutral and sensitive laws coexist; stochastic support is next
+
+**Superseded for navigation by the section above.** Its A5 card and
+`Phi_SR = 21` checkpoint predate the selected C answer and A6 adjudication.
 
 Zanzagar selected **RCS-04A4-C with RCS-04A4-A as the qualified clarity/equal-
 ceiling/anti-farming fallback**. The canonical automatic collision-law catalog
@@ -13440,7 +13527,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 19:52 UTC — Genuine stochastic support is next](docs/handoffs/2026-09-30-1952--relic-stochastic-support-next.md)**
+[2026-09-30 20:26 UTC — Transferable collision grammar is next](docs/handoffs/2026-09-30-2026--relic-collision-grammar-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

@@ -28896,7 +28896,14 @@ fails a declared balance or comprehension threshold, the explicit reopening
 rule applies. This differs from A3X, whose complete legal-action signatures
 change available control and authority grammar directly.
 
-### RCS-04A5 — stochastic support across complete automatic collision laws — active owner choice
+### RCS-04A5 — stochastic support across complete automatic collision laws — C selected with A fallback
+
+Zanzagar selected **C, with A as the qualified policy-mastery/multiplayer-
+trust/Rite-and-return fallback**. Deterministic-only and stochastic-capable
+complete automatic laws therefore coexist as stable canonical law/version
+identities. C does not promise all four A4 sensitivity × A5 variance cells,
+does not grant either family scalar compensation, and does not make
+randomness itself an expression of *Achintya Bheda Abheda*.
 
 Retain nonempty `W_v^auto` from A4. For each `w∈W_v^auto`, let
 `O_w^auto` be its nonempty domain of reachable **automatic collision
@@ -28942,18 +28949,17 @@ different target. RCS-16 later owns atomic fault repair. This row makes no
 claim that a whole-battle Rematch must repeat the same outcome; EP-A02 still
 owns public RNG, seed and retry policy.
 
-Selected A4-C and any A5 answer classify the same whole laws along two axes,
-but they do not guarantee every cross-product cell. If A5-C is selected, the
-catalog could place deterministic laws in the neutral class and stochastic
-laws in the sensitive class, reverse that placement, or contain a richer
+Selected A4-C and A5-C classify the same whole laws along two axes, but they
+do not guarantee every cross-product cell. The catalog may place deterministic
+laws in the neutral class and stochastic laws in the sensitive class, reverse
+that placement, or contain a richer
 mixture. Requiring players to change variance posture while holding
 sensitivity class fixed would be a stronger four-cell content promise and
 needs an explicit later amendment. Exact law placement remains AUTHOR/SPEC;
 RCS-02 must disclose each completed law's behavior, while RCS-17/RCS-18 test
 the resulting build, policy, fairness, robustness, and comprehension surface.
 
-Recommend **C, with A as the qualified policy-mastery/multiplayer-trust/Rite-
-and-return fallback**. C survives only if each required family supplies a
+Selected C survives only if each required family supplies a
 reachable, legible, non-token, non-dominated build or policy purpose; the
 stochastic identity materially changes at least one truthful legal play or
 build policy; both families retain strict optimized niches at equal optimized
@@ -28982,16 +28988,86 @@ exists.
 
 A5 selects no exact odds, probability response curve, entropy source, seed
 visibility, correlation among simultaneous occurrences, compensation, payoff,
-rarity, catalog placement, or implementation. A6 owns catalog-wide versus
-definition/version-local kernel grammar; A7 owns policy-binding timing;
+rarity, catalog placement, or implementation. A6 owns one transferable
+catalog-wide player-semantic grammar versus materially irreducible law/version-
+local causal explanation and counterplay calculi; A7 owns policy-binding timing;
 RCS-04B owns committed lineage identity; RCS-02/SR-10 own disclosure; and
 EP-A02/RCS-15/RCS-16 own retry, persistence, migration, idempotence, and fault
-repair. Every A/B/C answer moves A5 to `DIR-SELECTED` and opens A6 without
-adding or pruning a registered row. The register would then contain **19
+repair. C moves A5 to `DIR-SELECTED` and opens A6 without adding or pruning a
+registered row. The register now contains **19
 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A6, 61 `PRUNED`, 93 `DIR-SELECTED`, 5
 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`**. A letter selects
 worksheet direction only. The authoritative decision record remains
 unchanged.
+
+Three bounded read-only named-claim audits then attacked whether A6 is a real
+product decision or only code factoring. Two found a repairable owner choice;
+one showed that arbitrary functions `κ_w` can always be curried into one
+dispatcher `K(w,o)`, making the old “global resolver versus local kernels”
+wording vacuous. A neutral adjudication upheld A6 only after quotienting out
+implementation and defining the boundary through transferable player-facing
+semantics. One function, many functions, tables, callbacks, interpreters, and
+storage layout cannot decide A6.
+
+### RCS-04A6 — transferable collision-resolution grammar across complete automatic laws — active owner choice
+
+Let an admissible resolver grammar `Γ` be a finite, versioned, bounded player-
+facing algebra with typed semantic inputs, law-invariant operator meanings, a
+fixed evaluation/composition order, truthful normalization and certain/draw
+semantics, and counterfactual invariants that players can use to forecast and
+counterplay results. A law may bind disclosed parameters, omit operators, and
+select already-declared modes. It may not call a `CUSTOM` operation, interpret
+arbitrary law programs or opaque tables, dispatch on law/version identity, or
+give one nominal mode unrelated law-specific meanings.
+
+| Choice | Player-semantic scope | Gameplay and proof consequence | Concrete matched example |
+| --- | --- | --- | --- |
+| **A — one transferable catalog-wide grammar** | Every `w∈W_v^auto` has a bounded expression in one admissible `Γ`. Learning a new law requires learning its disclosed recipe and parameters, not a new operator meaning, composition order, normalization rule, or causal counterplay calculus. At least one nontrivial prediction or counterplay invariant beyond “one target commits once” must transfer across every law family. | **Recommended, with B as the qualified artifact-identity fallback.** A lets Stone and Veil laws remain distinct while their causal language transfers, lowering multiplayer explanation and validation burden. The danger is a homogenized catalog or one universal solved exploit. One global function proves nothing if it secretly switches on law ID. | Both **Stone of Two Names** and **Veil of Many Echoes** use `project typed evidence → add nonnegative target support → normalize → certain argmax or committed draw`. Stone can be neutral and deterministic while Veil is sensitive and stochastic. Their shared counterfactual is that adding lawful positive support for one target cannot reduce that target's probability; a neutral law may leave it unchanged. |
+| **B — materially irreducible law/version-local grammar families** | At least two reachable, non-token law/version families require different causal explanation or counterplay calculi. Every supposed common encoding would need a law-conditioned/custom branch, change an operator's meaning/order/normalization, or collapse to vacuous “inputs produce one target” plumbing. Several laws may still honestly share one family; B does not require every law to be unique. | B makes *how* a Relic judges competing becomings part of artifact temperament and can prevent one universal solution. It also creates multiple prediction dialects, a larger teaching and validation surface, and more room for opaque premiums, traps, and Rite regret. Each required family needs a matched intervention demonstrating materially different rational counterplay. | Stone uses the support grammar above. Veil instead uses a disclosed random-rotation cyclic duel, `M>T`, `T>E`, `E>M`. `[M,T,E]` gives each target `1/3`, but the four rotations of `[M,M,T,E]` settle `E,E,M,T`: adding an M contributor lowers M to `1/4` and raises E to `1/2`. Players must reason about cyclic order rather than monotone support. |
+
+A/B are exhaustive after player-semantic equivalence is made canonical. A
+shared core plus an extension is A when the extension is a lawful expression
+inside `Γ`, and B when it changes the explanation or counterplay calculus.
+“Some laws share one grammar and another does not,” two families, and many
+families are all B. Exact operators, family count above the minimum, family
+membership, recipes, rankings, weights, probabilities, and UI expression are
+AUTHOR/SPEC/TUNE rather than new owner cards.
+
+Recommend **A, with B as the qualified artifact-identity fallback**. A most
+cleanly expresses one underlying order through genuinely differentiated Relic
+laws: unity does not erase difference, and difference does not require an
+unrelated language for every artifact. The direct *Achintya Bheda Abheda* fit
+still occurs in settlement, where Soul intention, contributor histories, and
+immutable Relic law remain distinct and jointly operative; software reuse or
+grammar uniformity is not itself the ideal.
+
+Fire B only if every honest bounded shared grammar flattens the best Relic
+identities, creates a universal solved calculus, or survives only through
+hidden custom dispatch—and at least two local dialects remain compactly
+teachable, causally forecastable, non-token, and non-dominated at equal
+optimized Legendary ceilings. No complexity premium is allowed. Fire neither
+option as written if A needs an escape hatch or B devolves into “trust the
+preview,” teammate opacity, seed/callback shopping, cheap cause farming,
+unreliable paid Rites or D5 returns, or an unbounded validation/migration
+surface.
+
+Validation must hold fixed A4/A5 class membership and compare matched legal
+interventions; prove total target-only settlement and one committed
+realization; attack contributor inflation, ally steering, replay/redraw
+shopping, Rite/D5 reliability, and family-specific hard counters; and combine
+exact analysis where tractable, seeded simulation, solver/RL or self-play over
+held-out builds/formats/opponents, and human teach-back, forecast,
+coordination, and post-result explanation. RL maps and stress-tests policy; it
+does not decide whether one or several causal languages are fun or trustworthy.
+
+A6 does not promise every A4×A5 class inside each grammar family, decide exact
+law incidence, change participant authority, or choose policy timing,
+disclosure, lineage, persistence, or implementation. Every A/B answer moves
+A6 to `DIR-SELECTED` and opens applicable A7 without adding or pruning a row.
+The register would then contain **18 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A7, 61
+`PRUNED`, 94 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 19`**. A letter selects worksheet direction only. The authoritative
+decision record remains unchanged.
 
 ## Session protocol and evidence
 

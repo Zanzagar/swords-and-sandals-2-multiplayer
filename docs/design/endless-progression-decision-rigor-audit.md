@@ -12490,3 +12490,110 @@ persistence/fault behavior. A4-C moves A4 to `DIR-SELECTED` and A5 to
 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A5, 61 `PRUNED`, 92 `DIR-SELECTED`, 5
 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`**. Every A5 answer would
 open A6 at `Phi_SR = 20`. The authoritative decision record remains unchanged.
+
+### RCS-04A5 disposition and transferable-kernel-grammar audit — 2026-09-30
+
+Zanzagar selected **RCS-04A5-C with RCS-04A5-A as the qualified policy-
+mastery/multiplayer-trust/Rite-and-return fallback**. Thus
+`∅⊊G_v⊊W_v^auto`: at least one canonical complete automatic law is
+deterministic over its entire reachable domain, and at least one distinct law
+has a fixed reachable occurrence with a nondegenerate target distribution.
+Each law/version keeps one classification. Neither class receives scalar
+compensation, and C does not force all four A4 sensitivity × A5 variance cells.
+
+The selected direction remains conditional on two viable, legible, non-token,
+non-dominated sidegrade families at equal optimized Legendary ceilings;
+stochasticity changing truthful build or play policy; forecastable and
+attributable risk; one committed realization per occurrence; and matched
+analytic, seeded-simulation, solver/RL, and human proof of robustness,
+fairness, comprehension, and coordination. A fires if chance is spectacle,
+risk cannot guide hedging, cause-sensitive odds reward farming, redraw
+shopping survives, teammate risk is opaque, paid M Rites or practical D5
+returns become unreliable, or a stochastic premium/deterministic novice trap
+survives. A5-B remains a universal escalation, not the fallback. Randomness
+is not itself *Achintya Bheda Abheda*.
+
+Three bounded read-only audits then attacked A6 from distinct questions:
+atomic topology, gameplay consequence, and semantic observability. Two found
+that a repaired player-semantic A/B card survives. The semantic auditor found
+the old shorthand broken: arbitrary complete kernels `κ_w` can always be
+curried into one dispatcher `K(w,o)=κ_w(o)`, and any family can be relabeled a
+single “grammar” if opaque law-specific callbacks or tables count. Under that
+reading A6 is only representation and would violate the master index's §3.2
+anti-recursion rule.
+
+A neutral read-only adjudicator tested that named disagreement and returned
+**KEEP A6 as a binary OWNER card, but quotient out implementation**. A6 is not
+one function versus many, shared helpers versus modules, data versus code, or
+an interpreter versus callbacks. Its admissible boundary is whether truthful
+player reasoning transfers.
+
+Let an admissible `Γ` be a finite, versioned, bounded player-facing algebra
+containing typed semantic inputs; law-invariant operator meanings; a fixed
+evaluation/composition order; truthful normalization and certain/draw
+semantics; and counterfactual invariants players can use for forecast and
+counterplay. A law may bind disclosed parameters or omit operators. It may not
+call a custom operation, interpret arbitrary programs or opaque tables,
+dispatch on law/version identity, or give a nominal mode unrelated law-local
+meaning.
+
+The exhaustive quotient is:
+
+1. **A — one transferable catalog-wide grammar.** Every
+   `w∈W_v^auto` is a bounded expression in one admissible `Γ`. A new law may
+   require learning its recipe and parameters but not a new operator meaning,
+   evaluation order, normalization model, or causal counterplay calculus. At
+   least one nontrivial prediction/counterplay invariant beyond inherited
+   one-target atomic settlement transfers across every law family.
+2. **B — materially irreducible law/version-local grammar families.** At
+   least two reachable, non-token law families require different causal
+   explanation or counterplay calculi. Any purported common encoding needs a
+   law-conditioned/custom branch, changes an operator's meaning/order/
+   normalization, or collapses to vacuous input-to-target plumbing. Each
+   required family needs a matched intervention showing materially different
+   rational counterplay.
+
+This topology is exhaustive. A shared core with declared expressions is A; a
+player-semantic extension outside that grammar is B. Some laws sharing a
+family while another does not, two families, and many families are all B.
+Exact grammar operators, counts above the minimum, family incidence, recipes,
+weights, rankings, probabilities, and explanation UI remain AUTHOR/SPEC/TUNE.
+A5-C already forces at least two complete laws, so neither A6 option forces an
+additional law or a four-cell A4×A5 catalog.
+
+The matched countermodel holds Stone and Veil identities and their A4/A5
+classes fixed. Under A, both use `project typed evidence → accumulate
+nonnegative target support → normalize → certain argmax or committed draw`.
+Adding positive support for a target cannot reduce its probability, while a
+neutral law may ignore the added contributor. Under B, Stone retains that
+calculus while Veil uses a disclosed random-rotation cyclic duel with `M>T`,
+`T>E`, and `E>M`. `[M,T,E]` gives each target `1/3`; the four rotations of
+`[M,M,T,E]` settle `E,E,M,T`, so adding M lowers M to `1/4` and raises E to
+`1/2`. The legal intervention is the same, but truthful forecast and rational
+counterplay differ. A generic switch that executes both is the forbidden
+representation escape.
+
+Recommend **A, with B as the qualified artifact-identity fallback**. A gives
+the already-selected neutral/sensitive and deterministic/stochastic identities
+a transferable causal language, reducing relearning, teammate opacity, and
+validation burden while allowing genuinely different recipes. It also gives a
+clean unity-through-difference expression, but grammar unity is not itself the
+standing ideal; the direct fit remains Soul intention, contributor histories,
+and immutable Relic judgment staying distinct and jointly operative in one
+settlement.
+
+Fire B only if every honest bounded shared grammar flattens the strongest
+Relic identities, creates a universal solved calculus, or works only through
+hidden custom dispatch, and at least two local dialects remain compactly
+teachable, causally forecastable, non-token, non-dominated equal-ceiling
+sidegrades without a complexity premium, novice trap, Rite/D5 unreliability,
+seed/callback shopping, cheap cause farming, teammate opacity, or unbounded
+validation/migration burden. RL and self-play map and attack the policy
+surface; human tests retain authority over fun, trust, explanation, and
+coordination.
+
+A5-C moves A5 to `DIR-SELECTED` and A6 to `OWNER-OPEN` without adding,
+pruning, or reclassifying a row. The register is **181 rows: 19 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A6, 61 `PRUNED`, 93 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`**. Any A6 answer would open A7 at
+`Phi_SR = 19`. The authoritative decision record remains unchanged.
