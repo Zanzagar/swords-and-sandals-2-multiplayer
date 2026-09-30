@@ -11454,3 +11454,59 @@ The amendment raises the register from 156 to 157 rows. It now contains **19
 at 18. E2-C opens E2C at 19; either orientation then opens RCS-04A at 18. The
 old 247/243 path count is superseded. The authoritative decision record
 remains unchanged.
+
+### RCS-03E2 disposition and E2C orientation audit — 2026-09-29
+
+Zanzagar selected **E2-C with E2-A as the qualified production fallback**.
+The active participant-contingent P and Z causes therefore use opposite,
+cause-uniform approval timings. Definition, dialect, target, favorability,
+context, owner, Relic instance, and individual opportunity cannot vary timing
+within a cause. E2-A is armed and unfired: it may replace C only if both
+orientations or the two-grammar system fail while all-advance binding remains
+materially strategic rather than one dominant policy, forgotten default, or
+opaque loadout chore.
+
+E2C is an atomic binary orientation choice. P/Z/X/M opportunity identities are
+already partitioned by direct semantic cause, and the active participant
+domain is exactly the disjoint union of P and Z. E2-C fixes the live set to
+exactly one whole cause. Consequently only two worlds remain: P live with Z
+advance-bound, or P advance-bound with Z live. A target-, definition-, or
+context-specific timing switch would violate selected E2-C and requires an
+owner-visible amendment rather than another E2C option.
+
+Recommend **E2C-A, P live and Z advance-bound**. Universal P support gives
+every transforming definition at least one reachable direct-live assent
+relationship. Z is a nonempty proper both-dialect subset; making only Z live
+would concentrate reactive authority in that subset and create a potential
+agency-premium class. Advance-bound Z also prevents the actual ledger-bearing
+empty settlement from becoming an exact-proposal audition: the absence and
+all native consequences remain final, and an earlier material disposition
+governs the later proposal. The standing-ideal fit is direct locally at P,
+partial across time at Z, and merely aggregate across the two grammars.
+
+The recommendation remains guarded. P includes nonempty final substitutes as
+well as original receipts, so P-live does **not** eliminate every failure-
+associated or downside-shaped live proposal. Exact P proposals may still be
+unwanted, while a Z Mourning proposal may be valuable. E2C-A therefore retains
+universal prompt, favorable-target filtering, and cause-route-shopping risk,
+plus painful earlier Z commitments after hard-to-avoid or teammate-influenced
+absence. E2C-B instead gives live protection after actual absence and removes
+ubiquitous positive-result prompts, but enables Z failure audition and gives
+only the proper Z subset direct live authority. These are RCS-17/18 evaluation
+surfaces, not proof that either orientation dominates universally.
+
+No further E2C child passes admission. RCS-02 retains the exact information
+packet, default, timeout, communication, and unavailable-custodian recovery;
+RCS-13 retains binding and rebinding horizons; RCS-04A retains ordering and
+settlement among independently approved colliding proposals. Live capability
+does not authorize inspection of a rival proposal's later approval or collision
+result. Selected D5-B still requires at least one real compatible return
+history per transforming definition; if timing removes every such witness,
+D5 reopens rather than surviving by label.
+
+E2 moves to `DIR-SELECTED` and E2C becomes the sole `OWNER-OPEN` row. The
+157-row register contains **18 `SCREEN`, 1 `OWNER-OPEN` at E2C, 51 `PRUNED`,
+80 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**.
+Either E2C orientation then opens RCS-04A with **17 `SCREEN`, 1 `OWNER-OPEN`,
+51 `PRUNED`, 81 `DIR-SELECTED`, and `Phi_SR = 18`**. The authoritative
+decision record remains unchanged.

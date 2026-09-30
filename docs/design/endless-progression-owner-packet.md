@@ -437,11 +437,11 @@ proposal receives material custodian approval authority without letting assent
 undo the absence. E1ZA/E1ZA1 prune. Zanzagar then selected RCS-03E1X-A with
 E1X-B as the qualified cause-local agency fallback: every independently lived-
 event X proposal follows fixed law, while the event and all native consequences
-remain final. E1XA/E1XA1 prune. **RCS-03E2 is now the sole owner-facing choice
-under SR-04:** whether the active participant-contingent P/Z approvals are all
-advance-bound, all live-capable, or use opposite cause-uniform timings. A
-conditional E2C card resolves the two orientations only under coexistence. The
-current register has 157 rows and `Phi_SR = 20`.
+remain final. E1XA/E1XA1 prune. Zanzagar then selected RCS-03E2-C with E2-A
+as the qualified production fallback: participant-contingent P and Z approvals
+use opposite cause-uniform timings. **RCS-03E2C is now the sole owner-facing
+choice under SR-04:** whether P is live and Z advance-bound or P is advance-
+bound and Z live. The current register has 157 rows and `Phi_SR = 19`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -27625,7 +27625,7 @@ The authoritative decision record remains unchanged.
 > count is superseded rather than silently carried forward. No selected source,
 > event, result, proposal, assignment, or authoritative-record text changes.
 
-### RCS-03E2 — participant-approval timing — active owner choice
+### RCS-03E2 — participant-approval timing — C selected with A fallback
 
 On the active E1-C/E1Z-B/E1X-A branch, let
 `O^{part}_v = O^P_v union O^Z_v` be the nonempty set of proposal opportunities
@@ -27687,6 +27687,74 @@ prunes and RCS-04A opens with **17 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A, 52
 **18 `SCREEN`, 1 `OWNER-OPEN` at E2C, 51 `PRUNED`, 80 `DIR-SELECTED`, and
 `Phi_SR = 19`**. Closing E2C opens RCS-04A at `Phi_SR = 18`. The
 authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-09-29:** **C, P and Z use
+opposite cause-uniform participant-approval timings, with E2-A as the
+qualified production fallback.** Thus `L_v` is exactly one of `O^P_v` and
+`O^Z_v`. Every P proposal uses one timing and every Z proposal the other. No
+definition, dialect, target, favorability, context, owner, Relic instance, or
+individual opportunity may change timing within either cause.
+
+E2-C selects coexistence but not its orientation. E2C remains responsible for
+choosing which cause receives live authority; catalog authoring cannot supply
+that answer. E2-A is armed and unfired. It may replace C only if both E2C
+orientations or the two-grammar system fail through unacceptable prompts,
+stalls, option value, cause-route shopping, unavailable-custodian burden, or
+comprehension cost, while all-advance approval remains materially strategic.
+If advance bindings collapse into one dominant disposition, a forgotten
+default, or opaque loadout work, E2-A is not a valid fallback. A cause-local or
+definition-local failure instead reopens the applicable timing decision or
+requires an owner-visible amendment; it does not silently vary timing in the
+catalog.
+
+E2 moves to `DIR-SELECTED`; E2C becomes the sole `OWNER-OPEN` row. The
+157-row register now contains **18 `SCREEN`, 1 `OWNER-OPEN` at E2C, 51
+`PRUNED`, 80 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 19`**. The authoritative decision record remains unchanged.
+
+### RCS-03E2C — P-versus-Z timing orientation — active owner choice
+
+Retain E2's live set `L_v`, universal P opportunity set `O^P_v`, and nonempty
+proper both-dialect Z opportunity set `O^Z_v`. E2-C has already fixed that
+exactly one whole cause is live-capable and the other is advance-bound. E2C
+chooses the remaining orientation:
+
+| Choice | Cause-uniform orientation | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — P live; Z advance-bound** | `L_v=O^P_v`. After each exact positive-result P proposal is identified, its custodian coordinate remains materially operative until the live approval cut. Every Z disposition is irrevocably bound before that empty-settlement opportunity's specific facts are available. | **Recommended.** At positive manifestation, the result, continuing Relic, proposed assignment, and distinct Soul/custodian will meet at one operative boundary—a direct local standing-ideal fit available to every transforming definition through universal P support. Z carries materially different prior will into later actual absence, a partial across-time fit, without making actual empty-settlement absence an exact-proposal audition. A still risks universal P prompt load, favorable-target filtering, cause-route shopping, and a painful earlier Z commitment after teammate-influenced or hard-to-avoid absence. | Ashen positively settles and identifies `TEMPERED PROPOSED`; before collision settlement, changing only Mara's still-live P coordinate changes whether it advances. Later, Hollow Ashen actually settles `{}` and identifies `MOURNING PROPOSED`; the applicable earlier Z binding governs it with no new grant or veto, while the lost receipt and every native absence consequence remain final. |
+| **B — P advance-bound; Z live** | `L_v=O^Z_v`. Every P disposition is irrevocably bound before its exact positive-settlement proposal facts are available. After an exact Z proposal caused by actual empty settlement is identified, its custodian coordinate remains materially operative until the live approval cut. | B places direct local Soul/Relic participation at the emotionally charged absence boundary and lets a custodian refuse an unwanted failure-shaped scar after the loss is real. P's prior commitment participates partially across time and removes ubiquitous positive-result prompts. But live assent then exists only in the proper Z subset rather than every definition; Z-capable Relics gain a reactive safety surface, and players may seek or tolerate failure, inspect whatever proposal facts later RCS-02 disclosure exposes, accept favorable Mourning, and reject the rest. Universal P approval also becomes advance-policy work. | Ashen's positive `TEMPERED PROPOSED` follows Mara's earlier P binding without a live confirmation. Hollow Ashen then actually settles `{}` and identifies `MOURNING PROPOSED`; before collision settlement, changing only Mara's still-live Z coordinate changes whether it advances. The empty settlement, lost receipt, and recurrence consequences remain authoritative even when she withholds. |
+
+A/B are exhaustive after selected E2-C because `L_v` must be exactly one of
+the two disjoint active cause sets. Neither option chooses the exact advance
+commitment boundary, information packet, policy vocabulary, default, timeout,
+communication order, unavailable-custodian recovery, or collision winner.
+RCS-02 retains information/default/recovery semantics, RCS-13 retains bind and
+rebind horizons, and RCS-04A retains settlement among independently approved
+colliding proposals. A live decision may use only its later-defined lawful
+proposal-local information; it cannot inspect another proposal's later
+approval disposition or collision result.
+
+Recommend **E2C-A: P live and Z advance-bound**. Universal P support gives
+every transforming definition one direct live assent relationship, while
+advance Z preserves actual absence as something borne rather than an empty-
+settlement proposal lottery. This is a gameplay recommendation, not a claim
+that catalog-level coexistence strengthens the standing ideal: A's P relationship is direct,
+its Z relationship is partial across time, and their coexistence is aggregate.
+
+Reject A if live P becomes a universal prompt tax or favorable-target filter,
+or if advance Z becomes coercive, dominant-policy bureaucracy rather than
+material precommitment. B is the honest mirror, not a soft variant: it trades
+universal direct assent for reactive protection after actual absence and
+accepts the accompanying failure-audition and Z-premium risks. If neither
+orientation survives RCS-17/18's comprehension, fun, non-dominance, solver/RL,
+and exploit gates, evaluate the already armed E2-A fallback under its stated
+materiality condition rather than inventing within-cause exceptions.
+
+Either answer moves E2C to `DIR-SELECTED` and opens RCS-04A as the sole
+`OWNER-OPEN` row. The register would then contain **17 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A, 51 `PRUNED`, 81 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 18`**. The authoritative decision record
+remains unchanged.
 
 ## Session protocol and evidence
 

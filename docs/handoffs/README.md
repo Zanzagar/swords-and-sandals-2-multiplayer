@@ -148,6 +148,7 @@ single `LATEST` pointer is authoritative across all three tables.
 
 | Handoff | Session | One line |
 | --- | --- | --- |
+| [P-versus-Z approval-timing orientation is next](2026-09-30-0146--relic-timing-orientation-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | E2-C fixes opposite cause-uniform P/Z participant timings with E2-A as fallback; a targeted audit upholds the binary E2C orientation after narrowing an overbroad claim about failure audition. |
 | [participant approval timing is next](2026-09-29-2110--relic-participant-timing-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | E1X-A makes lived-event proposals deterministic with E1X-B as fallback; a read-only audit breaks generic E2 coexistence and adds conditional E2C so its two P/Z timing orientations remain explicit. |
 | [lived-event proposal approval is next](2026-09-29-1956--relic-lived-event-approval-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | E1Z-B makes every empty-settlement proposal participant-contingent with E1Z-A as fallback; a read-only audit narrows the next E1X A/B/C card and exposes self-authored-bind/suffered-ask as an explicit amendment path rather than hidden authoring. |
 | [actual empty-settlement proposal approval is next](2026-09-29-1646--relic-empty-settlement-approval-next.md) | `01a074ac-c9e7-7303-8538-c8e392199ac2` | E1-C makes P ask and initiated M use system law with B/A fallbacks; two audits replace hidden binary Z/X uniformity with finite definition-class prevalence/incidence trees, leaving E1Z as the sole card. |

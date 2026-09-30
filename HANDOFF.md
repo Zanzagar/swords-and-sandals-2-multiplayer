@@ -1,5 +1,60 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-29 opposite cause timings selected; P/Z orientation is next
+
+Zanzagar selected `RCS-03E2-C` with `RCS-03E2-A` as the qualified
+production fallback. Participant-contingent P and Z transformation proposals
+now use opposite cause-uniform approval timings. No definition, dialect,
+target, favorability, context, owner, Relic instance, or individual
+opportunity may change timing within either cause. E2-C does not choose which
+cause is live; E2C owns that remaining orientation.
+
+E2-A is armed and unfired. It may replace C only if both orientations or the
+two-grammar system fail through unacceptable prompts, stalls, option value,
+cause-route shopping, unavailable-custodian burden, or comprehension cost,
+while all-advance binding remains materially strategic. If advance binding
+collapses into one dominant policy, a forgotten default, or opaque loadout
+work, A is not a valid fallback. Cause-local or definition-local failure
+reopens the applicable timing decision or requires an owner-visible amendment.
+
+The 157-row register now has **18 `SCREEN`, 1 `OWNER-OPEN` at E2C, 51
+`PRUNED`, 80 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 19`**. The authoritative decision record remains byte-unchanged.
+
+`RCS-03E2C` now chooses the orientation fixed open by E2-C:
+
+- **A — P live; Z advance-bound. Recommended.** Every exact P proposal
+  retains material custodian authority at the live cut; every Z disposition
+  was irrevocably bound before that empty-settlement opportunity's specific
+  facts were available. Universal P support gives every transforming
+  definition a direct live assent relationship. Z carries earlier will into
+  later actual absence without making that ledger-bearing empty settlement an
+  exact-proposal audition. Risks are universal P prompt and favorable-target
+  filtering, cause-route shopping, and painful earlier Z commitments after
+  hard-to-avoid or teammate-influenced absence.
+- **B — P advance-bound; Z live.** Every P disposition was irrevocably bound
+  before its exact opportunity facts; every exact Z proposal retains material
+  custodian authority at the live cut. This provides reactive protection after
+  actual absence and removes ubiquitous P prompts, but live authority exists
+  only in the proper Z subset. It creates a potential Z-premium class and lets
+  players seek or tolerate `{}`, inspect whatever RCS-02 later discloses,
+  accept favorable Mourning, and reject the rest.
+
+Recommend **E2C-A, P-live/Z-advance**. Its direct local P relationship is
+available to every transforming definition; its Z relationship is partial
+across time, and the catalog coexistence is aggregate rather than a stronger
+theological claim. P includes nonempty final substitutes, so A does not remove
+every failure-associated live proposal; its narrower benefit is preventing
+live audition of Z's actual empty-settlement proposal.
+
+E2C selects no exact information packet, default, timeout, communication or
+unavailable-custodian recovery, advance bind/rebind horizon, ordering among
+live decisions, or collision winner. RCS-02, RCS-13, and RCS-04A retain those
+questions. A live coordinate may not inspect another proposal's later
+approval or collision result. RCS-17/18 retain comprehension, fun,
+non-dominance, solver/RL, and exploit gates. Either answer opens RCS-04A at
+`Phi_SR = 18`. Ask only for E2C A, B, or an explicit replacement.
+
 ## 2026-09-29 lived events bind; participant timing is next
 
 Zanzagar selected `RCS-03E1X-A` with `RCS-03E1X-B` as the qualified
@@ -12538,7 +12593,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-29 21:10 UTC — participant approval timing is next](docs/handoffs/2026-09-29-2110--relic-participant-timing-next.md)**
+[2026-09-30 01:46 UTC — P-versus-Z timing orientation is next](docs/handoffs/2026-09-30-0146--relic-timing-orientation-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
