@@ -521,10 +521,13 @@ advance/live coexistence remains armed only if prospective doctrine fails its
 playability gates. A named-claim audit then broke the old aggregate A3X card:
 its paired/native branches hid which major dialect actually offered intrinsic,
 policy, or direct play. A fifty-first prerequisite amendment replaces it with
-three exact-signature incidence rows. **RCS-04A3XI is now the sole owner-
-facing choice under SR-04:** whether pure participant-intrinsic Relics exist
-in both transformation dialects, the state dialect only, or the boundary
-dialect only. The register is now 183 rows and `Phi_SR = 20`.
+three exact-signature incidence rows. **RCS-04A3XI was the sole owner-facing
+choice under SR-04.** Zanzagar selected **RCS-04A3XI-A with RCS-04A3XI-B
+as the qualified clarity fallback**: pure participant-intrinsic Relics exist
+in both transformation dialects. **RCS-04A3XP is now the sole owner-facing
+choice under SR-04:** whether the complete advance-bound bundled exact-`{P}`
+signature exists in both transformation dialects, the state dialect only, or
+the boundary dialect only. The register remains 183 rows and `Phi_SR = 19`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -29224,7 +29227,7 @@ coexistence. Replacing one row with three raises the register from 181 to
 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`**.
 The authoritative decision record remains unchanged.
 
-### RCS-04A3XI — pure participant-intrinsic signature dialect incidence — active owner choice
+### RCS-04A3XI — pure participant-intrinsic signature dialect incidence — A selected with B fallback
 
 Let `sigma_I` be the canonical complete signature of the selected nonempty
 participant-intrinsic contract class: at every reachable genuine conflict,
@@ -29262,6 +29265,19 @@ an explicit uncanny-boundary replacement, not the fallback: choose it only if
 the thesis that thresholds alone judge for themselves is itself desired and
 demonstrated despite the sharper opacity and caste risk.
 
+**Direction answer — selected by Zanzagar on 2026-09-30:** **A, with B as
+the qualified clarity fallback.** `D_I={state,boundary}`. The release catalog
+must contain at least one honest remembered-condition contract and at least
+one honest remembered-attunement contract whose complete participant-control
+signature is pure `{I}`. This requires support, not equal counts, mirrored
+twins, shared targets, shared automatic laws, or cross-dialect cohorts.
+
+B fires only if boundary pure-`{I}` conflict remains materially opaque,
+creates timing/preview arbitrage, or causes arbitrary paid-Rite regret after
+the best disclosure, while state pure-`{I}` laws remain forecastable,
+desirable, non-token equal-ceiling sidegrades. C remains an affirmative
+uncanny-boundary replacement, not the fallback.
+
 Every required witness must survive matched catalog comparison, solver/RL or
 self-play, and human testing without becoming a novice trap, opaque premium,
 or compensated low-input option. Test pick and win rates, counter access,
@@ -29273,16 +29289,75 @@ exact counts, or power.
 Any later player-material coordinate introduced by RCS-02, RCS-13, or an
 explicit amendment extends the affected complete signatures and reopens the
 applicable A3XI/A3XP/A3XD incidence rows. A1C-C independently requires the
-union of their selected support sets to contain both dialects. Therefore, if
-A3XI and A3XP later both choose the same one-sided orientation, A3XD cannot
-choose that same one-sided orientation; its available card must be recomputed
-to retain an honest conflict witness in the other dialect.
+union of their selected support sets to contain both dialects. Selected
+A3XI-A already satisfies that coverage floor, so A3XP and A3XD each retain
+all three incidence options; A3XI-A does not force their answers. Firing
+A3XI-B later reopens the downstream map: if A3XP were also state-only, A3XD
+would then have to include boundary support.
 
-Any A/B/C answer moves A3XI to `DIR-SELECTED` and opens A3XP without adding or
-pruning a row. The register would then contain **18 `SCREEN`, 1 `OWNER-OPEN`
-at RCS-04A3XP, 61 `PRUNED`, 96 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 19`**. A letter selects worksheet direction only. The
-authoritative decision record remains unchanged.
+A3XI moves to `DIR-SELECTED` and A3XP opens without adding or pruning a row.
+The register now contains **18 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3XP, 61
+`PRUNED`, 96 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 19`**. A letter selects worksheet direction only. The authoritative
+decision record remains unchanged.
+
+### RCS-04A3XP — advance-bound bundled exact-`{P}` signature dialect incidence — active owner choice
+
+Let `sigma_P` be the complete selected policy-specialist signature. At every
+reachable genuine conflict, policy is its only participant-control form and
+materially changes the complete law; the participant selects one covenant
+whole from a finite, versioned menu of indivisible authored bundled covenants;
+that covenant's collision-policy change is bundled with another meaningful
+participant semantic; and A7-A makes the covenant irrevocable before
+occurrence-specific collision facts become lawfully available to the choice.
+A timeout, unavailable holder, automatic default, or target-named pseudo-
+covenant cannot make an otherwise non-policy contract count as `sigma_P`.
+
+Let `Delta_P` be the nonempty set of definition-pure transformation dialects
+that contain at least one honest `sigma_P` contract. A3XI-A already satisfies
+A1C-C's joint dialect-coverage floor, so exactly three choices remain:
+
+| Choice | Required support | Gameplay, ideal fit, and proof consequence | Concrete example |
+| --- | --- | --- | --- |
+| **A — policy Relics exist in both dialects** | `Delta_P={state,boundary}`. At least one remembered-condition and one remembered-attunement contract use the complete `sigma_P` signature. | **Recommended independent-axis direction, with B as the qualified clarity fallback.** A player can pursue prospective covenant mastery without first accepting one transformation-memory language. State and boundary Relics retain distinct biographies while neither becomes the exclusive “policy class.” The risk is a token paired witness or needless menu duplication; each witness needs its own coherent identity, strict optimized niche, and equal optimized Legendary ceiling outside the shared control signature. Catalog pairing is aggregate, while each advance covenant's Soul/Relic/contributor relation remains partial across time. | Before an encounter, **Oathbound Ashen** binds a whole covenant that couples its `MERCY`/`DEFIANCE` collision priority to one meaningful proof-routing posture. **Covenanted Dreamglass** separately binds a whole covenant coupling its `OATH`/`ECHO` law to an attunement-routing posture. Neither receives a collision-time prompt, and their menus, laws, causes, cadence, and routing need not match. |
+| **B — policy Relics are state-dialect only** | `Delta_P={state}`. At least one remembered-condition contract uses `sigma_P`; no boundary contract may use that complete signature. | **Qualified clarity fallback.** Prospective doctrine governs what a Relic comes to bear, the easier biography to forecast. Boundary Relics remain intrinsic or direct-specialist rather than stacking advance covenant choice onto timing-sensitive attunement. This reduces nested abstraction, but entangles control identity with transformation dialect and may make state the configuration-heavy mastery caste while boundary offers the lower-friction or more immediate play. | Oathbound Ashen binds **Merciful Chorus** or **Defiant Dissonance** before the collision exists. A Dreamglass boundary conflict may judge intrinsically or expose honest live direct choice, but never uses advance bundled policy as its complete signature. |
+| **C — policy Relics are boundary-dialect only** | `Delta_P={boundary}`. At least one remembered-attunement contract uses `sigma_P`; no state contract may use that complete signature. | C makes covenant the distinctive means by which a Soul teaches a Relic **how to listen**. That is a strong affirmative identity, but it concentrates prospective configuration in the timing-sensitive dialect and risks turning boundary Relics into an opaque expert caste while state Relics become intrinsic/direct only. It is not the clarity fallback. | Covenanted Dreamglass binds **Open Chorus** or **Sealed Echo** before an `OATH`/`ECHO` collision exists. An Ashen condition conflict may settle intrinsically or through honest live direct choice, but never through advance bundled policy. |
+
+A/B/C are exhaustive because required `sigma_P` support can occur in state
+only, boundary only, or both definition-pure dialects. “Both” means support,
+not equal counts, mirrored covenant menus, common law sensitivity or variance,
+shared causes, shared routing, or cross-dialect cohorts. Exact identities and
+counts above the minimum remain AUTHOR/SPEC; whole-dialect exclusion does not.
+
+Recommend **A, with B as the qualified clarity fallback**. A keeps
+transformation memory and prospective player doctrine as independently
+choosable build axes and best prevents one dialect from becoming the policy,
+complexity, or expertise caste. It does not follow automatically from the
+standing ideal: paired catalog incidence is aggregate. The local fit remains
+partial across time because the earlier Soul covenant, later distinct
+contributor histories, and immutable Relic law jointly determine settlement.
+
+Fire B only if, after the best one-sentence covenant preview and causal
+forecast, boundary `sigma_P` play remains materially opaque, compounds
+attunement timing into configuration regret or snapshot/route arbitrage, or
+makes paid Rites feel arbitrary, while state `sigma_P` witnesses remain
+forecastable, desirable, non-token equal-ceiling sidegrades. C is an explicit
+“the Soul teaches the threshold how to listen” replacement, not a fallback.
+
+Every required witness must survive matched state/boundary comparison,
+solver/RL or self-play, and human testing for covenant dominance, forecast
+accuracy, configuration regret, Rite/D5 reliability, counter access, teammate
+clarity, pick/win concentration, and token incidence. A3XP does not choose
+exact covenant menus, bind horizon, holder/default/disclosure, automatic-law
+recipes, sensitivity, variance, counts, or power.
+
+Any later player-material coordinate introduced by RCS-02, RCS-13, or an
+explicit amendment extends `sigma_P` and reopens A3XP. Any A/B/C answer moves
+A3XP to `DIR-SELECTED` and opens A3XD without adding or pruning a row. The
+register would then contain **17 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3XD, 61
+`PRUNED`, 97 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 18`**. A letter selects worksheet direction only. The authoritative
+decision record remains unchanged.
 
 ## Session protocol and evidence
 

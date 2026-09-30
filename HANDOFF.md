@@ -1,6 +1,93 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 intrinsic sovereignty is paired; policy dialect incidence is next
+
+Zanzagar selected **RCS-04A3XI-A with RCS-04A3XI-B as the qualified clarity
+fallback**. The release catalog must contain at least one honest pure-`{I}`
+remembered-condition contract and at least one honest pure-`{I}` remembered-
+attunement contract. In either witness, no authored material participant
+coordinate changes the complete law at a genuine conflict. This is support,
+not equal counts, mirrored twins, common targets, common automatic laws, or a
+cross-dialect cohort.
+
+A3XI-B is armed and unfired. It may replace A only if boundary intrinsic
+conflict remains materially opaque, creates timing/preview arbitrage, or
+causes arbitrary paid-Rite regret after the best disclosure, while state
+intrinsic laws remain forecastable, desirable, non-token equal-ceiling
+sidegrades. C remains an affirmative uncanny-boundary replacement, not the
+fallback.
+
+Because A3XI-A itself covers state and boundary, A1C-C's joint-coverage guard
+is already satisfied. It does not force the policy or direct-signature maps;
+RCS-04A3XP and RCS-04A3XD retain all three orientations. A later player-
+material coordinate still extends the affected complete signature and reopens
+its incidence row. If A3XI-B later fires, reopen the downstream map; state-only
+XI plus state-only XP would require XD to include boundary support.
+
+The register is **183 rows: 18 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3XP, 61
+`PRUNED`, 96 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 19`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-04A3XP` asks where the complete selected policy-specialist signature
+exists. `sigma_P` means all of these together:
+
+- policy is the only participant-control form and materially changes the
+  complete law at every reachable genuine conflict;
+- the player selects one covenant whole from a finite, versioned menu of
+  indivisible authored bundled covenants;
+- its collision policy is inseparably bundled with another meaningful
+  participant semantic; and
+- A7-A locks it before occurrence-specific collision facts become lawfully
+  available to that choice, with no post-freeze confirmation or override.
+
+The choices are:
+
+- **A — both state and boundary dialects. Recommended, with B as the
+  qualified clarity fallback.** Prospective covenant mastery remains
+  independent of whether a Relic remembers condition or attunement. Neither
+  dialect becomes the exclusive policy or expert class; paired witnesses must
+  remain mechanically distinct, non-token equal-ceiling sidegrades.
+- **B — state dialect only. Qualified clarity fallback.** Advance covenant
+  play governs what a Relic comes to bear, while timing-sensitive boundary
+  Relics use intrinsic or direct-specialist signatures. This removes one
+  nested abstraction but makes state the configuration-heavy policy caste.
+- **C — boundary dialect only.** Covenant becomes specifically how the Soul
+  teaches a Relic to listen. This is a strong affirmative identity, not the
+  fallback: it concentrates advance configuration in the harder-to-read
+  dialect and carries the sharpest opacity/expert-caste risk.
+
+Concrete A witness: before an encounter, **Oathbound Ashen** binds a whole
+covenant coupling its `MERCY`/`DEFIANCE` law to one meaningful proof-routing
+posture. **Covenanted Dreamglass** separately binds a whole covenant coupling
+its `OATH`/`ECHO` law to an attunement-routing posture. Neither receives a
+collision-time prompt. Their menus, causes, cadence, automatic laws, and
+routing need not match.
+
+Recommend **A with B as the qualified clarity fallback**. A keeps
+transformation memory and prospective player doctrine as independent build
+axes. That paired catalog incidence is aggregate rather than itself a direct
+*Achintya Bheda Abheda* realization; each local covenant remains partial
+across time, with earlier Soul orientation, later distinct contributors, and
+immutable Relic law jointly operative.
+
+Fire B only if boundary `sigma_P` remains materially opaque after the best
+one-sentence preview and causal forecast, compounds attunement timing into
+configuration regret or snapshot/route arbitrage, or makes paid Rites feel
+arbitrary, while state policy witnesses remain forecastable, desirable,
+non-token equal-ceiling sidegrades. C is an explicit “the Soul teaches the
+threshold how to listen” replacement.
+
+Any A3XP answer opens A3XD at `Phi_SR = 18`; do not batch it. RCS-02 retains
+holder/disclosure/default/recovery, RCS-13 retains bind/rebind/lock horizon,
+and A4-A6 retain automatic-law recipes/sensitivity/variance/grammar. The full
+gear/progression SVG update remains an SR-12 closeout obligation after the
+Relic design is complete.
+
 ## 2026-09-30 policy is prospective; intrinsic dialect incidence is next
+
+**Superseded for navigation by the section above.** Its A3XI card and
+`Phi_SR = 20` checkpoint predate the selected A answer.
 
 Zanzagar selected **RCS-04A7-A with RCS-04A7-C as the qualified artifact-
 identity/direct-participation fallback**. Every fixed exact-`{P}` policy
@@ -13707,7 +13794,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 22:32 UTC — Intrinsic-signature dialect incidence is next](docs/handoffs/2026-09-30-2232--relic-intrinsic-dialect-incidence-next.md)**
+[2026-09-30 23:08 UTC — Policy-signature dialect incidence is next](docs/handoffs/2026-09-30-2308--relic-policy-dialect-incidence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

@@ -12824,3 +12824,63 @@ rows: 19 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3XI, 61 `PRUNED`, 95
 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`**.
 Any A3XI answer opens A3XP at `Phi_SR = 19`. The authoritative decision record
 and final-system SVG remain unchanged.
+
+### RCS-04A3XI disposition and policy-signature dialect incidence — 2026-09-30
+
+Zanzagar selected **RCS-04A3XI-A with RCS-04A3XI-B as the qualified clarity
+fallback**. Pure participant-intrinsic contracts therefore have non-token
+support in both transformation dialects: at least one remembered-condition
+and one remembered-attunement contract have complete signature pure `{I}`.
+The selection requires support, not equal counts, mirrored twins, common
+targets, common automatic laws, or cross-dialect cohorts.
+
+B remains armed only if boundary pure-`{I}` conflict stays materially opaque,
+creates timing/preview arbitrage, or causes arbitrary paid-Rite regret after
+the best disclosure, while state pure-`{I}` remains forecastable, desirable,
+non-token, and equal-ceiling. C is an affirmative uncanny-boundary
+replacement, not the fallback. Because selected A already covers both
+dialects, A1C-C's joint-coverage floor is satisfied; A3XP and A3XD retain all
+three incidence choices rather than inheriting a forced orientation. If XI-B
+later fires, reopen the downstream map; state-only XI plus state-only XP would
+require XD to include boundary support.
+
+The next card is A3XP. Its complete `sigma_P` signature means policy is the
+only participant-control form and remains material at every genuine conflict;
+the participant selects one covenant whole from a finite, versioned menu of
+indivisible authored bundled covenants; the selected covenant bundles
+collision policy with another meaningful participant semantic; and A7-A binds
+it before exact collision facts become lawfully available. Timeout,
+unavailable-holder, default, or target-named pseudo-covenant behavior cannot
+make an otherwise non-policy contract count as the signature.
+Its exhaustive dialect-support options are:
+
+1. **A — both dialects:** at least one remembered-condition and one
+   remembered-attunement contract use `sigma_P`;
+2. **B — state only:** policy mastery is reserved to remembered condition;
+   and
+3. **C — boundary only:** covenant mastery is reserved to remembered
+   attunement.
+
+Recommend **A with B as the qualified clarity fallback**. A keeps
+transformation memory and prospective player doctrine independently choosable
+and prevents either dialect from becoming the exclusive policy or expertise
+caste. Paired catalog incidence is aggregate rather than a direct realization
+of the standing ideal; each local advance covenant remains partial across time
+because prior Soul orientation, later distinct contributors, and immutable
+Relic law jointly determine settlement.
+
+Fire B only if boundary `sigma_P` remains materially opaque after the best
+one-sentence covenant preview and causal forecast, compounds attunement timing
+into configuration regret or snapshot/route arbitrage, or makes paid Rites
+feel arbitrary, while state policy witnesses remain forecastable, desirable,
+non-token equal-ceiling sidegrades. C is an affirmative “the Soul teaches the
+threshold how to listen” thesis, not the fallback. Required witnesses must
+survive matched catalog, solver/RL, self-play, and human tests for covenant
+dominance, forecast accuracy, configuration regret, Rite/D5 reliability,
+counter access, teammate clarity, pick/win concentration, and token incidence.
+
+A3XI moves to `DIR-SELECTED` and A3XP to `OWNER-OPEN` without adding or
+pruning a row. The register is **183 rows: 18 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3XP, 61 `PRUNED`, 96 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 19`**. Any A3XP answer opens A3XD at `Phi_SR = 18`.
+The authoritative decision record and final-system SVG remain unchanged.
