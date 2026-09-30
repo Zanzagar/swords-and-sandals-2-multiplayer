@@ -11819,6 +11819,11 @@ explicit catalog authoring under a selected topology rather than implicit
 incidence freedom. The old A3A1/A3A2 marginal rows retire as non-counting
 historical aliases.
 
+> **Superseded at presentation by the fifty-first prerequisite correction
+> below:** the three-way aggregate remains only a derived parent topology. Its
+> non-universal branches hid player-material dialect membership, so the active
+> owner sequence is now RCS-04A3XI, RCS-04A3XP, and RCS-04A3XD.
+
 Removing those two rows and adding seven `I` rows plus A3X changes the register
 from 175 to **181 rows**. After A1C-C it contains **38 `SCREEN`, 1
 `OWNER-OPEN` at RCS-04A3A, 51 `PRUNED`, 84 `DIR-SELECTED`, 5 `DERIVED`, 1
@@ -12722,3 +12727,100 @@ pruning, or reclassifying a row. The register is **181 rows: 18 `SCREEN`, 1
 `OWNER-OPEN` at RCS-04A7, 61 `PRUNED`, 94 `DIR-SELECTED`, 5 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**. Any A7 answer would open A3X at
 `Phi_SR = 18`. The authoritative decision record remains unchanged.
+
+### RCS-04A7 disposition and exact-signature dialect-incidence repair — 2026-09-30
+
+Zanzagar selected **RCS-04A7-A with RCS-04A7-C as the qualified artifact-
+identity/direct-participation fallback**. Every fixed exact-`{P}` policy
+contract is therefore advance-bound: its indivisible whole covenant is
+irrevocable before the current collision's proposal IDs, targets,
+contributors, causes, and frozen-cohort facts become lawfully available to
+that choice. No policy confirmation, veto, override, or covenant change
+remains after maximal cohort `K` freezes. Earlier participant authorship
+remains materially operative and therefore remains `P`, not intrinsic `I`.
+
+A7-C remains armed and unfired. It may replace A only if well-disclosed
+advance policy still becomes a recurrent solved default, forgotten chore,
+emotionally remote choice, or arbitrary source of Rite regret; at least one
+live identity supplies repeatable policy play that cannot honestly be
+represented by direct `D`; and both timing families are stable, one-sentence
+teachable, non-token, non-dominated equal-ceiling sidegrades with no timing or
+complexity compensation. B remains the class-wide escalation. Under selected
+A there is no cohort-frozen/policy-pending state; the live-menu persistence
+rules remain conditional gates on firing C or escalating to B.
+
+One bounded read-only named-claim audit then attacked the registered A3X
+topology before presentation. Its mathematical partition held. For nonempty
+canonical signature set `Σ` and paired subset `Q`, exactly one of `Q=Σ`,
+`Q=∅`, or `∅⊊Q⊊Σ` holds.
+Its classification did not. The claim that exact native membership and
+orientation under the latter two branches were merely AUTHOR/SPEC hid a
+player-material product fork.
+
+The selected branch forces three complete structural signatures:
+
+- `sigma_I`: pure participant-intrinsic `{I}`;
+- `sigma_P`: exact `{P}`, finite authored indivisible bundled covenants, and
+  A7-A advance commitment; and
+- `sigma_D`: exact `{I,D}`, with honest live direct and authored intrinsic
+  opportunities.
+
+Consider two catalogs that both satisfy paired/native coexistence. In the
+first, `sigma_I` is state-native, `sigma_P` is paired, and `sigma_D` is
+boundary-native. In the second, `sigma_I` remains state-native, `sigma_P` is
+boundary-native, and `sigma_D` is paired. The state dialect offers prospective
+policy but no direct signature in the first catalog and direct control but no
+policy signature in the second. Legal actions, commitment information, and a
+major content-family guarantee change. Section 3.1 classifies all three as
+OWNER boundaries; AUTHOR cannot hide the map. The same counterexample applies
+to a fully native topology.
+
+The fifty-first explicit prerequisite amendment therefore retires counted
+RCS-04A3X as a non-counting parent alias and replaces it with three exact-
+signature incidence rows:
+
+1. `RCS-04A3XI` — pure `{I}` support is state-only, boundary-only, or paired;
+2. `RCS-04A3XP` — advance bundled exact-`{P}` support is state-only,
+   boundary-only, or paired; and
+3. `RCS-04A3XD` — exact-`{I,D}` support is state-only, boundary-only, or
+   paired.
+
+These rows expose the complete map without recreating the rejected marginal-
+incidence repair. Each row classifies one **complete** selected signature, not
+one marginal coordinate. Their three answers derive the old aggregate
+topology: all paired means universal pairing, no paired means universal native
+support, and any mixture means paired/native coexistence. A later player-
+material coordinate extends the signatures and explicitly reopens the
+applicable A3XI/A3XP/A3XD rows. A1C-C also requires the three selected support
+sets jointly cover both dialects. If XI and XP choose the same one-sided
+orientation, XD cannot repeat it; the last card must be recomputed around the
+remaining honest boundary.
+
+The first card is A3XI. Let `D_I` be the nonempty subset of the two definition-
+pure dialects containing an honest pure-`{I}` contract. Its exhaustive options
+are:
+
+1. **A — both dialects:** `D_I={state,boundary}`;
+2. **B — state only:** `D_I={state}`; and
+3. **C — boundary only:** `D_I={boundary}`.
+
+Recommend **A with B as the qualified clarity fallback**. A keeps artifact
+self-will independent of transformation dialect and prevents either dialect
+from becoming the always-controllable or low-interruption caste. This is
+neutral/protective or aggregate rather than a direct realization of the
+standing ideal; the direct relationship remains inside a settlement where
+preserved causes and one continuing Relic are distinct and jointly operative.
+
+Fire B only if boundary pure-`{I}` conflicts remain materially opaque, create
+timing/preview arbitrage, or cause arbitrary paid-Rite regret after the best
+disclosure, while state pure-`{I}` laws remain forecastable, desirable,
+non-token equal-ceiling sidegrades. C is an affirmative uncanny-boundary
+replacement, not the fallback. Any paired witnesses must remain distinct in
+their transformation semantics and survive token-witness, dominance,
+comprehension, Rite/D5, solver/RL, and human-play checks.
+
+Replacing one counted row with three raises the register from 181 to **183
+rows: 19 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3XI, 61 `PRUNED`, 95
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`**.
+Any A3XI answer opens A3XP at `Phi_SR = 19`. The authoritative decision record
+and final-system SVG remain unchanged.

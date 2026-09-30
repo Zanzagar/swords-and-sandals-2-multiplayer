@@ -514,11 +514,17 @@ cannot hide per-artifact calculi behind custom operations, opaque law IDs, or
 nominal shared modes. Zanzagar selected **RCS-04A6-A with RCS-04A6-B as the
 qualified artifact-identity fallback**: every complete automatic law uses one
 finite, versioned, transferable player-semantic grammar. Three A7 audits then
-repaired the old timing binary into an exhaustive ternary. **RCS-04A7 is now
-the sole owner-facing choice under SR-04:** whether every policy contract is
-advance-bound, every policy contract is live-capable, or stable advance-bound
-and live-capable contract families coexist. The register remains 181 rows and
-`Phi_SR = 19`.
+repaired the old timing binary into an exhaustive ternary. Zanzagar selected
+**RCS-04A7-A with RCS-04A7-C as the qualified artifact-identity/direct-
+participation fallback**: every policy contract is advance-bound, while stable
+advance/live coexistence remains armed only if prospective doctrine fails its
+playability gates. A named-claim audit then broke the old aggregate A3X card:
+its paired/native branches hid which major dialect actually offered intrinsic,
+policy, or direct play. A fifty-first prerequisite amendment replaces it with
+three exact-signature incidence rows. **RCS-04A3XI is now the sole owner-
+facing choice under SR-04:** whether pure participant-intrinsic Relics exist
+in both transformation dialects, the state dialect only, or the boundary
+dialect only. The register is now 183 rows and `Phi_SR = 20`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -28254,6 +28260,11 @@ token-witness review. Any later player-material coordinate added by RCS-02,
 RCS-13, or another amendment extends the signature and reopens A3X. Old
 A3A1/A3A2 retire as non-counting historical marginal-incidence aliases.
 
+> **Superseded at presentation by the fifty-first prerequisite correction
+> below:** aggregate A3X remains only a derived parent topology. Its
+> non-universal branches hid player-material dialect membership, so the active
+> owner sequence is now RCS-04A3XI, RCS-04A3XP, and RCS-04A3XD.
+
 Removing those two incomplete rows and adding the seven `I` rows plus A3X
 makes the finite register **181 rows: 38 `SCREEN`, 1 `OWNER-OPEN` at
 RCS-04A3A, 51 `PRUNED`, 84 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
@@ -29092,7 +29103,7 @@ three found that A7 remains one genuine owner card, but the old binary
 both timing identities changes legal actions, available information, prompt
 burden, counterplay, and build identity. It cannot be hidden in authoring.
 
-### RCS-04A7 — policy-mediated collision-control commitment timing — active owner choice
+### RCS-04A7 — policy-mediated collision-control commitment timing — A selected with C fallback
 
 Retain the nonempty exact-`{P}` policy-contract class `C_v^P`. Every reachable
 genuine conflict on each member already has a material policy coordinate under
@@ -29150,6 +29161,15 @@ express artifact self-will, policy specialists express prospective doctrine,
 and direct specialists supply bounded live target choice. B is the class-wide
 live-agency escalation, not the fallback.
 
+**Direction answer — selected by Zanzagar on 2026-09-30:** **A, with C as
+the qualified artifact-identity/direct-participation fallback.** Every fixed
+exact-`{P}` policy contract is advance-bound, so `L_v^P=∅`. Its whole covenant
+is irrevocable before the current collision's proposal IDs, targets,
+contributors, causes, and frozen-cohort facts become lawfully available to
+that choice. No confirmation, veto, override, or covenant change remains after
+`K` freezes. Earlier participant authorship remains materially operative and
+therefore remains `P`, not `I`.
+
 Fire C only if well-disclosed advance-bound policies still become recurrent
 solved defaults, forgotten chores, emotionally remote choices, or arbitrary
 Rite regret; at least one live identity creates repeatable policy-level play
@@ -29179,10 +29199,89 @@ externality. RL maps and attacks the policy surface; humans decide fun,
 comprehension, trust, blame, and whether live choice feels like Soul
 participation rather than menu exploitation.
 
-Any A/B/C answer moves A7 to `DIR-SELECTED` and opens A3X without adding or
-pruning a row. The register would then contain **17 `SCREEN`, 1 `OWNER-OPEN`
-at RCS-04A3X, 61 `PRUNED`, 95 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
-`EVALUATE`; `Phi_SR = 18`**. A letter selects worksheet direction only. The
+Under selected A there is no cohort-frozen/policy-pending phase: the earlier
+covenant is already committed when `K` freezes. The live-menu and pending-
+phase requirements above remain conditional gates on firing C or escalating
+to B; they are not secretly active mechanics under A.
+
+A7-A would ordinarily move one row from `OWNER-OPEN` to `DIR-SELECTED` and
+open A3X. A named-claim audit instead broke the registered A3X card before it
+was presented. Its empty/universal/proper paired-subset topology was
+mathematically exhaustive, but its B/C branches hid which complete signature
+became native to which major transformation family. That changes legal
+actions, commitment information, and a content-family guarantee, so it cannot
+remain AUTHOR/SPEC under the admission rule.
+
+The explicit fifty-first prerequisite amendment retires counted A3X as a
+non-counting parent alias and replaces it with three exact-signature incidence
+rows: A3XI for pure intrinsic `{I}`, A3XP for advance-bound bundled exact
+`{P}`, and A3XD for exact `{I,D}` direct specialists. Each asks state-only,
+boundary-only, or paired support. Together they derive the old topology
+without hiding its map: three paired answers derive universal pairing; three
+one-dialect answers derive no pairing; any mixture derives paired/native
+coexistence. Replacing one row with three raises the register from 181 to
+**183 rows: 19 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3XI, 61 `PRUNED`, 95
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`**.
+The authoritative decision record remains unchanged.
+
+### RCS-04A3XI — pure participant-intrinsic signature dialect incidence — active owner choice
+
+Let `sigma_I` be the canonical complete signature of the selected nonempty
+participant-intrinsic contract class: at every reachable genuine conflict,
+no authored material participant coordinate can change the complete collision
+law. Upstream proposal choices and the immutable Relic grammar remain real;
+timeouts, unavailable holders, defaults, or failed controls do not manufacture
+this signature.
+
+Let `D_I` be the nonempty set of definition-pure transformation dialects that
+contain at least one honest `sigma_I` contract. Definition purity and A1C-C
+leave exactly three nonempty possibilities:
+
+| Choice | Required support | Gameplay, ideal fit, and proof consequence | Concrete example |
+| --- | --- | --- | --- |
+| **A — intrinsic Relics exist in both dialects** | `D_I={state,boundary}`. At least one remembered-condition and one remembered-attunement contract use the complete pure-`{I}` signature. | **Recommended independent-axis direction, with B as the qualified clarity fallback.** Neither transformation dialect implies that a Soul must receive collision control. Players can choose self-willed artifacts in either memory language, preventing one dialect from becoming the sole sovereignty or low-interruption class. The risk is a token mirror added only to fill the matrix; the two witnesses must remain mechanically and thematically distinct outside their shared control signature. | **Stone of the Last Temper** remembers a condition and resolves its `MERCY`/`DEFIANCE` conflict by its own law. **Glass at the Unbidden Gate** remembers an attunement boundary and resolves `OATH`/`ECHO` without a participant control. Their targets, causes, cadence, and automatic law may differ. |
+| **B — intrinsic Relics are state-dialect only** | `D_I={state}`. At least one state contract is pure `{I}` and no boundary contract may use that complete signature. | B makes persistent remembered condition the exclusive home of artifact self-will, while every boundary genuine-conflict contract must be participant-configurable somewhere. This can make state Relics feel sovereign and boundary Relics relationally answerable, but it also entangles transformation fantasy with control availability and can turn state into the low-interruption or opaque-judgment caste. | An Ashen state Relic settles by its own remembered-condition covenant. Every Dreamglass boundary genuine-conflict contract instead exposes either advance policy or an honest live-direct opportunity somewhere. |
+| **C — intrinsic Relics are boundary-dialect only** | `D_I={boundary}`. At least one boundary contract is pure `{I}` and no state contract may use that complete signature. | C makes liminal attunement the exclusive home of an uncanny independent will, while every state genuine-conflict contract must be participant-configurable somewhere. It may strongly serve a specific “the threshold answers for itself” identity, but risks making boundary Relics opaque or low-interruption premiums and state Relics mandatory policy/direct consoles. | A Dreamglass boundary Relic settles its `OATH`/`ECHO` conflict through its own attunement law. Every Ashen state genuine-conflict contract instead exposes advance policy or an honest live-direct opportunity somewhere. |
+
+A/B/C are exhaustive because `sigma_I` is required globally and can occur in
+state only, boundary only, or both definition-pure dialects. “Both” means
+support, not equal counts, linked twins, shared targets, identical A4/A5 laws,
+or cross-dialect cohorts. Exact Relics and counts above the minimum remain
+AUTHOR/SPEC; excluding the signature from a whole dialect does not.
+
+Recommend **A, with B as the qualified clarity fallback**. A keeps
+transformation memory and artifact sovereignty as independent build axes and
+is neutral/protective rather than a direct *Achintya Bheda Abheda*
+realization. The direct ideal remains within each settlement, where preserved
+contributor histories and one continuing Relic remain distinct and jointly
+operative even without a Soul control. Fire B only if boundary pure-`{I}`
+conflicts remain materially opaque, create timing/preview arbitrage, or cause
+arbitrary paid-Rite regret after the best disclosure, while state pure-`{I}`
+laws remain forecastable, desirable, non-token equal-ceiling sidegrades. C is
+an explicit uncanny-boundary replacement, not the fallback: choose it only if
+the thesis that thresholds alone judge for themselves is itself desired and
+demonstrated despite the sharper opacity and caste risk.
+
+Every required witness must survive matched catalog comparison, solver/RL or
+self-play, and human testing without becoming a novice trap, opaque premium,
+or compensated low-input option. Test pick and win rates, counter access,
+Rite/D5 reliability, forecast and post-result explanation, and whether the
+witness remains chosen when rewards and presentation are equalized. A3XI does
+not choose automatic-law sensitivity, variance, recipes, holder/disclosure,
+exact counts, or power.
+
+Any later player-material coordinate introduced by RCS-02, RCS-13, or an
+explicit amendment extends the affected complete signatures and reopens the
+applicable A3XI/A3XP/A3XD incidence rows. A1C-C independently requires the
+union of their selected support sets to contain both dialects. Therefore, if
+A3XI and A3XP later both choose the same one-sided orientation, A3XD cannot
+choose that same one-sided orientation; its available card must be recomputed
+to retain an honest conflict witness in the other dialect.
+
+Any A/B/C answer moves A3XI to `DIR-SELECTED` and opens A3XP without adding or
+pruning a row. The register would then contain **18 `SCREEN`, 1 `OWNER-OPEN`
+at RCS-04A3XP, 61 `PRUNED`, 96 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 19`**. A letter selects worksheet direction only. The
 authoritative decision record remains unchanged.
 
 ## Session protocol and evidence

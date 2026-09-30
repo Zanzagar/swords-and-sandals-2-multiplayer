@@ -1,6 +1,98 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 policy is prospective; intrinsic dialect incidence is next
+
+Zanzagar selected **RCS-04A7-A with RCS-04A7-C as the qualified artifact-
+identity/direct-participation fallback**. Every fixed exact-`{P}` policy
+contract is advance-bound: its indivisible whole covenant becomes irrevocable
+before the current collision's proposal IDs, targets, contributors, causes,
+and frozen-cohort facts become lawfully available to that choice. No policy
+confirmation, veto, override, or covenant change remains after `K` freezes.
+Earlier Soul authorship remains a material input and therefore remains policy
+`P`, not intrinsic `I`.
+
+A7-C is armed and unfired. It may replace A only if disclosed advance policy
+still becomes a recurrent solved default, forgotten chore, emotionally remote
+choice, or arbitrary Rite regret; a live identity supplies repeatable policy
+play that cannot honestly be represented by direct `D`; and both timing
+families remain stable, one-sentence teachable, non-token, non-dominated
+equal-ceiling sidegrades without timing or complexity compensation. B remains
+the class-wide live escalation.
+
+One bounded read-only audit then broke the old aggregate A3X card before it was
+presented. “Every signature paired / none paired / some paired” is exhaustive,
+but its latter branches hid **which** major dialect offered intrinsic, policy,
+or direct play. Two catalogs could both satisfy paired/native coexistence
+while one gives state Relics prospective policy but no direct signature and
+the other gives them direct control but no policy signature. That changes
+legal actions, commitment information, and a content-family guarantee; it is
+OWNER work, not silent AUTHOR/SPEC incidence.
+
+The fifty-first prerequisite amendment therefore replaces counted A3X with
+three exact complete-signature rows:
+
+- `RCS-04A3XI` — pure intrinsic `{I}` dialect incidence;
+- `RCS-04A3XP` — advance-bound bundled exact-`{P}` dialect incidence; and
+- `RCS-04A3XD` — exact-`{I,D}` direct-specialist dialect incidence.
+
+Old A3X remains a non-counting parent alias. These are complete signatures,
+not the marginal rows previously rejected. Their final three answers derive
+the old aggregate topology without hiding its membership map.
+
+The register is now **183 rows: 19 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3XI,
+61 `PRUNED`, 95 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 20`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-04A3XI` asks where honest pure participant-intrinsic Relics exist:
+
+- **A — both state and boundary dialects. Recommended, with B as the
+  qualified clarity fallback.** Neither transformation dialect implies that a
+  Soul must receive collision control. A remembered-condition Relic and a
+  remembered-attunement Relic can each possess irreducible artifact will,
+  while remaining genuinely different in what they remember and transform.
+- **B — state dialect only. Qualified clarity fallback.** Persistent
+  remembered condition becomes the exclusive home of pure artifact self-will;
+  every boundary genuine-conflict contract is participant-configurable
+  somewhere. Fire this only if boundary intrinsic conflicts remain materially
+  opaque, create timing/
+  preview arbitrage, or cause arbitrary paid-Rite regret after the best
+  disclosure, while state intrinsic laws remain forecastable, desirable,
+  non-token equal-ceiling sidegrades.
+- **C — boundary dialect only.** Liminal attunement becomes the exclusive home
+  of uncanny independent will; every state genuine-conflict contract is
+  participant-configurable somewhere. This is a coherent affirmative thesis,
+  not the fallback, because it places pure self-will in the harder-to-read
+  dialect and carries the
+  sharpest opacity/caste risk.
+
+Concrete A witness: **Stone of the Last Temper** remembers condition and
+settles `MERCY`/`DEFIANCE` through its own law; **Glass at the Unbidden Gate**
+remembers an attunement boundary and settles `OATH`/`ECHO` without participant
+control. Their shared `{I}` action signature does not require shared targets,
+causes, cadence, automatic law, names, or power package.
+
+Recommend **A with B as the qualified clarity fallback**. This keeps
+transformation memory and artifact sovereignty independently choosable. It is
+neutral/protective or aggregate rather than itself a direct *Achintya Bheda
+Abheda* realization; the direct fit remains inside settlement, where distinct
+contributor histories and one continuing Relic remain jointly operative.
+
+Any A3XI answer opens A3XP at `Phi_SR = 19`; do not batch it. RCS-02 retains
+holder/disclosure/default/recovery, RCS-13 retains bind/rebind/lock horizon,
+RCS-15 retains lineage/version/migration, and RCS-16 retains storage/
+transaction/fault repair. A4-A6 remain automatic-law questions, not
+participant-control signature incidence. Any later player-material coordinate
+extends the affected complete signatures and reopens A3XI/A3XP/A3XD. A1C-C
+also requires the three selected support sets to cover both dialects; if XI
+and XP are both native to the same dialect, XD cannot select that same one-
+sided orientation. The full gear/progression SVG update
+remains an SR-12 closeout obligation after the Relic design is complete.
+
 ## 2026-09-30 one collision grammar; policy commitment timing is next
+
+**Superseded for navigation by the section above.** Its A7 card and 181-row
+checkpoint predate the selected A answer and the exact-signature repair.
 
 Zanzagar selected **RCS-04A6-A with RCS-04A6-B as the qualified artifact-
 identity fallback**. Every canonical complete automatic collision law must be
@@ -13615,7 +13707,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 21:03 UTC — Policy commitment timing is next](docs/handoffs/2026-09-30-2103--relic-policy-commitment-timing-next.md)**
+[2026-09-30 22:32 UTC — Intrinsic-signature dialect incidence is next](docs/handoffs/2026-09-30-2232--relic-intrinsic-dialect-incidence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
