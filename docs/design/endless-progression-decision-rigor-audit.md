@@ -11948,3 +11948,60 @@ B2-A would prune B3–B6 and B3I–B6I1, open B1I while B2I remains queued, and
 yield `Phi_SR = 27`. B2-B would prune B2I and open B3 at `Phi_SR = 35`.
 B2-C would open B3 while B1I and B2I remain queued at `Phi_SR = 36`. The
 authoritative decision record remains unchanged.
+
+### RCS-04A3B2 disposition and policy-specialist intrinsic-incidence audit — 2026-09-30
+
+Zanzagar selected **RCS-04A3B2-A with RCS-04A3B2-C as the qualified higher-
+ceiling/identity exception**. Every direct-capable fixed contract now has
+controlled-form projection exactly `{D}`. None also exposes a material policy-
+mediated participant coordinate, while B1-C preserves a separate nonempty
+controlled-form `{P}` class. C may replace A only if a concrete dual-capable
+Relic supplies an irreducible, quickly legible loop with real liabilities that
+is neither a strict action-set upgrade nor required optimized-build component.
+B2-B remains a universal escalation rather than a fallback. Equal optimized
+Legendary ceilings remain later proof, not a reward for interaction breadth.
+
+Three read-only named-claim audits then attacked the next card's dependency
+arithmetic, semantic exhaustiveness, and player-facing consequences. B1I is
+the sole next **presented** card. B2I remains applicable but queued, and A3C
+remains later `SCREEN` work rather than pruning. Let `C_v^P` be the nonempty
+exact-`{P}` controlled-form class established by B1-C, and let `J_v^P` contain
+its contracts with at least one reachable `I` opportunity. The only subset
+relations are empty, universal, and nonempty proper: exact `{P}` only, exact
+`{I,P}` only, or stable coexistence of both. No fourth option or prerequisite
+row is missing.
+
+The audits required two wording guards. First, universal `I` support means
+every contract has **at least one** authored participant-intrinsic opportunity;
+it cannot mean every opportunity is `I`, because every member already has a
+material `P` witness. Second, `I` is a semantic opportunity classification,
+not an execution failure. At one reachable genuine conflict, hold the fixed
+contract/version, frozen cohort, result domain, nonparticipant inputs, and
+automatic-completion inputs fixed, then compare every lawful participant
+collision-control vector that can govern it, including earlier-bound values.
+The opportunity is `I` only when no pair changes the complete committed-target
+law. Timeout, disconnect, operational holder unavailability, fallback
+execution, different RNG realization, or an immutable completion that
+preserves a policy difference does not create `I`. A lone mandatory default
+does not create `P`; an earlier-bound material policy remains `P`.
+
+Recommend **B1I-A, with B1I-B as the qualified system fallback**. A makes
+policy mastery dependable at every conflict and preserves the clearest
+specialist grammar. The participant policy and immutable Relic grammar may be
+distinct and jointly indispensable at each `P` opportunity, a direct local
+ideal fit. B gives every policy Relic a prospectively disclosed self-willed
+context without adding action breadth, but forces a two-context grammar and
+can become token loss of agency; its cross-context alternation is only a
+partial ideal fit. Fire B only if equal-access optimized testing shows that
+universal policy coverage creates an unavoidable control-coverage premium or
+solved tool-like play, and every intrinsic context remains meaningful,
+one-sentence teachable, Rite-safe, and non-token. C offers the richest profile
+contrast but the strongest hidden-tier burden and is not the default fallback.
+
+B2-A moves B2 to `DIR-SELECTED`, prunes B3–B6 and B3I–B6I1, and opens B1I
+while B2I remains queued. The register is **181 rows: 26 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A3B1I, 60 `PRUNED`, 87 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`**. Every B1I answer then closes B1I
+and opens B2I without further pruning, yielding **25 `SCREEN`, 1 `OWNER-OPEN`,
+60 `PRUNED`, 88 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 26`**. The authoritative decision record remains unchanged.

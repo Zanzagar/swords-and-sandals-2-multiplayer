@@ -1,6 +1,73 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 direct and policy specialists stay separate; policy-specialist self-will is next
+
+Zanzagar selected **RCS-04A3B2-A with RCS-04A3B2-C as the qualified higher-
+ceiling/identity exception**. Every direct-capable fixed contract has
+controlled-form projection exactly `{D}` and never also exposes policy-
+mediated control. B1-C's separate nonempty `{P}` class preserves policy
+mastery. C may replace A only if a concrete dual-capable Relic supplies an
+irreducible, quickly legible loop with real liabilities that specialists
+cannot reproduce and is neither a strict action-set upgrade nor a required
+optimized-build component. B2-B remains the universal escalation, not a
+fallback.
+
+B2-A prunes B3–B6 and B3I–B6I1. Three read-only named-claim audits upheld
+RCS-04A3B1I as the sole next presented card; B2I remains applicable but queued
+and A3C remains later `SCREEN` work. The register is **181 rows: 26 `SCREEN`,
+1 `OWNER-OPEN` at RCS-04A3B1I, 60 `PRUNED`, 87 `DIR-SELECTED`, 5 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`**. The authoritative decision
+record remains byte-unchanged.
+
+`RCS-04A3B1I` asks whether the policy-only contract class contains authored
+participant-intrinsic conflict opportunities:
+
+- **A — policy specialists remain participant-configurable at every conflict.
+  Recommended.** Every contract is exact `{P}`. Whenever genuine conflict
+  occurs, a material participant policy and immutable Relic grammar jointly
+  determine the complete result law.
+- **B — every policy specialist has at least one participant-intrinsic
+  conflict context. Qualified system fallback.** Every contract is exact
+  `{I,P}`. It retains policy-controlled conflicts and also has at least one
+  authored conflict with no material participant collision-control coordinate.
+- **C — exact `{P}` and `{I,P}` policy specialists coexist.** Some remain
+  always responsive; others have disclosed self-willed contexts. This creates
+  the strongest catalog identity contrast and the sharpest hidden-tier burden.
+
+Universal `I` support means every contract has **at least one** `I`
+opportunity, not that every opportunity is intrinsic. An earlier-bound policy
+remains `P` when alternative lawful bindings change the matched later result
+law. Timeout, disconnect, operational holder unavailability, fallback
+execution, mandatory default, or different RNG realization cannot convert an
+otherwise controlled opportunity into `I`.
+
+Illustratively, under A Oathbound Dreamglass always applies its lawful
+`RITE-FIRST` or `MANIFESTATION-FIRST` orientation whenever proposals conflict.
+Under B it still does so ordinarily, but a prospectively disclosed **Last
+Witness** context invokes its immutable covenant with no participant result-
+control coordinate. Under C an always-responsive Oathbound identity and a
+contextually self-willed Severed identity coexist.
+
+Recommend **A with B as the qualified system fallback**. A makes policy
+mastery dependable and gives a direct local *Achintya Bheda Abheda* fit when
+distinct participant orientation and immutable Relic grammar are jointly
+indispensable at one `P` opportunity. Fire B only if equal-access optimized
+testing shows that universal policy coverage creates an unavoidable control-
+coverage premium or solved tool-like play—and every intrinsic context is
+prospectively disclosed, tactically meaningful, one-sentence teachable, Rite-
+safe, and not merely a denial-of-agency token. B's cross-context alternation is
+only a partial ideal fit; C's catalog coexistence is aggregate.
+
+Every B1I answer opens B2I without another prune and yields `Phi_SR = 26`.
+The final full gear/progression visual refresh remains required at SR-12
+closeout in `docs/design/endless-build-system-map.svg`; no tracked HTML
+companion exists, and the SVG remains intentionally untouched while the Relic
+contract moves.
+
 ## 2026-09-30 direct and policy specialists coexist; hybrid capability is next
+
+**Superseded for navigation by the section above.** Its B2 card and
+`Phi_SR = 37` checkpoint predate the selected A answer and B1I audits.
 
 Zanzagar selected **RCS-04A3B1-C with RCS-04A3B1-A as the qualified low-
 interruption/policy-mastery fallback**. Inside the nonempty configurable class,
@@ -12995,7 +13062,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 12:35 UTC — Relic policy incidence inside direct-capable contracts is next](docs/handoffs/2026-09-30-1235--relic-policy-incidence-next.md)**
+[2026-09-30 14:37 UTC — Participant-intrinsic opportunities inside policy-only Relics are next](docs/handoffs/2026-09-30-1437--relic-policy-intrinsic-incidence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

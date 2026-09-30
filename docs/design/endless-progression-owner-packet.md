@@ -465,10 +465,17 @@ coordinate so deterministic policies cannot fake it. Zanzagar selected
 **RCS-04A3B1-C with RCS-04A3B1-A as the qualified low-interruption/policy-
 mastery fallback**: direct-capable and policy-only configurable contracts
 coexist. Three B2 audits upheld the next prevalence split and clarified that a
-material advance-bound policy still counts. **RCS-04A3B2 is now the sole
-owner-facing choice under SR-04:** whether no, every, or a stable proper subset
-of direct-capable contracts also supports policy. The amended register has 181
-rows and `Phi_SR = 37`.
+material advance-bound policy still counts. Zanzagar selected
+**RCS-04A3B2-A with RCS-04A3B2-C as the qualified higher-ceiling/identity
+exception**: direct-capable contracts never also expose policy-mediated
+control, while B1-C's separate policy-only class remains. Three B1I audits
+then upheld the intrinsic-incidence split and clarified that universal `I`
+support means at least one authored participant-intrinsic opportunity per
+contract, not intrinsic settlement at every opportunity. **RCS-04A3B1I is now
+the sole owner-facing choice under SR-04:** whether policy-only contracts have
+no `I` opportunities, every such contract has at least one, or exact `{P}` and
+`{I,P}` contracts coexist. The amended register has 181 rows and `Phi_SR =
+27`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -28343,7 +28350,7 @@ applicable but queued. The 181-row register now contains **36 `SCREEN`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`**. The authoritative decision record
 remains unchanged.
 
-### RCS-04A3B2 — policy capability inside direct-capable contracts — active owner choice
+### RCS-04A3B2 — policy capability inside direct-capable contracts — A selected
 
 Let `P_v^D` contain exactly those contracts in nonempty `D_v` with at least
 one reachable conflict at which authored participant collision-policy state is
@@ -28385,12 +28392,78 @@ if that necessity holds across every direct-capable contract. Equal optimized
 Legendary ceilings still require RCS-05/RCS-06/RCS-08 proof; hybrid breadth
 cannot serve as an unconditional power bonus.
 
-Selecting A prunes B3–B6 and B3I–B6I1, opens B1I while B2I remains applicable
-but queued, and yields **`Phi_SR = 27`**. Selecting B prunes B2I, opens B3
-while B1I remains queued, and yields **`Phi_SR = 35`**. Selecting C opens B3
-while B1I and B2I remain applicable but queued, yielding **`Phi_SR = 36`**.
-A letter selects worksheet direction only. The authoritative decision record
-remains unchanged.
+**Direction answer — selected by Zanzagar on 2026-09-30:** **A, with C as the
+qualified higher-ceiling/identity exception.** `P_v^D` is empty. Every
+direct-capable fixed contract has controlled-form projection exactly `{D}`;
+none also supports a material policy-mediated participant coordinate. B1-C's
+separate nonempty `{P}` class preserves policy mastery. This does not decide
+whether either specialist class also contains `I` opportunities.
+
+B2-C is armed and unfired. It may replace A only if a concrete dual-capable
+Relic produces an irreducible, quickly legible loop that separate specialists
+cannot reproduce, carries real contextual liabilities, and is neither a
+strict action-set upgrade nor a required optimized-build component. B2-B
+remains the universal dual-capability escalation—not a fallback—if every
+tested direct-only identity is strategically shallow and policy support proves
+indispensable across the entire direct-capable class. Equal optimized
+Legendary ceilings still require RCS-05/RCS-06/RCS-08 proof; interaction
+breadth is never an unconditional power bonus.
+
+Selecting A moves B2 to `DIR-SELECTED`, prunes B3–B6 and B3I–B6I1, and opens
+B1I while B2I remains applicable but queued. The 181-row register now contains
+**26 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3B1I, 60 `PRUNED`, 87
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`**.
+The authoritative decision record remains unchanged.
+
+### RCS-04A3B1I — participant-intrinsic opportunity incidence inside policy-only contracts — active owner choice
+
+Let `C_v^P` be the nonempty class whose controlled-form projection is exactly
+`{P}`, established by B1-C. Let `J_v^P` contain exactly those contracts in
+`C_v^P` with at least one reachable genuine-conflict opportunity classified
+`I`. Universal `I` support means **every contract has at least one** such
+opportunity; it does not mean every opportunity is `I` because every member of
+`C_v^P` already has a material `P` witness.
+
+At one reachable conflict, hold the fixed contract/version, frozen cohort,
+result domain, nonparticipant inputs, and automatic-completion inputs fixed.
+Consider every lawful participant collision-control vector that can govern
+that opportunity, including values bound before the cohort existed. The
+opportunity is `I` exactly when no pair changes the complete committed-target
+law. An earlier-bound policy remains `P` when two lawful earlier bindings
+produce different laws on the matched later conflict. Timeout, disconnect,
+operational holder unavailability, a fallback execution, a different random
+realization, or an immutable completion that preserves a material policy
+difference does not manufacture `I`. A lone mandatory default does not
+manufacture `P`; if no material participant alternative exists, the
+opportunity is genuinely participant-intrinsic.
+
+| Choice | `I` incidence inside `C_v^P` | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — policy specialists remain participant-configurable at every conflict** | `J_v^P` is empty. Every contract is exact `{P}`: it has policy-mediated control and no authored participant-intrinsic conflict opportunity. | **Recommended dependable-specialist direction.** A preserves B2-A's clean interaction identities and makes policy mastery trustworthy: whenever this Relic reaches genuine conflict, a material participant orientation governs its result law. At each local `P` opportunity, distinct participant policy and immutable Relic grammar can remain jointly indispensable, giving a direct ideal fit. The risk is that always-available control becomes an option-coverage premium or that policy play becomes solved and tool-like. | Oathbound Dreamglass always applies its lawful `RITE-FIRST` or `MANIFESTATION-FIRST` policy whenever proposals conflict. A7 may later make that policy live or advance-bound, but the stance never becomes irrelevant merely because the context changed. |
+| **B — every policy specialist has a participant-intrinsic context** | `J_v^P=C_v^P`. Every contract is exact `{I,P}`: each retains at least one policy opportunity and also has at least one authored conflict with no material participant result-control coordinate. | **Qualified system fallback.** B gives every policy Relic a disclosed rhythm between participant orientation and irreducible artifact will without adding another action form. It can prevent always-controlled coverage from becoming a premium and keep Relics from feeling like passive settings panels. It also forces a two-context grammar onto every policy specialist and can feel like bait-and-switch or token denial of agency. The alternation emphasizes real difference but is only a partial cross-context ideal fit; the local `P` opportunities still carry the direct fit. | Dreamglass follows the participant's policy during ordinary `MERCY`/`DEFIANCE` conflicts, but a prospectively disclosed **Last Witness** context invokes its immutable covenant. No timeout, missing holder, default, or already-bound policy causes the change; that authored conflict simply has no material participant collision-control coordinate. |
+| **C — always-responsive and contextually self-willed policy specialists coexist** | `J_v^P` is a nonempty proper subset of `C_v^P`. Exact `{P}` and exact `{I,P}` contracts both exist; therefore the class contains at least two fixed contracts. | C gives the strongest item-specific contrast between dependable covenants and contextually self-willed artifacts. It also creates another catalog comparison and the greatest hidden-tier risk: exact `{P}` may become the premium always-controllable profile while `{I,P}` is excused as merely “more thematic.” Coexistence across entries is aggregate rather than a direct ideal realization. Choose C only if selected self-willed identities remain legible, desirable sidegrades without turning either profile into the obvious optimized class. | Oathbound Dreamglass always honors a material policy. Severed Dreamglass honors one in ordinary conflicts but resolves a disclosed Last Witness conflict intrinsically. Exact names, contexts, counts, and dialect placement remain illustrative. |
+
+A/B/C exhaust the subset relation of `J_v^P` to nonempty `C_v^P`. B1I does
+not choose exact intrinsic contexts or frequency, policy timing, holder,
+information/default recovery, automatic-law details, policy recombinability or
+language, dialect placement, or power compensation. Those remain AUTHOR/SPEC,
+A7, RCS-02/RCS-13, A4–A6, A3C/D1/D2, A3X, and RCS-05/RCS-06/RCS-08.
+
+Recommend **A, with B as the qualified system fallback**. Replace A with B
+only if equal-access optimized testing shows that universal policy coverage
+creates an unavoidable control-coverage premium over intrinsic and direct
+specialists, or remains solved and tool-like despite meaningful commitments,
+liabilities, and previews—and every policy contract can support a
+prospectively disclosed participant-intrinsic context that is tactically
+meaningful, one-sentence teachable, Rite-safe, and not merely a denial-of-
+agency token. C remains available for a proved mixed identity catalog, but is
+not the fallback because it carries the sharpest profile-tier burden.
+
+Every A/B/C answer moves B1I to `DIR-SELECTED` and opens B2I without pruning
+another registered row. The register would then contain **25 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A3B2I, 60 `PRUNED`, 88 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. A letter selects worksheet
+direction only. The authoritative decision record remains unchanged.
 
 ## Session protocol and evidence
 
