@@ -12252,3 +12252,104 @@ RCS-04A3D1, 60 `PRUNED`, 90 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 24`**. D1-A would prune D2 and open A4 at `Phi_SR = 22`;
 D1-B/C would open D2 at `Phi_SR = 23`, after which A4 opens at 22. The
 authoritative decision record remains unchanged.
+
+### RCS-04A3D1 disposition and contributor-sensitivity audit — 2026-09-30
+
+Zanzagar selected **RCS-04A3D1-A with RCS-04A3D1-B as the qualified class-
+wide expressive-mastery/menu-bloat fallback**. Every exact-`{P}` policy
+contract therefore exposes a finite versioned menu of indivisible authored
+whole bundled covenants. A participant may select one whole but cannot extract,
+reorder, parameterize, or condition its semantic clauses. Rich author-written
+internal conditions remain closed. Selected A3C-A is unchanged: no material
+policy edit may hold all other participant semantics fixed.
+
+A3D1-B may replace A only if compact menus fail recurrently across the policy
+class through near-duplicate proliferation or omission of an easily stated
+whole intention, and a finite typed builder preserves bundling, indispensable
+immutable Relic contribution, quick forecast, non-dominance, Rite/D5 safety,
+class parity, multiplayer ownership, and deterministic serialization/migration.
+A3D1-C remains a localized stronger-proof identity exception. Neither
+construction nor closure earns scalar compensation.
+
+Three read-only named-claim audits then attacked A4's arithmetic, semantic
+boundary, and gameplay recommendation. The arithmetic holds exactly. D1 moves
+from `OWNER-OPEN` to `DIR-SELECTED`; D2 prunes because
+`K_v^{coll-build}` is empty; A4 opens after the last applicable A3
+configuration row. The 181-row register becomes 21 `SCREEN`, 1 `OWNER-OPEN`
+at A4, 61 `PRUNED`, 91 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 22`. A7 and A3X remain later decisions rather than A4
+prerequisites.
+
+The semantic audit broke the old binary “attribution-only versus may affect”
+shorthand. Let `W_v^auto` contain every canonical versioned total automatic
+collision-result law after lawful participant configuration and immutable
+Relic completion. It includes whole-covenant exact-`{P}` laws, pure `{I}`
+laws, and the intrinsic portions of exact-`{I,D}` contracts. It excludes live
+`D` actual-result choices, upstream proposal admission/approval, individual
+random realizations, and later committed lineage formation.
+
+A contributor-sensitivity witness cannot hold the complete cohort fixed,
+because its contributor multiset is the variable. It must compare reachable
+cohorts with the same distinct target set, contract/version, bound whole
+covenant, immutable Relic semantics, authoritative source revision/cut, and
+every non-contributor fact, while only the per-target contributor multiset
+changes. Let `S_v` contain the laws for which such a comparison changes the
+complete target ranking or distribution. Dormant, unreachable, duplicate-
+delivery, alias-only, or changed-target-set cases do not count.
+
+The exhaustive prevalence partition is therefore:
+
+1. A, `S_v` empty: contributor identity is attribution-only throughout;
+2. B, `S_v=W_v^auto`: every automatic law has at least one honest sensitivity
+   witness; and
+3. C, `S_v` a nonempty proper subset: contributor-neutral and contributor-
+   sensitive automatic laws coexist with stable canonical law/version
+   membership.
+
+B and C cannot be merged. Under B there is no automatic-law refuge from
+contributor-stacking and cause-priority play. C lets a player select or avoid a
+sensitive law and therefore creates its own possible expert/premium caste,
+forecast burden, and exploit surface. This changes shipped build selection and
+passes the owner-card admission test, but expands no register row.
+
+Selected A2-A remains hard: every complete law returns exactly one still-valid
+proposed target. A4 cannot introduce null, no-change, synthetic targets,
+duplicate outcomes, or same-cut sequences. Every proposal ID and native cause,
+event, payment, result, and lock remains preserved under A/B/C; contributor-
+neutral does not mean contributor-erased. If A2-C fires, A4 reopens over the
+expanded target/no-change domain rather than transferring its old label.
+A3C-A also remains hard because the sensitivity test holds the bound whole
+covenant fixed, and D1-A permits a rich sensitive rule inside an indivisible
+authored covenant.
+
+Recommend **A4-C, with A4-A as the qualified clarity/equal-ceiling/anti-
+farming fallback**. C gives named authored identity to a Choir law that heeds
+the plurality of causes while retaining a Stone law that judges each distinct
+target once. A sensitive law can directly express distinct causes remaining
+different and jointly operative in one becoming; catalog coexistence is only
+aggregate and is not a stronger ideal claim by itself. Every sensitive law
+must remain an equal-ceiling sidegrade with immutable liabilities and every
+neutral law must retain a strict optimized niche.
+
+Fire A if the best sensitive laws require hidden weight tables; cheap X/P
+route shopping, legitimate same-cause inflation, ally steering, or proposal-
+throughput caste play becomes optimal; paid M Rites or practical D5 returns
+become unreliable; neutral laws become novice traps; sensitivity merely
+duplicates another covenant choice; or matched solver/RL and human tests
+cannot establish equal optimized ceilings, non-dominance, robustness, and
+understandable attribution. B is a universal escalation only if every neutral
+refuge undermines the intended causal identity and universal sensitivity
+clears those same tests.
+
+The audit also caught a presentation contradiction. Earlier `RITE-FIRST` and
+`MANIFESTATION-FIRST` examples already presume cause-composition sensitivity.
+They remain conditional illustrations only: A requires contributor-neutral
+target-semantic replacements, while C permits them only in its sensitive
+subset. No selected A3 direction changes.
+
+A4 owns neither stochastic support (A5), kernel semantic scope (A6), exact
+weights/rankings/disclosure (AUTHOR/SPEC/TUNE and RCS-02), policy timing (A7),
+nor lineage identity (RCS-04B). Any A4 answer opens A5 without adding or
+pruning a row, yielding **181 rows: 20 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A5,
+61 `PRUNED`, 92 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 21`**. The authoritative decision record remains unchanged.

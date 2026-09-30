@@ -1,6 +1,85 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 policy covenants stay whole; contributor sensitivity is next
+
+Zanzagar selected **RCS-04A3D1-A with RCS-04A3D1-B as the qualified class-
+wide expressive-mastery/menu-bloat fallback**. Every exact-`{P}` policy
+contract offers a finite versioned menu of indivisible authored whole bundled
+covenants. Participants choose a covenant whole and cannot extract, reorder,
+parameterize, or condition its semantic clauses. Rich author-written internal
+conditions remain legal and closed. A3C-A remains invariant: policy cannot
+change while all other participant semantics stay fixed.
+
+A3D1-B is armed and unfired. It may replace A only if compact menus fail
+class-wide through recurring near-duplicate proliferation or omission of an
+easily stated whole intention, and a finite typed builder preserves bundling,
+indispensable immutable Relic contribution, quick forecast, non-dominance,
+Rite/D5 safety, class parity, multiplayer ownership, and deterministic
+migration. A localized construction need remains C's stronger-proof identity
+exception. No language class earns scalar compensation.
+
+Three read-only named-claim audits upheld A4 as the sole next card but broke
+its old binary shorthand. “Contributor-sensitive somewhere” hides two
+materially different worlds: every automatic law is sensitive, or neutral and
+sensitive laws coexist. A4 is therefore one rigorous A/B/C prevalence card,
+not a new row. Its matched test fixes the target set, contract/version, bound
+whole covenant, immutable Relic semantics, source revision/cut, and every
+non-contributor input while varying the per-target contributor multiset. The
+complete cohort itself cannot be fixed because contributor makeup is the
+variable.
+
+The register is **181 rows: 21 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A4, 61
+`PRUNED`, 91 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 22`**. The authoritative decision record remains byte-unchanged.
+
+`RCS-04A4` asks whether contributor multiplicity and cause composition may
+change canonical complete automatic collision-result laws:
+
+- **A — attribution-only throughout.** Every automatic law judges the
+  distinct target classes and other non-contributor facts; contributor IDs and
+  causes remain preserved but cannot change rank or probability. This is
+  clearest and most resistant to route farming, yet distinct causes are silent
+  at the exact settlement moment.
+- **B — every automatic law is contributor-sensitive somewhere.** Every law
+  has a real matched witness in which contributor count or cause composition
+  changes its target law. This is the universal expressive-causality
+  escalation and makes contributor-aware optimization unavoidable.
+- **C — neutral and sensitive laws coexist. Recommended.** Stable canonical
+  laws distinguish Choir covenants that heed causal plurality from Stone
+  covenants that judge each proposed becoming once. This adds authored
+  identity without imposing contributor arithmetic on every automatic law.
+
+Recommend **C with A as the qualified clarity/equal-ceiling/anti-farming
+fallback**. C is valid only if sensitive laws are equal-ceiling sidegrades with
+immutable liabilities and neutral laws retain strict optimized niches. Fire A
+if sensitivity needs hidden weights; cheap X/P route shopping, same-cause
+inflation, ally steering, or proposal-throughput caste play becomes optimal;
+paid M Rites or practical D5 returns become unreliable; neutral laws become
+novice traps; or matched solver/RL and human tests cannot establish parity,
+non-dominance, robustness, and understandable attribution. B is a universal
+escalation, not the fallback.
+
+A sensitive law can directly express *Achintya Bheda Abheda*: distinct causes
+remain genuinely different and jointly operative in one becoming. Catalog
+coexistence itself is aggregate, not a stronger theological claim. No option
+earns scalar compensation. Selected A2-A still forces exactly one proposed
+target; A4 cannot add no-change, null, synthetic targets, or sequences.
+
+Earlier `RITE-FIRST`/`MANIFESTATION-FIRST` A3 examples are conditional rather
+than already-selected priorities. Under A they need contributor-neutral
+target-semantic replacements; under C they belong only to the sensitive
+subset. A5 retains stochasticity, A6 kernel scope, RCS-02 exact disclosure,
+A7 policy timing, and RCS-04B lineage identity. Any A4 answer opens A5 at
+`Phi_SR = 21`.
+
+The final full gear/progression mockup refresh remains an SR-12 closeout
+obligation in `docs/design/endless-build-system-map.svg`; do not update it
+piecemeal while the Relic contract still moves.
+
 ## 2026-09-30 collision policy stays bundled; covenant construction is next
+
+**Superseded for navigation by the section above.** Its A3D1 card and
+`Phi_SR = 24` checkpoint predate the selected A answer and A4 audits.
 
 Zanzagar selected **RCS-04A3C-A with RCS-04A3C-B as the qualified class-wide
 agency/clarity fallback**. Every material collision-policy change on every
@@ -13280,7 +13359,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 18:58 UTC — Bundled-covenant language is next](docs/handoffs/2026-09-30-1858--relic-covenant-language-next.md)**
+[2026-09-30 19:18 UTC — Contributor sensitivity is next](docs/handoffs/2026-09-30-1918--relic-contributor-sensitivity-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

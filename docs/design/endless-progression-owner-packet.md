@@ -490,11 +490,17 @@ class-wide agency/clarity fallback**: collision policy is always bundled with
 at least one other meaningful participant semantic. Three A3D1 audits then
 upheld the next language split and supplied a mandatory guard: construction
 may occur inside an inseparable bundled covenant, but no lawful policy edit may
-hold every other participant semantic fixed. **RCS-04A3D1 is now the sole
-owner-facing choice under SR-04:** whether every policy Relic offers only
-closed authored whole covenants, every policy Relic supports bounded covenant
-construction, or both language classes coexist. The amended register has 181
-rows and `Phi_SR = 24`.
+hold every other participant semantic fixed. Zanzagar selected
+**RCS-04A3D1-A with RCS-04A3D1-B as the qualified class-wide expressive-
+mastery/menu-bloat fallback**: every policy contract offers only a finite menu
+of indivisible authored whole bundled covenants. Three A4 audits then broke
+the old binary shorthand: universal contributor sensitivity and stable
+neutral/sensitive coexistence impose different build promises and cannot be
+hidden together under “may affect.” **RCS-04A4 is now the sole owner-facing
+choice under SR-04:** whether contributor multiplicity/cause composition is
+attribution-only under every complete automatic law, affects every such law
+somewhere, or distinguishes stable neutral and sensitive laws. The amended
+register has 181 rows and `Phi_SR = 22`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -28662,7 +28668,7 @@ adding a registered row. The register now contains **23 `SCREEN`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`**. A letter selects worksheet
 direction only. The authoritative decision record remains unchanged.
 
-### RCS-04A3D1 — constructive collision-covenant-language prevalence — active owner choice
+### RCS-04A3D1 — constructive collision-covenant-language prevalence — A selected
 
 Let `C_v^P` remain the nonempty exact-`{P}` policy-contract class. Let
 `K_v^{coll-build}` contain a fixed contract exactly when its lawful prospective
@@ -28746,13 +28752,98 @@ needs construction, C is the relevant narrow exception and must pass the
 stronger sidegrade proof. No language class earns scalar compensation or
 automatic power for complexity.
 
-Selecting A moves D1 to `DIR-SELECTED`, prunes D2, and opens A4, yielding
-**21 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A4, 61 `PRUNED`, 91 `DIR-SELECTED`, 5
-`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**. Selecting B or C
-moves D1 to `DIR-SELECTED` and opens D2, yielding **22 `SCREEN`, 1
-`OWNER-OPEN` at RCS-04A3D2, 60 `PRUNED`, 91 `DIR-SELECTED`, 5 `DERIVED`, 1
-`SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`**. After any D2 answer, A4 opens at
-`Phi_SR = 22`. A letter selects worksheet direction only. The authoritative
+**Direction answer — selected by Zanzagar on 2026-09-30:** **A, with B as the
+qualified class-wide expressive-mastery/menu-bloat fallback.**
+`K_v^{coll-build}` is empty. Every exact-`{P}` policy contract offers a finite,
+versioned menu of indivisible authored whole bundled covenants. A participant
+may select a covenant whole but cannot extract, reorder, parameterize, or
+condition its semantic clauses. Rich author-written internal conditions remain
+legal and closed. Selected A3C-A remains invariant: no policy change may hold
+all other participant semantics fixed.
+
+A3D1-B is armed and unfired. It may replace A only if compact menus fail
+class-wide through recurring near-duplicate proliferation or omission of an
+easily stated whole-covenant intention, and a finite typed builder preserves
+bundling and indispensable immutable Relic contribution, remains quickly
+forecastable, and rejects dominant templates, cheap Rite insurance, hidden
+class premium, routine teammate authorship, and non-deterministic migration.
+A localized construction need remains A3D1-C's stronger sidegrade exception,
+not the fallback. No language class earns scalar compensation.
+
+Selecting A moves D1 to `DIR-SELECTED`, prunes D2, and opens A4. The register
+now contains **21 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A4, 61 `PRUNED`, 91
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**. A
+letter selects worksheet direction only. The authoritative decision record
+remains unchanged.
+
+### RCS-04A4 — contributor sensitivity across complete automatic collision laws — active owner choice
+
+Let `W_v^auto` be the nonempty set of canonical, versioned, total **automatic
+collision-result laws** after lawful participant configuration and immutable
+Relic completion. It includes whole-covenant exact-`{P}` laws, pure
+participant-intrinsic `{I}` laws, and the intrinsic portions of exact-`{I,D}`
+contracts. It excludes live `D` actual-target choices, upstream proposal
+admission or approval, individual random realizations, and later committed
+lineage formation.
+
+Let `S_v` contain a law exactly when a matched pair of reachable genuine-
+conflict cohorts has the same distinct target set, contract/version, bound
+whole covenant, immutable Relic semantics, authoritative source revision/cut,
+and every non-contributor input, but a different per-target contributor
+multiset changes the complete target ranking or distribution. The complete
+cohort itself cannot be held fixed: contributor multiplicity and cause
+composition are the variable being tested. Dormant code, unreachable cases,
+duplicate delivery, aliases, or a changed target set do not establish
+sensitivity.
+
+Selected A2-A remains hard under every answer. Every completed law returns
+exactly one still-valid member of `T(K)`; sensitivity cannot add no-change,
+null, a synthetic target, a duplicate outcome, or a sequential transition.
+Every proposal/contributor ID and its native P/Z/X/M facts remain preserved
+under every option. “Neutral” means those facts cannot alter this settlement
+law, not that attribution is erased. If A2-C later fires, A4 reopens over the
+expanded target/no-change domain rather than carrying a target-only label by
+name.
+
+| Choice | Contributor-sensitive incidence inside `W_v^auto` | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — attribution-only throughout** | `S_v` is empty. Every automatic law factors through the distinct target classes and other lawful non-contributor inputs. Contributor count and cause composition survive for trace, consequence, and later lineage but never change target rank or probability. | A is the clearest and safest rule. A player cannot improve a target merely by manufacturing more lawful proposal routes, and one paid Rite is not diluted because another target happened to collect two cheap voices. It minimizes hidden arithmetic, route-throughput premiums, and disclosure burden. It also makes distinct contributors mechanically silent at the exact moment of conflict: their histories remain true but the resolver hears each proposed becoming only once. This is a clean unity rule, though a weaker direct expression of distinct causes remaining jointly operative. | Under **Stone Judgment**, compare `{P→TEMPERED, X→TEMPERED, M→MERCY}` with `{P→TEMPERED, M→MERCY}`. A fixed target-semantic law ranks the two distinct targets once, so its result law is identical in both cohorts. Every P/X/M identity remains attached afterward. |
+| **B — every automatic law is contributor-sensitive somewhere** | `S_v=W_v^auto`. Every canonical automatic law has at least one honest reachable matched witness in which contributor multiplicity or cause composition changes its completed target ranking or distribution. Token, unreachable, or permanently shadowed sensitivity does not count. | B gives the highest universal expressive-causality promise: no automatic law treats contributor history as settlement-irrelevant everywhere. It also makes contributor-aware optimization unavoidable. Proposal-throughput and cause access can become a universal premium; players may farm cheap X/P voices, suppress dangerous causes, or see an M Rite outvoted. This is the escalation if the game ultimately requires every automatic Relic to heed its causal chorus, not the recommended fallback. A5 still decides whether any law is genuinely stochastic. | Under a closed **Rite-Heeding** covenant, `{M→MERCY, P→DEFIANCE}` chooses MERCY while `{P→MERCY, M→DEFIANCE}` chooses DEFIANCE. Counts, targets, covenant, and all other facts match; moving the M contributor changes the law. Every other automatic law must possess some equally real witness, though not necessarily this rule. |
+| **C — neutral and sensitive automatic laws coexist** | `S_v` is a nonempty proper subset of `W_v^auto`. At least one complete automatic law is neutral and another is sensitive. The neutral/sensitive classification of each canonical law/version is invariant and may distinguish Relics or indivisible whole covenants. A7 separately decides when a participant may bind among those whole covenants relative to cohort facts. | **Recommended authored-identity direction, with A as the qualified clarity/equal-ceiling/anti-farming fallback.** C lets a Choir covenant heed the plurality of causes while a Stone covenant judges each possible becoming once, preserving a legible refuge from contributor arithmetic rather than forcing it catalog-wide. It creates the strongest gameplay contrast and the sharpest premium-caste risk: sensitive laws must be sidegrades with immutable liabilities, while neutral laws retain strict optimized niches. A sensitive law can directly express distinct causes remaining different and jointly operative in one becoming; catalog coexistence is aggregate, not a stronger theological claim by itself. | Dreamglass offers indivisible **Choir of Witnesses**, whose fixed cause-aware rule can change when M and X support move between the same two targets, and **Stone of Two Names**, whose target-class law ignores that move. Both are closed whole covenants under D1-A and bundled under A3C-A; neither exposes an editable contributor-weight knob. |
+
+A/B/C exhaust the subset relation of `S_v` to nonempty `W_v^auto`. Binary
+“never versus may” would merge B and C and hide whether any automatic-law
+refuge from contributor stacking exists. That changes build choice, required
+forecast information, exploit surface, and the possibility of a sensitive-law
+premium caste, so it is an owner decision rather than authoring detail.
+
+Recommend **C, with A as the qualified clarity/equal-ceiling/anti-farming
+fallback**. C keeps cause-sensitive resolution an authored, forecastable
+identity rather than a universal subsystem tax. Fire A if the best sensitive
+laws cannot be explained in one sentence without hidden weights; cheap cause-
+route shopping, legitimate same-cause inflation, ally steering, or proposal-
+throughput caste play becomes optimal; paid M Rites or practical D5 returns
+become unreliable; neutral laws are novice traps; sensitivity only duplicates
+another covenant choice; or matched solver/RL and human tests cannot establish
+equal optimized ceilings, non-dominance, robustness, and understandable
+attribution. B is a universal escalation only if every neutral refuge itself
+undermines the desired causal identity and universal sensitivity clears those
+same tests. No option earns scalar compensation.
+
+Earlier `RITE-FIRST` and `MANIFESTATION-FIRST` examples in the A3 discussion
+are conditional illustrations, not already-selected cause priorities. Under A
+they must be replaced by contributor-neutral target-semantic covenants; under
+C they may exist only inside the sensitive subset. This correction changes no
+selected A3 direction.
+
+A4 does not choose deterministic versus stochastic support (A5), catalog-wide
+versus definition/version-local kernel scope (A6), exact weights/rankings or
+disclosure (AUTHOR/SPEC/TUNE and RCS-02), policy-binding timing (A7), or
+committed lineage identity (RCS-04B). Every A/B/C answer moves A4 to
+`DIR-SELECTED` and opens A5 without adding or pruning a registered row. The
+register would then contain **20 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A5, 61
+`PRUNED`, 92 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 21`**. A letter selects worksheet direction only. The authoritative
 decision record remains unchanged.
 
 ## Session protocol and evidence
