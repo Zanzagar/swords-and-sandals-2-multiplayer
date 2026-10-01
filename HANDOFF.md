@@ -1,6 +1,82 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-01 named nature endures; biography chapters are next
+
+Zanzagar selected **RCS-04B2-A with RCS-04B2-B as the qualified named-
+metamorphosis/artifact-identity fallback**. Every reachable successful nonnull
+transformation commit preserves the Relic's definition and immutable fixed
+current-design gameplay contract/version. Combined with B1-A, one persistent
+artifact and one learnable named law endure while its operative assignment
+materially changes.
+
+Thus `ashen-17` may commit `Mercy -> Defiance` and later lawfully return under
+D5-B while remaining both `ashen-17` and `Ashen Covenant@v1`. B2-B stays armed
+and unfired. It may replace A only if a disclosed cross-definition family
+creates recurrent visible strategy or identity that assignment state or a
+semantic biography chapter cannot express, is uniquely forecastable before
+payment and commitment, and tests as a non-token equal-ceiling sidegrade.
+Cosmetic aliases, migration, premium progression, opaque routing, upgrade
+ladders, duplicate or collection laundering, rerolls, and resets fail B.
+
+A bounded read-only audit then upheld **RCS-04B3 as one atomic owner choice
+with a mandatory terminology/materiality guard**. Every option preserves the
+artifact's immutable history and one canonical nonforking biography lineage.
+B3 varies only the active semantic chapter inside it:
+
+- **history** is the append-only ordered authoritative event/commit record;
+- **biography lineage** is the one-artifact chain spanning every chapter;
+- **chapter** is the sole active player-material semantic epoch; and
+- **chapter ancestry** is the complete predecessor chain and precommit history.
+
+No option permits a fork, merge, reopened/reused predecessor, selective
+inheritance, reset, or simultaneous active chapters. “Reincarnation” remains
+reserved for B1-B's successor artifact. RCS-15 owns stored identity and
+migration; RCS-16 owns atomic replay and repair.
+
+The register is **185 rows: 16 `SCREEN`, 1 `OWNER-OPEN` at RCS-04B3, 61
+`PRUNED`, 100 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 17`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-04B3` asks whether each successful assignment-changing commit keeps the
+active chapter or turns one page in the same unbroken biography:
+
+- **A — every commit continues the active chapter. Qualified simplicity/non-
+  token-biography fallback.** `Mercy -> Defiance -> Mercy` appends to chapter
+  4 throughout. This is simplest, but no transformation can mechanically mean
+  “the same Soul has entered a new era.”
+- **B — every commit opens exactly one linked successor chapter. Recommended,
+  with A as the qualified fallback.** `Mercy/chapter 4 -> Defiance/chapter 5
+  -> Mercy/chapter 6`; chapters 5 and 6 inherit complete ancestry, and chapter
+  4 is never restored as active. One artifact, definition, and lineage endure
+  while each real becoming is irreversibly distinct.
+- **C — continuing and successor-chapter commits coexist.** Stable disclosed
+  transition contracts decide prospectively which routes continue and which
+  turn the page. This is legitimate only if two meaningful transformation
+  families need different biography behavior; it adds a taxonomy and is not a
+  stronger ideal fit merely because it offers both.
+
+Recommend **B with A as the qualified simplicity/non-token-biography
+fallback**. B1-A and B2-A already secure sameness; B makes transformation a
+new but inseparable chapter in one Soul-bearing artifact's life, the strongest
+local Souls and Simulacra / *Achintya Bheda Abheda* fit at this boundary. Fire
+A if no recurrent, forecastable later legal consequence distinguishes a
+chapter from a raw log marker, or the explanation/UI/persistence burden is not
+worth it.
+
+Chapter materiality cannot become chapter farming. B3 grants no per-chapter
+reward or refresh, free Rite, cooldown/claim/latch/payment reset, lock escape,
+reroll, Charm change, duplicate/collection change, or eligibility laundering.
+Cheap D5 `a -> b -> a` cycling retains every spent fact and creates no
+independent source or claim. Any deliberate chapter-local reset/reward is a
+new owner-visible axis, not hidden authoring. Any B3 answer opens RCS-05 at
+`Phi_SR = 16`; do not batch it. The full gear/progression SVG refresh remains
+an SR-12 closeout obligation after Relic design is complete.
+
 ## 2026-10-01 the artifact endures; definition-contract continuity is next
+
+**Superseded for navigation by the section above.** Its B2 card and
+`Phi_SR = 18` checkpoint predate the selected A answer.
 
 Zanzagar selected **RCS-04B1-A with RCS-04B1-B as the qualified
 reincarnation/artifact-identity fallback**. Every reachable successful nonnull
@@ -14044,7 +14120,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-01 00:38 UTC — Definition-contract continuity is next](docs/handoffs/2026-10-01-0038--relic-definition-contract-continuity-next.md)**
+[2026-10-01 00:53 UTC — Biography-chapter succession is next](docs/handoffs/2026-10-01-0053--relic-biography-chapter-succession-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

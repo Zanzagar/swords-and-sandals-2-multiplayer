@@ -537,10 +537,13 @@ Old RCS-04B is now a non-counting alias for RCS-04B1 through RCS-04B3.
 Zanzagar selected **RCS-04B1-A with RCS-04B1-B as the qualified
 reincarnation/artifact-identity fallback**: every successful nonnull
 transformation commit preserves the persistent Relic artifact instance.
-**RCS-04B2 is now the sole owner-facing choice under SR-04:** whether every
-commit also preserves its definition and fixed gameplay contract/version or
-stable within-definition and cross-definition metamorphosis doctrines coexist.
-The amended register contains 185 rows and `Phi_SR = 18`.
+Zanzagar then selected **RCS-04B2-A with RCS-04B2-B as the qualified named-
+metamorphosis/artifact-identity fallback**: every successful nonnull commit
+also preserves its definition and fixed gameplay contract/version. **RCS-04B3
+is now the sole owner-facing choice under SR-04:** whether each commit
+continues the active semantic biography chapter, every commit opens one linked
+successor chapter, or those doctrines coexist under stable authored transition
+rules. The amended register contains 185 rows and `Phi_SR = 17`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -29681,7 +29684,7 @@ nonempty proper subset; the logically empty case is incompatible with D5-B.
 Any future authorization for live same-definition contract hot-swaps would
 invalidate this atomicity result and require a fresh owner-visible split audit.
 
-### RCS-04B2 — committed definition-contract continuity — active owner choice
+### RCS-04B2 — committed definition-contract continuity — A selected with B fallback
 
 Fix one reachable successful nonnull transformation commit after proposal
 approval and collision settlement. Under selected B1-A, the output retains the
@@ -29756,6 +29759,147 @@ pruning a row. The register would then contain **16 `SCREEN`, 1 `OWNER-OPEN` at
 RCS-04B3, 61 `PRUNED`, 100 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 17`**. A letter selects worksheet direction only. Do not
 batch B3; the authoritative decision record and final-system SVG remain
+unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-01:** **A, with B as
+the qualified named-metamorphosis/artifact-identity fallback.** Thus
+`S_v=C_v`. Every reachable successful nonnull transformation commit preserves
+the same canonical Relic definition and its immutable fixed current-design
+gameplay contract/version. The artifact's selected assignment materially
+changes without making its named nature a temporary rung.
+
+`ashen-17` may commit `Mercy -> Defiance`, and later return under D5-B, while
+remaining both `ashen-17` and `Ashen Covenant@v1` throughout. Together B1-A
+and B2-A establish one persistent artifact with one learnable named law whose
+operative assignment can genuinely differ. This is a direct local *Achintya
+Bheda Abheda* expression; it does not make assignment difference cosmetic.
+
+B remains armed and unfired. It may replace A only if a stable disclosed
+cross-definition family creates recurrent player-visible strategy or identity
+that cannot truthfully be expressed through assignment state or a semantic
+biography chapter, is uniquely forecastable before payment and commitment,
+and remains a non-token equal-ceiling sidegrade. Cosmetic aliases, migration,
+premium-coded progression, opaque routing, upgrade ladders, duplicate or
+collection laundering, rerolls, and state resets fail its gate. Firing B
+reopens B3 and every affected dialect/signature mapping rather than silently
+transferring later answers across definitions.
+
+B2 moves to `DIR-SELECTED` and B3 opens without adding or pruning a row. The
+register now contains **16 `SCREEN`, 1 `OWNER-OPEN` at RCS-04B3, 61
+`PRUNED`, 100 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 17`**. The authoritative decision record and final-system SVG remain
+unchanged.
+
+### RCS-04B2 disposition and biography-chapter audit — 2026-10-01
+
+One bounded read-only named-claim audit independently re-derived B2's selected
+state and attacked whether old RCS-04B3 still bundled multiple identity axes.
+The audit **upheld one atomic owner choice with a mandatory terminology and
+materiality guard**. The same artifact has one canonical nonforking biography
+lineage under every B3 option. B3 varies only whether a successful commit keeps
+the currently active semantic chapter or atomically closes it and activates
+one unique linked successor chapter.
+
+For this card, **history** is the immutable ordered authoritative event and
+commit record and is never rewound. **Biography lineage** is the one-artifact,
+nonforking ordered chain spanning all its chapters and is always preserved.
+A **chapter** is the one active player-material semantic epoch inside that
+lineage. **Chapter ancestry** is the append-only predecessor chain plus the
+complete precommit history; a successor may support later chapter-aware
+predicates but cannot erase or reset anything. Reserve **reincarnation** for
+B1-B's successor-artifact fallback. Storage identifiers and patch/save/schema
+migration remain RCS-15, while atomic replay and repair remain RCS-16; neither
+can witness a chapter transition.
+
+C130-C's canonical nonforked fixed-version history and D5-B's compatible lived
+return do not prune an option. A whole-form history may span linked chapters,
+and a return can remain in one chapter or traverse successors without rewinding
+chronology. Forked, merged, reopened, reused, ancestry-resetting, chapterless,
+or simultaneously multi-active outputs are invalid states rather than extra
+directions. No register split or amendment is required.
+
+### RCS-04B3 — active semantic biography-chapter succession — active owner choice
+
+Fix one reachable successful nonnull assignment-changing transformation commit
+after proposal approval and collision settlement. Under selected B1-A and
+B2-A, hold fixed the persistent artifact ID, canonical definition/fixed
+contract/version, owner, Relic root, Bound Soul/source records, selected target,
+cause/proposal/collision result, contributor and proof ancestry, payments and
+costs, receipts/claims/latches/cooldowns, current information, Relic/Charm/equip/
+custody/lock state, transformation dialect, complete participant-control
+signature, and every nonchapter consequence. B3 asks only whether the active
+semantic chapter persists or one ancestry-complete successor becomes active.
+
+Let `H_v` contain the reachable successful nonnull assignment-changing commits
+whose output keeps the input's active chapter. Every commit outside `H_v` must
+atomically close that predecessor and activate exactly one fresh successor in
+the same biography lineage, with `parent=predecessor` and complete append-only
+ancestry.
+
+| Choice | Active-chapter doctrine | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every commit continues the active chapter** | `H_v=C_v`. Each transformation appends one authoritative event to the same active chapter; none creates a semantic successor chapter. | **Qualified simplicity/non-token-biography fallback.** A is clearest and prevents chapter-ledger or tooltip burden. The same artifact, named nature, biography, and chapter persist while assignment genuinely changes, so its local ideal fit remains direct. Its cost is that no transformation can mechanically read as “the same Soul has entered a new era”; threshold language remains flavor or ordinary history. | `ashen-17`, `Ashen Covenant@v1`, lineage `L17`, chapter 4, commits `Mercy -> Defiance`. It remains in chapter 4; a later lawful return to `Mercy` also appends to chapter 4. |
+| **B — every commit opens one linked successor chapter** | `H_v` is empty. Every successful transformation closes the prior active chapter and activates exactly one fresh sole successor in the same lineage, inheriting the complete history. Returning to an old assignment creates another successor; it never reopens the earlier chapter. | **Recommended, with A as the qualified simplicity/non-token-biography fallback.** B1-A and B2-A already secure one enduring artifact and named nature. B makes each real becoming turn one page in that unbroken biography: the predecessor and successor chapters are genuinely distinct yet inseparable. That is the strongest local Souls and Simulacra / *Achintya Bheda Abheda* fit here and is easier to teach than C's two transition grammars. The cost is a universal chapter ledger and the obligation to prove chapters matter without becoming farmable resets. | The same `ashen-17` and `Ashen Covenant@v1` commits `Mercy/chapter 4 -> Defiance/chapter 5`, with chapter 5 parented to 4. A later return becomes `Mercy/chapter 6`; chapter 4 remains immutable ancestry, not a restored active state. |
+| **C — continuing and successor-chapter commits coexist** | `H_v` is a nonempty proper subset of `C_v`. Stable authored transition-contract rules supply at least one chapter-preserving route and at least one successor-opening route. The classification is fixed and forecastable before irreversible commitment. | C gives ordinary development and true threshold transitions different biography meanings. It is legitimate only if two recurrent, player-legible transformation families genuinely need that distinction; coexistence itself is not a stronger ideal fit. It adds an edge taxonomy and makes chapter-opening routes look premium or punitive unless carefully balanced. | An ordinary `Mercy -> Defiance` contract may stay in chapter 4, while a disclosed Renewal contract `Defiance -> Tempered` opens chapter 5. The player sees which rule applies before paying or committing; neither result is chosen after audition. |
+
+A/B/C are exhaustive and mutually exclusive because `H_v` is a subset of the
+nonempty live commit domain: it is the whole domain, empty, or a nonempty proper
+subset. Under B or C, a successor always belongs to the same artifact,
+definition, and one biography lineage. Null, rejected, invalid,
+duplicate-delivered, and assignment-preserving no-op outcomes lie outside the
+domain and open no chapter.
+
+Recommend **B, with A as the qualified simplicity/non-token-biography
+fallback**. The same Soul-bearing artifact and its named nature endure; a real
+transformation nevertheless becomes an irreversible fact in the shape of its
+life. D5-B's return is then visibly non-restorative rather than a rewind. Fire
+A if no recurrent, forecastable, non-dominant later legal consequence can
+distinguish a semantic chapter from a raw log marker, or if the explanation,
+history UI, and persistence burden is not worth that play. Choose C only if
+matched examples prove that two meaningful transformation families need
+different chapter behavior and players can forecast the distinction without
+mistaking it for a power tier.
+
+The materiality guard is strict. A successor chapter needs at least one later
+player-visible lawful distinction—such as a monotonic ancestry-sensitive
+eligibility or explanation that recognizes a crossed threshold—while retaining
+the full lifetime record. A database ID, ordinal, flavor paragraph, animation,
+or log grouping alone canonicalizes to A. Conversely B3 grants no
+once-per-chapter reward or refresh, free Rite, cooldown/claim/latch/payment
+reset, lock escape, reroll, Charm reconfiguration, collection/duplicate change,
+or eligibility laundering. Any deliberate chapter-local reset or reward is a
+new player-material axis and must reopen or split before implementation.
+
+The principal exploit is cheap D5 cycling: `a -> b -> a` must not wash history
+by manufacturing chapters. Both legs retain spent evidence, receipts, claims,
+latches, cooldowns, costs, payments, information, causal/proposal ancestry,
+and chronology. Predecessor chapters are immutable and inactive, cannot occupy
+Relic source positions beside their successor, and never count as separate
+artifacts, definitions, collection entries, roots, or reward claims. Crash or
+retry must replay to the same successor, never append another or fork; RCS-16
+owns that proof. Patch/save migration reconstructs the same semantic relation
+and never counts as gameplay transformation; RCS-15 owns it.
+
+Under C, whether a route turns the page must be uniquely determined by stable
+authored transition-contract data and disclosed before payment and commitment.
+Delivery order, outcome audition, retry, hidden randomness, later participant
+input, or incidental contributor identity may not select chapter behavior.
+Exact route maps, names, and examples remain AUTHOR/SPEC. RCS-02/SR-10 own
+disclosure; RCS-13/SR-07 own operation admission and lock horizon; RCS-15/SR-11
+own persisted lineage/chapter identity and migration; RCS-16 owns atomicity and
+fault repair; RCS-05 owns later qualitative payoff; and RCS-17/RCS-18 own
+comprehension, chapter-washing, balance, simulation/RL, and human acceptance.
+
+Firing B1-B or B2-B reopens B3 and affected mappings. So does any proposal for
+fork/merge/reopen/selective inheritance, state reset, participant-selected or
+stochastic chaptering, or a chapter coordinate that changes transformation
+dialect or complete participant-control signature.
+
+Any live answer moves B3 to `DIR-SELECTED` and opens RCS-05 without adding or
+pruning a row. The register would then contain **15 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-05, 61 `PRUNED`, 101 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 16`**. A letter selects worksheet direction only. Do not
+batch RCS-05; the authoritative decision record and final-system SVG remain
 unchanged.
 
 ## Session protocol and evidence
