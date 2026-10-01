@@ -1,6 +1,81 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-01 payoff completes at settlement; input compatibility is next
+
+Zanzagar selected **RCS-05C1-A with RCS-05C1-C as the qualified temporal-
+policy/artifact-identity fallback**. Every complete legal positive-payoff
+package—singleton or B1-A's pair-irreducible dual package—fully commits its
+material payoff through already-paid source transitions at settlement. No
+unresolved payoff authorization survives to a later player-semantic cut, so
+C2/C3/C4 prune.
+
+A source-owned state may last after settlement when its whole legal transition
+was already committed there. Later animation, callbacks, network delivery, or
+storage do not create retention. C remains armed only if prototypes prove a
+recurrent forecastable temporal policy or artifact identity that immediate
+source transitions cannot express, with equal optimized ceiling and no hidden
+token economy. Firing it reopens the retained-lifecycle and affected downstream
+maps.
+
+A bounded audit then found that RCS-06 contains **no new owner decision**.
+Selected D04-R3.2 already requires separate binding 1v1, 2v2, and 3v3 gates;
+D04-R4.2 makes the complete allied composition the claimant in team formats;
+and the selected D04 version rule requires a fresh pinned run after semantic
+change. RCS-08 still owns team budgets and evidence fan-out; RCS-19 with
+SR-06/SR-12 still owns launch versus later-patch inclusion. RCS-06 is therefore
+`DERIVED`, not a repeated A/B/C card.
+
+A second atomicity audit **broke old RCS-07**. Root/input catalog support,
+root/payoff catalog support, and residual support for the complete root + input
++ payoff package can vary independently. The fifty-sixth amendment makes old
+RCS-07 a non-counting alias for RCS-07A/B/C. The register is now **197 rows:
+18 `SCREEN`, 1 `OWNER-OPEN` at RCS-07A, 66 `PRUNED`, 104 `DIR-SELECTED`, 6
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**. The authoritative
+decision record and final-system SVG remain byte-unchanged.
+
+`RCS-07A` asks only about root-to-input-Charm catalog support. A support edge
+means at least one lawful compatible configuration exists; it does not mean
+every context admits the pair:
+
+- **A — every input Charm is root-universal.** Every supported root/input pair
+  has at least one lawful supported configuration; root-specific semantics and
+  later lawful context conditions may still differ.
+- **B — selective compatibility, with every root input-capable. Recommended,
+  with A as the qualified clarity/anti-dead-loot fallback.** The support
+  relation is genuinely selective, but every supported root has at least one
+  input-Charm edge and every supported input Charm has at least one viable root.
+- **C — input-capable and input-ineligible roots coexist.** At least one
+  supported root has no input-Charm support in any lawful configuration; every
+  supported input Charm remains usable elsewhere.
+
+Recommend **B with A as the qualified clarity/anti-dead-loot fallback**. B
+makes a specific root/Charm relationship materially govern catalog support
+without creating C's inputless-root caste. For example, Ashen has support with
+Ember and Knot; Tide has support with Knot but not Ember. Both roots retain
+input customization and both Charms remain viable. Fire A if the matrix proves opaque, arbitrary,
+loot-trapping, or policy-empty. Later power and acceptance testing must test
+whether A lets one easy predicate adapter become the universal default.
+
+The principal later hypotheses are a disguised premium adapter and a dead
+reward: testing must determine whether broader support dominates narrower
+Charms and whether acquisition creates unusable inventory. 07A selects no
+breadth liability, compensation, magnitude, optimized ceiling, or rarity
+correlation. Exact edges and any lawful route/opponent/context conditions
+remain AUTHOR/SPEC; RCS-13/RCS-14 own their binding and recheck horizons.
+Outcome audition, hidden-seed conditioning, and retry shopping remain later
+exploit tests. 07B owns payoff support, 07C owns residual full-package support,
+and RCS-17/RCS-18 own optimized-ceiling, regret, comprehension, solver/RL,
+exploit, and human-play gates.
+
+Any 07A answer opens 07B at `Phi_SR = 18`. Do not preview or batch 07B/07C
+unless the owner asks. The final gear/progression SVG refresh remains an SR-12
+closeout obligation after Relic design is complete.
+
 ## 2026-10-01 dual payoff is inseparable; retained-payoff incidence is next
+
+**Superseded for navigation by the section above.** Its C1 card and 195-row
+checkpoint predate the selected A answer, derived RCS-06 scope, and RCS-07
+compatibility split.
 
 Zanzagar selected **RCS-05B1-A with RCS-05B1-C as the qualified receipt-
 agency/artifact-identity fallback**. Every positive dual-payoff resolution now
@@ -14365,7 +14440,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-01 03:24 UTC — Retained-payoff incidence is next](docs/handoffs/2026-10-01-0324--relic-retained-payoff-incidence-next.md)**
+[2026-10-01 04:52 UTC — Input-Charm compatibility is next](docs/handoffs/2026-10-01-0452--relic-input-charm-compatibility-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

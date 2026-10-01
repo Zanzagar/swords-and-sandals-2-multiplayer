@@ -553,10 +553,15 @@ old RCS-05B into three independently player-material settlement rows.
 identity fallback:** every positive dual settlement is one pair-inseparable
 source-mediated consequence, so conditional B2/B3 prune. A bounded audit then
 broke old RCS-05C into retained-payoff incidence, realization-control source,
-conditional participant timing, and nonterminal-expiry topology. **RCS-05C1
-is now the sole owner-facing choice under SR-09:** whether positive payoff is
-universally cut-complete, universally retention-bearing, or stable forms of
-both coexist. The amended register contains 195 rows and `Phi_SR = 22`.
+conditional participant timing, and nonterminal-expiry topology. **RCS-05C1-A
+is now selected with C as its qualified temporal-policy/artifact-identity
+fallback:** every positive package fully commits at settlement, so C2/C3/C4
+prune. RCS-06 then closes as a derived integration of already-selected format,
+whole-team claimant, and pinned-version rules. A further audit makes old
+RCS-07 a non-counting alias for separate input catalog support, payoff catalog
+support, and residual complete-package support rows. **RCS-07A is the
+sole owner-facing choice under SR-09.** The amended register contains 197 rows
+and `Phi_SR = 19`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -29985,10 +29990,11 @@ non-counting parent alias and replaces it with six counted rows:
 D and E remain separate because an input adapter may be lateral while a payoff
 Charm is progression, or the reverse. Their later marginal tests hold the other
 lane both empty and legally occupied so pair-only vertical synergy cannot hide.
-The dependency order is `B3 -> 05A -> 05B -> 05C -> RCS-06 -> RCS-07 ->
-RCS-08 -> 05D -> 05E -> 05F`. RCS-06 must first fix the format/team/release
-comparison domain, RCS-07 the legal root/Charm packages, and RCS-08
-cross-system stacking, team authority, and evidence fan-out. RCS-17 owns
+The dependency order is `B3 -> 05A -> 05B -> 05C -> RCS-06 integration ->
+RCS-07A -> RCS-07B -> RCS-07C -> RCS-08 -> 05D -> 05E -> 05F`. RCS-06
+inherits the selected format/team/version comparison domain; RCS-07A/B/C fix
+the legal root/Charm packages; and RCS-08 fixes cross-system stacking, team
+authority, and evidence fan-out. RCS-17 owns
 numeric acceptance, comprehension, fun, and exploit gates; RCS-18 owns
 enumeration, simulator/RL, accessibility, and human-playtest procedure.
 
@@ -30275,7 +30281,7 @@ Replacing one counted row with four raises the register to **195 rows: 21
 conditional lifecycle choices and selects none. The authoritative decision
 record and final-system SVG remain unchanged.
 
-### RCS-05C1 — retained-payoff incidence across all positive packages — active owner choice
+### RCS-05C1 — retained-payoff incidence across all positive packages — A selected with C fallback
 
 C1 asks only whether a positive package can leave any material source-owned
 payoff authorization unresolved beyond its settlement cut. It holds
@@ -30324,6 +30330,176 @@ RCS-06, 66 `PRUNED`, 104 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`**. A letter selects worksheet
 direction only. Do not batch C2-C4 or RCS-06; the authoritative decision record
 and final-system SVG remain unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-01:** **A, with C as
+the qualified temporal-policy/artifact-identity fallback.** Thus `R_v` is
+empty. Every complete legal positive-payoff package—singleton or B1-A's one
+pair-irreducible dual package—fully commits its material payoff through
+already-paid source transitions at its settlement cut. No unresolved payoff
+authorization survives to a later player-semantic cut. C2/C3/C4 therefore
+prune.
+
+A lasting source-owned state may remain after settlement when its complete
+legal state transition was already fixed and committed at that cut. Later
+animation, presentation, callback, network delivery, persistence write, or
+observation does not make that state a retained authorization. Conversely, an
+unresolved right to choose, condition, redirect, spend, or otherwise determine
+material payoff later would violate A even if implementation stores no token.
+
+C remains armed and unfired. It may replace A only if prototypes prove a
+recurrent, forecastable temporal policy or artifact identity that no immediate
+source-owned transition can express honestly, retains an equal optimized
+ceiling, and stays understandable without a hidden token economy. Firing C
+reopens C2/C3/C4 and every affected compatibility, stacking, power,
+persistence, information, and acceptance mapping. A delayed animation, an
+extra callback, or a lasting state already committed at settlement cannot fire
+the fallback.
+
+No implementation layout may disguise retention or multiply packages. A dual
+payoff cannot split into `P`-local and `Q`-local future entitlements; no branch
+may create a distinct Relic-origin action, reaction, persistent carrier,
+transferable right, fresh Relic evidence, second causal package, or unpaid
+payload. Retry must reproduce the same committed source transition rather than
+append another. Exact source transitions and presentation remain
+AUTHOR/SPEC/TUNE; RCS-08 still owns stacking and team interactions, and
+RCS-17/RCS-18 still own balance, comprehension, simulation/RL, exploits, and
+human acceptance.
+
+C1 moves to `DIR-SELECTED`; C2/C3/C4 move to `PRUNED`. Before resolving the
+integration screen below, the register contains **17 `SCREEN`, 1
+`OWNER-OPEN` at RCS-06, 66 `PRUNED`, 104 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 18`**. The authoritative decision record
+and final-system SVG remain unchanged.
+
+### RCS-06 integration audit — scope is inherited, not another owner choice
+
+A bounded read-only named-claim audit attacked whether “format/team/release
+scope over which that envelope must hold” exposed a new atomic owner decision.
+It **held only as a derived integration row**. Each player-material coordinate
+already has a selected owner, and asking it again here would permit the Relic
+power proof to contradict the larger progression measurement contract:
+
+- selected D04-R3.2 requires separate binding 1v1, 2v2, and 3v3 gates; a pooled
+  cross-format score is secondary and cannot rescue a failed format;
+- selected D04-R4.2 makes the complete legal allied composition the claimant in
+  team formats, while focal-seat and replacement/ablation views remain causal
+  diagnostics rather than alternate claimants; and
+- the selected D04 version rule pins one complete version tuple per gate run;
+  a semantic catalog or rule change creates a new version and reruns the gate,
+  never pools with the old result.
+
+This derivation does not steal later work. RCS-07 owns root/Charm catalog
+support. RCS-08 owns cross-system stacking, team-budget authority, and
+cross-combatant evidence fan-out. RCS-18 owns enumeration, solver/RL,
+accessibility, and playtest procedure. RCS-19 with SR-06/SR-12 owns whether the
+system or content ships at launch or in a later patch. Therefore “first
+playable 2v2” may stage implementation, but cannot weaken a release claim for a
+mode-neutral system into a 2v2-only power proof; an included semantically new
+release cannot inherit an old version's pass.
+
+RCS-06 moves to `DERIVED` and RCS-07 becomes the sole frontier. The 195-row
+register now contains **16 `SCREEN`, 1 `OWNER-OPEN` at RCS-07, 66 `PRUNED`,
+104 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 17`**.
+An upstream replacement of D04-R3.2, D04-R4.2, or the pinned-version rerun rule
+reopens this integration row and every dependent Relic power mapping.
+
+### RCS-07 prerequisite audit — three catalog-support relations must remain separate
+
+A second bounded read-only named-claim audit attacked whether “internal
+Relic-root/Charm compatibility policy” was one atomic owner choice. It
+**broke the row**. With one active root and two optional typed Charm lanes,
+three catalog-support relations can vary independently:
+
+1. `RCS-07A` — root-to-input-Charm catalog-support topology;
+2. `RCS-07B` — root-to-payoff-Charm catalog-support topology; and
+3. `RCS-07C` — residual support for a complete root + input + payoff package
+   after both unary root/Charm support edges exist.
+
+Fix design version `v`. Let nonempty `K^root_v` be the supported otherwise-
+legal root realizations, and let nonempty `K^input_v` and `K^payoff_v` be the
+supported materially functional input- and payoff-Charm candidates. Let
+`C^input_v ⊆ K^root_v × K^input_v` and
+`C^payoff_v ⊆ K^root_v × K^payoff_v` be the two unary catalog-support
+relations: an edge means that version `v` admits at least one lawful compatible
+configuration for that root/Charm pair, not that every context admits it.
+Define the pairwise-supported triple domain
+`T_v={(r,i,p):(r,i)∈C^input_v and (r,p)∈C^payoff_v}` and let
+`J_v ⊆ T_v` contain the actually supported complete two-Charm packages. `J_v` must
+remain nonempty because selected C3c.24-B/C3c.25-B already require at least one
+materially functional complementary input + payoff pair.
+
+The relations are not interchangeable. Ashen + Ember may have input support
+while Ashen + Mirror lacks payoff support, so 07A cannot answer 07B. Both unary
+pairs may have support while Ashen + Ember + Mirror lacks complete-package
+support because Ember's predicate rewrite invalidates Mirror's payoff
+assumptions, so neither answers 07C. C3c.3-B makes Bound Soul universally
+non-gating and therefore unable to change these support bits. C3c.25-B already
+rejects same-type pairs, and
+C3c.26-A forbids disguising incompatibility as a Capacity or new-pool charge.
+
+Old RCS-07 becomes a non-counting parent alias. The fifty-sixth explicit
+prerequisite amendment replaces its one counted row with three. The register
+therefore contains **197 rows: 18 `SCREEN`, 1 `OWNER-OPEN` at RCS-07A, 66
+`PRUNED`, 104 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 19`**. 07A and 07B are logically independent but serialize for the
+one-card owner workflow; 07C waits for both, and any 07C answer opens RCS-08.
+Exact matrix entries and any lawful route/opponent/context conditions remain
+AUTHOR/SPEC. RCS-02 owns disclosure; RCS-08 owns stacking/team interaction;
+RCS-09–RCS-12 acquisition, duplicates, and custody; RCS-13/RCS-14
+configuration binding and recheck horizons; RCS-15/RCS-16 persistence and
+fault repair; 05D–05F power topology; and RCS-17/RCS-18 acceptance and proof
+procedure.
+
+### RCS-07A — root-to-input-Charm catalog-support topology — active owner choice
+
+`C^input_v` is nonempty because the selected typed catalog requires materially
+functional input-Charm support. Every supported input Charm must have at least
+one root support edge; an authored definition with no lawful configuration is
+not a supported catalog entry. Ask only whether every root has input-lane support
+and whether the root/input support relation is complete. Hold payoff support
+and complete-package support fixed for 07B/07C.
+
+| Choice | Root-to-input catalog-support doctrine | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every input Charm is root-universal** | `C^input_v=K^root_v × K^input_v`. Every supported root/input pair has at least one lawful supported configuration. The Charm may still produce root-specific semantics through the root's existing grammar, and later lawful context conditions may differ; catalog support alone is universal. | **Qualified clarity/anti-dead-loot fallback.** A maximizes experimentation and makes every input-Charm reward potentially relevant to every owned root. Root and Charm may still remain distinct and jointly operative, so universality is not thematic flattening by itself. Its risk hypothesis is that the easiest predicate adapter fits the entire catalog and becomes the default input Charm everywhere. | Ashen and Tide each have support with both Ember and Knot. Ember may alter different truthful predicate structures under the two roots, and this card does not decide whether a supported pair has additional lawful context conditions. |
+| **B — selective compatibility, with every root input-capable** | `C^input_v` is a proper subset of `K^root_v × K^input_v`, while both projections are total: every supported root has at least one input-Charm support edge and every supported input Charm has support with at least one root. No root loses the input lane. | **Recommended, with A as the qualified clarity/anti-dead-loot fallback.** B makes the exact root/Charm relationship materially affect catalog support while preserving the promised input-customization role for every root. A supported pair can directly express meaningful unity without erasing two distinct item identities. The cost may be a larger matrix, dead-looking rewards, hidden premium pairs, and more collection friction; later cards decide whether those risks materialize and how they are handled. | Ashen has support with Ember and Knot; Tide has support with Knot but not Ember. Both roots retain input customization, and both Charms have a viable home. |
+| **C — input-capable and input-ineligible roots coexist** | The projection of `C^input_v` onto `K^root_v` is a nonempty proper subset, while every supported input Charm has support somewhere. At least one supported root has no input-Charm support in any lawful configuration; exact support among input-capable roots remains AUTHOR/SPEC. | C gives some roots a sharply distinct no-input identity and may support payoff-focused or unusually self-contained artifacts. It also creates a root caste that cannot use one of the system's two designed modifier roles, raising trap, perceived-incompleteness, and compensation hypotheses for later cards. Catalog coexistence is aggregate, not a stronger realization of the standing ideal. | Ashen has support with Ember and Knot. Dreamglass has no input-Charm support in any lawful configuration, though it may remain a viable root and may later have payoff-Charm support. |
+
+A/B/C are exhaustive under the viability rule. The matrix is either complete;
+proper with every root still represented; or proper because at least one root
+has no input edge. **07A selects only catalog-support incidence.** Exact edge
+identities, counts, symmetry, frequency, and any lawful conditioning
+coordinates stay AUTHOR/SPEC; RCS-13/RCS-14 own their binding and recheck
+horizons. 07A selects no breadth liability, compensation, magnitude, optimized
+ceiling, or rarity correlation.
+
+Recommend **B, with A as the qualified clarity/anti-dead-loot fallback**. B
+lets the root and input Charm remain genuinely distinct while their specific
+relationship determines whether the catalog admits at least one lawful
+configuration. It
+also avoids C's inputless-root caste. Fire A if prototypes show that the matrix
+is opaque, arbitrary, loot-trapping, or adds no recurrent policy beyond menu
+denial. Later 05D–05F and RCS-17/RCS-18 must test whether broad support makes
+one adapter dominate narrower Charms or become the universal default; a
+failure may reopen the compatibility/power boundary.
+
+The principal hypotheses are a disguised premium adapter and a dead reward;
+07A does not decide that they are forbidden or how breadth is compensated.
+Later 05D–05F and RCS-17/RCS-18 must test whether a broadly supported Knot
+reproduces narrower Charms' best policies while fitting more roots, whether an
+easy predicate becomes the universal default, and whether acquisition creates
+unusable inventory that RCS-09/RCS-10 must address. Outcome audition,
+hidden-seed conditioning, and retry shopping are later exploit hypotheses;
+lawful disclosed route/opponent/context conditioning and its bind/recheck
+timing remain unselected. Optimized ceiling, usage, regret, comprehension, and
+reward deadness must be measured rather than inferred from populated cells.
+
+Any A/B/C answer moves 07A to `DIR-SELECTED` and opens 07B without pruning a
+row. The register would then contain **17 `SCREEN`, 1 `OWNER-OPEN` at RCS-07B,
+66 `PRUNED`, 105 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 18`**. A letter selects worksheet direction only. Do not batch 07B
+or 07C; the authoritative decision record and final-system SVG remain
+unchanged.
 
 ## Session protocol and evidence
 
