@@ -1,6 +1,78 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-01 the artifact endures; definition-contract continuity is next
+
+Zanzagar selected **RCS-04B1-A with RCS-04B1-B as the qualified
+reincarnation/artifact-identity fallback**. Every reachable successful nonnull
+transformation commit updates the same persistent `soulRelicInstanceId`.
+Changing a remembered condition or attunement never retires that artifact or
+mints an inventory successor. Owner, root, definition/version, biography,
+proposal/cause ancestry, payments, and Relic/Charm configuration retain their
+separately governed identities.
+
+Thus `ashen-17` can commit `Mercy -> Defiance` and later lawfully return under
+D5-B, but every point remains the history of `ashen-17`. This is the cleanest
+local *Achintya Bheda Abheda* expression at the artifact boundary: numerical
+continuity and material transformation are both real. B1-B stays armed and
+unfired. It may replace A only if a disclosed exactly-one-successor
+Reincarnate family creates recurrent player-visible identity or strategy that
+cannot be represented by assignment state or a lineage chapter, remains an
+equal-ceiling sidegrade, and survives every anti-fork, retirement, custody,
+Charm, lock, payment, reroll, reset, retry, and recovery gate.
+
+A bounded read-only audit then upheld **RCS-04B2 as one atomic owner choice**
+with a wording guard. A definition and the immutable gameplay contract/version
+attached to it in the current design version form one canonical identity key.
+Assignment variation authored inside that contract is not a contract-identity
+change. A same-definition contract replacement or version change belongs to
+RCS-15 migration/retuning, not a live transformation; a material replacement
+mechanic requires a new definition ID. Authorizing live same-definition
+contract hot-swaps would invalidate this audit and require a fresh split.
+
+The register is **185 rows: 17 `SCREEN`, 1 `OWNER-OPEN` at RCS-04B2, 61
+`PRUNED`, 99 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 18`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-04B2` asks whether the same B1-A artifact keeps its named Relic
+definition and fixed contract when an assignment commits. Hold owner, root,
+Bound Soul/source, selected target, cause/proposal/collision result, payments,
+ancestry, receipts/latches/cooldowns, Charm configuration, and B3 biography
+fixed:
+
+- **A — every commit preserves the definition-contract identity.
+  Recommended, with B as the qualified named-metamorphosis/artifact-identity
+  fallback.** `ashen-17` changes `Mercy -> Defiance` while remaining both
+  `ashen-17` and `Ashen Covenant@v1`. Each named Relic stays a learnable law
+  while its operative assignment genuinely changes.
+- **B — within-definition continuity and cross-definition metamorphosis
+  coexist.** At least one route remains inside its definition, while a stable
+  disclosed route sends the same persistent artifact into a different named
+  definition and fixed target contract. For example, `phoenix-17` may cross
+  from `Ashen Seed@v1` into `Sunbird Testament@v1` at one authored legal entry
+  assignment.
+
+There are exactly two live branches. D5-B already requires every transforming
+definition to retain a same-artifact/owner/root/definition/version
+`a ... b ... a` history, so universal cross-definition replacement is
+unavailable unless D5 is explicitly reopened.
+
+Recommend **A with B as the qualified named-metamorphosis/artifact-identity
+fallback**. Fire B only if cross-definition transfiguration creates recurrent
+visible strategy or identity that neither assignment state nor B3 lineage can
+express, is uniquely forecastable before cost/commitment, and tests as a
+non-token equal-ceiling sidegrade. Cosmetic aliases, migrations, upgrade
+ladders, opaque routing, duplicate laundering, collection shortcuts, rerolls,
+or state resets fail B. Any B mapping that changes dialect or complete
+participant-control signature reopens the applicable RCS-03A/A3X guarantee.
+Either answer opens B3 at `Phi_SR = 17`; do not batch it. The full
+gear/progression SVG refresh remains an SR-12 closeout obligation after Relic
+design is complete.
+
 ## 2026-10-01 all signatures are paired; artifact-instance continuity is next
+
+**Superseded for navigation by the section above.** Its B1 card and
+`Phi_SR = 19` checkpoint predate the selected A answer.
 
 Zanzagar selected **RCS-04A3XD-A with RCS-04A3XD-B as the qualified clarity
 fallback**. The release catalog must contain at least one honest remembered-
@@ -13972,7 +14044,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-01 00:19 UTC — Artifact-instance continuity is next](docs/handoffs/2026-10-01-0019--relic-artifact-instance-continuity-next.md)**
+[2026-10-01 00:38 UTC — Definition-contract continuity is next](docs/handoffs/2026-10-01-0038--relic-definition-contract-continuity-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

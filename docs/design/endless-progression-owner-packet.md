@@ -534,10 +534,13 @@ A bounded prerequisite audit then proved that old RCS-04B compressed three
 independently player-material relations: artifact-instance continuity,
 definition-contract continuity, and semantic biography-lineage continuity.
 Old RCS-04B is now a non-counting alias for RCS-04B1 through RCS-04B3.
-**RCS-04B1 is the sole owner-facing choice under SR-04:** whether every
-nonnull transformation commit preserves the persistent Relic artifact instance
-or stable in-place and successor-artifact doctrines coexist. The amended
-register contains 185 rows and `Phi_SR = 19`.
+Zanzagar selected **RCS-04B1-A with RCS-04B1-B as the qualified
+reincarnation/artifact-identity fallback**: every successful nonnull
+transformation commit preserves the persistent Relic artifact instance.
+**RCS-04B2 is now the sole owner-facing choice under SR-04:** whether every
+commit also preserves its definition and fixed gameplay contract/version or
+stable within-definition and cross-definition metamorphosis doctrines coexist.
+The amended register contains 185 rows and `Phi_SR = 18`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -29563,7 +29566,7 @@ Replacing one counted row with three raises the register to **185 rows: 18
 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**. The authoritative
 decision record and final-system SVG remain unchanged.
 
-### RCS-04B1 — committed artifact-instance continuity — active owner choice
+### RCS-04B1 — committed artifact-instance continuity — A selected with B fallback
 
 Fix one reachable successful nonnull transformation commit after proposal
 approval and collision settlement. Its one selected target becomes the new
@@ -29623,6 +29626,136 @@ pruning a row. The register would then contain **17 `SCREEN`, 1 `OWNER-OPEN`
 at RCS-04B2, 61 `PRUNED`, 99 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 18`**. A letter selects worksheet direction only. Do not
 batch B2 or B3; the authoritative decision record and final-system SVG remain
+unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-01:** **A, with B as
+the qualified reincarnation/artifact-identity fallback.** Thus
+`C_v^{same-id}=C_v`. Every reachable successful nonnull transformation commit
+updates the same persistent `soulRelicInstanceId`; changing remembered
+condition or attunement never retires that artifact or mints a successor.
+Owner, root, definition/version, biography, proposal/cause ancestry, payments,
+and Relic/Charm configuration retain their separately governed identities.
+
+The committed assignment is materially new while the artifact is numerically
+continuous. `ashen-17` in `Mercy` may become `Defiance` and later lawfully
+return under D5-B, but every point in that history still concerns
+`ashen-17`. This is the cleanest local *Achintya Bheda Abheda* expression at
+the artifact boundary: neither continuity nor real transformation is reduced
+to the other. A null, rejected, invalid, duplicate-delivered, or
+assignment-preserving no-op mints nothing.
+
+B remains armed and unfired. It may replace A only if a stable disclosed
+successor-artifact family creates recurrent player-visible play or identity
+that cannot truthfully be represented by assignment state or a lineage
+chapter, remains a non-token equal-ceiling sidegrade, and survives every
+anti-fork, predecessor-retirement, ownership, one-root, custody, Charm,
+payment, information, reroll, reset, lock, retry, and recovery gate above. A
+fresh storage identifier or cosmetic rebirth is RCS-15 realization, not a B
+witness. Firing B reopens B2/B3 and every affected mapping rather than
+silently transferring their later answers onto successor artifacts.
+
+B1 moves to `DIR-SELECTED` and B2 opens without adding or pruning a row. The
+register now contains **17 `SCREEN`, 1 `OWNER-OPEN` at RCS-04B2, 61
+`PRUNED`, 99 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 18`**. The authoritative decision record and final-system SVG remain
+unchanged.
+
+### RCS-04B1 disposition and definition-contract audit — 2026-10-01
+
+One bounded read-only named-claim audit independently re-derived B1's selected
+state and attacked whether RCS-04B2 still bundled definition identity with a
+separate mutable gameplay-contract/version question. The audit **upheld B2 as
+one atomic owner choice, with one wording guard**: in the live transformation
+domain, a Relic definition and the immutable gameplay contract/version attached
+to that definition in the current design version form one canonical identity
+key. Assignment-level variation already authored inside that fixed contract is
+not a contract-identity change. A same-definition contract replacement or
+design-version change is migration/retuning under RCS-15 rather than a
+transformation commit; a material replacement mechanic requires a new
+definition ID and therefore belongs to B2's cross-definition branch.
+
+The audit found no hidden third live option and no need for another register
+amendment. D5-B makes the within-definition subset nonempty in every
+transforming definition. It is therefore either the whole commit domain or a
+nonempty proper subset; the logically empty case is incompatible with D5-B.
+Any future authorization for live same-definition contract hot-swaps would
+invalidate this atomicity result and require a fresh owner-visible split audit.
+
+### RCS-04B2 — committed definition-contract continuity — active owner choice
+
+Fix one reachable successful nonnull transformation commit after proposal
+approval and collision settlement. Under selected B1-A, the output retains the
+same persistent artifact instance. Also hold fixed the owner, Relic root, Bound
+Soul/source records, selected committed target, cause/proposal/collision result,
+payments, contributor ancestry, prior receipts/latches/cooldowns, Charm
+configuration, and B3's still-unselected biography relation. B2 asks only
+whether the output keeps the input artifact's canonical Relic definition and
+its fixed gameplay contract/version.
+
+Let `S_v` contain those commits that preserve that definition-contract key.
+D5-B guarantees `S_v` is nonempty: every transforming definition retains at
+least one same-active-artifact/owner/root/definition/fixed-version
+`a ... b ... a` history, and a patch migration or repair cannot supply that
+gameplay witness.
+
+| Choice | Definition-contract doctrine | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every commit preserves its definition-contract identity** | `S_v=C_v`. Every successful nonnull commit changes the selected assignment while preserving the artifact's definition ID and immutable fixed contract/version. | **Recommended, with B as the qualified named-metamorphosis/artifact-identity fallback.** A lets each named Relic remain a learnable law while it genuinely changes what it remembers or bears. It is the cleanest local *Achintya Bheda Abheda* expression at this boundary: one artifact and named nature persist, yet its authoritative assignment is materially different. The cost is that a fantasy such as Ashen literally transfiguring into Dreamglass cannot itself be mechanical definition change. | `ashen-17` is `Ashen Covenant@v1`. Its legal `Mercy -> Defiance` commit keeps `ashen-17` and `Ashen Covenant@v1`; future Ashen grammar and collection identity remain Ashen even though its operative assignment changed. |
+| **B — within-definition continuity and cross-definition metamorphosis coexist** | `S_v` is a nonempty proper subset of `C_v`. Stable authored routes include at least one within-definition transformation and at least one route where the same B1-A artifact crosses into another named definition and that target definition's fixed contract. | **Qualified named-metamorphosis fallback.** B can make a rare transfiguration recurrently meaningful: the enduring artifact enters a different named nature with different future legal play. It also adds cross-definition forecasting, collection/duplicate conflicts, new eligibility surfaces, and a much higher risk of an upgrade ladder or opaque identity laundering. Sequentially becoming another definition is not automatically a stronger expression of the standing ideal. | `phoenix-17` begins as `Ashen Seed@v1`. A disclosed `REBORN` transition has a fixed authored map to `Sunbird Testament@v1` and commits that same `phoenix-17` at a legal `REBORN` assignment. Other Ashen Seed routes remain within-definition, satisfying D5-B. |
+
+These are the two live exhaustive branches. The apparent third choice—**every
+commit crosses into another definition**, so `S_v` is empty—is unavailable
+while D5-B stands because each transforming definition must retain its own
+same-definition return history. It may be reconsidered only by explicitly
+reopening D5; it is not a selectable B2 answer on this branch.
+
+Recommend **A, with B as the qualified named-metamorphosis/artifact-identity
+fallback**. A gives a Relic a stable, comprehensible nature rather than making
+its name a temporary rung, while preserving real change through its selected
+assignment. Fire B only if a stable disclosed cross-definition family creates
+recurrent player-visible strategy or identity that cannot truthfully be
+expressed as an assignment change or a B3 lineage chapter, and matched testing
+shows a non-token equal-ceiling sidegrade rather than an upgrade path. Fall back
+to A if the difference is cosmetic, migration-only, premium-coded, opaque,
+dominant, or already expressible inside the source definition's fixed contract.
+
+Under B, the source definition/version, selected assignment or transition
+contract, and authored mapping must determine one unique disclosed target
+definition and a legal canonical entry assignment before approval, payment, or
+commitment. Delivery order, outcome audition, retry, hidden randomness, later
+participant input, or incidental contributor identity may not choose among
+definitions. If source and target labels have no later player-visible legal
+difference, they are aliases and fail to witness B. If context or cause would
+materially change the target map, that extra coordinate requires a fresh
+owner-visible boundary rather than being hidden in AUTHOR/SPEC.
+
+Suppose `ashen-17` would metamorphose into Dreamglass while its owner already
+possesses a Dreamglass Relic. B does not authorize silent destruction of the
+existing Relic, a second same-definition copy, consolation currency, target
+reroll, collection-completion laundering, or a free reset. The route must be
+forecast-invalid or use a separately selected RCS-09 duplicate/acquisition
+policy and RCS-16 atomic settlement. It also may not change owner or root,
+bypass Load, custody, equip, information, Charm or lock rules, or reset ancestry,
+receipts, claims, recurrence latches, cooldowns, costs, payments, or D5
+chronology.
+
+B2 chooses only universal preservation versus stable metamorphosis coexistence.
+Exact named Relics, source/target definitions, edge mapping, identifier spelling,
+presentation, and target mechanics remain AUTHOR/SPEC. RCS-09 owns acquisition,
+duplicates and completion. RCS-15 owns persisted identifiers, patch/save/schema
+version migration, deprecation, and invalid-configuration repair. RCS-16 owns
+atomic/idempotent commitment, duplicate/loss repair, and crash recovery. B3
+still owns continuous biography versus linked succession. A mapping that changes
+transformation dialect reopens its RCS-03A guarantee; one that changes a complete
+participant-control signature reopens the applicable RCS-04A3X incidence row
+and the six-contract/version derivation. Firing B1's successor-artifact fallback
+also reopens B2, B3, and affected mappings.
+
+Either live answer moves B2 to `DIR-SELECTED` and opens B3 without adding or
+pruning a row. The register would then contain **16 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04B3, 61 `PRUNED`, 100 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 17`**. A letter selects worksheet direction only. Do not
+batch B3; the authoritative decision record and final-system SVG remain
 unchanged.
 
 ## Session protocol and evidence
