@@ -1,5 +1,91 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-01 all signatures are paired; artifact-instance continuity is next
+
+Zanzagar selected **RCS-04A3XD-A with RCS-04A3XD-B as the qualified clarity
+fallback**. The release catalog must contain at least one honest remembered-
+condition contract and at least one honest remembered-attunement contract
+whose complete participant-control signature is exact `{I,D}`: at least one
+genuine live two-valid-proposed-target direct opportunity, at least one
+authored participant-intrinsic genuine-conflict context, and no material
+policy coordinate anywhere on that fixed contract.
+
+This is support, not equal counts, mirrored contexts, targets, prompt cadence,
+laws, causes, or cohorts. Timeout, disconnect, holder unavailability,
+execution failure, automatic default, an invalidated second target, or two
+labels for one target supplies neither witness. Together A3XI-A, A3XP-A, and
+A3XD-A derive universal paired signature support and a six-contract/version
+minimum across the three mutually exclusive complete signatures and two
+dialects.
+
+A3XD-B remains armed and unfired. It may replace A only if boundary direct-
+specialist play remains unclear after the best ask/answer rule, forecast, and
+live causal preview; interrupts attunement play; causes snapshot or last-
+moment Rite arbitrage, latency/default harm, teammate quarterbacking, or token
+intrinsic contexts; while state direct-specialist play remains legible, fun,
+non-token, non-dominant, and equal-ceiling. C remains the affirmative “only at
+the threshold does the Soul directly answer” replacement, not the fallback.
+
+One bounded read-only named-claim audit then **broke old RCS-04B before it was
+presented**. “Committed-output identity across artifact, definition, and
+lineage” compressed three independent player-material relations:
+
+1. whether a commit keeps the same persistent artifact instance;
+2. whether it keeps the same definition and fixed gameplay contract/version;
+   and
+3. whether it stays inside one continuous semantic biography or begins a
+   canonically linked successor lineage.
+
+A successor artifact can retain the same definition and complete lineage; the
+same artifact can cross definitions while retaining one biography; and the
+same artifact/definition can begin a linked successor chapter. Those variants
+change later legal ownership/duplicate treatment, available Relic grammar and
+participant-control signature, or ancestry-sensitive eligibility. They cannot
+be assigned silently to AUTHOR/SPEC.
+
+Selected D5-B requires every transforming definition to retain at least one
+same-active-instance/owner/root/definition/fixed-version `a ... b ... a`
+history. It rules out universal artifact or definition replacement, but a
+separate in-place route can satisfy D5 while another route creates a successor.
+It therefore does not collapse the three axes.
+
+The fifty-second prerequisite amendment makes old RCS-04B a non-counting
+alias and adds RCS-04B1 artifact-instance continuity, RCS-04B2 definition-
+contract continuity, and RCS-04B3 biography-lineage continuity. The register
+is **185 rows: 18 `SCREEN`, 1 `OWNER-OPEN` at RCS-04B1, 61 `PRUNED`, 98
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**.
+The authoritative decision record and final-system SVG remain byte-unchanged.
+
+`RCS-04B1` asks only whether a successful nonnull transformation commit keeps
+the persistent `soulRelicInstanceId`, holding owner, root, definition/version,
+semantic biography, selected target, cause/proposal ancestry, payments, and
+Relic/Charm configuration fixed:
+
+- **A — every commit preserves the artifact instance. Recommended, with B as
+  the qualified reincarnation/artifact-identity fallback.** `ashen-17` changes
+  from `Mercy` to `Defiance` and remains `ashen-17`. One artifact is genuinely
+  continuous while its remembered condition or attunement materially changes:
+  the cleanest local *Achintya Bheda Abheda* expression at this boundary.
+- **B — stable in-place and exactly-one-successor commits coexist.** Ordinary
+  changes remain in place, while a disclosed Reincarnate route retires one
+  predecessor into one fresh sole successor, holding definition/version and
+  complete biography fixed for this card. This is a qualified fallback only
+  if incarnation identity creates recurrent visible play or meaning that
+  assignment state or lineage cannot express.
+
+There are exactly two live branches after D5-B. “Every commit creates a
+successor” would violate its required same-active-instance return history and
+is available only by explicitly reopening D5, not as a third B1 answer.
+
+Recommend **A with B as the qualified reincarnation/artifact-identity
+fallback**. B may never fork/copy an artifact, leave a usable predecessor,
+change owner, reroll, reset ancestry or operative state, or bypass one-root,
+custody, Charm, payment, information, equip, reconfiguration, or lock rules.
+A fresh implementation ID with no later player-visible legal distinction is
+RCS-15 storage detail and fails B. Any B1 answer opens B2 at `Phi_SR = 18`;
+do not batch it. The full gear/progression SVG refresh remains an SR-12
+closeout obligation after Relic design is complete.
+
 ## 2026-09-30 policy is paired; direct-signature dialect incidence is next
 
 Zanzagar selected **RCS-04A3XP-A with RCS-04A3XP-B as the qualified clarity
@@ -13886,7 +13972,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 23:56 UTC — Direct-signature dialect incidence is next](docs/handoffs/2026-09-30-2356--relic-direct-dialect-incidence-next.md)**
+[2026-10-01 00:19 UTC — Artifact-instance continuity is next](docs/handoffs/2026-10-01-0019--relic-artifact-instance-continuity-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

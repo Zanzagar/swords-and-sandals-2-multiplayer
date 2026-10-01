@@ -526,10 +526,18 @@ RCS-04A3XI-B as the qualified clarity fallback**: pure participant-intrinsic
 Relics exist in both transformation dialects. Zanzagar then selected
 **RCS-04A3XP-A with RCS-04A3XP-B as the qualified clarity fallback**: the
 complete advance-bound bundled exact-`{P}` signature also has honest support
-in both transformation dialects. **RCS-04A3XD is now the sole owner-facing
-choice under SR-04:** whether the complete exact-`{I,D}` direct-specialist
-signature exists in both transformation dialects, the state dialect only, or
-the boundary dialect only. The register remains 183 rows and `Phi_SR = 18`.
+in both transformation dialects. Zanzagar then selected **RCS-04A3XD-A with
+RCS-04A3XD-B as the qualified clarity fallback**: the complete exact-`{I,D}`
+direct-specialist signature also has honest support in both transformation
+dialects. The three paired answers derive universal paired signature support.
+A bounded prerequisite audit then proved that old RCS-04B compressed three
+independently player-material relations: artifact-instance continuity,
+definition-contract continuity, and semantic biography-lineage continuity.
+Old RCS-04B is now a non-counting alias for RCS-04B1 through RCS-04B3.
+**RCS-04B1 is the sole owner-facing choice under SR-04:** whether every
+nonnull transformation commit preserves the persistent Relic artifact instance
+or stable in-place and successor-artifact doctrines coexist. The amended
+register contains 185 rows and `Phi_SR = 19`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -29390,7 +29398,7 @@ The register now contains **17 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3XD, 61
 `Phi_SR = 18`**. The authoritative decision record and final-system SVG
 remain unchanged.
 
-### RCS-04A3XD — exact-`{I,D}` direct-specialist signature dialect incidence — active owner choice
+### RCS-04A3XD — exact-`{I,D}` direct-specialist signature dialect incidence — A selected with B fallback
 
 Let `sigma_D` be the complete selected direct-specialist participant-control
 signature, not the Relic's entire gameplay identity. Its controlled-form
@@ -29464,6 +29472,158 @@ adding or pruning a row. The register would then contain **16 `SCREEN`, 1
 `OWNER-OPEN` at RCS-04B, 61 `PRUNED`, 98 `DIR-SELECTED`, 5 `DERIVED`, 1
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 17`**. A letter selects worksheet
 direction only. The authoritative decision record remains unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-01:** **A, with B as
+the qualified clarity fallback.** `Delta_D={state,boundary}`. The release
+catalog must contain at least one honest remembered-condition contract and at
+least one honest remembered-attunement contract whose complete participant-
+control signature is exact `{I,D}`. Each has at least one genuine live direct
+choice between two distinct still-valid proposed targets and at least one
+authored intrinsic genuine-conflict context, with no material policy
+coordinate anywhere on that fixed contract.
+
+This requires support, not equal counts, mirrored prompt cadence, common
+direct menus, shared intrinsic contexts, common automatic laws, common causes,
+or cross-dialect cohorts. Timeout, disconnect, holder unavailability,
+execution failure, default, an invalidated second target, or two labels for
+one target supplies neither witness. The selected XI-A, XP-A, and XD-A
+answers derive universal paired signature support and a minimum of six
+distinct fixed contract/version witnesses across the three mutually exclusive
+complete participant-control signatures and two transformation dialects.
+
+B remains armed and unfired. It may replace A only if boundary `sigma_D`
+stays materially unclear after the best ask/answer rule, pre-conflict
+forecast, and live causal preview; interrupts attunement play; creates
+boundary-specific snapshot or last-moment Rite arbitrage, latency/default
+harm, teammate quarterbacking, or only token intrinsic contexts; while state
+`sigma_D` remains legible, fun, non-token, non-dominant, and equal-ceiling. C
+remains the affirmative “only at the threshold does the Soul directly answer”
+replacement, not the fallback.
+
+The old aggregate A3X topology is now derived as universal pairing. If XD-B
+later fires while XI-A and XP-A remain selected, topology becomes paired/
+native coexistence and the minimum drops to five witnesses. Any fallback or
+later player-material coordinate reopens the applicable incidence and
+topology derivation rather than inheriting this label by name.
+
+A3XD moves to `DIR-SELECTED` and RCS-04B opens without adding or pruning a
+row. The register now contains **16 `SCREEN`, 1 `OWNER-OPEN` at RCS-04B, 61
+`PRUNED`, 98 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 17`**. The authoritative decision record and final-system SVG
+remain unchanged.
+
+### RCS-04B prerequisite audit — committed-output identity must be separated
+
+One bounded read-only named-claim audit attacked whether the registered
+“committed-output identity across artifact, definition, and lineage” row was
+one atomic owner decision. It **broke the row**. Holding the selected target
+and all other semantics fixed, three different relations can vary alone:
+
+1. **artifact-instance continuity** — whether the authoritative output retains
+   the same persistent `soulRelicInstanceId`;
+2. **definition-contract continuity** — whether it retains the same Relic
+   definition and fixed gameplay contract/version; and
+3. **semantic biography-lineage continuity** — whether the output remains in
+   one continuous biography or begins one canonically linked successor chapter.
+
+A successor artifact can keep the same definition and complete lineage; the
+same artifact can cross into a different authored definition while keeping one
+biography; and the same artifact and definition can begin a linked successor
+chapter. Those catalogs differ in later legal ownership/duplicate treatment,
+available transformation grammar and participant-control signature, or
+ancestry-sensitive eligibility. None is a storage-only label when it changes
+those consequences.
+
+Selected D5-B constrains but does not collapse the three axes. Every
+transforming definition must retain at least one legal history of the same
+active Relic instance, owner, root, definition, and fixed version that lives
+`a ... b ... a`. A catalog may satisfy that witness through an in-place route
+and still offer a separate successor route. D5 therefore makes universal
+artifact or definition replacement unavailable on the current branch; it does
+not silently choose universal continuity.
+
+The fifty-second explicit prerequisite amendment makes old RCS-04B a
+non-counting parent alias and replaces it with three counted rows in dependency
+order:
+
+1. `RCS-04B1` — committed artifact-instance continuity;
+2. `RCS-04B2` — committed definition-contract continuity; and
+3. `RCS-04B3` — committed semantic biography-lineage continuity.
+
+Exact named Relics, edge-to-doctrine assignment, identifiers, and presentation
+remain AUTHOR/SPEC after these doctrines. RCS-15 retains persisted identifier
+shape, schema/version migration, deprecation, and invalid-configuration repair.
+RCS-16 retains atomic/idempotent storage, predecessor retirement, crash replay,
+and duplicate/loss repair. Any later mapping that changes a dialect or complete
+participant-control signature reopens the applicable RCS-03A/RCS-04A3X
+guarantee rather than hiding that consequence in authoring.
+
+Replacing one counted row with three raises the register to **185 rows: 18
+`SCREEN`, 1 `OWNER-OPEN` at RCS-04B1, 61 `PRUNED`, 98 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**. The authoritative
+decision record and final-system SVG remain unchanged.
+
+### RCS-04B1 — committed artifact-instance continuity — active owner choice
+
+Fix one reachable successful nonnull transformation commit after proposal
+approval and collision settlement. Its one selected target becomes the new
+authoritative assignment. Hold owner, Relic root, definition and fixed gameplay
+contract/version, semantic biography lineage, selected target, cause and
+proposal identities, payments, contributor ancestry, Relic/Charm configuration,
+and every non-identity consequence fixed. B1 asks only whether that commit
+retains the active persistent artifact's `soulRelicInstanceId`.
+
+Let `C_v` contain those commits and let `C_v^{same-id}` contain the ones whose
+output keeps the input artifact instance. D5-B guarantees in-place witnesses in
+every transforming definition, so `C_v^{same-id}` cannot be empty on the
+current branch.
+
+| Choice | Artifact-instance doctrine | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every commit preserves the artifact instance** | `C_v^{same-id}=C_v`. A successful assignment change updates the same persistent artifact; it never retires that artifact merely because its remembered condition or attunement changed. | **Recommended, with B as the qualified reincarnation fallback.** A makes transformation read as one Relic genuinely changing rather than inventory replacement. It is the cleanest local *Achintya Bheda Abheda* expression here: the artifact remains numerically continuous while its operative assignment is materially different. It also keeps ownership, one-copy rules, Charms, locks, and recovery easiest to understand. The cost is that identities built around an actual death/recasting/new vessel cannot use a new incarnation as gameplay rather than flavor. | `ashen-17` commits `Mercy -> Defiance`. After commitment, the owner still has `ashen-17`; its exact assignment is now `Defiance`, its prior causes remain ancestry, and a later legal D5 route can return that same artifact to `Mercy`. |
+| **B — in-place and exactly-one-successor commits coexist** | `C_v^{same-id}` is a nonempty proper subset of `C_v`. Stable authored transition contracts identify at least one in-place route and at least one route that retires one predecessor and continues through exactly one fresh successor artifact. The successor keeps the held-fixed owner, root, definition/version, and complete semantic biography for this card; B2 and B3 remain open. | **Qualified reincarnation fallback.** B permits a named recasting, rebirth, or vessel-shedding identity whose new incarnation changes a later visible legal relation that cannot honestly be represented by the assignment itself or by lineage alone. It adds a second identity grammar, predecessor/successor UI, and severe duplicate, lock, Charm, retry, and recovery hazards. A merely fresh database ID or cosmetic rename is not a witness. | Ordinary Ashen still changes in place. A disclosed Phoenix Ashen route commits `Cinder -> Rekindled` by retiring `phoenix-8` and continuing as sole active `phoenix-9`, with the same owner, definition/version, and full ancestry held fixed. If no later rule can distinguish that incarnation change, it canonicalizes to A/RCS-15 rather than satisfying B. |
+
+These are the two live exhaustive branches because D5-B already makes the
+same-ID subset nonempty: it is either all of `C_v` or a nonempty proper subset.
+The apparent third option—**every commit creates a successor artifact**—is
+incompatible with D5-B's required same-active-instance `a ... b ... a` history
+for every transforming definition. It is available only as an explicit
+replacement that first reopens D5; it is not a selectable B1 direction under
+the current tree.
+
+Recommend **A, with B as the qualified reincarnation/artifact-identity
+fallback**. Fire B only if a stable successor-artifact family creates recurrent
+player-visible play or identity that cannot be truthfully encoded as a changed
+assignment or a linked lineage chapter, and matched testing shows it remains a
+non-token equal-ceiling sidegrade. B may never fork or copy an active artifact;
+leave the predecessor usable; change owner; bypass one-root, custody, equip,
+reconfiguration, Charm, payment, or information locks; reroll a result; or
+reset evidence, receipts, claims, recurrence latches, cooldowns, costs, or D5
+chronology. Crash safety and atomic predecessor retirement remain RCS-16 proof
+obligations, not extra B1 choices.
+
+The clean matched test is deliberately narrow. If `Mercy -> Defiance` keeps
+the same ID under A and retires `ashen-17` for sole successor `ashen-18` under
+B, but no later legal action, state, disclosure, counterplay, or authored
+meaning can distinguish those histories, B has supplied only a storage alias
+and fails. If a disclosed Reincarnate contract later makes the current
+incarnation itself a lawful, ancestry-preserving fact without granting any
+bypass above, the branches are genuinely different.
+
+B1 selects no definition change (B2), lineage succession (B3), exact named
+catalog or edge mapping (AUTHOR/SPEC), acquisition/duplicate policy (RCS-09),
+equip/reconfiguration or Charm lock horizon (RCS-13/RCS-14), persistence and
+migration realization (RCS-15), transaction/fault repair (RCS-16), power or
+acceptance threshold (RCS-17/RCS-18), UI, release, or implementation. A null,
+rejected, invalid, duplicate-delivered, or assignment-preserving no-op cannot
+mint an artifact identity under either answer.
+
+Either live answer moves B1 to `DIR-SELECTED` and opens B2 without adding or
+pruning a row. The register would then contain **17 `SCREEN`, 1 `OWNER-OPEN`
+at RCS-04B2, 61 `PRUNED`, 99 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 18`**. A letter selects worksheet direction only. Do not
+batch B2 or B3; the authoritative decision record and final-system SVG remain
+unchanged.
 
 ## Session protocol and evidence
 
