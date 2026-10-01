@@ -12884,3 +12884,81 @@ pruning a row. The register is **183 rows: 18 `SCREEN`, 1 `OWNER-OPEN` at
 RCS-04A3XP, 61 `PRUNED`, 96 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 19`**. Any A3XP answer opens A3XD at `Phi_SR = 18`.
 The authoritative decision record and final-system SVG remain unchanged.
+
+### RCS-04A3XP disposition and direct-signature dialect-incidence audit — 2026-09-30
+
+Zanzagar selected **RCS-04A3XP-A with RCS-04A3XP-B as the qualified clarity
+fallback**. Complete advance-bound bundled exact-`{P}` policy signatures
+therefore have honest non-token support in both transformation dialects: at
+least one remembered-condition and one remembered-attunement fixed contract
+use `sigma_P`. This requires support, not equal counts, mirrored twins,
+shared covenant menus, common automatic laws, common causes or routing, or a
+cross-dialect cohort.
+
+B remains armed only if boundary `sigma_P` stays materially opaque after the
+best one-sentence covenant preview and causal forecast, compounds attunement
+timing into configuration regret or snapshot/route arbitrage, or makes paid
+Rites feel arbitrary, while state `sigma_P` remains forecastable, desirable,
+non-token, and equal-ceiling. C remains the affirmative “the Soul teaches the
+threshold how to listen” replacement, not the fallback.
+
+One bounded read-only named-claim audit then attacked A3XD's atomicity,
+exhaustiveness, recommendation, coverage consequence, and arithmetic. It
+**held with one wording guard**: `sigma_D` is the complete selected
+participant-control/legal-action signature, not the Relic's entire gameplay
+signature. B2-A excludes every material policy coordinate from this class.
+B2I-B requires every member to have at least one honest live direct
+opportunity with two lawful arms naming distinct still-valid proposed targets
+and at least one authored intrinsic opportunity with no material participant
+collision-control coordinate. Timeout, disconnect, unavailable holder,
+execution failure, automatic default, an invalidated second target, or two
+labels for one target supplies neither witness.
+
+Let `Delta_D` be the nonempty subset of the two definition-pure dialects that
+contains an honest `sigma_D` contract. Its exhaustive options are therefore:
+
+1. **A — both dialects:** `Delta_D={state,boundary}`;
+2. **B — state only:** `Delta_D={state}`; and
+3. **C — boundary only:** `Delta_D={boundary}`.
+
+Recommend **A with B as the qualified boundary-legibility/interrupt
+fallback**. A keeps the ask/self-settle rhythm independent of transformation
+memory and prevents one dialect from becoming the exclusive immediate-agency
+caste. The pairing is aggregate rather than a theological mandate. A live
+`D` opportunity directly fits the standing ideal only when the Soul's choice
+matters while preserved proposals, contributor histories, and immutable
+Relic grammar remain distinct and indispensable; if the click supplies all
+meaningful causation, the witness fails. Cross-context `I/D` alternation is a
+partial fit.
+
+Fire B only if a genuine boundary `sigma_D` witness remains materially
+unclear after the best one-sentence ask/answer rule, forecast, and live causal
+preview—especially if players cannot predict whether the threshold asks or
+self-settles, its prompt causes unacceptable interruption, latency/default
+harm, teammate quarterbacking, paid-Rite regret, boundary-specific snapshot
+arbitrage, or only token intrinsic contexts—while state `sigma_D` remains
+legible, fun, bounded, non-dominated, and equal-ceiling. C is the affirmative
+“only at the threshold does the Soul directly answer” replacement, not the
+fallback.
+
+The selected complete signatures are mutually exclusive. XI-A and XP-A
+already require four distinct fixed contract/version witnesses across two
+signatures and two dialects. XD-A adds two and therefore establishes a six-
+witness floor; XD-B or C adds one and establishes a five-witness floor. This
+is a real content cost, but never a demand for mirrored items or equal counts;
+a renamed matrix-filler, unreachable intrinsic context, advance policy,
+one-button-plus-default prompt, or target invalidation cannot satisfy it.
+
+XI-A and XP-A each already satisfy A1C-C's joint two-dialect coverage guard,
+so all three A3XD orientations remain legal. A derives old universal pairing;
+B or C derives paired/native coexistence. Old no-pairing topology is no longer
+reachable. If both XI-B and XP-B later fire and become state-only, however,
+XD-B becomes illegal: A or C must retain boundary support. Any later player-
+material coordinate extends the affected complete signature and reopens its
+incidence row.
+
+A3XP moves to `DIR-SELECTED` and A3XD to `OWNER-OPEN` without adding or
+pruning a row. The register is **183 rows: 17 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3XD, 61 `PRUNED`, 97 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 18`**. Any A3XD answer opens RCS-04B at `Phi_SR = 17`.
+The authoritative decision record and final-system SVG remain unchanged.

@@ -1,6 +1,98 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-09-30 policy is paired; direct-signature dialect incidence is next
+
+Zanzagar selected **RCS-04A3XP-A with RCS-04A3XP-B as the qualified clarity
+fallback**. The release catalog must contain at least one honest remembered-
+condition contract and at least one honest remembered-attunement contract
+using the complete advance-bound bundled exact-`{P}` signature. This is
+support, not equal counts, mirrored twins, shared covenant menus, common laws,
+causes or routing, or a cross-dialect cohort.
+
+A3XP-B is armed and unfired. It may replace A only if boundary policy remains
+materially opaque after the best one-sentence preview and causal forecast,
+compounds attunement timing into configuration regret or snapshot/route
+arbitrage, or makes paid Rites feel arbitrary, while state policy remains
+forecastable, desirable, non-token, and equal-ceiling. C remains the
+affirmative “the Soul teaches the threshold how to listen” replacement, not
+the fallback.
+
+Selected A3XI-A and A3XP-A each cover both dialects, so A1C-C's joint-
+coverage guard is satisfied twice without forcing the final orientation. If
+both clarity fallbacks later fire and leave XI and XP state-only, A3XD must
+retain boundary support through A or C. Any later player-material coordinate
+extends the affected complete signature and reopens its incidence row.
+
+The register is **183 rows: 17 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3XD, 61
+`PRUNED`, 97 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 18`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-04A3XD` asks where the complete selected direct-specialist participant-
+control signature exists. `sigma_D` means all of these together:
+
+- no material participant policy exists anywhere on the fixed contract;
+- at least one honest live genuine conflict offers two lawful arms naming
+  distinct still-valid proposed targets and commits the selected target; and
+- at least one authored genuine conflict has no material participant
+  collision-control coordinate.
+
+Timeout, disconnect, holder unavailability, execution failure, automatic
+default, an invalidated second target, or two labels for one target supplies
+neither the `I` nor the `D` witness. The choices are:
+
+- **A — both state and boundary dialects. Recommended, with B as the
+  qualified clarity fallback.** Live Soul intervention and the ask/self-
+  settle rhythm remain independent of transformation memory. Neither dialect
+  becomes the exclusive immediate-agency caste. With XI-A and XP-A, this
+  derives universal paired signature support and a six-witness minimum across
+  three mutually exclusive signatures and two dialects.
+- **B — state dialect only. Qualified clarity fallback.** Live intervention
+  governs what a Relic comes to bear, where target meaning and the switch
+  between asking and answering are easiest to forecast. Boundary Relics remain
+  pure intrinsic or advance-policy specialists. This lowers the minimum to
+  five witnesses but makes state the immediate-agency caste.
+- **C — boundary dialect only.** Live choice becomes the distinctive moment
+  when the Soul answers an opened threshold. This is a strong affirmative
+  relational identity, not the clarity fallback: it concentrates immediate
+  agency in the timing-sensitive dialect and leaves state without the direct
+  signature.
+
+Concrete A witnesses: **Ashen of the Answering Hand** remembers condition; an
+Open Temper conflict asks the Soul to choose valid `MERCY` or `DEFIANCE`,
+while its disclosed Last Witness context settles intrinsically. **Dreamglass
+at the Answering Gate** remembers attunement; an Open Gate asks for valid
+`OATH` or `ECHO`, while a Veiled Gate answers for itself. Their contexts,
+cadence, laws, causes, and targets need not match.
+
+Recommend **A with B as the qualified clarity fallback**. A keeps live agency
+available without making transformation memory secretly choose the player's
+interaction grammar. Pairing is aggregate, not a theological symmetry
+mandate. The direct *Achintya Bheda Abheda* fit is local: the Soul's choice is
+material, yet inherited proposals, contributor histories, and immutable
+Relic grammar remain distinct and constrain what may become. A click that
+does all meaningful work fails.
+
+Fire B only if a genuine boundary `sigma_D` witness remains unclear after the
+best ask/answer rule, forecast, and live causal preview; interrupts attunement
+play; causes boundary-specific snapshot or last-moment Rite arbitrage,
+latency/default harm, teammate quarterbacking, or only token intrinsic
+contexts; while state `sigma_D` remains legible, fun, non-token, non-dominant,
+and equal-ceiling. C is the explicit “only at the threshold does the Soul
+directly answer” replacement.
+
+A paired answer derives old universal pairing. B or C derives paired/native
+coexistence; no-pairing topology is no longer reachable. Any A3XD answer opens
+RCS-04B at `Phi_SR = 17`; do not batch it. RCS-02 retains holder/disclosure/
+default/recovery, RCS-13 retains bind/rebind/lock horizon, and A4-A6 retain
+automatic-law recipes/sensitivity/variance/grammar. The full gear/progression
+SVG update remains an SR-12 closeout obligation after the Relic design is
+complete.
+
 ## 2026-09-30 intrinsic sovereignty is paired; policy dialect incidence is next
+
+**Superseded for navigation by the section above.** Its A3XP card and
+`Phi_SR = 19` checkpoint predate the selected A answer.
 
 Zanzagar selected **RCS-04A3XI-A with RCS-04A3XI-B as the qualified clarity
 fallback**. The release catalog must contain at least one honest pure-`{I}`
@@ -13794,7 +13886,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-09-30 23:08 UTC — Policy-signature dialect incidence is next](docs/handoffs/2026-09-30-2308--relic-policy-dialect-incidence-next.md)**
+[2026-09-30 23:56 UTC — Direct-signature dialect incidence is next](docs/handoffs/2026-09-30-2356--relic-direct-dialect-incidence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
