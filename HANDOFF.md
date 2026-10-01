@@ -1,6 +1,91 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-01 every transformation turns one page; payoff carrier is next
+
+Zanzagar selected **RCS-04B3-B with RCS-04B3-A as the qualified simplicity/
+non-token-biography fallback**. Every reachable successful nonnull assignment-
+changing transformation commit closes the sole active semantic chapter and
+opens exactly one fresh ancestry-complete successor inside the same persistent
+artifact, definition/fixed contract, and canonical nonforking biography
+lineage.
+
+Thus `ashen-17`, `Ashen Covenant@v1`, lineage `L17`, may live
+`Mercy/chapter 4 -> Defiance/chapter 5 -> Mercy/chapter 6`. Returning to
+`Mercy` never reopens chapter 4 or rewinds the intervening life. Every
+predecessor is immutable ancestry; no fork, merge, reuse, selective
+inheritance, reset, or multiple active chapters is legal. B3 grants no reward,
+refresh, free Rite, cooldown/claim/latch/payment reset, lock escape, reroll,
+Charm change, duplicate/collection change, independent source, or separate
+claim. Cheap D5 cycling cannot wash history. RCS-15 owns persistence/migration,
+and RCS-16 owns atomic replay/repair.
+
+B3-A stays armed and unfired. It replaces B only if no recurrent,
+forecastable, non-dominant legal consequence distinguishes a semantic chapter
+from raw log grouping, or its explanation/UI/persistence burden is not worth
+the meaning. A database ID, ordinal, flavor paragraph, animation, or log marker
+alone fires the fallback.
+
+A bounded read-only audit then **broke old RCS-05**. “Qualitative payoff and
+power envelope” had compressed six independently player-material choices:
+
+1. positive-payoff carrier / Relic-manifestation prevalence;
+2. same-evaluation settlement multiplicity;
+3. payoff realization horizon;
+4. input-Charm marginal power;
+5. payoff-Charm marginal power; and
+6. catalog/required-family optimized-ceiling topology.
+
+Old RCS-05 is now a non-counting alias for RCS-05A through RCS-05F. The
+dependency order is `05A -> 05B -> 05C -> RCS-06 -> RCS-07 -> RCS-08 ->
+05D -> 05E -> 05F`; the power rows remain screened until comparison scope,
+legal packages, stacking, team authority, and evidence fan-out are fixed.
+RCS-17 owns numeric acceptance/fun/exploit thresholds, while RCS-18 owns
+enumeration, simulator/RL, accessibility, and human-playtest procedure.
+
+The fifty-third amendment raises the register to **190 rows: 20 `SCREEN`, 1
+`OWNER-OPEN` at RCS-05A, 61 `PRUNED`, 101 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`**. The increase exposes work the old
+label hid; it accepts no payoff or power answer. The authoritative decision
+record and final-system SVG remain byte-unchanged.
+
+`RCS-05A` asks only whether a complete positive-payoff contract may create a
+distinct material Relic-origin action, reaction, or state, holding settlement
+multiplicity/horizon and power fixed:
+
+- **A — every payoff remains source-mediated. Recommended, with C as the
+  qualified emergent-artifact-identity fallback.** The weave changes or
+  authorizes a legal transition of an already-paid qualifying source. It
+  creates no separate Relic operation/state. `Guard + Heat` may reshape the
+  paid Heat resolution, but grants no Relic button or unequipped payload.
+- **B — every payoff contract is manifestation-capable.** Each contract has at
+  least one reachable distinct Relic-origin operation/state, such as a bounded
+  `Cinder Echo`. This gives every Relic a visible carrier but risks turning the
+  system into another proc/action engine.
+- **C — source-mediated-only and manifestation-capable contracts coexist.** A
+  stable disclosed contract identity decides which language applies. Ashen may
+  reshape its paid sources while Dreamglass manifests an Echo; neither can
+  switch opportunistically by outcome.
+
+Recommend **A with C as the qualified emergent-artifact-identity fallback**.
+A best preserves the Relic as a cross-source weaver rather than a seventeenth
+pseudo-item, and directly expresses *Achintya Bheda Abheda*: distinct paid
+sources retain identity, ownership, and cost while their inseparable relation
+genuinely changes resolution. Fire C only when prototypes reveal a recurrent,
+legible artifact manifestation that source transitions cannot represent
+honestly, creates policy rather than spectacle, and remains a nonrecursive
+equal-ceiling sidegrade.
+
+The exploit boundary is recursion and stolen payment. A manifested Echo cannot
+become fresh Relic evidence and mint another Echo; a source-mediated payoff
+cannot activate an unpaid Legendary payload, unequipped content, or an ally's
+ownership/payment. RCS-08 retains cross-system and team authority. Do not batch
+05B. The full gear/progression SVG refresh remains an SR-12 closeout obligation
+after Relic design is complete.
+
 ## 2026-10-01 named nature endures; biography chapters are next
+
+**Superseded for navigation by the section above.** Its B3 card and
+`Phi_SR = 17` checkpoint predate the selected B answer and RCS-05 amendment.
 
 Zanzagar selected **RCS-04B2-A with RCS-04B2-B as the qualified named-
 metamorphosis/artifact-identity fallback**. Every reachable successful nonnull
@@ -14120,7 +14205,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-01 00:53 UTC — Biography-chapter succession is next](docs/handoffs/2026-10-01-0053--relic-biography-chapter-succession-next.md)**
+[2026-10-01 01:10 UTC — Relic payoff carrier is next](docs/handoffs/2026-10-01-0110--relic-payoff-carrier-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

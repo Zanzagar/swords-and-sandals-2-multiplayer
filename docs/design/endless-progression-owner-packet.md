@@ -539,11 +539,16 @@ reincarnation/artifact-identity fallback**: every successful nonnull
 transformation commit preserves the persistent Relic artifact instance.
 Zanzagar then selected **RCS-04B2-A with RCS-04B2-B as the qualified named-
 metamorphosis/artifact-identity fallback**: every successful nonnull commit
-also preserves its definition and fixed gameplay contract/version. **RCS-04B3
-is now the sole owner-facing choice under SR-04:** whether each commit
-continues the active semantic biography chapter, every commit opens one linked
-successor chapter, or those doctrines coexist under stable authored transition
-rules. The amended register contains 185 rows and `Phi_SR = 17`.
+also preserves its definition and fixed gameplay contract/version. Zanzagar
+then selected **RCS-04B3-B with RCS-04B3-A as the qualified simplicity/non-
+token-biography fallback**: every successful assignment-changing commit opens
+one unique ancestry-complete successor chapter inside the same artifact,
+definition, and canonical nonforking biography lineage. A bounded audit broke
+old RCS-05 into six independently player-material payoff/power rows. **RCS-05A
+is now the sole owner-facing choice under SR-09:** whether every positive payoff
+remains mediated through already-paid qualifying sources, every payoff contract
+can manifest a distinct Relic-origin operation/state, or stable contract
+families do both. The amended register contains 190 rows and `Phi_SR = 21`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -29818,7 +29823,7 @@ chronology. Forked, merged, reopened, reused, ancestry-resetting, chapterless,
 or simultaneously multi-active outputs are invalid states rather than extra
 directions. No register split or amendment is required.
 
-### RCS-04B3 — active semantic biography-chapter succession — active owner choice
+### RCS-04B3 — active semantic biography-chapter succession — B selected with A fallback
 
 Fix one reachable successful nonnull assignment-changing transformation commit
 after proposal approval and collision settlement. Under selected B1-A and
@@ -29900,6 +29905,142 @@ pruning a row. The register would then contain **15 `SCREEN`, 1 `OWNER-OPEN` at
 RCS-05, 61 `PRUNED`, 101 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 16`**. A letter selects worksheet direction only. Do not
 batch RCS-05; the authoritative decision record and final-system SVG remain
+unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-01:** **B, with A as
+the qualified simplicity/non-token-biography fallback.** Thus `H_v` is empty.
+Every reachable successful nonnull assignment-changing transformation commit
+closes the sole active semantic chapter and atomically activates exactly one
+fresh successor in the same artifact, definition/fixed contract, and canonical
+nonforking biography lineage. The successor has exactly one predecessor and
+inherits the complete append-only ancestry and immutable precommit history.
+
+For example, `ashen-17`, `Ashen Covenant@v1`, lineage `L17`, may live
+`Mercy/chapter 4 -> Defiance/chapter 5 -> Mercy/chapter 6`. The return to
+`Mercy` does not reopen chapter 4 or rewind the intervening life. B1-A and B2-A
+secure the numerically same artifact and named nature; B3-B makes each real
+becoming a distinct but inseparable chapter in its life. This is the strongest
+local Souls and Simulacra / *Achintya Bheda Abheda* fit at this boundary.
+
+A remains armed and unfired. It may replace B only if no recurrent,
+forecastable, non-dominant later legal consequence distinguishes a semantic
+chapter from raw log grouping, or the explanation, history UI, persistence,
+and repair burden is not worth that meaning. A database ID, ordinal, flavor
+paragraph, animation, or log-only witness fires the fallback rather than
+justifying chapters.
+
+B3 grants no per-chapter reward or refresh, free Rite, cooldown/claim/latch/
+payment reset, lock escape, reroll, Charm reconfiguration, duplicate or
+collection change, independent source/claim, or eligibility laundering. Cheap
+D5 `a -> b -> a` cycling retains every spent fact and cannot wash history.
+Fork, merge, reopen/reuse, selective inheritance, multi-active chapters, and
+reset remain invalid. RCS-15 owns persistence/migration and RCS-16 owns atomic,
+idempotent replay/repair. Firing B1-B or B2-B reopens B3 and affected mappings.
+
+B3 moves to `DIR-SELECTED`. Before amendment, old RCS-05 would have opened at
+**15 `SCREEN`, 1 `OWNER-OPEN`, 61 `PRUNED`, 101 `DIR-SELECTED`, 5 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 16`**. The prerequisite audit below
+supersedes that aggregate frontier. The authoritative decision record and
+final-system SVG remain unchanged.
+
+### RCS-05 prerequisite audit — payoff and power must be separated
+
+One bounded read-only named-claim audit re-derived the selected Relic/Charm
+topology and attacked whether “qualitative payoff and power envelope” was one
+atomic owner choice. It **broke the row**. A single lateral/additive/mixed card
+would silently choose six consequences that can vary independently: whether
+payoff value stays inside already-paid source transitions or creates a distinct
+Relic operation/state; whether two aligned receipts settle jointly or each has
+a consequence; whether payoff settles locally or leaves a retained
+opportunity; the input Charm's marginal power; the payoff Charm's marginal
+power; and the optimized ceiling relation across roots and required semantic
+families.
+
+Those are different games even when both are casually called “bounded
+additive.” Two receipts could immediately reshape one paid source while both
+Charm lanes remain lateral, or they could create retained Relic-owned actions
+while payoff Charms provide vertical progression. The difference changes legal
+commands, state, acquisition value, UI, counterplay, and optimal builds; it is
+not numerical authoring.
+
+The fifty-third explicit prerequisite amendment makes old RCS-05 a
+non-counting parent alias and replaces it with six counted rows:
+
+1. `RCS-05A` — positive-payoff carrier / Relic-manifestation prevalence;
+2. `RCS-05B` — same-evaluation receipt-to-payoff settlement multiplicity;
+3. `RCS-05C` — payoff realization horizon;
+4. `RCS-05D` — input-Charm marginal power doctrine;
+5. `RCS-05E` — payoff-Charm marginal power doctrine; and
+6. `RCS-05F` — catalog-wide root/definition and required-semantic-family
+   optimized-ceiling topology.
+
+D and E remain separate because an input adapter may be lateral while a payoff
+Charm is progression, or the reverse. Their later marginal tests hold the other
+lane both empty and legally occupied so pair-only vertical synergy cannot hide.
+The dependency order is `B3 -> 05A -> 05B -> 05C -> RCS-06 -> RCS-07 ->
+RCS-08 -> 05D -> 05E -> 05F`. RCS-06 must first fix the format/team/release
+comparison domain, RCS-07 the legal root/Charm packages, and RCS-08
+cross-system stacking, team authority, and evidence fan-out. RCS-17 owns
+numeric acceptance, comprehension, fun, and exploit gates; RCS-18 owns
+enumeration, simulator/RL, accessibility, and human-playtest procedure.
+
+Replacing one counted row with six raises the register to **190 rows: 20
+`SCREEN`, 1 `OWNER-OPEN` at RCS-05A, 61 `PRUNED`, 101 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`**. Exact effects,
+magnitudes, durations, and cooldowns remain AUTHOR/SPEC/TUNE only while they
+introduce no new action family, accumulation class, or power tier. The
+authoritative decision record and final-system SVG remain unchanged.
+
+### RCS-05A — positive-payoff carrier / Relic-manifestation prevalence — active owner choice
+
+Fix the combatant, root, definition/version, Soul/resonance, input and payoff
+Charm state, qualifying already-paid sources, aligned receipt set, magnitude,
+beneficiary, format, and later settlement horizon. Ask only whether a complete
+positive-payoff contract can create a distinct material Relic-origin combat
+operation/state, rather than expressing all of its value through legal
+transitions owned by those paid qualifying sources.
+
+Let `P_v` be the nonempty current-version domain of complete positive-payoff
+contracts. Let `M_v` contain each contract with at least one reachable material
+Relic manifestation. A contract that sometimes remains source-mediated and
+sometimes manifests still belongs to `M_v`.
+
+| Choice | Positive-payoff carrier doctrine | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every payoff remains source-mediated** | `M_v` is empty. Every material consequence changes or authorizes a legal transition of at least one already-paid qualifying source while preserving its owner, payment, and identity. No distinct Relic action, reaction, or persistent effect carrier appears. | **Recommended, with C as the qualified emergent-artifact-identity fallback.** A preserves the Relic as a cross-source weaver rather than a seventeenth pseudo-item. The simulacrum's real equipment and actions stay visually primary, yet their inseparable relationship changes what they can lawfully do. It has the clearest causal story and smallest command/state burden. Its cost is that a Relic can never express itself through a genuinely separate apparition, echo, or operation. | `Guard + Heat` yields an aligned receipt that changes the authored resolution available through that same paid Heat source. It grants no Relic button, and it cannot activate an unequipped payload. |
+| **B — every payoff contract is manifestation-capable** | `M_v=P_v`. Every complete positive-payoff contract has at least one reachable receipt that creates a distinct bounded Relic-origin action, reaction, or state. It may also affect source-owned transitions. | B makes the Relic visibly present in every payoff identity and can support highly legible artifact-specific actions. The cost is systemic: every Relic becomes an additional proc/action/state engine, increasing UI, persistence, interruption, balance, and recursion burden even where source mediation would have told the truth more cleanly. | The same relationship authorizes a separately attributable `Cinder Echo`. The Echo exists only because the weave succeeded, but it is not the shield's or Technique's own transition. |
+| **C — source-mediated-only and manifestation-capable contracts coexist** | `M_v` is a nonempty proper subset of `P_v`. Stable disclosed contract identity determines which language applies; the carrier cannot switch opportunistically after seeing an outcome. | **Qualified emergent-artifact-identity fallback.** C lets an exceptional Relic manifest when prototypes find a recurrent operation that source transitions cannot represent honestly, while most stay integrated. It creates two payoff grammars and can make manifested Relics look like the premium tier unless each family retains equal optimized ceilings and strict niches. | Ashen contracts reshape their paid sources, while a disclosed Dreamglass contract manifests a bounded Echo operation. Both identities are known before commitment. |
+
+A/B/C are exhaustive because `M_v` is empty, all of `P_v`, or a nonempty
+proper subset. This card classifies capability, not whether every qualifying
+occurrence within a manifestation-capable contract must manifest.
+
+Recommend **A, with C as the qualified emergent-artifact-identity fallback**.
+A is the cleanest local *Achintya Bheda Abheda* expression: the paid sources
+retain distinct identities, owners, and costs while their inseparable
+relationship genuinely changes resolution. A valid manifestation can also
+fit the ideal as a distinct expression inseparable from that relationship;
+catalog coexistence under C is not philosophically stronger merely because it
+contains both. Fire C only if prototypes reveal a recurrent, legible artifact
+manifestation that cannot be represented honestly through source transitions,
+creates distinct policy rather than spectacle, and remains a nonrecursive,
+equal-ceiling sidegrade. B risks making manifestation obligatory even when it
+adds no honest play.
+
+The principal exploit is recursive evidence minting. A manifested `Cinder
+Echo` may never become fresh Relic evidence and pair with `Guard` to mint
+another Echo; one effect still cannot trigger another effect. Conversely, a
+source-mediated payoff may not smuggle in an unpaid Legendary payload, activate
+unequipped content, or borrow an ally's ownership/payment. RCS-08 retains
+cross-system stacking and team authority. Exact manifestation catalogs,
+source transitions, presentation, magnitudes, durations, and cooldowns remain
+AUTHOR/SPEC/TUNE subject to the reopening rule above.
+
+Any live answer moves 05A to `DIR-SELECTED` and opens 05B without adding or
+pruning a row. The register would then contain **19 `SCREEN`, 1 `OWNER-OPEN`
+at RCS-05B, 61 `PRUNED`, 102 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 20`**. A letter selects worksheet direction only. Do not
+batch 05B; the authoritative decision record and final-system SVG remain
 unchanged.
 
 ## Session protocol and evidence
