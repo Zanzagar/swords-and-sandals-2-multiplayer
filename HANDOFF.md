@@ -1,6 +1,86 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-01 payoff stays in the sources; receipt-local incidence is next
+
+Zanzagar selected **RCS-05A-A with RCS-05A-C as the qualified emergent-
+artifact-identity fallback**. Every material positive-payoff consequence now
+changes or authorizes a legal transition owned by at least one already-paid
+qualifying source while preserving source owner, payment, and identity. No
+positive payoff creates a distinct Relic-origin action, reaction, or
+persistent effect carrier.
+
+This selection is narrow. It does not remove the Relic's transformation,
+collision, chapter, claim, or recurrence machinery. `Guard + Heat` may change
+the authored resolution of the already-paid Heat source, but it grants no Relic
+button, apparition payload, or unequipped effect. Distinct sources remain
+themselves while their inseparable relationship changes what one can lawfully
+do—a direct local *Achintya Bheda Abheda* fit.
+
+05A-C stays armed and unfired. It may replace A only if prototypes reveal a
+stable disclosed material manifestation that source transitions cannot
+represent honestly, creates policy rather than spectacle, and remains a
+nonrecursive equal-ceiling sidegrade. VFX, names, logs, callbacks, or renamed
+source transitions do not satisfy it. Firing C reopens the affected downstream
+payoff, power, compatibility, stacking, persistence, and acceptance mappings.
+
+A bounded read-only audit then **broke old RCS-05B**. “One joint payoff versus
+one payoff per receipt” omitted both a single winning receipt and a layered
+local-plus-pair consequence. The fifty-fourth amendment makes old 05B a
+non-counting alias for:
+
+1. `RCS-05B1` — receipt-local payoff incidence;
+2. `RCS-05B2` — receipt-local consequence breadth; and
+3. `RCS-05B3` — pair-irreducible supplement incidence.
+
+For one fixed positive dual resolution `{P,Q}`, material consequences are
+canonicalized by minimal semantic causal basis. `L(d)` contains packages
+attributable solely to `P` or `Q`; `J(d)` is a pair-irreducible package whose
+legality or identity changes if either receipt disappears. Multiple fields,
+callbacks, VFX events, or writes with one basis remain one package. This keeps
+implementation layout from manufacturing settlement multiplicity.
+
+The amended register is **192 rows: 21 `SCREEN`, 1 `OWNER-OPEN` at RCS-05B1,
+61 `PRUNED`, 102 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 22`**. The increase exposes choices hidden by the old shorthand; it
+selects none. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-05B1` asks only whether any positive dual settlement contains a
+receipt-local payoff package:
+
+- **A — every dual payoff is pair-inseparable. Recommended, with C as the
+  qualified receipt-agency/artifact-identity fallback.** `P` and `Q` are both
+  indispensable to one source-mediated consequence. Remove either and that
+  consequence is unavailable or materially different.
+- **B — every dual payoff is local-bearing.** Every positive dual settlement
+  has at least one package attributable solely to one receipt. B1 does not yet
+  decide whether exactly one receipt wins, both receive packages, or a joint
+  supplement also exists.
+- **C — joint-only and local-bearing forms coexist.** Stable disclosed contract
+  identity determines which grammar applies before commitment or outcome.
+
+Recommend **A with C as the qualified receipt-agency/artifact-identity
+fallback**. A keeps two truthful, consumer-distinct receipts meaningful while
+their unity produces one consequence rather than two free rewards. This is the
+strongest direct local ideal fit and the smallest arbitration/jackpot surface.
+Fire C only if prototypes prove a stable identity where receipt-local payoff
+voice creates recurrent policy fusion cannot express, at equal optimized
+ceiling and without jackpot dominance. Universal B makes every dual weave an
+output/arbitration engine before that burden is justified.
+
+A “joint” consequence depending only on `P` is disguised priority, not A. Two
+callbacks are not two packages. Local packages cannot double-spend a shared
+paid source or resolve by delivery order; pair supplements cannot mint fresh
+Relic evidence; no branch activates unpaid/unequipped payloads or borrows ally
+ownership/payment. Exact winner authority stays RCS-02, horizon stays 05C,
+compatibility RCS-07, stacking/team authority RCS-08, atomicity RCS-16, and
+power/acceptance 05D-F/RCS-17/18. Do not batch B2/B3 or 05C. The final gear/
+progression SVG refresh remains an SR-12 closeout obligation.
+
 ## 2026-10-01 every transformation turns one page; payoff carrier is next
+
+**Superseded for navigation by the section above.** Its 05A card and
+`Phi_SR = 21` checkpoint predate the selected A answer and 05B amendment.
 
 Zanzagar selected **RCS-04B3-B with RCS-04B3-A as the qualified simplicity/
 non-token-biography fallback**. Every reachable successful nonnull assignment-
@@ -14205,7 +14285,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-01 01:10 UTC — Relic payoff carrier is next](docs/handoffs/2026-10-01-0110--relic-payoff-carrier-next.md)**
+[2026-10-01 01:43 UTC — Receipt-local payoff incidence is next](docs/handoffs/2026-10-01-0143--relic-receipt-local-payoff-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

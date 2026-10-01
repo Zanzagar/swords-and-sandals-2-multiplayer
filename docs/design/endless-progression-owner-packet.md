@@ -545,10 +545,14 @@ token-biography fallback**: every successful assignment-changing commit opens
 one unique ancestry-complete successor chapter inside the same artifact,
 definition, and canonical nonforking biography lineage. A bounded audit broke
 old RCS-05 into six independently player-material payoff/power rows. **RCS-05A
-is now the sole owner-facing choice under SR-09:** whether every positive payoff
-remains mediated through already-paid qualifying sources, every payoff contract
-can manifest a distinct Relic-origin operation/state, or stable contract
-families do both. The amended register contains 190 rows and `Phi_SR = 21`.
+then selected A with C as the qualified emergent-artifact-identity fallback:**
+every positive payoff remains mediated through already-paid qualifying sources;
+no separate Relic-origin payoff operation/state appears. A bounded audit broke
+old RCS-05B into three independently player-material settlement rows.
+**RCS-05B1 is now the sole owner-facing choice under SR-09:** whether positive dual
+settlements are universally pair-inseparable, universally contain some
+receipt-local consequence, or stable joint-only/local-bearing forms coexist.
+The amended register contains 192 rows and `Phi_SR = 22`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -29991,7 +29995,7 @@ magnitudes, durations, and cooldowns remain AUTHOR/SPEC/TUNE only while they
 introduce no new action family, accumulation class, or power tier. The
 authoritative decision record and final-system SVG remain unchanged.
 
-### RCS-05A — positive-payoff carrier / Relic-manifestation prevalence — active owner choice
+### RCS-05A — positive-payoff carrier / Relic-manifestation prevalence — A selected with C fallback
 
 Fix the combatant, root, definition/version, Soul/resonance, input and payoff
 Charm state, qualifying already-paid sources, aligned receipt set, magnitude,
@@ -30042,6 +30046,134 @@ at RCS-05B, 61 `PRUNED`, 102 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 20`**. A letter selects worksheet direction only. Do not
 batch 05B; the authoritative decision record and final-system SVG remain
 unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-01:** **A, with C as
+the qualified emergent-artifact-identity fallback.** Thus `M_v` is empty.
+Every material positive-payoff consequence changes or authorizes a legal
+transition owned by at least one already-paid qualifying source while
+preserving source owner, payment, and identity. No positive payoff
+creates a distinct Relic-origin action, reaction, or persistent effect carrier.
+
+This does not erase the Relic's separately selected transformation, collision,
+chapter, claim, or recurrence machinery. It fixes only the carrier of positive
+payoff value. `Guard + Heat` may therefore change the authored resolution of
+that already-paid Heat source, but it grants no Relic button, apparition
+payload, or unequipped effect. Distinct paid sources remain themselves while
+their inseparable relationship changes what one can lawfully do—a direct local
+Souls and Simulacra / *Achintya Bheda Abheda* fit.
+
+C remains armed and unfired. It may replace A only if prototypes reveal a
+stable disclosed contract family with a recurrent, legible material Relic
+manifestation that source-owned transitions cannot represent honestly,
+creates distinct policy rather than spectacle, and remains a nonrecursive
+equal-ceiling sidegrade. VFX, names, logs, extra callbacks, or a renamed source
+transition do not satisfy C. Firing C reopens B1-B3, 05C, and every affected
+power, stacking, compatibility, persistence, and acceptance mapping.
+
+A manifested-looking presentation cannot become fresh Relic evidence or
+trigger another effect. Source mediation cannot activate an unpaid Legendary
+payload, unequipped content, or borrow an ally's ownership/payment. RCS-08
+retains cross-system stacking and team authority. Exact source transitions,
+presentation, magnitudes, durations, and cooldowns remain AUTHOR/SPEC/TUNE
+subject to the registered reopening rule.
+
+05A moves to `DIR-SELECTED`. Before amendment, old 05B would have opened at
+**19 `SCREEN`, 1 `OWNER-OPEN`, 61 `PRUNED`, 102 `DIR-SELECTED`, 5 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`**. The prerequisite audit below
+supersedes that aggregate frontier. The authoritative decision record and
+final-system SVG remain unchanged.
+
+### RCS-05B prerequisite audit — payoff causal basis must precede breadth and supplementation
+
+One bounded read-only named-claim audit independently re-derived selected
+05A-A and attacked whether old 05B's “one joint settlement versus independently
+consequential per-receipt settlements” was exhaustive. It **broke the row**.
+C3c.44-C3c.46 deliberately leave surviving receipts free to map to, share,
+compete for, or amplify payoffs. The old shorthand omitted at least two
+material worlds that still obey source mediation: exactly one winning receipt
+may own the consequence, or one/both receipt-local consequences may coexist
+with an irreducible pair-dependent consequence.
+
+Callback, field, and write counts cannot repair the question. For one fixed
+legal source-mediated positive dual-payoff resolution `d` with final receipt
+set `{P,Q}`, hold every nonreceipt fact, eligibility, horizon, magnitude,
+beneficiary, and format fixed. Canonicalize simultaneous consequences by their
+**minimal semantic causal basis**:
+
+- `L(d)` contains receipt-local packages attributable solely to `P` or solely
+  to `Q`; because receipt width is two, `|L(d)|` is zero, one, or two; and
+- `J(d)` records one pair-irreducible package whose legality or identity
+  changes if either receipt is removed and which is not merely the commutative
+  union of local packages.
+
+Multiple fields, callbacks, VFX events, or writes sharing one minimal basis are
+one package. Positivity excludes `|L(d)|=0` with no `J(d)`. This exposes three
+independent axes. The fifty-fourth explicit prerequisite amendment makes old
+RCS-05B a non-counting parent alias and replaces it with:
+
+1. `RCS-05B1` — receipt-local payoff incidence in positive dual settlements;
+2. `RCS-05B2` — receipt-local consequence breadth inside the local-bearing
+   domain; and
+3. `RCS-05B3` — pair-irreducible supplement incidence inside that domain.
+
+The dependency order is `05A -> 05B1`. B1-A prunes B2/B3 and opens 05C.
+B1-B/C opens B2, then B3, then 05C. B2 and B3 are logically independent but
+serialize so the owner still receives one decision at a time. Exact winning-
+receipt selector, holder, default, and disclosure remain RCS-02; realization
+horizon remains 05C; legal packages RCS-07; cross-system/team stacking RCS-08;
+atomic/idempotent commit RCS-16; and power plus numeric/fun gates 05D-F and
+RCS-17/RCS-18.
+
+Replacing one counted row with three raises the register to **192 rows: 21
+`SCREEN`, 1 `OWNER-OPEN` at RCS-05B1, 61 `PRUNED`, 102 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**. The amendment exposes
+hidden work and selects no settlement topology. The authoritative decision
+record and final-system SVG remain unchanged.
+
+### RCS-05B1 — receipt-local payoff incidence in positive dual settlements — active owner choice
+
+Let `D_v` be the nonempty current-version domain of legal source-mediated
+positive dual-payoff resolutions under selected 05A-A. For each `d` in `D_v`,
+use the fixed causal-basis model above. Let `L_v` contain exactly those
+resolutions with `|L(d)|>0`. B1 asks only whether any positive dual settlement
+has a receipt-local payoff package. It holds exact local breadth and every
+pair-irreducible supplement fixed for B2/B3.
+
+| Choice | Receipt-local incidence doctrine | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every dual payoff is pair-inseparable** | `L_v` is empty. Every positive dual resolution has one `J(d)` and no receipt-local package. Both receipts are counterfactually indispensable to one source-mediated relational consequence; removing either makes that consequence unavailable or materially different. | **Recommended, with C as the qualified receipt-agency/artifact-identity fallback.** A makes dual weave mean two truthful distinct receipts expressing one consequence, rather than two free rewards. It has the strongest direct local *Achintya Bheda Abheda* fit and the smallest arbitration/jackpot surface. The cost is that no receipt can retain an independently attributable payoff voice when it co-occurs. | `P = Guard + Heat` and `Q = Feint + Strike` jointly authorize one altered transition owned by the already-paid Strike source. Remove either receipt and that transition is unavailable or different. It is not a new Relic action under 05A-A. |
+| **B — every dual payoff is local-bearing** | `L_v=D_v`. Every positive dual resolution has at least one receipt-local package. B1 does not decide whether exactly one receipt wins or both receive local packages, and it does not decide whether a `J(d)` supplement also exists. | B guarantees receipt-level payoff agency everywhere and makes individual successes easier to attribute. It also turns every dual weave into a potential arbitration/output engine, increasing delivery-order, shared-source double-spend, UI, and jackpot pressure before breadth or supplementation is chosen. | `P` owns a source-mediated change to the paid Guard transition. B1 leaves open whether `Q` also owns a paid Strike change and whether the pair additionally creates an irreducible joint change. |
+| **C — joint-only and local-bearing forms coexist** | `L_v` is a nonempty proper subset of `D_v`. Stable disclosed contract identity supplies at least one pair-inseparable resolution and at least one local-bearing resolution; classification cannot switch after outcome audition. | **Qualified receipt-agency/artifact-identity fallback.** C lets exceptional Relics preserve a receipt-local voice where that creates real policy, while other Relics remain relationally fused. It adds two causal grammars and can make local-bearing identities the hidden premium unless both classes keep equal optimized ceilings and strict niches. | Ashen dual payoffs may be pair-inseparable, while a disclosed Dreamglass contract preserves at least one receipt-local package. Players know which grammar applies before commitment. |
+
+A/B/C are exhaustive because `L_v` is empty, all of nonempty `D_v`, or a
+nonempty proper subset. A purported joint package that actually depends only
+on `P` is a disguised receipt-local priority outcome, not an A witness. Two
+callbacks or log lines do not establish B; a material minimal causal basis
+does.
+
+Recommend **A, with C as the qualified receipt-agency/artifact-identity
+fallback**. `P` and `Q` remain truthful, consumer-distinct receipts and each is
+indispensable, but their unity produces one source-mediated relational
+consequence. Fire C only if prototypes prove a stable identity where retaining
+receipt-local consequence creates recurrent policy that fusion cannot express,
+at equal optimized ceiling and without jackpot dominance. Universal B makes
+individual payoff agency the grammar of every dual weave before its arbitration
+cost is justified.
+
+No local package may double-spend a shared paid source, resolve by callback or
+delivery order, activate an unpaid/unequipped payload, or borrow ally ownership
+or payment. A pair supplement cannot mint fresh Relic evidence. Under C,
+classification is prospective and versioned; retry, hidden randomness, outcome
+audition, or incidental contributor identity cannot select it.
+
+Selecting B1-A would move B1 to `DIR-SELECTED`, prune B2/B3, and open 05C. The
+register would then contain **18 `SCREEN`, 1 `OWNER-OPEN` at RCS-05C, 63
+`PRUNED`, 103 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 19`**. Selecting B1-B/C would instead open B2 at **20 `SCREEN`, 1
+`OWNER-OPEN`, 61 `PRUNED`, 103 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 21`**. A letter selects worksheet direction only. Do not
+batch B2/B3 or 05C; the authoritative decision record and final-system SVG
+remain unchanged.
 
 ## Session protocol and evidence
 
