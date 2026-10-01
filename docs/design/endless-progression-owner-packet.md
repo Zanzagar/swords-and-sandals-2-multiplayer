@@ -549,10 +549,14 @@ then selected A with C as the qualified emergent-artifact-identity fallback:**
 every positive payoff remains mediated through already-paid qualifying sources;
 no separate Relic-origin payoff operation/state appears. A bounded audit broke
 old RCS-05B into three independently player-material settlement rows.
-**RCS-05B1 is now the sole owner-facing choice under SR-09:** whether positive dual
-settlements are universally pair-inseparable, universally contain some
-receipt-local consequence, or stable joint-only/local-bearing forms coexist.
-The amended register contains 192 rows and `Phi_SR = 22`.
+**RCS-05B1 then selected A with C as the qualified receipt-agency/artifact-
+identity fallback:** every positive dual settlement is one pair-inseparable
+source-mediated consequence, so conditional B2/B3 prune. A bounded audit then
+broke old RCS-05C into retained-payoff incidence, realization-control source,
+conditional participant timing, and nonterminal-expiry topology. **RCS-05C1
+is now the sole owner-facing choice under SR-09:** whether positive payoff is
+universally cut-complete, universally retention-bearing, or stable forms of
+both coexist. The amended register contains 195 rows and `Phi_SR = 22`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -30130,7 +30134,7 @@ Replacing one counted row with three raises the register to **192 rows: 21
 hidden work and selects no settlement topology. The authoritative decision
 record and final-system SVG remain unchanged.
 
-### RCS-05B1 — receipt-local payoff incidence in positive dual settlements — active owner choice
+### RCS-05B1 — receipt-local payoff incidence in positive dual settlements — A selected with C fallback
 
 Let `D_v` be the nonempty current-version domain of legal source-mediated
 positive dual-payoff resolutions under selected 05A-A. For each `d` in `D_v`,
@@ -30174,6 +30178,152 @@ register would then contain **18 `SCREEN`, 1 `OWNER-OPEN` at RCS-05C, 63
 `EVALUATE`; `Phi_SR = 21`**. A letter selects worksheet direction only. Do not
 batch B2/B3 or 05C; the authoritative decision record and final-system SVG
 remain unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-01:** **A, with C as
+the qualified receipt-agency/artifact-identity fallback.** Thus `L_v` is empty.
+Every positive dual-payoff resolution contains one pair-irreducible package
+`J(d)` and no receipt-local package. Both truthful, consumer-distinct receipts
+are indispensable: removing either makes the source-mediated consequence
+unavailable or materially different.
+
+This choice does not collapse the two receipts into one tag, create another
+payoff package, or change 05A-A's carrier rule. `P = Guard + Heat` and
+`Q = Feint + Strike` may jointly authorize one altered transition owned by the
+already-paid Strike source; neither receipt independently owns that transition.
+A package that actually depends only on `P` is disguised receipt priority and
+violates A regardless of callback, field, VFX, log, or transaction layout.
+
+C remains armed and unfired. It may replace A only if prototypes prove a stable
+disclosed contract identity where a receipt-local consequence creates recurrent
+policy that pair fusion cannot express, retains an equal optimized ceiling, and
+does not become a jackpot or hidden premium. Firing C reopens B2/B3 and every
+affected horizon, compatibility, stacking, power, persistence, and acceptance
+mapping. No branch may double-spend a shared paid source, activate an unpaid or
+unequipped payload, borrow ally ownership/payment, or mint fresh Relic evidence.
+
+B1 moves to `DIR-SELECTED`; B2/B3 prune. Before amendment, old 05C would have
+opened at **18 `SCREEN`, 1 `OWNER-OPEN`, 63 `PRUNED`, 103 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**. The prerequisite audit
+below supersedes that aggregate frontier. The authoritative decision record
+and final-system SVG remain unchanged.
+
+### RCS-05C prerequisite audit — retention requires conditional lifecycle rows
+
+One bounded read-only named-claim audit attacked whether old RCS-05C's
+“cut-local settlement versus a retained payoff opportunity” was one exhaustive
+owner decision. It **broke the row**. Retention incidence is one valid first
+question, but any retained branch independently leaves open whether realization
+is system-mandatory or participant-contingent, whether participant authority is
+live or advance-bound, and whether an unused opportunity can expire before an
+otherwise-authoritative terminal disposition. RCS-02/RCS-13 own exact holder,
+information, default, and lock details; they do not silently select those
+topologies. The earlier RCS-03B/C2 audit established the same boundary for
+evaluation lifecycles.
+
+Fix design version `v`. Let `X_v` be the nonempty set of canonical complete
+legal positive-payoff package forms, tagged by final receipt support:
+
+- `X_v^(1)` contains packages arising from a singleton final receipt `{P}`;
+- `X_v^(2)` contains packages arising from a dual final receipt `{P,Q}`; and
+- `X_v = X_v^(1) disjoint-union X_v^(2)`.
+
+B1-A governs only `X_v^(2)`: every dual member is the one pair-irreducible
+`J(d)` and has no receipt-local package. Singleton receipt settlements exist,
+but positive singleton-payoff support was never guaranteed, so `X_v^(1)` may
+be empty. Canonicalization still uses minimal semantic causal basis: callbacks,
+fields, VFX, logs, or writes sharing one basis remain one package.
+
+For each `x` in `X_v`, let `U(x)` be its possibly empty set of material
+source-owned payoff authorizations left unresolved after the positive
+settlement cut. Define `R_v={x in X_v : U(x) is nonempty}`. An immediate
+component plus a retained authorization is retention-bearing; an immediate
+component does not remove the member from `R_v`.
+
+The fifty-fifth explicit prerequisite amendment makes old RCS-05C a
+non-counting parent alias and replaces it with four counted rows:
+
+1. `RCS-05C1` — retained-payoff incidence across all positive packages;
+2. `RCS-05C2` — retained-opportunity realization-control source, conditional
+   on C1-B/C;
+3. `RCS-05C3` — participant realization-authority timing, conditional on
+   C2-B/C; and
+4. `RCS-05C4` — automatic nonterminal-expiry topology, conditional on C1-B/C.
+
+C2 asks whether participant-contingent opportunities are absent, universal,
+or a stable proper subset. C3 then asks whether any such participant authority
+is live after the exact opportunity is known, wholly advance-bound, or split
+across stable disclosed classes. C4 independently asks whether automatic
+finite nonterminal expiry is absent, universal, or confined to a stable proper
+subset. Exact actor, consent, communication, disclosure, default, timeout, and
+unavailable-holder recovery remain RCS-02; exact bind/rebind/lock interaction
+remains RCS-13/RCS-14; cross-encounter identity and migration remain RCS-15;
+atomic storage/retry/repair remains RCS-16. RCS-08 owns opportunity stacking,
+refresh, concurrency, overflow, team budget, and cross-root authority.
+
+Dependency order is `B1-A -> C1`. C1-A prunes C2/C3/C4 and opens RCS-06.
+C1-B/C opens C2. C2-A prunes C3 and opens C4; C2-B/C proceeds through C3
+and then C4. Any C4 answer opens RCS-06. Exact source transitions, semantic
+time units, finite values, presentation, and tuning remain AUTHOR/SPEC/TUNE.
+Exact retained-incidence placement across singleton and dual packages also
+remains AUTHOR/SPEC: the global C1 quantifier already decides the material
+horizon class, singleton positive-payoff support is not guaranteed, and no
+selected rule promises independent horizon coverage by receipt cardinality.
+
+Replacing one counted row with four raises the register to **195 rows: 21
+`SCREEN`, 1 `OWNER-OPEN` at RCS-05C1, 63 `PRUNED`, 103 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**. This amendment exposes
+conditional lifecycle choices and selects none. The authoritative decision
+record and final-system SVG remain unchanged.
+
+### RCS-05C1 — retained-payoff incidence across all positive packages — active owner choice
+
+C1 asks only whether a positive package can leave any material source-owned
+payoff authorization unresolved beyond its settlement cut. It holds
+realization control, participant timing, expiry, stacking, exact lifetime,
+power, and content mapping fixed for their registered owners.
+
+| Choice | Retained-payoff incidence doctrine | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every positive package completes at its settlement cut** | `R_v` is empty. Every singleton or dual positive package fully commits its material payoff through already-paid source transitions at that cut; no unresolved payoff authorization survives to a later player-semantic cut. | **Recommended, with C as the qualified temporal-policy/artifact-identity fallback.** A preserves the selected automatic, cut-atomic, pair-inseparable grammar and keeps tactical feedback at the relationship's legible hinge. It avoids a second queue of banked payoff rights. Its cost is that no Relic contract can create meaningful later timing policy from a successful weave. | Singleton `P` changes its paid Heat transition immediately. Dual `{P,Q}` immediately and inseparably changes the currently resolving paid Strike transition. After settlement, neither leaves a payoff right waiting. |
+| **B — every positive package is retention-bearing** | `R_v=X_v`. Every existing positive package leaves at least one unresolved source-owned material authorization that can matter after a later player-semantic cut. A package may also have an immediate component. | B makes temporal setup and delayed conversion universal: every success creates something players must track beyond its settlement. It can support anticipation and sequencing, but imposes banked-state UI, control, expiry, stacking, retry, and optionality pressure on even the simplest teaching contract. | Every existing singleton package and every dual `J(d)` seals a source-owned follow-through authorization for a later eligible transition. C1 does not yet decide who controls it or when it expires. |
+| **C — cut-complete and retention-bearing forms coexist** | `R_v` is a nonempty proper subset of `X_v`. One stable versioned mapping law is fixed before resolution and may classify the realized package/final receipt support; outcome audition or retry cannot rewrite that law. C1 selects neither disclosure nor binding timing. | **Qualified temporal-policy/artifact-identity fallback.** C lets an exceptional contract express a legible temporal policy while most relationships settle cleanly. It adds two payoff-timing grammars and can make retention-bearing identities the hidden premium unless both classes keep equal optimized ceilings and strict niches. | One authored Dreamglass mapping may retain its dual package while an Ashen mapping completes at the cut—or the reverse. Receipt cardinality does not secretly determine the rule unless the fixed mapping law says so. |
+
+A/B/C are exhaustive because `R_v` is empty, all of nonempty `X_v`, or a
+nonempty proper subset. Delayed animation, callbacks, networking, or storage
+writes are not retention. A lasting source state fully committed at settlement
+is cut-complete unless some payoff authorization remains unresolved. Immediate
+plus retained stages stay one package when they share one causal basis; C1 does
+not manufacture a second payoff.
+
+Recommend **A, with C as the qualified temporal-policy/artifact-identity
+fallback**. A makes the relationship's payoff whole at the same legible cut
+without erasing the distinct receipts, source identities, or history that made
+it possible. Fire C only if prototypes prove a recurrent, forecastable timing
+policy or artifact identity that an immediate source transition cannot express,
+keeps an equal optimized ceiling, and remains understandable without a hidden
+token economy. Universal B makes delayed optionality mandatory before it has
+earned that system-wide burden.
+
+A retained authorization must remain owned by an already-paid qualifying
+source; it cannot create a distinct Relic-origin button, action, reaction, or
+persistent effect carrier, fresh Relic evidence, transferable token, second
+causal package, or unpaid payload.
+A dual authorization cannot split into disguised `P`-local and `Q`-local
+rights. Retry cannot duplicate it. Lawful refresh and permanence interactions
+remain RCS-08, C4, and RCS-17/RCS-18; C1 grants no stacking, refresh, overflow,
+cancellation, realization-control, or expiry rule. Under C, the mapping law is
+fixed before resolution and may classify realized package/final receipt
+support; outcome audition or retry cannot rewrite it. RCS-02 and RCS-13/RCS-14
+retain disclosure and binding timing.
+
+Selecting C1-A would move C1 to `DIR-SELECTED`, prune C2/C3/C4, and open
+RCS-06. The register would then contain **17 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-06, 66 `PRUNED`, 104 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 18`**. Selecting C1-B/C would instead open C2 at **20
+`SCREEN`, 1 `OWNER-OPEN`, 63 `PRUNED`, 104 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`**. A letter selects worksheet
+direction only. Do not batch C2-C4 or RCS-06; the authoritative decision record
+and final-system SVG remain unchanged.
 
 ## Session protocol and evidence
 

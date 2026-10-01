@@ -1,6 +1,86 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-01 dual payoff is inseparable; retained-payoff incidence is next
+
+Zanzagar selected **RCS-05B1-A with RCS-05B1-C as the qualified receipt-
+agency/artifact-identity fallback**. Every positive dual-payoff resolution now
+contains one pair-irreducible source-mediated package and no receipt-local
+package. Both distinct receipts are indispensable: removing either makes the
+consequence unavailable or materially different. A callback, field, VFX, log,
+or transaction split cannot turn one causal package into two.
+
+Thus `P = Guard + Heat` and `Q = Feint + Strike` may jointly authorize one
+altered transition owned by the already-paid Strike source; neither receipt
+owns an independent reward. B2/B3 prune. 05B1-C stays armed and unfired; it may
+replace A only if prototypes prove a stable disclosed identity where receipt-
+local agency creates recurrent policy fusion cannot express, keeps an equal
+optimized ceiling, and avoids jackpot or hidden-premium dominance.
+
+A bounded read-only audit then **broke old RCS-05C**. Retained-payoff incidence
+is one valid first question, but a retained branch independently leaves open
+realization-control source, participant-authority timing, and automatic
+nonterminal expiry. The fifty-fifth amendment makes old 05C a non-counting
+alias for:
+
+1. `RCS-05C1` — retained-payoff incidence across all positive packages;
+2. `RCS-05C2` — retained-opportunity realization-control source;
+3. `RCS-05C3` — participant realization-authority timing; and
+4. `RCS-05C4` — automatic nonterminal-expiry topology.
+
+The audit initially scoped C1 only to pair-inseparable dual packages. The main
+session caught that singleton positive packages would then have no horizon
+rule. The corrected domain includes every complete legal positive-payoff
+package: singleton members have basis `{P}`, while B1-A makes every dual member
+the one pair-irreducible `{P,Q}` package. Receipt cardinality does not mint a
+fifth card; exact horizon placement remains prospective AUTHOR/SPEC unless it
+later proves a distinct required policy boundary.
+
+The amended register is **195 rows: 21 `SCREEN`, 1 `OWNER-OPEN` at RCS-05C1,
+63 `PRUNED`, 103 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 22`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-05C1` asks only whether any positive package can leave a material
+source-owned payoff authorization unresolved beyond its settlement cut:
+
+- **A — every positive package completes at settlement. Recommended, with C
+  as the qualified temporal-policy/artifact-identity fallback.** Singleton and
+  dual packages fully commit their material payoff at the cut; no payoff right
+  remains unresolved or banked.
+- **B — every positive package is retention-bearing.** Every existing positive
+  package leaves at least one source-owned authorization able to matter after a
+  later player-semantic cut; it may also have an immediate component.
+- **C — cut-complete and retention-bearing forms coexist.** One stable
+  versioned mapping law is fixed before resolution and may classify realized
+  package/final receipt support; outcome audition or retry cannot rewrite it.
+  Disclosure and binding timing remain later decisions.
+
+Recommend **A with C as the qualified temporal-policy/artifact-identity
+fallback**. A keeps the selected automatic, cut-atomic, pair-inseparable grammar
+whole at one legible hinge and avoids a second queue of banked payoff rights.
+Fire C only if prototypes prove a recurrent, forecastable timing policy or
+artifact identity that an immediate source transition cannot express, at equal
+optimized ceiling and without a hidden token economy. B makes delayed
+optionality mandatory before it has earned that system-wide burden.
+
+Delayed animation, callbacks, networking, or storage writes are not retention.
+A lasting source state fully committed at settlement is cut-complete unless an
+authorization remains unresolved. Any retained right stays owned by an
+already-paid source; it cannot create a distinct Relic-origin button, action,
+reaction, persistent effect carrier, or token, fresh Relic evidence, second
+package, unpaid payload, transferable right, or split `P`-local/`Q`-local
+entitlement. C1 decides no control, expiry, stacking, refresh, overflow,
+cancellation, or retry rule.
+
+C1-A prunes C2-C4 and opens RCS-06 at `Phi_SR = 18`. C1-B/C opens C2 at
+`Phi_SR = 21`. Do not preview or batch those dependent cards unless the owner
+explicitly asks. The final gear/progression SVG refresh remains an SR-12
+closeout obligation after Relic design is complete.
+
 ## 2026-10-01 payoff stays in the sources; receipt-local incidence is next
+
+**Superseded for navigation by the section above.** Its B1 card and 192-row
+checkpoint predate the selected A answer and RCS-05C amendment.
 
 Zanzagar selected **RCS-05A-A with RCS-05A-C as the qualified emergent-
 artifact-identity fallback**. Every material positive-payoff consequence now
@@ -14285,7 +14365,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-01 01:43 UTC — Receipt-local payoff incidence is next](docs/handoffs/2026-10-01-0143--relic-receipt-local-payoff-next.md)**
+[2026-10-01 03:24 UTC — Retained-payoff incidence is next](docs/handoffs/2026-10-01-0324--relic-retained-payoff-incidence-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
