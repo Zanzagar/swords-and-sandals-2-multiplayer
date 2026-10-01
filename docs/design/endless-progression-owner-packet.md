@@ -559,9 +559,12 @@ fallback:** every positive package fully commits at settlement, so C2/C3/C4
 prune. RCS-06 then closes as a derived integration of already-selected format,
 whole-team claimant, and pinned-version rules. A further audit makes old
 RCS-07 a non-counting alias for separate input catalog support, payoff catalog
-support, and residual complete-package support rows. **RCS-07A is the
-sole owner-facing choice under SR-09.** The amended register contains 197 rows
-and `Phi_SR = 19`.
+support, and residual complete-package support rows. **RCS-07A-B is now
+selected with RCS-07A-A as the qualified clarity/anti-dead-loot fallback:**
+input support is genuinely selective while every root remains input-
+customizable and every supported input Charm remains viable. **RCS-07B is the
+sole owner-facing choice under SR-09.** The register remains 197 rows and
+`Phi_SR = 18`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -30450,7 +30453,7 @@ configuration binding and recheck horizons; RCS-15/RCS-16 persistence and
 fault repair; 05D–05F power topology; and RCS-17/RCS-18 acceptance and proof
 procedure.
 
-### RCS-07A — root-to-input-Charm catalog-support topology — active owner choice
+### RCS-07A — root-to-input-Charm catalog-support topology — B selected with A fallback
 
 `C^input_v` is nonempty because the selected typed catalog requires materially
 functional input-Charm support. Every supported input Charm must have at least
@@ -30494,12 +30497,79 @@ lawful disclosed route/opponent/context conditioning and its bind/recheck
 timing remain unselected. Optimized ceiling, usage, regret, comprehension, and
 reward deadness must be measured rather than inferred from populated cells.
 
-Any A/B/C answer moves 07A to `DIR-SELECTED` and opens 07B without pruning a
-row. The register would then contain **17 `SCREEN`, 1 `OWNER-OPEN` at RCS-07B,
-66 `PRUNED`, 105 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
-`Phi_SR = 18`**. A letter selects worksheet direction only. Do not batch 07B
-or 07C; the authoritative decision record and final-system SVG remain
-unchanged.
+**Direction answer — selected by Zanzagar on 2026-10-01:** **B, with A as the
+qualified clarity/anti-dead-loot fallback.** `C^input_v` is a proper subset of
+`K^root_v × K^input_v`, and both projections are total. At least one
+root/input pair has support and at least one does not; every supported root has
+at least one input-Charm support edge, and every supported input Charm has at
+least one viable root. The genuine proper/total relation entails at least two
+supported root realizations and at least two supported input-Charm candidates.
+No root loses the input-customization lane. A remains armed if prototypes show
+that selectivity is opaque, arbitrary, loot-trapping, or policy-empty; firing
+it makes the relation complete and reopens affected content, acquisition,
+power, and proof mappings. Exact edges, lawful conditioning, binding, power,
+rarity, compensation, and optimized ceilings remain with their registered
+owners.
+
+07A moves to `DIR-SELECTED` and 07B becomes `OWNER-OPEN` without pruning a
+row. The register now contains **17 `SCREEN`, 1 `OWNER-OPEN` at RCS-07B, 66
+`PRUNED`, 105 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 18`**.
+
+### RCS-07B — root-to-payoff-Charm catalog-support topology — active owner choice
+
+`C^payoff_v` is nonempty because the selected typed catalog requires
+materially functional payoff-Charm support. Every supported payoff Charm must
+have at least one root support edge; an authored definition with no lawful
+configuration is not a supported catalog entry. Ask only whether every root
+has payoff-Charm support and whether the root/payoff support relation is
+complete. Payoff-Charm ineligibility means only that no payoff-Charm support
+edge exists. 07B neither creates nor removes any otherwise-authored uncharmed
+receipt or payoff and leaves that behavior unchanged. Payoff Charms alter only
+the qualitative payoff side after the input predicate succeeds. Hold complete
+root + input + payoff package support fixed for 07C.
+
+| Choice | Root-to-payoff catalog-support doctrine | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every payoff Charm is root-universal** | `C^payoff_v=K^root_v × K^payoff_v`. Every supported root/payoff-Charm pair has at least one lawful supported configuration. Root-specific result semantics and later lawful context conditions may differ; catalog support alone is universal. | **Qualified clarity/anti-dead-loot fallback.** A keeps every payoff-Charm reward potentially relevant to every owned root and prevents the already-selective input relation from becoming two multiplied mismatch filters. Root and Charm remain distinct and jointly operative, so universality is not thematic flattening by itself. Its later risk hypothesis is that one easy or broadly valuable payoff modifier becomes the default everywhere. | Ashen and Tide each have support with both Mirror and Echo. Mirror may alter different source-owned result transitions under the two roots, and this card does not decide whether a supported pair has additional lawful context conditions. |
+| **B — selective compatibility, with every root payoff-Charm-customizable** | `C^payoff_v` is a proper subset of `K^root_v × K^payoff_v`, while both projections are total: every supported root has at least one payoff-Charm support edge and every supported payoff Charm has support with at least one root. No root loses the payoff-Charm lane. | **Recommended, with A as the qualified clarity/anti-dead-loot fallback.** B makes the exact root/payoff-Charm relationship materially affect catalog support while preserving the modifier role for every root. That is the strongest direct *Achintya Bheda Abheda* fit at this boundary: distinct items become jointly operative through a specific supported relation. Its cost is a second selective unary matrix after 07A-B, increasing mismatch, collection, explanation, and testing load before 07C decides complete-package support. | Ashen has support with Mirror and Echo; Tide has support with Echo but not Mirror. Whatever uncharmed receipt or payoff is otherwise authored for Tide remains unchanged; 07B neither guarantees nor removes one. |
+| **C — payoff-Charm-customizable and payoff-Charm-ineligible roots coexist** | The projection of `C^payoff_v` onto `K^root_v` is a nonempty proper subset, while every supported payoff Charm has support somewhere. At least one supported root has no payoff-Charm support in any lawful configuration; exact support among customizable roots remains AUTHOR/SPEC. | C gives some roots a sharply distinct no-payoff-Charm identity. It also creates a root caste that cannot use one of the system's two designed modifier roles, raising perceived-incompleteness, loot-friction, and compensation hypotheses for later cards. Ineligibility says nothing about whether an uncharmed receipt or payoff is otherwise authored. | Ashen has support with Mirror and Echo. Dreamglass has no payoff-Charm support in any lawful configuration and may still support input Charms. Any uncharmed receipt or payoff authored elsewhere remains unchanged; 07B does not guarantee one. |
+
+A/B/C are exhaustive under the supported-catalog viability rule. The relation
+is complete; proper with every root represented; or proper because at least
+one root has no payoff-Charm edge. Under B, genuine proper support with both
+projections total also entails at least two supported root realizations and at
+least two supported payoff-Charm candidates. **07B selects only catalog-
+support incidence.** Exact edges, counts, symmetry, frequency, and any lawful
+conditioning coordinates stay AUTHOR/SPEC; RCS-13/RCS-14 own their binding
+and recheck horizons. 07B selects no breadth liability, compensation,
+magnitude, optimized ceiling, rarity correlation, or uncharmed-payoff rule.
+
+Recommend **B, with A as the qualified clarity/anti-dead-loot fallback**. B
+lets a root and payoff Charm remain genuinely distinct while their specific
+relationship determines whether the catalog admits at least one lawful
+configuration, without creating C's no-payoff-Charm caste. Fire A if the two
+selective unary relations become opaque, arbitrary, loot-trapping, or add no
+recurrent policy beyond menu denial. Later 05D–05F and RCS-17/RCS-18 must test
+whether broad support makes one payoff modifier dominate narrower Charms or
+become the universal default; failure may reopen the compatibility/power
+boundary.
+
+The principal hypotheses are a disguised premium modifier and a dead reward;
+07B neither forbids them nor decides how breadth is compensated. Later tests
+must ask whether broadly supported Echo reproduces narrower Charms' best
+policies while fitting more roots, and whether acquisition creates unusable
+inventory that RCS-09/RCS-10 must address. Outcome audition, hidden-seed
+conditioning, and retry shopping remain later exploit hypotheses; lawful
+disclosed route/opponent/context conditioning and its bind/recheck timing
+remain unselected. 07C alone owns whether an individually supported root/input
+pair and root/payoff pair form a supported complete three-item package.
+
+Any A/B/C answer moves 07B to `DIR-SELECTED` and opens 07C without pruning a
+row. The register would then contain **16 `SCREEN`, 1 `OWNER-OPEN` at RCS-07C,
+66 `PRUNED`, 106 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 17`**. A letter selects worksheet direction only. Do not batch 07C;
+the authoritative decision record and final-system SVG remain unchanged.
 
 ## Session protocol and evidence
 

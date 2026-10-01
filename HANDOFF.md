@@ -1,6 +1,70 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-01 input support is selective; payoff support is next
+
+Zanzagar selected **RCS-07A-B with RCS-07A-A as the qualified clarity/anti-
+dead-loot fallback**. Root-to-input-Charm catalog support is a genuine proper
+subset while both projections remain total: every supported root has at least
+one input-Charm edge, every supported input Charm has at least one viable root,
+and at least one root/input pair lacks support. No root loses the input-
+customization lane. The proper/total relation also entails at least two
+supported root realizations and two supported input-Charm candidates.
+
+This selection fixes only support incidence. Exact edges and lawful route/
+opponent/context conditions remain AUTHOR/SPEC; RCS-13/RCS-14 own binding and
+recheck horizons. Breadth liability, compensation, magnitude, optimized
+ceiling, and rarity correlation remain unselected. A stays armed if prototypes
+show that selectivity is opaque, arbitrary, loot-trapping, or policy-empty.
+
+The register remains **197 rows: 17 `SCREEN`, 1 `OWNER-OPEN` at RCS-07B, 66
+`PRUNED`, 105 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 18`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-07B` asks only about root-to-payoff-Charm catalog support. A support edge
+means at least one lawful compatible configuration exists; it does not mean
+every context or complete root + input + payoff package admits the pair.
+Payoff-Charm ineligibility means only that no payoff-Charm support edge exists;
+07B neither creates nor removes any otherwise-authored uncharmed receipt or
+payoff and leaves that behavior unchanged:
+
+- **A — every payoff Charm is root-universal.** Every supported root/payoff-
+  Charm pair has at least one lawful supported configuration.
+- **B — selective compatibility, with every root payoff-Charm-customizable.
+  Recommended, with A as the qualified clarity/anti-dead-loot fallback.** Some
+  pairs lack support, but every root has at least one payoff-Charm edge and
+  every payoff Charm has at least one viable root.
+- **C — payoff-Charm-customizable and payoff-Charm-ineligible roots coexist.**
+  At least one root supports no payoff Charm in any lawful configuration;
+  every payoff Charm remains usable somewhere. Ineligibility neither decides
+  nor changes any otherwise-authored uncharmed receipt or payoff.
+
+Recommend **B with A as the qualified clarity/anti-dead-loot fallback**. B
+lets the root and payoff Charm remain genuinely distinct while their specific
+relationship determines whether they can operate together, directly fitting
+the standing *Achintya Bheda Abheda* ideal without creating C's no-payoff-Charm
+caste. For example, Ashen may support Mirror and Echo while Tide supports Echo
+but not Mirror; whatever uncharmed behavior is authored for Tide remains
+unchanged. Fire A if two selective unary matrices become opaque, arbitrary,
+loot-trapping, or add no recurrent policy beyond menu denial.
+
+The principal later hypotheses are a broadly supported payoff modifier that
+dominates narrower Charms and acquisition that creates dead inventory. 07B
+does not forbid those outcomes or choose compensation. Exact support entries,
+lawful conditions, power, rarity, acquisition, and locking remain with their
+registered owners. 07C alone owns residual complete-package support after both
+unary edges exist.
+
+Any 07B answer opens 07C at **197 rows: 16 `SCREEN`, 1 `OWNER-OPEN`, 66
+`PRUNED`, 106 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 17`**. Do not preview or batch 07C unless the owner asks. The final
+gear/progression visual refresh remains an SR-12 closeout obligation after
+Relic design is complete.
+
 ## 2026-10-01 payoff completes at settlement; input compatibility is next
+
+**Superseded for navigation by the section above.** Its RCS-07A card and
+`Phi_SR = 19` checkpoint predate the selected B answer.
 
 Zanzagar selected **RCS-05C1-A with RCS-05C1-C as the qualified temporal-
 policy/artifact-identity fallback**. Every complete legal positive-payoff
@@ -14440,7 +14504,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-01 04:52 UTC — Input-Charm compatibility is next](docs/handoffs/2026-10-01-0452--relic-input-charm-compatibility-next.md)**
+[2026-10-01 05:11 UTC — Payoff-Charm compatibility is next](docs/handoffs/2026-10-01-0511--relic-payoff-charm-compatibility-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
