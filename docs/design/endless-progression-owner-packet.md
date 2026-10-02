@@ -575,8 +575,9 @@ now selected with RCS-08C2-A as the qualified clarity/anti-laundering fallback;
 RCS-08C4G1-A is now selected with RCS-08C4G1-B as the qualified irreducible-
 3v3-coordination fallback; and RCS-08C3EA-A is now selected with RCS-08C3EA-C
 as the qualified cross-player-agency/artifact-temperament fallback.
-RCS-08C3ED is the sole owner-facing choice under SR-09.** The register remains
-328 rows and `Phi_SR = 111`; conditional
+RCS-08C3ED-A is now selected with RCS-08C3ED-C as the qualified artifact-
+temperament/robust-risk-policy fallback. RCS-08C3EE3 is the sole owner-facing
+choice under SR-09.** The register remains 328 rows and `Phi_SR = 108`; conditional
 branches prune rather than promising 132 shipped mechanics.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
@@ -31245,7 +31246,7 @@ the sole `OWNER-OPEN` row: **328 rows: 110 `SCREEN`, 1 `OWNER-OPEN`, 98
 `Phi_SR = 111`**. The authoritative decision record and final-system SVG remain
 unchanged.
 
-### RCS-08C3ED — stochastic support across intrinsic cross-active exact-permission laws — active owner choice
+### RCS-08C3ED — stochastic support across intrinsic cross-active exact-permission laws — A selected with C fallback
 
 C3EA-A makes permission intrinsic, but an intrinsic covenant can still be
 deterministic or can contain an authored chance-bearing rule. C3ED asks only
@@ -31330,6 +31331,129 @@ moves to `DIR-SELECTED` and C3EE1 opens with no immediate pruning: **109
 because stochastic-capable laws may still contain certain regions. Do not
 batch the next row. A letter selects worksheet direction only; the
 authoritative decision record and final-system SVG remain unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-02:** **A, deterministic
+intrinsic laws only, with C as the qualified artifact-temperament/robust-risk-
+policy fallback.** `G^{co-exact-perm-stoch}_v` is empty. Every complete
+intrinsic cross-active exact-permission law returns a certain zero-or-one bit
+on every reachable fully fixed opportunity. A law may still return different
+certain bits in different contexts, but replaying the same authoritative
+opportunity can never change permission through chance.
+
+This keeps the result attributable to the Relic/relationship covenant rather
+than a third random arbiter, protects team planning and replay trust, and
+leaves all combat, acquisition, and previously committed randomness intact.
+The same once-paid proof participating in two distinct personal Relics already
+supplies the direct *Achintya Bheda Abheda* relation; chance is not required to
+strengthen it. C remains armed only if a distinct Oracle family later proves a
+legible, non-redundant, non-dominated risk policy at equal optimized Legendary
+ceilings, with advance-understandable risk, one durable non-redrawable
+realization, no teammate-imposed variance, and robust simulator/RL plus human
+forecast performance. It has not fired.
+
+C3ED is now `DIR-SELECTED`; C3EE1 and C3EE2 are `PRUNED`; and C3EE3 is the
+sole `OWNER-OPEN` row: **328 rows: 107 `SCREEN`, 1 `OWNER-OPEN`, 100
+`PRUNED`, 112 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 108`**. The authoritative decision record and final-system SVG remain
+unchanged.
+
+### RCS-08C3EE3 — deterministic response across intrinsic cross-active exact-permission projections — active owner choice
+
+C3ED-A makes every fully fixed permission opportunity certain, but does not
+decide whether one complete deterministic law projection returns the same bit
+throughout its own reachable domain. C3EE3 asks whether the completed catalog
+must support responsive projections, context-invariant projections, or both.
+It does not yet ask whether any player can cause a response or which polarity
+a steadfast projection carries.
+
+Let `D^{co-exact-det}_v` be the nonempty family of canonical complete
+deterministic intrinsic same-cut exact-permission law projections. For each
+`d` in that family, let `O_d` be its complete nonempty reachable opportunity
+domain after prospective bindings and earlier authoritative state are fixed,
+and let `b_d(o)=pi_d(o)` in `{0,1}`. Define:
+
+`X^{co-exact-det-response}_v = {d in D^{co-exact-det}_v | {b_d(o): o in O_d} = {0,1}}`.
+
+Membership means that one unchanged complete projection certainly permits
+both uses somewhere in its domain and certainly refuses joint use elsewhere.
+It does not imply player actionability; C3EE4 owns that separate causal test.
+
+| Choice | Deterministic-response prevalence | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — every projection is context-invariant** | `X^{co-exact-det-response}_v` is empty. Every complete projection keeps one certain bit throughout its own reachable domain, although different projections may have different polarities. C3EE4 prunes and C3EE5 decides which steadfast polarity classes exist. | **Qualified clarity/multiplayer-trust/policy-nonredundancy fallback.** A gives every cross-active covenant a reliable compatibility identity and minimizes forecasting, causal-state, grief, and teaching burdens. Its ideal fit is **neutral/protective**: an always-allow law can preserve one proof across two relationships, while EE5 may reserve meaningful refusal identities. Costs are less lived covenant play, pressure for always-allow laws to dominate, and a risk that this lane merely repeats static compatibility already expressed elsewhere. | Stone Witness always returns one bit for Aster/Borel's repeated `Heat h` throughout its complete domain. A different law may always return the opposite bit; EE3 does not choose either polarity. |
+| **B — every projection is responsive** | `X^{co-exact-det-response}_v=D^{co-exact-det}_v`. Every complete projection certainly permits both uses in at least one reachable context and certainly refuses them in another. C3EE4 opens; C3EE5 prunes. | B makes conditional covenant behavior universal. Every cross-active exact-capable identity contains lived allow/refuse state play and prevents guaranteed-compatibility or guaranteed-conflict anchors. A responsive local witness can directly express unity-with-difference, but universality does not deepen that fit automatically. Costs are universal forecast and coordination burden, loss of iconic steadfast Relics, and responsive laws that may still be unplayable lookup tables until C3EE4. | Every law, including Stone-like identities, must contain both a certain-allow and a certain-deny context. No deterministic exact-permission build remains steadfast throughout its domain. |
+| **C — responsive and context-invariant projections coexist** | `X^{co-exact-det-response}_v` is a nonempty proper subset of `D^{co-exact-det}_v`. At least one complete projection reaches both certain bits and at least one distinct projection keeps one bit throughout its domain. C3EE4 and C3EE5 both remain applicable. | **Recommended, with A as the qualified clarity/multiplayer-trust/policy-nonredundancy fallback.** C preserves dependable Witness Relics as coordination anchors while Covenant Relics support deterministic state protection, timing, forecasting, and counterplay. A responsive local covenant can directly express *Achintya Bheda Abheda*: the same proof remains one, the personal Relics remain distinct, and participation is admitted under one real relational condition but not another. Catalog coexistence is only aggregate. Costs are two prediction dialects, extra UI and balance work, and flexible-versus-reliable premium/trap risks. | Stone Witness always permits its shared `Heat h` pair. Ashen Accord, within its own unchanged complete law and exact-pair domain, permits while an independently meaningful **Concord Seal** is intact and refuses after the Seal is scarred. C3EE4 later asks whether a lawful player or counterplayer decision can cause any qualifying change; C3EE5 later decides steadfast polarity. |
+
+A/B/C are mutually exclusive and exhaustive because the responsive subset of
+nonempty `D^{co-exact-det}_v` is empty, whole, or nonempty proper. One
+unreachable branch does not establish response. Different outputs from two
+canonical projections do not make either responsive.
+
+Classification follows complete semantic behavior rather than code shape.
+Never split one projection by output, context region, combat instance,
+callback, helper, or generated identifier; never concatenate distinct
+canonical laws, exact and related-only domains, or same-cut and later-use
+domains to manufacture response. A law-defining committed variant may be a
+distinct canonical projection, but a refactor or alias cannot create one. A
+same-pair exact/related hybrid remains in exact treatment once; its related
+evidence grants no second projection, permission vote, or response witness.
+
+Recommend **C, with A as the qualified clarity/multiplayer-trust/policy-
+nonredundancy fallback**. C adds deterministic mastery rather than variance:
+one family supplies a dependable co-op anchor, while another makes protecting,
+forecasting, or contesting real relationship facts matter. B universalizes
+that burden and should remain a stronger replacement escalation, not the
+practical fallback.
+
+C may fire only if all of the following survive authoring and evaluation:
+
+1. At least one responsive projection creates a material **cross-active exact**
+   build, routing, forecasting, hedging, or counterplay policy that is not a
+   relabeling of the within-Relic exact or related-form response lanes.
+2. The witness stays inside one stable canonical projection and complete
+   domain. Output/context splitting and cross-tag concatenation cannot create
+   it.
+3. Every operative fact has authoritative truth conditions and a lifecycle
+   independent of the desired permission result. A concealed or cosmetically
+   laundered `Permit Both` flag fails.
+4. Responsive and steadfast families are both reachable, legible, non-token,
+   and non-dominated. Each supports optimized Legendary families at the
+   intended equal ceiling with strict niches; flexibility receives no hidden
+   premium and reliability is not a novice trap.
+5. Players know the law class and can forecast the operative condition before
+   their last informed reversible commitment, with retrospective attribution
+   after settlement.
+6. The system creates no cheap teammate veto, covert sabotage, compulsory ally
+   fuel, or permanent quarterback. EE3 selects no player causality; if C3EE4
+   later admits one, its intervention must remain independently meaningful
+   when the permission effect is ablated.
+7. Simulator/RL evaluation across held-out formats, opponents, and policy
+   classes confirms robust non-dominated niches, while human forecast and
+   teach-back tests confirm comprehension. RL evaluates the policy surface; it
+   does not choose the philosophy.
+
+If no responsive exemplar passes those gates, reopen A. If steadfast identities
+alone fail while responsive laws thrive across the domain, B may be reconsidered
+as a stronger replacement rather than smuggled into C.
+
+C3EE3 chooses no exact law identity, trigger, actionability, actor, disclosure,
+steadfast polarity, endpoint result, permission incidence, false-bit
+disposition, survivor, recurrence, payoff, rarity, acquisition, UI, storage,
+or implementation. A false bit still means only “not both”; C3ED1 onward owns
+cancellation versus singleton retention and resolver behavior.
+
+Under A, C3EE3 moves to `DIR-SELECTED`, C3EE4 prunes, and C3EE5 opens; C3EE6
+and C3EE7 remain screened: **105 `SCREEN`, 1 `OWNER-OPEN`, 101 `PRUNED`, 113
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 106`**.
+Under B, C3EE3 moves to `DIR-SELECTED`, C3EE4 opens, C3EE5 and C3EE7 prune,
+and C3EE6 derives that both certainty endpoints exist: **103 `SCREEN`, 1
+`OWNER-OPEN`, 102 `PRUNED`, 113 `DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 104`**. Under C, C3EE4 opens, C3EE5 stays queued,
+C3EE6 derives both endpoints, and C3EE7 prunes: **104 `SCREEN`, 1
+`OWNER-OPEN`, 101 `PRUNED`, 113 `DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 105`**. Do not batch the next row. A letter selects
+worksheet direction only; the authoritative decision record and final-system
+SVG remain unchanged.
 
 ## Session protocol and evidence
 

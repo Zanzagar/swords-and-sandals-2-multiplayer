@@ -1,6 +1,74 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-02 exact permission made deterministic; response prevalence is next
+
+Zanzagar selected **RCS-08C3ED-A with RCS-08C3ED-C as the qualified artifact-
+temperament/robust-risk-policy fallback**. Every complete intrinsic same-cut
+cross-active exact-permission law returns a certain bit after all authoritative
+inputs are fixed. Different contexts may still receive different certain bits,
+but the identical opportunity never redraws through chance.
+
+This protects prediction, co-op trust, replay integrity, and causal
+attribution while preserving combat, acquisition, and earlier committed
+randomness elsewhere. The same once-paid proof participating in distinct
+personal Relics already supplies the direct *Achintya Bheda Abheda* relation.
+C remains armed only if a distinct Oracle family later proves a legible,
+non-redundant, non-dominated risk policy at equal optimized Legendary ceilings
+with advance-understandable risk, one durable realization, no teammate-imposed
+variance, and robust simulator/RL plus human performance. It has not fired.
+
+C3EE1/C3EE2 prune. The finite register remains **328 rows: 107 `SCREEN`, 1
+`OWNER-OPEN` at RCS-08C3EE3, 100 `PRUNED`, 112 `DIR-SELECTED`, 6 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 108`**. The authoritative decision
+record and final-system SVG remain byte-unchanged.
+
+C3EE3 now asks whether one canonical deterministic exact-permission projection
+keeps the same bit throughout its own complete reachable domain or can
+certainly allow in one context and certainly refuse in another. Response cannot
+be manufactured by splitting one projection by output/context/code shape or
+by concatenating different laws, exact and related-only domains, or same-cut
+and later-use domains. The options are:
+
+- **A — every projection is context-invariant.** Each complete projection
+  keeps one bit throughout its domain, although different projections may have
+  different polarities. This is the qualified clarity/multiplayer-trust/
+  policy-nonredundancy fallback.
+- **B — every projection is responsive.** Every projection reaches both
+  certain bits somewhere in its domain. This universalizes conditional
+  forecast and coordination burden.
+- **C — responsive and context-invariant projections coexist. Recommended,
+  with A as the qualified fallback.** At least one projection reaches both bits
+  and at least one distinct projection remains steadfast.
+
+Recommend C. Stone Witness can always permit its shared-`Heat h` pair,
+providing a reliable coordination anchor. Ashen Accord can permit while an
+independently meaningful Concord Seal remains intact and refuse once the Seal
+is scarred, providing deterministic state protection, forecasting, and
+counterplay. C3EE4 later asks whether a legal player/counterplayer decision
+can cause a responsive change; C3EE5 later chooses the polarity support among
+steadfast projections. EE3 selects neither.
+
+The responsive local relation can directly express *Achintya Bheda Abheda*:
+the proof stays one, the personal Relics stay genuinely distinct, and one
+continuing covenant admits participation under one real relational condition
+but not another. Catalog coexistence itself is only aggregate. C falls back to
+A unless the responsive class adds a genuinely cross-active exact policy,
+uses independent authoritative facts rather than a disguised permission flag,
+keeps both families legible/non-token/non-dominated at equal optimized
+Legendary ceilings, avoids covert vetoes and quarterbacking, and survives
+held-out simulator/RL plus human forecast/teach-back evaluation.
+
+Under A, C3EE4 prunes and C3EE5 opens at `Phi_SR = 106`. Under B, C3EE4 opens,
+C3EE5/C3EE7 prune, and C3EE6 derives both endpoints at `Phi_SR = 104`. Under C,
+C3EE4 opens, C3EE5 remains queued, C3EE6 derives both endpoints, and C3EE7
+prunes at `Phi_SR = 105`. Do not batch the next row. The final gear/progression
+visual refresh remains an SR-12 closeout obligation after Relic design is
+complete.
+
 ## 2026-10-02 exact permission kept intrinsic; stochastic support is next
+
+**Superseded for navigation by the section above.** Its RCS-08C3ED card and
+`Phi_SR = 111` checkpoint predate the selected A answer.
 
 Zanzagar selected **RCS-08C3EA-A with RCS-08C3EA-C as the qualified cross-
 player-agency/artifact-temperament fallback**. Once both Relics and
@@ -14959,7 +15027,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-02 05:28 UTC — Intrinsic exact-permission randomness is next](docs/handoffs/2026-10-02-0528--relic-exact-permission-randomness-next.md)**
+[2026-10-02 05:41 UTC — Deterministic exact-permission response prevalence is next](docs/handoffs/2026-10-02-0541--relic-exact-deterministic-response-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
