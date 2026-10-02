@@ -1,6 +1,121 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-02 complete Relic packages factorize; corrected coincident candidate overlap is next
+
+Zanzagar selected **RCS-07C-A with RCS-07C-B as the qualified three-way
+artifact-chemistry fallback**. Whenever a root/input edge and root/payoff edge
+are individually supported for the same root, their complete root + input +
+payoff package has at least one lawful supported configuration. The two unary
+relations remain genuinely selective and mechanically distinct, but their
+truths compose without a hidden third compatibility filter.
+
+B stays armed only if prototypes reveal a stable, disclosed, semantically
+honest three-way incompatibility that creates recurrent build policy, cannot
+be expressed by either unary relation or a lawful contextual condition, and
+does not create dead rewards. 07C selects support incidence only: exact
+triples, lawful contexts, locks, power, compensation, rarity, acquisition,
+custody, stacking, team authority, and proof thresholds remain open. The
+authoritative decision record and final-system SVG remain byte-unchanged.
+
+A bounded prerequisite audit and successive before-commit adversarial
+challenges then **broke old RCS-08**. The final finite register contains **132
+counted RCS-08 rows**: 88 same-cut rows, 31 later-use rows, and 13 stacking/
+team-signature, other-system-overlap, and composition-law rows. Old RCS-08 plus
+C3E, C3R, C4, L3E, L3R, and I2 are non-counting parent aliases.
+
+The final whole-diff review rejected the otherwise arithmetically correct
+eighty-nine-row draft. It found omitted resolver response/certainty, false-
+result recurrence, same-cut cross-active payoff co-application, incomplete
+composition-law authority, and three reversed prerequisite edges. The repaired
+tree also freezes one maximal cross-active cohort per cut, resolves every
+recipient set before any retained evaluator commits, commits atomically and
+permutation-invariantly, and preserves one already-authored personal payoff
+transaction per retained Relic instead of minting or merging a cross-active
+package. A subsequent no-count hold then caught I2 being worded for I1's
+Relic-versus-other-system domain only even though I0 can admit noncommutative
+cross-active co-application. I2 and all ten children now govern separately
+tagged I0 and I1 domains; the repaired whole diff received `HOLD`. No
+intermediate draft was committed or pushed.
+
+The corrected register is **328 rows: 146 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-08C1, 66 `PRUNED`, 107 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and
+1 `EVALUATE`; `Phi_SR = 147`**. This is a worst-case finite decision tree,
+not 132 answers or mechanics promised for launch. Conditional branches prune;
+C1-A alone prunes 87 same-cut descendants and reduces `Phi_SR` to 59. Team
+Control 2, Survival 1, and Burst 2 remain proposal constraints requiring later
+specification/testing, while the separate Team Tactic allowance and independent
+stacking/control/survival enforcement are accepted.
+
+The corrected dependency spine is:
+
+`C1 -> C2 -> C4G1 -> applicable C3 permission/disposition -> conditional C4 settlement -> same-cut recurrence -> L1/L2/L3 -> later recurrence -> RCS-13 prerequisite -> L4/L5 -> S1 -> T1 -> I0 -> I1 -> applicable I2 composition law across surviving I0/I1 domains -> 05D`.
+
+C4G1 precedes pair-law classification because a triple-only context can create
+a response witness. S1/T1 precede co-application because their fixed definition/
+version signatures feed hard loadout legality. L4 waits for RCS-13 rather than
+pretending same-combatant root switching is already reachable. I2 covers every
+supported noncommutative co-application admitted by I0 or I1; it evaluates
+cross-active-Relic and Relic-versus-other-system domains as separately tagged
+projections so joining them cannot manufacture response or certainty.
+
+One advisory verifier that agreed with the first break is excluded as formal
+verification because it wrote a search result to `/tmp` despite a write-
+nothing brief. It changed neither the repository nor Git state, and the final
+amendment does not depend on it.
+
+`RCS-08C1` asks only whether two allied combatants' active personal Relics may
+select same-cut authoritative ledgers whose proof families overlap. Overlap
+means either one identical final child appears in both or distinct cross-ledger
+children intersect in complete lineage/share one nonmultiplying authorization
+or accounting parent. Candidate overlap is not permission for both Relics to
+use it:
+
+- **A — no coincident cross-Relic candidate overlap.** At one cut, no selected
+  allied active-Relic ledgers overlap by either form.
+- **B — require functional coincident cross-Relic candidate overlap.
+  Recommended, with A as the qualified clarity/anti-amplification fallback.**
+  At least one reachable catalog state has exact or distinct-related overlap;
+  C2 later chooses which forms, C3E/C3R decide permission, denial, and
+  recurrence, C4 handles three recipients, and I0 later decides material
+  co-application among retained personal transactions.
+
+Example: Borel pays for `Heat h`. Aster's Relic has the valid weave
+`Aster Guard g + h`, while Borel's Relic has the distinct valid weave
+`h + Aster Return t`. That exact shared `h` can witness B. Alternatively,
+one paid `Twin Vow` may yield distinct children `a` and `b`, with one
+selected ledger using each; their shared nonmultiplying lineage/payment is a
+distinct-related witness. Under A, neither form may reach the two selected
+tuples; callback or seat order cannot allocate the overlap after the fact and
+pretend it never existed.
+
+Recommend B because it creates a legible co-op surface where one deed remains
+one yet truthfully participates in two distinct personal relationships—a
+direct *Achintya Bheda Abheda* fit—without yet granting duplicated use or
+payoff. Fire A if the shared-candidate state cannot be explained prospectively,
+turns an ally's ordinary action into mandatory team fuel, or makes later
+treatment depend on callback order, double billing, or opaque hub
+amplification.
+
+Under B, the register remains 328 rows and becomes **145 `SCREEN`, 1
+`OWNER-OPEN` at C2, 66 `PRUNED`, 108 `DIR-SELECTED`, 6 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 146`**. Under A, it becomes **58
+`SCREEN`, 1 `OWNER-OPEN` at L1, 153 `PRUNED`, 108 `DIR-SELECTED`, 6
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 59`**.
+
+C1 selects no overlap form, permission, denial outcome, recurrence, priority,
+claim propagation, later reuse, triple settlement, retained-recipient count,
+material payoff co-application, Capacity, Team Tactic allowance, stacking,
+team tag, power, acquisition, or lock. Opponent-origin evidence, zero-bearer
+weaves, one atom filling two positions of one relationship, and more than one
+active personal Relic on a combatant remain excluded. The final gear/progression
+visual refresh remains an SR-12 closeout obligation after Relic design is
+complete.
+
 ## 2026-10-01 both unary Charm relations are selective; complete-package support is next
+
+**Superseded for navigation by the section above.** Its RCS-07C card and
+`Phi_SR = 17` checkpoint predate the selected A answer and the RCS-08
+atomicity amendment.
 
 Zanzagar selected **RCS-07B-B with RCS-07B-A as the qualified clarity/anti-
 dead-loot fallback**. Root-to-payoff-Charm catalog support is a genuine proper
@@ -14577,7 +14692,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-02 03:00 UTC — Complete Relic-package support is next](docs/handoffs/2026-10-02-0300--relic-complete-package-support-next.md)**
+[2026-10-02 03:24 UTC — Coincident cross-Relic candidate overlap is next](docs/handoffs/2026-10-02-0324--relic-coincident-candidate-overlap-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
