@@ -1,6 +1,70 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-02 three-Relic constellations pair-bounded; exact permission authority is next
+
+Zanzagar selected **RCS-08C4G1-A with RCS-08C4G1-B as the qualified
+irreducible-3v3-coordination fallback**. Every reachable fixed same-cut
+candidate-overlap graph has connected components of size at most two. Three
+allied combatants may all have active Relics, and exact plus related-only pair
+support remain required, but one cut never joins all three Relics into one
+connected candidate constellation.
+
+This preserves the local *Achintya Bheda Abheda* relation—one truthful proof
+family participating in genuinely distinct personal Relics—without treating a
+third vertex as automatically deeper. B stays armed only if a smallest 3v3
+prototype proves one prospectively legible, irreducible three-human policy in
+which every vertex and edge materially matters under matched ablation, pair and
+triad builds remain non-dominated, and nobody becomes compulsory fuel or a
+bridge quarterback. Candidate topology still grants no shared use, permission,
+denial result, recipient, draw, claim, payoff co-application, or power.
+
+All twenty-nine C4G2/H/I descendants prune. The finite register remains **328
+rows: 114 `SCREEN`, 1 `OWNER-OPEN` at RCS-08C3EA, 95 `PRUNED`, 110
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 115`**.
+The authoritative decision record and final-system SVG remain byte-unchanged.
+
+C3EA now asks whether a prospectively bound participant-semantic setting may
+change the **complete permission law** for one matched exact cross-active pair.
+Hold fixed both active Relics, facts, selected ledgers, unordered Relic pair,
+and repeated final child. A setting that only reroutes to another ledger does
+not qualify. The options are:
+
+- **A — permission intrinsic to every contract. Recommended, with C as the
+  qualified cross-player-agency/artifact-temperament fallback.** No
+  participant setting changes the law on a matched exact pair. Different
+  Relics, relationships, and contexts may still have different intrinsic
+  laws.
+- **B — every exact-capable contract participant-configurable.** Every such
+  contract has two prospectively bindable settings whose complete laws differ
+  on a matched pair. This is the universal-agency escalation, not the practical
+  fallback.
+- **C — intrinsic and configurable contracts coexist.** At least one stable
+  contract class is configurable and another intrinsic. Use C only if
+  intrinsic treatment creates a recurrent material co-op-agency failure,
+  bounded control adds non-dominated policy that routing cannot reproduce,
+  intrinsic Relics remain desirable, and preview avoids veto grief and
+  quarterbacking.
+
+Recommend A. It matches the already-selected intrinsic within-evaluation exact
+and related-only permission rules, while players retain agency through build
+and routing choices. The exact shared child remaining one while participating
+in two personal Relics supplies the direct ideal fit; permission-control
+cardinality does not strengthen it automatically. Aster/Borel may select the
+same `Heat h`, while Stone Witness applies one disclosed intrinsic covenant.
+Under C, illustrative Ashen Covenant settings such as Concord/Reserve may alter
+one matched law while Stone Witness remains immutable; holder, consent,
+information, coupling, language, timing, randomness, incidence, and denial
+disposition all remain later boundaries.
+
+Under A, three conditional authority/language rows prune and C3ED opens at
+`Phi_SR = 111`. Under B or C, they remain and C3EB opens at `Phi_SR = 114`.
+Do not batch the next row. The final gear/progression visual refresh remains an
+SR-12 closeout obligation after Relic design is complete.
+
 ## 2026-10-02 both cross-active overlap forms selected; three-Relic constellation is next
+
+**Superseded for navigation by the section above.** Its RCS-08C4G1 card and
+`Phi_SR = 145` checkpoint predate the selected A answer.
 
 Zanzagar selected **RCS-08C2-C with RCS-08C2-A as the qualified clarity/anti-
 laundering fallback**. Both pair-local form classes must have reachable
@@ -14829,7 +14893,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-02 05:03 UTC — Three-Relic candidate constellation is next](docs/handoffs/2026-10-02-0503--relic-three-constellation-next.md)**
+[2026-10-02 05:16 UTC — Exact cross-active permission authority is next](docs/handoffs/2026-10-02-0516--relic-exact-permission-authority-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

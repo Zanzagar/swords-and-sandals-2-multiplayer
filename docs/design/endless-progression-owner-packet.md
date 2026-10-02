@@ -572,9 +572,10 @@ recurrence, three-recipient, later-reuse, co-application, composition-law,
 stacking-signature, and team-signature rows. **RCS-08C1-B is selected with
 RCS-08C1-A as the qualified clarity/anti-amplification fallback; RCS-08C2-C is
 now selected with RCS-08C2-A as the qualified clarity/anti-laundering fallback;
-RCS-08C4G1 is the sole owner-facing choice under SR-09.** The register remains
-328 rows and `Phi_SR = 145`; conditional branches prune rather than promising
-132 shipped mechanics.
+RCS-08C4G1-A is now selected with RCS-08C4G1-B as the qualified irreducible-
+3v3-coordination fallback; RCS-08C3EA is the sole owner-facing choice under
+SR-09.** The register remains 328 rows and `Phi_SR = 115`; conditional
+branches prune rather than promising 132 shipped mechanics.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -31041,7 +31042,7 @@ C2 is now `DIR-SELECTED` and C4G1 is the sole `OWNER-OPEN` row: **328 rows:
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 145`**. The authoritative decision record
 and final-system SVG remain unchanged.
 
-### RCS-08C4G1 — three-Relic same-cut candidate-constellation support — active owner choice
+### RCS-08C4G1 — three-Relic same-cut candidate-constellation support — A selected with B fallback
 
 Fix the ruleset/catalog version, one player-semantic cut, a legal allied
 roster, operative context, earlier committed state, every combatant's active
@@ -31113,6 +31114,104 @@ prune, and C3EA opens: **114 `SCREEN`, 1 `OWNER-OPEN`, 95 `PRUNED`, 110
 Under B, those descendants remain conditional and C3EA opens: **143 `SCREEN`,
 1 `OWNER-OPEN`, 66 `PRUNED`, 110 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and
 1 `EVALUATE`; `Phi_SR = 144`**. Do not batch C3EA. A letter selects worksheet
+direction only; the authoritative decision record and final-system SVG remain
+unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-02:** **A, keep
+cross-active candidate overlap pair-bounded, with B as the qualified
+irreducible-3v3-coordination fallback.** Thus `G^{3co}_v` is empty. Every
+reachable fixed same-cut candidate graph has connected components of size at
+most two. Three allied combatants may all have active Relics, and C2-C's exact
+and related-only witnesses both remain required, but one fixed cut never joins
+all three active Relics into one connected overlap component.
+
+The answer rejects graph cardinality as automatic relational depth. Pair-local
+relations already preserve one truthful proof family across genuinely distinct
+personal Relics; a third vertex that exists only as fuel, insurance, a bridge,
+or a cheap late edge adds coordination burden without strengthening that local
+unity-in-difference. B remains armed only if a smallest-cardinality 3v3
+prototype proves one prospectively legible, irreducible three-human policy in
+which every vertex and present edge materially changes the atomic settlement
+or optimal policy under matched ablation, pair-only and triadic builds remain
+non-dominated, and no player becomes compulsory fuel or a bridge quarterback.
+
+G1 selects candidate topology only. It grants no shared use, permission bit,
+denial result, recipient, draw, coupling, claim, later reuse, payoff
+co-application, stacking, team tag, power, acquisition, lock, or UI. G1 is now
+`DIR-SELECTED`; all twenty-nine C4G2/H/I descendants are `PRUNED`; and C3EA is
+the sole `OWNER-OPEN` row: **328 rows: 114 `SCREEN`, 1 `OWNER-OPEN`, 95
+`PRUNED`, 110 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 115`**. The authoritative decision record and final-system SVG
+remain unchanged.
+
+### RCS-08C3EA — cross-active exact-permission participant configurability — active owner choice
+
+C2-C guarantees at least one reachable exact cross-active candidate pair.
+C3EA asks whether a prospectively bound participant-semantic setting may
+materially change that pair's complete joint-use permission law. It does not
+decide who holds the setting, how several people consent or compose inputs,
+when it binds, whether it is a separate coordinate, what language it uses,
+whether the resulting law is deterministic or stochastic, or whether a false
+bit cancels both candidate uses or retains one.
+
+Let `S^{co-exact-perm}_v` be the nonempty set of supported versioned
+cross-active treatment contracts for which some lawful configuration produces
+a reachable exact pair in `E^{co}_v`. A contract belongs to
+`P^{co-exact-perm-config}_v` when two lawful prospectively bindable
+participant-semantic setting profiles produce different **complete permission
+laws** on one matched reachable exact opportunity. Hold fixed the ruleset and
+contract version, both active Relics and relationships, operative facts and
+earlier committed state, both selected authoritative ledgers, the unordered
+Relic pair, and the repeated final child occurrence; change only a setting
+carrying authored permission-control force.
+
+The same exact opportunity must survive the comparison. A setting that merely
+selects a different ledger, equipping a different Relic, causing the evidence,
+accepting one mandatory default, or reacting after the candidate appears does
+not prove permission configurability. A complete law may still contain an
+immutable system composer, canonical tie rule, or eventual random realization;
+later rows own those distinctions.
+
+| Choice | Cross-active exact-permission configurability rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — permission is intrinsic to every contract** | `P^{co-exact-perm-config}_v` is empty. Once the matched exact opportunity and every other authoritative input are fixed, no participant-semantic setting changes its complete permission law. Different Relics, relationships, or factual contexts may still carry different intrinsic laws. C3ED has not yet ruled out randomness. | **Recommended, with C as the qualified cross-player-agency/artifact-temperament fallback.** Players already choose builds and prospectively orient routing; A lets the Relic/relationship covenant decide compatibility instead of adding another approval optimizer. It matches both selected within-evaluation permission precedents, strengthens artifact identity, prediction, UI economy, team trust, and policy attribution, and avoids obvious “always allow both,” teammate pressure, hostile settings, and quarterbacking. Its fit here is **neutral/protective**: the repeated child remaining one while participating in two distinct personal Relics supplies the direct unity-in-difference; authority cardinality does not strengthen it automatically. The cost is less downstream agency and possible frustration when an exposed pair meets intrinsic refusal. | Aster's `{Guard g, Heat h}` and Borel's `{Heat h, Return t}` select the same once-paid `Heat h`. Stone Witness applies one intrinsic covenant law to that matched pair. It may respond to disclosed relationship facts, but changing any prospective participant orientation while preserving the pair and facts cannot change the complete law. |
+| **B — every contract is participant-configurable** | `P^{co-exact-perm-config}_v=S^{co-exact-perm}_v`. Every exact-capable cross-active treatment contract exposes at least two lawful prospectively bindable setting profiles whose complete permission laws differ on some matched exact opportunity. This does not mean participants write code, control the eventual draw, or exclusively resolve composition. | B maximizes prospective co-op agency and can let distinct participant orientations and an enduring Relic covenant jointly govern compatibility—a **potential direct** configuration-boundary relation. But it makes a second control dialect mandatory for every exact-capable contract, duplicates routing agency, creates universal configuration and migration burden, and invites “allow both” dominance, teammate coercion, deliberate grief, and permanent team quarterbacking. Use B only as a stronger replacement escalation if intrinsic permission fails across essentially the whole domain and bounded controls pass the fallback gates universally. | Every exact-capable contract offers illustrative whole settings such as **Concord** and **Reserve**. On the same Aster/Borel `Heat h` opportunity and fixed facts, the two settings induce different complete permission laws. C3EB and C3EC still decide whether that force is a separate coordinate and how the legal setting language works. |
+| **C — intrinsic and participant-configurable contracts coexist** | `P^{co-exact-perm-config}_v` is a nonempty proper subset of `S^{co-exact-perm}_v`. At least one exact-capable contract has a matched configurable witness and at least one other has none. The class is a stable definition/version property and cannot switch only when one result would be favorable. | **Qualified cross-player-agency/artifact-temperament fallback.** C can preserve immutable Witness Relics while making bounded Covenant Relics prospectively orientable where two distinct combatants face a genuine shared-agency problem. Each local case inherits A or B's fit; catalog coexistence is only **aggregate**. It adds two control, preview, teaching, comparison, and migration dialects and risks making configurable artifacts feel like premium loot. Fire C only if intrinsic permission causes a recurrent material co-op-agency failure, the new control cannot be reproduced through routing, both settings remain legible and non-dominated, intrinsic contracts remain desirable, and no live veto, hidden grief, or standing quarterback emerges. | Ashen Covenant offers Concord/Reserve whose complete laws differ on one fixed shared-`h` pair; Stone Witness applies one immutable law to its own reachable shared-child pair. Their authority classes are version-fixed. The exact holder, consent protocol, disclosure, and bind horizon remain undecided. |
+
+A/B/C are mutually exclusive and exhaustive because the configurable subset of
+the nonempty exact-capable contract domain is empty, whole, or nonempty proper.
+Participant configurability includes permission force inseparably bundled into
+another prospectively bound setting; representation or UI layout cannot erase
+it. Conversely, a cosmetic setting, a change only to routing, or a live
+post-candidate prompt cannot manufacture it.
+
+Recommend **A, with C as the qualified cross-player-agency/artifact-
+temperament fallback**. The already-selected routing stance gives players
+meaningful control over which ledger becomes authoritative, while the prior
+within-evaluation exact and related-only permission directions both keep the
+resulting covenant intrinsic. Cross-active play should break that grammar only
+if a held-fixed prototype shows a genuine two-player agency failure: two
+prospective settings must alter the complete law without changing the selected
+exact pair; both must create understandable, non-dominated policies; “always
+allow both” must not dominate; intrinsic contracts must remain desirable; and
+the result must be previewable and attributable without a live prompt or
+last-moment veto. If essentially every exact-capable contract needs that
+exception, reopen B explicitly rather than disguising universal control as C.
+
+C3EA chooses no exact holder, electorate, consent protocol, communication
+channel, information set, default, bind/rebind horizon, coordinate coupling,
+policy language, branching, randomness, incidence, false-bit disposition,
+survivor, recurrence, claim, payoff, persistence, or implementation. RCS-02,
+C3EB/C3EC, RCS-13, C3ED onward, and later disposition rows retain those
+boundaries. Every option remains automatic at the semantic cut; a live
+`allow both?` prompt is outside this card.
+
+Under A, C3EA moves to `DIR-SELECTED`, C3EB/C3EC1/C3EC2 prune, and C3ED
+opens: **110 `SCREEN`, 1 `OWNER-OPEN`, 98 `PRUNED`, 111 `DIR-SELECTED`, 6
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 111`**. Under B or C, those
+three conditional rows remain and C3EB opens: **113 `SCREEN`, 1 `OWNER-OPEN`,
+95 `PRUNED`, 111 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 114`**. Do not batch the next row. A letter selects worksheet
 direction only; the authoritative decision record and final-system SVG remain
 unchanged.
 
