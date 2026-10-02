@@ -1,6 +1,77 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-02 functional cross-active overlap selected; overlap form is next
+
+Zanzagar selected **RCS-08C1-B with RCS-08C1-A as the qualified clarity/anti-
+amplification fallback**. The completed catalog must contain at least one
+reachable same-cut state in which two distinct allied combatants' active
+personal Relics select authoritative ledgers joined by an identical final
+child or by distinct children with intersecting complete lineages/shared
+nonmultiplying authorization or accounting. Candidate overlap still grants no
+shared use, receipt, claim, retained transaction, or payoff. Each child stays
+source-owned and once-paid; each Relic keeps its own personal evaluator and
+already-authored payoff transaction.
+
+A remains armed if prototypes cannot disclose the shared candidate
+prospectively or if it degenerates into compulsory ally fuel, callback-order
+allocation, double billing, sibling laundering, or opaque hub amplification.
+The authoritative decision record and final-system SVG remain byte-unchanged.
+
+The finite register remains **328 rows: 145 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-08C2, 66 `PRUNED`, 108 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 146`**. This is a worst-case conditional tree, not 146
+promised mechanics or necessarily 146 further questions. C2 is the only active
+card and chooses the supported cross-active overlap forms. The unit is one
+unordered pair of selected authoritative ledgers inside a fixed state, not the
+whole cohort:
+
+- **A — exact-form support only.** An identical final child repeats across at
+  least one selected allied-ledger pair; there is no related-only pair. A
+  same-pair hybrid containing exact and distinct-related facts enters the exact
+  class once. This is the qualified clarity/anti-laundering fallback.
+- **B — distinct-related-only support.** No overlapping ledger pair repeats a
+  final child, but at least one pair uses genuinely distinct children joined
+  by complete lineage or one nonmultiplying authorization/accounting parent.
+- **C — support both exact and distinct-related-only forms. Recommended, with
+  A as the qualified clarity/anti-laundering fallback.** At least one
+  functional ledger-pair witness of each class exists, possibly in different
+  states or as different pairs inside one three-Relic state; identities,
+  counts, distribution, and prevalence remain AUTHOR/SPEC.
+
+Recommend C. It carries the two already-established proof grammars across the
+allied personal-Relic boundary: a readable common keystone and distinct
+manifestations of one truthful causal family. Each local witness can directly
+express one reality participating in genuinely distinct relationships, while
+catalog coexistence is only aggregate. C offers the richest co-op buildcraft
+but carries both exact-child hub dominance and sibling/payment-compression
+risks plus the highest UI and teaching burden. Use A if the related-only
+residual cannot be explained prospectively in one causal/accounting sentence
+or cannot survive anti-laundering and anti-double-billing prototypes. B is the
+weakest default because it forbids the clearest form while retaining the most
+expensive one.
+
+Exact example: Borel's once-paid `Heat h` appears in Aster's selected
+`Guard g + h` ledger and Borel's selected `h + Return t` ledger. Related-only
+example: one paid `Twin Vow` yields distinct final children `Guard Pulse a`
+and `Riposte Mark b`; Aster's selected ledger uses `a`, Borel's uses `b`, and
+no exact child repeats in that pair. Neither example lets both Relics use
+anything. A same-pair hybrid receives one exact-form permission law, result,
+recurrence rule, and realization—never a second related vote or draw. In a
+three-Relic cohort, however, one pair may classify exact while a different pair
+classifies related-only; neither pair inherits the other's law.
+
+Every C2 answer opens C4G1 before form-specific C3 permission law. That order
+is load-bearing because a triple-only candidate context can create or remove a
+pair-law response witness. Under A, twenty-eight related descendants prune and
+`Phi_SR = 117`; under B, twenty-seven exact descendants prune and `Phi_SR =
+118`; under C, neither form subtree prunes and `Phi_SR = 145`. Do not batch
+C4G1. The final gear/progression visual refresh remains an SR-12 closeout
+obligation after Relic design is complete.
+
 ## 2026-10-02 complete Relic packages factorize; corrected coincident candidate overlap is next
+
+**Superseded for navigation by the section above.** Its RCS-08C1 card and
+`Phi_SR = 147` checkpoint predate the selected B answer.
 
 Zanzagar selected **RCS-07C-A with RCS-07C-B as the qualified three-way
 artifact-chemistry fallback**. Whenever a root/input edge and root/payoff edge
@@ -14692,7 +14763,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-02 03:24 UTC — Coincident cross-Relic candidate overlap is next](docs/handoffs/2026-10-02-0324--relic-coincident-candidate-overlap-next.md)**
+[2026-10-02 04:45 UTC — Cross-active overlap form is next](docs/handoffs/2026-10-02-0445--relic-cross-active-overlap-form-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

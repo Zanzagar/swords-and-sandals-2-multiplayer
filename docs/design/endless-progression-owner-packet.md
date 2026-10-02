@@ -569,9 +569,11 @@ fully factorize into complete-package support. A prerequisite audit and
 successive before-commit challenges then make old RCS-08 a non-counting alias
 for 132 counted evidence-sharing, permission-law, denial-resolution,
 recurrence, three-recipient, later-reuse, co-application, composition-law,
-stacking-signature, and team-signature rows. **RCS-08C1 is the sole owner-
-facing choice under SR-09.** The register now contains 328 rows and `Phi_SR =
-147`; conditional branches prune rather than promising 132 shipped mechanics.
+stacking-signature, and team-signature rows. **RCS-08C1-B is now selected with
+RCS-08C1-A as the qualified clarity/anti-amplification fallback; RCS-08C2 is
+the sole owner-facing choice under SR-09.** The register remains 328 rows and
+`Phi_SR = 146`; conditional branches prune rather than promising 132 shipped
+mechanics.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -30850,7 +30852,7 @@ unchanged.
 > and recurrence, incomplete composition authority, and reversed prerequisites.
 > Every intermediate draft remained uncommitted and unpushed.
 
-### RCS-08C1 — same-cut cross-active-Relic candidate-overlap support — active owner choice
+### RCS-08C1 — same-cut cross-active-Relic candidate-overlap support — B selected with A fallback
 
 Fix the ruleset/catalog version, one player-semantic cut, allied roster,
 combatants, active personal Relic roots and realizations, operative context,
@@ -30916,6 +30918,106 @@ same-cut descendants under C2/C3E/C3R/C4/I0 prune and L1 opens: **328 rows:
 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 59`**. A letter selects worksheet
 direction only. Do not batch C2 or L1; the authoritative decision record and
 final-system SVG remain unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-02:** **B, require
+functional coincident cross-Relic candidate overlap, with A as the qualified
+clarity/anti-amplification fallback.** Thus `O^{co}_v` is nonempty: the
+completed catalog must contain at least one reachable state in which two
+distinct allied combatants' active personal Relics select authoritative
+ledgers joined by an exact child or a distinct-related lineage/accounting
+pair.
+
+The selection promises a truthful shared-candidate relationship, not shared
+use. Every child remains one source-owned, once-paid occurrence; each Relic
+keeps a distinct personal evaluator and any later retained payoff remains its
+already-authored personal transaction. C2 must still choose the supported
+overlap forms, C3E/C3R must still decide pair permission, denial disposition,
+and recurrence, C4 must still settle a possible three-recipient constellation,
+and I0 must still decide whether retained personal transactions may materially
+co-apply. A fires instead if prototypes cannot disclose the relationship
+prospectively or if the design degenerates into compulsory ally fuel, callback-
+order allocation, double billing, sibling laundering, or opaque hub
+amplification.
+
+C1 is now `DIR-SELECTED` and C2 is the sole `OWNER-OPEN` row: **328 rows: 145
+`SCREEN`, 1 `OWNER-OPEN`, 66 `PRUNED`, 108 `DIR-SELECTED`, 6 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 146`**. The authoritative decision record
+and final-system SVG remain unchanged.
+
+### RCS-08C2 — cross-active candidate-overlap form support — active owner choice
+
+C1-B requires at least one functional same-cut cross-active overlap, but it
+does not say whether the completed catalog supports the literal reuse of one
+final child, the coordination of distinct children from one truthful causal
+family, or both. C2 chooses that form vocabulary before any permission or
+settlement law is designed.
+
+For every fixed state in `O^{co}_v`, enumerate each **unordered pair of
+selected authoritative ledgers** that overlaps. Let `P^{co}_v` be that
+nonempty set of pair-local opportunities, retaining the fixed state and both
+Relic identities in each key. Classify every member of `P^{co}_v` exactly
+once:
+
+- `E^{co}_v` contains the ledger pair when that same pair repeats one exact
+  final child occurrence. If those two ledgers also contain a distinct-related
+  pair, their same-pair hybrid remains in this exact class and receives one
+  eventual exact-form law, result, recurrence rule, and realization only.
+- `Q^{co}_v` contains the **related-only residual**: those two ledgers repeat
+  no final child occurrence but contain genuinely distinct final children
+  whose complete lineages intersect or that share one nonmultiplying
+  authorization/accounting parent.
+
+`E^{co}_v` and `Q^{co}_v` are disjoint, and C1-B makes their union
+`P^{co}_v` nonempty. Different pairs inside one three-Relic cohort classify
+independently: Aster/Borel may be exact while Borel/Cyra is related-only, which
+populates both sets and therefore requires C. Exact dominance never leaks from
+one pair to another. Aliases, member sites inside one compound child, packets,
+callbacks, class membership, and two names for one occurrence cannot
+manufacture either a second child or a related-only witness.
+
+| Choice | Required cross-active overlap-form support | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — exact-form support only** | `E^{co}_v` is nonempty and `Q^{co}_v` is empty. At least one reachable selected-ledger pair repeats an identical final child; every overlapping pair without an exact repeat is forbidden. A same-pair factual hybrid remains exact and is counted once. | **Qualified clarity/anti-laundering fallback.** “This same proof appears in both Relics” is the shortest forecast and combat-log grammar. One child remains one while participating in two distinct personal relationships, so a local witness can directly fit the standing ideal. A also concentrates build pressure in obvious hub children and globally excludes truthful sibling choreography. | Borel's once-paid `Heat h` appears in both Aster's selected `Guard g + h` ledger and Borel's selected `h + Return t` ledger. No unordered selected-ledger pair may overlap solely through distinct `Guard Pulse a`/`Riposte Mark b` children. |
+| **B — distinct-related-only support** | `E^{co}_v` is empty and `Q^{co}_v` is nonempty. No overlapping selected-ledger pair may repeat a final child, but at least one reachable pair uses distinct children joined by complete lineage or one nonmultiplying authorization/accounting parent. | B makes distinction maximally visible at the child level while retaining causal unity. It can support choreographed allies without literal proof hubs, but it bans the easiest same-child story and keeps the hardest lineage/payment story. It has the greatest risk that “one paid action became two proofs” feels like hidden duplication; choose it only if exact reuse proves intrinsically unhealthy while related choreography remains exceptionally legible and fun. | One paid `Twin Vow` yields distinct final children `Guard Pulse a` and `Riposte Mark b`. Aster's selected ledger uses `a`; Borel's uses `b`. Their identities stay distinct and their shared nonmultiplying parent stays one, but that ledger pair repeats no exact child. |
+| **C — support both exact and distinct-related-only forms** | Both `E^{co}_v` and `Q^{co}_v` are nonempty. The completed catalog contains at least one functional exact-pair witness and at least one functional related-only-pair witness. They may occur in different states or as different unordered pairs in one three-Relic state; exact identities, counts, distribution, and prevalence remain AUTHOR/SPEC. | **Recommended, with A as the qualified clarity/anti-laundering fallback.** C preserves the two already-established proof grammars across allied personal Relics: readable keystone sharing and choreographed distinct manifestations of one causal family. Each local relation may directly express unity with real difference; catalog coexistence is only aggregate. It offers the richest co-op buildcraft, but it carries both hub dominance and sibling/payment-compression risks and the highest UI, authoring, solver, and teaching burden. | Aster/Borel share exact `Heat h`; in that same state Borel/Cyra may instead overlap only through distinct `Guard Pulse a`/`Riposte Mark b`. The two unordered pairs receive their own later laws. Neither witness grants both Relics use of anything. |
+
+A/B/C are mutually exclusive and exhaustive because the nonempty pair-local
+domain `P^{co}_v` has exact-class support only, related-only-residual support
+only, or both. A does not create a loophole for same-pair hybrids: that pair is
+classified once under exact law and never receives a second related vote,
+draw, denial disposition, or recurrence attempt. An exact relation on a
+different ledger pair supplies no authority over its related-only neighbor.
+B cannot be proved by splitting one authored compound child into hidden member
+sites. Every witness must be reachable and functional in otherwise legal play
+rather than debug-only, dominated, or cosmetic.
+
+Recommend **C, with A as the qualified clarity/anti-laundering fallback**. C
+keeps the cross-active system consistent with the selected within-evaluation
+proof vocabulary instead of teaching allies that one of the two truthful
+relations arbitrarily disappears at the personal-Relic boundary. Use A if the
+related-only residual cannot be shown prospectively in one player-facing
+causal/accounting sentence, if it turns one payment into a broadly reusable
+team hub, or if adversarial prototypes cannot prevent sibling laundering and
+double billing. B is the weakest default because it removes the clearest form
+while retaining the more expensive one.
+
+C2 chooses support only. It grants no shared use, retained recipient, denial
+result, priority, chooser, random draw, recurrence, claim propagation, later
+reuse, payoff co-application, source payment, Capacity, Team Tactic allowance,
+stacking, team tag, power, acquisition, lock, or UI realization. C4G1 follows
+every answer **before** form-specific C3 law classification because a
+triple-only candidate context can create or remove a pair-law response witness.
+
+Under A, the twenty-eight related descendants prune and C4G1 opens: **116
+`SCREEN`, 1 `OWNER-OPEN`, 94 `PRUNED`, 109 `DIR-SELECTED`, 6 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 117`**. Under B, the twenty-seven exact
+descendants prune and C4G1 opens: **117 `SCREEN`, 1 `OWNER-OPEN`, 93 `PRUNED`,
+109 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 118`**.
+Under C, neither form subtree prunes and C4G1 opens: **144 `SCREEN`, 1
+`OWNER-OPEN`, 66 `PRUNED`, 109 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 145`**. A letter selects worksheet direction only. Do not
+batch C4G1; the authoritative decision record and final-system SVG remain
+unchanged.
 
 ## Session protocol and evidence
 
