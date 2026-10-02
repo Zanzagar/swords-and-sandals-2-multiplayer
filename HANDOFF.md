@@ -1,6 +1,83 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-02 responsive permission made causal; steadfast polarity is next
+
+Zanzagar selected **RCS-08C3EE4-B with RCS-08C3EE4-A as the qualified
+clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback**.
+At least one responsive deterministic intrinsic cross-active exact-permission
+projection must have one independently meaningful participant or opponent
+decision whose complete causal closure changes its certain bit, or its
+reachable/conditional support under mediated uncertainty, while the same law,
+Relics, ledgers, exact pair, repeated child, and proof survive.
+
+The requirement is existential, not universal. The changed fact and both
+policy arms remain useful after permission ablation; removing the second Relic
+must expose a marginal cross-active purpose; and direct permission commands,
+token choices, changed laws or pairs, retries, callbacks, reroutes, alternate
+ledgers, and lucky seed crossovers fail. This can directly express *Achintya
+Bheda Abheda* at the action/result boundary: one proof stays one, two personal
+Relics stay distinct, and meaningful action changes whether both relationships
+may participate under one continuing covenant. A remains armed if the causal
+class becomes redundant, opaque, dominated, grief-prone, or coercive. It has
+not fired.
+
+C3EE4 and C3EE5 are orthogonal serialized siblings. C3EE3-C already guarantees
+the nonempty steadfast class; recording B merely closes the causal sibling and
+opens C3EE5. The finite register is **328 rows: 103 `SCREEN`, 1 `OWNER-OPEN`
+at RCS-08C3EE5, 101 `PRUNED`, 114 `DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and
+1 `EVALUATE`; `Phi_SR = 104`**. The authoritative decision record and final-
+system SVG remain byte-unchanged.
+
+C3EE5 now asks which polarities occur among complete context-invariant
+deterministic cross-active exact-permission projections. The nonempty
+steadfast family partitions into projections whose complete image is `{0}`
+and those whose complete image is `{1}`:
+
+- **A — steadfast refusal only.** Every steadfast projection always returns
+  false. This can create robust proof-sovereignty and orthogonal-evidence play,
+  but supplies no reliable sharing anchor and carries the highest dead-loot,
+  trap, grief, and compensation burden. Use A only if steadfast compatibility
+  itself fails while refusal remains viable.
+- **B — steadfast compatibility only.** Every steadfast projection always
+  returns true. This is the qualified clarity/multiplayer-trust/policy-
+  nonredundancy fallback and lower-risk baseline: responsive Covenants retain
+  conditional refusal while dependable Witnesses remain reliable anchors.
+- **C — both steadfast polarities coexist. Conditionally recommended, with B
+  as the qualified fallback.** At least one steadfast projection always
+  permits and another always refuses. This supports dependable sharing,
+  causal conditional response, and context-proof refusal as three distinct
+  cross-active exact policies, but only if refusal earns real marginal team
+  play rather than a matrix-symmetry cell.
+
+Stone Concord always permits Borel's once-paid `Heat h` when it appears in
+Aster's `{Guard g, Heat h}` and Borel's `{Heat h, Return t}` ledgers. That
+allow case is a direct local ideal fit: one proof participates in two distinct
+personal relationships without duplicate payment. Sovereign Ember always
+refuses joint participation for its repeated `h`; a qualifying team knowingly
+routes one Relic toward `h` and the other toward orthogonal evidence. Refusal
+is neutral/protective, and coexistence is aggregate. The false bit still means
+only “not both”; C3EE5 cannot promise cancellation, a survivor, substitute,
+benefit, or retry.
+
+Recommend C only if removing the second Relic or replacing exact `h/h` with
+independent or merely related evidence destroys the policy; deny versus allow
+and deny versus responsive variants materially change preferred builds; both
+allies can forecast and attribute the relation; no cheap veto, proof poisoning,
+dead loot, compulsory fuel, or quarterbacking emerges; allow, deny, and
+responsive families keep strict non-dominated niches at equal optimized
+Legendary ceilings; and simulator/RL ablations plus human teach-back survive.
+If steadfast refusal/coexistence fails, use B. If compatibility alone fails but
+refusal survives, reopen A. If both fail, reopen C3EE3-C toward responsive-only
+C3EE3-B.
+
+Under A, B, or C, C3ED1 opens and the register reaches `Phi_SR = 103`. Do not
+batch the next row. The final gear/progression visual refresh remains an SR-12
+closeout obligation after Relic design is complete.
+
 ## 2026-10-02 responsive and steadfast permission coexist; causal support is next
+
+**Superseded for navigation by the section above.** Its RCS-08C3EE4 card and
+`Phi_SR = 105` checkpoint predate the selected B answer.
 
 Zanzagar selected **RCS-08C3EE3-C with RCS-08C3EE3-A as the qualified
 clarity/multiplayer-trust/policy-nonredundancy fallback**. The completed catalog
@@ -15097,7 +15174,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-02 05:57 UTC — Cross-active exact causal response is next](docs/handoffs/2026-10-02-0557--relic-exact-causal-response-next.md)**
+[2026-10-02 18:20 UTC — Cross-active exact steadfast polarity is next](docs/handoffs/2026-10-02-1820--relic-exact-steadfast-polarity-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

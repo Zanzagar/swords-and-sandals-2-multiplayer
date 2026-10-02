@@ -578,8 +578,10 @@ as the qualified cross-player-agency/artifact-temperament fallback.
 RCS-08C3ED-A is now selected with RCS-08C3ED-C as the qualified artifact-
 temperament/robust-risk-policy fallback. RCS-08C3EE3-C is now selected with
 RCS-08C3EE3-A as the qualified clarity/multiplayer-trust/policy-nonredundancy
-fallback. RCS-08C3EE4 is the sole owner-facing choice under SR-09.** The
-register remains 328 rows and `Phi_SR = 105`; conditional
+fallback. RCS-08C3EE4-B is now selected with RCS-08C3EE4-A as the qualified
+clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback.
+RCS-08C3EE5 is the sole owner-facing choice under SR-09.** The register
+remains 328 rows and `Phi_SR = 104`; conditional
 branches prune rather than promising 132 shipped mechanics.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
@@ -31483,7 +31485,7 @@ set is not singleton. The register is **328 rows: 104 `SCREEN`, 1
 `EVALUATE`; `Phi_SR = 105`**. The authoritative decision record and final-
 system SVG remain unchanged.
 
-### RCS-08C3EE4 — matched player/counterplay-causal response for responsive cross-active exact permission — active owner choice
+### RCS-08C3EE4 — matched player/counterplay-causal response for responsive cross-active exact permission — B selected with A fallback
 
 C3EE3-C requires a responsive deterministic class, but a projection may vary
 only with immutable, automatic, or externally fixed facts. C3EE4 asks whether
@@ -31594,6 +31596,153 @@ other immediate status change: **103 `SCREEN`, 1 `OWNER-OPEN`, 101 `PRUNED`,
 114 `DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 104`**.
 Do not batch the next row. A letter selects worksheet direction only; the
 authoritative decision record and final-system SVG remain unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-02:** **B, require at
+least one matched player/counterplay-causal response, with A as the qualified
+clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback.**
+Thus `M^{co-exact-det-causal}_v` is nonempty. At least one responsive complete
+intrinsic cross-active exact-permission projection has one qualifying lawful
+participant or counterplayer decision whose complete causal closure changes
+the eventual certain bit, or its reachable/conditional support under mediated
+uncertainty, while the same projection, Relics, selected ledgers, exact pair,
+repeated child, and proof survive.
+
+This is existential. It requires neither universal actionability nor a
+particular controlling side, action, fact, timing, success rate, or full-bit
+preview. The changed fact and both policy arms must remain independently
+meaningful after permission ablation; removing the second Relic must expose a
+marginal cross-active exact policy purpose; and direct or cosmetically
+laundered permission commands, changed laws or pairs, token choices, retries,
+callbacks, reroutes, alternate ledgers, and lucky sample crossovers remain
+invalid. A stays armed if the causal exemplar becomes redundant, opaque,
+dominated, grief-prone, or socially coercive. It has not fired.
+
+C3EE4 is now `DIR-SELECTED`; C3EE5 is the sole `OWNER-OPEN` row. These are
+orthogonal serialized siblings: C3EE3-C, not C3EE4-B, already guarantees the
+nonempty steadfast class whose polarity C3EE5 now classifies. The register is
+**328 rows: 103 `SCREEN`, 1 `OWNER-OPEN`, 101 `PRUNED`, 114 `DIR-SELECTED`,
+7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 104`**. The authoritative
+decision record and final-system SVG remain unchanged.
+
+### RCS-08C3EE5 — steadfast deterministic polarity for context-invariant cross-active exact permission — active owner choice
+
+C3EE3-C independently guarantees both a responsive deterministic class and a
+nonempty context-invariant deterministic complement. C3EE5 asks whether those
+steadfast projections always refuse joint participation, always permit it, or
+support both polarities across the completed catalog. It classifies complete
+canonical projections, not isolated opportunities, whole physical Relics, or
+the eventual result of a false bit.
+
+Let
+
+`F^{co-exact-det-steady}_v = D^{co-exact-det}_v setminus X^{co-exact-det-response}_v`.
+
+This set is nonempty. For each `d` in it, the complete reachable domain `O_d`
+is nonempty and deterministic `b_d:O_d->{0,1}` is not responsive, so its image
+is exactly `{0}` or `{1}`. Define
+
+`F^{co-exact-det,+}_v = {d in F^{co-exact-det-steady}_v | {b_d(o):o in O_d}={1}}`
+
+and let `F^{co-exact-det,-}_v` be its complement inside the steadfast family.
+
+| Choice | Steadfast cross-active exact polarity | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — steadfast refusal only** | `F^{co-exact-det,+}_v` is empty. Every steadfast projection returns zero throughout its own complete reachable domain. The responsive class still certainly allows somewhere and refuses elsewhere. | A makes context-proof refusal the only dependable cross-active exact philosophy. It can support proof sovereignty and deliberately orthogonal team evidence lanes, but supplies no steadfast sharing anchor. Its fit is **neutral/protective**: it preserves real distinction and rejects automatic proof compression while joint participation must come from responsive laws. It has the greatest dead-loot, ally-suppression, matchmaking, trap, and compensation burden. Use A only if steadfast compatibility itself fails while refusal remains viable. | **Sovereign Ember** always refuses joint participation when Aster's and Borel's selected personal Relic ledgers repeat the same `Heat h`. A qualifying team deliberately routes one Relic toward `h` and builds the other around independent Guard/Return evidence. If players merely suffer the collision or optimally avoid the item, the witness fails. The false bit still means only “not both.” |
+| **B — steadfast compatibility only** | `F^{co-exact-det,+}_v=F^{co-exact-det-steady}_v`. Every steadfast projection returns one throughout its own complete reachable domain. Responsive projections retain both certain bits, so B removes no global refusal endpoint. | **Qualified clarity/multiplayer-trust/policy-nonredundancy fallback and lower-risk production baseline.** B preserves the dependable Witness anchor promised by C3EE3-C while responsive causal Covenants retain conditional allow/refuse play. A stable allow can express the ideal **directly**: one proof remains one while participating in two genuinely distinct personal Relic relationships. B minimizes hard-veto, grief, and trap risk. Costs are proof-compression and mandatory-team-glue pressure, plus the loss of context-proof refusal as its own build identity. | **Stone Concord** always passes Borel's once-paid `Heat h` through this permission coordinate when it appears in Aster's `{Guard g, Heat h}` ledger and Borel's `{Heat h, Return t}` ledger. The team can plan around a reliable shared keystone without preserving a Seal. No duplicated payment, final receipt, co-application, or payoff is promised. |
+| **C — both steadfast polarities coexist** | `F^{co-exact-det,+}_v` is a nonempty proper subset of `F^{co-exact-det-steady}_v`. At least one steadfast projection always permits and at least one distinct steadfast projection always refuses. | **Conditionally recommended as the higher-ceiling target, with B as the qualified fallback above.** C permits three readable cross-active exact covenant philosophies: steadfast sharing, causal conditional response, and steadfast refusal. The allow case is a direct local ideal fit; refusal is neutral/protective; their catalog coexistence is only **aggregate**, never a stronger theological analogue. A robust refusal can add proof-sovereignty and orthogonal-evidence policy that no responsive law guarantees, because no context or action can turn it permissive. Costs are a third prediction dialect, queue grief, proof poisoning, dead loot, denial farming, compensation inversion, and the greatest authoring/evaluation burden. | **Stone Concord** always permits its repeated exact child while **Sovereign Ember** always refuses its own. Ashen Accord remains responsive through a meaningful Concord Seal. Sovereign qualifies only if its invariant refusal materially changes preferred team composition or routing under matched ablation and receives commensurate package value—not because a support matrix wanted a deny cell. |
+
+A/B/C are mutually exclusive and exhaustive because the allow subset of
+nonempty `F^{co-exact-det-steady}_v` is empty, all of that family, or nonempty
+proper. A or B implies at least one responsive and one steadfast projection.
+C implies at least three canonical projections overall—one responsive, one
+steadfast-allow, and one distinct steadfast-deny—but no additional physical-
+Relic or definition count and no per-Relic, per-pair, per-player, or per-format
+quota. A separately fixed law-defining variant may be a distinct canonical
+projection; an alias or refactor cannot be.
+
+Classification uses each projection's complete semantic behavior over its
+complete reachable domain. Never split one projection by bit, context region,
+combat instance, callback, helper, generated identity, or code shape; never
+concatenate distinct laws, exact and related-only tags, or same-cut and later-
+use domains. The zero and one regions of a responsive projection are not two
+steadfast members. A same-pair exact/related hybrid receives this exact
+treatment once and no second related vote. A singleton reachable domain is
+formally steadfast but cannot by itself prove a viable policy.
+
+Polarity remains gate-local. A true bit passes only this cross-active exact
+permission coordinate; it duplicates no proof payment and guarantees no
+candidate, commitment, final co-survival, receipt, payoff, or co-application.
+A false bit means only “not both.” C3ED1 and its resolver descendants own
+cancellation versus one retained personal transaction and its identity;
+C3EG1 owns recurrence. This cross-active gate may suppress already-authored
+personal transactions but cannot manufacture a substitute or new payoff
+identity. Because the responsive class already supplies both certain
+endpoints, every C3EE5 answer leaves C3EE6 `DERIVED` and C3EE7 `PRUNED`.
+
+The earlier within-evaluator exact and related polarity choices do not decide
+this cross-active row. A C witness is valid only if its steadfast-refusal
+purpose disappears when the second active personal Relic is removed and
+changes when the repeated exact child is replaced by independent or merely
+related evidence. Merely relabeling the earlier Severed Bell/Chorus policy,
+hard-coding an item incompatibility matrix, or copying Ashen's responsive
+witness fails.
+
+Recommend **C, with B as the qualified clarity/multiplayer-trust/policy-
+nonredundancy fallback**. Use A only if steadfast compatibility fails while
+refusal remains viable. If neither steadfast polarity can furnish a viable
+purpose, reopen C3EE3-C toward responsive-only C3EE3-B rather than preserving
+a token steadfast class.
+
+C may stand only if all of the following hold:
+
+1. Removing the second active personal Relic removes the policy; otherwise the
+   witness duplicates a within-Relic lane.
+2. Replacing the repeated exact child with independent or merely related
+   evidence changes the policy; otherwise it duplicates another proof form.
+3. Swapping steadfast refusal for steadfast compatibility under the same
+   package materially changes a preferred legal build, route, hedge, or team
+   policy.
+4. Swapping it for a responsive projection with a reachable allow context
+   proves a distinct value for context-proof refusal rather than a worse
+   conditional law.
+5. Every required polarity is reachable, prospectively legible, materially
+   operative, non-token, and non-dominated; a singleton-domain formality or
+   showcase incompatibility fails.
+6. Both affected allies can understand the exact pair relation before their
+   last informed reversible commitment and attribute the verdict afterward.
+7. No cheap unilateral veto, covert sabotage, proof poisoning, compulsory
+   ally fuel, permanent quarterback, or live approval prompt emerges.
+8. Steadfast-allow, steadfast-deny, and responsive families retain strict
+   niches at the same intended optimized Legendary ceiling. Reliability gets
+   no novice tax, refusal no compensation premium, and flexibility no hidden
+   universal advantage.
+9. Later false-bit settlement and recurrence must not launder refusal into
+   pure upside, favorable-survivor shopping, or a farmable retry loop; those
+   later choices cannot be presumed to justify C now.
+10. Held-out simulator/RL tests use matched second-Relic, exact-versus-related,
+    polarity, and responsive-law ablations and search for queue grief, dead
+    loot, proof poisoning, denial harvesting, dominance, and policy collapse.
+    Human forecast, teach-back, and attribution tests remain binding; RL
+    evaluates robustness rather than choosing the philosophy.
+
+If steadfast refusal or its coexistence fails while compatibility remains
+viable, reopen B. If compatibility fails while refusal remains viable, reopen
+A. If both fail, reopen C3EE3-C as stated above.
+
+C3EE5 selects no exact law, Relic, child, action, actor, result, survivor,
+recipient, substitute, compensation, payoff, recurrence, count beyond the
+derived projection floor, catalog share, rarity, acquisition, disclosure UI,
+storage, or implementation. RCS-02/SR-10 owns exact information; C3ED1 onward
+owns false-bit settlement; C3EG1 owns recurrence; RCS-05D–F and SR-09 own the
+power envelope; RCS-17/RCS-18 own simulation, balance, exploit, and playtest
+acceptance.
+
+Under A, B, or C, C3EE5 moves to `DIR-SELECTED` and C3ED1 becomes the sole
+`OWNER-OPEN` row with no other immediate status change: **102 `SCREEN`, 1
+`OWNER-OPEN`, 101 `PRUNED`, 115 `DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 103`**. Do not batch the next row. A letter selects
+worksheet direction only; the authoritative decision record and final-system
+SVG remain unchanged.
 
 ## Session protocol and evidence
 
