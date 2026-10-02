@@ -559,12 +559,12 @@ fallback:** every positive package fully commits at settlement, so C2/C3/C4
 prune. RCS-06 then closes as a derived integration of already-selected format,
 whole-team claimant, and pinned-version rules. A further audit makes old
 RCS-07 a non-counting alias for separate input catalog support, payoff catalog
-support, and residual complete-package support rows. **RCS-07A-B is now
-selected with RCS-07A-A as the qualified clarity/anti-dead-loot fallback:**
-input support is genuinely selective while every root remains input-
-customizable and every supported input Charm remains viable. **RCS-07B is the
-sole owner-facing choice under SR-09.** The register remains 197 rows and
-`Phi_SR = 18`.
+support, and residual complete-package support rows. **RCS-07A-B and
+RCS-07B-B are now selected, each with A as the qualified clarity/anti-dead-
+loot fallback:** both unary support relations are genuinely selective while
+every root retains both Charm-customization lanes and every supported Charm
+remains viable with at least one root. **RCS-07C is the sole owner-facing
+choice under SR-09.** The register remains 197 rows and `Phi_SR = 17`.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -30516,7 +30516,7 @@ row. The register now contains **17 `SCREEN`, 1 `OWNER-OPEN` at RCS-07B, 66
 `PRUNED`, 105 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 18`**.
 
-### RCS-07B — root-to-payoff-Charm catalog-support topology — active owner choice
+### RCS-07B — root-to-payoff-Charm catalog-support topology — B selected with A fallback
 
 `C^payoff_v` is nonempty because the selected typed catalog requires
 materially functional payoff-Charm support. Every supported payoff Charm must
@@ -30570,6 +30570,80 @@ row. The register would then contain **16 `SCREEN`, 1 `OWNER-OPEN` at RCS-07C,
 66 `PRUNED`, 106 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
 `Phi_SR = 17`**. A letter selects worksheet direction only. Do not batch 07C;
 the authoritative decision record and final-system SVG remain unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-01:** **B, selective
+compatibility with every root payoff-Charm-customizable, with A as the
+qualified clarity/anti-dead-loot fallback.** `C^payoff_v` is a genuine proper
+subset while both projections remain total: every supported root has at least
+one payoff-Charm edge, every supported payoff Charm has at least one viable
+root, and at least one root/payoff-Charm pair lacks support. The proper/total
+relation entails at least two supported root realizations and two supported
+payoff-Charm candidates. A remains armed if the two selective unary matrices
+prove opaque, arbitrary, loot-trapping, or policy-empty. This selects only
+support incidence; it neither creates nor removes any otherwise-authored
+uncharmed receipt or payoff and changes no authoritative wording.
+
+07B moves to `DIR-SELECTED` and 07C becomes `OWNER-OPEN` without pruning a
+row. The register now contains **16 `SCREEN`, 1 `OWNER-OPEN` at RCS-07C, 66
+`PRUNED`, 106 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 17`**.
+
+### RCS-07C — residual complete-package catalog support — active owner choice
+
+Both unary relations are now selective with total projections. For the
+pairwise-supported triple domain
+`T_v={(r,i,p):(r,i)∈C^input_v and (r,p)∈C^payoff_v}`, let nonempty
+`J_v ⊆ T_v` contain the actually supported complete root + input + payoff
+packages. A member of `J_v` means that at least one lawful complete
+configuration exists; it does not make that package legal in every route,
+opponent, or runtime context. `J_v` must remain nonempty because selected
+C3c.24-B/C3c.25-B require at least one materially functional complementary
+two-Charm configuration.
+
+Let `π_ri(J_v)` and `π_rp(J_v)` be the root/input and root/payoff edge
+projections of supported complete packages. Ask only whether the two unary
+support relations compose without another exclusion layer and, if not,
+whether every unary edge still has at least one complete-package extension.
+
+| Choice | Complete-package support doctrine | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — unary support fully factorizes** | `J_v=T_v`. Whenever a root/input edge and a root/payoff edge are individually supported for the same root, their three-item package has at least one lawful supported configuration. | **Recommended, with B as the qualified three-way artifact-chemistry fallback.** The two already-selective unary relationships remain distinct, yet their truths participate transparently in one whole package: a direct *Achintya Bheda Abheda* fit without a hidden third compatibility filter. A's later risk is that the easiest input Charm and strongest payoff Charm become an automatic package wherever both unary edges exist. | If Ashen supports input Charms Ember and Knot and payoff Charms Mirror and Echo, all four complete packages are supported: Ember+Mirror, Ember+Echo, Knot+Mirror, and Knot+Echo. Their exact effects and lawful contexts may still differ. |
+| **B — selective three-way compatibility without package-orphan unary edges** | `J_v` is a proper subset of `T_v`, while `π_ri(J_v)=C^input_v` and `π_rp(J_v)=C^payoff_v`. Some pairwise-supported triples lack complete-package support, but every supported root/input and root/payoff edge extends into at least one supported complete package. This necessarily creates at least one root with a supported `2×2` unary rectangle and at least one omitted cell. | **Qualified three-way artifact-chemistry fallback.** B gives the complete package an emergent relationship not reducible to its two unary edges—the strongest literal whole-and-parts expression of the standing ideal—but adds a third compatibility matrix. Use it only if exclusions create legible recurrent policy rather than arbitrary menu denial. | Ashen supports the same four unary edges, but Ember+Mirror is excluded while Ember+Echo, Knot+Mirror, and Knot+Echo are supported. Every unary edge still has a full-package home, so the exclusion expresses three-way chemistry rather than orphaning an advertised root/Charm relation. |
+| **C — package-orphan unary support exists** | `J_v` is a proper subset of `T_v`, and `π_ri(J_v)` is a proper subset of `C^input_v` or `π_rp(J_v)` is a proper subset of `C^payoff_v`. At least one exact supported root/Charm edge extends into no supported complete package. The edge remains usable in a lawful unary configuration, and the Charm may still join complete packages under another root. | C permits deliberate single-lane specialist relationships and sharp artifact identity, but makes two individually truthful support indicators fail to compose and creates the greatest loot, disclosure, and compensation burden. It is not recommended by default; package-orphan edges would need a player-legible identity and recurrent policy worth losing that root/Charm edge's second-lane flexibility. | Ashen+Ember remains a supported input relation, but no Ashen package containing Ember admits any payoff Charm. Ashen+Knot+Mirror remains supported, and Ember may still join a complete package under Tide. Ember is not globally solo-only; the exact Ashen/Ember edge is package-orphaned. |
+
+A/B/C are exhaustive for nonempty `J_v`: it equals `T_v`; it is proper while
+both unary-edge projections remain total; or it is proper and at least one
+projection is strict. Under B, omitting `(r,i,p)` while keeping both `(r,i)`
+and `(r,p)` represented requires another supported payoff edge at `r` to
+extend `(r,i)` and another supported input edge at `r` to extend `(r,p)`.
+Thus B's `2×2` floor is derived topology, not an authored catalog count.
+
+Recommend **A, with B as the qualified three-way artifact-chemistry
+fallback**. The two selected unary matrices already make the root/input and
+root/payoff relationships materially specific. A lets those distinct
+relationships become one usable hierarchy without asking players to discover
+a third denial rule. Fire B only if prototypes reveal a stable, disclosed,
+semantically honest three-way incompatibility that cannot be represented by
+the unary relations or lawful contextual conditions, creates recurrent build
+policy, and does not make rewards feel dead. C remains a legitimate authored
+specialist direction, but it carries the largest clarity and collection debt.
+
+The principal hypotheses are an automatic best input+payoff pair under A and
+an opaque compatibility tax under B/C. 07C selects only complete-package
+catalog-support incidence. It does not select exact members of `J_v`, lawful
+conditioning coordinates, binding or recheck horizons, power, compensation,
+rarity, acquisition, duplicate handling, custody, stacking, team authority,
+or proof thresholds. C3c.25-B continues to reject every same-type pair before
+07C runs; Bound Soul remains universally non-gating under C3c.3-B; and no
+support refusal may be disguised as Capacity or a new scarce pool under
+C3c.26-A.
+
+Any A/B/C answer moves 07C to `DIR-SELECTED` and opens RCS-08 without pruning
+a row. The register would then contain **15 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-08, 66 `PRUNED`, 107 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 16`**. A letter selects worksheet direction only. Do
+not batch RCS-08; the authoritative decision record and final-system SVG
+remain unchanged.
 
 ## Session protocol and evidence
 

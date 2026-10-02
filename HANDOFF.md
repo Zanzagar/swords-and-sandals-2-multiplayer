@@ -1,6 +1,79 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-01 both unary Charm relations are selective; complete-package support is next
+
+Zanzagar selected **RCS-07B-B with RCS-07B-A as the qualified clarity/anti-
+dead-loot fallback**. Root-to-payoff-Charm catalog support is a genuine proper
+subset while both projections remain total: every supported root has at least
+one payoff-Charm edge, every supported payoff Charm has at least one viable
+root, and at least one root/payoff-Charm pair lacks support. No root loses the
+payoff-Charm customization lane. Together with selected 07A-B, both unary
+root/Charm relations are selective and total on both projections.
+
+This selection fixes only support incidence. Exact edges and lawful route/
+opponent/context conditions remain AUTHOR/SPEC; RCS-13/RCS-14 own binding and
+recheck horizons. Breadth liability, compensation, magnitude, optimized
+ceiling, rarity, acquisition, and complete-package support remain unselected.
+07B neither creates nor removes any otherwise-authored uncharmed receipt or
+payoff. A stays armed if the two selective unary matrices prove opaque,
+arbitrary, loot-trapping, or policy-empty.
+
+The register remains **197 rows: 16 `SCREEN`, 1 `OWNER-OPEN` at RCS-07C, 66
+`PRUNED`, 106 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 17`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+`RCS-07C` asks only whether individually supported root/input and root/payoff
+edges compose into a supported complete root + input + payoff package. Let
+`T_v` be the pairwise-supported triple domain and nonempty `J_v ⊆ T_v` the
+supported complete packages. A support entry means at least one lawful
+configuration exists, not that every route, opponent, or runtime context
+admits it:
+
+- **A — unary support fully factorizes. Recommended, with B as the qualified
+  three-way artifact-chemistry fallback.** `J_v=T_v`: any two supported unary
+  edges sharing a root have at least one supported complete-package
+  realization.
+- **B — selective three-way compatibility without package-orphan unary
+  edges.** `J_v` is proper, but every supported root/input and root/payoff edge
+  extends into at least one supported complete package. This necessarily
+  requires at least one root with a supported `2×2` unary rectangle and an
+  omitted cell.
+- **C — package-orphan unary support exists.** `J_v` is proper and at least
+  one exact supported root/Charm edge extends into no complete package. The
+  edge remains usable in a unary configuration, and that Charm may still join
+  complete packages under another root.
+
+Recommend **A with B as the qualified three-way artifact-chemistry fallback**.
+The two selective unary matrices already make the parts materially distinct;
+A lets those truthful relationships participate in one whole without adding a
+third hidden denial rule, a direct *Achintya Bheda Abheda* fit. B expresses the
+strongest emergent whole-and-parts chemistry, but should fire only if prototypes
+prove a stable, disclosed incompatibility that creates recurrent policy and
+cannot be represented honestly by unary support or lawful context conditions.
+
+For one `2×2` example, suppose Ashen supports input Charms Ember/Knot and
+payoff Charms Mirror/Echo. A supports all four complete packages. B may exclude
+Ember+Mirror while supporting Ember+Echo, Knot+Mirror, and Knot+Echo, leaving
+every unary edge a full-package home. Under C, Ashen+Ember may be supported
+alone yet extend into no Ashen two-Charm package; Ember can still pair under a
+different root. The principal later hypotheses are an automatic best pair
+under A and an opaque compatibility tax or dead inventory under B/C.
+
+07C selects no exact triples, lawful conditioning, locks, power, compensation,
+rarity, acquisition, duplicate/custody rule, stacking, team authority, or
+proof threshold. Same-type pairs remain rejected by C3c.25-B, Bound Soul
+remains non-gating under C3c.3-B, and no rejection may masquerade as a scarce
+budget under C3c.26-A. Any 07C answer opens RCS-08 at **197 rows: 15 `SCREEN`,
+1 `OWNER-OPEN`, 66 `PRUNED`, 107 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 16`**. Do not preview or batch RCS-08 unless the owner
+asks. The final gear/progression visual refresh remains an SR-12 closeout
+obligation after Relic design is complete.
+
 ## 2026-10-01 input support is selective; payoff support is next
+
+**Superseded for navigation by the section above.** Its RCS-07B card and
+`Phi_SR = 18` checkpoint predate the selected B answer.
 
 Zanzagar selected **RCS-07A-B with RCS-07A-A as the qualified clarity/anti-
 dead-loot fallback**. Root-to-input-Charm catalog support is a genuine proper
@@ -14504,7 +14577,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-01 05:11 UTC — Payoff-Charm compatibility is next](docs/handoffs/2026-10-01-0511--relic-payoff-charm-compatibility-next.md)**
+[2026-10-02 03:00 UTC — Complete Relic-package support is next](docs/handoffs/2026-10-02-0300--relic-complete-package-support-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
