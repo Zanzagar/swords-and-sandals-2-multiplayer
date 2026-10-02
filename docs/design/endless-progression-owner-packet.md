@@ -576,8 +576,10 @@ RCS-08C4G1-A is now selected with RCS-08C4G1-B as the qualified irreducible-
 3v3-coordination fallback; and RCS-08C3EA-A is now selected with RCS-08C3EA-C
 as the qualified cross-player-agency/artifact-temperament fallback.
 RCS-08C3ED-A is now selected with RCS-08C3ED-C as the qualified artifact-
-temperament/robust-risk-policy fallback. RCS-08C3EE3 is the sole owner-facing
-choice under SR-09.** The register remains 328 rows and `Phi_SR = 108`; conditional
+temperament/robust-risk-policy fallback. RCS-08C3EE3-C is now selected with
+RCS-08C3EE3-A as the qualified clarity/multiplayer-trust/policy-nonredundancy
+fallback. RCS-08C3EE4 is the sole owner-facing choice under SR-09.** The
+register remains 328 rows and `Phi_SR = 105`; conditional
 branches prune rather than promising 132 shipped mechanics.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
@@ -31357,7 +31359,7 @@ sole `OWNER-OPEN` row: **328 rows: 107 `SCREEN`, 1 `OWNER-OPEN`, 100
 `Phi_SR = 108`**. The authoritative decision record and final-system SVG remain
 unchanged.
 
-### RCS-08C3EE3 — deterministic response across intrinsic cross-active exact-permission projections — active owner choice
+### RCS-08C3EE3 — deterministic response across intrinsic cross-active exact-permission projections — C selected with A fallback
 
 C3ED-A makes every fully fixed permission opportunity certain, but does not
 decide whether one complete deterministic law projection returns the same bit
@@ -31454,6 +31456,144 @@ C3EE6 derives both endpoints, and C3EE7 prunes: **104 `SCREEN`, 1
 `EVALUATE`; `Phi_SR = 105`**. Do not batch the next row. A letter selects
 worksheet direction only; the authoritative decision record and final-system
 SVG remain unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-02:** **C, responsive
+and context-invariant deterministic projections coexist, with A as the
+qualified clarity/multiplayer-trust/policy-nonredundancy fallback.** Thus
+`X^{co-exact-det-response}_v` is a nonempty proper subset of
+`D^{co-exact-det}_v`. At least one complete canonical projection certainly
+allows and certainly refuses somewhere in its own reachable domain, while at
+least one distinct projection keeps one certain bit throughout its domain.
+
+This preserves dependable Witness Relics as coordination anchors while making
+room for Covenant Relics whose certain result responds to real relational
+facts. The responsive local covenant can directly express *Achintya Bheda
+Abheda*: one proof remains one, two personal Relics remain genuinely distinct,
+and participation holds under one real condition but not another. Catalog
+coexistence remains aggregate. A stays armed if the responsive class cannot
+produce a genuinely cross-active exact policy without duplicating earlier
+lanes, disguised permission flags, unequal optimized ceilings, opaque state,
+teammate vetoes, grief, or quarterbacking. It has not fired.
+
+C3EE3 is now `DIR-SELECTED`; C3EE4 is `OWNER-OPEN`; C3EE5 remains queued
+`SCREEN`; C3EE6 is `DERIVED` because a responsive deterministic projection
+supplies both certainty endpoints; and C3EE7 is `PRUNED` because that endpoint
+set is not singleton. The register is **328 rows: 104 `SCREEN`, 1
+`OWNER-OPEN`, 101 `PRUNED`, 113 `DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 105`**. The authoritative decision record and final-
+system SVG remain unchanged.
+
+### RCS-08C3EE4 — matched player/counterplay-causal response for responsive cross-active exact permission — active owner choice
+
+C3EE3-C requires a responsive deterministic class, but a projection may vary
+only with immutable, automatic, or externally fixed facts. C3EE4 asks whether
+at least one lawful participant or counterplayer decision must causally move
+one responsive projection between its certain outcomes. It does not require
+every responsive projection to be actionable, choose the controlling side, or
+grant direct permission control.
+
+Let `M^{co-exact-det-causal}_v` be the subset of nonempty
+`X^{co-exact-det-response}_v` whose members possess at least one qualifying
+matched causal witness. A witness begins from one common reachable positive-
+support authoritative **upstream** state and compares two lawful non-oracular
+policies identical at every independently revisable decision coordinate except
+one materially operative participant or counterplayer decision. A
+prospectively bound finite episode may be that intervention only when its later
+member decisions are already bound; independently revisable later choices
+cannot be bundled after the fact.
+
+Hold fixed all non-descendant exogenous variables and other actors' policies;
+the ruleset/version and canonical projection/law; both Relics and
+relationships; every prospective binding and law-defining committed variant;
+both selected authoritative ledgers; the unordered Relic pair, repeated exact
+child, and complete proof structure. Carry each arm through the intervention's
+complete direct, indirect, delayed, reactive, inseparable, and stochastic
+causal closure. Both arms must reach the same structural exact opportunity and
+designated permission realization. In the clean deterministic case their
+certain bits differ.
+
+If upstream stochastic descendants mediate the relevant fact, the decision
+must instead change reachable bit support or the conditional bit distribution
+under the lawful observation history. One favorable seed crossover under
+unchanged policy distributions is not causation. At every fully realized fixed
+opportunity, permission itself remains deterministic under C3ED-A.
+
+| Choice | Matched causal-response support | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — no matched player/counterplay-causal response** | `M^{co-exact-det-causal}_v` is empty. Every responsive projection changes only through immutable, automatic, forced, exogenous, or otherwise nonqualifying facts. Players may forecast, route, and hedge around those facts, but no independently revisable lawful decision supplies a matched causal bit change. | **Qualified clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback.** A preserves responsive **Omen** Relics whose disclosed temperament answers the world rather than either player. It minimizes causal-state tracking, cheap denial loops, teammate vetoes, grief, quarterbacking, and explanation burden. Its fit is **neutral/protective**: it preserves the relational response already selected without adding player-enacted expression. The cost is that responsive laws can become descriptive lookup tables or external clocks instead of lived covenant play. | Ashen Accord permits Aster/Borel's repeated `Heat h` under a precommitted Dawn arena seal and refuses it under Dusk. No lawful action can choose, preserve, accelerate, delay, scar, or restore that seal. Players can adapt to it but cannot cause the bit change. |
+| **B — require at least one matched player/counterplay-causal response** | `M^{co-exact-det-causal}_v` is nonempty. At least one responsive projection has one qualifying participant or counterplayer decision whose complete causal closure changes the certain bit, or its reachable/conditional support under mediated uncertainty, while the canonical projection and eventual exact pair/proof remain fixed. This is existential, not universal. | **Recommended, with A as the qualified fallback above.** B makes at least one responsive cross-active Covenant lived gameplay rather than an exogenous lookup table. At this action/result boundary the fit can be **direct**: one proof remains one, both personal Relics remain distinct, and one independently meaningful decision changes whether both relationships may participate under the continuing intrinsic covenant. It also fits Legendary commitment through disclosed timing, protection, resource, or counterplay rather than flat power. Costs are causal/UI burden, allied grief, denial loops, covert sabotage, role capture, and token witnesses unless the hard gates hold. | From one common upstream state, `Guard` preserves an independently useful **Concord Seal** and supplies real defense; `Burst` consumes it for meaningful immediate damage. Both policies remain lawful and useful without permission. Their complete continuations preserve Ashen's law and eventual shared-`h` pair, but certainly allow with the Seal and refuse without it. An opponent's costly, telegraphed `Sunder` versus higher-damage `Strike` may instead supply the witness if the Seal and both actions have independent purpose. |
+
+A/B are mutually exclusive and exhaustive because the matched-causal subset of
+nonempty responsive `X^{co-exact-det-response}_v` is empty or nonempty. B does
+not require universal causal coverage, bearer control, both allied and opponent
+witnesses, immediate effects, deterministic upstream success, or a full-bit
+preview. Those would be stronger replacement minima, not hidden consequences
+of existential support.
+
+C3EA-A remains intact. A player does not choose or rewrite the permission law;
+one unchanged intrinsic law reads an independently meaningful fact whose state
+a lawful decision may cause to differ. A forced action, illegal inaction,
+dominated token arm, changed projection/law/version/Relic/relationship/variant,
+different selected ledger/pair/child/proof, direct or cosmetically laundered
+`Permit Both` command, post-result action, retry, reroute, callback, reload,
+reconnect, alternate-ledger substitution, unrelated RNG ordering, or changed
+fact without independent authoritative truth and lifecycle cannot qualify.
+
+Recommend **B, with A as the qualified clarity/multiplayer-trust/policy-
+nonredundancy/artifact-temperament fallback**. C3EE3-C already pays the
+complexity cost of a responsive cross-active family; one genuine causal
+exemplar ensures that at least one member creates lived deterministic policy.
+A remains fully legitimate if actionability cannot add safe marginal gameplay.
+
+B may stand only if all of the following hold:
+
+1. One independently revisable lawful decision is isolated from a common
+   upstream state; every other decision rule and non-descendant fact remains
+   fixed.
+2. The canonical projection/law/version, both Relics and relationships,
+   selected ledgers, law-defining variant, exact child/pair, and proof survive
+   both arms.
+3. Both policies and every changed permission-read fact remain materially
+   meaningful when the cross-active permission consequence is ablated.
+4. A matched ablation that removes the second Relic/cross-active edge proves a
+   marginal cross-active exact build, action, timing, coordination, hedge, or
+   counterplay purpose. Merely relabeling the earlier within-Relic exact or
+   related witness fails.
+5. No direct or cosmetically laundered permission command qualifies; a cost or
+   token damage/defense rider cannot cleanse one.
+6. Both affected allies can understand the operative condition before their
+   last informed reversible divergence and attribute the result afterward.
+7. No cheap unilateral teammate veto, covert sabotage, compulsory ally fuel,
+   permanent quarterback, or live approval prompt emerges. Opponent denial
+   needs a real cost and answerable response surface.
+8. Every admitted responsive family, whether causal-capable or exogenous-only,
+   and the already-required steadfast family must remain legible, non-token,
+   non-dominated, and capable of the intended optimized Legendary ceiling.
+   Actionability receives no hidden complexity premium; Omen and Witness
+   identities are not novice traps.
+9. Any stochastic mediation changes reachable bit support or the conditional
+   distribution under lawful information; one lucky sample never qualifies.
+10. Simulator/RL evaluation covers held-out builds, formats, opponents, and
+    seeds; matched causal and cross-active ablations; denial loops, stalling,
+    teammate grief, role capture, and policy diversity. Human forecast,
+    teach-back, and attribution tests remain binding. RL evaluates robustness;
+    it does not choose the philosophy.
+
+If any gate fails, reopen A rather than keeping a decorative, redundant, or
+socially toxic causal witness.
+
+C3EE4 selects no universal coverage, exact actor, action, fact, sequence
+length, success rate, disclosure UI, communication contract, steadfast
+polarity, false-bit disposition, survivor, recurrence, payoff, rarity,
+acquisition, storage, or implementation. C3EE5 owns steadfast polarity;
+C3ED1 onward owns false-bit results; RCS-02/SR-10 owns exact information and
+communication; RCS-17/RCS-18 owns evaluation and thresholds.
+
+Under either A or B, C3EE4 moves to `DIR-SELECTED` and C3EE5 opens with no
+other immediate status change: **103 `SCREEN`, 1 `OWNER-OPEN`, 101 `PRUNED`,
+114 `DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 104`**.
+Do not batch the next row. A letter selects worksheet direction only; the
+authoritative decision record and final-system SVG remain unchanged.
 
 ## Session protocol and evidence
 

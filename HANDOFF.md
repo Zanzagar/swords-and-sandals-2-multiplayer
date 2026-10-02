@@ -1,6 +1,76 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-02 responsive and steadfast permission coexist; causal support is next
+
+Zanzagar selected **RCS-08C3EE3-C with RCS-08C3EE3-A as the qualified
+clarity/multiplayer-trust/policy-nonredundancy fallback**. The completed catalog
+must contain at least one deterministic intrinsic cross-active exact-permission
+projection that certainly allows in one reachable context and refuses in
+another, plus at least one distinct projection that keeps one certain bit
+throughout its own domain.
+
+This preserves dependable Witness Relics as coordination anchors while
+allowing Covenant Relics to support deterministic state protection,
+forecasting, hedging, and counterplay. A responsive local covenant can directly
+express *Achintya Bheda Abheda*: one proof remains one, two personal Relics
+remain genuinely distinct, and participation holds under one real relational
+condition but not another. Catalog coexistence is only aggregate. A remains
+armed if the responsive class cannot add a distinct cross-active exact policy
+without disguised permission control, unequal ceilings, opaque state, grief,
+or quarterbacking. It has not fired.
+
+The responsive class supplies both certainty endpoints, so C3EE6 derives and
+C3EE7 prunes. C3EE5 remains queued. The finite register is **328 rows: 104
+`SCREEN`, 1 `OWNER-OPEN` at RCS-08C3EE4, 101 `PRUNED`, 113 `DIR-SELECTED`,
+7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 105`**. The authoritative
+decision record and final-system SVG remain byte-unchanged.
+
+C3EE4 now asks whether any lawful participant or counterplayer decision must
+causally move one responsive projection between its certain outcomes. A valid
+witness begins from one common authoritative upstream state, varies one
+independently revisable meaningful decision, holds the intrinsic covenant and
+eventual exact pair/proof fixed, and carries the intervention's complete causal
+closure. The options are:
+
+- **A — no matched player/counterplay-causal response.** Responsive **Omen**
+  Relics vary only with immutable, automatic, forced, exogenous, or otherwise
+  nonqualifying facts. Players can forecast and hedge but cannot cause the bit
+  change. This is the qualified clarity/multiplayer-trust/policy-nonredundancy/
+  artifact-temperament fallback.
+- **B — require at least one matched causal response. Recommended, with A as
+  the qualified fallback.** At least one responsive projection has one
+  qualifying participant or opponent decision whose complete causal closure
+  changes the bit while the same projection and eventual exact pair/proof
+  survive. This is existential, not universal.
+
+Recommend B. From one upstream state, `Guard` can preserve an independently
+useful Concord Seal and supply real defense, while `Burst` consumes it for
+meaningful damage. Both policies remain useful when permission is ablated;
+their continuations preserve Ashen Accord and the same shared `Heat h`, but
+certainly allow with the Seal and refuse without it. A costly telegraphed
+opponent `Sunder` versus higher-damage `Strike` can supply counterplay under
+the same rules.
+
+B is valid only if the changed fact and both policies remain materially useful
+without permission; matched removal of the second Relic proves a marginal
+cross-active purpose; both allies can forecast and attribute the result; no
+cheap veto, sabotage, compulsory fuel, quarterback, or live prompt appears;
+every admitted responsive identity and the already-required steadfast identity
+remain non-token and non-dominated at the intended Legendary ceiling; and
+simulator/RL plus human
+tests survive causal ablation, grief, denial-loop, stalling, and comprehension
+checks. A direct or cosmetically laundered `Permit Both` command, changed law or
+pair, post-result action, reroute, retry, callback, or lucky seed crossover
+never qualifies.
+
+Under either A or B, C3EE5 opens and the register reaches `Phi_SR = 104`.
+Do not batch the next row. The final gear/progression visual refresh remains an
+SR-12 closeout obligation after Relic design is complete.
+
 ## 2026-10-02 exact permission made deterministic; response prevalence is next
+
+**Superseded for navigation by the section above.** Its RCS-08C3EE3 card and
+`Phi_SR = 108` checkpoint predate the selected C answer.
 
 Zanzagar selected **RCS-08C3ED-A with RCS-08C3ED-C as the qualified artifact-
 temperament/robust-risk-policy fallback**. Every complete intrinsic same-cut
@@ -15027,7 +15097,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-02 05:41 UTC — Deterministic exact-permission response prevalence is next](docs/handoffs/2026-10-02-0541--relic-exact-deterministic-response-next.md)**
+[2026-10-02 05:57 UTC — Cross-active exact causal response is next](docs/handoffs/2026-10-02-0557--relic-exact-causal-response-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.
