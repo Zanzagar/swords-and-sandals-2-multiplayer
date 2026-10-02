@@ -1,6 +1,72 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-02 exact permission kept intrinsic; stochastic support is next
+
+Zanzagar selected **RCS-08C3EA-A with RCS-08C3EA-C as the qualified cross-
+player-agency/artifact-temperament fallback**. Once both Relics and
+relationships, selected ledgers, repeated exact child, facts, and earlier
+authoritative state are fixed, no participant-semantic permission setting may
+change the complete cross-active exact-permission law. Different Relics,
+relationships, and contexts may still carry different intrinsic laws, while
+players retain agency through build selection and prospective routing.
+
+This keeps exact permission an authored artifact covenant rather than a second
+approval optimizer. The one once-paid child can participate in two genuinely
+distinct personal Relics—the direct *Achintya Bheda Abheda* relation here—
+without making either player the other's live permission gate. C remains armed
+only if intrinsic treatment causes a recurrent material co-op-agency failure,
+held-fixed prospective controls create non-dominated play that routing cannot
+reproduce, intrinsic Relics remain desirable, and preview plus attribution
+prevent veto grief and quarterbacking. It has not fired.
+
+C3EB/C3EC1/C3EC2 prune. The finite register remains **328 rows: 110 `SCREEN`,
+1 `OWNER-OPEN` at RCS-08C3ED, 98 `PRUNED`, 111 `DIR-SELECTED`, 6 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 111`**. The authoritative decision
+record and final-system SVG remain byte-unchanged.
+
+C3ED now asks whether any complete intrinsic exact-permission law remains
+genuinely stochastic after every semantic input and earlier committed state is
+fixed. A fixed opportunity realizes permission once; callbacks, reloads,
+reconnects, replay, denial, fallbacks, alternate ledgers, and rejected
+transactions cannot redraw it. The options are:
+
+- **A — deterministic intrinsic laws only. Recommended, with C as the
+  qualified artifact-temperament/robust-risk-policy fallback.** Every fully
+  fixed opportunity certainly allows or denies both uses. Laws may still
+  respond deterministically to different disclosed contexts.
+- **B — every intrinsic law is stochastic-capable somewhere.** Every law has
+  at least one reachable fully fixed opportunity with a nondegenerate allow-
+  both probability. This does not mean every opportunity rolls; it imposes a
+  universal variance grammar.
+- **C — deterministic-only and stochastic-capable laws coexist.** At least one
+  stable law class never rolls and another has a genuine nondegenerate
+  opportunity. This is the qualified fallback, not the default.
+
+Recommend A. Stone Witness can certainly allow while a disclosed Guarded
+Accord holds and certainly deny once it is broken, but the same completely
+fixed opportunity never flips through chance. Under C, a distinct Ashen Oracle
+could instead make one disclosed shared-child opportunity resolve through one
+committed non-redrawable draw while Stone Witness remains deterministic.
+
+C may fire only if the Oracle identity changes legal build or combat policy,
+is not redundant with the existing related-only Oracle lane, leaves reliable
+and stochastic families legible and non-dominated at equal optimized
+Legendary ceilings, exposes attributable risk before irreversible commitment,
+prevents teammate-imposed variance and seed shopping, survives simulator/RL
+held-out-policy evaluation, passes human forecast/teach-back tests, and uses
+definition/version-stable class membership. RL evaluates robust performance;
+it does not select the design philosophy.
+
+Under A, C3EE1/C3EE2 prune and C3EE3 opens at `Phi_SR = 108`. Under B or C,
+C3EE1 opens without immediate pruning at `Phi_SR = 110`; C3EE3 remains queued
+because stochastic-capable laws may still have certain regions. Do not batch
+the next row. The final gear/progression visual refresh remains an SR-12
+closeout obligation after Relic design is complete.
+
 ## 2026-10-02 three-Relic constellations pair-bounded; exact permission authority is next
+
+**Superseded for navigation by the section above.** Its RCS-08C3EA card and
+`Phi_SR = 115` checkpoint predate the selected A answer.
 
 Zanzagar selected **RCS-08C4G1-A with RCS-08C4G1-B as the qualified
 irreducible-3v3-coordination fallback**. Every reachable fixed same-cut
@@ -14893,7 +14959,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-02 05:16 UTC — Exact cross-active permission authority is next](docs/handoffs/2026-10-02-0516--relic-exact-permission-authority-next.md)**
+[2026-10-02 05:28 UTC — Intrinsic exact-permission randomness is next](docs/handoffs/2026-10-02-0528--relic-exact-permission-randomness-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

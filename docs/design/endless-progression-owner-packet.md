@@ -573,8 +573,10 @@ stacking-signature, and team-signature rows. **RCS-08C1-B is selected with
 RCS-08C1-A as the qualified clarity/anti-amplification fallback; RCS-08C2-C is
 now selected with RCS-08C2-A as the qualified clarity/anti-laundering fallback;
 RCS-08C4G1-A is now selected with RCS-08C4G1-B as the qualified irreducible-
-3v3-coordination fallback; RCS-08C3EA is the sole owner-facing choice under
-SR-09.** The register remains 328 rows and `Phi_SR = 115`; conditional
+3v3-coordination fallback; and RCS-08C3EA-A is now selected with RCS-08C3EA-C
+as the qualified cross-player-agency/artifact-temperament fallback.
+RCS-08C3ED is the sole owner-facing choice under SR-09.** The register remains
+328 rows and `Phi_SR = 111`; conditional
 branches prune rather than promising 132 shipped mechanics.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
@@ -31144,7 +31146,7 @@ the sole `OWNER-OPEN` row: **328 rows: 114 `SCREEN`, 1 `OWNER-OPEN`, 95
 `Phi_SR = 115`**. The authoritative decision record and final-system SVG
 remain unchanged.
 
-### RCS-08C3EA — cross-active exact-permission participant configurability — active owner choice
+### RCS-08C3EA — cross-active exact-permission participant configurability — A selected with C fallback
 
 C2-C guarantees at least one reachable exact cross-active candidate pair.
 C3EA asks whether a prospectively bound participant-semantic setting may
@@ -31214,6 +31216,120 @@ three conditional rows remain and C3EB opens: **113 `SCREEN`, 1 `OWNER-OPEN`,
 `Phi_SR = 114`**. Do not batch the next row. A letter selects worksheet
 direction only; the authoritative decision record and final-system SVG remain
 unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-02:** **A, keep the
+complete cross-active exact-permission law intrinsic to the treatment
+contract, with C as the qualified cross-player-agency/artifact-temperament
+fallback.** Thus `P^{co-exact-perm-config}_v` is empty. Once the two Relics and
+relationships, selected ledgers, exact repeated child, facts, and earlier
+authoritative state are fixed, no participant-semantic permission setting may
+change the law. Different Relics, relationships, and factual contexts may
+still carry genuinely different intrinsic laws, and players retain agency
+through build selection and the already-established prospective routing
+choices.
+
+This preserves the artifact as an authored covenant rather than adding a
+second approval optimizer to every cross-player exact pair. The same once-paid
+child remains one while participating in two genuinely distinct personal
+Relics—the direct *Achintya Bheda Abheda* relation at this boundary—without
+turning either player into the other's live permission gate. C remains armed,
+but has not fired. It may reopen only if intrinsic treatment creates a
+recurrent material co-op-agency failure, two held-fixed prospective policies
+add non-dominated play that routing cannot reproduce, the intrinsic class
+remains desirable rather than token loot, and preview plus attribution prevent
+veto grief and quarterbacking.
+
+C3EA is now `DIR-SELECTED`; C3EB, C3EC1, and C3EC2 are `PRUNED`; and C3ED is
+the sole `OWNER-OPEN` row: **328 rows: 110 `SCREEN`, 1 `OWNER-OPEN`, 98
+`PRUNED`, 111 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 111`**. The authoritative decision record and final-system SVG remain
+unchanged.
+
+### RCS-08C3ED — stochastic support across intrinsic cross-active exact-permission laws — active owner choice
+
+C3EA-A makes permission intrinsic, but an intrinsic covenant can still be
+deterministic or can contain an authored chance-bearing rule. C3ED asks only
+whether **genuine stochastic support** exists after every semantic input has
+already been fixed. It does not choose any probability, responsive fact,
+player influence, seed, disclosure rule, denial disposition, recurrence,
+payoff, rarity, or implementation.
+
+Let `W^{co-exact-perm-law}_v` be the nonempty set of canonical, complete,
+intrinsic cross-active exact-permission laws supported by the completed
+catalog. For a law `w` and a reachable exact opportunity `o`, hold fixed the
+ruleset and version; both Relics, relationships, and selected authoritative
+ledgers; the unordered Relic pair and repeated child; the complete factual
+context; and all earlier committed authoritative state. Let `pi_w(o)` be the
+probability, immediately before the one designated permission realization,
+that the law permits both candidate uses. Define:
+
+`G^{co-exact-perm-stoch}_v = {w in W^{co-exact-perm-law}_v | some reachable o has 0 < pi_w(o) < 1}`.
+
+| Choice | Intrinsic-law stochastic-support rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — deterministic intrinsic laws only** | `G^{co-exact-perm-stoch}_v` is empty. Every fully fixed opportunity has `pi_w(o)` equal to zero or one. A law may respond differently to different disclosed contexts; it simply cannot vary once the entire opportunity is held fixed. | **Recommended, with C as the qualified artifact-temperament/robust-risk-policy fallback.** A keeps mastery attributable, preserves teammate trust, makes replay and reconnection straightforward, and follows the already-selected deterministic exact-permission precedent within one Relic evaluation. Its fit is **neutral/protective**: unity-in-difference already lives in one proof participating in distinct Relics, not in a die roll. The cost is losing an Oracle-like artifact temperament whose value truly depends on committing to risk rather than merely receiving spectacle. | Aster and Borel share `Heat h`. Stone Witness certainly permits both uses while its disclosed **Guarded Accord** facts hold and certainly refuses when that covenant is broken. Those two contexts differ, but repeating the same fully fixed opportunity cannot flip the bit through chance. |
+| **B — every intrinsic law is stochastic-capable somewhere** | `G^{co-exact-perm-stoch}_v = W^{co-exact-perm-law}_v`. Every supported law has at least one reachable fully fixed opportunity with a nondegenerate allow-both probability. This is **universally stochastic-capable**, not “every opportunity is random”: the same law may still be certain in other contexts. | B makes risk an unavoidable grammar of cross-active exact permission. It can create commitment, adaptation, and dramatic uncertainty, but it taxes every artifact identity and every co-op pairing with variance, weakens the reliable-mastery refuge, complicates trust and replay, and risks making correct policy feel retrospectively wrong. Use only as a stronger replacement if deterministic exact permission proves broadly sterile and universal variance survives all C gates. | Every exact-capable covenant has at least one honest chance-bearing region. Stone Witness might still certainly allow under a perfected oath, but some fully fixed reachable lesser oath must resolve, for example, at an authored nondegenerate probability. |
+| **C — deterministic-only and stochastic-capable laws coexist** | `G^{co-exact-perm-stoch}_v` is a nonempty proper subset of `W^{co-exact-perm-law}_v`. At least one stable law class has no nondegenerate opportunity and at least one other does. A law that is certain in one context and random in another belongs wholly to the stochastic-capable class; that alone does not prove coexistence. | **Qualified artifact-temperament/robust-risk-policy fallback.** C can preserve Witness-style reliability while allowing a distinct Oracle family whose committed uncertainty changes build and combat policy. Catalog coexistence is only an **aggregate** ideal fit; each local permission still produces one bit for one shared proof. C adds balance, explanation, trust, seed-integrity, and novice-trap burdens and must not grant an expected-value premium merely for rolling. | Stone Witness uses the deterministic rule above. Ashen Oracle has a fully disclosed fixed shared-`h` opportunity whose one committed realization might permit both uses with an illustrative `70%` chance and deny them with `30%`. Those figures explain the boundary only; C selects no actual odds. |
+
+A/B/C are mutually exclusive and exhaustive because the stochastic-capable
+subset of the nonempty complete-law domain is empty, whole, or nonempty
+proper. A seeded pseudorandom generator may implement a genuine draw, while an
+opaque hash of already-fixed authoritative facts is still semantically
+deterministic. Conversely, a random choice made earlier and already committed
+as authoritative state is held fixed here rather than averaged again.
+
+Every opportunity receives exactly one permission realization. A callback,
+reload, reconnect, replay, denial path, fallback, rejected transaction, or
+alternate ledger cannot redraw, reroute, rejection-sample, or substitute a
+friendlier result. A same-pair hybrid still receives one exact law, one bit,
+and—if its law is stochastic-capable—one draw; its related-only evidence does
+not create a second permission attempt.
+
+Recommend **A, with C as the qualified artifact-temperament/robust-risk-policy
+fallback**. Deterministic intrinsic laws give players a reliable causal model:
+they can choose builds and routing, understand the covenant, and attribute a
+result to the disclosed state. They also avoid letting one teammate silently
+impose variance on another. The system already preserves an optional Oracle
+identity elsewhere; cross-active exact permission need not make chance
+universal—or duplicate that identity—to feel soulful.
+
+C may fire only if all of the following survive prototype and evaluation:
+
+1. The Oracle fantasy changes a legal build or combat policy, not only the
+   animation or emotional texture of an unchanged decision.
+2. Its policy is not redundant with the already-required related-only Oracle
+   family or another variance-bearing system.
+3. Deterministic and stochastic families remain reachable, legible,
+   non-token, non-dominated, and equal at optimized Legendary ceilings; no
+   expected-value chance premium or novice trap buys the stochastic identity.
+4. The risk is knowable before irreversible commitment and attributable after
+   settlement; one player cannot secretly impose it, grief with it, or become
+   the team's permanent probability quarterback.
+5. One durable realization survives callbacks, reconnects, reloads, denials,
+   fallbacks, retries, alternate ledgers, and seed-shopping attempts.
+6. Battle-simulator and later RL policy evaluation over held-out seeds,
+   formats, and adversaries shows a robust non-dominated risk policy, while
+   human forecast and teach-back tests show that people can understand it. RL
+   measures performance; it does not choose the design philosophy.
+7. Law-class membership is definition/version-stable. If any gate fails, the
+   system returns to A rather than retaining decorative or advantaged chance.
+
+C3ED does not decide probability values, constant versus context-responsive
+distributions, causal control of responsive odds, certainty endpoints,
+randomness source, disclosure, permission incidence, false-bit disposition,
+payoff, acquisition, rarity, UI, or storage. C3EA-A also continues to forbid a
+participant setting whose force directly changes the permission law or its
+odds.
+
+Under A, C3ED moves to `DIR-SELECTED`, C3EE1/C3EE2 prune, and C3EE3 opens:
+**107 `SCREEN`, 1 `OWNER-OPEN`, 100 `PRUNED`, 112 `DIR-SELECTED`, 6
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 108`**. Under B or C, C3ED
+moves to `DIR-SELECTED` and C3EE1 opens with no immediate pruning: **109
+`SCREEN`, 1 `OWNER-OPEN`, 98 `PRUNED`, 112 `DIR-SELECTED`, 6 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 110`**. C3EE3 remains queued under B or C
+because stochastic-capable laws may still contain certain regions. Do not
+batch the next row. A letter selects worksheet direction only; the
+authoritative decision record and final-system SVG remain unchanged.
 
 ## Session protocol and evidence
 
