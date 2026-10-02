@@ -18,10 +18,11 @@ measured evidence into self-confirming data.
 
 ## Start here
 
-**Read the newest file in `docs/handoffs/` before doing anything else**, then
-**`HANDOFF.md`'s LIVING HEAD** for accumulated state — everything above the
-`## THE ARCHIVE LINE` heading. Below that line is frozen evidence and history:
-read it to check a claim, never to learn what is current, and never append there.
+**Open `HANDOFF.md` and follow its single `LATEST` link before doing anything
+else**, then read **`HANDOFF.md`'s LIVING HEAD** for accumulated state —
+everything above the `## THE ARCHIVE LINE` heading. Below that line is frozen
+evidence and history: read it to check a claim, never to learn what is current,
+and never append there.
 
 `HANDOFF.md` is long and is deliberately NOT imported here — open it, do not
 expect it in context.
@@ -64,29 +65,15 @@ there never reaches the next reader.
 - `validate-vehicle.ps1` must PASS after ANY wrapper edit — but read what it does
   not prove. It caught 0 of the 6 defects found live on this route.
 - **Snapshot before every save-mutating run.** `run-arena.ps1` does it for you.
-- **Git and GitHub: follow `claude-harness/docs/git-hygiene.md`** — ~~thirteen~~
-  fourteen rules on branches, commits, pushing, PRs, merge eligibility and,
-  since 2026-09-24, rule 14: the commit trailer (the grilling gate, last line
-  of this file; enforced by `.githooks/` and CI, and `git commit --no-verify`/`-n`
-  are denied in settings). They are
-  ENFORCED, not advisory: `.claude/settings.json` carries them as
-  `permissions.deny`/`ask`, so they bind Claude, Codex and a human here
-  identically.
-  ~~**This project TIGHTENS rule 7 (push feature branches freely) to ASK BEFORE
-  EVERY PUSH**~~ **— DROPPED BY THE OWNER 2026-09-12. Rule 7 applies as
-  written: push a feature branch without asking.** The tightening existed
-  because the fixtures derive from a licensed game and what left this machine
-  was treated as the owner's call; the owner removed it in chat and at the
-  approval screen. **What still binds is the part that carried the safety:
-  ~~`main` and `master` are DENIED outright, as are~~ `--force`, `-f` and
-  `--force-with-lease` are DENIED, and so is deleting `main`/`master`; deny
-  beats everything — no allow entry reaches them.** **Pushing `main` is no
-  longer denied (the owner, 2026-09-26: "drop SS2's block on pushing main"):
-  SS2 is at the harness floor, where agents push `main` and merge their own
-  PRs; fast-forward `main` after a merge. GitHub branch protection on `main`
-  also blocks force-pushes and deletion.** `Bash(git push *)` is now in `permissions.allow`; the two
-  `git push --delete` forms stay in `ask`, and `.claude/settings.json` records
-  the one thing to watch there.
+- **Git and GitHub: follow `claude-harness/docs/git-hygiene.md`** — thirteen
+  rules on branches, commits, pushing, PRs and merge eligibility. They are
+  repository policy for Claude, Codex and humans, but enforcement is
+  actor-specific: a branch's `.claude/settings.json` mediates Claude Code only;
+  Codex permissions and a human shell are separate. Never claim one tool's
+  settings enforce another actor.
+  **Follow rule 7 as written:** push feature branches freely and often; no
+  per-push owner approval is required. This does not relax rules 8, 9, or 12:
+  never push `main`, never make a forbidden force-push, and only a human merges.
 
 ## If you are a subagent
 
@@ -96,8 +83,8 @@ and Plan agents), so these rules bind you as well:
 - **No agent launches Ruffle**, touches the installation, the save or the
   snapshots, or runs a state-mutating git command. Those are the main session's,
   serial and supervised.
-- **Adversarial verifiers write nothing at all.** They have been the
-  highest-value agents on this project; run more of them than feels necessary.
+- **Adversarial verifiers write nothing at all.** In the rare audit permitted
+  below, give each verifier one named claim and stay inside the committed cap.
 - **Treat every fact in your brief as a hypothesis** — tables, counts and quoted
   file contents included. Re-derive anything you rely on. A premise that turns
   out to be wrong is a finding that outranks the task, and must be reported
@@ -110,17 +97,18 @@ and Plan agents), so these rules bind you as well:
 Standing rules to paste into every agent prompt are in
 `docs/overnight-agent-plan.md` — **ABOVE its `## THE ARCHIVE LINE` only**;
 below that line is the frozen record of two runs in August, not guidance. The
-runnable form is in `.claude/workflows/`. *(This pointer used to name the whole
-file, which is how a plan written for ONE night in August became doctrine
+runnable Claude-only form is in `.claude/workflows/`; its presence is not
+permission to recreate or widen it inline. *(This pointer used to name the
+whole file, which is how a plan written for ONE night in August became doctrine
 loaded by every agent. See that file's own header for what the omission cost.)*
 
 - **PRECEDENCE, decided by the owner 2026-09-02 (harness `docs/adr/0001`):
-  Pocock's skills are the default workflow, Codex adversarial review is the
-  check on any diff that matters, and a fan-out wave is the LAST resort —
-  only for breaking a claim about the game's bytes or the capture archive
-  that no test pins and no diff review reaches. ONE wave at a time, never
-  concurrent; the committed script hard-caps questions and verifiers at 6
-  each, and authoring an inline workflow to get past that is a rule
+  Pocock's decision discipline is the default workflow, Codex adversarial
+  review is the check on any diff that matters, and a fan-out wave is the LAST
+  resort — only for breaking a claim about the game's bytes or the capture
+  archive that no test pins and no diff review reaches. ONE wave at a time,
+  never concurrent; the committed script hard-caps questions and verifiers at
+  6 each, and authoring an inline workflow to get past that is a rule
   violation. Say what a wave will spawn BEFORE launching it. Three concurrent
   12-verifier waves spent ~30% of a week's usage in twenty minutes.**
 - **Fan out on QUESTIONS, not replicas.** Measured here 2026-08-31: two
@@ -153,6 +141,11 @@ loaded by every agent. See that file's own header for what the omission cost.)*
 
 Installed skills are invoked on judgment; there is no forced-invocation rule.
 Provenance for the shared rules and workflows is the `claude-harness` repo.
+
+For dedicated Endless progression design, use the repo-local
+`$ss2-progression-design` skill. It adapts Pocock's decision-tree/frontier
+discipline to the existing owner packet and decision record; it does not
+replace them with issue tickets and does not apply to vanilla evidence work.
 
 ## Running the tests
 
@@ -212,22 +205,20 @@ and the path is unreachable from Linux anyway.
   line above read as though any session directory sufficed.)
 - A working tree with `assets/` but no probe session: **1 skipped**, the
   raw-trace archive existence check. EXPECTED, not a defect.
-- **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS ~~9~~ ~~10~~ ~~11~~ 16 —
-  measured 2026-09-25 by the gauges slice's implementer in scratch copies with no `assets/`: 15 at
-  808f6da (the four real-pack tests in `test/render-action-buttons.test.js`, 1f4759c, were never
-  counted here) and 16 with the in-frame gauges (56d1b36); the camera and wiring slices add no gated
-  test. Not re-measured at 3bc2238.** (11 was measured 2026-09-23 with the fight pop-ups:) (10 at b51ad05; 9 on 2026-09-15,
-  where this line used to say 1 and mean the tree above). Besides the archive
-  check, 8 are gated on the extracted TEXT pack, 1, since 2690559, on the
-  extracted PROPS pack (the boulder test), and 1 on the ICONS and TEXT packs
-  together (`test/render-popups.test.js`), all gitignored like every other
-  asset. A cloner who measures 11 against a documented 1 has a correct tree and
-  a wrong document.
+- **A FRESH CLONE HAS NO `assets/` EITHER, SO IT SKIPS ~~9~~ ~~10~~ ~~11~~
+  ~~15~~ ~~16~~ 18 — measured 2026-09-29 on the integrated recovery tree.**
+  Besides the raw-trace archive check, 8 are gated on the extracted TEXT pack,
+  1 on the PROPS pack (the boulder test), 1 on ICONS and TEXT together
+  (`test/render-popups.test.js`), 4 on ICONS for action buttons, 1 on ICONS for
+  the combat-panel gauges, 1 on ICONS for the crowd bar, and 1 on the CHAMPIONS
+  pack for the press regression. All are gitignored like every other asset.
+  A cloner who measures 18 against an older documented count has a correct tree
+  and a stale document.
 
 **Otherwise a skipped test is a real finding, not noise.** Expect the exact count
-the newest handoff states; if you measure a different number, say so rather than
-carrying the old one forward. The archive check is anchored so that a broken path
-derivation FAILS and names itself rather than skipping silently.
+the `LATEST`-linked handoff states; if you measure a different number, say so
+rather than carrying the old one forward. The archive check is anchored so that
+a broken path derivation FAILS and names itself rather than skipping silently.
 
 ## Conventions
 

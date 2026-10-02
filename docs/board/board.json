@@ -1,6 +1,6 @@
 {
- "updatedAt": "2026-09-29",
- "head": "71a9d3b",
+ "updatedAt": "2026-10-02",
+ "head": "aa59634",
  "lede": "Every system in the Swords and Sandals II team-arena project — the engine behind Swords and Sandals II: Souls and Simulacra (working title) — and where it stands: from what still needs design, left, to what is done, right. Cards come from a code-checked inventory; click one for its evidence, gaps and next step.",
  "lanes": [
   {
@@ -853,26 +853,26 @@
    "lane": "verification",
    "column": "ready",
    "order": 63,
-   "title": "Endless progression design (this branch's docs/design)",
-   "summary": "A full proposal (Arena Circuits, Rule Load, rarity, loot, custody, Pressure, Epochs) plus a readiness record. On this branch all six EP-D decisions and EP-A01 to A03 read 'pending', and the readiness record lists six P0 blockers. No Endless code exists.",
-   "gaps": "This copy is stale against the design branch (next item). The P0 items are not closed: pacing, retry/seed shopping, post-completion economy, combat kernel budgets, Pressure termination, u64 encoding.",
-   "next": "Merge or sync the design branch's accepted decisions into this branch so implementers do not grep a stale record.",
-   "evidence": "docs/design/endless-progression-decisions.md decision table (:46-51, :67-69). docs/design/endless-mvp-readiness.md section 1 table. docs/design/ is byte-identical to main's (git diff main HEAD -- docs/design is empty).",
-   "ownerDecision": "EP-D03, D04, D05, D06 and EP-A01 to A03 are still open.",
-   "updated": "2026-09-23"
+   "title": "Endless progression design (integrated recovery branch)",
+   "summary": "The recovered design lane is integrated with current main on draft PR #4. EP-D01 and EP-D02 are accepted replacements and EP-D07 is accepted; the larger owner-guided pass continues without implementation authorization. No Endless code exists.",
+   "gaps": "EP-D03 through D06 and EP-A01 through A03 remain open. The Soul Relic/Charm pass has 12 closure gates and a 328-row finite register after exact-signature, committed-identity, payoff-causal-basis, retained-payoff-lifecycle, compatibility-relation, and corrected RCS-08 atomicity repairs. RCS-07A-B and RCS-07B-B keep both unary root/Charm relations selective with total projections; RCS-07C-A fully factorizes complete-package support with B as the qualified three-way artifact-chemistry fallback. Old RCS-08 plus C3E, C3R, C4, L3E, L3R, and I2 are non-counting aliases over 132 counted candidate, permission-law, denial-resolution, recurrence, three-recipient, later-reuse, co-application, composition-law, stacking-signature, and team-signature rows. I2 covers every supported noncommutative co-application admitted by I0 or I1 while keeping cross-active-Relic and Relic-versus-other-system projections separately tagged. RCS-08C1-B requires functional same-cut cross-active candidate overlap with A as its clarity/anti-amplification fallback. RCS-08C2-C now preserves nonempty exact-pair and related-only-pair support with A as its clarity/anti-laundering fallback; pairs classify independently and same-pair hybrids receive exact treatment once. RCS-08C4G1-A now pair-bounds every fixed candidate graph and prunes all twenty-nine three-Relic coupling/settlement descendants, with B retained as the qualified irreducible-3v3 fallback. RCS-08C3EA-A keeps complete exact permission intrinsic after routing with C as its qualified cross-player-agency/artifact-temperament fallback and prunes C3EB/C3EC1/C3EC2. RCS-08C3ED-A makes every fully fixed intrinsic exact-permission opportunity deterministic with C as its qualified artifact-temperament/robust-risk-policy fallback and prunes C3EE1/C3EE2. RCS-08C3EE3-C requires responsive and context-invariant deterministic projections to coexist with A as its qualified clarity/multiplayer-trust/policy-nonredundancy fallback; C3EE6 derives both certainty endpoints and C3EE7 prunes. RCS-08C3EE4-B now requires at least one independently meaningful participant or opponent decision to causally change a responsive bit under a matched same-law/same-pair comparison, with A retained as the qualified clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback. RCS-08C3EE5-C now requires steadfast allow and steadfast deny projections to coexist, with B retained as the qualified clarity/multiplayer-trust/policy-nonredundancy fallback. RCS-08C3ED1 is the sole active frontier and asks whether a false exact bit cancels both already-authored personal transactions, retains exactly one, or supports both disposition families. The worst-case register has Phi_SR 103. Readiness blockers still include pacing, retry/seed shopping, post-completion economy, combat-kernel budgets, Pressure termination, and u64 encoding.",
+   "next": "Continue one owner card at a time from HANDOFF.md's LATEST link; do not implement until the complete normative replay is explicitly accepted and implementation is separately authorized.",
+   "evidence": "docs/design/endless-progression-decisions.md (authoritative accepted EP-D01/02/07); docs/design/endless-progression-owner-packet.md RCS-07C, RCS-08C1, RCS-08C2, RCS-08C4G1, RCS-08C3EA, RCS-08C3ED, RCS-08C3EE3, RCS-08C3EE4, RCS-08C3EE5, and RCS-08C3ED1; docs/design/endless-progression-master-closure-index.md sections 7.1, 7.3, and 8; HANDOFF.md LATEST; draft PR #4.",
+   "ownerDecision": "Current worksheet direction: E1-C with B/A fallbacks, E1Z-B with E1Z-A fallback, E1X-A with E1X-B fallback, E2-C with E2-A fallback, E2C-A (P live/Z advance-bound), RCS-04A1-C with A1-B fallback, RCS-04A2-A with A2-C fallback, RCS-04A1C-C with A1C-A fallback, RCS-04A3A-C with A3A-A fallback, RCS-04A3B1-C with B1-A fallback, RCS-04A3B2-A with B2-C as the qualified higher-ceiling/identity exception, RCS-04A3B1I-A with B1I-B as the qualified system fallback, RCS-04A3B2I-B with B2I-A as the qualified practical agency/clarity fallback, RCS-04A3C-A with A3C-B as the qualified class-wide agency/clarity fallback, RCS-04A3D1-A with A3D1-B as the qualified class-wide expressive-mastery/menu-bloat fallback, RCS-04A4-C with A4-A as the qualified clarity/equal-ceiling/anti-farming fallback, RCS-04A5-C with A5-A as the qualified policy-mastery/multiplayer-trust/Rite-and-return fallback, RCS-04A6-A with A6-B as the qualified artifact-identity fallback, RCS-04A7-A with A7-C as the qualified artifact-identity/direct-participation fallback, RCS-04A3XI-A with A3XI-B as the qualified clarity fallback, RCS-04A3XP-A with A3XP-B as the qualified clarity fallback, RCS-04A3XD-A with A3XD-B as the qualified clarity fallback (all three complete signatures have honest support in both dialects), RCS-04B1-A with RCS-04B1-B as the qualified reincarnation/artifact-identity fallback, RCS-04B2-A with RCS-04B2-B as the qualified named-metamorphosis/artifact-identity fallback, RCS-04B3-B with RCS-04B3-A as the qualified simplicity/non-token-biography fallback, RCS-05A-A with RCS-05A-C as the qualified emergent-artifact-identity fallback, RCS-05B1-A with RCS-05B1-C as the qualified receipt-agency/artifact-identity fallback, RCS-05C1-A with RCS-05C1-C as the qualified temporal-policy/artifact-identity fallback, RCS-07A-B with RCS-07A-A as the qualified clarity/anti-dead-loot fallback, RCS-07B-B with RCS-07B-A as the qualified clarity/anti-dead-loot fallback, RCS-07C-A with RCS-07C-B as the qualified three-way artifact-chemistry fallback, RCS-08C1-B with RCS-08C1-A as the qualified clarity/anti-amplification fallback, RCS-08C2-C with RCS-08C2-A as the qualified clarity/anti-laundering fallback, RCS-08C4G1-A with RCS-08C4G1-B as the qualified irreducible-3v3-coordination fallback, RCS-08C3EA-A with RCS-08C3EA-C as the qualified cross-player-agency/artifact-temperament fallback, RCS-08C3ED-A with RCS-08C3ED-C as the qualified artifact-temperament/robust-risk-policy fallback, RCS-08C3EE3-C with RCS-08C3EE3-A as the qualified clarity/multiplayer-trust/policy-nonredundancy fallback, and RCS-08C3EE4-B with RCS-08C3EE4-A as the qualified clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback, and RCS-08C3EE5-C with RCS-08C3EE5-B as the qualified clarity/multiplayer-trust/policy-nonredundancy fallback. RCS-08C3ED1 remains open; these directions are not yet authoritative record text.",
+   "updated": "2026-10-02"
   },
   {
    "id": "endless-design-worktree-ss2-progression-design-b",
    "lane": "verification",
    "column": "ready",
    "order": 64,
-   "title": "Endless design worktree (ss2-progression-design, branch design/endless-progression-owner-packet)",
-   "summary": "This worktree is ahead of docs/design/. Its committed and pushed record accepts replacements for EP-D01 and EP-D02 and accepts EP-D07, and it adds the owner packet, an EP-D01 matrix and a rigor audit. Nineteen days of later work are uncommitted: a nested decision chain now at EP-D02-C3c.158, for a standalone game named 'Souls and Simulacra', with 'Do not implement'.",
-   "gaps": "About 23k lines of owner-decision work exist only on local disk. The decision tree has grown to 158 sub-choices under one decision with no implementable slice. That branch's AGENTS.md and overnight-plan are stale against this branch.",
-   "next": "Commit and push the worktree's decision work (the owner's call, not an agent's). Then decide whether EP-D02 has reached a buildable granularity.",
-   "evidence": "git log main..HEAD shows 15 commits, the last 68dd0a3 on 2026-09-04, level with github upstream (0/0). Its docs/design/endless-progression-decisions.md table (:52-58) and EP-D07 section (:612+). git status: owner-packet +17,146 lines, HANDOFF.md +5,965, SKILL.md modified, 183 untracked files (181 handoffs dated 2026-09-05 to 2026-09-23 21:22, a rigor audit, an SVG). PR #3 is open. Latest handoff: 2026-09-23-2122--ep-d02-per-tag-two-form-disclosure.md.",
-   "ownerDecision": "Whether to keep refining EP-D02 sub-choices or stop and implement a first slice. Whether 'Souls and Simulacra' supersedes the SS2-multiplayer framing in README and the roadmap.",
-   "updated": "2026-09-23"
+   "title": "Endless design recovery and review history",
+   "summary": "The formerly local progression work is committed and pushed on design/endless-progression-gate-recovery, synchronized with main, and tracked by clean draft PR #4. Gate-invalid open PR #3 remains preserved history and must not merge.",
+   "gaps": "PR #4 is intentionally draft and only a human may merge it. Worksheet directions remain distinct from authoritative accepted decisions, and implementation remains blocked. The private Artifact copy of this board must be republished after this source update.",
+   "next": "Keep the recovery branch synchronized and reviewable while the owner closes the finite Relic frontier; merge only after the owner requests it and the normative replay is ready.",
+   "evidence": "branch design/endless-progression-gate-recovery; draft PR #4; HANDOFF.md LATEST.",
+   "ownerDecision": "Use Souls and Simulacra as the standalone north star and Achintya Bheda Abheda as the standing ideal; finish the full design-framework pass before the later expansion/audit/adaptation pass.",
+   "updated": "2026-09-30"
   },
   {
    "id": "shop-items-and-economy-between-fights",
@@ -1357,6 +1357,158 @@
   }
  ],
  "changes": [
+  {
+   "date": "2026-10-02",
+   "text": "RCS-08C3EE5-C requires steadfast allow and steadfast deny exact-permission projections to coexist, with B retained as the qualified clarity/multiplayer-trust/policy-nonredundancy fallback. RCS-08C3ED1 now asks whether a false exact bit cancels both already-authored personal transactions, retains exactly one, or supports both disposition families; coexistence C is recommended with singleton-only B as the qualified fallback."
+  },
+  {
+   "date": "2026-10-02",
+   "text": "RCS-08C3EE4-B requires at least one independently meaningful participant or opponent decision to causally change a responsive exact-permission bit under a matched same-law/same-pair comparison, with A retained as the qualified clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback. RCS-08C3EE5 now asks whether steadfast projections universally refuse, universally allow, or support both stable polarities; coexistence C is recommended with universal compatibility B as the qualified fallback."
+  },
+  {
+   "date": "2026-10-02",
+   "text": "RCS-08C3EE3-C requires responsive and context-invariant deterministic exact-permission projections to coexist, with A retained as the qualified clarity/multiplayer-trust/policy-nonredundancy fallback; the responsive class derives both certainty endpoints. RCS-08C3EE4 now asks whether at least one independently meaningful participant or opponent decision must causally change a responsive bit under a matched same-law/same-pair comparison, with existential B recommended and exogenous Omen A as the qualified trust/nonredundancy/artifact-temperament fallback."
+  },
+  {
+   "date": "2026-10-02",
+   "text": "RCS-08C3ED-A makes every fully fixed intrinsic exact-permission opportunity deterministic, with C retained as the qualified artifact-temperament/robust-risk-policy fallback, and prunes C3EE1/C3EE2. RCS-08C3EE3 now asks whether complete canonical deterministic projections are universally context-invariant, universally responsive, or support both; coexistence C is recommended with steadfast A behind clarity, multiplayer-trust, and policy-nonredundancy gates."
+  },
+  {
+   "date": "2026-10-02",
+   "text": "RCS-08C3EA-A keeps complete exact permission intrinsic after routing, with C retained as the qualified cross-player-agency/artifact-temperament fallback, and prunes C3EB/C3EC1/C3EC2. RCS-08C3ED now asks whether fully fixed intrinsic laws are deterministic-only, universally stochastic-capable, or a stable mixture; deterministic A is recommended with mixed C behind artifact-temperament and robust-risk-policy gates."
+  },
+  {
+   "date": "2026-10-02",
+   "text": "RCS-08C4G1-A pair-bounds every same-cut candidate-overlap component and prunes all twenty-nine three-Relic coupling/settlement descendants, with B retained as the qualified irreducible-3v3 fallback. RCS-08C3EA now asks whether exact cross-active permission is universally intrinsic, universally participant-configurable, or a stable mixture; intrinsic A is recommended with mixed C as the qualified cross-player-agency/artifact-temperament fallback."
+  },
+  {
+   "date": "2026-10-02",
+   "text": "RCS-08C2-C preserves both exact-pair and related-only-pair candidate support, with A as the qualified clarity/anti-laundering fallback; same-pair hybrids receive exact treatment once and different pairs remain distinct. RCS-08C4G1 now asks whether one fixed post-routing candidate graph may connect all three allied active Relics before any permission or settlement."
+  },
+  {
+   "date": "2026-10-02",
+   "text": "RCS-08C1-B requires at least one functional same-cut cross-active candidate overlap while preserving A as the clarity/anti-amplification fallback. It grants no shared use or payoff. RCS-08C2 now asks whether the catalog supports exact-form overlap, the distinct-related-only residual, or both. Each unordered selected-ledger pair classifies independently: same-pair hybrids receive exact treatment once, while different pairs in one three-Relic cohort may populate both classes."
+  },
+  {
+   "date": "2026-10-02",
+   "text": "RCS-07C-A fully factorizes complete root + input + payoff support over the two selective unary Charm relations, with B as the qualified three-way artifact-chemistry fallback. Successive before-commit audits make old RCS-08 plus six treatment groups non-counting aliases over 132 counted candidate, permission-law, denial-resolution, recurrence, three-recipient-settlement, later-reuse, co-application, composition-law, stacking-family-signature, and team-category-signature rows. I2 governs supported noncommutative co-application from either I0 or I1 through separately tagged cross-active-Relic and Relic-versus-other-system projections. RCS-08C1 remains the sole owner-facing card; the 328-row register is a worst-case tree whose conditional branches prune."
+  },
+  {
+   "date": "2026-10-01",
+   "text": "RCS-07B-B makes root/payoff-Charm catalog support genuinely selective while every root remains payoff-Charm-customizable and every supported payoff Charm remains viable, with A as the qualified clarity/anti-dead-loot fallback. RCS-07C now asks whether both unary relations fully factorize, have selective but non-orphaning three-way exclusions, or leave at least one exact unary edge unable to extend into any complete package."
+  },
+  {
+   "date": "2026-10-01",
+   "text": "RCS-07A-B makes root/input-Charm catalog support genuinely selective while every root remains input-customizable and every supported input Charm remains viable, with A as the qualified clarity/anti-dead-loot fallback. RCS-07B now asks whether root/payoff-Charm support is universal, selective while every root stays payoff-Charm-customizable, or leaves some roots payoff-Charm-ineligible without deciding or changing any otherwise-authored uncharmed payoff."
+  },
+  {
+   "date": "2026-10-01",
+   "text": "RCS-05C1-A makes every positive Relic payoff package complete through its already-paid source transitions at settlement, with C as the qualified temporal-policy/artifact-identity fallback; C2-C4 prune. RCS-06 derives separate-format, whole-team, and pinned-version scope from existing selections. An atomicity audit makes old RCS-07 a non-counting alias for input catalog support, payoff catalog support, and residual complete-package support; RCS-07A now asks whether root-to-input support is universal, selective while every root stays input-capable, or leaves some roots input-ineligible."
+  },
+  {
+   "date": "2026-10-01",
+   "text": "RCS-05B1-A makes every positive dual Relic payoff one pair-inseparable source-mediated consequence, with C as the qualified receipt-agency/artifact-identity fallback; B2/B3 prune. An atomicity audit makes old RCS-05C a non-counting alias and separates retained-payoff incidence, realization control, participant timing, and nonterminal expiry; RCS-05C1 now asks whether positive packages universally complete at settlement, universally retain a source-owned authorization, or stable forms of both coexist."
+  },
+  {
+   "date": "2026-10-01",
+   "text": "RCS-05A-A keeps every positive Relic payoff mediated through already-paid source-owned transitions, with 05A-C as the qualified emergent-artifact-identity fallback. An atomicity audit makes old RCS-05B a non-counting alias and separates receipt-local incidence, receipt-local breadth, and pair-irreducible supplementation; RCS-05B1 now asks whether dual payoffs are universally pair-inseparable, universally local-bearing, or stable forms of both coexist."
+  },
+  {
+   "date": "2026-10-01",
+   "text": "RCS-04B3-B makes every assignment-changing Relic transformation open one ancestry-complete linked biography chapter, with B3-A as the simplicity/non-token-biography fallback. An atomicity audit makes old RCS-05 a non-counting alias and separates six payoff/power rows; RCS-05A now asks whether positive payoffs stay source-mediated, every contract can manifest a distinct Relic-origin operation/state, or stable contract families do both."
+  },
+  {
+   "date": "2026-10-01",
+   "text": "RCS-04B2-A preserves every Relic's definition and immutable fixed current-design contract/version, with B2-B as the qualified named-metamorphosis/artifact-identity fallback. A named-claim audit keeps one nonforking biography lineage invariant and isolates RCS-04B3: whether transformation continues its active semantic chapter, always opens one linked successor, or stable route families do both."
+  },
+  {
+   "date": "2026-10-01",
+   "text": "RCS-04B1-A preserves the same persistent artifact through every nonnull transformation commit, with B1-B as the qualified reincarnation/artifact-identity fallback. A named-claim audit upholds definition plus its fixed current-design gameplay contract/version as one atomic identity key; RCS-04B2 now asks whether every commit preserves it or stable cross-definition metamorphosis coexists."
+  },
+  {
+   "date": "2026-10-01",
+   "text": "RCS-04A3XD-A puts honest complete exact-{I,D} direct-specialist Relics in both transformation dialects, with A3XD-B as the clarity fallback; all three complete signatures are now paired. An atomicity audit splits old RCS-04B into artifact-instance, definition-contract, and biography-lineage continuity rows. RCS-04B1 asks whether every commit preserves one artifact or stable in-place/reincarnation doctrines coexist."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A3XP-A puts honest complete advance-bound bundled exact-{P} Relics in both transformation dialects, with A3XP-B as the clarity fallback. RCS-04A3XD now asks where the complete exact-{I,D} direct-specialist signature exists; paired support is recommended with state-only as the clarity fallback."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A3XI-A puts honest pure intrinsic {I} Relics in both transformation dialects, with A3XI-B as the clarity fallback. RCS-04A3XP now asks whether the complete advance-bound bundled exact-{P} signature likewise exists in both dialects, state only, or boundary only."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A7-A makes every exact-{P} policy covenant advance-bound, with A7-C as the artifact-identity/direct-participation fallback. A named-claim audit catches a hidden dialect allocation inside aggregate A3X, so one row becomes three exact complete-signature incidence rows; RCS-04A3XI asks first where pure intrinsic {I} Relics exist."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A6-A gives every complete automatic collision law one transferable player-semantic grammar, with A6-B as the artifact-identity fallback. Three audits repair RCS-04A7 to ask whether whole policy covenants are universally advance-bound, universally live after cohort freeze, or split into stable advance/live contract families."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A5-C makes deterministic-only and stochastic-capable complete automatic laws coexist, with A5-A as the policy-mastery/multiplayer-trust/Rite-and-return fallback. A semantic adjudication removes code factoring from RCS-04A6; the next card asks whether truthful causal reasoning transfers through one bounded catalog grammar or requires at least two materially irreducible Relic-local calculi."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A4-C makes stable contributor-neutral and contributor-sensitive automatic laws coexist, with A4-A as the clarity/equal-ceiling/anti-farming fallback. A neutral adjudication keeps stochastic incidence global; RCS-04A5 now asks whether automatic laws are deterministic-only, universally stochastic-capable, or split across reliable and fateful families."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A3D1-A keeps every policy Relic on finite authored whole bundled covenants, with A3D1-B as the class-wide expressive-mastery/menu-bloat fallback. RCS-04A4 now asks whether contributor makeup is attribution-only, universally settlement-sensitive, or split across stable neutral and sensitive automatic laws."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A3C-A keeps every collision-policy change inseparably bundled with another meaningful participant semantic, with A3C-B as the qualified class-wide agency/clarity fallback. RCS-04A3D1 now asks whether policy Relics use only closed whole covenants, all support bounded bundled-covenant construction, or both language classes coexist."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A3B2I-B makes every direct-only Relic complete-profile exact {I,D}, with B2I-A as the qualified practical agency/clarity fallback. RCS-04A3C now asks whether collision policy is bundled-only, independently variable on every policy contract, or split across both topologies."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A3B1I-A keeps every policy-only Relic complete-profile exact {P}, with B1I-B as the qualified system fallback. RCS-04A3B2I now asks whether direct-only Relics always ask live, all also have a disclosed self-willed context, or both profiles coexist."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A3B2-A keeps direct-capable Relics controlled-form direct-only, with B2-C as the qualified higher-ceiling/identity exception. Nine hybrid-form rows prune, and RCS-04A3B1I now asks whether policy-only Relics are always participant-responsive or sometimes resolve conflict through authored self-will."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A3B1-C makes direct-capable and policy-only configurable Relic contracts coexist, with B1-A as the qualified low-interruption/policy-mastery fallback. RCS-04A3B2 now asks whether policy support is absent, universal, or mixed inside the direct-capable class."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A3A-C makes participant-configurable and participant-intrinsic Relic conflict contracts coexist, with A3A-A as the qualified simplicity/artifact-identity fallback. RCS-04A3B1 now asks how broadly live direct actual-result choice exists inside the configurable class."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A1C-C puts genuine Relic conflict in both transformation dialects. A post-answer audit repairs uncontrolled conflict opportunities and complete dialect-signature mapping, raising the finite register to 181 rows and opening RCS-04A3A; the final system-fit visual refresh is now an SR-12 closeout obligation."
+  },
+  {
+   "date": "2026-09-30",
+   "text": "RCS-04A2-A makes every genuine conflict settle one proposed target, with A2-C as the fairness fallback. Authority audits expand the register to 175 atomic rows, exhaust the seven policy/direct/coavailable contract profiles, and open RCS-04A1C to choose state-only, boundary-only, or both-dialect conflict support."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "RCS-04A1-C requires genuine distinct-target Relic conflicts, with A1-B as the qualified concordant-only fallback. RCS-04A2 now asks whether disagreement must commit a proposed target, preserve the current form, or admit both result categories."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "E2C-A makes P approval live and Z approval advance-bound. A collision audit replaces overcompressed RCS-04A with seven conditional rows; RCS-04A1 now asks whether proposals are isolated, concordant-only, or genuinely target-conflicting."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "E2-C gives participant-contingent P and Z proposals opposite cause-uniform approval timings with E2-A as the production fallback. E2C now explicitly chooses P-live/Z-advance or its mirror before collision precedence."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "E1X-A makes lived-event transformation proposals system-deterministic with E1X-B as fallback. A timing audit adds conditional E2C so P-live/Z-advance and its mirror cannot hide inside generic coexistence; E2 is next."
+  },
+  {
+   "date": "2026-09-29",
+   "text": "The recovered progression lane is committed, synchronized with main, and tracked by draft PR #4. E1Z-B makes empty-settlement transformation proposals participant-contingent with E1Z-A as fallback; E1X is the next one-at-a-time owner card."
+  },
   {
    "date": "2026-09-29",
    "text": "An eighth verifier refuted be56a22; the press keeps only its detour, both guards back at ab56337's form (25c2e8a): on the host, idling with a spot open 5 -> 0, everything else as at c2b5751. P2 measured a seventh time (71a9d3b)."

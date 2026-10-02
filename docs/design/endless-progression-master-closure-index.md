@@ -1,0 +1,4765 @@
+# Endless progression master closure index
+
+> **Design-track quarantine:** this index may not shape vanilla capture,
+> candidates, fixtures, or promoted evidence. It governs only designed systems
+> behind the separate ruleset/progression seam.
+
+**Status:** active scope and closure control for the current owner-guided design
+pass. It does not alter an accepted product rule, select an unanswered option,
+approve tuning, or authorize implementation. The
+[decision record](endless-progression-decisions.md) remains authoritative for
+accepted rules; the [owner packet](endless-progression-owner-packet.md) remains
+the worksheet for one-at-a-time choices.
+
+This index fixes the destination of the pass. Completion is measured by named
+closure gates, not by the number of A/B/C cards, the depth of a dependency
+tree, or a percentage inferred from those counts. A new subquestion must attach
+to one of the fixed gates below. Adding, removing, or redefining a macro gate
+requires an explicit dated amendment to this index with the reason.
+
+EP-D02-C3c.171 is **not answered** here. Its three alternatives are preserved
+as authoring/evaluation possibilities, but it is removed from the active owner
+queue because its own boundary states that no branch changes a result, receipt,
+decisive cut, definition, exact key, Soul row, presentation surface, power,
+strategy, fun, release rule, or implementation obligation. C170-A already
+supplies the required existential continuity case. C171 may return as an owner
+card only through the reopening rule in section 3.
+
+## 1. What “done” means
+
+There are three different destinations. They must not be collapsed.
+
+### 1.1 Owner-framework closure
+
+The current SS2-derived progression framework is closed only when:
+
+1. EP-D01 through EP-D07 and EP-A01 through EP-A03 have explicit accepted
+   dispositions or accepted fully normative replacements in the decision
+   record;
+2. the selected full-assurance queues for EP-D02 and EP-D07 are complete;
+3. EP-D04's R9.4 repair, remaining R10 choices, finite R11 closure lanes, and
+   final rarity replay are complete;
+4. every system gate in section 5 has either met its player-facing closure test
+   or carries a named, non-blocking deferral with an owner-approved release
+   boundary; and
+5. one final complete replay has been accepted and transcribed into the
+   authoritative record.
+
+This closes the design framework. It does not make a build implementation-
+ready.
+
+### 1.2 Normative implementation-readiness
+
+Implementation-readiness additionally requires the P0 repairs, S-01 through
+S-08 contracts, fourteen finite authoring-input groups, objective test plans,
+and every exit criterion in the
+[readiness record](endless-mvp-readiness.md#10-exit-criteria-for-implementation-ready).
+The owner must then give a separate implementation authorization.
+
+### 1.3 Standalone adaptation
+
+After owner-framework closure, begin a separate **Souls and Simulacra**
+expansion/audit/adaptation pass over the completed skeleton. That pass may
+replace SS2-derived assumptions before implementation specifications are
+frozen. It receives its own finite gate index; it is not allowed to reopen the
+current pass implicitly or hide unfinished current work under a rename.
+
+## 2. Status and work-class vocabulary
+
+Evidence labels retain their existing meanings: `[V]` repository-verified,
+`[D]` derived, `[A]` designed/assumed, and `[U]` unverified. Closure uses a
+separate vocabulary:
+
+| Closure state | Meaning |
+| --- | --- |
+| `CLOSED` | The row's exact exit test is satisfied and any required owner acceptance is durable. |
+| `PARTIAL` | Some authoritative or direction-selected inputs exist, but at least one named exit condition remains. |
+| `OPEN` | A required owner rule, specification, content contract, or proof is absent. |
+| `DEFERRED` | The work has a named later release boundary and does not block the declared current scope. “Later” without a boundary is not a deferral. |
+| `REOPENED` | A previously closed row has met the explicit reopening test in section 3. |
+
+Every remaining task also has exactly one primary work class:
+
+| Work class | Who/what resolves it | Does it receive an A/B/C card? |
+| --- | --- | --- |
+| `OWNER` | A genuine product direction with materially different shipped play or authority | Yes, one prerequisite-ready card at a time |
+| `DERIVE` | Logic forced by accepted premises | No; record the derivation and its premises |
+| `SPEC` | Exact total state, timing, schema, UI-information, or failure contract needed to implement a selected direction | Only if a still-open product fork remains |
+| `AUTHOR` | Catalog entries, examples, names, and content satisfying an accepted contract | Only if presence/exclusion of a content family changes the product promise |
+| `TUNE` | Numbers or thresholds inside an accepted qualitative envelope | No by default; use analysis and playtest gates |
+| `EVALUATE` | Simulation, solver, RL, adversarial, accessibility, or human-play evidence | No; evidence can trigger the reopening rule |
+| `BUILD` | Code, assets, transport, storage, and production integration | Never during this design pass; separate authorization required |
+
+`DIR-SELECTED` is not a closure state. It is a worksheet fact within an open or
+partial gate. The 171 selected C3c headings therefore do not equal 171 closed
+systems or 171 authoritative amendments.
+
+## 3. Owner-card admission and reopening rules
+
+### 3.1 Admission test
+
+A proposed owner card is admitted only if all of these are true:
+
+1. **Prerequisite-ready:** every premise that can remove or merge its options is
+   already selected or derived.
+2. **Independent alternatives:** each offered direction is legal, coherent,
+   and changes at least one consequence boundary below rather than merely
+   changing notation or proof shape.
+3. **Concrete boundary:** the card names one representative play situation,
+   the state before and after it, and the observable difference between
+   options.
+4. **Failure distinction:** the card states which degeneration, exploit, loss
+   of agency, thematic break, or release result differs between alternatives.
+5. **Closure attachment:** the card names the single gate in sections 5 or 7
+   that it advances and the exact exit condition it helps satisfy.
+
+At least one of these consequence boundaries must differ materially:
+
+- a legal player action, build, route, reward, or counterplay policy;
+- custody, ownership, authority, commitment, lifetime, or settlement state;
+- information required before a consequential player choice;
+- a power budget, compatibility rule, exploit result, or release acceptance
+  condition;
+- a content family's required presence or exclusion because it changes viable
+  play; or
+- a necessary proof obligation whose result accepts different shipped content
+  under different options.
+
+The card must also explain the implementation/tuning burden, but burden alone
+does not create a product choice.
+
+### 3.2 Anti-recursion rule
+
+The following do not create another owner card by themselves:
+
+- replacing “some” with “all,” or adding per-history, per-key, per-opportunity,
+  per-pair, or per-vertex saturation;
+- graph connectedness, all-pairs overlap, common-node existence, coverage, or
+  prevalence when no consequence boundary above changes;
+- exact labels, aliases, cardinalities, partitions, or catalog incidence used
+  only to make a proof stronger;
+- a stronger authoring minimum after the selected rule is already sufficient
+  to create and validate the intended player experience; or
+- storage, API, UI-widget, transport, or algorithm choices that implement the
+  same accepted authority and player contract.
+
+Such work is classified as `DERIVE`, `SPEC`, `AUTHOR`, `TUNE`, or `EVALUATE`.
+If a proposed card fails admission, preserve its reasoning in the worksheet,
+mark the reclassification at the original active instruction, and continue at
+the next admitted prerequisite-ready gap. Do not silently delete it.
+
+Full uniform assurance still applies to every **independent product choice**.
+Correctly classifying a derivation, catalog constraint, or evaluation property
+does not weaken that promise; turning it into an owner vote would falsify what
+the promise is meant to protect.
+
+### 3.3 Reopening test
+
+A reclassified or closed question returns to the owner queue only when new
+evidence demonstrates one of the following:
+
+1. two previously equivalent alternatives now permit different player actions
+   or authoritative transitions;
+2. simulation or human play crosses a declared release/rejection threshold;
+3. a selected rule cannot be specified without choosing between genuinely
+   different authority, information, custody, or failure semantics;
+4. standalone adaptation creates a new operative relationship that the current
+   answer does not cover; or
+5. the owner explicitly requests reconsideration and the replacement card
+   identifies the affected accepted text.
+
+The reopening note must cite the evidence, affected gate, and exact rule that
+would change. “More complete,” “more symmetric,” or “more rigorous” is not
+sufficient by itself.
+
+## 4. Souls and Simulacra design lens
+
+**Souls and Simulacra is not a later coat of paint.** It is the identity against
+which every remaining choice is judged now. The present pass completes the
+SS2-derived progression skeleton in that identity; the later standalone pass
+will separately retain, replace, remove, expand, and adapt its vocabulary,
+content, world assumptions, and engine seams before implementation is frozen.
+Deferring that adaptation does not permit a current answer that contradicts
+the title or the standing ideal.
+
+Every admitted relational recommendation must remain consistent with the
+**Souls and Simulacra** identity and the standing *Achintya Bheda Abheda*
+ideal. The card must:
+
+1. name the operative relationship and exact mechanical/player boundary;
+2. show how continuity or participation and real distinction coexist there;
+3. classify the fit as `direct`, `partial`, `neutral/protective`, or `merely
+   aggregate`;
+4. state the gameplay and comprehension tradeoff; and
+5. provide a consistent replacement option if none of the initial alternatives
+   meets the ideal.
+
+This lens is strongest at an actual choice, transformation, activation,
+custody, or result boundary. Catalog-wide coexistence, separate examples that
+individually supply unity and difference, mathematical symmetry, shared names,
+or cosmetic correspondence are not enough. The ideal does not manufacture an
+otherwise inadmissible owner choice and does not silently select one.
+
+## 5. Fixed progression-system closure gates
+
+These twenty gates are the fixed denominator for the current framework pass.
+Subquestions may attach to them, but their count does not change the
+denominator.
+
+### Anti-flattening contract
+
+These cards are a navigation and closure layer, never a replacement design.
+Each card must preserve five things separately:
+
+1. the fantasy and player experience the system exists to create;
+2. the concrete loop and relationships through which the player experiences it;
+3. every authoritative or direction-selected constraint that already shapes it;
+4. the genuinely unresolved frontier, without demoting it to a generic
+   “content/tuning” label; and
+5. the proof that would close the gate.
+
+The linked source prose remains part of the gate. An index omission cannot
+delete, weaken, or silently defer a linked mechanic, degeneration, negative
+case, or owner direction. If an index sentence conflicts with its source, the
+authoritative decision record wins for accepted rules; otherwise the conflict
+blocks closure until it is reconciled openly.
+
+### `SC-01` — A finite heroic ascent with meaningful life after the Emperor
+
+**What we are designing.** The campaign should deliver a real vertical climb
+and a real culmination, not pretend that numbers can rise forever. Ordinary
+stats and item chassis grow toward the Emperor and then stop at one finite,
+versioned ceiling. After that victory, the gladiator becomes broader, stranger,
+and more storied rather than exponentially larger. Arena Circuits open three
+parallel Pursuits: Ascendancy deepens one Legendary lineage, Frontier opens
+unusual encounters and risk/reward routes, and Legacy opens cosmetics, titles,
+history-dependent rewards, and noncombat access. A player chooses a primary
+Pursuit for each Circuit without losing progress already earned in the others.
+
+The promise is not merely “there is no infinite stat grind.” It is that the
+game always offers a meaningful successor objective without disguising a level
+counter or Chronicle entry as gameplay. Postgame opponents may become more
+compositionally difficult, and rare disclosed wild powers may exceed ordinary
+expectations, but standard enemies share the same bounded raw-power grammar and
+never mirror the currently equipped player snapshot.
+
+**Souls and Simulacra / ideal fit — `partial`.** One continuing gladiator can
+express a genuinely different post-Emperor life through Ascendancy, Frontier,
+or Legacy without becoming three disposable avatars. The tradeoff is that
+parallel bars alone would be merely aggregate; the fit becomes operative only
+when each Pursuit changes what that same person may choose, risk, remember, or
+become while the others remain real successor paths.
+
+**Selected foundation.** EP-D01's nine clauses are authoritative: the ceiling
+is aligned with the expected Emperor encounter; post-ceiling levels cannot leak
+stats, chassis, active-rule capacity, multipliers, or equivalent scalar power;
+Ascendancy's active edge is finite and behavior-led; the three Pursuits cannot
+all terminate at one milestone; and a bare record is not a meaningful
+successor. EP-D02 supplies Ascendancy's finite active accounting.
+
+**Still unresolved.** The exact ceiling, Pursuit catalogs and reward cadence,
+Ascendancy magnitude, exceptional-opponent envelope, and evidence that at least
+one meaningful objective remains after another lane completes are still open.
+
+**Closure proof.** Version and enforce the ceiling across stats, items, Forge,
+opponents, Evolutions, rewards, and migration; demonstrate each Pursuit's lived
+loop and cross-lane successor; and reject every route by which postgame creates
+an uncapped or mandatory disguised scalar.
+
+**Source spine.** [EP-D01 accepted replacement](endless-progression-decisions.md#ep-d01--finite-campaign-vertical-power-and-continuing-pursuits),
+[executive decision](endless-progression-system.md#executive-decision), and
+[career/challenge vocabulary](endless-progression-system.md#11-career-level-career-tier-and-challenge-tier).
+
+**State:** `PARTIAL` — the product philosophy is authoritative; its exact
+content, pace, and proofs are not.
+
+### `SC-02` — A legible career, frontier, milestone, and Epoch journey
+
+**What we are designing.** Career level is the gladiator's long-lived history;
+career tier is the finite raw-power budget; challenge tier is the next disclosed
+Circuit frontier earned by clearing play. Those counters must tell one coherent
+story. A veteran can keep gaining experience, Mastery options, rivals, records,
+and Epoch identity after raw power caps. Replaying a lower frontier remains
+possible, but cannot be the fastest way to create higher-tier power.
+
+The older proposal supplies the desired texture: early unlocks teach systems,
+Mastery screens offer compatible, counter, and off-axis directions rather than
+`+1%` filler, milestone bosses test accumulated vocabulary, and post-100 Epochs
+use one bounded team Charter across a whole band before an authored boss. Prune,
+retirement, completion, and Charter rotation exist to make a finite library
+inhabitable, not to fake procedural infinity. Those detailed schedules remain
+proposal inputs wherever EP-A01 or EP-D02 has superseded their numbers.
+
+**Souls and Simulacra / ideal fit — `partial`.** Career, frontier, Capacity,
+Mastery, and Epoch are distinct histories of one gladiator, not interchangeable
+levels. Their coexistence supports the ideal only if the UI and transitions let
+the player understand how the same life participates in each without one
+counter swallowing the others; five differently named progress bars would be
+merely aggregate.
+
+**Selected foundation.** Career may continue while chassis power stops;
+challenge unlock follows clears rather than equipped gear; the eighteen named
+championship lineages—not the old five-showcase level list—own Capacity; and no
+later level or boss raises v1 Capacity beyond 48.
+
+**Still unresolved.** EP-A01 must reconcile career XP, career tier, challenge
+tier, Circuit count, reward-budget tier, Emperor timing, the exact campaign
+ceiling, milestone queueing, and postcampaign/Epoch activation. The current
+“roughly every fifth Circuit” and older level mapping cannot both be true.
+
+**Closure proof.** Produce one transition table covering wins, losses,
+Recovery, mixed progression, milestone victories, Emperor completion, levels
+1/20/40/60/80/100 and later Epoch boundaries. No transition may jump reward
+power beyond its declared clear, offer a dead capped stat, strand progression,
+or let a display level masquerade as vertical power.
+
+**Source spine.** [progression timeline](endless-progression-system.md#3-progression-timeline-level-1-to-100-and-beyond),
+[EP-A01 readiness contradiction](endless-mvp-readiness.md#r-01--career-pace-challenge-pace-and-milestone-cadence-disagree),
+and EP-D02's accepted milestone schedule.
+
+**State:** `OPEN` — EP-A01/R-01 is a real model choice, not mere tuning.
+
+### `SC-03` — Personal Rule Capacity as earned build freedom
+
+**What we are designing.** A gladiator begins with zero room for added rule
+complexity and earns it through eighteen authored championship lineages in six
+`+2,+3,+3` chapters, reaching a permanent v1 ceiling of 48 at Emperor. Capacity
+belongs to that gladiator—not the account, campaign, team, controller, or most
+advanced friend. It measures how much behavior the player may bring at once,
+while the owned library can continue expanding.
+
+All sixteen mapped equipment positions can host behavior: both weapons, eight
+worn positions, and six carried spell/Technique positions. Standard or
+unchanged payloads cost 0, Tempered 1, Inscribed 2, and Legendary 3. Inactive
+equipment cannot hide cost: both weapons reserve Load even though only the
+selected weapon operates. At least one compatible all-sixteen-Legendary loadout
+must be legal, while compatibility and team budgets may reject arbitrary ones.
+On a lower route, a veteran explicitly prepares a legal lower-band build under
+`min(personalEarnedCapacity, routeCapacityCeiling)`; the game never mutates or
+silently disables saved equipment.
+
+**Souls and Simulacra / ideal fit — `partial/protective`.** One combatant owns
+one bounded capacity for a build assembled from sixteen nonfungible sources;
+unity lies in the committed whole and distinction in what each source actually
+contributes. The protective rule is as important as the image: Capacity cannot
+be pooled across people or make weapons, armour, carried Techniques, Soul, and
+Relic interchangeable. A total Load number by itself is merely aggregate.
+
+**Selected foundation.** EP-D02's personal ownership, exact hosts and tariffs,
+zero-to-48 lineage ledger, qualifying full-rank/Assistance/Recovery receipts,
+next-boundary activation, route clamp, full-proposal validation, clean migration
+behavior, and no-post-Emperor-growth rule are authoritative. Every rejected
+equip leaves the prior configuration byte-identical.
+
+**Still unresolved.** The full-assurance route still has C4 and C8–C12 work,
+plus complete compatibility, UI explanation, mixed-progression fixtures, and
+the interaction with Relics, Team Tactic, rarity policy, migration, and
+authoring catalogs.
+
+**Closure proof.** Trace every point from one stable personal receipt to one
+validated equipped projection; exhaust every host, cost, route band, inactive
+source, migration, duplicate receipt, and mixed-roster case; prove Capacity
+cannot be pooled, borrowed, hidden, duplicated, or silently exceeded.
+
+**Source spine.** [EP-D02 accepted replacement](endless-progression-decisions.md#ep-d02--personal-rule-capacity-grows-to-a-finite-48-load-ceiling)
+and [power model §§1.3–1.5](endless-progression-system.md#13-chassis-power-and-rule-power).
+
+**State:** `PARTIAL` — the governing model is authoritative and its complete
+assurance/specification is unfinished.
+
+### `SC-04` — Bound Soul identity and item-contained combat vocabulary
+
+**What we are designing.** The gladiator's Bound Soul is an intrinsic combat
+identity rather than another loot socket: it may directly transform combat even
+with no matching item equipped. Gear still carries its own vocabulary. Forms
+change one action's tactical shape instead of becoming Fireball II/III/IV;
+Signatures create visible short sequences; Keystones bridge at most a bounded
+pair of semantic tags; and Techniques occupy real carried-item positions. In
+v1 those ideas live inside paid item payloads, so removing the host removes the
+behavior and no phantom standalone source bypasses Load.
+
+This keeps two fantasies distinct: the Soul says something enduring about who
+the gladiator is, while equipment expresses learned and acquired techniques.
+The cost is a real additional balance axis beside sixteen item hosts, which is
+why Bound Soul multiplicity, accounting, and commitment cannot remain implied.
+
+**Souls and Simulacra / ideal fit — `direct` at the Soul–simulacrum boundary,
+`partial/protective` for gear.** The enduring Soul may transform the embodied
+fighter without becoming an item, while the simulacrum and its equipment remain
+real, paid, removable expressions. The design fails the ideal if “Soul” is only
+a cosmetic class tag, or if Soul access dissolves the distinct hosts and costs
+that make an equipped body legible.
+
+**Selected foundation.** C3a-A direction-confirms a gear-independent Bound Soul
+combat role. C3b-A direction-confirms that Forms, Signatures, and Keystones are
+item-contained only rather than standalone sources. The authoritative EP-D02
+record still supplies only one separately bounded character-creation identity
+and defers the remaining semantics until replay.
+
+**Still unresolved.** Bound Soul active multiplicity (C3d), accounting topology
+(C3e), initial selection/rebinding horizon (C3f), exact magnitude/content, and
+its interaction with Soul Relics must be completed. Item-contained families
+need exact catalog, budget, timing, source, and compatibility definitions; their
+illustrative numbers are not selected merely because placement is.
+
+**Closure proof.** Show one complete gladiator whose Soul matters without gear
+and whose item-contained behaviors remain attributable to paid hosts; reject
+unpaid sources, universal triggers, recursive procs, rank ladders, and gear
+removal that leaves ghost state. Replay Bound Soul and placement wording
+explicitly before it can amend EP-D02.
+
+**Source spine.** [abilities, spells, and build identity](endless-progression-system.md#4-abilities-spells-and-build-identity)
+and owner-packet C3a/C3b.
+
+**State:** `PARTIAL` — role and placement are direction-selected, not a complete
+accepted subsystem.
+
+### `SC-05` — Soul Relics and Charms as a lived relationship system
+
+**What we are designing.** A Soul Relic is not another weapon, passive gem, or
+spell slot. It is one persistent, combatant-specific artifact root outside all
+sixteen item hosts and every carried slot, through which a gladiator's Soul,
+simulacrum, bearer actions, allied participation, and lived combat history can
+be woven into new results. After a safe late enablement boundary, one personal
+root is active and up to two combatant-specific Charms customize it in
+complementary roles: zero or one input Charm shapes what the relationship
+listens for, and zero or one payoff Charm shapes what it can express. Neither
+Charm acts alone, creates a second meter, or consumes Rule Capacity. Bound Soul
+resonates universally without becoming an access gate, a free qualifying
+source, or an item host.
+
+The system's chosen identity is cross-source weaving, not a passive set bonus.
+Every successful weave needs at least two independently legal, already-paid
+non-Soul sources and the bearer must participate. An ally may contribute only
+while retaining ownership, declaration, and payment for that source; opponents
+never become ingredients, and an effect cannot recursively count another
+effect as fresh evidence. Recipes can read action semantics and build
+provenance, including contingent evidence generated only after entry. This
+makes the artifact respond to what this combatant and team actually did, not
+merely to a static equipment checklist.
+
+Each Relic definition is a pure archetype, while the combatant's instance
+varies qualitatively rather than rolling a strictly superior number. Its Soul
+map is distinct but pairwise overlapping with others; one affinity remains an
+all-Soul anchor while the rest rotate. The fixed cell stays dependable as the
+puzzle changes. At the result boundary, exactly the distinctions a downstream
+consumer can use may survive, with at most two aligned receipts in one bounded
+“dual weave”—never an unbounded trigger board or jackpot proc lattice.
+
+The artifact's identity and state continue across encounters and clean Circuit
+cuts. A relationship may become insufficient, break, renew, and recommit, but
+not through an invisible blink: rearm occurs only after that lived sequence and
+must expose a material player opportunity while the context remains live.
+Pre-choice integrated accounts explain predicate and recurrence forms as faces
+of one continuing choice. C170 preserves at least one canonical account
+identity across two commitment-separated opportunities, giving temporal
+continuity without requiring every Relic to use that form.
+
+Ownership is equally concrete. Relics and Charms are discrete per-combatant
+instances with a persistent custodian; ordinary play cannot wear out or destroy
+a Relic, and a combatant holds at most one instance of a definition. A duplicate
+Relic resolves to a bounded three-candidate, source-weighted offer of eligible
+unowned definitions; declining does not manipulate the weights, offer order is
+uniform, and an exhausted pool falls back to the source's ordinary reward—not
+Relic currency, Relic mastery, or hidden vertical growth.
+
+**Souls and Simulacra / ideal fit — `direct`.** Soul, Relic, embodied
+combatant, allied contribution, and downstream result participate in one
+operative relationship while retaining different owners, costs, histories, and
+causal roles. Persistent identity must survive real transformation, and
+transformation must remain mechanically legible rather than cosmetic
+relabeling. Aggregate graph symmetry is not a substitute for that lived
+boundary. The design degenerates if the easiest input always buys the best
+payoff, Legendary density becomes the answer, allies become anonymous event
+feeders, instance or Soul variance hides a best roll, dual weave becomes a
+jackpot, or long-lived state becomes regret the UI cannot explain.
+
+**Selected foundation.** The worksheet preserves the placement, topology,
+cross-source grammar, universal non-gating resonance, one personal persistent
+nontransferable Relic root, two optional complementary personal Charms,
+definition uniqueness, bounded source-weighted offers and pool-exhaustion
+fallback, bearer/allied ownership rules, nonrecursive evidence, qualitative
+instance variation, prism/affinity/archetype families, bounded result receipts,
+persistent artifact-state lineage, and decision-visible
+insufficiency/break/renew/rearm, form disclosure, integrated-account, and C170
+reuse directions described above. Evaluation is cut-atomic, immediately
+eligible when readiness opens, and automatically invoked at that exact cut.
+Its current-state and admissible occurrence-history inputs come from one
+coherent authoritative pre-adjudication revision, and every materially
+H-reading position has a finite disclosed semantic freshness horizon. Fully
+inseparable H+S paths and all residual material use of a position's opposite
+temporal form are excluded. Every history position now has at least one
+independently meaningful occurrence phase, and phase-singular and phase-plural
+history positions coexist. Every phase-plural position is exact-two.
+Positions with and without additional irreducibly multi-phase packages
+coexist. Coupled-package semantic phase-width support is the active product
+choice. Every exact C3c.1–C3c.170 constraint remains
+a traceable worksheet input even when this card describes their shared player
+meaning; none is promoted into the authoritative record merely by appearing
+here.
+
+**Still unresolved.** Material transformation authority and precedence,
+definition/artifact/lineage ownership, representative source/relationship/
+payoff content, qualitative and numeric power, internal and cross-system/team
+compatibility, separate Relic and Charm acquisition/progression, Charm
+duplicates/custody/transfer/loss, configuration horizons, persistence and
+migration, player/role/UI authority, validation, and release staging all remain
+real design. Section 7 preserves their finite gates and registered slots.
+
+**Closure proof.** Close all twelve `SR-*` gates and the vertical-slice proof
+packet; compile every selected structural rule into coherent player-facing
+semantics; show that every required archetype creates a distinct viable choice
+rather than a token graph witness; and obtain an explicit normative replay.
+
+**Source spine.** Owner packet C3c and C3c.1–C3c.170, the
+[Soul Relic manifest](#7-soul-relic-and-charm-closure-manifest), and the living
+**Souls and Simulacra** north star.
+
+**State:** `OPEN` — substantial direction exists, but neither a complete Relic
+contract nor an accepted EP-D02 amendment exists.
+
+### `SC-06` — Ascendancy as one evolving Legendary lineage
+
+**What we are designing.** Ascendancy lets a veteran deepen one beloved
+Legendary rather than replace the entire build with a second progression tree.
+For a Circuit, at most one equipped Legendary may Ascend. Its base identity,
+one Core Evolution, one active learned Branch, and any active completion
+benefit remain one indivisible three-Load payload. Learning more Branches grows
+the player's portfolio, not simultaneous power.
+
+The item and Core lock for the whole Circuit. After each authorized encounter
+preview and before the first attempt, the player may retain or choose one
+learned Branch from that exact lineage. That Branch survives loss, reload, and
+Rematch; Assistance may reopen the choice once for its altered recipe, and
+Recovery uses the same per-encounter rule. This is intentional narrow
+adaptation—not permission to rebuild after seeing every opponent—and it never
+consumes or expands the ordinary Pivot.
+
+**Souls and Simulacra / ideal fit — `direct/partial`.** The same storied
+Legendary remains one item and one lineage while different learned Branches
+become real, mutually exclusive expressions of it. That continuity-in-change
+fits directly at the item/active-expression boundary; the fit is only partial
+at the wider catalog level. Allowing all learned Branches to operate together
+would erase the distinction that makes the choice meaningful.
+
+**Selected foundation.** EP-D01 clauses 6–7 and EP-D02 clauses 13–14 are
+authoritative. Trophy, Signature, or Keystone naming does not qualify an item;
+additional Branches never add Load; the Pivot cannot change the Ascended item
+or Core; and an illegal migrated configuration is preserved until the owner
+chooses a legal replacement.
+
+**Still unresolved.** C5/C6 assurance, exact Lineage/Core/Branch catalog,
+learning sources, completion interaction, power envelope, UI comparison,
+compatibility, migration, and proof that this finite veteran edge is exciting
+without becoming universally mandatory.
+
+**Closure proof.** Exercise every Circuit/encounter/Rematch/Assistance/Recovery
+boundary and attempt to swap item, Core, Branch, or Load illegally; then prove
+several learned Branches increase strategic choice while one active lineage
+remains bounded and non-dominant.
+
+**Source spine.** [EP-D01 clauses 6–7](endless-progression-decisions.md#ep-d01--finite-campaign-vertical-power-and-continuing-pursuits),
+[EP-D02 clauses 13–14](endless-progression-decisions.md#ep-d02--personal-rule-capacity-grows-to-a-finite-48-load-ceiling),
+and [Circuit build locks](endless-progression-system.md#21-build-locks-ascendancy-branches-and-the-ordinary-pivot).
+
+**State:** `PARTIAL` — the lifecycle skeleton is authoritative; content and
+assurance remain open.
+
+### `SC-07` — Team Tactic as shared strategy without borrowed identity
+
+**What we are designing.** A team should make one genuinely collective build
+choice without turning personal progression into a communal point pool. Team
+Tactic occupies one visible, nonfungible allowance outside every gladiator's
+Capacity. At most one applies; it locks for the Circuit; it cannot invalidate a
+personal loadout or be converted into item Load. Alongside it, team Control,
+Survival, and Burst caps prevent individually legal kits from composing into
+permanent lockdown, invulnerability, or multiplicative burst.
+
+**Souls and Simulacra / ideal fit — `direct`, conditionally.** Allies share one
+operative tactic at the team boundary while each remains the owner of a
+distinct gladiator, Capacity, equipment, action policy, and reward. The fit is
+direct only if selection and use preserve every seat's agency; host fiat,
+fungible team points, or one quarterback turning the others into extensions of
+one will would destroy it.
+
+**Selected foundation.** EP-D02 clause 15 authoritatively separates and locks
+the allowance. Team Control 2, Survival 1, Burst 2, strongest-only stacking, no
+extra turns, and no proc chains remain proposal constraints requiring final
+specification and testing.
+
+**Still unresolved.** C7 assurance, acquisition, eligible sources, source-
+member departure, 1v1 availability, preview and lock timing, voting/tie/
+deadline authority, migration, exact tactic content, and its relationship to
+Charters, Contracts, Relics, and distinct-human co-op.
+
+**Closure proof.** Define one complete lifecycle from earning and proposing a
+Tactic through unanimous/ranked selection, Circuit lock, source departure,
+save/reload, and migration. Prove no path converts it into personal Capacity,
+lets a host dictate it, or composes team packages into an oppressive loop.
+
+**Source spine.** [EP-D02 clause 15](endless-progression-decisions.md#ep-d02--personal-rule-capacity-grows-to-a-finite-48-load-ceiling),
+[team budgets](endless-progression-system.md#15-team-budgets), and
+[shared decisions](endless-progression-system.md#23-shared-decision-protocol).
+
+**State:** `OPEN` — only the separate allowance and Circuit lock are
+authoritative.
+
+### `SC-08` — Arena Circuits as short, committed co-op expeditions
+
+**What we are designing.** The repeatable heart of the game is a compact
+expedition rather than an isolated loot fight. The candidate Circuit contains
+Scout, Foil, Mixed, and Final encounters: first teach one doctrine, then ask a
+different question, combine readable pressures, and finish with a champion,
+rival, or milestone boss. Before entry, the team sees three persisted route
+offers with challenge tier, opening doctrine, likely reward family, Contract
+debt, rival possibility, and provenance. It chooses one route; every combatant
+chooses a hunt family; the recipes, rewards, roster, and relevant roots are then
+committed rather than rerolled.
+
+A locked build must answer several pressures, but the game retains bounded
+adaptation. The ordinary Pivot remains a D03 question; Ascendancy has its
+separate one-Branch window. Defeat teaches without regenerating the world.
+Rematch restores the selected attempt contract; Concede preserves earned
+progress, forfeits only unearned keys, and binds a precommitted zero-debt
+Recovery Circuit rather than shopping for a kinder route. Assistance after
+repeated boss loss removes one disclosed module under the same key instead of
+minting a second reward path. Gauntlet and Overtime remain bounded variants,
+not invisible fifth fights.
+
+**Souls and Simulacra / ideal fit — `partial/protective`.** One committed
+expedition persists through several distinct encounters, losses, adaptations,
+and recovery paths; the player can recognize continuity without pretending
+Scout, Foil, Mixed, and Final are the same fight. The thematic value depends on
+memory and consequence crossing those boundaries. Four adjacent matches with a
+shared menu label would be merely aggregate.
+
+**Selected foundation.** Route/opponent/reward plans are persisted before
+reveal; reload, loss, and Concede cannot reroll them. EP-D07 locks format and
+roster and governs disconnect. EP-D01/D02 lock Ascended item/Core and Load.
+The four-fight length itself remains the pending EP-D03 recommendation.
+
+**Still unresolved.** Circuit length after real human timing, ordinary Pivot
+scope/timing, route ballot details, Rematch state under EP-A02, Assistance and
+Recovery interaction, Contract reward/risk economics, optional-variant release
+scope, and shortest-route/scouting policy tests.
+
+**Closure proof.** Play the same committed route through win, loss, reload,
+Assistance, Concede, Recovery, disconnect, and mixed progression; prove no path
+rerolls information or rewards, duplicates keys, makes the shortest safe route
+strictly dominant, or lets preview-driven re-equipping erase commitment.
+
+**Source spine.** [the Arena Circuit](endless-progression-system.md#2-the-four-fight-arena-circuit)
+and [EP-D03](endless-progression-decisions.md#ep-d03--one-arena-circuit-contains-four-fights).
+
+**State:** `OPEN` — the loop is richly proposed; its length and coupled
+commitment contract are not accepted.
+
+### `SC-09` — Rarity as different rules, burdens, and build philosophies
+
+**What we are designing.** Rarity should change how an item asks the player to
+fight, not secretly inflate its sword or armour chassis. At the same family,
+profile, and tier, Standard, Tempered, Inscribed, and Legendary share the same
+total chassis budget. Tempered adds one focused minor rule, Inscribed adds a
+major rule or a compatible pair, and Legendary carries a defining identity
+behavior with an explicit, enjoyable item-local burden.
+
+The chosen direction deliberately preserves the fantasy of an optimized
+all-Legendary endgame build with the highest upper ceiling—closer to Diablo
+III's Legacy of Nightmares aspiration than a color penalty—while refusing a
+trivial “equip the highest color everywhere” answer. At least one compatible
+all-sixteen-Legendary composition must exist and may win the hardest optimized
+ceiling comparison. Tempered and Inscribed must nevertheless retain separate
+causal niches, and mixed-rarity teams/builds must earn real strict wins in
+appropriate matchups across 1v1, 2v2, and 3v3. A Legendary burden must create a
+fun commitment or exploitable liability, not an arbitrary tax that makes the
+item feel worse merely to satisfy a spreadsheet.
+
+Trophy names where an identity came from; it is not a fifth rarity or a hidden
+power tier. Legendary commitments should ask for target selection, timing,
+resource planning, mode choice, positioning, or setup that changes play. Random
+self-stuns, dull stat taxes, and inventory chores are not acceptable burdens.
+Policy comparison therefore uses the information and adaptation real players
+receive; fixed scripts and omniscient policies remain diagnostic bounds, not
+the definition of the intended balance surface.
+
+**Souls and Simulacra / ideal fit — `direct/partial`.** One shared chassis can
+support genuinely different behavioral expressions, and a Legendary can retain
+one identity while its gift and burden remain causally distinct. The fit becomes
+real only in use—when those behaviors change player choices and relationships.
+A catalog containing several colors or equal budget totals is merely aggregate.
+
+**Selected foundation.** The owner has direction-selected exact chassis
+equality, the higher optimized Legendary ceiling, purposeful Tempered and
+Inscribed access, item-local commitments, policy-based comparison, paired
+route/context cells, team-level rarity classification, mechanic-parent
+weighting, causal classifications, and metric directions through R10.2. These
+are worksheet directions, not an accepted EP-D04 replacement.
+
+**Still unresolved.** R9.4a–d, R10.3–R10.8, R11's package functional and
+thresholds, full support/taxonomy and communication contracts, compatibility
+catalog, exact Legendary burdens and lower-rarity identities, migration/version
+failure, and the complete replay.
+
+**Closure proof.** Compare legal player policies—not fixed showcase kits—over
+the selected route, format, context, build, and opponent grid. Require the
+optimized all-Legendary family to own the intended ceiling, mixed-rarity strict
+wins and separate Tempered/Inscribed causal mass, no disguised chassis scalar,
+no universally dominant package, and human confirmation that commitments are
+fun and legible. Use the finite R11 lanes in section 8 rather than inventing one
+card per statistic.
+
+**Source spine.** [rarity semantics](endless-progression-system.md#72-rarity-semantics),
+[EP-D04](endless-progression-decisions.md#ep-d04--rarity-changes-behaviour-complexity-not-chassis-budget),
+and the owner's R1–R10.2 worksheet directions.
+
+**State:** `OPEN` — the design philosophy is unusually detailed but not yet an
+authoritative replacement or tuned catalog.
+
+### `SC-10` — Every gladiator owns a fair, precommitted outcome
+
+**What we are designing.** Co-op progression should never belong to the last
+hit, highest damage, surviving seat, host, controller, or player who reached the
+reward screen first. For each paid encounter, every mechanically incomplete,
+eligible persistent gladiator receives one independently precommitted personal
+outcome: an item offer when its cache succeeds or automatic Forge Marks when it
+does not. A knocked-out teammate still participated in the victory and keeps
+the outcome. The custodian alone decides Keep, Salvage, Equip, or later Trade.
+
+Grant eligibility, clear eligibility, and record eligibility remain distinct.
+A paid win can grant and clear; a zero-grant Recovery final can clear and grant
+only the separately authorized championship Capacity receipt; Practice does
+neither. Once a combatant is mechanically complete, newly prepared frontier
+slots become typed records rather than disguised filler power. At most one
+already prepared reward set—and a separately bounded precommitted pot when
+applicable—may survive the completion marker unchanged.
+
+**Souls and Simulacra / ideal fit — `direct`.** The team participates in one
+victory and one atomic settlement, yet each gladiator receives a distinct
+precommitted consequence owned by that gladiator. Neither unity nor difference
+is rhetorical: the shared result cannot be split into unrelated solo worlds,
+and personal outcomes cannot be pooled, reassigned, or awarded by performance
+rank. That fairness costs more explicit settlement state, which is intentional.
+
+**Selected foundation.** Personal ownership, frozen slot keys, unchanged
+outcomes across reload/loss, no performance multiplier, and exactly-once
+settlement are proposal invariants. EP-D05 remains pending, so they are not yet
+an accepted product disposition.
+
+**Still unresolved.** EP-D05's exact acceptance, complete reward/record outcome
+schema, mixed incomplete/completed teams, Concede/Recovery/Overtime folding,
+escrow/custody behavior, atomic crash repair, and the interaction with Relic,
+Capacity, Trophy, pity, and post-completion maintenance.
+
+**Closure proof.** Precommit every personal result before play and fault-inject
+every reservation, loss, knockout, disconnect, acknowledgement, callback,
+commit, reload, and duplicate path. The same frozen victory must produce
+exactly the right zero-or-one personal outcome and never rewrite a displayed
+set after completion.
+
+**Source spine.** [encounter and settlement vocabulary](endless-progression-system.md#12-encounter-battle-attempt-and-settlement),
+[reward ownership](endless-progression-system.md#83-reward-ownership), and
+[EP-D05](endless-progression-decisions.md#ep-d05--personal-precommitted-outcomes-and-typed-completion-records).
+
+**State:** `OPEN` — the fairness model is concrete; EP-D05 and its fault-safe
+contract remain pending.
+
+### `SC-11` — Completion that preserves an earned armory without adding power
+
+**What we are designing.** Finishing the mechanical catalog should feel like
+mastery, not a trap. The player must retain practical access to already-earned
+identities after new mechanical rewards stop, without receiving a completion
+spike, hoard advantage, free chassis, transferable value, extra active copies,
+or new Capacity. The system should reward having built a library without making
+pre-completion inventory hoarding the rational permanent strategy.
+
+The former four-unit Reconstruction Tray cannot simply become forty-eight
+units: a maintenance-copy entitlement is not Rule Capacity. Its useful goals—
+personal earning rights, exact hosts, conservation, clean-boundary
+reconfiguration, retirement, version pinning, and fault replay—must be rebuilt
+for all sixteen rule-bearing positions.
+
+**Souls and Simulacra / ideal fit — `partial/protective`.** One earned identity
+may persist through distinct physical or reconstructed expressions without
+becoming multiple active copies or free power. That supports continuity without
+collapse, but only if provenance and conservation stay visible. A menu that
+silently materializes anything ever seen would erase the item's history and
+turn the theme into account-wide convenience.
+
+**Selected foundation.** Completion may convert newly prepared frontier sets
+to typed records, one already prepared reward set may remain as a bounded
+grandfather, and adding a new catalog identity may reopen completion without
+rewriting pinned outcomes. The maintenance mechanism itself is unselected.
+
+**Still unresolved.** EP-A03/R-03 must define licence creation, eligible
+identities and hosts, active-copy conservation, Keep/Salvage/retirement effects,
+reconfiguration timing, catalog reopen, mixed completed/incomplete teams,
+migration, and crash replay.
+
+**Closure proof.** Compare Keep, Salvage, retirement, completion, migration,
+and zero-currency histories. Prove the completed player can use the earned
+library while no sequence creates a new item, power, currency, tradable copy,
+Capacity, or incentive to delay completion.
+
+**Source spine.** [Epoch completion proposal](endless-progression-system.md#33-epochs-after-level-100),
+[EP-A03 readiness blocker](endless-mvp-readiness.md#r-03--catalog-completion-can-permanently-strand-known-builds),
+and the owner packet's superseded Reconstruction Tray note.
+
+**State:** `OPEN` — the desired player outcome is clear; the conservation model
+is not selected.
+
+### `SC-12` — Determinism that creates trust, learning, and honest retry
+
+**What we are designing.** Routes, opponents, rewards, and noncombat offers are
+committed before reveal so reloading cannot turn the game into a slot machine.
+Combat determinism should let players understand and learn from failure without
+turning visible seeds or alternative action labels into a counterfactual oracle.
+The player-facing information contract—not secrecy—must be honest enough that
+peers, UI, logs, save inspection, and replay agree byte-for-byte about what is
+knowable.
+
+The current recommended direction is a complete public immediate forecast and
+exact-state Rematch: before submission, the game discloses the authoritative
+immediate result of each canonical command; preview mutates nothing; resolution
+must match or fail closed. A settled loss can authorize another exact encounter
+attempt, while reload resumes the same attempt. Recovery and Assistance have
+their own persisted roots/recipes and cannot reroll paid plans. Overtime remains
+a later terminal-risk design rather than a hidden extension of ordinary retry.
+These are still EP-A02 worksheet proposals, not accepted rules.
+
+**Souls and Simulacra / ideal fit — `neutral/protective`.** Determinism protects
+one committed world while distinct players, commands, losses, and attempts keep
+their own causal meaning. That integrity serves the ideal, but seed topology is
+not itself a metaphysical relationship. The design should not force a thematic
+claim where its real job is trust, learnability, and equal information.
+
+**Selected foundation.** Independent noncombat streams, no wall-clock/
+controller/reload inputs, committed plan identity, exact active-state restore,
+and classic ordered-tape preservation are required. The earlier per-semantic-
+label draw plus same-seed Rematch model is rejected because players can shop
+alternative labels.
+
+**Still unresolved.** EP-A02 must select the public information/coupling model,
+retry state, Recovery/Assistance timing, Overtime deferral, projected RNG or
+forecast state, seed creation authority, and every white-box advantage limit.
+
+**Closure proof.** For every legal command and counterfactual information path,
+show what the player may know, what hashes, what persists, and what a retry can
+change. Seed-aware policies, save inspection, reload, loss padding, presentation
+calls, and peer disagreement must neither create private advantage nor alter a
+committed world.
+
+**Source spine.** [deterministic streams](endless-progression-system.md#102-deterministic-streams),
+[EP-A02/R-02](endless-mvp-readiness.md#r-02--deterministic-semantic-labels-turn-rematch-into-an-oracle),
+and the owner packet's F1/F2/R1 cluster.
+
+**State:** `OPEN` — no Endless combat RNG/retry model is approved.
+
+### `SC-13` — Readable opponents assembled from authored combat language
+
+**What we are designing.** Opponents should surprise through combinations the
+player can read and answer, not through hidden immunity, affix soup, or health
+inflation. A persisted recipe combines a tested body, public doctrine, at most a
+small number of compatible authored modifiers, a visible liability, team role,
+and provenance. Raw power follows the declared career/challenge budget and
+never inspects the party's current equipment.
+
+Aggressor, Tempo, Marksman, Provocateur, Arcanist, Attritor, and Skirmisher form
+a small common vocabulary. Scout/Foil/Mixed/Final structure teaches and combines
+it. Procedural champions carry one identity signature and one exploitable
+liability. Persistent rivals remember broad tags from two of the team's last
+three victories over that rival—not losses, exact items, or a single spoof win—
+and may replace only one secondary module with a disclosed counter. Milestone
+bosses test accumulated knowledge with equal seat counts, no bonus actions, and
+at least two materially different winning build families.
+
+**Souls and Simulacra / ideal fit — `partial`.** An opponent can retain a
+recognizable authored identity while doctrine, liability, team role, and bounded
+rival memory produce distinct encounters. The tradeoff is legibility versus
+variety: if identity dissolves into affix soup, or if every recipe is only the
+same body under a new name, neither side of the relationship survives.
+
+**Selected foundation.** Standard opponents remain within the bounded grammar;
+generation selects versioned authored modules and never invents rules; every
+positive elite/champion/rival modifier has a liability; and exact player gear,
+loss count, controller, and deliberate sandbagging cannot set opponent power.
+
+**Still unresolved.** Exact stat/action budgets, doctrine AI policies, module
+and exclusion catalogs, rival cadence/memory tests, eighteen milestone
+lineages, format variants, exceptional-opponent bounds, and their integration
+with Contracts, Charters, Relics, and rarity evaluation.
+
+**Closure proof.** Enumerate every legal recipe and reject every incompatible,
+unreadable, no-counter, gear-mirroring, sandbag-rewarding, or single-build
+composition. Demonstrate that fight `n+1` differs through bounded intersecting
+axes and player learning, not another order of magnitude of stats.
+
+**Source spine.** [opponent progression](endless-progression-system.md#5-opponent-progression)
+and EP-D01's opponent clauses.
+
+**State:** `OPEN` — the grammar is compelling proposal-level design; its total
+catalog and budgets remain unauthored.
+
+### `SC-14` — Chosen hardship and a visible end to every battle
+
+**What we are designing.** Contracts let players choose disclosed debts—scarce
+resources, tempo, control, an elite replacement, earlier Pressure, a telegraphed
+Focus doctrine, or a carried-category restriction—in exchange for authored
+risk/reward. The standard zero-debt route always remains. Rewards use an
+interaction table because two mild debts can combine into something severe;
+historical tiers remain Practice rather than an infinite first-clear farm.
+
+Arena Pressure is the battle's visible anti-stall law, not an arbitrary timer
+victory. After ordinary tactics have had room to matter, recovery declines.
+At the terminal stack every living seat receives a guaranteed legal Advance or
+Strike path against a frozen living opponent set; summons and redirection cannot
+absorb the required progress; each direct action removes a provable fraction of
+the target's Pressure-entry durability. Turn count never improves rewards, so
+players have no economic reason to stall toward the floor.
+
+**Souls and Simulacra / ideal fit — `neutral/protective`.** A chosen Contract
+can bind one expedition to distinct tactical consequences, but Contracts and
+Pressure primarily protect agency, consequence, and liveness rather than carry
+the game's central Soul relation. Their thematic duty is restraint: debt must
+remain chosen and intelligible, and the common battle cannot erase each
+combatant's legal path to act.
+
+**Selected foundation.** Contracts are player-selected, family-limited, and
+precommitted; the standard route stays available. Pressure belongs to canonical
+scheduler/cycle state, remains visible to both teams, supplies universal
+resource-free actions at its terminal state, and must monotonically approach
+elimination without extra turns or an alternate score result.
+
+**Still unresolved.** Exact debt catalog and interaction prices, rank/clear
+semantics, Arena Law/Charter relationship, Pressure start/stack/recovery values,
+turn-denial and dead-seat scheduling, integer rounding, Control Fatigue scope,
+and R-05's separate opportunity/action bound proof.
+
+**Closure proof.** Search every supported target, death, range, resource,
+summon, redirection, control, and skipped-turn state. Every terminal scheduled
+opportunity must resolve one monotone Pressure action, while pre-Pressure play
+retains real tactics and no debt combination dominates the standard or other
+Contract routes in reward per risk/action.
+
+**Source spine.** [Contracts and Arena Pressure](endless-progression-system.md#6-contracts-arena-laws-and-anti-stall-pressure)
+and [R-05](endless-mvp-readiness.md#r-05--pressures-termination-proof-omits-skipped-turns-and-rounding).
+
+**State:** `OPEN` — the experience is defined; the proof and exact content are
+not.
+
+### `SC-15` — A personal, steerable Armory economy built around discoveries
+
+**What we are designing.** Loot is sparse enough to matter, personal enough to
+be fair, and steerable enough that a player can pursue an identity without
+turning every reward screen into a free reroll. A successful cache shows two
+same-rarity candidates: one from the combatant's Circuit-locked hunt family and
+one off-axis. No-cache outcomes become automatic Forge Marks. Duplicate
+suppression, Legendary bad-luck protection, and a bounded exact-target ledger
+constrain the tail while preserving real offers and explicit decline costs.
+
+Forge is deterministic after discovery: it lets a player deliberately rebuild
+a known Tempered, Inscribed, Legendary, or Trophy identity instead of gambling
+through blind enchant rolls. It must remain slower than the general direct-
+offer throughput for the same rarity. Gold buys current-tier ordinary chassis
+and services; Forge Marks, pity, targets, clear credit, and personal guarantees
+are nontradeable. Charisma does not become the universal combat-acquisition
+stat for this designed Armory.
+
+**Souls and Simulacra / ideal fit — `partial`.** One gladiator carries a
+continuing acquisition history while each discovered item remains a distinct
+identity with its own source, provenance, and use. Hunts and Forge can express
+intent without making the player the author of every result. Merely collecting
+many IDs is aggregate; the fit depends on those discoveries changing this
+combatant's lived options without dissolving item difference into currency.
+
+**Selected foundation.** Rarity controls behavior rather than chassis; rewards
+are personal and precommitted; reload/loss/Concede cannot reroll or advance pity;
+one hunt target advances at a time; rarity pity resolves before target pity and
+duplicate handling; and retirement leaves no additive legacy stat.
+
+**Still unresolved.** EP-D05/EP-D04 dependencies, exact cache/rate/pity/target/
+Forge/gold tables, source and rarity unlocks, Relic/Charm acquisition, Trophy
+sources, completion folding, inherited-save behavior, and policy comparisons
+against hoarding, salvage-only, target churn, and shortest-route farming. The
+current deterministic worst-case exact-Legendary target can extend to **63
+Circuits / 252 wins**; that readiness finding is an unresolved acquisition-tail
+failure, not a pace value silently endorsed by this index.
+
+**Closure proof.** Simulate complete fresh-save and inherited histories across
+all legal policies, then prove bounded bad luck, meaningful offer decisions,
+finite conservation, no reroll channel, no Charisma monopoly, no deterministic
+Forge throughput dominance, and no post-completion deadlock or spike.
+
+**Source spine.** [Armory Ledger](endless-progression-system.md#7-armory-ledger-loot-rarity-and-acquisition)
+and [fresh-save economy gates](endless-progression-system.md#125-fresh-save-progression-and-economy).
+
+**State:** `OPEN` — the loop and anti-exploit shape exist; the numbers and
+cross-system economy are hypotheses.
+
+### `SC-16` — Personal custody with useful co-op exchange, never funneling
+
+**What we are designing.** A gladiator, battle seat, human controller, and
+campaign custodian are deliberately different identities. The gladiator owns
+equipment, currency, pity, and offers; the seat locates it in battle; the
+controller supplies commands; the custodian alone makes durable postbattle
+choices. A disconnect therefore cannot transfer a reward, and a host or AI
+cannot claim another player's item.
+
+Items move through explicit offered, personal escrow, personal-unbound,
+locker-unbound, personal-bound, retired, and salvaged states. Full vaults never
+delete rewards. Useful gifts are allowed through atomic consent, but personal
+guarantees and currencies cannot be laundered: transfer preserves provenance,
+requires the recipient's clear/career/source eligibility, recomputes only the
+usable chassis projection, clears Mark-salvage eligibility, and still charges
+the recipient's Load. Mixed-progression teams may adventure together at the
+minimum next frontier while each gladiator retains personal rewards, Capacity,
+and explicit lower-band configuration.
+
+**Souls and Simulacra / ideal fit — `direct/partial`.** A persistent item can
+change custody without changing identity, while combatant, seat, controller,
+and custodian participate in one session without becoming the same authority.
+That is a direct fit at the ownership/provenance boundary and a partial fit for
+the broader economy. The cost is explicit state and consent; collapsing it for
+convenience would make either people or items fungible.
+
+**Selected foundation.** EP-D07 protects first-playable human custody; EP-D02
+protects personal Capacity. The detailed vault/locker limits, global
+three-combatant roster bound, escrows, trade, binding, and projection rules are
+proposal-level full-design targets, with direct trade/locker deferred from the
+historical MVP.
+
+**Still unresolved.** Final capacities and UI, absence while another Circuit is
+active, permanent roster replacement/deletion, guest/source rules, Relic/Charm
+custody integration, direct-trade release scope, consent/fault protocol, and
+concentration/economy tuning.
+
+**Closure proof.** Walk every item and reward through keep, equip, escrow,
+deposit, claim, trade, return, upgrade, salvage, disconnect, full-vault, mixed-
+progression, and migration paths. Ownership and value must conserve; no
+controller theft, fourth hidden bench, guarantee funnel, `A→B→A` laundering, or
+silent item loss may exist.
+
+**Source spine.** [inventory, custody, and exchange](endless-progression-system.md#8-per-combatant-inventory-custody-and-co-op-exchange).
+
+**State:** `OPEN` — the identity model is strong; several lifecycle and release
+rules remain proposal-level.
+
+### `SC-17` — One persistent gladiator, one human voice, many team formats
+
+**What we are designing.** A gladiator is larger than an event format. The same
+persistent person-in-the-world can enter 1v1, 2v2, or 3v3 without being copied,
+reset, or relabeled. Each first-playable allied seat belongs to a distinct
+connected human; no allied AI, one-human multi-seat control, or takeover may
+simulate a team. Every build retains a functional solo loop, ally tools retain
+self-use or personal setup, and no one is reduced to a mandatory healer
+appliance. Team strength should emerge from distinct agents coordinating, not
+from one quarterback puppeteering several kits.
+
+If a player disconnects, an already committed action finishes exactly once and
+the fight pauses at the next action boundary. The visible grace period accepted
+at Circuit entry never kills, replaces, or advances the absent gladiator; its
+expiry activates only that member's narrow pre-consent to abandonment. Every
+connected teammate must still approve the atomic Concede path. Reconnect
+restores only the same member to the same seat, invalidates stale proposals,
+and combat resumes only when every required ally is back. Recovery preserves
+the original roster and human-seat requirement.
+
+**Souls and Simulacra / ideal fit — `direct`, and the clearest co-op form.** The
+team acts as one roster while each gladiator, custodian, vote, action, reward,
+and reconnect identity remains irreducibly distinct. Coordination therefore
+creates a real common act without turning allies into one player's simulacra.
+The human-only-seat cost is scheduling friction, accepted here because AI
+substitution or quarterback control would erase the operative distinction.
+
+**Selected foundation.** EP-D07 and its corrected dropout supplement are
+authoritative. Co-op agency proposals also require solo-capable baselines,
+fixed-budget multi-target effects, strongest-only buffs, bounded Control
+Fatigue, telegraphed Focus, equal seat counts, no leader bonus actions, and at
+least two consequential actions for most living seats.
+
+**Still unresolved.** Nine assurance confirmations, exact local/remote session
+topology, authentication/presence, command ownership, grace duration/storage,
+pause and reconnect protocol, race-safe abandonment, 3v3 presentation, UI
+density, and policy evidence against quarterbacking or one superior farming
+format.
+
+**Closure proof.** Round-trip one persistent gladiator through all formats;
+reject every duplicate/missing/AI/takeover authority; fault-inject every action-
+boundary disconnect and reconnect/abandon race; and demonstrate through policy
+and human tests that every seat retains meaningful independent agency.
+
+**Source spine.** [EP-D07 accepted rule](endless-progression-decisions.md#ep-d07--mode-neutral-gladiators-and-human-only-allied-mvp),
+[mode-neutral gladiators](endless-progression-system.md#17-mode-neutral-persistent-gladiators),
+and [co-op agency rules](endless-progression-system.md#9-co-op-agency-rules).
+
+**State:** `PARTIAL` — the product rule is authoritative; assurance and
+realization contracts remain open.
+
+### `SC-18` — Persistence as part of the game promise
+
+**What we are designing.** The player must be able to trust that a route shown,
+a rival learned, a reward earned, a Branch chosen, a Relic transformed, and a
+battle lost will still mean the same thing after reload, crash, reconnect, or
+version change. Progression therefore lives in a separate versioned sidecar
+that never overwrites the vanilla save. Rule, generator, definition, item,
+recipe, reward, and receipt identities remain explicit rather than allowing a
+balance patch to reinterpret old bytes.
+
+Plans are persisted before reveal; battle and campaign randomness remain
+separate; active attempts have exact start and per-action checkpoints; terminal
+acknowledgement is durably prepared before the callback; settlement applies one
+pure idempotent intent; and rewards/clears/Capacity either commit together or
+not at all. Migration waits for a clean boundary or finishes under pinned old
+definitions. Unknown content is quarantined. An invalid old loadout remains
+owned and visible until its owner chooses a legal replacement—never silently
+unequipped, disabled, salvaged, or retired.
+
+**Souls and Simulacra / ideal fit — `partial/protective`.** One identity and
+history persist through distinct serialized forms, versions, devices, and
+restored sessions without claiming those representations are identical.
+Persistence protects the relationship rather than supplying its content. Bytes
+alone are merely storage; the fit exists when player-recognizable provenance
+and choice survive transformation without silent reinterpretation.
+
+**Selected foundation.** Exactly-once behavior, stable ownership, immutable
+prepared outcomes, pinned active versions, bounded receipts/high-water marks,
+and no vanilla back-write are design invariants. The current repository still
+has only contract-v1 and final-record pieces, not this complete sidecar.
+
+**Still unresolved.** R-06 integer encoding, rule contract v2/provenance,
+canonical mechanics state, atomic progression and active-battle boundary,
+durable settlement coordinator, field/hash ownership, migration mappings,
+backend size, fault repair, and Relic/Charm state integration.
+
+**Closure proof.** Trace every rule-readable field through validation,
+projection, hashing, persistence, migration, and repair. Crash after every
+durable boundary; restore the exact attempt and apply each outcome once. Prove
+bounded size and history, pure/idempotent migration, conservation, and no
+classic-save mutation.
+
+**Source spine.** [persistence, determinism, and settlement](endless-progression-system.md#10-persistence-determinism-and-exactly-once-settlement)
+and readiness S-01/S-03–S-05.
+
+**State:** `OPEN` — this is required game semantics, not optional backend
+polish, and its contracts are not yet authored.
+
+### `SC-19` — A real proof of the game, first headless and then human-playable
+
+**What we are designing.** The first proof must demonstrate the actual game
+loop: persistent builds, committed routes, readable opponents, behavior loot,
+personal rewards, failure/recovery, and meaningful cooperation. A scalar 1v1
+ladder or bespoke demo resolver would prove the wrong thing. The current
+proposal uses deterministic 2v2 as the first playable boundary, with two
+distinct humans, while the headless simulator exercises 1v1/2v2/3v3 properties
+through the same production resolver, reducers, transaction API, and settlement
+coordinator.
+
+Headless and playable acceptance are deliberately separate. Headless work can
+prove state, generation, policy, conservation, and endless continuation. A
+playable build additionally needs resolver-owned action operation IDs,
+fail-closed presentation acknowledgement, exact re-presentation after restore,
+and a genuine human session that implements the accepted pause/reconnect/
+abandonment rule. A mock animation callback or allied AI filler cannot satisfy
+that promise.
+
+**Souls and Simulacra / ideal fit — `neutral/protective`.** Headless and
+human-playable forms must instantiate the same rules while remaining different
+proof surfaces. That guards the design from becoming a simulation-only fiction,
+but a shared code path does not itself express the philosophical ideal. The
+human boundary matters because agency, comprehension, and relationship cannot
+be inferred from machine success.
+
+**Selected foundation.** EP-D07 fixes human-only allied admission and mode-
+neutral identity. The historical fixed-four MVP is superseded by EP-D02's
+sixteen-host, zero-to-48 model; its eight effects remain content examples, not a
+complete live slice. EP-D06 still owns the first-proof product disposition.
+
+**Still unresolved.** EP-D06, exact headless surface, designed combat kernel,
+MVP catalog and Capacity band, production state/RNG/transactions, S-06
+simulator, S-07 action acknowledgement, S-08 human session, UI, performance,
+and the real presentation-completion signal.
+
+**Closure proof.** Before playable work, pass byte-identical seeded fixtures,
+at least a 100-Circuit no-endpoint soak, fault/reload tests, format properties,
+and policy gates on production logic. Then prove two genuine humans can enter,
+act, disconnect, restore, abandon, settle, and own rewards with no duplicate
+authority or hidden AI path.
+
+**Source spine.** [superseded MVP and rescope](endless-progression-system.md#14-prior-minimum-viable-slice--superseded-requires-rescope),
+[EP-D06](endless-progression-decisions.md#ep-d06--first-playable-proof-is-deterministic-2v2-under-designed-rules),
+and readiness S-06–S-08.
+
+**State:** `OPEN` — no implementation is authorized and no proof slice is fully
+specified.
+
+### `SC-20` — Finite authored depth, legible choices, and evidence-led release
+
+**What we are designing.** “Endless” means the game can keep producing
+meaningful sessions from bounded, understandable systems; it does not promise
+infinite novelty or procedural invention of rules. Every release has a finite,
+versioned catalog of actions, item behaviors, Relics, Charms, doctrines,
+liabilities, Contracts, bosses, rewards, and migrations. Before an irreversible
+choice, the responsible player sees the information needed to exercise agency.
+Afterward, logs and state explain what happened in the same vocabulary.
+
+Balance is evaluated as a surface of player policies, not a showcase build or
+one average win rate. The suite spans every Capacity band, route offer, doctrine,
+format, team composition, reward policy, retry/information condition, and
+fresh/inherited history. Exact enumeration and solver bounds handle tractable
+spaces; scripted exploit policies, fuzz/property search, and paired seeds probe
+invariants; later RL/self-play populations search adaptive policy surfaces;
+human playtests decide comprehension, coordination, burden fun, and discovery.
+No single agent score proves fun or absence of exploits.
+
+Release staging remains honest. The first finite slice proves the central loop;
+later content, 3v3 presentation, rivals, locker/trade, matchmaking, and launcher
+exposure enter only through explicit scope. After the current SS2-derived
+framework closes, a separate **Souls and Simulacra** retain/replace/remove audit
+adapts vocabulary, content, world, and engine assumptions before implementation
+is frozen.
+
+**Souls and Simulacra / ideal fit — `direct` at information and relationship
+boundaries, `partial` at catalog scale.** The player must understand how one
+continuing identity participates in genuinely distinct choices, sources,
+histories, and allies. A large balanced catalog is not enough; the direct fit
+appears when information makes unity and distinction actionable. Evaluation
+therefore protects both mechanical viability and the player's ability to
+perceive the relation the mechanics claim to create.
+
+**Selected foundation.** Six adversarial gate families already exist: combat/
+build frontier, resolution/control, co-op agency, determinism/conservation/
+saves, fresh-save progression/economy, and inherited boundary/history
+regressions. Their current numbers are rejection hypotheses, not proven balance
+or stealth owner decisions.
+
+**Still unresolved.** The total MVP mechanic appendix, fourteen authoring-input
+groups, D04/R11 metrics, Relic proof packet, exact UI/communication contract,
+simulation and human protocols, confidence/rejection rules, launch/later-patch
+scope, standalone adaptation index, and final replay.
+
+**Closure proof.** Every shipped rule and catalog cell has a finite definition,
+information surface, negative case, test owner, and release disposition. Run
+the complete evaluation ladder and reject dominance, dead choices, unresolved
+terminal mass, incomprehensible commitments, unbounded state, and false
+novelty. Record what is deferred and its reopening trigger; never call missing
+content “emergence.”
+
+**Source spine.** [adversarial tuning gates](endless-progression-system.md#12-adversarial-tuning-gates),
+[integration reality](endless-progression-system.md#13-integration-reality-and-sorted-cost),
+the readiness record's authoring inputs, and section 10 below.
+
+**State:** `OPEN` — the evaluation philosophy is strong; release-total content
+and evidence do not yet exist.
+
+### Source-coverage ledger
+
+This ledger prevents a closure card from becoming a lossy replacement for the
+old design. Every major source area has at least one primary home and keeps all
+of its detailed clauses, examples, and degeneration tests there.
+
+| Existing design area | Primary closure home | Required secondary links |
+| --- | --- | --- |
+| Executive decision and non-negotiable invariants | `SC-01`–`SC-20` | Every affected card; no invariant may be closed only “globally” |
+| §1.1 career/career-tier/challenge-tier | `SC-01`, `SC-02` | `SC-08`, `SC-13`, `SC-15` |
+| §1.2 encounter/attempt/settlement classifications | `SC-10`, `SC-18` | `SC-08`, `SC-11`, `SC-12` |
+| §§1.3–1.4 chassis, Capacity, Load, hosts | `SC-03`, `SC-09` | `SC-04`, `SC-05`, `SC-06`, `SC-16` |
+| §1.5 team budgets | `SC-07` | `SC-09`, `SC-17`, `SC-20` |
+| §1.6 capped vanilla axes | `SC-01`, `SC-02` | `SC-20` |
+| §1.7 mode-neutral gladiators | `SC-17` | `SC-03`, `SC-16`, `SC-19` |
+| §2 Arena Circuit, locks, failure, decisions, variants | `SC-08` | `SC-06`, `SC-07`, `SC-10`, `SC-12`, `SC-17`, `SC-18` |
+| §3 timeline, Mastery, Epochs, completion | `SC-02`, `SC-11` | `SC-01`, `SC-10`, `SC-13`, `SC-15`, `SC-20` |
+| §4 Forms, Techniques, Signatures, Keystones, effects | `SC-04` | `SC-03`, `SC-09`, `SC-20` |
+| §5 opponents, champions, rivals, milestones | `SC-13` | `SC-01`, `SC-02`, `SC-08`, `SC-20` |
+| §6 Contracts, Laws, Pressure | `SC-14` | `SC-08`, `SC-13`, `SC-20` |
+| §7 rarity, loot, pity, Forge | `SC-09`, `SC-15` | `SC-03`, `SC-10`, `SC-11`, `SC-16` |
+| §8 inventory, custody, exchange, mixed parties | `SC-16` | `SC-03`, `SC-10`, `SC-17`, `SC-18` |
+| §9 co-op agency | `SC-17` | `SC-07`, `SC-13`, `SC-19`, `SC-20` |
+| §10 sidecar, streams, settlement, migration, bounds | `SC-18` | `SC-10`, `SC-12`, `SC-16`, `SC-19` |
+| §11 seam/degeneration ledger | The owning `SC-*` card for every row | `SC-20` audits that no row is orphaned |
+| §12 six adversarial gate families | `SC-20` | Every system under test |
+| §13 integration sizes and seams | `SC-18`, `SC-19` | `SC-20` release ordering |
+| §14 superseded MVP slice | `SC-19`, `SC-20` | Historical content only; never silently operative |
+| §15 assumptions and gate before code | `SC-01`–`SC-20` | Sections 6, 8, and 9 of this index |
+
+### Anti-flattening verification — 2026-09-24
+
+This rebuild was checked against the older descriptive style and the underlying
+system prose, not against the former short SC summaries. “Not flattened” has a
+testable meaning here: every closure card must retain all six semantic layers
+below, while the source-coverage ledger must leave no old design section without
+a named home.
+
+| Semantic layer | Evidence required in each `SC-*` card | Result |
+| --- | --- | --- |
+| Player promise | Why the system should be fun or worth having, in player language | `20/20` present in **What we are designing** |
+| Operative design | Concrete loop, actors, objects, boundaries, and meaningful distinctions | `20/20` present; no card is only a topic label or metric |
+| Theme and philosophy | Exact relationship, fit classification, tradeoff, and aggregate false positive | `20/20` present in **Souls and Simulacra / ideal fit** |
+| Authority and constraint | Accepted rule versus direction/proposal, plus the constraints already selected | `20/20` present in **Selected foundation** and **State** |
+| Open design and degenerations | Remaining owner decisions, content, edge cases, exploit or failure surfaces | `20/20` present in **Still unresolved** and card-specific negative cases |
+| Proof and provenance | What would close the system and where the full older design still lives | `20/20` present in **Closure proof** and **Source spine** |
+
+The structural count is exact: twenty SC headings and twenty instances of each
+required field. The coverage ledger maps the executive decision, §§1.1–1.7,
+and every whole section from §2 through §15 of the old system document into
+primary and secondary closure homes. Three disjoint read-only comparisons
+independently rederived `SC-01`–`SC-07`, `SC-08`–`SC-14`, and `SC-15`–`SC-20`
+from those sources; their omissions were then reconciled here, including the
+Relic grammar, live Legendary burdens, acquisition hard tail, co-op identity,
+and present-tense title lens.
+
+Authority was audited separately. Only EP-D01, EP-D02, and EP-D07 are labelled
+`AUTH-CLOSED`; the rich C3c and R1–R10.2 material remains explicitly
+direction-selected, and the old four-unit tray and fixed-four MVP remain
+explicitly superseded. The authoritative decision record was not edited by this
+rebuild. Therefore the index has added neither a stealth decision nor a stealth
+deletion.
+
+This proves lossless **indexing and status preservation** at the framework
+level. It deliberately does not pretend that the twenty systems are designed,
+balanced, or accepted; their open mechanics and proof obligations remain open
+in full. On the question this audit answers—whether the new closure layer
+compressed the old design into generic labels—the result is **PASS**.
+
+No `SC-*` row is currently claimed `CLOSED`. This does not erase the accepted
+EP-D01, EP-D02, or EP-D07 rules; it records the downstream work required to turn
+those rules into a complete system.
+
+## 6. Authoritative owner-decision ledger
+
+This is a reading index only. The linked decision record owns the wording.
+
+| ID | Durable state | Remaining closure work |
+| --- | --- | --- |
+| EP-D01 | `AUTH-CLOSED` | EP-A01/R-01 pace table and SC-01 downstream specification |
+| EP-D02 | `AUTH-CLOSED` | Selected full-assurance route, Soul Relic contract, C3d–C3f, and C4–C12 |
+| EP-D03 | `OWNER-OPEN` | One Circuit's length and coupled commitment/timing contract |
+| EP-D04 | `OWNER-OPEN` | R9.4 repair, R10.3–R10.8, finite R11 lanes, contracts, and final replay |
+| EP-D05 | `OWNER-OPEN` | Reward/precommitment/completion settlement rule |
+| EP-D06 | `OWNER-OPEN` | First playable proof and designed-rules boundary |
+| EP-D07 | `AUTH-CLOSED` | Nine full-assurance confirmations and implementation-facing protocol specs |
+| EP-A01 | `OWNER-OPEN` | Career/frontier/campaign-ceiling synchronization |
+| EP-A02 | `OWNER-OPEN` | Public information/RNG/retry/Recovery contract |
+| EP-A03 | `OWNER-OPEN` | Post-completion zero-growth access and conservation contract |
+
+The authoritative totals remain **3 of 7 product decisions closed** and **0 of
+3 architecture dispositions closed**. Assurance confirmation does not revoke
+an accepted rule; only an explicitly accepted replacement can do that.
+
+## 7. Soul Relic and Charm closure manifest
+
+The base C3c choice and C3c.1–C3c.170 remain preserved as direction-selected
+worksheet history. They primarily populate `SR-01` through `SR-05` and parts of
+`SR-08`/`SR-10`; they do not close the manifest by their count alone.
+
+| Gate | Boundary | “Designed enough” exit test | Current state |
+| --- | --- | --- | --- |
+| `SR-01` | Fantasy, purpose, and topology | One vocabulary/relationship map distinguishes Soul, simulacrum/combatant, Bound Soul, Relic root, input/payoff Charms, sources, and results; each has a unique job and no slot duplicates another system's theme or UI role. | `PARTIAL`: standalone root/customizer and cross-source-weaver directions exist; normative map/replay remains. |
+| `SR-02` | Access, ownership, slots, custody, and loss | A state machine covers disabled/eligible/enabled states, one-root/two-Charm occupancy, personal ownership, duplicates, transfer, destruction/loss, retirement, and every illegal transition for Relics and Charms separately. | `PARTIAL`: personal Relic/Charm access, one root, two Charms, and permanent nontransferable Relics are selected; Charm custody/loss remains open. |
+| `SR-03` | Source and input grammar | A total matrix names eligible bearer/ally/source evidence, temporal and basis cells, Charm modifications, participation requirements, and legal/illegal examples; every selected cell has a gameplay use. | `PARTIAL`: extensive grammar directions, nonempty irreducible multi-root current-state support, repeated same-provenance cross-root support, exact-`Pi`-universal build identity, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, and nonempty within-evaluation cross-receipt overlap support exist; nontrivial within-parent site support is derived, while overlap form/treatment, cross-opportunity behavior, and total authored examples/exclusions remain open. |
+| `SR-04` | Transformation, result, precedence, and recurrence | Exact state transitions define what a persistent Relic may transform, what remains identical, who/what authorizes it, precedence among effects, break/renew/rearm/recommit, and result settlement without aliasing continuity. | `PARTIAL`: recurrence/artifact-lifetime directions, the complete two-dialect transformation domain, cut-atomic evaluation, immediate readiness eligibility, automatic invocation, finite occurrence-history freshness, temporal projection-purity, universal minimum phase attribution, coexistence of phase-singular and phase-plural history positions, exact-two independent routes at every plural position, coexistence of coupled-supplement and clean positions, both coupled-package widths, nonempty canonical cross-root temporal-relationship support, universal additive root promotion inside that eligible catalog, nonempty material nonterminating current-state revision support, universal continuity-root preservation across those revisions, nonempty irreducible multi-root current-state support, semantic-child-only addressability, one nonoverlapping final child scale with authored compounds, nonempty within-evaluation cross-receipt overlap support, full-union positive-result claims, one listen per uninterrupted cancelled-pair bond, Relic-wide spending of claimed proof, universal positive-result and dedicated-operation transformation-cause support, empty direct invocation/tuple-selection/true-verdict/false-verdict/provisional-sealing/claim-write/latch-write cause support, derived-empty true-zero-contender support, proper both-dialect Absence-bound and Event-bound support with their selected fallbacks, coexistence of staged and shortcut-complete nonclear topology in both dialects, the qualified shortcut-incidence fallback, universal material direct-reverse support with D3-A as its system fallback, no active clear-to-unassigned route with D4-C as a qualified Release-bound fallback, universal compatible lived nonclear-return support with D5-A as its system fallback, P-participant/M-deterministic approval coexistence with E1-B/E1-A fallbacks, participant-contingent Z approval with E1Z-A as its qualified cause-local fallback, system-deterministic X approval with E1X-B as its qualified cause-local fallback, opposite cause-uniform P/Z participant timing with E2-A as its qualified production fallback, P-live/Z-advance orientation, genuine distinct-target collision support with target-concordant-only A1-B as the qualified simplicity fallback, proposed-target-only genuine-conflict settlement with A2-C as the qualified fairness fallback, both-dialect genuine conflict with A1C-A as the qualified clarity fallback, coexistence of participant-configurable and participant-intrinsic conflict contracts with A3A-A as the qualified simplicity/artifact-identity fallback, coexistence of direct-capable and policy-only configurable contracts with B1-A as the qualified low-interruption/policy-mastery fallback, direct-capable controlled-form `{D}` specialization with B2-C as the qualified higher-ceiling/identity exception, exact-`{P}` policy-specialist conflict saturation with B1I-B as the qualified system fallback, exact-`{I,D}` direct-specialist coexistence with B2I-A as the qualified practical agency/clarity fallback, collision-policy bundling with A3C-B as the qualified class-wide agency/clarity fallback, closed authored whole-covenant language with A3D1-B as the qualified class-wide expressive-mastery/menu-bloat fallback, stable contributor-neutral/contributor-sensitive automatic-law coexistence with A4-A as the qualified clarity/equal-ceiling/anti-farming fallback, stable deterministic-only/stochastic-capable automatic-law coexistence with A5-A as the qualified policy-mastery/multiplayer-trust/Rite-and-return fallback, one transferable catalog-wide player-semantic collision grammar with A6-B as the qualified artifact-identity fallback, and advance-bound commitment for every exact-`{P}` genuine-conflict policy contract with A7-C as the qualified artifact-identity/direct-participation fallback are selected; D1M-A is the selected system fallback if universal dedicated-operation support fails its gates; coherent same-cut evidence acquisition, exact `{D,E,O}` material phase support, nontrivial within-parent application-site support, maximal frozen collision cohorts, and target-equivalence bucketing with preserved contributor identity are derived; all reachable cause loci, participant timing, collision geometry, the genuine-conflict result domain, both-dialect genuine-conflict incidence, participant-control prevalence, direct-control prevalence, policy capability inside the direct-capable class, policy/direct intrinsic incidence, collision-policy bundling, covenant-language prevalence, contributor-sensitivity prevalence, stochastic-support prevalence, collision-grammar scope, and policy-mediated collision-control commitment timing are closed at direction granularity; pure-`{I}` exact-signature dialect incidence is selected in both dialects with A3XI-B as the qualified clarity fallback; advance-bound exact-`{P}` signature dialect incidence is also selected in both dialects with A3XP-B as the qualified clarity fallback; exact-`{I,D}` incidence is selected in both dialects with A3XD-B as the qualified clarity fallback; the three paired answers derive universal paired signature support; a prerequisite audit split committed-output identity into artifact-instance, definition-contract, and biography-lineage rows; universal artifact-instance continuity is selected with a reincarnation fallback; universal definition/fixed-contract continuity is selected with a named-metamorphosis fallback; and universal unique linked biography-chapter succession is selected with the simplicity/non-token-biography fallback armed. |
+| `SR-05` | Relational archetypes and Achintya boundary | Every required archetype maps to an operative player choice or state transition where continuity and distinction are mechanically legible; no mandatory class exists only to satisfy a graph, coverage, or symmetry token. | `PARTIAL`: structural/archetype directions through C170 exist; concrete player-visible proof does not. |
+| `SR-06` | Representative and release catalog | A finite versioned release catalog (or explicit launch minimum plus deferred catalog boundary) supplies source/relationship/payoff definitions, counterexamples, and at least one viable build purpose for every required family. | `OPEN` |
+| `SR-07` | Configuration and evolution horizons | Equip, Charm socketing, reconfiguration, rebinding, learning/evolution, encounter/Circuit locks, preview, and rollback rules name every clean boundary and cannot be shopped through reload or route information. | `OPEN` |
+| `SR-08` | Acquisition, progression, offers, and duplicates | Separate Relic and Charm sources, eligibility, offer generation, bad-luck/fallback behavior, duplicate handling, completion behavior, and reward/economy interactions are total and non-exploitative. | `PARTIAL`: several personal Relic offer directions exist; Charm and complete progression contracts remain open. |
+| `SR-09` | Power, compatibility, stacking, and team budget | A finite power envelope, compatibility matrix, team interaction rule, rarity/Capacity accounting, and adversarial build suite prove meaningful optimized ceilings without one mandatory universal package. | `OPEN` |
+| `SR-10` | Information, controls, UI, onboarding, accessibility | Before each irreversible choice, the correct player can understand identity, inputs, likely result class, commitment horizon, and consequences; in-combat feedback distinguishes source, transformation, recurrence, and payoff without competing with core combat readability. | `PARTIAL`: pre-choice account/disclosure directions exist; player/role authority and the actual surface contract remain open. |
+| `SR-11` | Persistence, versioning, migration, and fault repair | Stable IDs, instance/definition separation, state lineage, receipts, save/restore, migration, invalid configuration repair, and duplicate/reward fault paths are exact and idempotent. | `OPEN` |
+| `SR-12` | Validation, tuning, release, and final replay | The proof packet below passes; v1 versus later-patch scope is explicit; every selected direction is transcribed into one coherent normative Relic contract and explicitly accepted. | `OPEN` |
+
+### 7.1 Minimum Relic proof packet
+
+Before `SR-12` can close, one reviewable packet must demonstrate all of these
+without inventing hidden rules:
+
+1. pre-enablement and first-enablement behavior;
+2. an equipped root with zero, one, and a complementary pair of Charms;
+3. bearer-only and ally-contributed source relationships;
+4. representative single-basis and mixed temporal/input recipes;
+5. at least one concrete `S-O`, `S-R`, `B-O`, and `B-R` aligned archetype from
+   the selected four-class direction, each with a player-facing purpose;
+6. continuity across a normal encounter/Circuit boundary and a legitimate
+   break–renew–recommit history;
+7. a material transformation case that makes identity retention and real
+   difference visible at the same operative boundary;
+8. acquisition, a duplicate/fallback case, and post-completion behavior;
+9. a legal optimized build, a useful mixed-system build, and an illegal or
+   degenerate stacking attempt rejected for a named reason;
+10. the exact information shown before commitment and the resulting event/log
+    explanation afterward;
+11. save, reload, version migration, and injected failure/replay behavior; and
+12. explicit launch content, later-patch deferrals, tuning metrics, and
+    acceptance/rejection thresholds.
+13. the non-normative
+    [system-fit visual](endless-build-system-map.svg) is refreshed only at
+    final Relic closeout from the explicitly accepted coherent contract, so
+    its visible diagram and accessible description show the complete gear and
+    progression hierarchy, explicit launch-versus-later-patch scope, and no
+    stale worksheet or frontier labels.
+
+The packet is a finite proof of the framework. It is not a demand to author
+every future Relic. Conversely, abstract set coverage without these scenarios
+cannot close the framework.
+
+### 7.2 C171 disposition
+
+`EP-D02-C3c.171` is now `EVALUATE/AUTHOR`, not `OWNER`:
+
+- C170-A's existential account reuse remains selected and available for the
+  eventual normative replay.
+- C171's A/B/C alternatives remain documented as possible catalog distribution
+  policies; none is selected.
+- every-history saturation, mixed positive/negative histories, and class
+  coexistence may be tested while authoring the proof packet and catalog.
+- C171 reopens only if a concrete scenario shows that those policies change a
+  legal choice, authoritative state, required information, balance/release
+  result, or necessary content family.
+- the proposed three-opportunity and graph-coverage descendants are not
+  admitted automatically under any later answer.
+
+The next active Relic frontier must therefore advance the first open
+player-facing boundary in dependency order under `SR-04`, before representative
+content, power, compatibility, acquisition, persistence, and release.
+
+**Prerequisite correction, 2026-09-24.** Re-reading the C131/C132 boundary
+instructions found that the original `RCS-03` row compressed five independently
+variable player-semantic questions. The older worksheet explicitly requires
+the mutable semantic domain, complete Relic-side grammar/state binding boundary,
+and contingent combat-evidence sampling boundary to be resolved separately
+*before* transformation cause or agency becomes well formed. `RCS-04` likewise
+compressed collision precedence with the identity of the committed output.
+The frozen register therefore replaces those two parent aliases with
+`RCS-03A`–`RCS-03E` and `RCS-04A`–`RCS-04B`. `RCS-13` still owns the distinct
+macro equip/reconfiguration/evolution initiation horizon.
+
+**Second prerequisite correction, 2026-09-24.** The first correction still
+overcompressed `RCS-03B`. It assumed that a semantic evaluation could remain
+pending while asking when its Relic assignment bound. A pending-evaluation
+lifecycle has seven independent consequence boundaries: existence/support,
+initiation, Relic-side binding, later legal context-change disposition,
+participant cancellation, automatic expiry/horizon, and concurrency. The exact
+Relic instance/definition/version, its one mutable coordinate, Bound Soul
+resonance, and input/payoff Charm presence must also be read from one co-
+temporal authoritative revision; permitting a torn tuple is an invalid
+implementation race, not an owner option. The register therefore replaces
+`RCS-03B` with `RCS-03B1`–`RCS-03B7`. This correction was made after
+`RCS-03A-C` was selected and before any binding option was offered.
+
+**Agent correction:** an interim draft of this second amendment named only
+existence, binding, context-change disposition, and concurrency. Its own card
+then cited opening, cancellation, and expiry as material play without routing
+them. The three missing conditional rows were added before the card was shown
+to the owner; exact trigger catalogs, durations, and UI realization may later
+be `AUTHOR`/`SPEC`, but their authority topology cannot be implicit.
+
+**Third prerequisite correction, 2026-09-24.** After the owner selected
+`RCS-03B1-A`, the six pending-only lifecycle descendants became impossible and
+were pruned. Re-deriving the next row then found that `RCS-03C` still combined
+three independently variable consequence boundaries: which canonical cuts are
+eligible for cut-atomic evaluation, who or what invokes the evaluator at an
+eligible cut, and which contingent `H`/`S` projection it acquires. C133 makes
+provisional completeness counterfactual rather than a sample; C141 explicitly
+treats phase eligibility and evaluation authority as independent inputs and
+leaves actual invocation open; C155 does not select evaluator cadence or
+authority. The register therefore replaces `RCS-03C` with
+`RCS-03C1`–`RCS-03C3`. The parent remains a non-counting alias.
+
+**Fourth prerequisite correction, 2026-09-24.** After the owner selected
+`RCS-03C1-A`, re-deriving invocation authority found that `RCS-03C2` still
+combined two independent consequence boundaries: system-mandatory versus
+participant-contingent invocation, and—if participant authority exists—live
+declaration at the eligible cut versus an earlier binding precommitment. C133
+permits a precommit before provisional completion without treating it as a
+response window, while C135/C141/C155 leave both trigger authority and timing
+open. The register therefore replaces `RCS-03C2` with
+`RCS-03C2A`–`RCS-03C2B`. Exact actor, consent/veto, communication, and
+information remain in `RCS-02`; precommitment lock/rebinding horizon remains
+in `RCS-13`. The parent remains a non-counting alias.
+
+**Post-answer screen, 2026-09-24.** The owner selected `RCS-03C2A-A`, so every
+eligible opportunity invokes automatically and conditional `RCS-03C2B` is
+pruned. Re-derivation of `RCS-03C3` removed a fake sampling fork: cut atomicity,
+immediate eligibility, automatic invocation, the semantic definition of
+current `S`, and the complete pre-adjudication projection force one coherent
+authoritative `H_e`/`S_e` read at the invocation cut. The remaining
+player-material part of the existing C3 slot is occurrence-history semantic
+freshness—whether all materially H-reading positions (including any permitted
+coupled additions) universally age out, universally permit open in-battle
+retention, or support both. Consumption/reuse, exact horizons,
+and storage realization remain separate.
+
+**Fifth prerequisite correction, 2026-09-24.** The screen above also exposed
+five player-material source-use boundaries that the same C3 row had left
+unrouted: canonical combat-evidence atom identity; same-cut evidence
+fan-out across distinct results/tags; the Relic-local claim/consumption trigger
+and no-result disposition; later same-tag reuse after valid break/rearm; and
+later different-tag reuse within the same active Relic. The register therefore
+makes `RCS-03C3` a non-counting parent and replaces it with
+`RCS-03C3A`–`RCS-03C3F`.
+Existing `RCS-08` is expanded explicitly to own cross-combatant/cross-root
+evidence fan-out, whether coincident or later. At that screen C3B was intended
+to select the semantic atom boundary before per-family atom catalogs became
+AUTHOR/SPEC. The selected
+cross-source purpose already forbids one canonical atom from occupying two
+positions of one relationship result, so that narrow duplicate case receives
+no separate owner card. The register grows from thirty-four to thirty-nine
+counted slots and current `Phi_SR` rises from 21 to 26.
+
+**Post-answer screen, 2026-09-24.** The owner selected `RCS-03C3A-A`, so every
+materially H-reading position is freshness-bounded by a disclosed finite
+nonterminal semantic-age horizon. This reduces `Phi_SR` from 26 to 25 without
+choosing exact units or values.
+
+**Sixth prerequisite correction, 2026-09-24.** Re-deriving atom identity found
+that `RCS-03C3B` still combined seven independently variable boundaries:
+additional coupled H+S evidence admission; within-H phase attribution;
+occurrence-history phase support; canonical action/transition source-root
+equivalence; canonical build-provenance root equivalence; root-versus-child
+atom addressability; and the conditional semantic partition of child
+applications. C3c.33/C3c.35 expressly deferred coupled supplements and do not
+derive phase isolation. Action-root and build-root equivalence remain
+independent under the selected pure-action/pure-build entry topology.
+Root/child addressability must precede child partitioning so a root-only answer
+can prune the latter. The register therefore makes `RCS-03C3B` a non-counting
+parent and replaces it with `RCS-03C3B0`, `RCS-03C3B1A`, `RCS-03C3B1B`,
+`RCS-03C3B2A`, `RCS-03C3B2B`, `RCS-03C3B3`, and `RCS-03C3B4`. Every atom
+retains its applicable root lineage, and sibling atoms
+from one root cannot satisfy two independent-source positions of one result.
+The existing C3C–C3F/RCS-08 boundaries remain downstream and unchanged. The
+register grows from thirty-nine to forty-five rows; replacing one screened row
+with seven adds six to the post-C3A potential, so the then-current
+`Phi_SR = 31`.
+
+**Agent correction.** The first internal draft of this amendment omitted the
+coupled-supplement and phase-attribution rows while its prose relied on both.
+They were restored before owner presentation; phase support follows them and
+must recompute its feasible subset options from their selected branches.
+
+**Post-answer screen, 2026-09-24.** The owner selected `RCS-03C3B0-A`, so no
+position may contain an additional fully inseparable H+S material path with
+zero projection-isolation witnesses. This reduces `Phi_SR` from 31 to 30. It
+does not forbid a residual H+S package with exactly one isolation witness or
+opposite-form evidence in a minimal package with another legal input.
+
+**Seventh prerequisite correction, 2026-09-24.** Re-deriving the phase row
+found that old `RCS-03C3B1A` still combined three independent boundaries.
+First, C3c.35-A and B0-A do not decide whether a position may materially use
+its opposite temporal form on another effective path. A material H+S package
+with exactly one isolation remains legal, and opposite-form evidence may
+instead belong to a minimal package with another legal input. Either topology
+can make `P^{H-read}_v` broader than `T_H`, so phase scope cannot assume that
+every H read is independently H-sensitive. Second, requiring one
+declaration-, execution-, or outcome-isolatable H path does not decide whether
+that same position may also carry a distinct irreducibly multi-phase H path.
+Catalog phase support cannot encode either topology without conflating support
+with coupling.
+
+The register therefore makes `RCS-03C3B1A` a non-counting parent and replaces
+its one row with `RCS-03C3B1A0` (residual opposite-form material participation),
+`RCS-03C3B1A1` (minimum phase-attribution topology), and conditional
+`RCS-03C3B1A2` (additional multi-phase-H supplement admission).
+`RCS-03C3B1B` follows those rows and recomputes feasible phase support.
+Replacing one screened row with three adds two counted slots and two potential
+cards, so the register grows from forty-five to forty-seven rows and the then-
+current `Phi_SR` rises from the post-B0 value 30 to 32.
+
+**Agent correction.** One internal review incorrectly treated B0-A as proof
+that every material H read occurs in `T_H`. The earlier C3A domain expressly
+includes H reads outside independently history-only positions, and a reachable
+one-way H+S dependency is a counterexample. The first repair then classified
+only H+S packages while claiming projection-purity across all paths; an
+opposite-form-plus-other-input package disproved that scope, so B1A0 now covers
+every material opposite-form path. Another review proved that an isolatable
+phase path and a separate irreducibly multi-phase supplement vary
+independently. All omitted boundaries are restored before owner presentation.
+
+**Post-answer screen, 2026-09-24.** The owner selected `RCS-03C3B1A0-A`, so
+every `T_H` position is materially H-pure and every `T_S` position materially
+S-pure across all effective paths. Thus `P^{H-read}_v=T_H`. Selecting A0
+reduces `Phi_SR` from 32 to 31 without choosing within-H phase topology.
+
+**Eighth prerequisite correction, 2026-09-24.** Minimum phase attribution,
+irreducibly multi-phase supplements, and catalog phase support do not determine
+whether one phase-attributable position independently isolates one phase or
+several. Over `p`'s reachable `(D,E)` valuations `{00,10,01}`, worlds
+`U: p=D, q=E` and `M: p=D OR E, q=E` can agree that every
+position is phase-attributable, have no irreducibly multi-phase package, and
+support catalog phases `{D,E}`, while only M gives `p` two independent phase
+routes. That changes one position's timing and counterplay surface and is not an
+atom or content-label detail.
+
+For this route, `D`, `E`, and `O` classify mutually exclusive semantic claims
+relative to one candidate source role rather than cuts, records, fields, or
+atoms. The same transition may be an outcome for one role and an activation
+for another without becoming two independent sources.
+
+The register therefore makes `RCS-03C3B1A1` a non-counting parent and replaces
+its row with `RCS-03C3B1A1A` (minimum phase attribution) and conditional
+`RCS-03C3B1A1B` (per-position independently isolatable phase multiplicity).
+`RCS-03C3B1A2` follows the applicable child, and `RCS-03C3B1B` recomputes phase
+support afterward. Replacing one screened row with two adds one counted slot
+and one potential card, so the register grows from forty-seven to forty-eight
+rows and the then-current `Phi_SR` returns from the post-A0 value 31 to 32.
+
+**Agent correction.** The prior seven-amendment route silently assumed that
+minimum attribution plus coupled-supplement admission plus catalog union
+exhausted within-H phase topology. The `U`/`M` countermodel disproves that
+assumption. The missing local multiplicity row is restored before phase
+attribution is presented.
+
+**Post-answer screen, 2026-09-24.** The owner selected
+`RCS-03C3B1A1A-A`, so every `p` in nonempty `T_H` has at least one
+C3c.33-valid isolation confined to `D`, `E`, or `O`. Thus the phase-isolation
+set of every history position is nonempty. Selecting A1A reduces `Phi_SR` from
+32 to 31 without choosing whether any position independently isolates more
+than one phase.
+
+**Ninth prerequisite correction, 2026-09-24.** Singleton-versus-plural
+position prevalence does not determine whether a plural position has exactly
+two independent phase routes or all three. On reachable `(D,E,O)` valuations
+`{000,100,010,001}`, worlds `X2: p=D OR E, q=E OR O` and
+`X3: p=D OR E OR O, q=E OR O` agree that every position is plural, have no
+irreducibly multi-phase package, and support catalog phases `{D,E,O}`, while
+only X3 gives `p` a third independently manipulable timing route. Immediate
+automatic evaluation makes that difference material to readiness timing,
+interruption/cancellation counterplay, explanation burden, and cheapest-route
+dominance rather than only proof strength.
+
+The register therefore makes `RCS-03C3B1A1B` a non-counting parent and replaces
+its row with `RCS-03C3B1A1B1` (singleton-versus-plural prevalence) and
+conditional `RCS-03C3B1A1B2` (exactly-two-versus-all-three prevalence among
+plural positions). `RCS-03C3B1A2` follows the applicable child, and
+`RCS-03C3B1B` recomputes phase support afterward. Replacing one screened row
+with two adds one counted slot and one potential card, so the register grows
+from forty-eight to forty-nine rows and the then-current `Phi_SR` returns from the
+post-A1A value 31 to 32.
+
+**Scope guard.** Exact `{D,E}`, `{D,O}`, and `{E,O}` pair identities remain
+catalog authoring after topology and support are selected. Pair-incidence
+quotas or exact percentages do not pass the admission test without a separate
+player-contract consequence; new evidence may still satisfy the reopening
+test later.
+
+**Agent correction.** The eighth-amendment route used one row for all local
+phase multiplicity while only its singleton/plural boundary was explicit. The
+X2/X3 countermodel holds minimum attribution, irreducible coupling, and
+catalog support fixed while changing `p`'s legal timing and counterplay. The
+missing tri-phase boundary is restored before plural prevalence is presented.
+
+**Post-answer screen, 2026-09-24.** The owner selected
+`RCS-03C3B1A1B1-C`, so `M^{plural}_v` is a nonempty proper subset of `T_H`:
+at least one history position is phase-singular and at least one distinct
+history position has multiple independently isolatable phases. This aggregate
+coexistence does not require both forms inside one Relic definition, entry, or
+result. Selecting B1-C reduces `Phi_SR` from 32 to 31. The existing conditional
+`RCS-03C3B1A1B2` row becomes the sole active card; it decides whether the
+nonempty plural domain contains only exact-two positions, only tri-phase
+positions, or both. No charter amendment is required.
+
+**Post-answer screen, 2026-09-24.** The owner selected
+`RCS-03C3B1A1B2-A`, so every phase-plural history position has exactly two
+independently isolatable phases and no history position has all three. Together
+with B1-C, phase-singular and exact-two positions coexist. A coupled package
+may still materially use an uncounted third phase without creating another
+independent isolation. Selecting B2-A reduces `Phi_SR` from 31 to 30.
+
+**Tenth prerequisite correction, 2026-09-24.** Re-deriving the next row found
+that coupled-supplement position prevalence does not decide whether the
+nonempty coupled-package catalog supports width two, width three, or both.
+Hold `L(p)={D,O}`, `L(q)={E}`, universal coupled-position prevalence, and
+catalog phase support `{D,E,O}` fixed. World X2 gives `p` an
+inclusion-minimal `{D,E}` arm becoming ready at `110`; world X3 instead gives
+it an inclusion-minimal `{D,E,O}` arm becoming ready only at `111`, with
+`110->111` supplying only the already-counted `O` isolation. Give `q` the same
+two-phase arm in both worlds. Under immediate mandatory invocation, an
+interruption between `110` and `111` is too late in X2 but can deny X3. The
+difference changes readiness, invocation timing, and counterplay while the
+later catalog phase-union row remains identical.
+
+The register therefore makes `RCS-03C3B1A2` a non-counting parent and replaces
+it with `RCS-03C3B1A2A` (coupled-supplement position prevalence) and
+conditional `RCS-03C3B1A2B` (two-phase-versus-three-phase package-width
+support). `RCS-03C3B1B` follows the applicable child. Replacing one counted
+row with two adds one slot and one potential card, so the register grows from
+forty-nine to fifty rows and then-current `Phi_SR` returned from the post-B2
+value 30 to 31.
+
+**Scope guard.** Exact two-phase identities, operators, package counts,
+distribution across singular/exact-two positions, per-position incidence, and
+quotas remain AUTHOR/SPEC unless new evidence passes the admission test.
+
+**Agent correction.** The first post-answer classification treated package
+width as content authoring. The X2/X3 countermodel proves that whole-act
+three-phase support changes the authoritative readiness cut under selected
+automatic invocation, so the missing product boundary is restored before
+coupled-supplement prevalence is presented.
+
+**Post-answer screen, 2026-09-24.** The owner selected
+`RCS-03C3B1A2A-C`, so `J^{multi}_v` is a nonempty proper subset of `T_H`:
+at least one history position has a reachable, materially effective,
+non-preempted inclusion-minimal H package spanning multiple semantic phases,
+while at least one distinct history position is proved clean across its
+declared reachable domain. Every position retains its one or two independent
+phase anchors, and the selection does not map coupling to the singular or
+exact-two class. Selecting A2A-C reduces `Phi_SR` from 31 to 30 and activates
+the already-counted conditional width row.
+
+For each admitted package `K`, let `w(K)` count the members of `{D,E,O}` that
+contain at least one indispensable claim in `K`. Every width is exactly 2 or
+3, and A2A-C makes the catalog width set nonempty. The sole active card is
+therefore `RCS-03C3B1A2B`: support only width two, only width three, or both.
+Exact phase pairs, operators, package counts, co-location, singular/exact-two
+mapping, incidence, prevalence, and quotas remain AUTHOR/SPEC. No eleventh
+register amendment is required for the width boundary itself.
+
+**Post-answer screen, 2026-09-24.** The owner selected
+`RCS-03C3B1A2B-C`, so `W^{multi}_v={2,3}`: at least one admitted coupled
+package has width two and at least one distinct package witness has width
+three. Width is route shape rather than a power or rarity ladder. Selecting C
+reduces `Phi_SR` from 30 to 29. The width-three witness contains indispensable
+claims in all three members of the exhaustive `{D,E,O}` universe relative to
+one candidate source role, so `RCS-03C3B1B` closes `DERIVED` with exact
+material phase support `{D,E,O}` and reduces `Phi_SR` to 28.
+
+**Eleventh prerequisite correction, 2026-09-24.** Re-deriving old
+`RCS-03C3B2A` found five independently variable source-root policies: whether
+one authorized multi-application operation remains one root or splits; whether
+separately authorized operations remain separate or merge into one finite
+authored episode root; whether a nonmerged compound order/trajectory claim
+additionally owns a multi-parent relation root; whether a material
+nonterminating revision preserves or succeeds a current-state episode root;
+and whether a current-state fact may have irreducibly multi-root causal support.
+Primitive split, merge, and additive promotion vary independently, as do
+current-state succession and support cardinality.
+
+One compound-`H` invariant is forced: each concrete witness retains the
+nonempty union of all indispensable operand lineages and drops no endpoint.
+This preserves origin and prevents a relation wrapper from repeating or
+laundering an already-accounted source. Whether the claim additionally owns a
+higher-order relation root remains B2A2B; atom addressability and exact operator
+catalogs remain later.
+
+The register therefore makes `RCS-03C3B2A` a non-counting parent and replaces
+its one row with `RCS-03C3B2A1` (within-operation root partition),
+non-counting `RCS-03C3B2A2` for `RCS-03C3B2A2A` (cross-operation
+finite-episode merging) and conditional `RCS-03C3B2A2B` (additive compound-H
+relation-root promotion),
+`RCS-03C3B2A3` (current-state root succession), and `RCS-03C3B2A4`
+(current-state irreducible multi-root support). Replacing one screened row with
+five adds four rows and potential cards. The register grows from fifty to
+fifty-four rows, and the then-current `Phi_SR` rises from 28 to 32.
+
+**Agent correction.** The first eleventh-amendment draft correctly required
+full operand-lineage retention but incorrectly treated that invariant as proof
+that an additive multi-parent relation root was impossible. A countermodel can
+preserve both parents and forbid overlap while giving the relation distinct
+later root-level behavior against an unrelated source. B2A2B restores that
+policy before owner presentation; B3 still decides addressability after root
+existence is settled.
+
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2A1-A`, so `S^{split}_v` is empty: every accepted operation
+occurrence has one primitive pre-episode action-root lineage across all
+authored applications it actually realizes. Applications may later be
+semantic child atoms, but retain that lineage and cannot fill independent-
+source positions together. Selecting A reduces `Phi_SR` from 32 to 31. It
+does not decide any cross-operation, current-state, build-root, or
+addressability row. `RCS-03C3B2A2A` is therefore the sole active card:
+whether no, every, or a nonempty proper subset of prospectively authored,
+finite, source-owned multi-operation episode forms coarsen their realized
+member lineages into one canonical episode root.
+
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2A2A-B`, so `M^{merge}_v=F^{xop}_v`, with at least one reachable
+functional source-episode witness. Every qualifying prospectively authored
+finite episode coarsens all operation lineages it actually realizes into one
+canonical episode root while retaining their primitive histories, payments,
+outcomes, and full ancestry. Those members cannot fill independent-source
+positions together. Whole-form/whole-occurrence assignment, prospective
+exclusive membership, fresh identity after terminal or abort, no phantom
+members, no rollback, and replacement rather than additive root semantics all
+remain mandatory. Selecting B reduces `Phi_SR` from 31 to 30.
+
+**Twelfth prerequisite correction, 2026-09-25.** B2A2A-B proves neither that
+an eligible nonmerged multi-root H order/trajectory form exists nor that none
+can exist. One satisfying world realizes required H positions through unary
+occurrence claims under unordered conjunction, keeps coupled phase packages
+inside single roots, and supplies Plant–Detonate as the required coarsened
+source episode. It has no eligible nonmerged temporal relation. Another
+satisfying world adds canonical `Guard-before-Heat` across two distinct roots
+outside every prospectively authored source episode. This changes readiness,
+denial, and counterplay while preserving every selected predecessor.
+
+Old `RCS-03C3B2A2B` therefore becomes a non-counting parent for counted
+`RCS-03C3B2A2B1` (whether the completed catalog supports any eligible
+nonmerged multi-root H order/trajectory form) and conditional
+`RCS-03C3B2A2B2` (whether an admitted form additionally owns a multi-parent
+relation root). Replacing one counted row with two adds one slot and restores
+`Phi_SR` from 30 to 31. Exact operators, form identities, counts,
+distribution, and prevalence remain AUTHOR/SPEC after support is selected.
+
+At presentation, `RCS-03C3B2A2B1` was the sole active card. Its eligible set
+contains only
+reachable, materially effective, non-preempted, inclusion-minimal canonical H
+order/trajectory forms with at least two indispensable operands whose full
+post-coarsening lineage union retains at least two distinct roots. Temporal
+structure must separately pass a reachable matched separator that holds the
+operand multiset, source roles, lineage topology, and every non-temporal input
+fixed; order reversal or a non-equivalent same-endpoint trajectory must flip
+the claim. Raw adjacency, co-occurrence, shared records/views, aliases,
+packets, post-hoc Relic matches, and same-root episode members do not qualify.
+The exhaustive choices are an empty or nonempty support set. If empty,
+B2A2B2 prunes and B2A3 follows; if nonempty, B2A2B2 becomes next.
+
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2A2B1-B`, so `E^{rel}_v` is nonempty. At least one qualifying
+canonical H form indispensably relates two or more distinct post-coarsening
+roots through order or trajectory, retains the full union of all indispensable
+operand lineages, and passes the held-fixed temporal separator. This is a
+support floor only: exact operators, forms, counts, distribution, and
+prevalence remain AUTHOR/SPEC, and no additive relation root has yet been
+selected. B1 moves from `OWNER-OPEN` to `DIR-SELECTED`; already-counted B2
+moves from `SCREEN` to `OWNER-OPEN`. The fifty-five-slot register therefore
+contains 29 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 15 `DIR-SELECTED`, 1
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`.
+`RCS-03C3B2A2B2` was then the sole active card. It asked whether the stable versioned
+promotion subset of the nonempty eligible set is empty, universal, or nonempty
+and proper. Every promoted concrete relationship keeps complete operand
+ancestry and remains non-independent from every ancestor; B3 and later rows
+still own addressability, fan-out, claim, and reuse semantics.
+
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2A2B2-B`, so `P^{rel-root}_v=E^{rel}_v`. Every successfully
+realized qualifying occurrence of every eligible form receives exactly one
+fresh additive relation root carrying the deduplicated complete transitive
+ancestry of all indispensable operands. The actual occurrence must still
+retain at least two distinct post-coarsening roots. Promotion replaces no
+parent, is idempotent per canonical occurrence, and creates no independence
+from ancestors, intersecting lineages, or shared nonmultiplying authorization/
+accounting parents. Stable prospective forms—not payoff, target, Relic,
+history, or post-hoc occurrence choices—own promotion. The selection grants no
+addressability, nesting, same-cut cascading, fan-out, team access, claim,
+reuse, payoff, persistence, or release rule.
+
+B2 moves from `OWNER-OPEN` to `DIR-SELECTED`, which ordinarily reduces
+`Phi_SR` from 30 to 29. A thirteenth prerequisite screen then disproved the
+assumption that selected current-state evidence guarantees any state episode
+survives a material semantic revision. A binary `Guarding-now` world and an
+otherwise valid world with continuous `Heat I -> Heat II` preserve every prior
+selection but differ in continuity, logs, interruption, and counterplay. Old
+`RCS-03C3B2A3` is therefore a non-counting parent for support child
+`RCS-03C3B2A3A` and conditional root-succession child `RCS-03C3B2A3B`.
+Replacing one row with two adds one potential slot. The then-current fifty-six-slot
+register contained 29 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 16
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`.
+`RCS-03C3B2A3A` was then the sole active card.
+
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2A3A-B`, so `E^{state-rev}_v` is nonempty. The completed catalog
+must contain at least one prospectively versioned revision form with a
+reachable functional occurrence that leaves one current-state continuity
+episode uninterrupted, materially changes player-semantic state under a
+held-fixed comparison, can independently alter an effective `S` predicate,
+legal continuation, or authoritative outcome, remains material with root/
+Relic/payoff/claim bookkeeping projected out, and commits at an authoritative
+cut. This is an existential support floor; exact forms, counts, distribution,
+and prevalence remain AUTHOR/SPEC. No-op/representation churn and genuine
+termination plus re-establishment remain outside it.
+
+A3A moves from `OWNER-OPEN` to `DIR-SELECTED`; conditional A3B moves from
+`SCREEN` to `OWNER-OPEN`. The then-current fifty-six-slot register contained 28
+`SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 17 `DIR-SELECTED`, 1 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 29`. `RCS-03C3B2A3B` was the sole active
+card. It asks whether stable eligible revision forms preserve the episode's
+one operative continuity root, universally replace it with a fresh successor,
+or support both policies. A4 still owns simultaneous causal-support topology.
+
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2A3B-A`, so `Q^{state-succ}_v` is empty. Every committed eligible
+revision preserves the episode's founder continuity root while its material
+manifestation may change. The preserved root append-only retains complete
+pre-cut ancestry plus every indispensable revision-cause lineage at the
+authoritative cut. Preservation creates no additive root and grants no
+downstream access or use.
+
+A3B moves from `OWNER-OPEN` to `DIR-SELECTED`; A4 moves from `SCREEN` to
+`OWNER-OPEN`. The then-current fifty-six-slot register contained 27 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 18 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 28`. `RCS-03C3B2A4` was the sole active card.
+
+The A4 prerequisite screen admits one existential product boundary rather than
+a prevalence subtree. For a current-state fact at one authoritative cut, a
+direct support basis is an inclusion-minimal nonempty set of canonical roots
+that are presently jointly sufficient. A qualifying multi-root basis contains
+at least two roots with disjoint complete lineages, no ancestor relationship,
+and no shared nonmultiplying authorization/accounting parent; a matched
+single-member withdrawal changes the fact or its legal continuation/outcome.
+Ancestry alone, aliases, time-separated handoff, relation root plus parent, and
+redundant alternatives `{r_A}` or `{r_B}` do not qualify. The choices are A,
+exclude every such basis, or B, require at least one reachable functional
+state form with one. Exact forms, widths, counts, distribution, prevalence,
+and redundant alternatives remain AUTHOR/SPEC under the anti-recursion rule.
+
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2A4-B`, so `E^{state-mroot}_v` is nonempty. The completed catalog
+must contain at least one reachable, committed, non-preempted current-state
+fact occurrence whose inclusion-minimal direct-support basis contains at least
+two independent roots. The fact retains one continuity identity and one Relic
+position; A4 mints and exposes no root. Exact forms, support widths, counts,
+distribution, prevalence, redundant alternatives, and incidence remain
+AUTHOR/SPEC.
+
+Before further prerequisite correction, A4 moved from `OWNER-OPEN` to
+`DIR-SELECTED` and B2B moved from `SCREEN` to `OWNER-OPEN`. The interim
+fifty-six-slot register contained 26 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 19
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`.
+
+**Fourteenth prerequisite correction, 2026-09-25.** B2B still combined two
+independent consequence boundaries. Pure-build entries and contingent combat
+evidence do not prove that any one exact build-provenance signature can produce
+two otherwise-distinct roots after all selected B2A canonicalization. An
+empty-domain world uses only one-shot provenance sources; a nonempty-domain
+world lets one exact configured origin produce separately accepted and
+accounted roots. Only in the second world can a later equivalence policy change
+repeat-source density.
+
+Old `RCS-03C3B2B` is therefore a non-counting parent for support child
+`RCS-03C3B2B1` and conditional equivalence child `RCS-03C3B2B2`. Additive
+build-view roots are already forbidden: aliases and action/build views never
+mint roots. B2A2B2 retains additive compound-H relation-root promotion; A4
+retains multi-root support for one current-state fact. Replacing one counted
+row with two adds one potential slot. The amended fifty-seven-slot register
+contains 27 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 19 `DIR-SELECTED`, 1
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 28`.
+At that checkpoint, `RCS-03C3B2B1` was the sole active card.
+
+The B2B1 support set is empty or nonempty. A qualifying positive witness has
+two committed contingent evidence occurrences at one evaluation cut with the
+same prospective exact provenance signature—including source combatant,
+frozen configuration revision, every indispensable exact causal origin, and
+each origin's configuration-side ownership/custody provenance—but distinct
+post-B2A roots, disjoint complete lineages, separate occurrence-specific
+authorization/payment/accounting, and material pure-build candidate use.
+Shared immutable provenance attribution/equip entitlement is metadata rather
+than a causal-lineage member or authorization/payment parent; reuse of one
+accepted payment event disqualifies the pair.
+Existing aliases, views, child applications, one paid operation, an A4
+support basis, or configuration alone cannot prove membership. A excludes all
+such witnesses; B requires at least one functional form while exact breadth
+remains AUTHOR/SPEC. Conditional B2B2 alone later decides whether supported
+same-provenance roots remain distinct or coarsen for pure-build identity.
+Candidate-ledger admission is B2B1's immediate authoritative difference;
+position use remains B3 even if B2B2 leaves roots distinct.
+
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2B1-B`, so `E^{build-repeat}_v` is nonempty. At least one
+prospectively versioned pure-build source form has a reachable functional
+witness containing two committed, separately authorized and accounted
+occurrences at one evaluation cut with equal exact `Pi`, distinct post-B2A
+roots, disjoint full lineages, and material candidate use. Exact forms, counts,
+distribution, and prevalence remain AUTHOR/SPEC. B1 mints, coarsens, exposes,
+and empowers no root.
+
+B1 moves from `OWNER-OPEN` to `DIR-SELECTED`; conditional B2B2 moves from
+`SCREEN` to `OWNER-OPEN`. At that checkpoint the fifty-seven-slot register
+contained 26
+`SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 20 `DIR-SELECTED`, 1 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`. `RCS-03C3B2B2` was the sole active
+card at that checkpoint.
+
+B2B2 has three exhaustive equivalence-relation policies over all currently
+admissible B1 candidates. Let `K^{same-Pi}_v` contain every pair of distinct
+candidate records with equal exact `Pi`, even across semantic source forms;
+B1-B makes it nonempty. A relates no distinct pair. B relates every pair in
+`K`, so exact `Pi` alone determines one build class. C relates a nonempty
+proper subset through a prospective finer equivalence key and requires
+reachable related and still-separated equal-`Pi` pairs. Reflexivity, symmetry,
+and transitivity bar favorable pair-by-pair grouping.
+
+Recommend B: one exact configured provenance has one build identity while its
+separately paid combat manifestations remain legible histories. This is a
+direct local ideal fit and blocks roots-per-repeat farming; its cost is the
+loss of same-source independent-root combinations and possible partner-source
+pressure. A is partial, while C creates two identity grammars and a hidden
+class-key/source-density taxonomy. Coarsening is replacement/equivalence in the
+pure-build projection, never an additive root or a global rewrite of B2A
+causal identity. B's append-only ancestry can also keep a later partner with
+intersecting lineage non-independent because an expired member remains class
+history until the later-authorized class lifetime ends.
+
+The relation and class key are prospective. Later equal-key candidates
+join atomically at their own commit and cannot rewrite earlier settled results;
+same-cut joins are commutative and idempotent before the coherent evidence
+read. Interruption creates no phantom member, and coarsening never refreshes H
+age, prolongs S, resurrects evidence, or opens readiness. Different `Pi` never
+coarsens here. SR-07 owns whether source mutation creates a new configuration
+revision; RCS-15/SR-11 owns class persistence across unchanged configurations
+and encounter boundaries. B3 still owns addressability and position use; B4 owns child
+partition; C3C-C3F and RCS-08 retain fan-out, claim, consumption, reuse, and
+cross-root/team authority.
+
+**Post-answer screen, 2026-09-25.** The owner selected
+`RCS-03C3B2B2-B`. Exact `Pi` now fully determines pure-build identity: every
+currently admissible equal-`Pi` candidate, including candidates classified
+under different semantic source forms, projects into one canonical class. The
+class carries the deduplicated union of every member's complete lineage while
+each member retains its origin, payment/accounting, semantic content, outcome,
+and history. It replaces member identities in the pure-build projection and is
+not an additive root. Joins remain prospective, atomic, idempotent, and
+nonretroactive; coarsening changes no H/S eligibility or readiness.
+
+B2B2 moves from `OWNER-OPEN` to `DIR-SELECTED`, and the then-registered B3
+row moves from `SCREEN` to `OWNER-OPEN`. Before further correction, the
+fifty-seven-slot register contained 25 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`,
+21 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`.
+
+**Fifteenth prerequisite correction, 2026-09-25.** B3 still combined global
+atom-layer support with a conditional same-lineage overlap policy. A catalog
+can support parent representatives and child applications without ever making
+one parent and one of its own children co-addressable: for example, a Bastion
+class is parent-only while an unrelated Twinstrike exposes only a child.
+Another catalog can make one Bastion class and its Guard child both
+addressable. Intersecting lineage prevents double occupancy in both catalogs,
+but only the latter lets the same source match either broad class-level or
+precise manifestation-level predicates. That is a player-material legal-build
+and counterplay boundary. B4 partitions children and cannot decide it.
+
+Old `RCS-03C3B3` is therefore a non-counting parent for global support child
+`RCS-03C3B3A` and conditional same-lineage-overlap child `RCS-03C3B3B`.
+B3A-A prunes B3B and B4; B3A-B prunes B3B and activates B4; B3A-C activates
+B3B, whose answer then activates B4. Replacing one counted row with two adds
+one potential slot. The amended fifty-eight-slot register contains 26
+`SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 21 `DIR-SELECTED`, 1 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`. `RCS-03C3B3A` is the sole active
+card.
+
+B3A's three exhaustive global support sets are parent only, child only, and
+both layers. A parent representative is the applicable already-canonical B2A
+root occurrence or the one B2B2-B exact-`Pi` class representative in the
+pure-build projection. A semantic child is an actually realized, authored,
+player-meaningful target/effect/application manifestation; it is never a new
+root, alias, field, packet, callback, storage write, or resolver microstep.
+Existing functional cross-source positions make the empty addressable universe
+infeasible; each nonempty branch must still prove it realizes the accepted
+support grid.
+
+Recommend B, child applications only. It makes the Relic address the concrete
+deed or manifestation rather than the parent root/class identity while the
+parent/class remains mechanically operative through complete lineage and
+independence. That is a direct local ideal fit and avoids maintaining both
+addressability languages. Its real costs are B4 authoring and presentation burden, exclusion
+of sources without a meaningful application frontier, and loss of directly
+addressable whole roots/classes or root-level nesting. A gives manifestation
+difference no separate addressable identity at this boundary. C supplies both languages across
+the catalog but is only aggregate until conditional B3B decides whether any
+same-lineage overlap exists.
+
+Every child carries its complete applicable proof lineage. A B2B2-B class
+child carries the class's full union lineage rather than only the visible
+member's lineage. An A4 current fact or child carries its continuity lineage
+and every member lineage of its one prospectively selected authoritative active
+support basis. That basis settles before Relic matching and cannot vary by
+recipe or result. This prevents B3A from laundering class members or A4
+supporters into independent positions.
+Current addressability requires a current admissible source; historical class
+ancestry alone supplies no live representative or child. B3A mints, splits,
+merges, succeeds, and promotes no root. Same-lineage overlap, child partition,
+fan-out, claims/reuse, source-revision boundaries, class lifetime, payoff, UI,
+release, and implementation retain their registered owners.
+
+**Post-answer screen, 2026-09-26.** The owner selected
+`RCS-03C3B3A-B`. `P^{addr}_v` is empty and `C^{addr}_v` is nonempty: only
+semantic child applications may furnish Relic source positions. Canonical B2A
+roots and B2B2 exact-`Pi` classes remain operative lineage/grouping identities
+but cannot themselves occupy positions. Source families without a canonical
+meaningful child are unavailable. Every child retains its complete applicable
+proof lineage; class children inherit the class's full union lineage, and A4
+children retain continuity plus the one authoritative support basis fixed
+before Relic matching. B3A grants no second position, root, fan-out, claim,
+reuse, payoff, persistence, or implementation.
+
+B3A moves to `DIR-SELECTED`, B3B is pruned, and the then-registered B4 row
+would have become `OWNER-OPEN`. Before further correction, the fifty-eight-slot
+register contained 24 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 22
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`.
+
+**Sixteenth prerequisite correction, 2026-09-26.** Old B4 did not state its
+nontrivial-support premise separately, but that premise is already derived.
+B2B1-B requires two semantically distinct, separately accepted/accounted,
+equal-`Pi` occurrences to remain materially admissible at one cut. B2B2-B
+makes their exact-`Pi` class the one parent representative, and B3A-B preserves
+their meaningful manifestations as the only position-furnishing layer.
+Therefore one current parent has at least two primitive semantic application
+sites. Grouping those sites into one child would be a partition answer, not a
+singular-site countermodel.
+
+Old `RCS-03C3B4` is therefore a non-counting parent for support child
+`RCS-03C3B4A` and partition child `RCS-03C3B4B`. B4A closes `DERIVED` as
+nonempty; B4B inherits the owner choice. Replacing one counted row with two
+adds one slot but no potential card. The amended fifty-nine-slot register
+contains 24 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 22 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`.
+`RCS-03C3B4B` is the sole active card.
+
+B4B has three exhaustive directions under one laminar child-family grammar. A
+admits semantic leaves only. B requires at least one reachable functional
+compound but keeps one nonoverlapping child scale. C requires at least one
+co-addressable compound/descendant pair in a laminar hierarchy. Recommend B:
+finite authored compounds keep signature acts readable without restoring
+parent-root addressability or introducing broad-versus-precise scale shopping.
+A is the strongest precision/simplicity countercase but risks target/stage
+fragmentation; C is the richest direct unity/difference expression but adds a
+second child scale and claim/fan-out/UI burden. Exact breadth remains
+AUTHOR/SPEC.
+
+**Post-answer screen, 2026-09-26.** The owner selected
+`RCS-03C3B4B-B`. `K^{compound}_v` is nonempty and `K^{nested}_v` is empty.
+Final children form one exhaustive nonoverlapping partition of realized
+primitive semantic sites beneath each current parent. At least one reachable
+functional child groups multiple sites; other children may remain singletons,
+but grouped member sites are not simultaneously addressable descendants. An
+incomplete compound furnishes nothing. Keys remain prospective, deterministic,
+versioned, and source-owned, and every final child retains complete parent
+lineage. B4B grants no fan-out, claim, reuse, payoff, or implementation.
+
+B4B moves to `DIR-SELECTED` and old C3C would ordinarily become
+`OWNER-OPEN`. Before further correction, the fifty-nine-slot register would
+contain 23 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 23 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`.
+
+**Seventeenth prerequisite correction, 2026-09-26.** Two independent
+read-only named-claim audits found that old C3C compressed support, proof form,
+and evaluation scope. Selected C3c.45-C/C3c.46-A require a two-receipt witness
+and exact maximum two but expressly leave event/source reuse open. B4B-B does
+not force any child to qualify for two tags. Exact reuse of one final child is
+also not equivalent to placing two distinct sibling/class-member proofs with
+intersecting lineage or shared nonmultiplying accounting in different receipt
+ledgers. Finally, sharing inside one evaluation and sharing across two
+semantically distinct coincident automatic opportunities can vary
+independently; only splitting one semantic opportunity into engine callbacks
+is a representation-invariant non-choice.
+
+Old C3C becomes a non-counting parent for C1 within-evaluation overlap support,
+C2 conditional exact/related overlap-form support, C3 conditional
+within-evaluation fan-out treatment, C4 distinct same-cut evaluation-
+opportunity support, C5 conditional cross-opportunity overlap support, C6
+conditional exact/related cross-opportunity overlap-form support, and C7
+conditional cross-opportunity fan-out treatment. C1-A prunes C2-C3; C4-A
+prunes C5-C7. C3D follows the settled seven-row route.
+
+Replacing one counted C3C row with seven adds six slots and six potential
+cards. The amended sixty-five-slot register contains 29 `SCREEN`, 1
+`OWNER-OPEN`, 8 `PRUNED`, 23 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 30`. At that checkpoint `RCS-03C3C1` was the sole active
+card.
+
+C1 asks whether any one fixed evaluation has two distinct receipt tags that
+are each individually ledger-satisfied before fan-out treatment under typed
+final-child proof ledgers which reuse the exact same child or otherwise
+intersect in full lineage/shared nonmultiplying accounting. This is a
+pre-treatment structural classification, not C133/C134 provisional
+completion, and it creates no candidate or commitment. A makes that reachable
+support set empty and forces all dual candidates to use cross-receipt-
+independent proof accounting. B makes it nonempty without yet permitting both
+tags to survive treatment. Recommend B: it
+preserves the bounded possibility that one deed participates in two distinct
+relationships, but the later fan-out card must confront hub-evidence
+compression because the two-receipt cap does not bound proof reuse.
+
+**Post-answer screen, 2026-09-26.** The owner selected `RCS-03C3C1-B`.
+`O^{intra-overlap}_v` is nonempty: at least one reachable fixed evaluation has
+two distinct canonical receipt tags that are individually ledger-satisfied
+before treatment through overlapping valid typed ledgers. The overlap uses an
+exact shared final child, distinct final children with intersecting complete
+lineage, or distinct final children sharing one nonmultiplying authorization/
+accounting parent. This creates no C133/C134 candidate, joint survival, or
+commitment.
+
+C1 moves to `DIR-SELECTED`, C2 moves to `OWNER-OPEN`, and `Phi_SR` falls from
+30 to 29. The register remains sixty-five slots: 28 `SCREEN`, 1 `OWNER-OPEN`,
+8 `PRUNED`, 24 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`.
+
+C2 separates two functional overlap forms. Exact support repeats one identical
+final child occurrence across the ledgers. Distinct-related support uses two
+different final children whose complete lineages intersect or whose
+nonmultiplying authorization/accounting parent is shared. C1-B makes their
+union nonempty, so C2 chooses exact-only, distinct-related-only, or support for
+both. Recommend both: it preserves legible common-proof hubs and choreographed
+distinct manifestations of one causal family without deciding C3 treatment.
+Each local witness may be a direct ideal fit; catalog coexistence is aggregate.
+The cost is carrying both hub dominance and one-payment compression risks plus
+the highest disclosure, authoring, solver, and teaching burden.
+
+**Post-answer screen and eighteenth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C2-C`: both exact-child and distinct-related
+within-evaluation overlap support sets are nonempty. The witnesses may be
+different opportunities or one opportunity carrying both factual relations.
+C2 grants no joint survival, proof selector, candidate, or commitment.
+
+Read-only named-claim audits then broke old `RCS-03C3C3` as one card. The row
+hid alternate-ledger support and resolution; independently selectable exact
+and related joint-survival topology; denied-pair output disposition and
+selection authority; and support, output cardinality, and selection authority
+for three-plus pre-treatment contenders under the already-selected exact-two
+final ceiling. C133/C134 apply only after this fan-out boundary and settle none
+of it.
+
+Old C3 becomes a non-counting parent for nine rows: C3C3A alternate-ledger
+support; conditional C3C3B authoritative ledger resolution; C3C3C exact-form
+and C3C3D related-form permission topology; C3C3E denied-pair disposition;
+conditional C3C3F denied-pair selection authority; C3C3G support for at least
+three contenders; conditional C3C3H output cardinality; and conditional C3C3I
+selection authority. C3C3C/C3C3D constrain one shared opportunity-level
+permission set, so a hybrid exact-and-related opportunity has one permission
+bit rather than hidden form-level grant/veto votes. Selective identities remain
+AUTHOR/SPEC; no recursive hybrid-subset card is admitted.
+
+Replacing one counted C3 row with nine adds eight slots and potential cards.
+The amended register has seventy-three slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 25 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. `RCS-03C3C3A` is the sole active card. It asks whether every
+individually satisfied tag has one canonical typed ledger at a fixed state or
+whether at least one reachable tag/state has two genuinely different
+position-to-child assignments. Recommend nonempty alternate-ledger support
+for richer proof-routing buildcraft, conditional on the next card imposing a
+prospective, disclosed, total resolver and never outcome-favored post-hoc
+selection.
+
+**Post-answer screen and nineteenth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3A-B`: at least one reachable fixed tag/state has
+multiple canonical valid position-to-child ledgers. This is structural support
+only and grants no chooser, treatment, candidate, claim, or result. Before
+further correction it would produce 34 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`,
+26 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`.
+
+Three bounded named-claim audits then broke old conditional C3C3B as one card.
+It hid authoritative-domain topology; conditional tag-local versus joint
+selection; conditional system versus participant-precommitted authority; and
+conditional deterministic versus random selection. Old C3C3B is now a
+non-counting parent for B1-B4 in that order. Complete-product robustness
+selects no tuple and prunes B2-B4; singleton selection or coexistence makes
+them applicable before C3C3C. Live prompts and permission/payoff/outcome-
+favored selection remain invalid. Complete-product treatment is universal;
+an existential passing witness is favorable selection rather than genuine
+no-selection. A proper-subset retained domain is excluded from these options
+and requires an explicit replacement branch if desired.
+
+Replacing one counted B row with four adds three slots and potential cards.
+The amended register has seventy-six slots: 37 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 26 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 38`. `RCS-03C3C3B1` is the sole active card. It asks whether every
+multiplicity-positive evaluation selects exactly one authoritative ledger
+tuple, every such evaluation retains the complete product under universal
+robustness, or both prospectively disclosed modes coexist. Recommend singleton
+selection because it turns C3C3A-B's plurality into legible proof-routing
+space; robustness is the strong consistency countercase, while coexistence
+teaches two proof-truth languages.
+
+**Post-answer screen and twentieth prerequisite correction, 2026-09-26.** The
+owner selected `RCS-03C3C3B1-A`: every reachable multiplicity-positive
+evaluation applies one total resolver and returns exactly one complete
+authoritative ledger tuple before downstream permission or results. It may not
+return none, retain a proper subset, produce a partial tuple, or retry after a
+later conclusion. B1 grants no scope, actor, or randomness answer.
+
+The first worksheet phrase “before exact/related classification” was an agent
+error. Exact-child equality, lineage intersection, shared accounting parents,
+and the derived structural signatures are canonical upstream proof facts. A
+selector may inspect them under a prospectively fixed rule; only the selected
+tuple proceeds to C3C3C/D permission, and no selector may inspect or optimize
+permission, survivor treatment, claims/reuse, completion, payoff, or combat
+outcome. This correction preserves B1-A and the registered joint-routing
+branch rather than silently making that branch impossible.
+
+Three bounded named-claim audits then found one more hidden downstream axis.
+B2 is narrowed from stochastic “factorization” to cross-tag contextual
+responsiveness: its positive branch requires a reachable held-fixed witness in
+which another contender or ledger domain changes one tag's selected ledger or
+marginal draw law while that tag's own inputs remain fixed. Context-stable
+marginals do not determine stochastic coupling—a shared coin can correlate the
+joint tuple without changing either tag's marginal. Old B4 is therefore a
+non-counting parent for B4A stochastic-support topology and conditional B4B
+product-versus-correlated draw support.
+
+After B1-A's ordinary reduction, replacing one counted B4 row with two adds
+one slot and potential card. The amended register has seventy-seven slots: 37
+`SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 27 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. `RCS-03C3C3B2` is the sole active
+card. It asks whether held-fixed cross-tag responsiveness is empty or must have
+at least one reachable witness. Recommend nonempty support for relational
+proof-routing and a direct evaluation-boundary ideal fit, conditional on
+preview/explanation and selector-injection testing; tag-local stability is the
+strong clarity countercase.
+
+**Post-answer screen and twenty-first prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3B2-B`: at least one reachable matched comparison
+holds P's complete local input fixed, changes only Q or Q's canonical ledger
+domain, and changes P's selected ledger or marginal draw law. Exact triggers
+and prevalence remain AUTHOR/SPEC; downstream permission, result, claim,
+payoff, and outcome remain forbidden inputs.
+
+Three bounded named-claim audits then broke old B3's exclusive
+system-versus-participant wording. A bound participant coordinate can
+materially change a tuple law while a system composer still supplies totality,
+conflict resolution, or canonical ties in the same selector contract. The
+atomic incidence is therefore material participant configurability, classified
+over routing-capable versioned Relic contracts as empty, universal, or
+nonempty proper. Merely equipping a Relic, choosing upstream evidence, or
+accepting a sole default is not configurability.
+
+The audits also separated the legal participant control language: a tiny
+Relic-specific named-mode menu is not gameplay-equivalent to constructive
+priority or conditional policy control. Old B3 becomes a non-counting parent
+for B3A configurability prevalence and conditional B3B policy-language and
+completion topology. B3A-A prunes B3B; B3A-B/C activates it. The composite
+selector remains prospective, automatic, and total. B4A, not B3, decides
+whether its law can be stochastic. RCS-02 retains holder/consent/information,
+RCS-13 retains bind/rebind/lock timing, RCS-15 retains migration identity, and
+RCS-16 retains fault repair.
+
+After B2-B's ordinary reduction, replacing one counted B3 row with two adds
+one slot and potential card. The amended register has seventy-eight slots: 37
+`SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 28 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. `RCS-03C3C3B3A` is the sole active
+card. Recommend universal participant configurability only if B3B later keeps
+the vocabulary small, closed, and Relic-specific; otherwise system-fixed
+routing is the safer recommendation.
+
+**Post-answer screen and twenty-second prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3B3A-B`: every routing-capable versioned Relic
+selector contract must have at least two lawful prospectively bindable
+participant routing settings whose completed laws differ on some reachable
+held-fixed ledger product. This does not grant code authorship, exclusive
+tie-breaking, live invocation, or downstream-aware selection.
+
+The initial presentation's word “attunement” was overloaded. RCS-03A-C already
+uses remembered boundary attunement for a persistent Relic-owned transformation
+coordinate. Dissonance/Chorus are **routing stances**, independent of that
+coordinate unless a later explicit replacement couples them.
+
+Three bounded named-claim audits and one adjudication then tested old B3B. A
+separate intrinsic completion module is not a representation-invariant product
+choice: a fixed preference plus fixed completion composes to the same total
+law as a whole policy containing the completion clause. Every lawful setting
+plus immutable contract semantics must denote one total composite selection
+law; exact completion clauses remain AUTHOR/SPEC and B4A retains stochastic
+support.
+
+Two observable control-language axes do remain. Selecting one indivisible
+authored stance differs from separately composing routing primitives. Among
+constructive languages, uniform ordering/parameterization differs from
+participant-built context branching. Old B3B therefore becomes a non-counting
+parent for B3B1 constructive-language prevalence and conditional B3B2
+context-branching prevalence. B3B1-A prunes B3B2 and activates B4A; B3B1-B/C
+activates B3B2 before B4A.
+
+After B3A-B's ordinary reduction, replacing one counted B3B row with two adds
+one slot and potential card. The amended register has seventy-nine slots: 37
+`SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 29 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. `RCS-03C3C3B3B1` is the sole active
+card. Recommend closed whole-policy routing stances: they preserve universal
+meaningful orientation without turning every Relic into a generic policy
+editor.
+
+**Post-answer screen and twenty-third prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3B3B1-A`: every routing-capable contract exposes
+only a finite versioned menu of indivisible authored whole-policy routing
+stances. Participants bind a stance whole and cannot compose, reorder,
+parameterize, or condition its clauses. B3B2 is therefore pruned.
+
+Three bounded named-claim audits and one adjudication found that B4A's earlier
+“random-only” and “none, universal, or coexistence” shorthand left its
+denominator ambiguous. Whole contracts are too coarse because one contract can
+offer deterministic and stochastic stances. Individual fixed evaluations are
+too fine because their empty/full/proper prevalence is exact authoring
+incidence, not automatically another player-material product choice. The
+smallest representation-invariant domain is the canonical complete bound
+whole-stance law supplied by B3B1-A.
+
+Let `W^{route-law}_v` be those versioned complete laws, and let
+`G^{route-stoch}_v` contain a law when at least one reachable held-fixed
+multiplicity-positive input gives two or more complete tuples positive
+probability before its designated random realization. B4A classifies that
+subset as empty, whole, or nonempty proper. An opaque deterministic mapping is
+not randomness merely because players cannot predict it, while a seeded PRNG
+may implement one normative stochastic draw. Earlier random stance assignment
+is upstream acquisition/configuration under RCS-09/RCS-13, not B4A.
+
+No row is added. The current seventy-nine-slot register contains 35 `SCREEN`,
+1 `OWNER-OPEN`, 9 `PRUNED`, 30 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 36`. `RCS-03C3C3B4A` is the sole active card. Recommend
+deterministic-only whole-stance laws: selected joint responsiveness already
+creates relational variation, while deterministic resolution preserves
+stance ownership, explanation, team choreography, and replay trust. Stochastic
+support adds no stronger ideal fit by itself. If randomness is admitted, B4B
+receives another prerequisite screen because one random tuple component does
+not create a nontrivial factorization-versus-correlation question.
+
+**Post-answer screen and twenty-fourth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3B4A-A`: every canonical complete bound routing-
+stance law is deterministic on every reachable fixed nonrandom selector input.
+The same stance can still respond differently when another contender or its
+ledger domain changes under B2-B; holding the complete input and stance fixed
+always returns one complete tuple. This selection governs the Relic ledger
+selector only. It neither prohibits combat RNG, random acquisition, or an
+earlier committed random state elsewhere in the game nor supplies a stronger
+ideal fit by itself. B4A moves to `DIR-SELECTED` and B4B is pruned.
+
+Three bounded named-claim audits then found that old C3C3C and C3C3D were not
+prerequisite-ready permission cards. C2-C guarantees exact-child and distinct-
+related overlap among valid **pre-selector** ledger pairs, while B1-A makes
+only the selected tuple authoritative downstream. None of B2-B, B3A-B,
+B3B1-A, or B4A-A requires a lawful stance to select either overlap-form
+witness. For example, P can have exact-overlapping
+`L_h={Guard g, Heat h}` beside Q's `L_q={Return t, Heat h}` and also an
+independent `L_v={Guard g, Vow v}`. Every lawful stance can select
+`(L_v,L_q)` at this input while satisfying required stance differentiation and
+cross-tag responsiveness elsewhere. Exact structural support then exists, but
+no exact pair reaches treatment. That is materially different from selecting
+an exact pair and denying it joint survival; only the latter enters the denied-
+pair result route.
+
+For version `v`, one resolved pair opportunity comes from one reachable actual
+evaluation, one lawful complete bound stance/configuration, its deterministic
+selected complete tuple, and one unordered pair of distinct contender tags in
+that tuple. Pair order, aliases, generated IDs, callback splits,
+serialization, reload, and replay do not multiply opportunities. Alternate
+unselected ledgers, stance bindings, contexts, cuts, Souls, or Relic
+realizations cannot be unioned. Several shared children between the same pair
+still form one opportunity; three selected contender tags would instead yield
+three unordered pair opportunities. Let `E^{resolved-exact}_v` contain those
+opportunities whose selected ledgers reuse one canonical final child. Let
+`R^{resolved-related}_v` contain those whose selected ledgers use distinct
+children with intersecting complete lineage or one shared nonmultiplying
+authorization/accounting parent. One opportunity may belong to both sets.
+
+Old `RCS-03C3C3C` and `RCS-03C3C3D` therefore become non-counting parents for
+four registered rows: C1 post-routing exact exposure, conditional C2 exact
+permission, D1 post-routing distinct-related exposure, and conditional D2
+related permission.
+C1-A prunes C2 and activates D1; C1-B activates C2, whose answer then activates
+D1. D1-A prunes D2; D1-B activates it. C2 and D2 remain restrictions of one
+opportunity-level compatibility set, never independent form votes. A hybrid
+exact-and-related pair has one permission bit; incompatible universal-versus-
+empty restrictions make the hybrid intersection empty rather than inventing a
+grant/veto composition rule. True means only that the pair is compatible to
+co-survive this fan-out gate, not that either tag is yet a candidate or commits.
+False means only “not both”; E/F or H/I still decides the result. Denial can
+never retry the selector or switch to an unselected ledger.
+
+Before either permission row is presented, its prerequisite screen must expose
+whether the permission law is intrinsic, participant-prebound, or stochastic.
+B4A-A settled selector randomness only; a participant permission policy or
+random allow/deny draw cannot hide inside “selective,” and a live proc-time
+choice remains incompatible with cut-atomic automatic invocation.
+
+Replacing two counted rows with four adds two slots and potential cards. The
+amended register has eighty-one slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 10
+`PRUNED`, 31 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. `RCS-03C3C3C1` is the sole active card. Recommend B, required
+nonempty authoritative exact-overlap exposure: it makes the selected exact-
+child grammar playable routing texture and a potential direct unity-with-
+difference fit, at the cost of proof-hub compression, selector-injection
+pressure, explanation burden, and a possible premium-route trap. B grants no
+joint-survival permission.
+
+**Post-answer screen and twenty-fifth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3C1-B`: the catalog must contain at least one
+reachable actual evaluation and lawful complete bound routing stance whose
+authoritative selected tuple exposes an exact-overlap opportunity in
+`E^{resolved-exact}_v`. This makes the already-required exact-child grammar a
+playable post-routing route rather than permanently latent pre-selector proof
+space. It does not grant either contender joint-survival permission, decide
+permission incidence, require exact exposure from every stance or Relic, or
+create any candidate, commitment, claim, consumption, or payoff.
+
+A bounded named-claim audit, followed by a focused countermodel challenge to
+its first repair, found that old C2 still compressed six player-material
+permission boundaries. “Selective” cannot say whether the
+permission force is intrinsic or participant-configurable, whether it is an
+independently recombinable coordinate or inseparably carried by an existing
+whole routing stance, whether participant permission force uses a closed
+authored menu or a constructive language, whether participants may compose
+conditional branches, whether the completed bound law is deterministic or
+stochastic, or finally which exposed exact opportunities it permits. Those
+distinctions change custody, buildcraft, comprehensibility, exploit surface,
+replay, and simulation even when the resulting one-bit permission on one
+example happens to match.
+
+Old `RCS-03C3C3C2` therefore becomes a non-counting parent for six registered
+rows. C2A classifies material participant permission-configurability
+prevalence. C2A-A prunes C2B/C2C1/C2C2 and activates C2D; C2A-B/C activates
+C2B. C2B then classifies whether a participant-configurable permission force
+is an independently recombinable coordinate: independence requires that
+permission can vary while routing orientation stays fixed. Every C2B answer
+then activates C2C1, which classifies closed whole-policy permission settings
+versus bounded construction across **all** participant-configurable permission
+forces. C2C1-A prunes C2C2 and activates C2D, while C2C1-B/C activates C2C2
+before C2D. C2D classifies stochastic support across the resulting canonical
+complete bound permission laws. C2E follows C2D and receives a fresh
+prerequisite audit before its exact-form permission-incidence options are
+written. It must not reuse deterministic empty/universal/selective shorthand
+if C2D admits stochastic laws.
+
+**Adversarial correction to the first repair:** C2B-A does not derive a closed
+permission language. A routing stance can retain one indivisible closed
+selector orientation while its one-to-one coupled permission component was
+participant-constructed before the composite stance was bound. The permission
+component is not independently recombinable—the participant cannot pair it
+with another routing orientation—but its construction still changes legal
+player action, solver surface, migration, and exploit risk. Therefore B3B1-A
+closes only the routing language and cannot prune C2C1 or C2C2. The same check
+found a later stochastic atomicity gap: with three selected contender tags,
+three distinct simultaneous unordered pair opportunities exist, and fixing
+each pair's allow marginal does not fix their joint draw law. Independent,
+shared, positively correlated, and anticorrelated realizations can produce
+different feasible survivor sets under identical marginals.
+
+Old `RCS-03C3C3G` therefore also becomes a non-counting parent. G1 preserves
+its three-plus-contender support question. Conditional G2 asks for a fresh
+joint permission-draw coupling screen only when G1 is positive and applicable
+exact/related laws give at least two distinct simultaneous pair opportunities
+nonconstant permission marginals in one reachable evaluation. Otherwise G2 is
+`PRUNED` or `DERIVED`. One exact-and-related hybrid pair is one unordered pair
+and one draw, so it cannot supply both required marginals by itself. H follows
+the applicable G2 disposition before asking three-plus output cardinality.
+
+An existing indivisible routing stance may carry a permission force without
+creating an independent permission coordinate. Conversely, no participant
+configuration answer grants a live proc-time prompt: invocation remains
+cut-atomic and automatic. `RCS-02` retains holder, consent, and information
+promises, while `RCS-13` retains binding, reconfiguration, evolution, and lock
+horizons. A canonical complete bound permission law `w` has one allow
+probability `pi_w(o)` for each reachable exposed fixed exact opportunity `o`
+after every prospective binding and all earlier committed authoritative state,
+regardless of random origin, are fixed. It is stochastic-capable exactly when
+some such opportunity has `0 < pi_w(o) < 1` immediately before the designated
+permission realization. Seed secrecy, implementation shape, catalog mixtures,
+or averaging over earlier committed random state cannot alter that
+classification. An exact-and-related hybrid opportunity still has one
+probability and one permission bit, never two form votes or draws. Permission
+denial cannot retry the selector or route to another ledger.
+
+Selecting C1-B ordinarily reduces the potential from 36 to 35. Replacing one
+counted C2 row with six adds five slots and five potential cards. The amended
+register would have eighty-six slots and `Phi_SR = 40`. Replacing old counted G
+with G1/G2 adds one further slot and potential card. The corrected register has
+eighty-seven slots: 40 `SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`, 32
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 41`.
+`RCS-03C3C3C2A` is the sole presented card. Its answer must precede every later
+permission-language, permission-randomness, and exact-incidence question.
+Distinct-related exposure at D1 is independently prerequisite-ready from the
+selected tuple but remains queued under the one-card protocol.
+
+**Post-answer screen and twenty-sixth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3C2A-A`: no participant-semantic setting changes
+the complete permission law for a matched held-fixed exact selected pair.
+Permission is intrinsic to every applicable versioned Relic/relationship
+contract. C2B, C2C1, and C2C2 therefore prune; C2D becomes the current
+owner-facing card.
+
+A bounded read-only challenge upheld those pruning consequences but broke the
+old statement that C2E logically precedes D1. Distinct-related exposure is
+already a property of the authoritative selected tuple before permission acts.
+D1 is therefore ready independently after C1-B and remains a `SCREEN` row
+queued while C2D is the single presented `OWNER-OPEN` card. If D1-B is later
+selected, D2 still receives its own fresh permission-law screen. Traversing the
+exact lane first lets both forms share one normalized one-bit vocabulary, but
+neither C2E nor D2 removes the other's legal options; a conflicting hybrid
+restriction instead makes the resolved hybrid intersection empty.
+
+The same challenge repaired C2D's conditioning boundary. Its canonical law set
+fixes all prospective bindings and every earlier committed authoritative
+state—even state that originated randomly—before measuring `pi_w(o)`
+immediately before one designated permission realization. A persisted
+acquisition coin selecting an always-allow or always-deny variant is not a 50%
+permission draw, and a deterministic context-responsive law may map different
+fixed opportunities to zero and one without becoming stochastic.
+
+No counted row is added. The register now has eighty-seven slots: 36 `SCREEN`,
+1 `OWNER-OPEN`, 13 `PRUNED`, 33 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 37`. At that checkpoint, C2D was the presented card; D1
+was prerequisite-ready but queued.
+
+**Post-answer screen and twenty-seventh prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3C2D-A`: every complete intrinsic exact-
+permission law returns a certain zero-or-one bit on every reachable fixed
+opportunity. Laws may still respond deterministically across contexts, but no
+fresh permission draw remains. C2D moves to `DIR-SELECTED`.
+
+Two bounded read-only audits, cross-challenged against each other's
+countermodels, found that old C2E's global empty/universal/mixed incidence card
+still compressed stable law-family support and player-actionable deterministic
+response. For each complete conditioned law `w`, let nonempty `O_w` be its
+reachable authoritative exact domain and `b_w(o)` its certain bit. Let
+`R^{exact-resp}_v` contain laws whose reachable image is `{0,1}`, and let
+`K_v` contain the remaining context-invariant always-deny or always-allow laws.
+Catalogs with the same global mixed incidence but different support for a
+constant always-allow or always-deny law admit different guaranteed builds.
+
+A responsive law may nevertheless vary only with an immutable or externally
+fixed fact. Its separate matched-actionability screen compares two lawful non-
+oracular policies from one common authoritative upstream decision state. They
+are identical at every independently revisable decision coordinate except one
+material participant/counterplayer choice; neither arm is forced or illegal
+inaction. Later actions and facts may differ only through that intervention's
+complete direct, indirect, delayed, reactive, inseparable, and stochastic
+causal closure. Fix one positive-support semantic causal background, every
+non-descendant exogenous variable and other actor decision rule, and the same
+law/version, Relic/relationship identities, stance, law-defining committed
+variant, eventual selected exact pair, and proof structure. Permission inputs
+outside the closure remain fixed and the certain bits differ. At least one
+changed fact must have upstream truth and lifecycle independent of the desired
+permission result; a costed permission-only toggle is invalid. Versioned causal
+semantics and representation invariance prevent post-result or field-layout
+classification. With unobserved stochastic mediation, the decision must change
+reachable bit support or its conditional distribution under the lawful
+observation history; one favorable crossover under an unchanged policy
+distribution is insufficient. This changes a factual input to the intrinsic
+law; it is not participant reconfiguration or a live permission prompt.
+
+Old C2E therefore becomes a non-counting parent for E1 responsive-law
+prevalence, conditional E2 matched player-causal response support, and
+conditional E3 constant-law polarity. E1-A prunes E2 and activates E3; E1-B
+activates E2 and prunes E3; E1-C activates both independent siblings and queues
+E2 first. E3 partitions nonempty `K_v` into always-deny only, always-allow
+only, or coexistence. The E1/E3 class-support projections enumerate all seven
+nonempty combinations of responsive, always-deny, and always-allow classes.
+E2 is orthogonal wherever responsive laws exist, yielding eleven terminal
+decision paths across the three rows. Global exact permission incidence is
+therefore derived rather than a fourth card. Exact identities, triggers,
+counts, distribution, and stronger within-definition prevalence remain
+AUTHOR/SPEC/TUNE.
+
+Replacing one counted C2E row with three adds two rows and two potential cards.
+After recording C2D-A and opening E1, the register has eighty-nine slots: 37
+`SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 34 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. At that checkpoint E1 was the
+presented card; D1 remained independently ready but queued.
+
+**Post-answer screen and twenty-eighth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3C2E1-C`: responsive laws and context-invariant
+laws coexist. Thus `R^{exact-resp}_v` is a nonempty proper subset of the
+complete intrinsic-law set, while constant polarity remains unsettled. E1
+moves to `DIR-SELECTED`; E2 and E3 are both applicable, with E2 first.
+
+Two distinct bounded read-only audits, followed by mutual cross-challenge,
+upheld E2's empty/nonempty support boundary but broke its one-action witness.
+That wording rejected a bound finite episode or delayed causal consequence and
+admitted a forced move, illegal inaction, unrelated random coincidence, or a
+permission-only flag. The repaired witness uses one independently revisable
+lawful decision intervention. A prospectively bound finite episode can be that
+one choice; several independently revisable future choices cannot be bundled
+afterward. Compared policies fix every other decision coordinate and causal
+background, carry the intervention's complete causal closure, preserve the
+same law and eventual selected pair/proof, and differ in their deterministic
+bits. A changed permission-read fact needs upstream truth conditions and
+lifecycle independent of the desired permission. Exact actor, disclosure,
+trigger, success rate, and saturation remain RCS-02/SR-10 or
+AUTHOR/SPEC/TUNE. Any stochastic witness needs a later semantic-coupling proof;
+two unrelated lucky traces and a distribution-neutral hidden crossover never
+qualify. This semantic repair adds no row.
+
+After E1-C and E2's activation, the register has eighty-nine slots: 36
+`SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 35 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. At that checkpoint E2 was the
+presented card; E3 and D1 remained prerequisite-ready but queued.
+
+**Post-answer screen and twenty-ninth prerequisite correction, 2026-09-26.**
+The owner selected `RCS-03C3C3C2E2-B`: at least one responsive intrinsic law
+has a qualifying matched decision intervention and complete causal closure
+that changes its certain bit while the same law and eventual selected exact
+pair/proof remain fixed. E2 moves to `DIR-SELECTED`. E3 becomes the presented
+sibling; D1 remains ready but queued.
+
+Two distinct bounded read-only audits, then mutual cross-challenge, upheld
+E3's three-way complete-law polarity partition. For nonempty constant-law class
+`K_v`, let `K^+_v` contain laws returning one throughout their own nonempty
+reachable authoritative domains. `K^+_v` is empty, all of `K_v`, or nonempty
+proper, yielding steadfast-refusal only, steadfast-compatibility only, or both.
+Singleton domains are nonvacuous but grant no breadth; dormant branches and
+representation/variant splitting cannot manufacture polarity.
+
+The classification is gate-local. Always-allow guarantees only passage through
+the exact permission coordinate; always-deny guarantees only “not both” and
+entry into later denied-pair treatment. Neither selects a final result, payoff,
+survivor, substitute, retry, reroute, or alternate proof. E1-C's responsive
+class already makes global exact-bit incidence mixed under every E3 answer.
+
+The audits initially disagreed between B's safe two-dialect catalog and C's
+three covenant philosophies. Cross-challenge proved steadfast refusal is not
+redundant with responsive denial: a responsive law must allow somewhere,
+whereas a constant-deny law removes allowance throughout its own reachable
+domain and can therefore support context-robust refusal. Participant or
+opponent steering is one possible realization, not a universally selected
+property. Conditional C is therefore the recommendation, with a hard existing-
+gate obligation rather than a new row. Each required constant-
+polarity family must support a reachable, mechanically legible, non-token legal
+build or policy purpose in its applicable release scope and remain viable and
+not everywhere weakly dominated under the later power/compatibility envelope.
+Certain refusal must be instrumentally useful or a play-shaping commitment or
+exploitable liability within a package receiving commensurate value. E3 chooses
+no concrete result or value mechanism. C3C3E/F and RCS-05/08 own those choices;
+SR-05/06 and RCS-17/18 validate purpose, fun, and non-domination. If no deny
+family passes, reopen E3 with B as the bounded replacement. No row is added.
+
+After E2-B and E3's activation, the register at that checkpoint had eighty-nine
+slots: 35
+`SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. E3 was the presented card; D1
+remained prerequisite-ready but queued.
+
+The owner then selected `RCS-03C3C3C2E3-C`. Responsive, context-invariant
+always-allow, and distinct context-invariant always-deny exact-permission law
+families must coexist (`R+D+A`). Each remains subject to SR-05/SR-06's
+legible, viable, non-token purpose gates; the steadfast-deny family also
+retains E3's explicit non-domination/reopen-to-B obligation. E3 selects no
+exact law, payoff, result, rarity, prevalence, or launch placement and moves to
+`DIR-SELECTED`.
+
+**Post-answer D1 prerequisite screen, 2026-09-26.** Two bounded read-only
+audits and cross-challenge upheld one binary post-routing distinct-related-
+exposure card. Reuse the existing resolved-pair domain. Let
+`R^{resolved-related}_v` contain its pairs whose selected authoritative ledgers
+use two distinct final children with intersecting complete lineages or one
+shared nonmultiplying authorization/accounting parent. The set is empty or
+nonempty; selector authority and deterministic complete-stance routing are
+already settled, and contextual response adds no third state.
+
+C2-C's pre-selector related support need not survive authoritative selection.
+Under D1-A every structurally valid related ledger pair remains counterfactual
+to authoritative co-selection, although either constituent ledger may be
+selected with an independent counterpart. D1-B instead requires at least one
+reachable actual selected-tuple witness. A hybrid member of
+`E^{resolved-exact}_v∩R^{resolved-related}_v` is not a third state: it is one
+pair and later receives one permission bit. Requiring a related-only witness
+would silently strengthen C2-C and is not part of B.
+
+Cross-challenge also rejected a proposed D1-time strategic-distinctness or
+dominance test. B promises exposure only. Its selected children and qualifying
+relation must be genuine and mechanically legible; the containing authored
+package must later satisfy SR-05/SR-06's operative-choice or state-transition,
+viable-purpose, and non-token release tests. At that later closure the related
+fact must matter to something players can understand, plan around, or have
+treated. That deferred validation neither requires a related-only route nor
+selects permission, control, result, benefit, or payoff. If no authored witness
+passes, reopen D1 with A. No row is added.
+
+After E3-C and D1's activation, the register at that checkpoint had eighty-nine
+slots: 34
+`SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 37 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. D1 was the presented card.
+
+The owner selected `RCS-03C3C3D1-B`. At least one reachable actual evaluation
+under one actually bound lawful complete stance/configuration selects an
+authoritative distinct-related pair. D1 moves to `DIR-SELECTED`; the witness
+may be related-only or hybrid and grants no permission, result, payoff, or
+participant actionability.
+
+**Thirtieth prerequisite correction, 2026-09-26.** Three bounded read-only
+audits and cross-challenge found that old D2 hid five prerequisite boundaries
+before final related-form incidence. Define
+`E_v=E^{resolved-exact}_v`, `R_v=R^{resolved-related}_v`,
+`H_v=E_v∩R_v`, and `Q_v=R_v setminus E_v`. Every hybrid in `H_v` is one
+opportunity with one permission bit. Exact C2A-A makes that bit participant-
+intrinsic, C2D-A makes it deterministic on fixed authoritative input, and the
+selected E1/E2/E3 topology governs its exact projection. D2 can constrain
+hybrid placement but cannot add a related vote, draw, or precedence rule.
+
+The residual `Q_v` projection remains open. Its permission may be intrinsic or
+prospectively participant-configurable; coupled to routing or independently
+recombinable; selected from a closed menu or bounded constructive language;
+participant-branched or not; and deterministic or genuinely stochastic after
+all authoritative inputs are fixed. Those boundaries change legal builds,
+actions, planning, replay, migration, and exploit surfaces independently.
+
+Old D2 becomes a non-counting parent for six rows: D2A participant-
+configurability prevalence on related-only-capable contracts; conditional D2B
+coordinate recombination; conditional D2C1 constructive language; conditional
+D2C2 participant-composed context branching; D2D stochastic support over
+complete `Q_v` law projections; and D2E final form-wide permission topology
+over all `R_v`. D2A-A prunes D2B/D2C1/D2C2 and activates D2D. D2A-B/C activates
+D2B; every D2B answer activates D2C1. D2C1-A prunes D2C2 and activates D2D;
+D2C1-B/C activates D2C2, then D2D. D2D precedes a fresh D2E screen.
+
+D2A through D2D use `Q_v`; otherwise forced-intrinsic, deterministic hybrid-
+only contracts would manufacture false mixed classes. D2E must return to all
+`R_v`: even when `Q_v` is empty, selected exact law families do not determine
+whether authored hybrids are all allowed, all denied, or mixed. A D2E answer
+constrains which exact opportunities may also be related and never changes an
+inherited hybrid bit.
+
+No separate related-only-support card passes admission. Positive D2A or D2D
+branches openly entail the residual support their distinct authority or
+randomness needs; bare `Q_v` coverage adds no independent player contract. No
+cross-form-uniformity or hybrid-composition row is needed, and existing G2
+already owns coupling across two distinct simultaneous nonconstant pair
+marginals. Replacing one D2 row with six adds five slots and potentials.
+
+The corrected register has ninety-four slots: 38 `SCREEN`, 1 `OWNER-OPEN`, 13
+`PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 39`. D2A was the presented card.
+
+The owner selected `RCS-03C3C3D2A-A`. No matched reachable related-only
+opportunity and pair of lawful prospective participant settings change the
+complete permission law while its contract, facts, tuple, and pair remain
+fixed. `Q_v` may still be empty, and different contracts or factual contexts
+may carry different intrinsic laws. D2A moves to `DIR-SELECTED`; D2B, D2C1,
+and D2C2 prune; D2D opens.
+
+Three bounded read-only prerequisite audits and two recommendation cross-
+challenges upheld D2D as one empty-aware stochastic-support card over canonical
+complete `Q_v` law projections. No row is added. Its exhaustive cases are no
+stochastic projection, every extant projection stochastic-capable, or
+deterministic-only and stochastic-capable projections coexisting. Probability
+is measured after all prospective bindings, facts, and earlier committed state
+are fixed but before the earliest semantic realization that commits this
+permission bit. One law random in one context and certain elsewhere remains one
+stochastic-capable law; code/refactor shape cannot multiply laws.
+
+At that checkpoint the register remained ninety-four slots: 34 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 39 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`;
+`Phi_SR = 35`. D2D was the presented card. A would immediately prune G2
+because every exact, hybrid, and related-only marginal would then be
+deterministic. B/C leave G2 conditional and send D2E through its required fresh
+audit without proving G2's three-plus or two-nonconstant-marginal prerequisites.
+
+The owner selected `RCS-03C3C3D2D-C`. Deterministic-only Witness and
+stochastic-capable Oracle related-only law projections coexist, so `Q_v` and
+both projection families are nonempty. The selected deferred obligation
+requires both families and their coexistence to support legible, viable,
+non-token, non-dominated policies; failure reopens D2D with A. Each related-
+only opportunity receives one committed realization, and hybrids retain one
+inherited deterministic exact bit. Before further amendment this would leave
+ninety-four slots: 33 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 40
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 34`.
+
+**Thirty-first prerequisite correction, 2026-09-26.** Three bounded read-only
+audits and one two-question cross-challenge wave found that old D2E still
+compressed six independently variable player-policy boundaries. Retain the
+nonempty Oracle family `S^Q_v=G^{Q-perm-stoch}_v`; let
+`D^Q_v=W^{Q-perm-law}_v setminus S^Q_v` be the deterministic related-only
+Witness family. Let `W^H_v` contain separately tagged exact-law restrictions to
+nonempty hybrid domains and set `D^R_v=D^Q_v disjoint-union W^H_v`. Tagging
+prevents one contract's stochastic `Q_v` behavior and deterministic `H_v`
+inheritance from manufacturing a false responsive law.
+
+Old D2E becomes a non-counting parent for D2E1 Oracle distribution-response
+prevalence; conditional D2E2 matched causal odds response; D2E3 deterministic
+related-projection response prevalence; conditional D2E4 matched causal
+certain-bit response; conditional D2E5 stable deterministic polarity; and
+conditional D2E6 missing-certainty endpoint support in a responsive stochastic
+related-only law. Deterministic response and stochastic distribution response
+change different policies, as do their causal witnesses. Stable deterministic
+polarity is independently variable. Finally, invariant-allow Witness plus
+Oracle images `{0.2,0.8}` and `{0.2,0}` agree through D2E5 but differ on whether
+any plan-relevant context guarantees denial.
+
+D2E6 is not a hybrid-composition card. When prior rows leave exactly one
+certain endpoint and responsive Oracle laws make the opposite endpoint
+possible, B requires its witness on some `q∈Q_v`; authoring an exact opportunity
+into `H_v` cannot activate or satisfy it. Otherwise it derives from the earlier
+rows. Exact identities, kernels, counts, contexts, and hybrid membership remain
+AUTHOR/SPEC/TUNE. No seventh row passes admission.
+
+E1 is presented first because it is the clearest continuation of D2D-C's new
+Oracle identity. E1-A prunes E2; E1-B/C activates E2; the deterministic E3-E5
+lane follows; E6 then opens only on its unresolved branch. Replacing one D2E
+row with six adds five slots and potentials. At that checkpoint the register
+had **ninety-nine slots: 38 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 40
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`**.
+D2E1 was the presented card.
+
+The owner selected `RCS-03C3C3D2E1-B`. Every Oracle law now has at least two
+reachable permission probabilities, but its factual response may remain wholly
+immutable or exogenous to player decisions. Two bounded read-only audits and a
+primary authority replay upheld D2E2 as one empty/nonempty matched causal-
+response card. A qualifying witness preserves the same intrinsic law and
+eventual related-only pair/proof, changes exactly one independently meaningful
+lawful decision coordinate, carries both arms through complete causal closure,
+and changes the conditional permission distribution rather than merely the
+sampled bit. Direct odds commands and token side effects do not qualify.
+
+No universal-actionability, actor, disclosure, exact-odds, or endpoint row is
+added. Those are stronger authoring minima or remain with their existing
+owners unless a distinct required product purpose later passes reopening. The
+register at that checkpoint had **ninety-nine slots: 37 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 41 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 38`**. D2E2 was the presented card.
+
+The owner selected `RCS-03C3C3D2E2-B`. At least one responsive Oracle law must
+have a qualifying matched player/counterplayer-causal witness: one materially
+meaningful lawful decision changes the conditional permission distribution
+through its complete causal closure while the intrinsic law and eventual
+related-only pair/proof remain fixed. This is existential, not universal; a
+direct or cosmetically laundered odds command, changed law/pair/proof,
+post-draw action, reroll, RNG-ordering artifact, or lucky sample does not
+qualify. The witness remains subject to the documented material-policy,
+legibility, non-token, and bounded-fallback guards.
+
+Two bounded read-only post-answer audits re-derived D2E3's tagged projection
+topology and attacked all three branches' gameplay purposes. They upheld one
+empty/all/nonempty-proper response-prevalence card and found no prerequisite
+correction or new row. Use each related-only Witness law's complete nonempty
+`Q` domain and each exact law's complete nonempty `H` restriction as separately
+tagged deterministic projections. Never split one projection by output or
+context, concatenate one contract's `Q` and `H` outputs, or slice certain
+endpoint contexts from an Oracle into deterministic projections.
+
+D2E3-A makes every tagged deterministic projection steadfast. D2E3-B makes
+every one responsive, so each complete domain reaches both certain bits.
+D2E3-C requires responsive and steadfast projections to coexist, without
+promising two physical contracts or per-form coverage. Exact E1-C does not
+settle this boundary: a responsive exact law may have no hybrid domain or may
+be steadfast when restricted to one. The audit conditionally recommends C for
+the distinct anchor, context-sensitive deterministic certainty, and Oracle-
+hedge policies, with active manipulation reserved to E4. A is the bounded
+fallback if the responsive deterministic class cannot prove a legible, viable,
+non-token, non-dominated purpose.
+
+At that checkpoint the register had **ninety-nine slots: 36 `SCREEN`, 1
+`OWNER-OPEN`, 16 `PRUNED`, 42 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 37`**. D2E3 was the presented card.
+
+The owner selected `RCS-03C3C3D2E3-C`. Responsive and steadfast tagged
+deterministic related projections coexist under the hard viability obligation.
+This is a projection-level requirement with no two-contract, per-form, or
+hybrid-existence quota. E4 opens, E5 remains queued, and E6 derives because a
+responsive deterministic projection supplies both certain endpoints.
+
+Two bounded read-only audits upheld E4 as one empty/nonempty matched-causal
+support card. A qualifying witness stays inside one fixed `Q`- or `H`-tagged
+projection, law, form, and eventual pair/proof; one meaningful lawful decision
+and complete causal closure must change the eventual bit support or conditional
+distribution. For an `H` witness, the one inherited exact bit remains the only
+permission bit. Direct permission commands, cross-form movement, changed
+pair/proof, rerouting, and lucky stochastic crossovers fail.
+
+The owner selected D2E4-B with its conditional fallback. At least one
+responsive deterministic related projection must have a qualifying causal
+play-or-counterplay witness, but B grants neither universal coverage nor
+guaranteed action success. The decision must change eventual bit support or
+its conditional distribution under complete causal closure, and the related-
+form consequence must add a marginal truthful policy purpose rather than
+relabel an exact or Oracle causal exemplar. Failure reopens E4 with A.
+
+Two bounded read-only audits then upheld E5's empty/all/nonempty-proper stable-
+allow topology over the nonempty steadfast complement. A means steadfast
+refusal only, B steadfast compatibility only, and C both polarities. Complete
+`Q` and `H` projections remain separately tagged; polarity is gate-local; a
+singleton domain does not prove a viable category; and no branch selects a
+result or survivor.
+
+The gameplay audit found that ordinary viable-purpose language was too weak:
+an exact E3-C steadfast-deny law could acquire a nonempty hybrid restriction
+and formally satisfy related E5 without changing play. Every selected E5
+polarity must therefore add a marginal related-form policy purpose beyond
+exact E3-C and responsive related laws. An `H` witness may qualify, but tag
+inheritance alone may not. C is the conditionally recommended higher-ceiling
+target only if steadfast refusal becomes an instrumental strategy, explicit
+commitment, or compensated exploitable liability and all polarity policies
+remain legible, non-token, non-dominated, and resistant to cheap veto/grief;
+B is the production baseline and default fallback only while compatibility
+passes its own viable-purpose gate. Compatibility failure with viable refusal
+routes to A; failure of both polarities reopens D2E3-C's steadfast-class
+promise.
+
+The owner selected guarded D2E5-C. Steadfast-allow and steadfast-deny related
+projections coexist, with the complete marginal-purpose, anti-laundering,
+legibility, non-dominance, anti-grief, and B/A/upstream fallback obligations
+unchanged. This guarantees a reachable false-bit route but does not claim a
+runtime-observed battle or choose its result.
+
+A two-question post-answer audit upheld that dependency transition and broke
+old C3C3E as one owner card. Under the false-bit and C3c.46-A constraints, a
+pair-local denied disposition has exactly five semantic shapes: empty; one
+retained original; one genuine substitute; one original plus one substitute;
+or two genuine substitutes. Cancellation incidence, positive width, singleton
+identity kind, double-result composition, and output authority change distinct
+settlement or gameplay boundaries.
+
+The thirty-second prerequisite correction therefore makes old E a non-counting
+parent for E1-E4 and broadens F to total denied-output resolution authority.
+E1 classifies cancel-only, positive-only, or both; E2 conditionally classifies
+singleton-only, double-only, or both positive widths; E3 conditionally
+classifies retained-original, substitute, or both singleton kinds; and E4
+conditionally classifies original-plus-substitute, two-substitute, or both
+double compositions. Together they encode every nonempty support subset of the
+five shapes exactly once. Exact identities and mappings remain AUTHOR/SPEC. F
+opens only when one fixed opportunity retains several lawful outputs after
+prospective binding; mixed catalog support alone creates no chooser.
+
+Replacing one counted E row with four adds three slots. At that checkpoint the
+register had **102 slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 45
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`**.
+E1 was the presented card.
+
+Under the owner's explicit delegation, a three-angle deep audit selected
+guarded E1-C. Cancellation and positive denied-pair outcomes coexist, but each
+must create an independently chosen policy after unrelated package value is
+equalized. Before every affected player's last informed reversible commitment,
+the bound result family and every cancellation/positive switching fact must be
+truthfully available; settlement must be causally attributable afterward. No
+cheap unilateral teammate action may force cancellation after that point.
+Exact holder, presentation, authority, compensation, and evaluation thresholds
+remain RCS-02/SR-10, F, RCS-05, and RCS-17/18 work. Failure follows E1's B/A
+fallbacks or reopens E5-C when the false-bit interaction itself remains abusive.
+
+Two post-answer audits uphold E2 as one empty/all/nonempty-proper width-two
+support card over the nonempty positive denied domain. A means every positive
+denial is singleton, B every positive denial is two-wide, and C requires both.
+E3/E4 retain identity composition and F retains same-opportunity output
+authority.
+
+Zanzagar selected guarded E2-C. Positive denied support must contain both
+singleton and double results, while cancellation, singleton, and double
+families remain prospectively legible, non-token, non-dominated policies
+rather than a `0 < 1 < 2` power ladder. The double family must add marginal
+purpose beyond ordinary dual weave; cheap teammate steering and a decorative
+second receipt fail. If one family fails, reopen E2 with the surviving A/B
+branch. If both remain viable but coexistence fails, reopen E2 for a fresh A/B
+choice; reopen E1 when neither positive width survives. Catalog coexistence
+creates no F authority.
+
+Two named-claim audits uphold E3's retained-original-only/substitute-only/both
+singleton identity topology and recommend guarded B as the cleanest way to
+give width one an intrinsic fusion/transmutation policy rather than a
+consolation rank beneath doubles. A is the production fallback if no honest
+substitute survives; C is a stretch only if both singleton families
+independently change optimized policy.
+
+Zanzagar selected guarded E3-B with E3-A as the qualified local fallback when
+substitute-specific viability fails and retained-original singleton play
+survives. Every singleton positive denial is one genuine substitute; neither
+original tag survives, but exact downstream consumer overlap remains
+AUTHOR/SPEC. Failure of both singleton kinds reopens E2, while identity-
+independent forced denial follows E5-C's upstream fallback.
+
+Two further audits uphold E4's original-plus-substitute-only/two-substitute-
+only/both composition topology. They conditionally recommend B so all positive
+denial remains transformational and singleton integration can compete with
+double breadth without reintroducing preferred-heir filtering. A is the
+production fallback if two genuine substitutes fail but anchored
+transformation survives; C requires both local policies to pass independently.
+Zanzagar selected guarded E4-B with E4-A as the practical fallback. Every
+double positive denial therefore uses two genuinely distinct substitutes
+unless that composition fails while anchored transformation remains viable.
+
+Two named-claim audits then broke old F before presentation. E1-E4 do not
+decide whether several outputs remain lawful at one fixed opportunity, and the
+old row also bundled that existence fact with participant configurability,
+policy-language, and stochastic-law boundaries. The thirty-third prerequisite
+correction makes old F a non-counting parent for F1, F2A, F2B1, F2B2, and F3.
+At that checkpoint the register had **106 slots: 35 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 49 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`**. F1 was the sole presented Relic card.
+
+Under the thirty-third correction, F1-A prunes F2A-F3. F1-B activates F2A;
+F2A-A prunes the two participant-language rows, while a configurable branch
+activates F2B1 and any constructive branch may activate F2B2. F3 follows F2A
+and every applicable language row. A participant witness must change the
+complete law through a prospectively bound setting under held-fixed nonpolicy
+inputs; ordinary build/context changes and live post-denial selection do not
+count. Exact mappings, priorities, policy vocabulary, probabilities, seeds,
+and replay mechanics remain in their AUTHOR/SPEC/TUNE or assurance lanes.
+
+Zanzagar selected F1-A. Every fixed denied opportunity is single-valued, so
+F2A, F2B1, F2B2, and F3 prune. Two named-claim audits then upheld G1 as one
+empty/nonempty three-plus pre-treatment contender-support card. Exact positive
+counts, maxima, prevalence, and pair incidence remain AUTHOR/SPEC absent a new
+player-material consequence boundary; G2, H, and I retain stochastic coupling,
+aggregate output cardinality, and identity authority. At that checkpoint the
+register had **106 slots: 30 `SCREEN`, 1 `OWNER-OPEN`, 20 `PRUNED`, 50
+`DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 31`**. G1
+was the sole presented Relic card.
+
+Zanzagar selected G1-A, forbidding three-plus contender sets inside one fixed
+evaluation. An exploratory follow-up briefly proposed separate cross-evaluation
+coupling and aggregate-settlement rows. A stricter canonicality audit broke
+that proposal before commit: under the selected automatic, immediate,
+cut-atomic semantics, any finite family of same-cut evaluators is exactly one
+product evaluator with labeled internal channels. Splitting it changes no
+player-observable policy, transition, information, or authority and cannot
+evade G1-A. C4 is therefore `DERIVED`; G2, H/I, and C5-C7 prune; C3D opens. The
+register then remained **106 slots: 22 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 51 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`**.
+
+A prerequisite audit of C3D then found four independent player-material
+boundaries: whether positive settlements claim evidence, whether ledger-bearing
+empty settlements claim evidence, which occurrences inside the authoritative
+selected ledger tuple are claimed, and whether held relationship truth can
+support another distinct evaluation after failure. The two claim-trigger bits
+must stay separate because no selected invariant forbids a failure-only claim
+law, however unattractive it may be. The thirty-fourth correction makes old
+C3D a non-counting parent and replaces it with C3D1-C3D4. At that checkpoint
+the register had **109 slots: 25 `SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 51
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. C3D1
+was the sole presented Relic card. Zanzagar then selected D1-B, requiring
+nonempty positive-result claim support without choosing prevalence or footprint.
+Zanzagar then selected D2-A, so ledger-bearing empty settlements preserve their
+selected causal evidence while the committed realization remains non-redrawable.
+Zanzagar then selected D3-A, so every actual claim takes the complete
+deduplicated selected-ledger union while exact claim prevalence remains open.
+A post-answer scope audit corrected D4's broad “failed-result” shorthand to
+ledger-bearing cancellation recurrence keyed by the canonical contender pair;
+true no-candidate recurrence would require a new identity boundary. Zanzagar
+then selected D4-A with B as a guarded reopening fallback: one listen per
+unbroken bond. A C3E scope audit established that same-tag evidence reuse keys
+to the receipt tag that actually committed, including substitute tags, rather
+than automatically to original contenders. Zanzagar then selected C3E-A, so
+claimed proof cannot return through a previously attributed exact tag after
+rearm. A C3F audit corrected old “different-tag” shorthand to later
+non-attributed-incidence reuse, including a co-committed tag that lacked the
+occurrence's incidence. One final pre-commit verifier broke the draft's hidden
+one-hop/first-admission rule; a second caught the first repair treating every
+successful incidence as a claim and leaving fresh co-proof unrouted. The
+amended register therefore has five B-only boundaries and **114 slots: 25
+`SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 56 `DIR-SELECTED`, 4 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`**. At that checkpoint, C3F was the sole
+presented Relic card.
+
+Zanzagar selected C3F-A. Claimed canonical proof is now spent across the same
+active Relic for every later result incidence throughout the immutable claim
+episode rooted at `z0`; a genuinely new occurrence remains eligible. C3F moves
+to `DIR-SELECTED`, and F1-F4B prune because their B-only reuse domain is empty.
+At that pre-amendment checkpoint, the 114-row register contained 19 `SCREEN`,
+1 `OWNER-OPEN` at old RCS-03D, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`.
+
+Three read-only prerequisite audits then agreed that old RCS-03D named only
+cause eligibility while its inherited scope also promised direction,
+adjacency, clearing, and reversibility. A cause-order audit separated the
+actual Relic-local evidence-claim write from its earlier positive receipt
+commit. A dialect countermodel then showed that leaving a proper-subset cause
+mapping wholly to authoring could silently exclude either remembered-condition
+or remembered-attunement Relics. The thirty-sixth correction therefore makes
+old RCS-03D a non-counting parent and replaces it with six cause-prevalence
+rows, one conditional state/boundary incidence child for each proper branch,
+and four transition-topology rows. Replacing one counted row with sixteen adds
+fifteen slots. The repaired register has **129 slots: 34 `SCREEN`, 1
+`OWNER-OPEN`, 31 `PRUNED`, 57 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 35`**. At that checkpoint, RCS-03D1P was the sole
+presented Relic card.
+
+Zanzagar selected D1P-B. Every transforming definition must have at least one
+reachable positive-result cause path, without making every result causal or
+any proposal self-authorizing. D1P moves to `DIR-SELECTED`; P1 prunes because
+universal support necessarily reaches both dialects; D1C becomes the sole
+`OWNER-OPEN` row. The register remains 129 slots and now contains 32 `SCREEN`,
+1 `OWNER-OPEN`, 32 `PRUNED`, 58 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 33`.
+
+Zanzagar then selected D1C-A. Claims retain their full proof-spend and
+later-reuse consequences but never directly cause a transformation proposal.
+D1C moves to `DIR-SELECTED`, and C1 prunes. Under the then-current register,
+D1Z would have opened at `Phi_SR = 31`.
+
+A bounded end-to-end lifecycle audit then broke the thirty-sixth correction's
+six-family cause list before D1Z was presented. It had omitted six independent
+authoritative occurrences: actual canonical invocation I, actual nontrivial
+ledger-tuple selection T, true/allow verdict VT, false/not-both verdict VF,
+positive provisional-output completion/sealing K, and the post-`{}` canonical
+pair-recurrence latch write L. It also registered N as a proposed terminal
+true-no-candidate conclusion. With existing P, C, Z, X, and M, the finite audit
+register became I, N, T, VT, VF, K, P, C, Z, L, X, and M. A later reachability
+audit, recorded below, proves N empty; the other eleven are the reachable cause
+families. Readiness, contender truth, reads, raw RNG, deterministic disposition,
+and implementation callbacks do not pass the same occurrence test.
+
+The thirty-seventh correction replaces the incomplete sixteen-row D subtree
+with twenty-eight rows: twelve cause-prevalence parents, their twelve
+conditional proper-support dialect children, and D2-D5. Cause witnesses use a
+prospectively versioned **direct locus edge**, not transitive but-for ancestry:
+deleting only that edge while holding the named occurrence and completed trace
+fixed must remove the proposal. At that checkpoint the 141-row register
+contained 42 `SCREEN`, 1 `OWNER-OPEN` at D1I, 33 `PRUNED`, 59
+`DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 43`. The
+added rows expose already-promised cause distinctions and add no Relic, source,
+result, payoff, or implementation mechanic.
+
+Zanzagar then selected D1I-A. Invocation listens but never itself proposes a
+persistent transformation, so D1I is `DIR-SELECTED` and D1I1 is `PRUNED`.
+Before D1N was presented, a focused reachability audit broke the newly
+registered no-candidate premise. Fixed-tag readiness already requires
+sufficient relationship and tag-specific occurrence/recurrence inputs; C1-A
+makes that cut eligible, C2A-A invokes there, and C3A reads the same coherent
+cut. The ready tag supplies at least one valid ledger. A unique tuple is fixed
+directly; a multiplicity-positive product resolves to exactly one complete
+tuple under C3C3B1-A. A denied pair's fixed disposition is either positive and
+continues through K/P or is ledger-bearing Z; neither is a zero-tuple result.
+Thus no actual invocation reaches a true zero-contender
+terminal. The inherited row ID `RCS-03D1N` is retained for audit continuity but
+is `DERIVED` with empty reachable domain; D1N1 is `PRUNED`. Current prose calls
+the hypothetical terminal `NC` to avoid collision with the earlier successful
+no-response class named N.
+
+Zanzagar then selected D1T-A. The actual selection among multiple valid
+complete ledger tuples remains mechanically authoritative: it chooses the one
+operative proof-weave and may thereby change later permission, settlement, and
+claim consequences. The act of selection never itself proposes persistent
+transformation. D1T is `DIR-SELECTED`, and D1T1 is `PRUNED`.
+
+Zanzagar then selected D1VT-A. The actual true/allow permission bit retains
+every coexistence, disposition, and downstream result consequence, but the
+verdict itself never proposes persistent transformation. D1VT is
+`DIR-SELECTED`, and D1VT1 is `PRUNED`.
+
+Zanzagar then selected D1VF-A. The actual false/not-both permission bit retains
+every denial and deterministic-disposition consequence, but the verdict itself
+never proposes persistent transformation. D1VF is `DIR-SELECTED`, D1VF1 is
+`PRUNED`.
+
+Zanzagar then selected D1K-A. The whole positive provisional output still
+becomes complete and sealed, but that K occurrence never itself proposes
+persistent transformation. D1K is `DIR-SELECTED`, D1K1 is `PRUNED`, and D1Z
+was the sole frontier. A post-answer audit also corrected D1K's sealing symbol
+to `seal_K(z)` because D4 already uses `kappa(z)` for its cancellation-pair
+recurrence key; no semantic rule or count changed.
+
+Zanzagar then selected D1Z-C with D1Z-A retained as the explicit failure
+fallback. A disclosed nonempty proper Absence-bound subset may be shaped by an
+actual ledger-bearing `{}` settlement; the fallback removes Z causes if later
+policy, comprehension, non-dominance, or anti-exploit evaluation fails. D1Z is
+`DIR-SELECTED`. Zanzagar then selected D1Z1-C, so the proper Absence-bound
+subset has nonempty support in both transformation dialects while remaining
+globally proper. The proposed D1Z1-A scope fallback was not selected. D1Z1 is
+`DIR-SELECTED`. Zanzagar then selected D1L-A: the persistent canonical-pair
+latch retains its no-reattempt force but never directly proposes
+transformation. D1L is `DIR-SELECTED`, D1L1 is `PRUNED`, and D1X is the sole
+frontier. Zanzagar then selected D1X-C with D1X-A as the explicit system
+fallback: a disclosed nonempty proper Event-bound subset may change on a
+qualifying independent lived event unless the whole mechanic fails its gates.
+D1X is `DIR-SELECTED`. Zanzagar then selected D1X1-C with D1X1-A as the
+explicit child scope fallback: the proper Event-bound subset has nonempty
+support in both transformation dialects unless boundary-attunement event play
+fails while state-side play survives. D1X1 is `DIR-SELECTED`. Zanzagar then
+selected D1M-B with D1M-A as the explicit system fallback: every transforming
+definition has at least one dedicated-operation cause path unless the complete
+M system fails its gates. D1M is `DIR-SELECTED` and D1M1 is `PRUNED`.
+Zanzagar then selected D2-C with D2-A as the explicit system fallback: a
+nonempty proper set of transforming definitions has genuine nonclear
+transitive gaps, so staged and shortcut-complete topologies coexist unless
+required staging fails its gates. D2 is `DIR-SELECTED`. Zanzagar then selected
+D2A-C with D2A-A as the explicit child scope fallback: staged support is
+nonempty in both transformation dialects unless boundary staging fails while
+state staging survives. D2A is `DIR-SELECTED`. Zanzagar then selected D2A1-C
+with D2A1-B as the explicit qualified fallback: staged and shortcut-complete
+definitions occur in both dialects unless the narrow state-shortcut/four-cell
+failure trigger fires. At that checkpoint D2A1 became `DIR-SELECTED`, and D3
+became the sole frontier.
+
+Zanzagar then selected D3-B with D3-A as the explicit whole-system fallback.
+Every transforming definition has at least one prospectively legible,
+policy-material direct-reverse pair among nonclear assignments, while other
+edges may remain one-way and D3 grants no available or executable roundtrip.
+D3-A may replace B only if paired support fails as a system; definition-local
+failure reopens D3 toward C. D3 is `DIR-SELECTED`, D3A/D3A1 are `PRUNED`, and
+D4 became the sole frontier.
+
+Zanzagar then selected D4-A with D4-C as the explicit qualified fallback. No
+direct proposal originating from an authoritative nonclear assignment targets
+its typed unassigned value, and no active fixed-version transformation history
+can enter that value. Unequip, replacement, acquisition initialization, and
+later configuration work remain outside D4. C may replace A only if human play
+demonstrates a disclosed, material, non-dominated Release-bound policy that no
+honest named nonclear assignment can express and that survives the anti-reset,
+anti-stage-bypass, counterpick, re-entry, and boundary-snapshot gates. Firing C
+opens D4A/D4A1 and reopens dependent D5. D4 is `DIR-SELECTED`, D4A/D4A1 are
+`PRUNED`, and D5 is the sole frontier.
+
+Zanzagar then selected D5-B with D5-A as the explicit whole-system fallback.
+Every completed state- and boundary-supporting transforming definition has at
+least one prospectively legible, policy-material legal history of the same
+active Relic instance, owner, root, definition, and fixed version that lives
+`a ... b ... a` for distinct nonclear assignments. Every later leg starts
+from the exact authoritative state left by the earlier one; independently
+lawful histories cannot be stitched. B is existential per definition, so
+irreversible limbs and terminal forms remain legal. A return restores only
+the assignment coordinate, never spent proof, receipts, claims, latches,
+costs, cooldowns, causal events, chronology, combat state, or revealed
+information. D5-A may replace B only if compatible lived return fails as a
+system while irreversible biographies remain fun; definition-local failure
+reopens D5 toward C. D5 is `DIR-SELECTED`, D5A/D5A1 are `PRUNED`, and the
+approval-control source becomes the sole frontier.
+
+The thirty-ninth prerequisite correction adds conditional D2A because proper
+staged-topology support may occur only in the state dialect, only in the
+boundary dialect, or in both. The fortieth correction adds D2A1 because each
+D2A branch still leaves a player-material question about which dialects retain
+shortcut-complete alternatives. The forty-first correction adds conditional
+D3A and D3A1 because proper direct-reverse support leaves both its own dialect
+incidence and its reverse-free complement's dialect incidence unresolved. The
+forty-second correction adds conditional D4A and D4A1 because proper explicit-
+clear support leaves both its own dialect incidence and its clear-free
+complement's incidence unresolved. The forty-third correction adds conditional
+D5A and D5A1 because proper compatible lived-return support leaves both its own
+dialect incidence and its nonempty return-free complement's dialect incidence
+unresolved. It also corrects an overstatement: D3-B grants a bidirectional
+proposal seam, not a compatible executable roundtrip. The forty-fourth
+correction replaces old counted RCS-03E with E1 approval-control source,
+conditional Z/X source rows, and E2 participant timing. Old RCS-03E remains a
+non-counting parent alias. An adversarial pre-commit review rejected the first
+global-coexistence draft because it silently permitted a controllable
+definition or dialect caste. Zanzagar then selected E1-C with E1-B as the
+qualified agency fallback and E1-A as the deeper system fallback: every P
+proposal is participant-contingent and every M proposal is
+system-deterministic, giving every transforming definition both modes.
+
+The forty-fifth correction rejects a second hidden uniformity assumption.
+D1Z1-C and D1X1-C put each proper cause subset in both dialects without making
+its definitions share one approval source. E1Z and E1X therefore each choose
+system-deterministic universal, participant-contingent universal, or disclosed
+definition-uniform proper coexistence. Conditional E1ZA/E1ZA1 and E1XA/E1XA1
+classify the two definition classes' dialect incidences under coexistence.
+Adding those four rows raised the register to **156 rows**. Zanzagar selected
+E1Z-B with E1Z-A as its qualified cause-local system fallback, then selected
+E1X-A with E1X-B as its qualified cause-local agency fallback. The forty-sixth
+correction adds conditional E2C because generic timing coexistence hid whether
+P or Z receives live authority. Zanzagar then selected E2-C with E2-A as its
+qualified production fallback, fixing opposite cause-uniform P/Z timings while
+leaving their orientation explicit. Zanzagar then selected E2C-A, fixing P
+live and Z advance-bound. The forty-seventh correction replaces old RCS-04A
+with seven conditional collision rows after two challenge audits derive the
+maximal frozen cohort and target-bucketing invariants but preserve contributor
+sensitivity as a real later system-kernel choice. At that checkpoint the
+register had **163 rows: 22 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A2, 51 `PRUNED`, 82
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 23`**.
+Every reachable cause parent, cause-dialect child, and participant-timing row
+remains closed at worksheet-direction granularity. Zanzagar selected RCS-04A1-C
+with RCS-04A1-B as the qualified simplicity fallback, so at least one genuine
+distinct-target conflict is required while concordant cohorts still commit
+once. Zanzagar then selected RCS-04A2-A with RCS-04A2-C as the qualified
+fairness fallback, so every genuine conflict must settle one proposed target.
+
+The forty-eighth correction follows three read-only authority audits and one
+adjudication. They found that old RCS-04A3's exclusive system/participant
+branch lost same-cohort participant configuration plus immutable Relic-law
+composition, and that A1-C never fixed which transformation dialects can
+actually reach genuine conflict. One new RCS-04A1C prerequisite fixes
+state-only, boundary-only, or both-dialect conflict incidence. At that
+checkpoint old counted RCS-04A3 became a non-counting parent for twelve rows.
+The fiftieth correction below supersedes that row count and its incomplete
+controlled-opportunity profile universe. A4-A6 still govern complete automatic
+resolver laws after applicable participant configuration, while A7 governs
+policy timing only. Exact holder/information/default and binding horizon remain
+RCS-02 and RCS-13.
+
+The forty-ninth correction prominently records two failures in that first
+repair. “Both forms” first collapsed separate fixed contracts with one
+contract supporting both. The intermediate two-row repair then collapsed
+context-separated availability with same-opportunity choice, and uniform
+coavailability with contexts that remove one form. Those worlds change legal
+actions and required forecast information. It correctly partitions the seven
+nonempty **controlled-form projections** over policy-only, direct-only, and
+both genuinely coavailable, but it incorrectly omitted reachable conflicts on
+the same configurable contract at which no participant result-control
+coordinate exists. Its old statement that seven profiles were exhaustive is
+therefore historical, not current.
+
+Zanzagar selected RCS-04A1C-C, so genuine distinct-target conflict has at
+least one state-dialect and at least one boundary-dialect witness. The
+fiftieth correction follows three further read-only audits. It adds `I` for a
+reachable conflict with no authored material participant result-control
+coordinate, seven conditional rows that split each controlled-form projection
+by absence, universality, or proper coexistence of `I`, and one later complete-
+signature dialect-topology row. The old A3A1/A3A2 marginal-incidence rows
+become non-counting historical aliases: independently classifying marginals
+still hid cross-coordinate dialect segregation. The then-counted A3X row
+classified complete versioned A3/A7 signatures, but its non-universal options
+still left player-material membership and orientation hidden. The fifty-first
+correction below therefore replaces it with A3XI/A3XP/A3XD, one complete-
+signature incidence row each. Any later new player-material coordinate reopens
+that exact-signature map.
+
+Removing those two incomplete marginal rows and adding eight exact rows made
+the register 181 rows. Zanzagar then selected RCS-04A3A-C with A3A-A as the
+qualified simplicity/artifact-identity fallback: participant-configurable and
+participant-intrinsic fixed contracts coexist. Zanzagar then selected
+RCS-04A3B1-C with B1-A as the qualified low-interruption/policy-mastery
+fallback: direct-capable and policy-only configurable contracts coexist.
+Zanzagar then selected RCS-04A3B2-A with B2-C as the qualified higher-ceiling/
+identity exception: direct-capable contracts have controlled-form projection
+exactly `{D}`, while the separate policy-only class remains. That register
+checkpoint had **181 rows: 26 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3B1I, 60 `PRUNED`, 87 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 27`**. Zanzagar then selected RCS-04A3B1I-A with B1I-B
+as the qualified system fallback: every policy-only contract is complete-
+profile exact `{P}` and remains materially policy-responsive at every genuine
+conflict. That checkpoint had **181 rows: 25 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3B2I, 60 `PRUNED`, 88 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 26`**. Zanzagar then selected RCS-04A3B2I-B with B2I-A
+as the qualified practical agency/clarity fallback: every direct-only contract
+is complete-profile exact `{I,D}`, with at least one valid live direct choice
+and one authored participant-intrinsic conflict. Direct control uses a
+semantic live target-coordinate test; policy uses a material non-target
+participant state and may bind live or earlier. `I` requires authored absence
+of any material participant result-control coordinate at one reachable
+conflict; failure to execute an otherwise material control does not count.
+Priorities, filters, deterministic outputs, UI aliases, target-looking labels,
+or one button plus a default cannot cross those forms by presentation alone.
+A3C now applies to the nonempty exact-`{P}` class. Its independent-coordinate
+test is semantic and local: policy must change the complete law on a matched
+conflict while every other participant-semantic value remains fixed. A full
+Cartesian product is unnecessary, while separate widgets with forced one-to-
+one pairings remain bundled. That checkpoint had **181 rows: 24 `SCREEN`,
+1 `OWNER-OPEN` at RCS-04A3C, 60 `PRUNED`, 89 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`**. Zanzagar then selected A3C-A with
+A3C-B as the qualified class-wide agency/clarity fallback: every material
+collision-policy change is inseparably bundled with another meaningful
+participant-semantic change. A3D1 remained independent: bundled policy could
+still be constructed, but no lawful policy edit could hold every other
+participant semantic fixed. Zanzagar then selected A3D1-A with A3D1-B as the
+qualified class-wide expressive-mastery/menu-bloat fallback, so every policy
+contract offers only finite authored whole bundled covenants. D2 prunes and A4
+opens. Three A4 audits then split the old binary shorthand into attribution-
+only, universal contributor-sensitive, and stable neutral/sensitive
+coexistence without adding a row. The current register has **181 rows: 21
+`SCREEN`, 1 `OWNER-OPEN` at RCS-04A4, 61 `PRUNED`, 91 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**. Zanzagar then
+selected A4-C with A4-A as the qualified clarity/equal-ceiling/anti-farming
+fallback, requiring stable contributor-neutral and contributor-sensitive law
+families without scalar compensation. Three A5 audits and two
+cross-challenges disputed whether stochastic incidence had to split by those
+classes. Neutral adjudication kept one global A5: no selected rule guarantees
+variance posture independently within each sensitivity class, so exact
+cross-placement is AUTHOR/SPEC unless its tested consequences trigger the
+explicit reopening rule. The current register remains **181 rows: 20
+`SCREEN`, 1 `OWNER-OPEN` at RCS-04A5, 61 `PRUNED`, 92 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`**.
+Zanzagar then selected A5-C with A5-A as the qualified policy-mastery/
+multiplayer-trust/Rite-and-return fallback. Deterministic-only and stochastic-
+capable automatic law families coexist as stable equal-ceiling identities;
+exact A4×A5 placement remains AUTHOR/SPEC. Three A6 audits disagreed over
+whether catalog-wide versus local kernels were a product choice or vacuous
+code factoring. Neutral adjudication kept A6 only after repairing it around
+transferable player-semantic grammar: code factoring is irrelevant, while a
+change in truthful causal explanation or counterplay calculus is material.
+The current register is **181 rows: 19 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A6,
+61 `PRUNED`, 93 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 20`**.
+Zanzagar then selected A6-A with A6-B as the qualified artifact-identity
+fallback. Every complete automatic law now uses one bounded transferable
+player-semantic grammar; code factoring and exact recipes remain outside the
+owner choice. Three A7 audits unanimously repaired its old binary shorthand:
+advance-bound and live-capable policy contracts may coexist as stable timing
+identities, changing legal actions and available information without forcing a
+new row or cross-product guarantee. Zanzagar selected A7-A with A7-C as the
+qualified artifact-identity/direct-participation fallback, making every policy
+contract advance-bound. A named-claim audit then broke old A3X: its aggregate
+paired/native topology hid which major dialect actually offered intrinsic,
+policy, or direct actions. The fifty-first prerequisite amendment replaces
+that one row with three complete-signature incidence rows, not marginal
+coordinates. The current register is **183 rows: 19 `SCREEN`, 1 `OWNER-OPEN`
+at RCS-04A3XI, 61 `PRUNED`, 95 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 20`**.
+Zanzagar then selected A3XI-A with A3XI-B as the qualified clarity fallback,
+requiring honest pure-`{I}` support in both transformation dialects without
+requiring equal counts or mirrored content. Because A3XI-A alone covers both
+dialects, A1C-C's joint-coverage guard is already satisfied and does not force
+an A3XP or A3XD orientation. The current register is **183 rows: 18 `SCREEN`,
+1 `OWNER-OPEN` at RCS-04A3XP, 61 `PRUNED`, 96 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**.
+Zanzagar then selected A3XP-A with A3XP-B as the qualified clarity fallback,
+requiring honest advance-bound bundled exact-`{P}` support in both dialects
+without requiring equal counts, mirrored covenant menus, common laws, causes,
+or routing. A3XI-A and A3XP-A each cover both dialects, so A3XD retains all
+three orientations. The current register is **183 rows: 17 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A3XD, 61 `PRUNED`, 97 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 18`**.
+Zanzagar then selected A3XD-A with A3XD-B as the qualified clarity fallback,
+requiring honest exact-`{I,D}` direct-specialist support in both dialects.
+Together XI-A, XP-A, and XD-A derive universal paired signature support and a
+six-contract/version witness floor. The current register is **183 rows: 16
+`SCREEN`, 1 `OWNER-OPEN` at RCS-04B, 61 `PRUNED`, 98 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 17`**.
+A bounded prerequisite audit then proved that artifact-instance identity,
+definition-contract identity, and semantic biography-lineage identity can vary
+independently while the selected committed target stays fixed. Old RCS-04B is
+therefore a non-counting parent alias for RCS-04B1 through RCS-04B3. The
+fifty-second amendment raises the register to **185 rows: 18 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04B1, 61 `PRUNED`, 98 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**. D5-B excludes universal artifact or
+definition replacement but leaves stable in-place/successor coexistence open.
+Zanzagar then selected B1-A with B1-B as the qualified reincarnation/artifact-
+identity fallback. Every successful nonnull transformation commit preserves
+its `soulRelicInstanceId`; B1 closes and B2 opens without adding or pruning a
+row. The current register is **185 rows: 17 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04B2, 61 `PRUNED`, 99 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 18`**.
+Zanzagar then selected B2-A with B2-B as the qualified named-metamorphosis/
+artifact-identity fallback. Every successful nonnull transformation commit
+preserves its definition and immutable fixed current-design contract/version;
+B2 closes and B3 opens without adding or pruning a row. A terminology audit
+holds one canonical nonforking biography lineage invariant and narrows B3 to
+active semantic chapter preservation versus unique linked succession. The
+current register is **185 rows: 16 `SCREEN`, 1 `OWNER-OPEN` at RCS-04B3, 61
+`PRUNED`, 100 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 17`**.
+Zanzagar then selected B3-B with B3-A as the qualified simplicity/non-token-
+biography fallback. Every successful assignment-changing commit closes the
+sole active chapter and opens exactly one ancestry-complete linked successor
+inside the same artifact, definition, and canonical nonforking biography
+lineage. B3 closes and old RCS-05 would open without adding or pruning a row.
+A bounded prerequisite audit then broke old RCS-05 into six independently
+player-material axes: manifestation prevalence, settlement multiplicity,
+realization horizon, input-Charm marginal power, payoff-Charm marginal power,
+and catalog/required-family optimized-ceiling topology. Old RCS-05 becomes a
+non-counting parent alias. The fifty-third amendment replaces its one counted
+row with six and raises the register to **190 rows: 20 `SCREEN`, 1
+`OWNER-OPEN` at RCS-05A, 61 `PRUNED`, 101 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`**.
+Zanzagar then selected 05A-A with 05A-C as the qualified emergent-artifact-
+identity fallback. Every positive payoff remains mediated through legal
+transitions owned by already-paid qualifying sources; no distinct Relic-origin
+payoff operation/state appears. A bounded audit then broke old 05B's joint-
+versus-per-receipt shorthand into receipt-local incidence, receipt-local
+breadth, and pair-irreducible supplementation. Old 05B becomes a non-counting
+parent alias. The fifty-fourth amendment replaces its one counted row with
+three and raises the register to **192 rows: 21 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-05B1, 61 `PRUNED`, 102 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 22`**.
+Zanzagar then selected B1-A with B1-C as the qualified receipt-agency/artifact-
+identity fallback. Every positive dual payoff is pair-inseparable, so B2/B3
+prune and old 05C would open. A bounded audit then broke old 05C's horizon
+shorthand into retained-payoff incidence, conditional realization-control
+source, conditional participant timing, and nonterminal-expiry topology. Old
+05C becomes a non-counting parent alias. The fifty-fifth amendment replaces
+its one counted row with four and raises the register to **195 rows: 21
+`SCREEN`, 1 `OWNER-OPEN` at RCS-05C1, 63 `PRUNED`, 103 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`**.
+Zanzagar then selected C1-A with C1-C as the qualified temporal-policy/
+artifact-identity fallback. Every positive package fully commits through its
+already-paid source transitions at settlement; no unresolved payoff
+authorization survives. C2/C3/C4 prune. A bounded integration audit then held
+RCS-06 only as a derived row: selected D04-R3.2 supplies separate 1v1/2v2/3v3
+gates, D04-R4.2 supplies the whole-allied-composition team claimant, and the
+selected D04 version rule requires a new pinned run after semantic change;
+RCS-08 and RCS-19 retain team-budget and launch/defer authority. RCS-06 moves
+to `DERIVED`. A further bounded audit broke old RCS-07 into independent
+root/input catalog support, root/payoff catalog support, and residual complete-
+package support. Old RCS-07 becomes a non-counting parent alias. The fifty-
+sixth amendment replaces its one counted row with three and raises the current
+register to **197 rows: 18 `SCREEN`, 1 `OWNER-OPEN` at RCS-07A, 66 `PRUNED`,
+104 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`**.
+Zanzagar then selected 07A-B with 07A-A as the qualified clarity/anti-dead-
+loot fallback. Root/input support is genuinely selective while both
+projections remain total: every root stays input-customizable and every
+supported input Charm stays viable. Zanzagar then selected 07B-B with 07B-A
+as the qualified clarity/anti-dead-loot fallback. Root/payoff support is also
+genuinely selective while both projections remain total: every root stays
+payoff-Charm-customizable and every supported payoff Charm stays viable. At
+that checkpoint the register remained **197 rows: 16 `SCREEN`, 1
+`OWNER-OPEN` at RCS-07C, 66 `PRUNED`, 106 `DIR-SELECTED`, 6 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 17`**. Zanzagar then selected 07C-A with
+07C-B as the qualified three-way artifact-chemistry fallback, making complete-
+package support factorize over the two unary relations. A bounded audit and
+successive before-commit adversarial challenges broke old RCS-08 into 132
+counted evidence-sharing, permission-law, denied-pair, three-recipient,
+later-reuse, co-application, composition-law, stacking-signature, and team-
+signature rows. The last whole-diff review rejected the otherwise arithmetically
+correct eighty-nine-row draft: it still hid resolver response/certainty,
+false-result recurrence, cross-active co-application, and composition-law
+authority, and it ordered three prerequisites backward. Old RCS-08 and six
+treatment groups become non-counting parent aliases. The corrected fifty-
+seventh amendment replaces its one counted row with 132 and raises the
+register to **328 rows: 146 `SCREEN`, 1 `OWNER-OPEN` at RCS-08C1, 66
+`PRUNED`, 107 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 147`**. The increase registers conditional policy surfaces rather
+than selecting mechanics; C1-A alone prunes eighty-seven same-cut descendants.
+A final no-count hold caught I2 being worded only for I1 despite I0 also being
+able to admit noncommutative co-application. The repaired I2 subtree evaluates
+separately tagged I0 and I1 domains and passed re-review without changing any
+row or bound. Zanzagar then selected **RCS-08C1-B with RCS-08C1-A as the
+qualified clarity/anti-amplification fallback**. Functional same-cut cross-
+active candidate overlap is required somewhere in the completed catalog,
+without granting joint use or payoff. C2 is now the sole active row: **328
+rows: 145 `SCREEN`, 1 `OWNER-OPEN` at RCS-08C2, 66 `PRUNED`, 108
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 146`**.
+Zanzagar then selected **RCS-08C2-C with RCS-08C2-A as the qualified clarity/
+anti-laundering fallback**. Functional exact-pair and related-only-pair support
+both remain, with same-pair hybrids routed through exact treatment once and
+different pairs kept distinct. C4G1 is now the sole active row: **328 rows:
+144 `SCREEN`, 1 `OWNER-OPEN` at RCS-08C4G1, 66 `PRUNED`, 109
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 145`**.
+Zanzagar then selected **RCS-08C4G1-A with RCS-08C4G1-B as the qualified
+irreducible-3v3-coordination fallback**. Every same-cut candidate-overlap
+component is pair-bounded; all twenty-nine C4G2/H/I descendants prune without
+removing exact or related-only pair play. C3EA is now the sole active row:
+**328 rows: 114 `SCREEN`, 1 `OWNER-OPEN` at RCS-08C3EA, 95 `PRUNED`, 110
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 115`**.
+Zanzagar then selected **RCS-08C3EA-A with RCS-08C3EA-C as the qualified
+cross-player-agency/artifact-temperament fallback**. Exact permission remains
+intrinsic after routing, while different Relics, relationships, and factual
+contexts may retain distinct intrinsic laws. C3EB/C3EC1/C3EC2 prune and C3ED
+is now the sole active row: **328 rows: 110 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-08C3ED, 98 `PRUNED`, 111 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 111`**.
+Zanzagar then selected **RCS-08C3ED-A with RCS-08C3ED-C as the qualified
+artifact-temperament/robust-risk-policy fallback**. Every complete intrinsic
+exact-permission law is deterministic after all authoritative inputs are
+fixed; identical opportunities never redraw, while laws may still respond
+certainly across contexts. C3EE1/C3EE2 prune and C3EE3 is now the sole active
+row: **328 rows: 107 `SCREEN`, 1 `OWNER-OPEN` at RCS-08C3EE3, 100 `PRUNED`,
+112 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 108`**.
+Zanzagar then selected **RCS-08C3EE3-C with RCS-08C3EE3-A as the qualified
+clarity/multiplayer-trust/policy-nonredundancy fallback**. Responsive and
+context-invariant deterministic projections coexist. The responsive class
+derives both certainty endpoints, so C3EE6 derives and C3EE7 prunes; C3EE5
+remains queued and C3EE4 is now the sole active row: **328 rows: 104 `SCREEN`,
+1 `OWNER-OPEN` at RCS-08C3EE4, 101 `PRUNED`, 113 `DIR-SELECTED`, 7 `DERIVED`,
+1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 105`**.
+Zanzagar then selected **RCS-08C3EE4-B with RCS-08C3EE4-A as the qualified
+clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback**.
+At least one responsive projection has a qualifying participant or opponent
+decision that causally changes its certain bit while the same law and exact
+pair/proof survive. This existential causal sibling closes without changing
+the steadfast class, and C3EE5 is now the sole active row: **328 rows: 103
+`SCREEN`, 1 `OWNER-OPEN` at RCS-08C3EE5, 101 `PRUNED`, 114 `DIR-SELECTED`,
+7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 104`**.
+Zanzagar then selected **RCS-08C3EE5-C with RCS-08C3EE5-B as the qualified
+clarity/multiplayer-trust/policy-nonredundancy fallback**. Steadfast exact-
+permission projections now include at least one stable allow and one distinct
+stable deny, alongside the already-required responsive class. C3ED1 is now the
+sole active row: **328 rows: 102 `SCREEN`, 1 `OWNER-OPEN` at RCS-08C3ED1,
+101 `PRUNED`, 115 `DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 103`**.
+Any upstream source change invalidates and re-screens the timing subtree:
+E1-A prunes it, while a changed nonempty participant domain reopens the
+applicable timing row(s).
+The register describes eleven reachable cause families plus one derived-empty
+audit placeholder, not twelve reachable families.
+
+### 7.3 Frozen remaining Relic slot register
+
+To make that route genuinely finite, the remaining C3c pass has 328
+candidate slots. A slot may produce at most one atomic owner card. It may
+instead close as already selected, derived, specified, authored, evaluated,
+deferred, or pruned. It may not mint descendant slots automatically.
+
+If prerequisite analysis proves that a row hides two independent product
+choices, stop and propose an owner-visible amendment to this register before
+asking either one. The amendment must name the missed consequence boundary and
+print the new total. This is the safeguard against both Zeno refinement and
+overcompression.
+
+| Slot | Remaining boundary | Initial route |
+| --- | --- | --- |
+| `RCS-01` | Required launch content families and distinct player-facing build purposes | `SCREEN` under `SR-06` |
+| `RCS-02` | Decision-holder and pre/post-choice information promise | `SCREEN` under `SR-10` |
+| `RCS-03A` | Persistent transformation semantic domain: which Relic-owned dimensions may materially change or must remain invariant while identity is provisionally held fixed | `DIR-SELECTED`; C gives every state-supporting definition remembered-condition transformation and every boundary-supporting definition remembered-attunement transformation under `SR-04` |
+| `RCS-03B1` | Pre-completion semantic evaluation-lifetime topology: whether a Relic evaluation is cut-atomic or may remain authoritatively pending across semantic cuts before provisional completion | `DIR-SELECTED`; A makes every evaluation cut-atomic under `SR-04` |
+| `RCS-03B2` | Pending-evaluation initiation: which act or authored event opens an attempt and whose authority or precommitment is required | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03B3` | Pending-evaluation Relic-side binding cut: which authoritative revision supplies the one atomic Relic tuple | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03B4` | In-flight legal Relic-context-change disposition: whether an already-pending evaluation preserves, rebinds, or terminates after a later authorized change | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03B5` | Participant cancellation/disruption authority, required consent, and no-result disposition for a pending evaluation | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03B6` | Automatic expiry and maximum player-semantic persistence horizon for a pending evaluation | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03B7` | Pending-evaluation concurrency and overlap authority | `PRUNED`; `RCS-03B1-A` admits no pending evaluation |
+| `RCS-03C1` | Cut-atomic evaluation-eligibility cadence: immediate eligibility at each non-cadence-readiness episode's opening cut versus an authored later schedule gate | `DIR-SELECTED`; A makes every readiness episode immediately eligible at its opening cut under `SR-04` |
+| `RCS-03C2A` | Evaluator invocation-control source at a ready eligible cut: system-mandatory versus participant-contingent invocation or coexistence | `DIR-SELECTED`; A makes every eligible opportunity invoke automatically under `SR-04` |
+| `RCS-03C2B` | Participant-authorization timing: live declaration at the eligible cut versus an earlier binding precommitment or coexistence | `PRUNED`; `RCS-03C2A-A` admits no participant-contingent invocation authority |
+| `RCS-03C3A` | Coherent contingent-evidence acquisition and occurrence-history semantic freshness at each actual invocation cut | `DIR-SELECTED`; A gives every materially H-reading path a disclosed finite nonterminal semantic-age horizon under `SR-03`/`SR-04`; exact units and values remain AUTHOR/SPEC/TUNE |
+| `RCS-03C3B0` | Admission of additional fully inseparable H+S material paths inside positions already required to have one independently attributable single-form path | `DIR-SELECTED`; A excludes every additional path with zero H/S projection-isolation witnesses under `SR-03` while leaving other opposite-form material participation separate |
+| `RCS-03C3B1A0` | Admission of residual material paths containing a position's opposite temporal form, whether coupled to its selected form or another legal input | `DIR-SELECTED`; A excludes every opposite-form material path under `SR-03`, making `P^{H-read}_v=T_H` and every position temporally projection-pure |
+| `RCS-03C3B1A1A` | Minimum phase-attribution topology for materially H-reading positions: whether each has a declaration-, execution/performance-, or outcome/disposition-isolatable path or may be phase-coupled-only | `DIR-SELECTED`; A gives every history position at least one truthful single-phase anchor under `SR-03` |
+| `RCS-03C3B1A1B1` | Prevalence of positions with multiple independently isolatable phases: none, every history position, or coexistence with phase-singular positions | `DIR-SELECTED`; C requires a nonempty proper plural-position subset, so phase-singular and phase-plural history positions coexist under `SR-03` |
+| `RCS-03C3B1A1B2` | Tri-phase prevalence among positions already possessing at least two independently isolatable phases | `DIR-SELECTED`; A requires every phase-plural position to be exact-two under `SR-03`, while later coupled packages remain separate |
+| `RCS-03C3B1A2A` | Prevalence of positions with at least one supplemental irreducibly multi-phase H package | `DIR-SELECTED`; C requires a nonempty proper coupled-position subset under `SR-03`, so coupled-supplement and clean history positions coexist |
+| `RCS-03C3B1A2B` | Catalog support for inclusion-minimal coupled-package phase width | `DIR-SELECTED`; C requires both width-two and width-three package witnesses under `SR-03`, without making width a power or rarity rank |
+| `RCS-03C3B1B` | Material occurrence-history phase support across accepted declaration/commitment, execution/performance, and authoritative outcome/disposition | `DERIVED`; A2B-C's admitted width-three package forces exact support `{D,E,O}` under `SR-03` |
+| `RCS-03C3B2A1` | Primitive within-operation action-root partition: one lineage per accepted operation occurrence versus semantic multi-lineage forms before cross-operation equivalence | `DIR-SELECTED`; A gives every accepted operation occurrence one primitive lineage across all realized applications under `SR-03`; later children retain that lineage, while B2A2A/B1/B2 separately own cross-operation coarsening, temporal-form support, and compound-root promotion |
+| `RCS-03C3B2A2A` | Cross-operation root merging/coarsening into finite, authored, disclosed episode identities | `DIR-SELECTED`; B coarsens every qualifying prospectively authored finite source episode's realized member lineages into one canonical root under `SR-03`; primitive histories, payments, outcomes, and full ancestry remain, and every terminal/abort re-initiation opens a fresh identity |
+| `RCS-03C3B2A2B1` | Support for canonical nonmerged multi-root H order/trajectory forms after episode coarsening | `DIR-SELECTED`; B requires nonempty eligible support under `SR-03`: at least one reachable, effective, non-preempted, inclusion-minimal temporal claim retains at least two distinct post-coarsening roots and passes a matched held-fixed separator; exact operators, forms, counts, distribution, and prevalence remain AUTHOR/SPEC |
+| `RCS-03C3B2A2B2` | Additive multi-parent relation-root promotion for eligible nonmerged multi-root H order/trajectory forms | `DIR-SELECTED`; B gives every successfully realized qualifying occurrence of every eligible form exactly one fresh additive relation root with complete transitive operand ancestry; the occurrence must retain at least two post-coarsening roots, and no promoted root is independent from an ancestor, intersecting lineage, or shared nonmultiplying authorization/accounting parent |
+| `RCS-03C3B2A3A` | Support for material semantic revision while one current-state continuity episode remains uninterrupted | `DIR-SELECTED`; B requires nonempty `E^{state-rev}_v`: at least one reachable committed revision materially changes player-semantic state while the same episode remains continuously operative; exact forms, counts, distribution, and prevalence remain AUTHOR/SPEC |
+| `RCS-03C3B2A3B` | Current-state root preservation versus succession across an eligible material nonterminating revision | `DIR-SELECTED`; A makes `Q^{state-succ}_v` empty under `SR-03`: every committed eligible revision preserves the episode's founder continuity root while append-only retaining complete indispensable cause lineage at the cut; material manifestations remain distinct, and no revision mints a root or grants downstream use |
+| `RCS-03C3B2A4` | Current-state irreducible multi-root causal-support topology | `DIR-SELECTED`; B requires nonempty `E^{state-mroot}_v` under `SR-03`: at least one reachable current fact has an inclusion-minimal simultaneous direct-support basis containing multiple independent roots; one authoritative active basis settles prospectively before Relic matching and cannot vary by recipe/result; exact forms, widths, counts, distribution, prevalence, and redundant alternatives remain AUTHOR/SPEC, and A4 mints and exposes no root |
+| `RCS-03C3B2B1` | Support for repeated same-provenance otherwise-distinct post-B2A roots in pure-build evidence | `DIR-SELECTED`; B requires nonempty `E^{build-repeat}_v` under `SR-03`: at least one functional form supplies equal-`Pi`, separately accepted/accounted candidate occurrences with distinct post-B2A roots and disjoint lineages; exact forms, counts, distribution, and prevalence remain AUTHOR/SPEC, and B1 grants no position use |
+| `RCS-03C3B2B2` | Build-provenance root equivalence/coarsening across supported repeated same-provenance roots | `DIR-SELECTED`; B makes exact `Pi` fully determine one canonical pure-build class even across semantic source forms under `SR-03`; the class replaces member identities in that projection, carries their deduplicated complete union lineage, and is not an additive root |
+| `RCS-03C3B3A` | Global support for directly addressable parent-representative and semantic-child-application atom layers | `DIR-SELECTED`; B makes semantic child applications the sole position-furnishing layer under `SR-03`; parent roots/classes remain operative lineage and grouping identities but cannot occupy positions |
+| `RCS-03C3B3B` | Same-lineage parent/child co-addressability after both atom layers have global support | `PRUNED`; `RCS-03C3B3A-B` admits no addressable parent layer |
+| `RCS-03C3B4A` | Support for a nontrivial within-parent semantic-application frontier before final child partition | `DERIVED`; B2B1-B's two semantically distinct equal-`Pi` current candidates become sites beneath one B2B2-B class, and B3A-B preserves their manifestations as the only addressable layer; exact additional breadth remains AUTHOR/SPEC |
+| `RCS-03C3B4B` | Canonical final family topology for multiple qualifying semantic application sites beneath one parent representative | `DIR-SELECTED`; B requires one exhaustive nonoverlapping final-child partition with nonempty reachable functional compound support and no co-addressable compound/descendant pair; exact families, widths, counts, distribution, and prevalence remain AUTHOR/SPEC |
+| `RCS-03C3C1` | Support for one fixed evaluation containing distinct receipt tags that are individually ledger-satisfied before fan-out treatment and whose typed proof ledgers overlap by exact final child, complete lineage, or shared nonmultiplying authorization/accounting; this is not C133/C134 provisional completion | `DIR-SELECTED`; B requires nonempty functional overlap support under `SR-03` without granting joint survival or commitment |
+| `RCS-03C3C2` | Form support among C1-positive within-evaluation overlaps: exact same final child, distinct related proofs, or both | `DIR-SELECTED`; C requires nonempty exact and distinct-related support, possibly in one hybrid opportunity or different evaluations, without granting joint survival |
+| `RCS-03C3C3A` | Support for multiple canonical position-keyed typed ledgers for one individually satisfied tag at one fixed evaluation state | `DIR-SELECTED`; B requires at least one reachable alternate-ledger witness under `SR-03`; aliases canonicalize and no authority or treatment is granted |
+| `RCS-03C3C3B1` | Authoritative ledger-domain topology when one or more tags have alternate valid ledgers: one selected joint tuple, complete-product robustness, or prospectively declared coexistence | `DIR-SELECTED`; A makes every multiplicity-positive evaluation return exactly one complete authoritative tuple before downstream permission/results; canonical upstream structural relations remain lawful selector inputs |
+| `RCS-03C3C3B2` | Cross-tag contextual responsiveness of singleton selection: whether another contender or ledger domain can change one tag's held-fixed selected ledger or marginal draw law | `DIR-SELECTED`; B requires at least one reachable matched sensitivity witness; exact triggers/prevalence remain AUTHOR/SPEC, and permission/outcome inputs remain forbidden |
+| `RCS-03C3C3B3A` | Material participant-configurability prevalence across routing-capable versioned Relic selector contracts: empty, universal, or nonempty proper | `DIR-SELECTED`; B requires every routing-capable contract to have at least two prospectively bindable participant routing stances/settings with materially different completed laws on some held-fixed reachable product |
+| `RCS-03C3C3B3B1` | Constructive participant routing-language prevalence: closed whole-policy stances only, bounded construction on every contract, or coexistence | `DIR-SELECTED`; A makes every routing-capable contract expose only a finite versioned menu of indivisible authored whole-policy routing stances |
+| `RCS-03C3C3B3B2` | Participant-composed context-branching prevalence among constructive-capable routing contracts | `PRUNED`; B3B1-A admits no participant construction and therefore no participant-composed context branching |
+| `RCS-03C3C3B4A` | Stochastic support across canonical complete bound whole-stance routing laws: deterministic-only, universally stochastic-capable, or coexistence | `DIR-SELECTED`; A makes every canonical complete bound stance law deterministic on every reachable fixed nonrandom selector input; B2 relational responsiveness remains legal, while exact routing-law authoring, disclosure, acquisition, lock, migration, realization, replay, evaluation, and retry stay routed to their existing owners |
+| `RCS-03C3C3B4B` | Product-factorized versus correlated joint tuple draws when stochastic singleton selection exists | `PRUNED`; B4A-A admits no stochastic routing law and therefore no joint-draw coupling question |
+| `RCS-03C3C3C1` | Post-routing authoritative exact-form exposure support among resolved pair opportunities | `DIR-SELECTED`; B requires nonempty `E^{resolved-exact}_v`, so at least one reachable bound routing stance selects an authoritative exact-overlap pair without granting joint survival |
+| `RCS-03C3C3C2A` | Material participant permission-configurability prevalence across exact-exposure-capable versioned Relic treatment contracts | `DIR-SELECTED`; A makes participant permission-configurability empty, so every applicable contract's exact-overlap permission law is intrinsic while Relic, relationship, and factual-context variation remains legal |
+| `RCS-03C3C3C2B` | Independently recombinable participant permission-coordinate prevalence among permission-configurable contracts | `PRUNED`; C2A-A admits no participant-configurable permission force and therefore no independently recombinable permission coordinate |
+| `RCS-03C3C3C2C1` | Constructive participant permission-language prevalence across all participant-configurable permission forces | `PRUNED`; C2A-A leaves no participant permission language, coupled or independent, to classify |
+| `RCS-03C3C3C2C2` | Participant-composed context-branching prevalence among constructive-capable permission forces | `PRUNED`; C2A-A leaves no participant-constructed permission force and therefore no participant-composed permission branching |
+| `RCS-03C3C3C2D` | Stochastic support across canonical complete bound permission laws after applicable configuration and language rows | `DIR-SELECTED`; A makes every complete intrinsic law deterministic on every reachable fixed exact opportunity while permitting certain context response; no permission draw, retry, or reroute remains |
+| `RCS-03C3C3C2E1` | Responsive-law prevalence across complete deterministic intrinsic exact-permission laws | `DIR-SELECTED`; C requires responsive laws and context-invariant laws to coexist, without selecting actionability or constant polarity |
+| `RCS-03C3C3C2E2` | Matched player/counterplay-causal factual-response support among responsive exact-permission laws | `DIR-SELECTED`; B requires at least one qualifying lawful independently revisable decision and complete causal closure to change the certain bit under the same law and eventual exact pair/proof; exact actor, trigger, prevalence, disclosure, and success rate remain unsettled |
+| `RCS-03C3C3C2E3` | Constant-law polarity among context-invariant intrinsic exact-permission laws | `DIR-SELECTED`; C requires responsive, steadfast-allow, and distinct steadfast-deny complete law families (`R+D+A`), with domain-relative gate-local polarity and the documented non-token non-dominated refusal obligation or reopening to B |
+| `RCS-03C3C3D1` | Post-routing authoritative distinct-related-form exposure support among resolved pair opportunities | `DIR-SELECTED`; B requires nonempty `R^{resolved-related}_v`, so at least one reachable actually bound route selects a genuine distinct-related pair; its witness may be related-only or hybrid, grants no joint survival, and a hybrid receives no second permission bit |
+| `RCS-03C3C3D2A` | Material participant permission-configurability prevalence across related-only-capable versioned Relic treatment contracts | `DIR-SELECTED`; A makes participant-configurable related-only permission empty, so every extant `Q_v=R_v setminus E_v` permission law is intrinsic while `Q_v` itself may remain empty; hybrid permission was already intrinsic |
+| `RCS-03C3C3D2B` | Independently recombinable participant related-permission-coordinate prevalence among related-only permission-configurable contracts | `PRUNED`; D2A-A admits no participant-configurable related-only permission force and therefore no independently recombinable coordinate |
+| `RCS-03C3C3D2C1` | Constructive participant related-permission-language prevalence across all participant-configurable related-only permission forces | `PRUNED`; D2A-A leaves no participant related-permission language, coupled or independent, to classify |
+| `RCS-03C3C3D2C2` | Participant-composed related context-branching prevalence among constructive-capable related-only permission forces | `PRUNED`; D2A-A leaves no participant-constructed related-permission force and therefore no participant-composed context branching |
+| `RCS-03C3C3D2D` | Stochastic support across complete bound related-only permission-law projections after applicable configuration and language rows | `DIR-SELECTED`; C requires deterministic-only Witness and stochastic-capable Oracle related-only projection families to coexist under the documented viable-purpose, non-token, non-dominance, legibility, and bounded-fallback obligation; each opportunity receives one committed realization, while inherited hybrid bits remain deterministic |
+| `RCS-03C3C3D2E1` | Distribution-response prevalence across stochastic-capable related-only Oracle law projections | `DIR-SELECTED`; B makes every Oracle law distribution-responsive with at least two reachable probabilities while selecting no causal control, exact odds, or endpoint |
+| `RCS-03C3C3D2E2` | Matched player/counterplayer-causal odds-response support among responsive Oracle laws | `DIR-SELECTED`; B requires at least one qualifying witness in which one independently meaningful lawful decision and complete causal closure change the conditional permission distribution under the same intrinsic law and eventual pair/proof, not merely the realized sample or a disguised direct odds command; universal coverage, exact actor, odds, and endpoint remain unsettled |
+| `RCS-03C3C3D2E3` | Responsive-law prevalence across tagged deterministic related-form projections, including related-only Witness and inherited hybrid restrictions | `DIR-SELECTED`; C requires responsive and steadfast complete tagged deterministic projections to coexist under the documented viable-purpose, non-token, non-dominance, legibility, and bounded-fallback obligation; it imposes no per-form or hybrid-existence quota |
+| `RCS-03C3C3D2E4` | Matched player/counterplayer-causal certain-bit response among responsive deterministic related projections | `DIR-SELECTED`; B conditionally requires at least one same-projection/law/form/pair/proof witness in which one independently meaningful lawful decision plus complete causal closure changes eventual bit support or conditional distribution; direct permission commands and relabeled exact/Oracle witnesses fail, and inability to author a qualifying marginal related-form policy reopens E4 with A |
+| `RCS-03C3C3D2E5` | Stable polarity among context-invariant deterministic related projections | `DIR-SELECTED`; guarded C requires steadfast refusal and compatibility to coexist over complete separately tagged `Q`/`H` projections under the marginal related-form-purpose, anti-inheritance-laundering, legibility, non-dominance, anti-grief, and B/A/upstream fallback obligations |
+| `RCS-03C3C3D2E6` | Missing-certainty endpoint support in responsive stochastic related-only laws after the deterministic form-wide baseline is known | `DERIVED`; D2E3-C's responsive deterministic support already supplies both certain endpoints, so no endpoint is missing from the form-wide baseline |
+| `RCS-03C3C3E1` | Empty-versus-positive pair-local disposition prevalence after a false joint-survival permission bit | `DIR-SELECTED`; guarded C requires cancellation and positive dispositions to coexist as disclosed, attributable, non-token, non-dominated policies, known before each affected player's last informed reversible commitment and resistant to cheap post-commitment teammate coercion, with B/A/E5 fallback as documented |
+| `RCS-03C3C3E2` | Positive denied-output width support under C3c.46-A's exact-two global receipt ceiling | `DIR-SELECTED`; guarded C requires singleton and double positive denied outputs to coexist as non-token, non-dominated policies rather than a count ladder; double denial must add purpose beyond ordinary dual weave, with A/B/E1 fallback as documented; identity remains E3/E4 and catalog coexistence creates no F authority |
+| `RCS-03C3C3E3` | Singleton denied-output identity-kind support | `DIR-SELECTED`; guarded B makes every singleton one genuine substitute, with A the qualified fallback only when substitute-specific viability fails and retained-original singleton play survives; exact substitute identities, mappings, and same-opportunity authority remain later |
+| `RCS-03C3C3E4` | Two-receipt denied-output composition support | `DIR-SELECTED`; guarded B makes every double positive denial two genuinely distinct substitutes, with A the practical fallback only when dual-substitute viability fails and anchored transformation survives; exact identities, mappings, and same-opportunity resolution remain later |
+| `RCS-03C3C3F1` | Support for several canonical lawful denied outputs at one fixed base opportunity before F-owned resolution | `DIR-SELECTED`; A makes every fixed denied opportunity single-valued while allowing different disclosed contracts/contexts to map deterministically to different selected E1-E4 output families; exact maps remain AUTHOR/SPEC |
+| `RCS-03C3C3F2A` | Material participant output-law configurability prevalence across ambiguity-capable denied-output contracts | `PRUNED`; F1-A leaves no same-opportunity output multiplicity for a participant setting to resolve |
+| `RCS-03C3C3F2B1` | Closed whole-policy versus constructive participant output-policy language prevalence | `PRUNED`; F1-A leaves no participant output-resolution policy language |
+| `RCS-03C3C3F2B2` | Participant-composed context-branching prevalence among constructive-capable output policies | `PRUNED`; F1-A leaves no participant-constructed output-resolution policy |
+| `RCS-03C3C3F3` | Stochastic support across canonical complete bound denied-output laws | `PRUNED`; F1-A makes every held-fixed opportunity's lawful output single-valued and admits no F-owned output realization draw |
+| `RCS-03C3C3G1` | Support for at least three simultaneously individually ledger-satisfied receipt tags before within-evaluation treatment | `DIR-SELECTED`; A makes `G^{3+}_v` empty, so every held-fixed actual evaluation contains at most two canonical pre-treatment contender tags under its selected complete ledger tuple |
+| `RCS-03C3C3G2` | Joint stochastic permission-draw coupling across distinct simultaneous unordered pair opportunities inside one evaluation | `PRUNED`; G1-A admits no three-plus within-evaluation state containing the required distinct pair opportunities |
+| `RCS-03C3C3H` | Complete feasible final-cardinality topology for a three-plus settlement domain | `PRUNED`; G1-A admits no qualifying three-plus settlement domain |
+| `RCS-03C3C3I` | Authority and identity consequences when a three-plus settlement domain retains several lawful final identity sets | `PRUNED`; G1-A prunes H and leaves no qualifying nonunique three-plus identity output |
+| `RCS-03C3C4` | Support for multiple semantically distinct automatic evaluation opportunities of one active Relic at one semantic cut | `DERIVED`; selected automatic, immediate, cut-atomic semantics canonicalize every finite same-cut evaluator family into one product evaluator with labeled internal channels and the same joint law, outputs, transition, information, and authority |
+| `RCS-03C3C5` | Cross-opportunity proof-overlap support when distinct same-cut evaluations coexist | `PRUNED`; C4 derives one canonical product evaluation and leaves no distinct same-cut evaluation opportunities |
+| `RCS-03C3C6` | Form support among C5-positive cross-opportunity overlaps: exact same final child, distinct related proofs, or both | `PRUNED`; C5 prunes |
+| `RCS-03C3C7` | Cross-opportunity same-cut fan-out treatment over supported overlaps | `PRUNED`; C5/C6 prune and technical internal channels cannot manufacture cross-opportunity fan-out |
+| `RCS-03C3D1` | Positive-result Relic-local evidence-claim support without deleting canonical occurrence truth | `DIR-SELECTED`; B makes positive-result claim support nonempty, so at least one positive original or substitute settlement claims a nonempty part of its selected causal proof union after atomic commit; prevalence and footprint remain unresolved |
+| `RCS-03C3D2` | Ledger-bearing empty-result Relic-local evidence-claim support | `DIR-SELECTED`; A makes empty-settlement claim support empty, so cancellation preserves every occurrence in its selected causal union; the formerly hypothesized true-no-candidate branch is derived unreachable, and D4 still owns recurrence |
+| `RCS-03C3D3` | Claimed-proof footprint inside the authoritative selected contender-ledger tuple | `DIR-SELECTED`; A makes every actual claim take the complete deduplicated selected-ledger final-child union, counting exact shared occurrences once; D1-B still leaves exact claim prevalence and assignments open |
+| `RCS-03C3D4` | Ledger-bearing empty-settlement held-pair reattempt support while canonical contender-pair relationship sufficiency remains uninterrupted | `DIR-SELECTED`; A permits one listen per unbroken canonical pair bond; B is only a guarded reopening fallback if human tests expose dominant reset-flicker or intolerably stranded formations and a material retry event passes every documented guard |
+| `RCS-03C3E` | Later reuse, after valid break/renew/rearm, of an otherwise-admissible claimed canonical occurrence through the same exact fixed C135 context/receipt tag | `DIR-SELECTED`; A makes qualifying same-incidence reuse empty, so a claimed occurrence remains ineligible for every later post-rearm commit of any exact tag through which a settlement actually claimed it; fresh occurrences, later non-attributed incidences, and successful nonclaiming-incidence recurrence remain separate |
+| `RCS-03C3F` | Later-cut reuse of a claimed canonical occurrence through a target incidence not previously attributed to that occurrence inside the same active Relic | `DIR-SELECTED`; A makes qualifying new-incidence reuse empty throughout the immutable claim episode rooted at first still-operative claim `z0(x)`, so together with C3E-A one claimed occurrence is spent across every later result incidence of this active Relic; a genuinely new occurrence remains eligible, pre-`z0` history remains canonical but outside the episode, and same-cut/other-root use stays in C3C/RCS-08 |
+| `RCS-03C3F1` | Successful nonclaiming-target recurrence after an actual C3F incidence and valid target rearm | `PRUNED`; C3F-A leaves no successful later new-incidence reuse whose nonclaiming recurrence could be classified |
+| `RCS-03C3F2` | Fresh independently eligible post-claim co-proof requirement across B-enabled reuse admissions | `PRUNED`; C3F-A leaves no B-enabled admission or repeat requiring a fresh post-claim co-proof rule |
+| `RCS-03C3F3` | Claimed-occurrence first-attribution propagation topology across later settlements after nonempty new-incidence support | `PRUNED`; C3F-A leaves no later first-attribution transition to form a terminal edge, path, or branch-capable DAG |
+| `RCS-03C3F4A` | Positive-substitute relay-attempt authorization-consumption prevalence | `PRUNED`; C3F-A admits no new-incidence relay attempt whose unused intended authorization needs disposition after positive substitution |
+| `RCS-03C3F4B` | Empty-settlement relay-attempt authorization-consumption prevalence | `PRUNED`; C3F-A admits no new-incidence relay attempt whose unused intended authorization needs disposition after `{}` |
+| `RCS-03D1I` | Actual canonical-evaluator-invocation transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; A makes direct invocation-cause support empty, so invocation listens but never itself proposes persistent transformation; later semantic loci retain independent cause classifications |
+| `RCS-03D1I1` | State/boundary transformation-dialect incidence for proper invocation cause support | `PRUNED`; D1I-A leaves no proper invocation-cause support whose dialect incidence could be chosen |
+| `RCS-03D1N` | Hypothetical terminal true-zero-contender-conclusion transformation-cause prevalence across transforming definitions | `DERIVED`; selected fixed-tag readiness, immediate invocation, coherent same-cut evidence, and total tuple resolution make the reachable domain empty; a denied pair has a positive K/P disposition or ledger-bearing Z, neither N/NC |
+| `RCS-03D1N1` | State/boundary transformation-dialect incidence for proper no-candidate cause support | `PRUNED`; D1N has no reachable occurrence or proper support whose dialect incidence could be chosen |
+| `RCS-03D1T` | Actual nontrivial authoritative ledger-tuple-selection transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; A makes direct tuple-selection-cause support empty, so the selected complete joint tuple retains every downstream consequence but the act of choosing it never itself proposes transformation |
+| `RCS-03D1T1` | State/boundary transformation-dialect incidence for proper tuple-selection cause support | `PRUNED`; D1T-A leaves no proper tuple-selection-cause support whose dialect incidence could be chosen |
+| `RCS-03D1VT` | Actual true/allow permission-verdict transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; A makes direct true-verdict-cause support empty, so the actual allow bit retains every coexistence consequence but never itself proposes transformation |
+| `RCS-03D1VT1` | State/boundary transformation-dialect incidence for proper true-verdict cause support | `PRUNED`; D1VT-A leaves no proper true-verdict-cause support whose dialect incidence could be chosen |
+| `RCS-03D1VF` | Actual false/not-both permission-verdict transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; A makes direct false-verdict-cause support empty, so refusal retains every not-both and deterministic-disposition consequence but never itself proposes transformation |
+| `RCS-03D1VF1` | State/boundary transformation-dialect incidence for proper false-verdict cause support | `PRUNED`; D1VF-A leaves no proper false-verdict-cause support whose dialect incidence could be chosen |
+| `RCS-03D1K` | Positive provisional-output completion/sealing transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; A makes direct sealing-cause support empty, so one whole positive output still becomes complete and unrevocable but K never itself proposes transformation; its corrected occurrence symbol is `seal_K(z)` because D4 already owns `kappa(z)` |
+| `RCS-03D1K1` | State/boundary transformation-dialect incidence for proper provisional-completion cause support | `PRUNED`; D1K-A leaves no proper sealing-cause support whose dialect incidence could be chosen |
+| `RCS-03D1P` | Positive committed-settlement transformation-cause prevalence across transforming Relic definitions | `DIR-SELECTED`; B makes positive-result cause support universal across `D_mut`, so every transforming state- and boundary-supporting definition has at least one reachable prospectively authored direct proposal edge at its same active Relic's authoritative nonempty final receipt commit; exact results, targets, prevalence, authority, and power remain later |
+| `RCS-03D1P1` | State/boundary transformation-dialect incidence for proper positive-settlement cause support | `PRUNED`; D1P-B's universal definition support necessarily reaches both nonempty dialects and leaves no proper-subset incidence to choose |
+| `RCS-03D1C` | Actual Relic-local evidence-claim-write transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; A makes claim-write cause support empty across `D_mut`, so claims spend their complete proof and retain every reuse consequence but never themselves propose transformation |
+| `RCS-03D1C1` | State/boundary transformation-dialect incidence for proper claim-write cause support | `PRUNED`; D1C-A leaves no proper claim-write support whose dialect incidence could be chosen |
+| `RCS-03D1Z` | Ledger-bearing `{}` cancellation-settlement transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; C makes direct Z-cause support a disclosed nonempty proper Absence-bound subset, with A explicitly retained if later policy/comprehension/non-dominance/exploit gates fail; the actual empty commit remains distinct from the earlier false bit and later latch write |
+| `RCS-03D1Z1` | State/boundary transformation-dialect incidence for proper cancellation cause support | `DIR-SELECTED`; C gives the globally proper Absence-bound subset nonempty state- and boundary-dialect incidence without universalizing support or creating a hybrid axis; the proposed D1Z1-A scope fallback was not selected, while the earlier parent D1Z-A system fallback remains |
+| `RCS-03D1L` | Canonical pair-recurrence-latch-write transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; A makes direct latch-write cause support empty, so the first persistent D4-A `LISTENED—SEVERED` write retains every no-reattempt consequence but never itself proposes transformation |
+| `RCS-03D1L1` | State/boundary transformation-dialect incidence for proper latch-write cause support | `PRUNED`; D1L-A leaves no proper latch-write support whose dialect incidence could be chosen |
+| `RCS-03D1X` | Independently meaningful non-evaluation combat/source/relationship-event transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; C admits a disclosed nonempty proper Event-bound subset with A selected as the whole-system failure fallback; A is a replacement and has not fired, while the later D1X1 selection separately governs child incidence |
+| `RCS-03D1X1` | State/boundary transformation-dialect incidence for proper independent-event cause support | `DIR-SELECTED`; C gives the globally proper Event-bound subset nonempty state- and boundary-dialect incidence, with A selected as the child state-only scope fallback if boundary-attunement play fails while state-side play survives; the parent D1X-A system fallback remains deeper, and neither fallback has fired |
+| `RCS-03D1M` | Dedicated evolution/reconfiguration-operation transformation-cause prevalence across transforming definitions | `DIR-SELECTED`; B makes operation-cause support universal across `D_mut`, with A selected as a whole-system replacement fallback if the M mechanic fails its purpose, policy, comprehension, anti-duplication, commitment, or anti-loop gates; RCS-03E still retains transformation agency/approval and RCS-13 retains operation initiation/admission and lock horizon |
+| `RCS-03D1M1` | State/boundary transformation-dialect incidence for proper dedicated-operation cause support | `PRUNED`; D1M-B's universal definition support necessarily reaches both nonempty dialects and leaves no proper-subset incidence to choose |
+| `RCS-03D2` | Direct shortcut versus required staged nonclear assignment topology | `DIR-SELECTED`; C makes `D_stage` nonempty proper so staged and shortcut-complete transforming definitions coexist, with D2-A selected as the whole-system replacement if required staging fails its legibility, material-intermediate, non-dominance, anti-bypass, anti-copy-lottery, or comprehension gates; any parent-cause or D2 fallback must rebuild the graph and revalidate or explicitly reopen dependent topology answers |
+| `RCS-03D2A` | State/boundary transformation-dialect incidence for proper required-stage support | `DIR-SELECTED`; C makes staged support nonempty in both dialects with A selected as the child state-only scope fallback if boundary-attunement staging fails while state-condition staging survives; the parent D2-A whole-system fallback remains deeper, and neither fallback has fired |
+| `RCS-03D2A1` | State/boundary transformation-dialect incidence for the shortcut-complete complement after D2A | `DIR-SELECTED`; C puts shortcut-complete support in both dialects, so both state and boundary contain staged and shortcut-complete definitions, with B selected as a qualified replacement only if the state-shortcut cell or four-cell burden fails its narrow trigger while universal state staging and both boundary classes remain worthwhile |
+| `RCS-03D3` | Definition-level direct reverse-edge support among nonclear adjacent assignments | `DIR-SELECTED`; B gives every transforming definition at least one prospectively legible, policy-material direct-reverse pair without requiring every edge to be paired, with D3-A selected as the whole-system fallback if paired support broadly fails its gates; definition-local failure reopens C rather than firing A |
+| `RCS-03D3A` | State/boundary transformation-dialect incidence for proper direct-reverse support | `PRUNED`; D3-B makes reverse support universal across both nonempty transformation dialects |
+| `RCS-03D3A1` | State/boundary transformation-dialect incidence for the reverse-free complement after D3A | `PRUNED`; D3-B leaves no reverse-free definition complement |
+| `RCS-03D4` | Definition-level explicit clear-to-unassigned transition support | `DIR-SELECTED`; A makes clear support empty, so no direct proposal originating from an authoritative nonclear assignment targets `bottom_d` and no active fixed-version transformation history can enter it; D4-C is the qualified Release-bound fallback and must reopen D4A/D4A1 plus dependent D5 if its narrow trigger fires |
+| `RCS-03D4A` | State/boundary transformation-dialect incidence for proper explicit-clear support | `PRUNED`; D4-A leaves no proper explicit-clear support whose dialect incidence could be chosen; reopen only if qualified D4-C fires |
+| `RCS-03D4A1` | State/boundary transformation-dialect incidence for the clear-free complement after D4A | `PRUNED`; D4-A leaves no active proper branch whose clear-free complement needs a separate incidence choice; reopen only after D4-C and D4A |
+| `RCS-03D5` | Definition-level compatible lived nonclear-return support | `DIR-SELECTED`; B gives every completed state- and boundary-supporting transforming definition at least one prospectively legible, policy-material legal same-instance/owner/root/definition/fixed-version history `a ... b ... a` whose legs compose from exact successive authoritative state; return restores only the assignment coordinate and leaves irreversible limbs legal, with D5-A selected as the whole-system fallback if lived return broadly fails its anti-profit, integrity, commitment, comprehension, counterpick, or boundary-snapshot gates; definition-local failure reopens C instead |
+| `RCS-03D5A` | State/boundary transformation-dialect incidence for proper compatible lived-return support | `PRUNED`; D5-B makes compatible lived-return support universal across both nonempty transformation dialects |
+| `RCS-03D5A1` | State/boundary transformation-dialect incidence for the return-free complement after D5A | `PRUNED`; D5-B leaves no return-free definition complement |
+| `RCS-03E1` | Transformation-proposal approval-control source: system-deterministic only, participant-contingent universal, or cause-authored universal coexistence | `DIR-SELECTED`; C makes every P proposal participant-contingent and every M proposal system-deterministic so universal P/M support gives every transforming definition both modes; E1-B is the qualified agency fallback if even informed constrained M needs distinct material assent, and E1-A is the deeper system fallback if participant approval fails across viable timing models; E1 selects no Z/X source or participant timing |
+| `RCS-03E1Z` | Z-locus proposal approval-source prevalence under E1-C | `DIR-SELECTED`; B makes every reachable Z proposal participant-contingent while leaving the actual `{}` settlement and every nonapproval consequence final; E1Z-A is the qualified cause-local system fallback if assent fails across viable E2 timing/default/recovery models while deterministic Z remains legible and fun |
+| `RCS-03E1ZA` | Transformation-dialect incidence of the participant-contingent Z-definition class under E1Z-C | `PRUNED`; E1Z-B makes participant authority universal across nonempty both-dialect `D_Z` |
+| `RCS-03E1ZA1` | Transformation-dialect incidence of the system-deterministic Z-definition complement after E1ZA | `PRUNED`; E1Z-B leaves no deterministic Z-definition complement |
+| `RCS-03E1X` | X-locus proposal approval-source prevalence under E1-C | `DIR-SELECTED`; A makes every reachable X proposal system-deterministic while preserving its independently real event and native consequences; E1X-B is the qualified cause-local agency fallback and necessarily reopens E2 if fired |
+| `RCS-03E1XA` | Transformation-dialect incidence of the participant-contingent X-definition class under E1X-C | `PRUNED`; E1X-A leaves no participant-contingent X-definition class |
+| `RCS-03E1XA1` | Transformation-dialect incidence of the system-deterministic X-definition complement after E1XA | `PRUNED`; E1X-A makes deterministic X authority universal, so no proper complement incidence remains to choose |
+| `RCS-03E2` | Participant-approval timing for the active participant-contingent P/Z proposal subset | `DIR-SELECTED`; C gives P and Z opposite cause-uniform timings, with E2-A as the qualified production fallback if both orientations or the two-grammar system fail while all-advance bindings remain materially strategic; upstream source changes invalidate timing, E1-A prunes it, and a changed nonempty participant domain reopens applicable rows |
+| `RCS-03E2C` | P-versus-Z timing orientation under E2-C cause-uniform coexistence | `DIR-SELECTED`; A makes every P proposal live-capable and every Z proposal advance-bound; within-cause definition/dialect/target/favorability/context/owner/instance/opportunity variation requires an owner-visible amendment |
+| `RCS-04A1` | Reachable collision geometry across maximal frozen same-Relic/source-revision/cut proposal cohorts | `DIR-SELECTED`; C requires at least one genuine distinct-target conflict while retaining target-concordant cohorts, with B armed as the qualified simplicity fallback if genuine conflict causes jamming, cause suppression, unreliable paid Rites/D5 returns, or comprehension failure |
+| `RCS-04A1C` | Transformation-dialect incidence of genuine distinct-target conflict under A1-C | `DIR-SELECTED`; C requires at least one state-dialect and one boundary-dialect genuine-conflict contract without requiring every definition, equal counts, shared targets, or cross-dialect cohorts; A is the qualified clarity fallback if boundary conflict remains materially less legible or creates dominant timing/preview arbitrage while state conflict remains fun |
+| `RCS-04A2` | Uniform admissible assignment-result domain for every genuine distinct-target conflict | `DIR-SELECTED`; A requires exactly one still-valid proposed target to settle, with C armed as the qualified fairness fallback if every target-forcing resolver causes material arbitrary/involuntary harm while target/null resolution remains legible, non-dominated, anti-jam, Rite-safe, and D5-safe; firing C reopens the complete applicable A3/A7/A3X subtree rather than transferring target-only labels by name |
+| `RCS-04A3A` | Material participant result-control prevalence across genuine-conflict definition/version contracts | `DIR-SELECTED`; C makes the configurable class a nonempty proper subset, so configurable and participant-intrinsic contracts coexist; configurable contracts may still contain `I` opportunities, A is the qualified simplicity/artifact-identity fallback, B is the agency/fairness escalation, and exact dialect allocation remains A3XI/A3XP/A3XD work |
+| `RCS-04A3B1` | Direct-capable prevalence across participant-configurable collision contracts | `DIR-SELECTED`; C makes direct-capable contracts a nonempty proper subset of the configurable class, so direct-capable and controlled-form `{P}` contracts coexist; B1-A is the qualified low-interruption/policy-mastery fallback, B1-B is the agency/clarity escalation, and exact dialect allocation remains A3XI/A3XP/A3XD work |
+| `RCS-04A3B2` | Policy-capable prevalence inside the direct-capable contract class | `DIR-SELECTED`; A makes every direct-capable contract controlled-form exact `{D}` and preserves B1-C's separate `{P}` class; C is the qualified higher-ceiling/identity exception, B is the universal dual-capability escalation, B2I later selects exact `{I,D}` complete profiles, and equal optimized ceilings remain later proof work |
+| `RCS-04A3B3` | Same-opportunity coavailability prevalence inside the dual-form contract class | `PRUNED`; B2-A leaves no contract supporting both policy and direct control |
+| `RCS-04A3B4` | Context-varying form-availability prevalence inside the coavailability-capable class | `PRUNED`; B2-A leaves no coavailability-capable class |
+| `RCS-04A3B5` | Policy-only-opportunity prevalence inside context-varying coavailability contracts | `PRUNED`; B2-A leaves no context-varying coavailability class |
+| `RCS-04A3B6` | Direct-only-opportunity prevalence inside the direct-removal class | `PRUNED`; B2-A leaves no direct-removal class |
+| `RCS-04A3B1I` | Participant-intrinsic-opportunity incidence inside the nonempty `{P}` controlled-form projection class | `DIR-SELECTED`; A makes every policy-only contract complete-profile exact `{P}` and materially policy-responsive at every genuine conflict; B is the qualified system fallback if universal policy coverage creates unavoidable control premium or solved tool-like play while honest intrinsic contexts remain legible and non-token |
+| `RCS-04A3B2I` | Participant-intrinsic-opportunity incidence inside the nonempty `{D}` controlled-form projection class | `DIR-SELECTED`; B makes every direct-only contract complete-profile exact `{I,D}` with at least one honest live direct opportunity and one authored participant-intrinsic opportunity; A is the qualified practical agency/clarity fallback if honest `I` contexts remain arbitrary or token while exact-`{D}` testing proves low interruption, acceptable multiplayer handling, and no unavoidable dominance |
+| `RCS-04A3B3I` | Intrinsic-opportunity incidence inside the nonempty `{P,D}` controlled-form projection class | `PRUNED`; B2-A leaves no `{P,D}` controlled-form projection class |
+| `RCS-04A3B4I` | Intrinsic-opportunity incidence inside the nonempty `{B}` controlled-form projection class | `PRUNED`; B2-A leaves no `{B}` controlled-form projection class |
+| `RCS-04A3B5I` | Intrinsic-opportunity incidence inside the nonempty `{D,B}` controlled-form projection class | `PRUNED`; B2-A leaves no `{D,B}` controlled-form projection class |
+| `RCS-04A3B6I` | Intrinsic-opportunity incidence inside the nonempty `{P,B}` controlled-form projection class | `PRUNED`; B2-A leaves no `{P,B}` controlled-form projection class |
+| `RCS-04A3B6I1` | Intrinsic-opportunity incidence inside the nonempty `{P,D,B}` controlled-form projection class | `PRUNED`; B2-A leaves no `{P,D,B}` controlled-form projection class |
+| `RCS-04A3C` | Independently variable collision-policy-coordinate prevalence among policy-mediated contracts | `DIR-SELECTED`; A makes every material collision-policy change inseparably bundled with another meaningful participant semantic; B is the qualified class-wide agency/clarity fallback if cohesive bundles create recurrent hostage-taking, opaque attribution, or paid-Rite regret while finite independence tests as low-friction and non-premium |
+| `RCS-04A3D1` | Constructive collision-covenant-language prevalence across policy-mediated participant controls | `DIR-SELECTED`; A requires finite authored whole bundled covenants only, with B armed as the qualified class-wide expressive-mastery/menu-bloat fallback if compact menus fail recurrently and a finite typed builder preserves bundling, immutable Relic contribution, forecastability, non-dominance, and deterministic migration |
+| `RCS-04A3D2` | Participant-authored context-branching prevalence among constructive collision policies | `PRUNED`; D1-A leaves no constructive collision-policy language |
+| `RCS-04A4` | Complete collision-law sensitivity to contributor multiplicity and cause composition | `DIR-SELECTED`; C requires stable contributor-neutral and contributor-sensitive automatic-law families, with A as the qualified clarity/equal-ceiling/anti-farming fallback; every law/version keeps one classification, A2-A keeps every result target-only, and firing A2-C reopens A4 over the expanded domain |
+| `RCS-04A5` | Genuine stochastic support across complete collision-result laws | `DIR-SELECTED`; C requires stable deterministic-only and stochastic-capable complete automatic-law families, with A as the qualified policy-mastery/multiplayer-trust/Rite-and-return fallback; every occurrence realizes once, both families need equal optimized Legendary ceilings and strict non-dominated niches, exact A4×A5 placement remains AUTHOR/SPEC, and RCS-02 retains disclosure |
+| `RCS-04A6` | Transferable collision-resolution grammar across complete automatic laws | `DIR-SELECTED`; A requires one bounded catalog-wide player-semantic grammar, with B as the qualified artifact-identity fallback if every honest shared grammar flattens Relic identity, creates one solved calculus, or needs hidden custom dispatch and plural dialects clear the stronger legibility/non-dominance proof; implementation factoring and exact operators/recipes remain AUTHOR/SPEC/TUNE |
+| `RCS-04A7` | Policy-mediated participant collision-control commitment timing | `DIR-SELECTED`; A makes every exact-`{P}` contract advance-bound, with C as the qualified artifact-identity/direct-participation fallback if prospective doctrine fails its explicit playability gates; no policy confirmation, veto, override, or change survives cohort freeze, while exact holder/disclosure/default stays RCS-02 and bind/rebind/lock horizon stays RCS-13 |
+| `RCS-04A3XI` | Pure participant-intrinsic `{I}` signature incidence across transformation dialects | `DIR-SELECTED`; A requires at least one honest pure-`{I}` contract in both the state and boundary dialects, with B state-only as the qualified clarity fallback; support does not require equal counts or mirrored content; selected paired support already satisfies A1C-C's joint-coverage floor, while firing B reopens downstream incidence; any later player-material coordinate reopens affected exact-signature incidence rows |
+| `RCS-04A3XP` | Advance-bound bundled exact-`{P}` signature incidence across transformation dialects | `DIR-SELECTED`; A requires at least one honest complete policy-signature contract in both state and boundary dialects, with B state-only as the qualified clarity fallback; support does not require equal counts, mirrored covenant menus, common laws, causes, or routing; selected paired support independently satisfies A1C-C's joint-coverage floor; any later player-material coordinate reopens affected exact-signature incidence rows |
+| `RCS-04A3XD` | Exact-`{I,D}` direct-specialist signature incidence across transformation dialects | `DIR-SELECTED`; A requires at least one honest complete exact-`{I,D}` direct-specialist contract in both state and boundary dialects, with B state-only as the qualified clarity fallback; support does not require equal counts or mirrored content; selected XI-A/XP-A/XD-A derive universal paired signature support and a six-contract/version witness floor; any later player-material coordinate reopens affected exact-signature incidence rows and the topology derivation |
+| `RCS-04B1` | Committed artifact-instance continuity | `DIR-SELECTED`; A makes every successful nonnull transformation commit preserve `soulRelicInstanceId`, with B as the qualified reincarnation/artifact-identity fallback; firing B reopens B2/B3 and affected mappings, while persistence/transaction realization stays RCS-15/RCS-16 |
+| `RCS-04B2` | Committed definition-contract continuity | `DIR-SELECTED`; A makes every successful nonnull transformation commit preserve its definition and immutable fixed current-design contract/version, with B as the qualified named-metamorphosis/artifact-identity fallback; firing B reopens B3 and affected dialect/signature mappings, while patch/save-version migration remains RCS-15 |
+| `RCS-04B3` | Active semantic biography-chapter succession inside one preserved lineage | `DIR-SELECTED`; B makes every successful assignment-changing commit close the sole active chapter and open exactly one ancestry-complete linked successor inside the same artifact, definition, and canonical nonforking biography lineage, with A as the qualified simplicity/non-token-biography fallback; no chapter may fork/merge/reopen/reset or become an independent source/reward claim, and persistence/transaction realization stays RCS-15/RCS-16 |
+| `RCS-05A` | Positive-payoff carrier / Relic-manifestation prevalence | `DIR-SELECTED`; A makes every positive payoff source-mediated through already-paid qualifying-source transitions, with C as the qualified emergent-artifact-identity fallback; no payoff creates a distinct Relic-origin action/state, and firing C reopens affected downstream payoff/power mappings |
+| `RCS-05B1` | Receipt-local payoff incidence in positive dual settlements | `DIR-SELECTED`; A makes every positive dual payoff one pair-irreducible source-mediated consequence with no receipt-local package, with C as the qualified receipt-agency/artifact-identity fallback; firing C reopens B2/B3 and affected downstream mappings |
+| `RCS-05B2` | Receipt-local consequence breadth inside the local-bearing dual-settlement domain | `PRUNED`; B1-A leaves no receipt-local package; reopens if B1-C fires |
+| `RCS-05B3` | Pair-irreducible supplement incidence inside local-bearing dual settlements | `PRUNED`; B1-A already requires the sole positive dual package to be pair-irreducible and leaves no local-bearing domain; reopens if B1-C fires |
+| `RCS-05C1` | Retained-payoff incidence across all positive packages | `DIR-SELECTED`; A makes every positive package cut-complete with no unresolved payoff authorization, while C is the qualified temporal-policy/artifact-identity fallback; a lasting source state fully committed at settlement remains cut-complete |
+| `RCS-05C2` | Retained-opportunity realization-control source | `PRUNED`; C1-A leaves no retained payoff authorization; reopens if C1-C fires |
+| `RCS-05C3` | Participant realization-authority timing | `PRUNED`; C1-A leaves no retained participant realization authority; reopens if C1-C fires and C2 admits participant contingency |
+| `RCS-05C4` | Automatic nonterminal-expiry topology for retained opportunities | `PRUNED`; C1-A leaves no retained payoff opportunity to expire; reopens if C1-C fires |
+| `RCS-05D` | Input-Charm marginal power doctrine relative to the empty input lane | `SCREEN`; follows the complete RCS-08 route after its RCS-13 reachability detour and I2 composition-law subtree, with RCS-06 already derived; C1-A prunes only the same-cut branch and does not bypass later-use or legality rows; tests the payoff lane both empty and legally occupied so pair-only vertical synergy cannot hide |
+| `RCS-05E` | Payoff-Charm marginal power doctrine relative to the empty payoff lane | `SCREEN`; follows RCS-05D, testing the input lane both empty and legally occupied so pair-only vertical synergy cannot hide |
+| `RCS-05F` | Catalog-wide root/definition and required-semantic-family optimized-ceiling topology | `SCREEN`; follows RCS-05E after format, compatibility, stacking, team authority, and both Charm marginal doctrines are fixed; numeric thresholds remain RCS-17 and proof method remains RCS-18 |
+| `RCS-06` | Format/team/release scope over which that envelope must hold | `DERIVED`; selected D04-R3.2 requires separate 1v1/2v2/3v3 gates, D04-R4.2 makes the whole allied composition the team claimant, and the selected pinned-version rule reruns semantic changes; RCS-08 retains team-budget authority and RCS-19 retains inclusion/defer scope |
+| `RCS-07A` | Root-to-input-Charm catalog-support topology | `DIR-SELECTED`; B makes support genuinely selective while both projections remain total, so every root stays input-customizable and every supported input Charm remains viable, with A as the qualified clarity/anti-dead-loot fallback; exact edges, lawful conditioning, power, and rarity remain unselected |
+| `RCS-07B` | Root-to-payoff-Charm catalog-support topology | `DIR-SELECTED`; B makes support genuinely selective while both projections remain total, so every root stays payoff-Charm-customizable and every supported payoff Charm remains viable, with A as the qualified clarity/anti-dead-loot fallback; 07B neither creates nor removes any otherwise-authored uncharmed receipt or payoff |
+| `RCS-07C` | Residual complete root + input + payoff package support after both unary support edges exist | `DIR-SELECTED`; A fully factorizes the two unary support relations, with B as the qualified three-way artifact-chemistry fallback; exact triples and lawful context remain AUTHOR/SPEC |
+| `RCS-08` | Cross-system stacking, team-budget authority, and cross-combatant/cross-root evidence fan-out across coincident or later evaluator invocations | Non-counting parent alias for RCS-08C1 through the RCS-08I2 subtree after the corrected fifty-seventh prerequisite amendment |
+| `RCS-08C1` | Broad same-cut cross-active-Relic post-routing candidate-overlap support | `DIR-SELECTED`; B requires functional nonempty overlap across distinct allied combatants' selected authoritative Relic ledgers, including exact-child or distinct-related lineage/accounting overlap, with A as the qualified clarity/anti-amplification fallback; candidate overlap grants no joint use |
+| `RCS-08C2` | Exact-child versus distinct-related form support inside the C1-positive cross-active overlap domain | `DIR-SELECTED`; C requires nonempty exact-pair and related-only-pair support, with A as the qualified clarity/anti-laundering fallback; each unordered selected-ledger pair classifies independently, a same-pair hybrid enters exact once, and different pairs in one three-Relic cohort may populate both classes |
+| `RCS-08C3E` | Complete same-cut exact-form permission, false-bit disposition, and recurrence law | Non-counting parent alias for C3EA through C3EG1; a hybrid uses this exact law, outcome, recurrence, and realization once |
+| `RCS-08C3EA` | Material participant-configurability prevalence across same-cut exact-permission contracts | `DIR-SELECTED`; A makes every complete exact-permission law intrinsic after routing, with C retained as the qualified cross-player-agency/artifact-temperament fallback; different contracts and fixed contexts may still have different intrinsic laws |
+| `RCS-08C3EB` | Independently recombinable exact-permission-coordinate prevalence | `PRUNED`; C3EA-A admits no participant permission-control setting, so no independently recombinable permission coordinate exists |
+| `RCS-08C3EC1` | Constructive exact-permission-language prevalence | `PRUNED`; C3EA-A admits no participant-authored permission-control language |
+| `RCS-08C3EC2` | Participant-composed context-branching prevalence inside constructive exact-permission languages | `PRUNED`; C3EA-A prunes participant-authored permission construction and therefore its branching child |
+| `RCS-08C3ED` | Stochastic support across complete bound same-cut exact-permission laws | `DIR-SELECTED`; A makes every fully fixed intrinsic exact-permission opportunity deterministic, with C retained as the qualified artifact-temperament/robust-risk-policy fallback; identical authoritative opportunities never redraw |
+| `RCS-08C3EE1` | Distribution-response prevalence among stochastic-capable same-cut exact laws | `PRUNED`; C3ED-A leaves no stochastic-capable same-cut exact-permission law |
+| `RCS-08C3EE2` | Matched player/counterplay-causal odds-response support for responsive exact laws | `PRUNED`; C3ED-A prunes the stochastic domain and therefore its causal odds-response child |
+| `RCS-08C3EE3` | Deterministic bit-response prevalence among same-cut exact-law projections | `DIR-SELECTED`; C requires responsive and context-invariant deterministic projections to coexist, with A retained as the qualified clarity/multiplayer-trust/policy-nonredundancy fallback; complete canonical domains cannot be split or concatenated across tags |
+| `RCS-08C3EE4` | Matched player/counterplay-causal certain-bit response for responsive exact laws | `DIR-SELECTED`; B requires at least one qualifying participant/counterplayer decision that causally changes eventual certain-bit support through an independently meaningful fact while the same projection and exact pair/proof remain fixed, with A retained as the qualified clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback; support is existential, not universal |
+| `RCS-08C3EE5` | Steadfast deterministic polarity for context-invariant same-cut exact laws | `DIR-SELECTED`; C requires steadfast allow and steadfast deny projections to coexist with B retained as the qualified clarity/multiplayer-trust/policy-nonredundancy fallback; no permission projection is split by output or context, and no physical-Relic quota follows |
+| `RCS-08C3EE6` | Missing-certainty-endpoint support topology across the complete same-cut exact law family | `DERIVED`; C3EE3-C's responsive deterministic projection necessarily supplies both guaranteed-deny and guaranteed-allow endpoints |
+| `RCS-08C3EE7` | Singleton certainty-endpoint identity for same-cut exact laws | `PRUNED`; C3EE6 derives both certainty endpoints, so the endpoint set is not singleton |
+| `RCS-08C3ED1` | Empty-versus-singleton retained-use support after a false same-cut exact permission bit | `OWNER-OPEN`; false means not both and may cancel both already-authored personal transactions, retain exactly one unchanged transaction, or support both disposition families across the catalog without choosing survivor identity or resolver authority |
+| `RCS-08C3EF1` | Fixed-opportunity exact-denial output-set multiplicity | `SCREEN`; conditional on C3ED1 admitting singleton retention; distinguishes one canonical `{}`, `{A}`, or `{B}` result from several lawful results at one held-fixed opportunity |
+| `RCS-08C3EF2A` | Participant-configurability prevalence for ambiguous exact-denial resolvers | `SCREEN`; conditional on C3EF1 admitting multiplicity; no live post-denial prompt is permitted |
+| `RCS-08C3EF2B` | Independently recombinable exact-denial resolver-coordinate prevalence | `SCREEN`; conditional on positive C3EF2A; distinguishes a separately variable resolver setting from one bundled with routing, permission, or another operative covenant |
+| `RCS-08C3EF2C1` | Constructive exact-denial resolver-language prevalence | `SCREEN`; conditional on positive C3EF2A; closed whole policies versus bounded construction remain player-material even when bundled |
+| `RCS-08C3EF2C2` | Participant-composed context branching for constructive exact-denial resolvers | `SCREEN`; conditional on constructive C3EF2C1 support |
+| `RCS-08C3EF3` | Stochastic support across complete bound exact-denial resolver laws | `SCREEN`; follows every applicable authority/language row when C3EF1 admits multiplicity; exact deterministic maps and priorities remain AUTHOR/SPEC |
+| `RCS-08C3EF4` | Distribution-response prevalence among stochastic-capable exact-denial resolver laws | `SCREEN`; constant nondegenerate empty/singleton distributions versus laws whose probability image changes across reachable fixed factual contexts |
+| `RCS-08C3EF5` | Matched player/counterplay-causal odds-response support for responsive exact-denial resolvers | `SCREEN`; conditional on C3EF4 admitting response; a direct survivor command or lucky crossover is not a causal witness |
+| `RCS-08C3EF6` | Deterministic complete retained-set response prevalence among exact-denial resolver projections | `SCREEN`; context-invariant versus fact-responsive complete results over `{}`, `{A}`, and `{B}`, or stable coexistence; a C3ED1 singleton-only answer fixes cardinality but does not erase lawful `{A}`-versus-`{B}` response, while exact recipient maps remain AUTHOR/SPEC rather than another incidence axis |
+| `RCS-08C3EF7` | Matched player/counterplay-causal certain-output response for responsive exact-denial resolvers | `SCREEN`; conditional on C3EF6 admitting response through an independently meaningful fact |
+| `RCS-08C3EF8` | Steadfast deterministic empty-versus-singleton cardinality across exact-denial resolvers | `SCREEN`; for any nonempty deterministic resolver class, coarsen complete `{A}` and `{B}` results to singleton before classifying empty-only, singleton-only, or both stable cardinalities; C3ED1-B therefore conditionally derives singleton-only if that class exists and leaves the row vacuous otherwise, without erasing EF6's complete-result response |
+| `RCS-08C3EF9` | Missing-certainty-endpoint support topology across the complete exact-denial resolver family | `SCREEN`; classifies neither, both, or exactly one of guaranteed empty/singleton when prior stochastic and deterministic rows do not derive the answer |
+| `RCS-08C3EF10` | Singleton certainty-endpoint identity for exact-denial resolver laws | `SCREEN`; conditional on C3EF9 leaving exactly one endpoint; guaranteed cancellation versus guaranteed one retained use |
+| `RCS-08C3EG1` | Held-overlap reattempt support after a false same-cut exact permission decision | `SCREEN`; conditional on a reachable false exact bit; distinguishes one listen during continuous exact-overlap sufficiency from at least one genuinely later re-evaluation without treating a callback, poll, reload, or unchanged-context redraw as a new opportunity |
+| `RCS-08C3R` | Complete same-cut distinct-related permission, false-bit disposition, and recurrence law | Non-counting parent alias for C3RA through C3RG1; only the related-only residual receives these controls, while hybrids inherit the exact law, outcome, and recurrence once |
+| `RCS-08C3RA` | Material participant-configurability prevalence across same-cut related-only permission contracts | `SCREEN`; conditional on C2 selecting distinct-related support; intrinsic-only, every residual-capable contract configurable, or stable coexistence |
+| `RCS-08C3RB` | Independently recombinable related-only permission-coordinate prevalence | `SCREEN`; conditional on C3RA admitting participant control; hybrid opportunities never receive a second coordinate |
+| `RCS-08C3RC1` | Constructive related-only permission-language prevalence | `SCREEN`; conditional on positive C3RA regardless of C3RB; closed whole policies versus bounded construction |
+| `RCS-08C3RC2` | Participant-composed context-branching prevalence inside constructive related-only languages | `SCREEN`; conditional on constructive C3RC1 support |
+| `RCS-08C3RD` | Stochastic support across complete bound same-cut related-only permission laws | `SCREEN`; measured only on the related-only residual so inherited hybrid behavior cannot manufacture a mixed class |
+| `RCS-08C3RE0` | Tagged full-related deterministic/stochastic class topology | `SCREEN`; returns from the residual to all distinct-related opportunities, including separately tagged hybrid restrictions, without changing any inherited hybrid bit |
+| `RCS-08C3RE1` | Distribution-response prevalence among stochastic-capable full-related projections | `SCREEN`; constant versus fact-responsive probability images within one tagged law projection |
+| `RCS-08C3RE2` | Matched player/counterplay-causal odds-response support for responsive related projections | `SCREEN`; conditional on C3RE1 admitting response; a hybrid remains governed by its exact bit and draw |
+| `RCS-08C3RE3` | Deterministic bit-response prevalence among tagged full-related projections | `SCREEN`; context-invariant versus responsive projections, or coexistence, without concatenating disjoint tags into fake response |
+| `RCS-08C3RE4` | Matched player/counterplay-causal certain-bit response for responsive related projections | `SCREEN`; conditional on C3RE3 admitting response and requiring a form-material causal witness |
+| `RCS-08C3RE5` | Steadfast deterministic polarity for context-invariant full-related projections | `SCREEN`; conditional on a nonempty steadfast class; deny-only, allow-only, or both |
+| `RCS-08C3RE6` | Missing-certainty-endpoint support topology across the complete full-related family | `SCREEN`; classifies neither, both, or exactly one guaranteed endpoint when not derived upstream |
+| `RCS-08C3RE7` | Singleton certainty-endpoint identity for full-related laws | `SCREEN`; conditional on C3RE6 leaving exactly one endpoint; deny versus allow |
+| `RCS-08C3RD1` | Empty-versus-singleton retained-use support after a false same-cut related-only permission bit | `SCREEN`; applies only to the related-only residual; hybrids inherit C3ED1 and cannot receive a second disposition |
+| `RCS-08C3RF1` | Fixed-opportunity related-denial output-set multiplicity | `SCREEN`; conditional on C3RD1 admitting singleton retention; distinguishes one canonical result from several lawful `{}`, `{A}`, or `{B}` sets |
+| `RCS-08C3RF2A` | Participant-configurability prevalence for ambiguous related-denial resolvers | `SCREEN`; conditional on C3RF1 admitting multiplicity; no live post-denial prompt |
+| `RCS-08C3RF2B` | Independently recombinable related-denial resolver-coordinate prevalence | `SCREEN`; conditional on positive C3RF2A; separate versus bundled resolver force |
+| `RCS-08C3RF2C1` | Constructive related-denial resolver-language prevalence | `SCREEN`; conditional on positive C3RF2A; closed whole policy versus bounded construction |
+| `RCS-08C3RF2C2` | Participant-composed context branching for constructive related-denial resolvers | `SCREEN`; conditional on constructive C3RF2C1 support |
+| `RCS-08C3RF3` | Stochastic support across complete bound related-denial resolver laws | `SCREEN`; follows every applicable authority/language row when C3RF1 admits multiplicity; exact maps remain AUTHOR/SPEC |
+| `RCS-08C3RF4` | Distribution-response prevalence among stochastic-capable related-denial resolver laws | `SCREEN`; constant nondegenerate empty/singleton distributions versus laws whose probability image changes across reachable fixed factual contexts |
+| `RCS-08C3RF5` | Matched player/counterplay-causal odds-response support for responsive related-denial resolvers | `SCREEN`; conditional on C3RF4 admitting response and requiring a form-material causal witness |
+| `RCS-08C3RF6` | Deterministic empty/singleton-output response prevalence among related-denial resolver projections | `SCREEN`; context-invariant versus fact-responsive deterministic projections, or stable coexistence, measured only on the related-only residual |
+| `RCS-08C3RF7` | Matched player/counterplay-causal certain-output response for responsive related-denial resolvers | `SCREEN`; conditional on C3RF6 admitting response through an independently meaningful fact |
+| `RCS-08C3RF8` | Steadfast deterministic empty-versus-singleton polarity across related-denial resolvers | `SCREEN`; conditional on a nonempty context-invariant related-only class; empty-only, singleton-only, or both |
+| `RCS-08C3RF9` | Missing-certainty-endpoint support topology across the complete related-denial resolver family | `SCREEN`; classifies neither, both, or exactly one guaranteed empty/singleton endpoint when not derived upstream |
+| `RCS-08C3RF10` | Singleton certainty-endpoint identity for related-denial resolver laws | `SCREEN`; conditional on C3RF9 leaving exactly one endpoint; guaranteed cancellation versus guaranteed one retained use |
+| `RCS-08C3RG1` | Held-overlap reattempt support after a false same-cut related-only permission decision | `SCREEN`; conditional on a reachable false related-only bit; hybrids inherit the exact recurrence law, while the residual distinguishes one listen from a later re-evaluation inside one continuously sufficient related bond |
+| `RCS-08C4` | Aggregate same-cut three-recipient overlap and settlement topology | Non-counting parent alias for C4G1 through C4I19; pairwise permission and pair-local false-bit disposition do not settle a three-recipient constellation |
+| `RCS-08C4G1` | Three-recipient same-cut candidate-overlap support | `DIR-SELECTED`; A keeps every reachable fixed candidate-overlap component pair-bounded, with B as the qualified irreducible-3v3-coordination fallback; exact and related-only pair support remain required |
+| `RCS-08C4G2A` | Non-product joint draw-coupling support across simultaneous nonconstant pair permissions | `PRUNED`; C4G1-A leaves no connected three-Relic candidate constellation and therefore no simultaneous constellation pair draws to couple |
+| `RCS-08C4G2B` | Participant-configurability prevalence for non-product pair-draw coupling | `PRUNED`; C4G1-A leaves no three-Relic coupling domain |
+| `RCS-08C4G2C` | Independently recombinable coupling-coordinate prevalence | `PRUNED`; C4G1-A leaves no three-Relic coupling coordinate |
+| `RCS-08C4G2D1` | Constructive coupling-policy-language prevalence | `PRUNED`; C4G1-A leaves no three-Relic coupling policy language |
+| `RCS-08C4G2D2` | Participant-composed context branching for constructive coupling policies | `PRUNED`; C4G1-A leaves no three-Relic coupling policy language |
+| `RCS-08C4G2E1` | Distribution-response prevalence among non-product joint pair-draw coupling laws | `PRUNED`; C4G1-A leaves no three-Relic joint pair-draw coupling law |
+| `RCS-08C4G2E2` | Matched player/counterplay-causal odds-response support for responsive pair-draw coupling | `PRUNED`; C4G1-A leaves no three-Relic joint pair-draw coupling law |
+| `RCS-08C4H1` | Empty-versus-positive final recipient-set incidence for three-recipient settlements | `PRUNED`; C4G1-A leaves no three-Relic candidate constellation to settle |
+| `RCS-08C4H2` | Singleton-versus-multi positive recipient-set incidence | `PRUNED`; C4G1-A leaves no three-Relic candidate constellation to settle |
+| `RCS-08C4H3` | Double-versus-triple multi-recipient incidence | `PRUNED`; C4G1-A leaves no three-Relic candidate constellation to settle |
+| `RCS-08C4I1` | Fixed-opportunity final-recipient-set multiplicity | `PRUNED`; C4G1-A leaves no three-Relic final-recipient set |
+| `RCS-08C4I2` | Participant selector-configurability prevalence for ambiguous three-recipient settlements | `PRUNED`; C4G1-A leaves no three-Relic settlement selector |
+| `RCS-08C4I3` | Independently recombinable three-recipient selector-coordinate prevalence | `PRUNED`; C4G1-A leaves no three-Relic settlement selector coordinate |
+| `RCS-08C4I4` | Constructive three-recipient selector-language prevalence | `PRUNED`; C4G1-A leaves no three-Relic settlement selector language |
+| `RCS-08C4I5` | Participant-composed context branching for constructive three-recipient selectors | `PRUNED`; C4G1-A leaves no three-Relic settlement selector language |
+| `RCS-08C4I6` | Stochastic support across complete bound three-recipient selector laws | `PRUNED`; C4G1-A leaves no three-Relic settlement selector law |
+| `RCS-08C4I7` | Distribution-response prevalence among stochastic-capable three-recipient selector laws | `PRUNED`; C4G1-A leaves no three-Relic settlement selector law |
+| `RCS-08C4I8` | Matched player/counterplay-causal odds-response support for responsive three-recipient selectors | `PRUNED`; C4G1-A leaves no three-Relic settlement selector law |
+| `RCS-08C4I9` | Deterministic final-recipient-set response prevalence among three-recipient selector projections | `PRUNED`; C4G1-A leaves no three-Relic settlement selector projection |
+| `RCS-08C4I10` | Matched player/counterplay-causal certain-set response for responsive three-recipient selectors | `PRUNED`; C4G1-A leaves no three-Relic settlement selector projection |
+| `RCS-08C4I11` | Steadfast deterministic empty-versus-positive polarity across three-recipient selectors | `PRUNED`; C4G1-A leaves no three-Relic settlement selector projection |
+| `RCS-08C4I12` | Steadfast deterministic singleton-versus-multi polarity among positive three-recipient settlements | `PRUNED`; C4G1-A leaves no three-Relic settlement selector projection |
+| `RCS-08C4I13` | Steadfast deterministic double-versus-triple polarity among multi-recipient settlements | `PRUNED`; C4G1-A leaves no three-Relic settlement selector projection |
+| `RCS-08C4I14` | Missing-certainty-endpoint support topology for empty versus positive three-recipient settlement | `PRUNED`; C4G1-A leaves no three-Relic settlement certainty endpoints |
+| `RCS-08C4I15` | Singleton certainty-endpoint identity for empty versus positive settlement | `PRUNED`; C4G1-A leaves no three-Relic settlement certainty endpoint |
+| `RCS-08C4I16` | Missing-certainty-endpoint support topology for singleton versus multi positive settlement | `PRUNED`; C4G1-A leaves no three-Relic settlement certainty endpoints |
+| `RCS-08C4I17` | Singleton certainty-endpoint identity for singleton versus multi settlement | `PRUNED`; C4G1-A leaves no three-Relic settlement certainty endpoint |
+| `RCS-08C4I18` | Missing-certainty-endpoint support topology for double versus triple multi-recipient settlement | `PRUNED`; C4G1-A leaves no three-Relic settlement certainty endpoints |
+| `RCS-08C4I19` | Singleton certainty-endpoint identity for double versus triple settlement | `PRUNED`; C4G1-A leaves no three-Relic settlement certainty endpoint |
+| `RCS-08L1` | Broad strictly later other-active-Relic candidate-reuse opportunity support | `SCREEN`; independent of the same-cut C branch; covers an identical final child or distinct later child joined to the earlier proof by complete lineage/shared nonmultiplying authorization or accounting |
+| `RCS-08L2` | Exact-child versus distinct-related form support inside the L1-positive later-overlap domain | `SCREEN`; conditional on L1-B; exact-only, distinct-related-only, or both, with hybrids counted once |
+| `RCS-08L3E` | Complete strictly-later exact-form admission and recurrence law | Non-counting parent alias for L3EA through L3EG1; a false bit preserves the already committed earlier use and rejects only the later use, while G1 owns later re-evaluation during continuous sufficiency |
+| `RCS-08L3EA` | Material participant-configurability prevalence across later exact-admission contracts | `SCREEN`; intrinsic-only, every contract configurable, or stable coexistence; any authority is prospectively bound rather than a live reuse prompt |
+| `RCS-08L3EB` | Independently recombinable later exact-admission-coordinate prevalence | `SCREEN`; conditional on L3EA admitting participant control; separate from versus bundled with another operative setting |
+| `RCS-08L3EC1` | Constructive later exact-admission-language prevalence | `SCREEN`; conditional on positive L3EA regardless of L3EB; closed authored whole policies versus bounded construction |
+| `RCS-08L3EC2` | Participant-composed context-branching prevalence inside constructive later exact-admission languages | `SCREEN`; conditional on constructive L3EC1 support |
+| `RCS-08L3ED` | Stochastic support across complete bound later exact-admission laws | `SCREEN`; deterministic-only, stochastic-only, or stable coexistence after all authoritative state is fixed; one later opportunity draws once |
+| `RCS-08L3EE1` | Distribution-response prevalence among stochastic-capable later exact laws | `SCREEN`; constant versus fact-responsive probability images |
+| `RCS-08L3EE2` | Matched player/counterplay-causal odds-response support for responsive later exact laws | `SCREEN`; conditional on L3EE1 admitting response; direct reuse commands do not qualify |
+| `RCS-08L3EE3` | Deterministic bit-response prevalence among later exact-law projections | `SCREEN`; context-invariant versus responsive projections, or coexistence |
+| `RCS-08L3EE4` | Matched player/counterplay-causal certain-bit response for responsive later exact laws | `SCREEN`; conditional on L3EE3 admitting response through independently meaningful facts |
+| `RCS-08L3EE5` | Steadfast deterministic polarity for context-invariant later exact laws | `SCREEN`; conditional on a nonempty steadfast class; deny-only, allow-only, or both |
+| `RCS-08L3EE6` | Missing-certainty-endpoint support topology across the complete later exact family | `SCREEN`; neither, both, or exactly one guaranteed denial/admission endpoint when not already derived |
+| `RCS-08L3EE7` | Singleton certainty-endpoint identity for later exact laws | `SCREEN`; conditional on L3EE6 leaving one endpoint; guaranteed denial versus guaranteed admission |
+| `RCS-08L3EG1` | Held-overlap reattempt support after a false strictly-later exact admission | `SCREEN`; conditional on a reachable later exact denial; the earlier committed use remains final, while this row distinguishes a latched rejection from at least one new evaluation during the same continuously sufficient cross-active exact bond |
+| `RCS-08L3R` | Complete strictly-later distinct-related admission and recurrence law | Non-counting parent alias for L3RA through L3RG1; authority/randomness/recurrence use the related-only residual and hybrids inherit the exact law once |
+| `RCS-08L3RA` | Material participant-configurability prevalence across later related-only admission contracts | `SCREEN`; conditional on L2 selecting distinct-related support; intrinsic-only, universal configurability, or stable coexistence |
+| `RCS-08L3RB` | Independently recombinable later related-only admission-coordinate prevalence | `SCREEN`; conditional on L3RA admitting participant control; no hybrid second coordinate |
+| `RCS-08L3RC1` | Constructive later related-only admission-language prevalence | `SCREEN`; conditional on positive L3RA regardless of L3RB; closed whole policies versus bounded construction |
+| `RCS-08L3RC2` | Participant-composed context-branching prevalence inside constructive later related-only languages | `SCREEN`; conditional on constructive L3RC1 support |
+| `RCS-08L3RD` | Stochastic support across complete bound later related-only admission laws | `SCREEN`; measured only on the related-only residual so hybrid inheritance cannot manufacture a mixed class |
+| `RCS-08L3RE0` | Tagged full-related later-admission deterministic/stochastic class topology | `SCREEN`; recombines residual projections with separately tagged hybrid restrictions without changing an inherited bit |
+| `RCS-08L3RE1` | Distribution-response prevalence among stochastic-capable full-related later projections | `SCREEN`; constant versus fact-responsive probability images |
+| `RCS-08L3RE2` | Matched player/counterplay-causal odds-response support for responsive later related projections | `SCREEN`; conditional on L3RE1 admitting response and requiring form-material policy value |
+| `RCS-08L3RE3` | Deterministic bit-response prevalence among tagged full-related later projections | `SCREEN`; context-invariant versus responsive projections, or coexistence, without false cross-tag response |
+| `RCS-08L3RE4` | Matched player/counterplay-causal certain-bit response for responsive later related projections | `SCREEN`; conditional on L3RE3 admitting response |
+| `RCS-08L3RE5` | Steadfast deterministic polarity for context-invariant full-related later projections | `SCREEN`; conditional on a nonempty steadfast class; deny-only, allow-only, or both |
+| `RCS-08L3RE6` | Missing-certainty-endpoint support topology across the complete full-related later family | `SCREEN`; neither, both, or exactly one guaranteed endpoint when not derived upstream |
+| `RCS-08L3RE7` | Singleton certainty-endpoint identity for full-related later laws | `SCREEN`; conditional on L3RE6 leaving one endpoint; denial versus admission |
+| `RCS-08L3RG1` | Held-overlap reattempt support after a false strictly-later related-only admission | `SCREEN`; conditional on a reachable later related-only denial; hybrids inherit exact recurrence, while the residual distinguishes one rejection from a new evaluation inside one continuously sufficient related bond |
+| `RCS-08L4` | Later-recipient scope across another active root on the same combatant, an allied combatant, or both | `SCREEN`; conditional on an applicable L3 law admitting actual later use and reached only after the RCS-13 root-switch prerequisite; the same-combatant arm derives away if no lawful switch preserves the proof family |
+| `RCS-08L5` | Later cross-active-Relic reuse-propagation topology | `SCREEN`; conditional on admitted later use and L4; terminal hop, finite nonbranching path, and finite branch-capable DAG remain distinct fixed graph-support policies, never a live unregistered branch selector |
+| `RCS-08S1` | Stacking-family signature-change support for a Relic-modified canonical source package | `SCREEN`; preserve every underlying strongest-only family signature versus require at least one truthful material signature change; each selected definition/version fixes its signature before loadout legality, while exact group mappings remain AUTHOR/SPEC |
+| `RCS-08T1` | Team categorical-signature-change support for a Relic-modified canonical source package | `SCREEN`; preserve every Control/Survival/Burst capability signature versus require at least one truthful material signature change; each selected definition/version fixes its signature before loadout legality, while exact tags and cap values remain AUTHOR/SPEC |
+| `RCS-08I0` | Same-cut material co-application support among two or more retained active-Relic payoff transactions | `SCREEN`; conditional on a same-cut recipient set of size at least two; no material co-application, universal legal co-application, or disclosed selective coexistence, while each retained Relic keeps exactly its already-authored personal transaction |
+| `RCS-08I1` | Relic-versus-other-system material co-application support after selected stacking and team signatures run | `SCREEN`; no material overlap, universal normalized overlap, or disclosed selective overlap; excludes cases already rejected by strongest-only, team-category, or another hard rule |
+| `RCS-08I2` | Complete canonical composition/precedence law for every supported noncommutative co-application admitted by I0 or I1 | Non-counting parent alias for I2A through I2F4; cross-active-Relic and Relic-versus-other-system domains remain separately tagged projections, while exact composition recipes, normal forms, and priorities remain AUTHOR/SPEC after the player-material law topology closes |
+| `RCS-08I2A` | Fixed-opportunity canonical normal-form multiplicity inside each tagged supported noncommutative domain | `SCREEN`; distinguishes one lawful normal form from several lawful forms after the complete factual opportunity and every non-I2 law input are fixed; concatenating the I0 and I1 domains cannot manufacture multiplicity |
+| `RCS-08I2B` | Participant-configurability prevalence for ambiguous tagged composition/precedence contracts | `SCREEN`; conditional on I2A admitting multiplicity inside at least one tagged domain; any participant force is prospectively bound rather than a live post-effect prompt |
+| `RCS-08I2C` | Independently recombinable composition-coordinate prevalence | `SCREEN`; conditional on positive I2B inside a tagged domain; distinguishes a separately variable precedence setting from one bundled with another meaningful participant semantic |
+| `RCS-08I2D1` | Constructive composition-policy-language prevalence | `SCREEN`; conditional on positive I2B inside a tagged domain; closed authored whole policies versus bounded participant construction |
+| `RCS-08I2D2` | Participant-composed context branching for constructive composition policies | `SCREEN`; conditional on constructive I2D1 support inside a tagged domain |
+| `RCS-08I2E` | Stochastic support across complete bound ambiguous composition laws | `SCREEN`; conditional on I2A multiplicity inside a tagged domain after every applicable authority/language row; exact draws and deterministic maps remain AUTHOR/SPEC |
+| `RCS-08I2F1` | Distribution-response prevalence among stochastic-capable composition laws | `SCREEN`; within each tagged domain, constant nondegenerate normal-form distributions versus laws whose probability image changes across reachable fixed factual contexts |
+| `RCS-08I2F2` | Matched player/counterplay-causal odds-response support for responsive composition laws | `SCREEN`; conditional on I2F1 admitting response through an independently meaningful fact inside that same tagged domain |
+| `RCS-08I2F3` | Deterministic normal-form response prevalence among tagged composition-law projections | `SCREEN`; within each tagged domain, context-invariant versus fact-responsive deterministic projections, or stable coexistence, including unique fixed-opportunity laws |
+| `RCS-08I2F4` | Matched player/counterplay-causal certain-form response for responsive composition laws | `SCREEN`; conditional on I2F3 admitting response inside a tagged domain; a relabeled recipe, cross-domain concatenation, or outcome coincidence is not a causal witness |
+| `RCS-09` | Relic acquisition, progression, duplicate/fallback, and completion policy | `SCREEN` under `SR-08`; existing offer directions are inputs |
+| `RCS-10` | Charm acquisition, progression, and completion policy | `SCREEN` under `SR-08` |
+| `RCS-11` | Charm duplicate policy | `SCREEN` under `SR-02`/`SR-08` |
+| `RCS-12` | Charm custody, transfer, loss, and retirement authority | `SCREEN` under `SR-02` |
+| `RCS-13` | Relic equip, reconfiguration, evolution, and lock horizon | `SCREEN` under `SR-07` |
+| `RCS-14` | Charm socket/reconfiguration and lock horizon | `SCREEN` under `SR-07` |
+| `RCS-15` | Persistent identity, state-lineage, version, and migration semantics, including B2B2 class lifetime across unchanged source configurations and encounter boundaries | `SCREEN` under `SR-11`; SR-07 separately declares which source mutations create a new frozen configuration revision and therefore a different `Pi` |
+| `RCS-16` | Storage/transaction/fault-repair realization of selected semantics | `SPEC`, not an owner card unless authority remains ambiguous |
+| `RCS-17` | Relic-specific balance, comprehension, fun, and exploit acceptance policy | `SCREEN` under `SR-12` |
+| `RCS-18` | Enumeration, simulator, RL, accessibility, and playtest procedure | `EVALUATE`, not an owner card; thresholds attach to RCS-17 |
+| `RCS-19` | Launch inclusion versus later-patch Relic/Charm scope | `SCREEN` under `SR-06`/`SR-12` |
+| `RCS-20` | Deferred expansion trigger and forward-compatibility promise | `SCREEN` under `SR-12` |
+
+Define `Phi_SR` as the number of `SCREEN` plus `OWNER-OPEN` rows. It began at
+**23** after the first prerequisite correction. Replacing one `SCREEN` row with
+seven registered rows raised that pre-answer potential to **29**. It became
+**28** after `RCS-03A-C`. Replacing the still-bundled `RCS-03C` row with three
+registered rows would have raised that pre-`RCS-03B1` potential to **30**;
+`RCS-03B1-A` then selected one row and pruned its six pending-only descendants,
+producing `Phi_SR = 23`. `RCS-03C1-A` then selected one open row, reducing it to
+22; replacing the still-bundled open `RCS-03C2` row with two registered rows
+adds one, producing `Phi_SR = 23`. `RCS-03C2A-A` then selected one row and
+pruned its conditional timing descendant, reducing current `Phi_SR` to **21**
+across thirty-four slots. Replacing still-bundled `RCS-03C3` with six counted
+children adds five `SCREEN` rows while preserving one `OWNER-OPEN` row, so the
+current fifth-amendment register has **thirty-nine slots** and
+`Phi_SR = 26`. `RCS-03C3A-A` then selects one row, reducing that potential to
+25. Replacing still-bundled `RCS-03C3B` with seven counted children adds six
+`SCREEN` rows while preserving one `OWNER-OPEN` row, so the current sixth-
+amendment register had **forty-five slots** and `Phi_SR = 31`.
+`RCS-03C3B0-A` then selects one row, reducing that potential to 30. Replacing
+still-bundled `RCS-03C3B1A` with three counted children adds two `SCREEN` rows
+while preserving one `OWNER-OPEN` row, so the seventh-amendment register had
+**forty-seven slots** and `Phi_SR = 32`. `RCS-03C3B1A0-A` then selects one row,
+reducing that potential to 31. Replacing still-bundled `RCS-03C3B1A1` with two
+counted children adds one potential row, so the eighth-amendment register had
+**forty-eight slots** and `Phi_SR = 32`. `RCS-03C3B1A1A-A` then selects one
+row, reducing that potential to 31. Replacing still-bundled
+`RCS-03C3B1A1B` with two counted children adds one potential row, so the
+ninth-amendment pre-answer register had **forty-nine slots** and `Phi_SR = 32`.
+`RCS-03C3B1A1B1-C` then selects one row and activates its already-counted
+conditional child, producing 30 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 9
+`DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row, so the then-current
+`Phi_SR = 31`. `RCS-03C3B1A1B2-A` next selects one row and activates
+`RCS-03C3B1A2`, reducing the potential to 30 across forty-nine rows. Replacing
+that still-bundled row with `RCS-03C3B1A2A` and conditional
+`RCS-03C3B1A2B` adds one potential row, so the tenth-amendment register has
+**fifty slots**. Before A2A, it contained 30 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 10 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE`, with
+`Phi_SR = 31`. `RCS-03C3B1A2A-C` then selects one row and activates its
+already-counted conditional width child, producing 29 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 11 `DIR-SELECTED`, 1 `SPEC`, and 1 `EVALUATE` row,
+so the then-current `Phi_SR = 30`. `RCS-03C3B1A2B-C` next selects the width
+row, producing 29 `SCREEN`, 0 `OWNER-OPEN`, 7 `PRUNED`, 12 `DIR-SELECTED`, 1
+`SPEC`, and 1 `EVALUATE` row, with `Phi_SR = 29`. Its width-three witness then
+closes `RCS-03C3B1B` as `DERIVED`, reducing the potential to 28 across fifty
+rows. Replacing old `RCS-03C3B2A` with five children adds four potential rows,
+so the eleventh-amendment register had **fifty-four slots**: 31 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 12 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`, with `Phi_SR = 32`. `RCS-03C3B2A1-A` then selected one primitive
+lineage per accepted operation occurrence and advanced the frontier, reducing
+the potential to 31. `RCS-03C3B2A2A-B` then selected universal qualifying
+source-episode coarsening, reducing it to 30. Replacing old
+`RCS-03C3B2A2B` with support child `RCS-03C3B2A2B1` and conditional promotion
+child `RCS-03C3B2A2B2` adds one potential row. The twelfth-amendment
+pre-B1-answer register had **fifty-five slots**: 30 `SCREEN`, 1 `OWNER-OPEN`,
+7 `PRUNED`, 14 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`, with
+`Phi_SR = 31`. `RCS-03C3B2A2B1-B` then selected nonempty eligible temporal
+support and activated its already-counted conditional child. The current
+register then had **fifty-five slots**: 29 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 15 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
+`Phi_SR = 30`, and `RCS-03C3B2A2B2` was the sole active card.
+`RCS-03C3B2A2B2-B` then selected universal promotion within the eligible
+catalog, reducing `Phi_SR` to 29. Replacing old `RCS-03C3B2A3` with support
+child `RCS-03C3B2A3A` and conditional succession child
+`RCS-03C3B2A3B` adds one potential row. The then-current thirteenth-amendment
+register had **fifty-six slots**: 29 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 16
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; then-current
+`Phi_SR = 30`, and `RCS-03C3B2A3A` was the sole active card.
+`RCS-03C3B2A3A-B` then selected nonempty material nonterminating current-state
+revision support and activated its already-counted conditional child. The
+then-current register still had **fifty-six slots**: 28 `SCREEN`, 1
+`OWNER-OPEN`, 7 `PRUNED`, 17 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; then-current `Phi_SR = 29`, and `RCS-03C3B2A3B` was the sole active
+card. `RCS-03C3B2A3B-A` then selected universal continuity-root preservation
+across every eligible revision. At that checkpoint the register still had
+**fifty-six slots**: 27 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 18
+`DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 28`, and
+`RCS-03C3B2A4` was the sole active card. `RCS-03C3B2A4-B` then selected
+nonempty irreducible multi-root current-state support, producing an interim
+`Phi_SR = 27`. Replacing old B2B with support child `RCS-03C3B2B1` and
+conditional equivalence child `RCS-03C3B2B2` adds one potential row. The
+fourteenth-amendment pre-B1-answer register had **fifty-seven slots**: 27
+`SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 19 `DIR-SELECTED`, 1 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 28`, and `RCS-03C3B2B1` was the sole
+active card. `RCS-03C3B2B1-B` then selected nonempty repeated-provenance
+support and activated its already-counted conditional child. At that checkpoint
+the register still had **fifty-seven slots**: 26 `SCREEN`, 1 `OWNER-OPEN`, 7
+`PRUNED`, 20 `DIR-SELECTED`, 1 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 27`, and `RCS-03C3B2B2` was the sole active card.
+`RCS-03C3B2B2-B` then selected exact-`Pi`-universal pure-build equivalence,
+reducing the potential to 26. Replacing old B3 with global layer-support child
+`RCS-03C3B3A` and conditional same-lineage-overlap child `RCS-03C3B3B` adds
+one potential row. At the fifteenth-amendment checkpoint the register had **fifty-eight
+slots**: 26 `SCREEN`, 1 `OWNER-OPEN`, 7 `PRUNED`, 21 `DIR-SELECTED`, 1
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 27`, and
+`RCS-03C3B3A` is the sole active card.
+`RCS-03C3B3A-B` then selected semantic-child-only addressability, pruned B3B,
+and would have activated old B4, reducing the potential to 25. Replacing old
+B4 with nontrivial-support child `RCS-03C3B4A` and family-topology child
+`RCS-03C3B4B` adds one row, while B4A derives nonempty from the existing
+repeated-provenance class witness. The sixteenth-amendment checkpoint had
+**fifty-nine slots**: 24 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 22
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 25`, and `RCS-03C3B4B` is the sole active card.
+`RCS-03C3B4B-B` then selected one nonoverlapping final child scale with
+nonempty authored compound support, reducing the potential to 24. Replacing
+old C3C with seven independently variable support/form/treatment/scope rows adds
+six slots and six potential cards. The pre-C1 seventeenth-amendment register
+had **sixty-five slots**: 29 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 23
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 30`.
+`RCS-03C3C1-B` then selected nonempty functional within-evaluation overlap
+support, reducing `Phi_SR` to 29. `RCS-03C3C2-C` then selected nonempty exact
+and distinct-related overlap-form support, which would ordinarily reduce the
+potential to 28. The eighteenth prerequisite amendment replaces old C3 with
+nine ledger, form-permission, denied-pair, and over-cap arbitration rows,
+adding eight counted slots and eight potential cards. That checkpoint had
+**seventy-three slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 8
+`PRUNED`, 25 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. `RCS-03C3C3A-B` then selected nonempty alternate-ledger
+support, ordinarily reducing the potential to 35. The nineteenth prerequisite
+amendment replaces old conditional B with four authoritative-domain,
+selection-scope, selection-authority, and stochastic-selection rows, adding
+three slots and potential cards. That checkpoint had **seventy-six slots**: 37
+`SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 26 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. `RCS-03C3C3B1-A` then selected one
+authoritative tuple everywhere, ordinarily reducing the potential to 37. The
+twentieth prerequisite amendment narrows B2 to contextual responsiveness and
+replaces old B4 with stochastic-support and stochastic-coupling children,
+adding one slot and potential card. That register had **seventy-seven slots**:
+37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 27 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. `RCS-03C3C3B2-B` then selected
+nonempty held-fixed cross-tag responsiveness, ordinarily reducing the
+potential to 37. The twenty-first prerequisite amendment replaces old B3 with
+participant-configurability-prevalence B3A and conditional policy-language
+B3B, adding one slot and potential card. That register had **seventy-eight
+slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 28 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+`RCS-03C3C3B3A-B` then selected universal material participant
+configurability, ordinarily reducing the potential to 37. The twenty-second
+prerequisite amendment normalizes fixed completion into each total composite
+law and replaces old B3B with constructive-language B3B1 and conditional
+context-branching B3B2, adding one slot and potential card. That register had
+**seventy-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 8 `PRUNED`, 29
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+`RCS-03C3C3B3B1-A` then selected finite authored whole-policy stances, pruned
+B3B2, and activated B4A. The twenty-third prerequisite correction classifies
+B4A over complete bound stance laws rather than contracts or individual
+evaluation cases and adds no row. At that checkpoint the register had **seventy-nine
+slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 9 `PRUNED`, 30 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`, and
+`RCS-03C3C3B4A` is the sole active card.
+`RCS-03C3C3B4A-A` then selected deterministic complete bound routing-stance
+laws and pruned B4B, which would ordinarily reduce the potential to 34. The
+twenty-fourth prerequisite correction makes post-routing overlap exposure a
+separate prerequisite to form-specific permission. It replaces old C and D
+with C1/C2 and D1/D2, adding two counted slots and two potential cards. The
+amended register has **eighty-one slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 10
+`PRUNED`, 31 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
+`Phi_SR = 36`, and `RCS-03C3C3C1` is the sole active card.
+`RCS-03C3C3C1-B` then selected nonempty post-routing authoritative exact-form
+exposure, ordinarily reducing the potential to 35. The twenty-fifth
+prerequisite correction replaces old C2 with participant-configurability C2A,
+conditional independent-coordinate C2B, constructive-language C2C1,
+conditional context-branching C2C2, stochastic-support C2D, and final exact-
+permission-incidence C2E. This adds five counted slots and five potential
+cards. That initial amendment would have produced **eighty-six slots**: 39
+`SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`, 32 `DIR-SELECTED`, 2 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`, with `Phi_SR = 40`. An adversarial countermodel then
+proved that coupled permission force may still use a constructive language, so
+every C2B answer must reach C2C1. The same check split old G into three-plus support G1
+and conditional joint stochastic permission-draw coupling G2. Replacing one
+counted G row with those two adds one slot and one potential card. The corrected
+register has **eighty-seven slots**: 40 `SCREEN`, 1 `OWNER-OPEN`, 10 `PRUNED`,
+32 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; current
+`Phi_SR = 41`, and `RCS-03C3C3C2A` is the sole presented card; the
+twenty-sixth correction later proves D1 was independently ready but queued.
+`RCS-03C3C3C2A-A` then selects intrinsic permission for every applicable
+contract, moves C2A to `DIR-SELECTED`, prunes C2B/C2C1/C2C2, and activates
+C2D. The same correction fixes earlier committed state before C2D's probability
+measurement and removes the false C2E-to-D1 dependency without adding a row.
+At that checkpoint the register had **eighty-seven slots**: 36 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 33 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 37`. C2D was the presented card and D1 was ready but
+queued.
+`RCS-03C3C3C2D-A` then selects deterministic intrinsic permission laws. The
+twenty-seventh correction replaces counted C2E with responsive-law E1,
+conditional matched-actionability E2, and conditional constant-polarity E3,
+adding two rows and two unresolved potentials. At that checkpoint the register
+had **eighty-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 34
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`.
+E1 was the presented card and D1 remained ready but queued.
+`RCS-03C3C3C2E1-C` then selects coexistence of responsive and context-
+invariant intrinsic laws. The twenty-eighth correction preserves E2's binary
+support boundary but repairs its witness from one action to one independently
+revisable lawful decision and its full causal closure. No row is added. The
+register at that checkpoint had **eighty-nine slots**: 36 `SCREEN`, 1 `OWNER-OPEN`, 13
+`PRUNED`, 35 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 37`. E2 was the presented card; E3 and D1 were ready but
+queued.
+`RCS-03C3C3C2E2-B` then requires at least one qualifying causal
+play/counterplay witness. The twenty-ninth correction upholds E3's three stable-
+polarity branches, makes their gate-local meaning explicit, and attaches the
+existing non-token viability obligation to any required polarity family. No
+row is added. The register at that checkpoint had **eighty-nine slots**: 35 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 36 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 36`. E3 was the presented card and D1 remained ready
+but queued.
+`RCS-03C3C3C2E3-C` then requires responsive, steadfast-allow, and steadfast-
+deny exact-permission law families to coexist under the selected viability
+obligation. The post-answer D1 screen preserves its empty/nonempty
+authoritative distinct-related-exposure boundary, permits one hybrid witness
+without a second permission vote, and defers non-token package validation to
+the existing gates. No row is added. The register at that checkpoint had **eighty-nine
+slots**: 34 `SCREEN`, 1 `OWNER-OPEN`, 13 `PRUNED`, 37 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. D1 was the
+presented card.
+`RCS-03C3C3D1-B` then requires at least one authoritative selected distinct-
+related pair. The thirtieth correction preserves one-bit hybrid inheritance
+and replaces old D2 with six rows: participant configurability, coordinate
+recombination, constructive language, participant-composed branching, and
+stochastic support over the related-only residual `Q_v`, followed by final
+form-wide incidence over all `R_v`. It adds five rows and five unresolved
+potentials. The register at that checkpoint had **ninety-four slots**: 38 `SCREEN`, 1
+`OWNER-OPEN`, 13 `PRUNED`, 38 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 39`. D2A was the presented card.
+`RCS-03C3C3D2A-A` then makes every extant related-only permission law
+participant-intrinsic while allowing `Q_v` itself to remain empty. D2B, D2C1,
+and D2C2 prune. A three-question prerequisite audit and two recommendation
+cross-challenges uphold D2D as one empty-aware law-level stochastic-support
+card; no row is added. At that checkpoint the register had **ninety-four
+slots**: 34 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 39 `DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 35`. D2D was the presented
+card.
+`RCS-03C3C3D2D-C` then requires deterministic Witness and stochastic-capable
+Oracle related-only laws to coexist under its hard viability obligation. The
+thirty-first correction replaces old D2E with six rows for Oracle probability
+response and causal control, deterministic related response and causal
+control, stable deterministic polarity, and the conditional missing-certainty
+endpoint. The final endpoint row requires a responsive `Q_v` witness and does
+not constrain hybrid composition. At that checkpoint the register had
+**ninety-nine slots**: 38 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 40
+`DIR-SELECTED`, 2
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 39`. D2E1 was the
+presented card.
+`RCS-03C3C3D2E1-B` then makes every Oracle law distribution-responsive. A
+two-question audit upholds one binary matched causal odds-response card without
+adding prevalence, actor, disclosure, or tuning rows. The register at that
+checkpoint had **ninety-nine slots**: 37 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`, 41
+`DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 38`. D2E2
+was the presented card.
+`RCS-03C3C3D2E2-B` then requires at least one qualifying matched causal Oracle
+odds-response witness under the material-policy and anti-laundering guards. A
+two-question audit upholds D2E3's empty/all/nonempty-proper classification over
+complete separately tagged deterministic `Q` and `H` projections; no row is
+added. The register at that checkpoint had **ninety-nine slots**: 36 `SCREEN`,
+1 `OWNER-OPEN`, 16 `PRUNED`, 42 `DIR-SELECTED`, 2 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 37`. D2E3 was the presented card.
+`RCS-03C3C3D2E3-C` then requires responsive and steadfast tagged deterministic
+related projections to coexist under the hard viability obligation. E6 derives
+because responsive deterministic support supplies both certain endpoints. A
+two-question audit upholds E4 as one empty/nonempty matched-causal support card
+with stochastic-mediation and marginal-related-purpose guards; no row is added.
+`RCS-03C3C3D2E4-B` then conditionally requires at least one qualifying causal
+deterministic related-response witness, with A as the mandatory fallback if no
+marginal, legible, non-token policy purpose survives. A two-question audit
+upholds E5's deny-only/allow-only/both stable-polarity topology while adding a
+marginal related-form-purpose guard against inherited-`H` relabeling; no row is
+added. `RCS-03C3C3D2E5-C` then selects both steadfast polarities with all stated
+viability conditions and fallback routes. A post-answer audit upholds the
+required false-bit route but breaks old E as an omnibus result card. The
+thirty-second correction replaces old E with four counted rows for empty/
+positive incidence, positive width, singleton identity kind, and double-result
+composition, while F retains only total output-resolution authority. The
+register at that checkpoint had **102 slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 16
+`PRUNED`, 45 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 36`. E1 was the presented card. Under the owner's explicit
+delegation, `RCS-03C3C3E1-C` then selects cancellation and positive denied-pair
+outcomes with last-informed-reversible-commitment disclosure, causal
+attribution, anti-coercion, independent-policy, and B/A/E5 fallback guards.
+Two audits uphold E2's singleton-only/double-only/both topology. Zanzagar then
+selected guarded `RCS-03C3C3E2-C`, requiring singleton and double positive
+denied outputs to coexist without becoming a count ladder. Two further audits
+uphold E3's exhaustive retained-original/substitute/both singleton topology and
+recommend conditional B, genuine-substitute-only, so width one can mean fusion
+or transmutation rather than consolation beneath width two. Zanzagar selected
+that B with A as the qualified substitute-specific fallback. Two further audits
+uphold E4's exhaustive mixed-original/two-substitute/both double-composition
+topology and conditionally recommend two-substitute-only B. Zanzagar selected
+that B with A as the practical dual-substitute-specific fallback. Two next-
+frontier audits then found that old F assumed an unselected same-opportunity
+multiplicity fact and bundled it with three later resolution-law boundaries.
+The thirty-third correction replaces old F with five counted children. The
+register at that checkpoint had **106 slots**: 35 `SCREEN`, 1 `OWNER-OPEN`, 16 `PRUNED`,
+49 `DIR-SELECTED`, 3 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 36`. F1
+was the presented Relic card. Zanzagar then selected F1-A, making every fixed
+denied opportunity single-valued and pruning all four conditional F children.
+Two audits upheld G1 as one binary three-plus contender-support card. Zanzagar
+selected G1-A. An exploratory post-answer audit then proposed C8-C9 for a
+supposed plural-evaluator branch, but a stricter semantic audit broke that
+repair before commit: a same-cut evaluator family under the selected atomic
+semantics is one canonical product evaluator, not a second topology. C4 derives;
+G2/H/I and C5-C7 prune; the proposed C8-C9 rows never enter the register. The
+register then remained **106 slots**: 22 `SCREEN`, 1 `OWNER-OPEN`, 26
+`PRUNED`, 51 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 23`. A prerequisite audit then split old C3D into positive-result
+claim support, ledger-bearing empty-result claim support, claimed-proof
+footprint, and failed-result recurrence. That checkpoint had **109 slots**: 25
+`SCREEN`, 1 `OWNER-OPEN`, 26 `PRUNED`, 51 `DIR-SELECTED`, 4 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 26`. Zanzagar then selected D1-B, requiring
+nonempty positive-result claim support. Zanzagar then selected D2-A, making
+ledger-bearing empty-result claim support empty without selecting recurrence.
+Zanzagar then selected D3-A, requiring every actual claim to take its complete
+deduplicated selected-ledger union. A scope audit narrowed D4 from unkeyed
+“failed-result” recurrence to ledger-bearing cancellation recurrence keyed by
+the canonical contender pair; no row split was needed. Zanzagar then selected
+D4-A with B as a guarded reopening fallback. A C3E audit fixed same-tag reuse
+to the receipt tag that actually committed, including substitute tags, rather
+than a vanished original contender. Zanzagar then selected C3E-A. A C3F audit
+corrected “different tag” to any later target incidence outside the claimed
+occurrence's prior-attribution set. A final verifier broke the first draft's
+attempt to derive one-hop propagation and first-admission consumption from
+mere nonempty support. A second final verifier then broke the first repair's
+claim/attribution conflation and found fresh co-proof still unrouted. The
+thirty-fifth prerequisite correction then added F1, F2, F3, F4A, and F4B as
+counted B-only rows. The then-current register had **114 slots**: 25 `SCREEN`, 1
+`OWNER-OPEN`, 26 `PRUNED`, 56 `DIR-SELECTED`, 4 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 26`. Zanzagar selected C3F-A, spending claimed proof
+Relic-wide and pruning F1-F4B. The thirty-sixth correction then replaced old
+RCS-03D's bundled cause/direction/adjacency/clearing/reversibility promise with
+six cause-prevalence rows, their six conditional proper-branch dialect
+children, and four transition-topology rows. Zanzagar then selected D1P-B,
+requiring every transforming definition to have at least one positive-result
+cause path and pruning P1. Zanzagar selected D1C-A, keeping claim writes as
+proof expenditure rather than transformation causes and pruning C1.
+
+A bounded lifecycle audit then proved that the thirty-sixth correction was
+still incomplete. The thirty-seventh correction added six omitted registered
+loci—I, T, VT, VF, K, and L—and their six conditional dialect children, while
+also registering a proposed terminal true-no-candidate row N. Every witness
+uses a prospectively versioned locus edge whose deletion removes only its
+proposal while the actual occurrence and completed trace remain fixed;
+transitive ancestry is not a cause witness.
+
+Zanzagar selected D1I-A, so invocation is noncausal and I1 prunes. A subsequent
+reachability audit broke N before it was presented: one fixed tag is already
+sufficient at readiness, the same cut invokes and reads coherent evidence, and
+tuple resolution returns exactly one complete tuple rather than none. A denied
+pair has a positive K/P disposition or the ledger-bearing Z branch. D1N is
+therefore `DERIVED` empty and N1
+is `PRUNED`; the register retains its row as an audit placeholder but has
+eleven reachable cause families, not twelve. Zanzagar then selected D1T-A:
+actual nontrivial tuple selection chooses the operative complete proof-weave
+but never itself proposes persistent transformation. D1T is `DIR-SELECTED`,
+D1T1 is `PRUNED`. Zanzagar then selected D1VT-A: the actual true/allow bit
+governs coexistence without directly proposing persistent transformation.
+D1VT is `DIR-SELECTED` and D1VT1 is `PRUNED`. Zanzagar then selected D1VF-A:
+the actual false/not-both bit routes its deterministic denied disposition
+without directly proposing persistent transformation. D1VF is `DIR-SELECTED`,
+D1VF1 is `PRUNED`. Zanzagar then selected D1K-A: the whole positive provisional
+output becomes sealed without that K occurrence directly proposing persistent
+transformation. D1K is `DIR-SELECTED` and D1K1 is `PRUNED`. Zanzagar then
+selected D1Z-C with D1Z-A as the explicit failure fallback: a disclosed
+nonempty proper Absence-bound subset may change on actual `{}`. Zanzagar then
+selected D1Z1-C: that proper subset has nonempty incidence in both dialects,
+then selected D1L-A: the first persistent canonical-pair latch write remains
+recurrence-significant but is noncausal. Zanzagar then selected D1X-C with
+D1X-A as the explicit system fallback: a disclosed proper Event-bound subset
+may change on a qualifying lived event unless the mechanic fails its gates.
+D1X1-C then gives that proper subset nonempty incidence in both transformation
+dialects, with D1X1-A selected as the child scope fallback. D1M-B then gives
+every transforming definition a dedicated-operation cause path, with D1M-A
+selected as the whole-system fallback; D1M1 prunes. D2-C then makes staged and
+shortcut-complete definitions coexist, with D2-A selected as the whole-system
+fallback. The thirty-ninth correction adds D2A for the state-only, boundary-
+only, or both-dialect incidence of proper staged-topology support. The
+fortieth adds D2A1 for the independently player-material dialect incidence of
+the shortcut-complete complement. D2A-C then places required-stage support in
+both dialects, with D2A-A selected as the child state-only scope fallback.
+D2A1-C then places shortcut-complete support in both dialects, with D2A1-B
+selected as the qualified fallback. The forty-first correction adds D3A and
+D3A1 for the independently player-material dialect incidences of proper
+direct-reverse support and its reverse-free complement. D3-B then gives every
+transforming definition at least one material direct-reverse pair, with D3-A
+as its system fallback; D3A/D3A1 prune. The forty-second correction adds D4A
+and D4A1 for the independently player-material dialect incidences of proper
+clear support and its clear-free complement. At that checkpoint, the register
+had **147 slots**. Zanzagar selected D4-A with D4-C as its qualified
+Release-bound fallback, so active histories cannot enter `bottom_d` and
+D4A/D4A1 prune. The forty-third correction adds D5A and D5A1 for the
+independently player-material dialect incidences of proper compatible lived-
+return support and its return-free complement. Zanzagar selected D5-B with
+D5-A as its whole-system fallback, so every transforming definition has at
+least one compatible lived nonclear return while irreversible limbs remain
+legal; D5A/D5A1 prune. The forty-fourth correction replaces old counted
+RCS-03E with E1 approval-control source, conditional Z/X source children, and
+conditional E2 participant timing. A pre-commit adversarial review corrected
+the first overbroad E1-C draft before it could hide a definition/dialect
+authority caste in authoring. Zanzagar selected E1-C with E1-B as its qualified
+agency fallback and E1-A as its deeper system fallback, so P asks and an
+initiated M Rite uses system law. The forty-fifth correction then finds that
+each proper both-dialect Z/X subset may contain participant and deterministic
+definition classes. It adds E1ZA/E1ZA1 and E1XA/E1XA1 rather than hiding those
+incidence patterns or assuming source uniformity. Zanzagar then selected E1Z-B
+with E1Z-A as the qualified cause-local system fallback: every Z proposal asks
+the owning combatant's custodian, while the actual absence and every
+nonapproval consequence remain final. E1ZA/E1ZA1 prune. Zanzagar then selected
+E1X-A with E1X-B as the qualified cause-local agency fallback: every X
+proposal follows fixed law while its independently real event remains final.
+E1XA/E1XA1 prune. The forty-sixth correction adds E2C after proving that
+generic timing coexistence hid whether P or Z receives live authority.
+Zanzagar then selected E2-C with E2-A as its qualified production fallback,
+so P and Z use opposite cause-uniform participant timings. Zanzagar then
+selected E2C-A, making P live and Z advance-bound. The forty-seventh
+correction replaces old RCS-04A with seven conditional rows. One initial
+eight-row audit was narrowed by two challenge audits: maximal frozen cohort
+atomicity is forced by the selected topology, and target bucketing with every
+contributor ID preserved is a representation invariant; contributor-sensitive
+system rank/probability remains an explicit later card. Zanzagar selected
+RCS-04A1-C with RCS-04A1-B as the qualified simplicity fallback, requiring
+genuine distinct-target conflict while retaining concordant settlement, then
+selected RCS-04A2-A with RCS-04A2-C as the qualified fairness fallback, so one
+proposed target must settle.
+
+The forty-eighth and forty-ninth corrections add genuine-conflict
+transformation-dialect incidence and replace old exclusive A3 authority with
+participant-control/form/language rows. Zanzagar selected A1C-C, requiring
+genuine conflict in both dialects. The fiftieth correction records that the
+old seven profiles were controlled-form projections, not complete profiles:
+an otherwise configurable contract may also have an `I` opportunity with no
+material participant coordinate. Seven conditional `I` rows now exhaust the
+four-state opportunity-profile universe. A rejected marginal-incidence repair
+still hid correlations among availability, language, and dialect, so A3A1/
+A3A2 retire as non-counting historical aliases and A3X later classifies the
+complete A3/A7 legal-action signature through one total versioned dialect map.
+That was the fiftieth-correction checkpoint; the fifty-first correction below
+splits the player-material map into A3XI/A3XP/A3XD before presentation.
+Zanzagar selected A3A-C with A3A-A as the qualified simplicity/artifact-
+identity fallback, so participant-configurable and participant-intrinsic
+contracts coexist. Zanzagar selected B1-C with B1-A as the qualified low-
+interruption/policy-mastery fallback, so direct-capable and policy-only
+configurable contracts coexist. At that checkpoint the register had **181 slots**: 36
+`SCREEN`, 1 `OWNER-OPEN` at RCS-04A3B2, 51 `PRUNED`, 86 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 37`. Zanzagar then selected
+B2-A with B2-C as the qualified higher-ceiling/identity exception. B3–B6 and
+B3I–B6I1 prune; B1I opens while B2I remains queued. At that checkpoint the
+register was **181 slots**: 26 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3B1I, 60
+`PRUNED`, 87 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 27`. Zanzagar then selected B1I-A with B1I-B as the qualified system
+fallback. B1I closes and B2I opens without pruning another row. The current
+checkpoint was **181 slots**: 25 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3B2I, 60
+`PRUNED`, 88 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 26`. Zanzagar then selected B2I-B with B2I-A as the qualified
+practical agency/clarity fallback. Every direct-only contract is complete-
+profile exact `{I,D}`: at least one conflict offers honest live target choice
+and at least one authored conflict is participant-intrinsic. B2I closes and
+A3C opens without pruning another row. That checkpoint was **181 slots**:
+24 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3C, 60 `PRUNED`, 89 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 25`. Zanzagar then selected
+A3C-A with A3C-B as the qualified class-wide agency/clarity fallback.
+Collision policy is bundled-only across the exact-`{P}` class. A3C closes and
+A3D1 opens without pruning another row. That checkpoint was **181 slots**:
+23 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3D1, 60 `PRUNED`, 90 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 24`. Zanzagar then selected
+A3D1-A with A3D1-B as the qualified class-wide expressive-mastery/menu-bloat
+fallback. Closed authored whole bundled covenants now cover every policy
+contract; D2 prunes and A4 opens. The current register is **181 slots**: 21
+`SCREEN`, 1 `OWNER-OPEN` at RCS-04A4, 61 `PRUNED`, 91 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`. Zanzagar then selected
+A4-C with A4-A as the qualified clarity/equal-ceiling/anti-farming fallback.
+Contributor-neutral and contributor-sensitive complete automatic laws now
+coexist as stable law/version identities. A4 closes and A5 opens without
+adding or pruning a row. Two A5 cross-challenges exposed opposite judgments
+about splitting stochastic incidence by those A4 classes; neutral semantic
+adjudication kept the global registered row because class-local variance
+availability is no selected product promise and the exact cross-product is
+catalog incidence. The current register is **181 slots**: 20 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A5, 61 `PRUNED`, 92 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 21`.
+Zanzagar then selected A5-C with A5-A as the qualified policy-mastery/
+multiplayer-trust/Rite-and-return fallback, so deterministic-only and
+stochastic-capable automatic laws coexist as stable equal-ceiling identities.
+A5 closes and A6 opens without adding or pruning a row. An A6 semantic
+adjudication rejects code factoring as a product boundary and retains the row
+only as one transferable player-facing causal grammar versus at least two
+materially irreducible explanation/counterplay calculi. The current register
+is **181 slots**: 19 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A6, 61 `PRUNED`, 93
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`.
+Zanzagar then selected A6-A with A6-B as the qualified artifact-identity
+fallback, requiring one bounded transferable player-semantic grammar across
+all complete automatic laws. A6 closes and A7 opens without adding or pruning
+a row. Three A7 audits repair its binary shorthand to universal advance
+binding, universal live capability after maximal cohort freeze, or stable
+advance/live contract coexistence. The current register is **181 slots**: 18
+`SCREEN`, 1 `OWNER-OPEN` at RCS-04A7, 61 `PRUNED`, 94 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`.
+Zanzagar then selected A7-A with A7-C as the qualified artifact-identity/
+direct-participation fallback, making every exact-`{P}` contract advance-
+bound. A7 closes and the registered aggregate A3X row would open, but a named-
+claim audit demonstrates that its non-universal branches hide a legal-action
+and content-family allocation: the same proper paired subset can give state
+Relics policy but no direct signature, or direct but no policy signature.
+The fifty-first prerequisite amendment therefore retires counted A3X as a
+non-counting parent alias and replaces it with A3XI, A3XP, and A3XD, each
+classifying one complete selected signature across state-only, boundary-only,
+or paired support. The register is now **183 slots**: 19 `SCREEN`, 1
+`OWNER-OPEN` at RCS-04A3XI, 61 `PRUNED`, 95 `DIR-SELECTED`, 5 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 20`.
+Zanzagar then selected A3XI-A with A3XI-B as the qualified clarity fallback,
+requiring pure-`{I}` support in both dialects. A3XI closes and A3XP opens
+without adding or pruning a row. Because A3XI-A already covers both dialects,
+the A1C-C union guard does not remove any later incidence option. The register
+is now **183 slots**: 18 `SCREEN`, 1 `OWNER-OPEN` at RCS-04A3XP, 61 `PRUNED`,
+96 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`.
+Zanzagar then selected A3XP-A with A3XP-B as the qualified clarity fallback,
+requiring complete advance-bound bundled exact-`{P}` support in both dialects.
+A3XP closes and A3XD opens without adding or pruning a row. A3XI-A and
+A3XP-A each cover both dialects, so the A1C-C union guard removes no A3XD
+option. The register is now **183 slots**: 17 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-04A3XD, 61 `PRUNED`, 97 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 18`.
+Zanzagar then selected A3XD-A with A3XD-B as the qualified clarity fallback,
+requiring exact-`{I,D}` direct-specialist support in both dialects. A3XD
+closes and RCS-04B opens without adding or pruning a row. The three paired
+signature answers derive universal paired support and a six-contract/version
+witness floor. The register is now **183 slots**: 16 `SCREEN`, 1 `OWNER-OPEN`
+at RCS-04B, 61 `PRUNED`, 98 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 17`.
+A bounded audit then broke old RCS-04B into three independently player-material
+relations: artifact-instance continuity, definition-contract continuity, and
+semantic biography-lineage continuity. Old RCS-04B becomes a non-counting
+parent alias for B1/B2/B3. Replacing one counted row with three raises the
+register to **185 slots**: 18 `SCREEN`, 1 `OWNER-OPEN` at RCS-04B1, 61
+`PRUNED`, 98 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 19`. D5-B makes universal artifact or definition replacement
+unavailable but does not choose between universal continuity and stable
+in-place/successor coexistence.
+Zanzagar then selected B1-A with B1-B as the qualified reincarnation/artifact-
+identity fallback. Every successful nonnull transformation commit preserves
+the persistent artifact instance; B1 closes and B2 opens without adding or
+pruning a row. The register is now **185 slots**: 17 `SCREEN`, 1 `OWNER-OPEN`
+at RCS-04B2, 61 `PRUNED`, 99 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 18`.
+Zanzagar then selected B2-A with B2-B as the qualified named-metamorphosis/
+artifact-identity fallback. Every successful nonnull transformation commit
+preserves the definition and immutable fixed current-design contract/version;
+B2 closes and B3 opens without adding or pruning a row. A bounded audit keeps
+one nonforking biography lineage invariant and isolates active semantic chapter
+succession as B3's sole variable. The register is now **185 slots**: 16
+`SCREEN`, 1 `OWNER-OPEN` at RCS-04B3, 61 `PRUNED`, 100 `DIR-SELECTED`, 5
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 17`.
+Zanzagar then selected B3-B with B3-A as the qualified simplicity/non-token-
+biography fallback. Every successful assignment-changing commit opens exactly
+one linked successor chapter without replacing the artifact, definition, or
+nonforking lineage. A bounded audit broke old RCS-05's qualitative-payoff/
+power shorthand into six player-material rows. Old RCS-05 becomes a
+non-counting parent alias. Replacing one counted row with six raises the
+register to **190 slots**: 20 `SCREEN`, 1 `OWNER-OPEN` at RCS-05A, 61
+`PRUNED`, 101 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 21`.
+Zanzagar then selected 05A-A with 05A-C as the qualified emergent-artifact-
+identity fallback. Positive payoff remains source-mediated, so 05A closes and
+old 05B would open without adding or pruning a row. A bounded audit broke old
+05B into three material causal-basis rows. Old 05B becomes a non-counting
+parent alias. Replacing one counted row with three raises the register to **192
+slots**: 21 `SCREEN`, 1 `OWNER-OPEN` at RCS-05B1, 61 `PRUNED`, 102
+`DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 22`.
+Zanzagar then selected B1-A with B1-C as the qualified receipt-agency/artifact-
+identity fallback. Every positive dual payoff is one pair-irreducible package,
+so B2/B3 prune. A bounded audit broke old 05C into four conditional lifecycle
+rows. Old 05C becomes a non-counting parent alias. Replacing one counted row
+with four raises the register to **195 slots**: 21 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-05C1, 63 `PRUNED`, 103 `DIR-SELECTED`, 5 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 22`.
+Zanzagar then selected C1-A with C1-C as the qualified temporal-policy/
+artifact-identity fallback. Every positive payoff package completes at its
+settlement cut, so C2/C3/C4 prune. The inherited format/team/release screen at
+RCS-06 closes as `DERIVED`. A bounded audit then broke old RCS-07 into three
+independent catalog-support relations. Old RCS-07 becomes a non-counting parent alias.
+Replacing its one counted row with RCS-07A/B/C raises the register to **197
+slots**: 18 `SCREEN`, 1 `OWNER-OPEN` at RCS-07A, 66 `PRUNED`, 104
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 19`.
+Zanzagar then selected 07A-B with 07A-A as the qualified clarity/anti-dead-
+loot fallback. The register remains **197 slots**: 17 `SCREEN`, 1
+`OWNER-OPEN` at RCS-07B, 66 `PRUNED`, 105 `DIR-SELECTED`, 6 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 18`. Zanzagar then selected 07B-B with
+07B-A as the qualified clarity/anti-dead-loot fallback. The register remains
+**197 slots**: 16 `SCREEN`, 1 `OWNER-OPEN` at RCS-07C, 66 `PRUNED`, 106
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 17`.
+Zanzagar then selected 07C-A with 07C-B as the qualified three-way artifact-
+chemistry fallback. At the immediate checkpoint the register remained **197
+slots** with 15 `SCREEN`, 1 `OWNER-OPEN` at old RCS-08, 66 `PRUNED`, 107
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 16`. A
+bounded audit and successive before-commit challenges then broke old RCS-08
+into 132 counted rows. The last whole-diff challenge added resolver response/
+certainty, false-result recurrence, cross-active co-application, and the full
+composition-law grammar that the arithmetically correct eighty-nine-row draft
+still hid, while correcting triple, legality-signature, and root-switch order.
+The final map contains fifty exact/related permission-law rows across same-cut
+and later horizons, twenty-eight same-cut false-bit disposition/resolver rows,
+thirty aggregate three-recipient rows, four false-result recurrence rows, six
+structural candidate/recipient/propagation rows, one cross-active co-
+application row, and thirteen stacking/team-signature, other-system-overlap,
+and I0/I1 composition-law rows. Old RCS-08, four form-treatment groups, C4, and I2 become non-
+counting parent aliases. Replacing its one counted row with 132 raises the
+register to **328 slots**: 146 `SCREEN`, 1 `OWNER-OPEN` at RCS-08C1, 66
+`PRUNED`, 107 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 147`. Selecting RCS-08C1-B with A as its qualified fallback then
+makes C2 the sole active row: **145 `SCREEN`, 1 `OWNER-OPEN`, 66 `PRUNED`,
+108 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 146`**.
+Selecting RCS-08C2-C with A as its qualified fallback then preserves both form
+subtrees and makes C4G1 the sole active row: **144 `SCREEN`, 1 `OWNER-OPEN`,
+66 `PRUNED`, 109 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 145`**.
+Selecting RCS-08C4G1-A with B as its qualified fallback then pair-bounds the
+candidate graph, prunes all twenty-nine C4G2/H/I descendants, and makes C3EA
+the sole active row: **114 `SCREEN`, 1 `OWNER-OPEN`, 95 `PRUNED`, 110
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 115`**.
+Selecting RCS-08C3EA-A with C as its qualified fallback then makes complete
+exact permission intrinsic, prunes C3EB/C3EC1/C3EC2, and makes C3ED the sole
+active row: **110 `SCREEN`, 1 `OWNER-OPEN`, 98 `PRUNED`, 111
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 111`**.
+Selecting RCS-08C3ED-A with C as its qualified fallback then makes every fully
+fixed exact-permission opportunity deterministic, prunes C3EE1/C3EE2, and
+makes C3EE3 the sole active row: **107 `SCREEN`, 1 `OWNER-OPEN`, 100
+`PRUNED`, 112 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 108`**.
+Selecting RCS-08C3EE3-C with A as its qualified fallback then preserves
+responsive and context-invariant deterministic projections, derives both
+certainty endpoints at C3EE6, prunes C3EE7, queues C3EE5, and makes C3EE4 the
+sole active row: **104 `SCREEN`, 1 `OWNER-OPEN`, 101 `PRUNED`, 113
+`DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 105`**.
+Selecting RCS-08C3EE4-B with A as its qualified fallback then requires one
+existential matched player/counterplay-causal response and makes the
+orthogonal steadfast-polarity sibling C3EE5 the sole active row: **103
+`SCREEN`, 1 `OWNER-OPEN`, 101 `PRUNED`, 114 `DIR-SELECTED`, 7 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 104`**.
+Selecting RCS-08C3EE5-C with B as its qualified fallback then requires both
+steadfast allow and steadfast deny projections and makes C3ED1 the sole active
+row: **102 `SCREEN`, 1 `OWNER-OPEN`, 101 `PRUNED`, 115 `DIR-SELECTED`, 7
+`DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 103`**.
+All reachable cause and approval-timing slots remain closed. Any source change
+invalidates timing; E1-A prunes it, while a changed nonempty participant
+domain reopens applicable rows.
+Every ordinary Relic answer must reduce `Phi_SR` by selecting or reclassifying
+one registered slot. An explicit prerequisite amendment may offset that
+reduction only by naming the missed consequence boundary and new finite bound;
+it is not ordinary frontier recursion. `RCS-16` and `RCS-18` are already routed
+outside owner choice. Therefore the remaining Relic pass has at most 103
+owner cards under this fifty-seven-times-corrected charter and will
+usually have fewer. `RCS-03`, `RCS-03B`, `RCS-03C`, `RCS-03C2`, `RCS-03C3`, `RCS-03C3B`,
+`RCS-03C3B1A`, `RCS-03C3B1A1`, `RCS-03C3B1A1B`, `RCS-03C3B1A2`,
+`RCS-03C3B2A`, `RCS-03C3B2A2`, `RCS-03C3B2A2B`, `RCS-03C3B2A3`,
+`RCS-03C3B2B`, `RCS-03C3B3`, `RCS-03C3B4`, `RCS-03C3C`, `RCS-03C3C3B`,
+`RCS-03C3C3B3`, `RCS-03C3C3B3B`, `RCS-03C3C3B4`, `RCS-03C3C3C`,
+`RCS-03C3C3C2`, `RCS-03C3C3C2E`, `RCS-03C3C3D`, `RCS-03C3C3D2`,
+`RCS-03C3C3D2E`, `RCS-03C3C3E`, `RCS-03C3C3F`,
+`RCS-03C3C3G`, `RCS-03C3F4`, `RCS-03D`, `RCS-03E`, `RCS-04`, `RCS-04A`,
+`RCS-04A3`, `RCS-04A3A1`, `RCS-04A3A2`, `RCS-04A3X`, `RCS-04B`, `RCS-05`,
+`RCS-05B`, `RCS-05C`, `RCS-07`, `RCS-08`, `RCS-08C3E`, `RCS-08C3R`,
+`RCS-08C4`, `RCS-08L3E`, `RCS-08L3R`, and `RCS-08I2`
+remain readable parent aliases only; `RCS-03C3C3` is now also a non-counting
+parent alias. They are not additional counted slots.
+
+`Phi_SR = 0` is necessary but not sufficient for Relic closure: the twelve
+`SR-*` exit tests, proof packet, coherent normative replay, and explicit
+acceptance must still pass.
+
+## 8. Remaining queues and boundedness
+
+These units are deliberately not added into one misleading percentage because
+some rows overlap and some lanes yield no owner choice after derivation. They
+do provide a finite map of what remains.
+
+| Queue | Fixed closure units | Branch-dependent part |
+| --- | --- | --- |
+| Soul Relics/Charms | 12 `SR-*` gates; 328 frozen candidate slots; current `Phi_SR = 103` after C3F-A spends claimed proof across its active Relic, D1P-B gives every transforming definition a positive-result cause path, D1C-A keeps claim writes noncausal, D1I-A keeps invocation noncausal, D1N is derived empty, D1T-A keeps tuple selection authoritative but noncausal, D1VT-A lets permission govern coexistence without itself transforming, D1VF-A lets refusal route disposition without itself transforming, D1K-A keeps sealing meaningful but noncausal, D1Z-C reserves disclosed proper Absence-bound support with A as failure fallback, D1Z1-C gives that proper subset nonempty incidence in both transformation dialects, D1L-A keeps the spent-bond latch recurrence-significant but noncausal, D1X-C reserves disclosed proper Event-bound support with A as the selected system fallback, D1X1-C gives it both-dialect incidence with A as the selected child scope fallback, D1M-B gives every transforming definition a dedicated-operation cause path with A as the selected system fallback, D2-C makes staged and shortcut-complete topology coexist with D2-A as the selected system fallback, D2A-C puts staged support in both dialects with D2A-A as the selected child scope fallback, D2A1-C puts shortcut-complete support in both dialects with D2A1-B as its qualified fallback, D3-B gives every transforming definition a material direct-reverse pair with D3-A as its system fallback, D4-A forbids active clear-to-unassigned histories with D4-C as its qualified Release-bound fallback, D5-B gives every transforming definition a compatible lived nonclear-return history with D5-A as its system fallback, E1-C makes every P proposal participant-contingent plus every M proposal system-deterministic with E1-B/E1-A fallbacks, E1Z-B makes every Z proposal participant-contingent with E1Z-A as its qualified cause-local fallback, E1X-A makes every X proposal system-deterministic with E1X-B as its qualified cause-local fallback, E2-C gives P and Z opposite cause-uniform participant timings with E2-A as its qualified production fallback, E2C-A makes P live and Z advance-bound, RCS-04A1-C requires genuine target conflict with A1-B as the qualified simplicity fallback, RCS-04A2-A requires one proposed target to settle with A2-C as the qualified fairness fallback, RCS-04A1C-C requires genuine conflict in both transformation dialects with A1C-A as the qualified clarity fallback, RCS-04A3A-C makes participant-configurable and participant-intrinsic fixed contracts coexist with A3A-A as the qualified simplicity/artifact-identity fallback, RCS-04A3B1-C makes direct-capable and policy-only configurable contracts coexist with B1-A as the qualified low-interruption/policy-mastery fallback, RCS-04A3B2-A keeps every direct-capable contract controlled-form exact `{D}` with B2-C as the qualified higher-ceiling/identity exception, RCS-04A3B1I-A keeps every policy-only contract complete-profile exact `{P}` with B1I-B as the qualified system fallback, RCS-04A3B2I-B makes every direct-only contract complete-profile exact `{I,D}` with B2I-A as the qualified practical agency/clarity fallback, RCS-04A3C-A keeps collision policy inseparably bundled with another meaningful participant semantic with A3C-B as the qualified class-wide agency/clarity fallback, RCS-04A3D1-A keeps every policy contract on finite authored whole bundled covenants with A3D1-B as the qualified class-wide expressive-mastery/menu-bloat fallback, RCS-04A4-C makes stable contributor-neutral and contributor-sensitive automatic laws coexist with A4-A as the qualified clarity/equal-ceiling/anti-farming fallback, RCS-04A5-C makes stable deterministic-only and stochastic-capable automatic laws coexist with A5-A as the qualified policy-mastery/multiplayer-trust/Rite-and-return fallback, RCS-04A6-A requires one transferable catalog-wide player-semantic collision grammar with A6-B as the qualified artifact-identity fallback, RCS-04A7-A makes every policy covenant advance-bound with A7-C as the qualified artifact-identity/direct-participation fallback, RCS-04A3XI-A requires honest pure-`{I}` support in both dialects with A3XI-B as the qualified clarity fallback, RCS-04A3XP-A requires honest advance-bound bundled exact-`{P}` support in both dialects with A3XP-B as the qualified clarity fallback, and RCS-04A3XD-A requires honest exact-`{I,D}` direct-specialist support in both dialects with A3XD-B as the qualified clarity fallback; a fifty-second prerequisite amendment replaces old RCS-04B with B1/B2/B3; RCS-04B1-A preserves the persistent artifact instance on every nonnull commit with B1-B as the qualified reincarnation/artifact-identity fallback; and RCS-04B2-A preserves the definition and fixed current-design contract/version on every nonnull commit with B2-B as the qualified named-metamorphosis/artifact-identity fallback; RCS-04B3-B opens one unique linked successor chapter on every assignment-changing commit with B3-A as the qualified simplicity/non-token-biography fallback; and a fifty-third prerequisite amendment replaces old RCS-05 with six payoff/power rows; RCS-05A-A keeps every positive payoff source-mediated with 05A-C as the qualified emergent-artifact-identity fallback; and a fifty-fourth amendment replaces old 05B with three causal-basis rows; RCS-05B1-A selects universal pair-inseparable dual payoff with C as the qualified receipt-agency/artifact-identity fallback; and a fifty-fifth amendment replaces old 05C with four conditional lifecycle rows; RCS-05C1-A selects universal cut completion with C as its qualified fallback and prunes C2-C4; RCS-06 derives its format, team, and pinned-version scope; a fifty-sixth amendment replaces old RCS-07 with three catalog-support rows, opening RCS-07A; RCS-07A-B then selects genuinely selective root/input support with both projections total and A as its qualified clarity/anti-dead-loot fallback, opening RCS-07B; RCS-07B-B then selects genuinely selective root/payoff support with both projections total and A as its qualified clarity/anti-dead-loot fallback, opening RCS-07C; RCS-07C-A then fully factorizes complete-package support with B as its qualified three-way artifact-chemistry fallback; a corrected fifty-seventh amendment replaces old RCS-08 with 132 counted evidence-sharing, permission, denial-resolution, recurrence, three-recipient, later-reuse, co-application, composition-law, stacking-signature, and team-signature rows, opening RCS-08C1; RCS-08C1-B then selects functional same-cut cross-active candidate overlap with A as its qualified clarity/anti-amplification fallback and opens RCS-08C2; RCS-08C2-C then preserves both exact-pair and related-only-pair support with A as its qualified clarity/anti-laundering fallback and opens RCS-08C4G1; RCS-08C4G1-A then pair-bounds same-cut candidate components with B as its qualified irreducible-3v3-coordination fallback, prunes twenty-nine three-Relic descendants, and opens RCS-08C3EA; RCS-08C3EA-A then makes exact permission intrinsic with C as its qualified cross-player-agency/artifact-temperament fallback, prunes C3EB/C3EC1/C3EC2, and opens RCS-08C3ED; RCS-08C3ED-A then makes exact permission deterministic with C as its qualified artifact-temperament/robust-risk-policy fallback, prunes C3EE1/C3EE2, and opens RCS-08C3EE3; RCS-08C3EE3-C then makes responsive and steadfast deterministic projections coexist with A as its qualified clarity/multiplayer-trust/policy-nonredundancy fallback, derives both certainty endpoints at C3EE6, prunes C3EE7, and opens RCS-08C3EE4; RCS-08C3EE4-B then requires one existential matched player/counterplay-causal response with A as its qualified clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback and opens RCS-08C3EE5; RCS-08C3EE5-C then requires steadfast allow and steadfast deny projections to coexist with B as its qualified clarity/multiplayer-trust/policy-nonredundancy fallback and opens RCS-08C3ED1 | At most 103 future owner cards without another explicit charter amendment; several are Charm-focused, and many others are conditional closure/guardrail decisions rather than new combat mechanics; eleven reachable cause parents plus one derived-empty audit placeholder retain twelve registered parent rows and conditional children, all closed at direction granularity; a fifty-first prerequisite amendment replaces aggregate A3X with three exact-signature dialect-incidence rows; a fifty-second replaces old RCS-04B with artifact-instance, definition-contract, and biography-lineage continuity rows; RCS-04A3XI-A selects pure-`{I}` support in both dialects; RCS-04A3XP-A selects advance-bound bundled exact-`{P}` support in both dialects with A3XP-B as the qualified clarity fallback; RCS-04A3XD-A selects exact-`{I,D}` support in both dialects with A3XD-B as the qualified clarity fallback; the three paired answers derive universal paired signature support and a six-contract/version floor; old RCS-04B is now a non-counting alias; RCS-04B1-A selects universal artifact-instance preservation with B1-B as the qualified reincarnation/artifact-identity fallback; RCS-04B2-A selects universal definition/fixed-contract preservation with B2-B as the qualified named-metamorphosis/artifact-identity fallback; RCS-04B3-B selects universal unique ancestry-complete linked succession with B3-A as the qualified simplicity/non-token-biography fallback; a fifty-third amendment makes old RCS-05 a non-counting alias for RCS-05A through RCS-05F, separating manifestation prevalence, settlement multiplicity, realization horizon, input-Charm power, payoff-Charm power, and catalog/required-family ceiling topology; RCS-05A-A selects universal source-mediated payoff with 05A-C as the qualified emergent-artifact-identity fallback; a fifty-fourth amendment makes old RCS-05B a non-counting alias for RCS-05B1 through RCS-05B3, separating receipt-local incidence, receipt-local breadth, and pair-irreducible supplementation; RCS-05B1-A selects universal pair-inseparable dual payoff with C as its qualified fallback and prunes B2/B3; a fifty-fifth amendment makes old RCS-05C a non-counting alias for RCS-05C1 through RCS-05C4, separating retained-payoff incidence, realization control, participant timing, and nonterminal expiry; RCS-05C1-A selects universal cut completion and prunes C2-C4; RCS-06 is derived from the selected format, whole-team claimant, and pinned-version measurement rules; a fifty-sixth amendment makes old RCS-07 a non-counting alias for RCS-07A through RCS-07C, separating input catalog support, payoff catalog support, and residual complete-package support; RCS-07A-B selects genuinely selective root/input support with both projections total and A as its qualified fallback; RCS-07B-B selects genuinely selective root/payoff support with A as its qualified fallback; RCS-07C-A selects full unary factorization with B as its qualified three-way artifact-chemistry fallback; a corrected fifty-seventh amendment makes old RCS-08 plus four form-treatment groups, C4, and I2 non-counting aliases over 132 counted rows; exact holder/disclosure/default and bind horizon remain RCS-02/RCS-13; catalog size and tuning values are not card counts |
+| EP-D02 after C3c | C3d–C3f plus C4–C12: 12 named lanes | A lane may collapse by derivation or yield bounded cards after its prerequisites |
+| EP-D07 assurance | 9 named confirmations | None beyond a replacement branch selected by the owner |
+| EP-D04 R9.4 | R9.4a–R9.4d: at most 4 cards | Dependent caps may be skipped when topology makes them irrelevant |
+| EP-D04 R10 | R10.3–R10.8: 6 cards | Later cards follow the selected earlier branch |
+| EP-D04 R11/closeout | 15 closure lanes below | Numeric vectors are tuning inputs, not one owner card per number |
+| Remaining macro record | EP-D03–D06 and EP-A01–A03: 7 dispositions | A replacement may create prerequisite-ready subcards |
+| Readiness repairs | R-01–R-06: 6 gates | Exact specifications depend on selected product branches |
+| Architecture contracts | S-01–S-08: 8 gates | Playable S-07/S-08 remain later than headless work |
+| Normative authoring | 14 input groups | Catalog cardinality and balance iterations vary; each group still has one totality gate |
+
+The fifteen finite EP-D04 R11/closeout lanes are:
+
+1. package-proximity functional;
+2. its dependent package cap;
+3. mixed-rarity coverage threshold;
+4. Legendary coverage floor and cap vector;
+5. aggregate Legendary ceiling;
+6. Tempered causal floor;
+7. Inscribed causal floor;
+8. selected breadth-threshold vector;
+9. structural and experience package-cap vector;
+10. generated-experience coverage;
+11. any branch-selected R10.8 aggregate magnitude;
+12. exact support/taxonomy contract;
+13. communication contract;
+14. migration/version-failure authority; and
+15. complete normative replay and disposition.
+
+If one lane has several numbers, it still closes as one versioned table with
+one declared evaluation method. A qualitative change in what the metric means
+may require an owner card; estimating its value does not.
+
+## 9. Dependency order from here
+
+```text
+master closure index
+  -> Soul Relic SR-04 transformation/precedence/lineage frontier
+  -> remaining admitted SR gates and finite Relic replay
+  -> EP-D02 C3d-C3f and C4-C12
+  -> EP-D02 full-assurance replay (accepted rule changes only if replaced)
+  -> nine EP-D07 confirmations
+  -> EP-D04 R9.4 repair
+  -> EP-D04 R10.3-R10.8
+  -> EP-D04 finite R11/closeout lanes and replay
+  -> remaining EP-D03/05/06 and EP-A01/A02/A03 dependency pairs
+       -> D03 + A01: Circuit and pace
+       -> D05 + A03: rewards, completion, and maintenance
+       -> D06 + A02: first proof, information, RNG, and retry
+  -> complete owner-framework replay into the authoritative record
+  -> Souls and Simulacra standalone expansion/audit/adaptation pass
+  -> normative readiness repairs, S-01-S-08, and 14 authoring groups
+  -> separate implementation authorization
+  -> staged contract/state/progression/headless/playable delivery
+```
+
+The three dependency pairs may be prepared in parallel, but owner-facing cards
+remain one at a time. A later branch cannot be used to bulk-accept its sibling.
+
+## 10. Policy evaluation and reinforcement learning
+
+Policy comparison is a required part of `SC-12`, but it happens in layers:
+
+1. define the authoritative state, legal actions, observations, commitment
+   horizons, episode boundaries, and success/degeneration metrics;
+2. use exact enumeration or dynamic programming for tractable subspaces;
+3. run scripted baselines, exploit policies, property/fuzz searches, and paired
+   seeded comparisons;
+4. after the headless simulator uses production rules and reducers, train a
+   population of RL/self-play agents across formats, routes, builds, opponent
+   doctrines, information conditions, and seeds; and
+5. compare those results with human playtests for comprehension, fun,
+   coordination, and strategy discovery.
+
+RL is valuable for mapping policy surfaces, finding unexpected dominant loops,
+and testing robustness to adaptive opponents. It does not choose the design
+philosophy, prove absence of exploits, replace exact invariants, or make a
+single trained policy representative of all players. Release evidence should
+combine solver bounds where possible, multiple independent policy families,
+held-out seeds/content, ablations, adversarial search, confidence intervals,
+and human results. A metric reopens a product gate only through section 3.3's
+declared threshold/effect rule.
+
+## 11. Reporting and maintenance protocol
+
+At each handoff, report this compact dashboard rather than an overall percent:
+
+```text
+Authoritative product decisions: 3/7 closed
+Architecture dispositions:       0/3 closed
+System closure gates:             0/20 closed; name PARTIAL rows
+Soul Relic gates:                 0/12 closed; name current SR frontier
+Assurance queue:                  current fixed lane and card
+Readiness:                        blocked; name first unresolved gate
+Implementation authorization:    not granted
+```
+
+Update a gate to `CLOSED` only beside the artifact and acceptance/proof that
+satisfies its exit test. Record branch-dependent work under its parent gate;
+do not create an ever-growing top-level denominator. If a new macro system is
+truly required, add it through an explicit owner-visible amendment before
+using it to delay closure.
+
+## 12. Source map
+
+- [Endless progression system](endless-progression-system.md)
+- [Owner-guided decision worksheet](endless-progression-owner-packet.md)
+- [Authoritative decision record](endless-progression-decisions.md)
+- [Decision-rigor audit](endless-progression-decision-rigor-audit.md)
+- [MVP implementation-readiness record](endless-mvp-readiness.md)

@@ -263,8 +263,18 @@ Three separate things:
 `ControllerRegistry` maps seat → controller and nothing else. One team can mix
 all four kinds. `reassignController(battle, seatId, controller)` hands a seat
 over mid-battle without touching combat state, and `advanceAiTurns` follows the
-*seat*, so handing a seat to the AI (a disconnect) or to a remote peer (a
-reconnect) needs no combat code at all.
+*seat*. That makes AI takeover and remote handoff representable generic engine
+operations; it does not define disconnect policy. Accepted Endless EP-D07
+explicitly forbids allied takeover in the first playable version: disconnect
+finishes an already-committed action, pauses at the next action boundary, and
+authenticated reconnect restores the original human authority to the same
+frozen seat/state. Its accepted corrected dropout supplement lets expiry arm only the
+absent member's Circuit-entry consent to abandonment; every connected roster
+member must approve, expiry never resolves combat automatically, and reconnect
+first makes the proposal stale. Reconnect restores only that member and cannot
+resume a multiple-dropout battle until all required allies return; Recovery
+keeps the original roster and human-seat admission. The admission/session
+layer—not combat code—must enforce that narrower product rule.
 
 Two projections follow from that split:
 
@@ -764,7 +774,7 @@ inventing vanilla state rather than mirroring it.
    rewriting a vanilla field. Note that this is a deliberate *departure* from
    the resolver's own default, which is `min: 0`.
 
-#### One resolver limitation the host reports rather than papers over
+#### Closed: the former host integration lag
 
 ► **CLOSED. This section described a defect that no longer exists, and said
 so for eight days after it was fixed. Re-derived 2026-09-07 against
@@ -1317,10 +1327,20 @@ handover, and reconnects do not read as desyncs.
 ## First integration checkpoint
 
 With a supplied licensed SS2 build, complete a 1v1 adapter first and compare it
-with vanilla combat. Then render two static allies, progress to 2v2 with the
-second ally controlled by AI, then enable 2v2 campaign co-op, 3v3 campaign
-co-op, and remote clients. These stages share one verified resolver; 1v1 is a
-parity gate, not the final scope.
+with vanilla combat. Then render the additional static slots and exercise 2v2
+binding as a non-product integration harness. The per-action acknowledgement
+gate already exists. Before any Endless team build is called the first playable
+version, accepted EP-D07 requires one distinct connected human for every allied
+seat and a session layer that uses that gate for action-boundary pause,
+authenticated same-seat reconnect, and the established team-abandonment path.
+That path includes the visible versioned grace policy,
+non-automatic expiry, every connected member's approval, and stale-on-reconnect
+ordering accepted in the corrected EP-D07 supplement. Terminal actions settle
+without a timer, partial reconnect stays paused, and Recovery keeps its original
+roster/admission. Allied AI fill, one-human
+multi-seat control, and AI takeover cannot substitute for that checkpoint.
+Later 3v3 and broader remote client work use the same resolver; 1v1 is a parity
+gate, not the final scope.
 
 The licensed build's read-only static map is now recorded in
 [the SS2 battle map](integration/ss2-battle-map.md). Its formulas are evidence
@@ -1340,6 +1360,10 @@ above. The separate campaign save record is implemented asset-free in
 
 What is still missing before a playable mod:
 
+- **the accepted human session lifecycle** — no admission/transport layer
+  proves one distinct human per allied seat, persists action-boundary pause, or
+  authenticates same-seat reconnect, visible grace timing, and race-safe
+  connected-team abandonment without AI takeover;
 - **the runtime-verified rule set** — the seam and its gate exist and nothing
   RUNTIME-VERIFIED has been dropped into them yet. ► **Two errors corrected
   2026-09-07, both mine.** (a) `classicStyleRules` is a formulas object; the

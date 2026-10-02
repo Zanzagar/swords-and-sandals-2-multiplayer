@@ -39,6 +39,10 @@ The detailed and frequently changing delivery state lives in the
 - Controller identity is separate from combatant and seat identity. Local,
   hot-seat, named remote, and AI controllers can coexist, and controller
   reassignment does not alter combat state.
+- Those are generic engine capabilities, not the accepted Endless MVP
+  admission policy. EP-D07 requires one distinct connected human per allied
+  first-playable seat and forbids allied AI fill, multi-seat human control, and
+  takeover; opponent AI remains allowed.
 - Ordered labelled RNG, action logs, replay, JSON-safe wire projections, and
   controller-independent combat hashes provide a host-authoritative foundation.
 - [`src/adapter/`](src/adapter) converts between vanilla-shaped and canonical
@@ -110,32 +114,33 @@ and deterministic protocol. They do not share an evidence claim.
 
 ## Proposed Endless direction — design only
 
-> **Stale against the design branch (noted 2026-09-24).** This section, and
-> `docs/design/` on this branch, carry the 2026-08-31 proposal with all six
-> decisions `pending` and no EP-D07. The owner has since decided on the design
-> branch `design/endless-progression-owner-packet` (open PR #3; re-read at its
-> tip `f8df632`): **EP-D01 and EP-D02 are accepted REPLACEMENTS** — ordinary
-> vertical power ends at a versioned campaign ceiling, then a finite
-> behaviour-led veteran edge (not the tier-50 cap below), and personal Rule
-> Capacity grows through championship milestones to a finite 48-Load ceiling
-> (not the four-point Rule Load below) — and **EP-D07 is accepted**
-> (mode-neutral persistent gladiators; human-controlled allied seats in the
-> first playable version). EP-D03 to EP-D06 are still pending there. Read that
-> branch's `docs/design/endless-progression-decisions.md` for the current
-> record; the bullets below are the August proposal.
+> **Current design branch status (2026-09-25).** This branch carries the current
+> owner-guided progression packet and authoritative decision record. **EP-D01,
+> EP-D02, and EP-D07 have accepted dispositions**; EP-D03 through EP-D06 remain
+> pending. The relic
+> closure tree is still being decided one frontier card at a time, so no
+> progression implementation is authorized yet. Read
+> `docs/design/endless-progression-decisions.md` for the accepted product
+> decisions and `docs/design/endless-progression-master-closure-index.md` for
+> the live closure frontier.
 
 The current design proposes:
 
 - four-fight **Arena Circuits** with disclosed routes, opponents, Contracts,
   and deterministic reward plans;
-- a designed vertical stat and item-chassis cap at career tier 50, followed by
-  lateral progression rather than unbounded scalar inflation;
-- a four-point **Rule Load** budget shared by behaviour-bearing equipment and
-  abilities;
+- a finite, versioned vertical stat and item-chassis ceiling aligned with the
+  expected Emperor encounter, followed by bounded behaviour-led progression
+  rather than unbounded scalar inflation; the exact ceiling remains open;
+- personal **Rule Capacity** earned through eighteen authored championship
+  milestones, rising from zero to a finite 48-Load ceiling across all sixteen
+  mapped item positions; Team Tactic uses a separate nonfungible allowance;
 - rarity based on authored rule complexity rather than strictly larger damage
   or armour numbers;
 - personal inventories tied to stable combatants, with explicit co-op custody,
   binding, exchange, and crash-safe settlement rules;
+- mode-neutral persistent gladiators that may enter 1v1, 2v2, or 3v3 without
+  resetting their Bound Soul, stats, gear, Legendary Lineages, or Tactic
+  library; format and roster lock per Circuit;
 - authored doctrine modules, champions, rivals, milestone bosses, and bounded
   anti-stall Arena Pressure; and
 - post-100 Epoch Charters that rotate bounded challenge, opponent, and reward
@@ -143,13 +148,25 @@ The current design proposes:
 
 Every proposed mechanic states whether it preserves classic combat semantics or
 requires the separate designed rule set, the degenerate strategy it invites,
-and the required counter/rejection test. Names, rates, caps, unlock levels, and
-balance thresholds remain design assumptions until approved and tested.
+and the required counter/rejection test. Unless the decision record explicitly
+accepts one—as it now does for EP-D02's named milestone order, grant cadence,
+costs, hosts, and 48 ceiling—names, rates, caps, unlocks, and balance thresholds
+remain design assumptions until approved and tested.
 
-The first proposed proof is a deterministic 2v2, four-fight Contract loop.
-Before code, each of the six product decisions and EP-A01–EP-A03 must be
-accepted or superseded by a fully normative, explicitly accepted replacement;
-rejection or an open revision remains blocking.
+The pending first-proof proposal is a deterministic 2v2, four-fight Contract
+loop. EP-D07 already requires every allied seat in any first playable version
+to have a distinct connected human, with action-boundary pause and same-seat
+reconnect instead of allied AI fill or takeover. Before code, each of the seven
+product decisions and EP-A01–EP-A03 must be accepted or superseded by a fully
+normative, explicitly accepted replacement; EP-D01, EP-D02, and EP-D07 are
+closed while EP-D03–EP-D06 remain pending. Rejection or an open revision
+remains blocking.
+EP-D07's accepted corrected dropout supplement makes its grace period visible at Circuit
+entry: expiry never abandons automatically, but can activate an absent member's
+narrow pre-consent while every connected teammate must approve the existing
+atomic Concede receipt. A reconnect restores only that member, so a
+multiple-dropout battle stays paused until every required ally returns; any
+resulting Recovery retains its original roster and human-seat requirements.
 The readiness audit also found three P0 model questions that approval alone
 does not close—career/challenge pacing, deterministic retry/seed shopping, and
 post-completion maintenance access—plus missing designed-combat budgets and an
@@ -157,21 +174,23 @@ incomplete Pressure termination proof, and one incompatible JSON/u64
 persistence claim. Rule-contract v2, sidecar/snapshot, or `endless-v0` code
 remains blocked until their selected repairs/specifications are normative.
 Headless and playable proofs have different final gates; playable work also
-needs a real per-action animation acknowledgement signal. **The SEAM for that
-landed 2026-09-07** — presentation commands carry an `actionToken`, and
-`src/adapter/action-gate.js` is the gate a host consults before submitting the
-next action — but the sentence above still stands as written, because the
-*signal* is what is missing: no capture has ever observed a vanilla action
-timeline reaching its terminal frame, so nothing in the adapter owns a timeout
-and a host that stops waiting must say so itself.
+needs a genuine multi-human admission, pause, reconnect, grace-timer, and
+race-safe abandonment protocol implementing that accepted authority rule. The
+per-action animation acknowledgement **seam** landed 2026-09-07: presentation
+commands carry an `actionToken`, and `src/adapter/action-gate.js` blocks the next
+action while one is outstanding. A real vanilla completion **signal** remains
+unobserved, however, so the adapter owns no timeout and a host that abandons a
+wait must supply its reason.
 
 Read the work in this order:
 
 1. [progression diagnosis and transferable principles](docs/design/progression-diagnosis.md);
 2. [Swords & Sandals mod-scene survey](docs/design/swords-and-sandals-mod-scene-survey.md);
 3. [complete Endless progression-system design](docs/design/endless-progression-system.md);
-4. [six owner decisions](docs/design/endless-progression-decisions.md); and
-5. [MVP implementation-readiness record](docs/design/endless-mvp-readiness.md).
+4. [master progression closure index](docs/design/endless-progression-master-closure-index.md);
+5. [owner decision packet and guided-session worksheet](docs/design/endless-progression-owner-packet.md);
+6. [authoritative owner decision record](docs/design/endless-progression-decisions.md); and
+7. [MVP implementation-readiness record](docs/design/endless-mvp-readiness.md).
 
 ## Evidence vocabulary
 
@@ -206,6 +225,7 @@ The primary technical sources are the
 - [quantitative progression diagnosis](docs/design/progression-diagnosis.md)
 - [mod-scene findings](docs/design/swords-and-sandals-mod-scene-survey.md)
 - [Arena Circuit progression design](docs/design/endless-progression-system.md)
+- [Endless master closure index](docs/design/endless-progression-master-closure-index.md)
 - [Endless owner decision record](docs/design/endless-progression-decisions.md)
 - [Endless MVP readiness record](docs/design/endless-mvp-readiness.md)
 
