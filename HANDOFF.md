@@ -1,6 +1,72 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-02 both cross-active overlap forms selected; three-Relic constellation is next
+
+Zanzagar selected **RCS-08C2-C with RCS-08C2-A as the qualified clarity/anti-
+laundering fallback**. Both pair-local form classes must have reachable
+functional support: at least one unordered selected-ledger pair repeats one
+exact final child, and at least one pair repeats no child but uses genuinely
+distinct children joined by complete lineage or one nonmultiplying
+authorization/accounting parent. The witnesses may occur in different fixed
+states or as different pairs in one three-Relic state.
+
+A same-pair hybrid receives one exact law, result, recurrence rule, and
+realization only. An exact edge on one pair never converts a different
+related-only edge in the same cohort. C grants no joint use, denial result,
+recipient, coupling, claim, later reuse, payoff co-application, or power. A
+stays armed if related-only opportunities cannot be forecast in one truthful
+causal/accounting sentence or survive anti-laundering and anti-double-billing
+prototypes. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+The finite register remains **328 rows: 144 `SCREEN`, 1 `OWNER-OPEN` at
+RCS-08C4G1, 66 `PRUNED`, 109 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1
+`EVALUATE`; `Phi_SR = 145`**. C4G1 is the only active card and asks whether one
+fixed post-routing candidate graph may contain a connected component of three
+distinct allied active personal Relics, before any pair permission or
+settlement:
+
+- **A — pair-bounded cross-active overlap. Recommended, with B as the
+  qualified irreducible-3v3-coordination fallback.** Every connected component
+  has at most two Relics. Three allied Relics may all be active and both C2
+  forms still exist, but no one cut connects all three. The twenty-nine
+  conditional C4G2/H/I rows prune.
+- **B — require a functional three-Relic constellation.** At least one
+  reachable fixed candidate graph connects all three allied Relics. A two-edge
+  path or three-edge triangle qualifies; B requires neither a clique, both
+  forms in one constellation, any prevalence, nor any shared-use result.
+
+Recommend A by default. C1/C2 already retain rich exact and related-only pair
+relationships, each capable of directly expressing unity with real
+difference. Greater graph cardinality is not automatically a stronger
+*Achintya Bheda Abheda* fit. A protects pair play while minimizing bridge-
+player quarterbacking, compulsory ally fuel, cheap third-edge injection,
+discarded-success frustration, and explanation burden.
+
+B is the qualified fallback only if a smallest-cardinality 3v3 prototype
+creates one irreducible three-human policy: every vertex and present edge must
+materially change one atomic settlement or optimal policy under matched
+ablation; the result cannot be decomposed into clearer pair play; the complete
+graph and possible displacement are prospectively legible; pair-only and
+triadic builds remain non-dominated; and no player becomes mandatory fuel or
+a bridge quarterback. Downstream G2/H/I can make settlement atomic and explicit
+but cannot cure a token third node, mandatory hub, or opaque loss.
+
+A example: Aster/Borel share exact `Heat h`; Cyra's selected ledger is
+disconnected at that cut. A separate state supplies the required related-only
+pair witness. B example: Aster/Borel share exact `h`, while Borel/Cyra overlap
+only through distinct `Twin Vow` children `a` and `b`; Aster/Cyra have no edge.
+That path is connected but still grants no shared use.
+
+Under A, twenty-nine C4 descendants prune and C3EA opens at `Phi_SR = 115`.
+Under B, they remain conditional and C3EA opens at `Phi_SR = 144`. Do not batch
+C3EA. The final gear/progression visual refresh remains an SR-12 closeout
+obligation after Relic design is complete.
+
 ## 2026-10-02 functional cross-active overlap selected; overlap form is next
+
+**Superseded for navigation by the section above.** Its RCS-08C2 card and
+`Phi_SR = 146` checkpoint predate the selected C answer.
 
 Zanzagar selected **RCS-08C1-B with RCS-08C1-A as the qualified clarity/anti-
 amplification fallback**. The completed catalog must contain at least one
@@ -14763,7 +14829,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-02 04:45 UTC — Cross-active overlap form is next](docs/handoffs/2026-10-02-0445--relic-cross-active-overlap-form-next.md)**
+[2026-10-02 05:03 UTC — Three-Relic candidate constellation is next](docs/handoffs/2026-10-02-0503--relic-three-constellation-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

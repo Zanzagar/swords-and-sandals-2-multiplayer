@@ -569,11 +569,12 @@ fully factorize into complete-package support. A prerequisite audit and
 successive before-commit challenges then make old RCS-08 a non-counting alias
 for 132 counted evidence-sharing, permission-law, denial-resolution,
 recurrence, three-recipient, later-reuse, co-application, composition-law,
-stacking-signature, and team-signature rows. **RCS-08C1-B is now selected with
-RCS-08C1-A as the qualified clarity/anti-amplification fallback; RCS-08C2 is
-the sole owner-facing choice under SR-09.** The register remains 328 rows and
-`Phi_SR = 146`; conditional branches prune rather than promising 132 shipped
-mechanics.
+stacking-signature, and team-signature rows. **RCS-08C1-B is selected with
+RCS-08C1-A as the qualified clarity/anti-amplification fallback; RCS-08C2-C is
+now selected with RCS-08C2-A as the qualified clarity/anti-laundering fallback;
+RCS-08C4G1 is the sole owner-facing choice under SR-09.** The register remains
+328 rows and `Phi_SR = 145`; conditional branches prune rather than promising
+132 shipped mechanics.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
 > game name is **Souls and Simulacra**. Complete the current design-framework
@@ -30944,7 +30945,7 @@ C1 is now `DIR-SELECTED` and C2 is the sole `OWNER-OPEN` row: **328 rows: 145
 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 146`**. The authoritative decision record
 and final-system SVG remain unchanged.
 
-### RCS-08C2 — cross-active candidate-overlap form support — active owner choice
+### RCS-08C2 — cross-active candidate-overlap form support — C selected with A fallback
 
 C1-B requires at least one functional same-cut cross-active overlap, but it
 does not say whether the completed catalog supports the literal reuse of one
@@ -31017,6 +31018,102 @@ Under C, neither form subtree prunes and C4G1 opens: **144 `SCREEN`, 1
 `OWNER-OPEN`, 66 `PRUNED`, 109 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1
 `EVALUATE`; `Phi_SR = 145`**. A letter selects worksheet direction only. Do not
 batch C4G1; the authoritative decision record and final-system SVG remain
+unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-02:** **C, support both
+exact and distinct-related-only cross-active overlap forms, with A as the
+qualified clarity/anti-laundering fallback.** Thus both `E^{co}_v` and
+`Q^{co}_v` are nonempty. The completed catalog must contain at least one
+reachable functional exact-pair witness and at least one reachable functional
+related-only-pair witness. They may occur in different fixed states or as
+different unordered pairs in one three-Relic state.
+
+The selection preserves pair-local identity. A same-pair hybrid receives one
+exact law, result, recurrence rule, and realization; an exact edge on one pair
+never converts a different related-only edge in the same cohort. C chooses no
+permission bit, denial result, recipient, priority, coupling, claim, later
+reuse, payoff co-application, or power. A remains armed if related-only
+opportunities cannot be explained prospectively in one causal/accounting
+sentence or survive anti-laundering and anti-double-billing prototypes.
+
+C2 is now `DIR-SELECTED` and C4G1 is the sole `OWNER-OPEN` row: **328 rows:
+144 `SCREEN`, 1 `OWNER-OPEN`, 66 `PRUNED`, 109 `DIR-SELECTED`, 6 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 145`**. The authoritative decision record
+and final-system SVG remain unchanged.
+
+### RCS-08C4G1 — three-Relic same-cut candidate-constellation support — active owner choice
+
+Fix the ruleset/catalog version, one player-semantic cut, a legal allied
+roster, operative context, earlier committed state, every combatant's active
+personal Relic root and realization, and every personal evaluator's one
+selected authoritative ledger tuple. For that fixed state `z`, build the
+simple **candidate-overlap graph** `Gamma^{co}_v(z)`:
+
+- each vertex is one distinct allied combatant's active personal Relic; and
+- an unordered vertex pair has one connectivity edge exactly when its two
+  selected ledgers contain at least one pair-local opportunity in
+  `P^{co}_v`, whether exact or related-only.
+
+The simple edge is only for connectivity. Parallel proof opportunities on the
+same Relic pair retain their separate identities and later C2/C3 treatment;
+they do not create extra vertices or counterfeit a third participant. Build
+the graph before any pair permission, denial disposition, draw, claim, or
+payoff. Alternate ledgers, unselected routes, different cuts or contexts,
+callbacks, aliases, serialized copies, and imagined extra active roots cannot
+be unioned into one graph.
+
+Let `G^{3co}_v` contain the fixed states whose graph has one connected
+component on three distinct active allied Relics. A two-edge path and a
+three-edge triangle both qualify; a single overlapping pair plus an isolated
+third Relic does not. Current accepted mode scope tops out at 3v3, so these
+three vertices exhaust the allied roster at this boundary. A future format
+above 3v3 must reopen the exact-three scope rather than inherit it silently.
+
+| Choice | Three-Relic candidate-constellation rule | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — pair-bounded cross-active overlap** | `G^{3co}_v` is empty. Every reachable fixed same-cut candidate graph has connected components of size at most two. Three allied Relics may all be active, and C2-C's exact and related-only witnesses still exist, but no one cut connects all three into one overlap component. All twenty-nine conditional C4G2/H/I rows prune. | **Recommended, with B as the qualified irreducible-3v3-coordination fallback.** C1/C2 already preserve rich exact and related-only pair relationships, each capable of directly expressing unity with real difference. A protects those relations without treating greater cardinality as a stronger ideal. It gives the clearest forecast, minimizes bridge-player quarterbacking, mandatory ally fuel, cheap third-edge grief, and discarded-success frustration, and keeps policy attribution tractable. Its cost is forbidding a genuinely nondecomposable three-human Relic constellation in 3v3. | Aster's ledger `{Guard g, Heat h}` and Borel's `{Heat h, Return t}` share exact `h`; Cyra's `{Brace c, Lunge l}` is disconnected at that cut. A different state may provide C2-C's related-only pair witness with the third Relic isolated. |
+| **B — require a functional three-Relic constellation** | `G^{3co}_v` is nonempty. At least one reachable fixed state has a connected three-Relic candidate graph. B requires neither a triangle, both C2 forms inside one constellation, universal prevalence, nor any joint-use result. Exact path/triangle incidence, edge-form mixture, identities, counts, and prevalence remain AUTHOR/SPEC. | **Qualified irreducible-3v3-coordination fallback.** B is worthwhile only if one smallest-cardinality triad creates a material three-human policy that cannot be reproduced as clearer pair play across separate cuts. Then three distinct personal Relics can remain themselves while jointly participating in one atomic relation—a potentially direct standing-ideal fit. Mere connectivity is only aggregate. Costs are compatibility-graph UI, bridge builds becoming compulsory, quarterbacking, late edge injection, teammate grief, opaque displacement, and twenty-nine conditional coupling/settlement boundaries. | Aster's `{g,h}` and Borel's `{h,a}` share exact `h`; Borel's and Cyra's `{c,b}` ledgers overlap only because distinct `a` and `b` descend from one once-paid `Twin Vow`; Aster/Cyra have no edge. The path is connected without being a clique and grants no Relic shared use. |
+
+A/B are mutually exclusive and exhaustive because `G^{3co}_v` is empty or
+nonempty. Path versus triangle, exact/related edge mixture, exact identities,
+and prevalence stay AUTHOR/SPEC because they do not independently choose the
+registered consequence boundaries: C4G2 owns conditional non-product joint
+pair-draw coupling, C4H owns final recipient-set cardinality, and C4I owns
+fixed-opportunity multiplicity, authority, response, and certainty.
+
+Recommend **A, with B as the qualified irreducible-3v3-coordination
+fallback**. The accepted format rule makes 3v3 a supported persistent mode,
+but the current deterministic-2v2 first-playable proposal remains pending; mode
+support alone does not make a triad fun. Fire B only if a smallest-cardinality
+3v3 prototype shows, under matched node/edge ablation, that every vertex and
+present edge materially changes one atomic settlement or optimal policy; the
+experience cannot be decomposed into clearer pair-only play; the complete
+graph, ownership/payment, and possible displacement are prospectively legible;
+pair-only and triadic builds both retain non-dominated uses; and no player
+becomes compulsory fuel, a bridge quarterback, or a cheap late injector.
+
+Stay with A if the third Relic is filler or free insurance, “always add the
+third edge” dominates, one common child becomes mandatory team glue, losses
+cannot be explained before commitment, or triad-dependent builds cease to
+function meaningfully in 1v1/2v2. Downstream atomic, idempotent, permutation-
+invariant settlement is necessary for B but cannot cure those upstream
+failures.
+
+G1 selects candidate support only. It grants no pair permission, draw
+coupling, recipient cardinality or identity, survivor, chooser, priority,
+claim, later reuse, transaction co-application, aggregate evaluator, merged
+payoff, source payment, Capacity, Team Tactic allowance, stacking, team tag,
+power, acquisition, lock, or UI realization. Three connected candidates may
+still later yield zero, one, two, or three retained personal transactions; C4H
+owns which cardinalities exist.
+
+Under A, G1 moves to `DIR-SELECTED`, all twenty-nine C4G2/H/I descendants
+prune, and C3EA opens: **114 `SCREEN`, 1 `OWNER-OPEN`, 95 `PRUNED`, 110
+`DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 115`**.
+Under B, those descendants remain conditional and C3EA opens: **143 `SCREEN`,
+1 `OWNER-OPEN`, 66 `PRUNED`, 110 `DIR-SELECTED`, 6 `DERIVED`, 1 `SPEC`, and
+1 `EVALUATE`; `Phi_SR = 144`**. Do not batch C3EA. A letter selects worksheet
+direction only; the authoritative decision record and final-system SVG remain
 unchanged.
 
 ## Session protocol and evidence
