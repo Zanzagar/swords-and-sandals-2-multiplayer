@@ -1,6 +1,88 @@
 # Transfer handoff — Swords & Sandals II Multiplayer Foundation
 
+## 2026-10-02 steadfast sharing and refusal coexist; false-bit disposition is next
+
+Zanzagar selected **RCS-08C3EE5-C with RCS-08C3EE5-B as the qualified
+clarity/multiplayer-trust/policy-nonredundancy fallback**. The completed exact
+cross-active catalog must contain at least one steadfast projection that always
+permits its repeated-child pair and one distinct steadfast projection that
+always refuses its own, alongside the already-required responsive class.
+
+The catalog therefore supports dependable sharing, causal conditional
+response, and context-proof refusal as distinct permission philosophies. A
+steadfast allow may directly express one proof participating in two genuinely
+distinct personal Relic relationships. Steadfast refusal is neutral/protective;
+their coexistence is aggregate. C requires at least three canonical projections
+overall, not three physical Relics or a per-item/player/format quota. B remains
+armed if invariant refusal becomes token coverage, dead loot, grief, proof
+poisoning, denial farming, or a dominated/overcompensated burden. It has not
+fired.
+
+C3EE5 is now `DIR-SELECTED`; C3ED1 is the sole `OWNER-OPEN` row. The finite
+register is **328 rows: 102 `SCREEN`, 1 `OWNER-OPEN` at RCS-08C3ED1, 101
+`PRUNED`, 115 `DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`;
+`Phi_SR = 103`**. The authoritative decision record and final-system SVG remain
+byte-unchanged.
+
+C3ED1 asks what a false exact cross-active permission bit leaves at its one
+atomic pair-local settlement. The two inputs are already-authored personal
+transactions `tau_A` and `tau_B`; the only legal completed results are
+`empty`, `{tau_A}`, or `{tau_B}`. `{tau_A,tau_B}` violates “not both,” while a
+substitute, merged package, compensation receipt, or new payoff identity is
+outside this gate.
+
+- **A — mutual cancellation only.** Every false exact-pair result suppresses
+  both personal transactions. This is the clearest anti-laundering rule and
+  prunes the resolver subtree, but carries the greatest dead-loot, lost-
+  mastery, grief, and compensation pressure. Use A only if singleton
+  resolution itself fails while deliberate symmetric severance remains fun.
+- **B — singleton retention only. Qualified fallback.** Every false result
+  retains exactly one unchanged original personal transaction; later rows,
+  not C3ED1, decide which and how. This avoids total loss but risks priority
+  metas, favoritism, source-owner extraction, survivor shopping, and
+  quarterbacking.
+- **C — cancellation and singleton retention coexist. Conditionally
+  recommended, with B as the qualified fallback.** At least one false exact
+  disposition cancels both and at least one retains exactly one. C means both
+  disposition families across the catalog, never both transactions, a hidden
+  roll, or a live survivor choice at one opportunity.
+
+**Mutual Silence** has Sovereign Ember refuse shared `Heat h` and suppress both
+Aster's Guard transaction and Borel's Return transaction. **Last Witness**
+retains exactly one of those original transactions under a distinct disclosed
+treatment; this card does not choose the survivor. C is worthwhile only if
+teams intentionally build differently around severance and heirship after
+unrelated package value is held fixed. Neither false-bit result strengthens the
+standing ideal beyond the true/shared relation: cancellation protects
+distinction, singleton preserves singular continuity, and coexistence is
+aggregate.
+
+Recommend C only if removing the second Relic, replacing exact `h/h` with
+independent or merely related evidence, replacing refusal with allowance, or
+swapping the disposition destroys or materially changes the policy; both
+families stay legible, non-token, non-dominated, and equal-ceiling; cancellation
+is neither novice tax nor compensation bait; singleton is neither premium
+consolation nor favorable-survivor filtering; no cheap teammate steering or
+live prompt appears; and held-out simulator/RL ablations plus human forecast,
+teach-back, attribution, and fairness tests survive. RL evaluates robustness;
+it does not choose the philosophy.
+
+C3ED1 is support incidence, not resolver authority. C3EF1 later asks whether
+one held-fixed opportunity has one canonical result or several. Exact A/B maps
+remain AUTHOR/SPEC; related-only pairs get their own C3RD1 treatment, while a
+hybrid inherits exact disposition once. C3EG1 owns genuine later reevaluation.
+Under A, all thirteen C3EF rows prune and C3RA opens at `Phi_SR = 89`. Under B,
+C3EF1 opens; C3EF8 is conditionally derived singleton-only for any nonempty
+deterministic resolver class and vacuous otherwise, while C3EF9–10 derive the
+guaranteed singleton endpoint consequences; `Phi_SR = 99`. Under C, C3EF1
+opens with `Phi_SR = 102`. Do not batch the next
+row. The final gear/progression visual refresh remains an SR-12 closeout
+obligation after Relic design is complete.
+
 ## 2026-10-02 responsive permission made causal; steadfast polarity is next
+
+**Superseded for navigation by the section above.** Its RCS-08C3EE5 card and
+`Phi_SR = 104` checkpoint predate the selected C answer.
 
 Zanzagar selected **RCS-08C3EE4-B with RCS-08C3EE4-A as the qualified
 clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback**.
@@ -15174,7 +15256,7 @@ standalone name is **"Souls and Simulacra"** (the design branch's). Until then
 the "ship no SS2 asset" rule stands unchanged.
 
 **LATEST:
-[2026-10-02 18:20 UTC — Cross-active exact steadfast polarity is next](docs/handoffs/2026-10-02-1820--relic-exact-steadfast-polarity-next.md)**
+[2026-10-02 19:36 UTC — Cross-active exact false-bit disposition is next](docs/handoffs/2026-10-02-1936--relic-exact-false-bit-disposition-next.md)**
 (session `01a074ac-c9e7-7303-8538-c8e392199ac2`). Start there for the active
 progression frontier, then use this living head for the integrated project
 state.

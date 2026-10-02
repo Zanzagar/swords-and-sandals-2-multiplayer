@@ -580,8 +580,10 @@ temperament/robust-risk-policy fallback. RCS-08C3EE3-C is now selected with
 RCS-08C3EE3-A as the qualified clarity/multiplayer-trust/policy-nonredundancy
 fallback. RCS-08C3EE4-B is now selected with RCS-08C3EE4-A as the qualified
 clarity/multiplayer-trust/policy-nonredundancy/artifact-temperament fallback.
-RCS-08C3EE5 is the sole owner-facing choice under SR-09.** The register
-remains 328 rows and `Phi_SR = 104`; conditional
+RCS-08C3EE5-C is now selected with RCS-08C3EE5-B as the qualified clarity/
+multiplayer-trust/policy-nonredundancy fallback. RCS-08C3ED1 is the sole
+owner-facing choice under SR-09.** The register remains 328 rows and
+`Phi_SR = 103`; conditional
 branches prune rather than promising 132 shipped mechanics.
 
 > **Standalone north star — owner direction, 2026-09-15:** the intended new
@@ -31624,7 +31626,7 @@ nonempty steadfast class whose polarity C3EE5 now classifies. The register is
 7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 104`**. The authoritative
 decision record and final-system SVG remain unchanged.
 
-### RCS-08C3EE5 — steadfast deterministic polarity for context-invariant cross-active exact permission — active owner choice
+### RCS-08C3EE5 — steadfast deterministic polarity for context-invariant cross-active exact permission — C selected with B fallback
 
 C3EE3-C independently guarantees both a responsive deterministic class and a
 nonempty context-invariant deterministic complement. C3EE5 asks whether those
@@ -31743,6 +31745,157 @@ Under A, B, or C, C3EE5 moves to `DIR-SELECTED` and C3ED1 becomes the sole
 `EVALUATE`; `Phi_SR = 103`**. Do not batch the next row. A letter selects
 worksheet direction only; the authoritative decision record and final-system
 SVG remain unchanged.
+
+**Direction answer — selected by Zanzagar on 2026-10-02:** **C, require both
+steadfast deterministic polarities to coexist, with B as the qualified
+clarity/multiplayer-trust/policy-nonredundancy fallback.** Thus
+`F^{co-exact-det,+}_v` is a nonempty proper subset of
+`F^{co-exact-det-steady}_v`. At least one complete steadfast exact-permission
+projection always permits its repeated-child pair and at least one distinct
+steadfast projection always refuses its own. The already-selected responsive
+class continues to contain both certain bits.
+
+The completed catalog therefore supports three distinct cross-active exact
+permission philosophies: dependable sharing, causal conditional response, and
+context-proof refusal. The allow witness may directly express one proof
+participating in two distinct personal Relic relationships. Refusal is
+neutral/protective, preserving proof singularity and relationship distinction;
+their catalog coexistence is aggregate rather than a stronger theological
+analogue. C promises at least three canonical projections overall, not three
+physical Relics, definitions, or one projection of every kind inside every
+item, pair, player, or format.
+
+B remains armed if steadfast refusal becomes a token matrix cell, dead loot,
+queue grief, proof poisoning, denial farming, compulsory ally fuel, or a
+dominated/overcompensated burden. A is considered only if compatibility itself
+fails while refusal remains viable. If neither steadfast polarity remains
+viable, reopen C3EE3-C toward responsive-only C3EE3-B. Those fallbacks have not
+fired.
+
+C3EE5 is now `DIR-SELECTED`; C3ED1 is the sole `OWNER-OPEN` row. The register
+is **328 rows: 102 `SCREEN`, 1 `OWNER-OPEN`, 101 `PRUNED`, 115
+`DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 103`**.
+The authoritative decision record and final-system SVG remain unchanged.
+
+### RCS-08C3ED1 — pair-local retained-use incidence after a false same-cut cross-active exact permission bit — active owner choice
+
+C3EE3-C and C3EE5-C both guarantee reachable false exact-permission routes,
+but a false bit still means only **not both**. C3ED1 asks whether the completed
+pair-local disposition suppresses both already-authored personal transactions,
+retains exactly one, or supports both disposition families across the exact
+catalog. It does not decide which transaction survives or how a resolver
+chooses among several lawful results at one fixed opportunity.
+
+For every reachable false-bit exact-pair opportunity `x`, name its two
+already-authored personal source-mediated transactions `tau_A(x)` and
+`tau_B(x)`. Let its nonempty legal completed output support be
+
+`Sigma_x subseteq {empty, {tau_A(x)}, {tau_B(x)}}`.
+
+`{tau_A(x),tau_B(x)}` is illegal because the permission bit was false. A
+pending evaluation, crash, rollback, callback, or retry is not another
+semantic output. The cross-active gate can only preserve or suppress these
+two transactions; it cannot create a substitute, aggregate evaluator, merged
+package, compensation receipt, or new payoff identity. Define
+
+- `K^{co-exact-deny,0}_v = {x | empty in Sigma_x}`; and
+- `K^{co-exact-deny,1}_v = {x | {tau_A(x)} in Sigma_x or {tau_B(x)} in Sigma_x}`.
+
+At least one of these sets is nonempty because every `Sigma_x` is nonempty.
+
+| Choice | False exact-bit retained-use support | Recommendation, ideal fit, and gameplay tradeoff | Concrete boundary example |
+| --- | --- | --- | --- |
+| **A — mutual cancellation only** | `K^{co-exact-deny,1}_v` is empty. Every false exact-pair disposition suppresses both personal transactions and completes with `empty`. | A is the shortest and hardest anti-compression grammar. “Not both” becomes “neither,” so no resolver can launder refusal into a preferred heir. Its standing-ideal fit is **neutral/protective**: distinction is preserved, but neither relationship continues at this boundary. It prunes the complete EF resolver subtree and carries the greatest dead-loot, lost-mastery, teammate-grief, and compensation pressure. Use A only if every honest singleton resolver fails while deliberate symmetric severance remains viable. | **Mutual Silence:** Sovereign Ember refuses Aster/Borel's repeated `Heat h`; both Aster's Guard transaction and Borel's Return transaction are suppressed. Unrelated transactions elsewhere remain untouched. The build qualifies only if teams deliberately value independent evidence lanes rather than merely suffer the loss. |
+| **B — singleton retention only** | `K^{co-exact-deny,0}_v` is empty. Every false exact-pair disposition retains exactly one unchanged original personal transaction. C3ED1 does not choose `tau_A` versus `tau_B`; EF1 onward owns fixed-opportunity multiplicity and resolver behavior. | **Qualified clarity/multiplayer-trust/policy-nonredundancy fallback and lower-risk playability baseline.** B makes refusal an heirship rule rather than total erasure, preserving one player's authored work while keeping the proof from serving both. It avoids cancellation-only dead loot but creates priority, favoritism, survivor-shopping, source-owner dominance, and quarterback risk. Its ideal fit is partial/protective: singular continuity survives without duplicating the shared proof, but joint participation does not. | **Last Witness:** the same false verdict leaves exactly one of the two personal transactions. A later authored resolver might prefer the source-owner transaction, but this card promises neither that rule nor either player as survivor. |
+| **C — cancellation and singleton retention coexist** | Both `K^{co-exact-deny,0}_v` and `K^{co-exact-deny,1}_v` are nonempty. At least one reachable false exact disposition cancels both transactions and at least one retains exactly one. Different prospectively legible laws or contexts may witness them; C neither requires nor creates ambiguity at one fixed opportunity. | **Conditionally recommended as the higher-ceiling target, with B as the qualified fallback above.** C supports two readable refusal philosophies: symmetric severance and one-heir continuity. That can make refusal a real build commitment rather than one universal punishment. Their coexistence is only an **aggregate** ideal fit. Costs are another prediction distinction, cancellation becoming a novice trap, singleton becoming the premium result, survivor extraction, and greater authoring/evaluation burden. | **Mutual Silence** cancels both under one disclosed treatment, while **Last Witness** preserves exactly one original transaction under another. A matched prototype must show that teams build differently around severance versus heirship; a hidden roll, live survivor prompt, or compensation difference does not establish C. |
+
+A/B/C are mutually exclusive and exhaustive: singleton support is absent,
+empty support is absent, or both are present. “Both” means both **disposition
+families**, never both personal transactions. `{tau_A}` and `{tau_B}` are
+distinct concrete results but one singleton cardinality family; exact recipient
+maps and priorities remain AUTHOR/SPEC rather than a separate incidence card.
+
+C is catalog support, not fixed-opportunity ambiguity. Different single-valued
+laws can satisfy it. C3EF1 alone asks whether one completely held-fixed
+opportunity has one canonical result or several lawful results. EF2 onward owns
+prospective resolver control, language, randomness, factual response, and
+certainty; no live post-denial prompt is permitted. Under B, EF8 is removed
+from owner choice: if any deterministic resolver class exists, coarsening its
+complete `{tau_A}` and `{tau_B}` results to cardinality conditionally derives
+singleton-only steadfastness; if none exists, EF8 is vacuous. EF9/EF10 derive
+the sole guaranteed singleton endpoint and its retained-use identity. EF4 and
+EF6 still classify
+complete-result-set response across `empty`, `{tau_A}`, and `{tau_B}` where
+their prerequisites apply, so B does not silently erase lawful `tau_A` versus
+`tau_B` resolver response while exact mappings remain authored.
+
+C3ED1 and C3EE5 are orthogonal. EE5 classifies whether one complete permission
+projection allows or refuses; ED1 classifies the completed pair-local result
+only after a false bit. ED1 does not require every responsive/steadfast
+permission philosophy to cross with every disposition family, and a true bit
+cannot witness singleton retention. Exact and related-only domains cannot be
+concatenated: a same-pair hybrid inherits this exact disposition once and gets
+no second C3RD1 vote. C4G1-A keeps candidate components pair-bounded; a
+disconnected third Relic's independent transaction is projected out.
+
+Recommend **C, with B as the qualified clarity/multiplayer-trust/policy-
+nonredundancy fallback**. C adds an understandable *Silence versus Testament*
+choice without inventing substitutes or extra receipts. Use B if cancellation
+becomes dead loot, a novice tax, an overcompensated fake burden, or an avoid-at-
+all-costs matchup. Use A only if every singleton resolver produces preferred-
+player extraction, survivor shopping, or multiplayer distrust while deliberate
+mutual cancellation remains viable. If neither family works, reopen the
+upstream false-bit architecture rather than buying it off with payoff.
+
+C may stand only if all of the following hold:
+
+1. Removing the second active Relic, replacing exact `h/h` with independent or
+   merely related evidence, or replacing the false bit with allowance removes
+   or materially changes the claimed policy.
+2. Swapping cancellation for singleton retention while holding permission law
+   and unrelated package value fixed changes a preferred legal build, route,
+   hedge, or team policy.
+3. Every required family is reachable, prospectively legible, independently
+   policy-changing, non-token, non-dominated, and capable of the same intended
+   optimized Legendary ceiling. Cancellation is not a novice trap; singleton
+   is not a premium consolation tier.
+4. Both allies know the bound disposition family and every operative switching
+   fact before their last informed reversible commitment, and can attribute
+   the exact pair, law, and retained-set class afterward.
+5. No cheap teammate steering, covert sabotage, proof poisoning, compulsory
+   ally fuel, permanent quarterback, or live survivor prompt emerges.
+6. Singleton retention cannot become favorable-survivor filtering, source-
+   owner extraction, or denial farming. Cancellation cannot be rescued only by
+   unrelated compensation. Later payoff cannot manufacture a valid witness.
+7. EG1's later recurrence choice cannot turn one false result into callback,
+   reload, reconnect, alias, or unchanged-context survivor shopping.
+8. Held-out simulator/RL tests use second-Relic, exact-versus-related,
+   permission-bit, and matched disposition ablations and search for dead loot,
+   collision avoidance, denial farming, survivor concentration, queue grief,
+   role capture, dominance, and policy collapse. Human forecast, teach-back,
+   attribution, and perceived-fairness tests remain binding; RL evaluates
+   robustness rather than choosing the philosophy.
+
+C3ED1 selects no surviving side, recipient symmetry, exact mapping, priority,
+chooser, control coordinate, randomness, factual response, recurrence, claim,
+co-application, value, compensation, payoff, rarity, disclosure UI, storage,
+or implementation. A retained singleton is exactly one unchanged already-
+authored personal transaction, not a substitute or rewritten package.
+
+Under A, C3ED1 moves to `DIR-SELECTED`, all thirteen C3EF rows prune, and
+C3RA—not C3EG1—becomes the sole `OWNER-OPEN` row under the registered
+serialization: **88 `SCREEN`, 1 `OWNER-OPEN`, 114 `PRUNED`, 116
+`DIR-SELECTED`, 7 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 89`**.
+Under B, C3EF1 opens; C3EF8 is conditionally derived singleton-only for any
+nonempty deterministic class (and vacuous otherwise), while C3EF9/C3EF10
+derive the singleton endpoint consequences: **98 `SCREEN`, 1 `OWNER-OPEN`,
+101 `PRUNED`, 116
+`DIR-SELECTED`, 10 `DERIVED`, 1 `SPEC`, and 1 `EVALUATE`; `Phi_SR = 99`**.
+Under C, C3EF1 opens with no further immediate classification: **101
+`SCREEN`, 1 `OWNER-OPEN`, 101 `PRUNED`, 116 `DIR-SELECTED`, 7 `DERIVED`, 1
+`SPEC`, and 1 `EVALUATE`; `Phi_SR = 102`**. Do not batch the next row. A
+letter selects worksheet direction only; the authoritative decision record
+and final-system SVG remain unchanged.
 
 ## Session protocol and evidence
 
